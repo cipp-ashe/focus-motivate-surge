@@ -16,7 +16,7 @@ const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [duration, setDuration] = useState(1500);
+  const [duration, setDuration] = useState(1500); // 25 minutes default
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -42,6 +42,10 @@ const Index = () => {
       setSelectedTask(null);
     }
   }, [selectedTask]);
+
+  const handleDurationChange = (minutes: number) => {
+    setDuration(minutes * 60);
+  };
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -72,31 +76,13 @@ const Index = () => {
 
           <div className="space-y-6">
             {selectedTask ? (
-              <>
-                <div className="flex justify-center">
-                  <Select
-                    value={duration.toString()}
-                    onValueChange={(value) => setDuration(parseInt(value))}
-                  >
-                    <SelectTrigger className="w-[180px] bg-card border-primary/20">
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="900">15 minutes</SelectItem>
-                      <SelectItem value="1500">25 minutes</SelectItem>
-                      <SelectItem value="2700">45 minutes</SelectItem>
-                      <SelectItem value="3600">60 minutes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Timer
-                  duration={duration}
-                  taskName={selectedTask.name}
-                  onComplete={handleTaskComplete}
-                  onAddTime={() => {}}
-                />
-              </>
+              <Timer
+                duration={duration}
+                taskName={selectedTask.name}
+                onComplete={handleTaskComplete}
+                onAddTime={() => {}}
+                onDurationChange={handleDurationChange}
+              />
             ) : (
               <div className="text-center text-muted-foreground p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">
                 Select a task to start the timer

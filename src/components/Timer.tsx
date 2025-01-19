@@ -1,26 +1,37 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Clock, Plus, Check, Sparkles } from "lucide-react";
+import { Clock, Plus, Check, Sparkles, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "./ui/input";
 
 interface TimerProps {
   duration: number;
   taskName: string;
   onComplete: () => void;
   onAddTime: () => void;
+  onDurationChange?: (minutes: number) => void;
 }
 
-export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps) => {
+export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationChange }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [minutes, setMinutes] = useState(Math.floor(duration / 60));
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleMinutesChange = (value: number) => {
+    const newMinutes = Math.max(1, Math.min(60, value));
+    setMinutes(newMinutes);
+    const newDuration = newMinutes * 60;
+    setTimeLeft(newDuration);
+    onDurationChange?.(newMinutes);
   };
 
   const toggleTimer = () => {
@@ -73,6 +84,43 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
         <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
           {taskName}
         </h2>
+
+        {!isRunning && !showActions && (
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleMinutesChange(minutes - 1)}
+              className="border-primary/20 hover:bg-primary/20"
+              disabled={minutes <= 1}
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            <div className="relative w-20">
+              <Input
+                type="number"
+                min={1}
+                max={60}
+                value={minutes}
+                onChange={(e) => handleMinutesChange(parseInt(e.target.value) || 1)}
+                className="text-center font-mono bg-background/50"
+              />
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                min
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleMinutesChange(minutes + 1)}
+              className="border-primary/20 hover:bg-primary/20"
+              disabled={minutes >= 60}
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         <div className="relative w-48 h-48 mx-auto">
           <svg className={`timer-circle ${isRunning ? 'active' : ''}`} viewBox="0 0 100 100">
             <circle
@@ -91,7 +139,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
               cx="50"
               cy="50"
               strokeDasharray="283"
-              strokeDashoffset={283 * (timeLeft / duration)}
+              strokeDashoffset={283 * (timeLeft / (minutes * 60))}
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
