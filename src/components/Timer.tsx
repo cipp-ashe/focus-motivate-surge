@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Clock, Plus, Check, Sparkles, ChevronUp, ChevronDown, Volume2 } from "lucide-react";
+import { Clock, Plus, Check, Sparkles, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
@@ -16,9 +16,9 @@ interface TimerProps {
 }
 
 const SOUND_OPTIONS = {
-  bell: "/sounds/bell.mp3",
-  chime: "/sounds/chime.mp3",
-  ding: "/sounds/ding.mp3",
+  bell: "https://assets.mixkit.co/active_storage/sfx/2424/2424-preview.mp3",
+  chime: "https://assets.mixkit.co/active_storage/sfx/2400/2400-preview.mp3",
+  ding: "https://assets.mixkit.co/active_storage/sfx/2404/2404-preview.mp3",
   none: "",
 };
 
@@ -46,8 +46,28 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
 
   const playCompletionSound = () => {
     if (selectedSound === "none") return;
+    
     const audio = new Audio(SOUND_OPTIONS[selectedSound]);
-    audio.play().catch(error => console.error("Error playing sound:", error));
+    
+    // Test sound on selection
+    audio.play()
+      .then(() => {
+        console.log("Sound played successfully");
+        toast.success("Sound test successful!");
+      })
+      .catch((error) => {
+        console.error("Error playing sound:", error);
+        toast.error("Could not play sound. Please check your browser settings.");
+      });
+  };
+
+  // Add a test sound button
+  const testSound = () => {
+    if (selectedSound === "none") {
+      toast("No sound selected");
+      return;
+    }
+    playCompletionSound();
   };
 
   const toggleTimer = () => {
@@ -153,6 +173,14 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
                   </div>
                 ))}
               </RadioGroup>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={testSound}
+                className="mt-2"
+              >
+                Test Sound
+              </Button>
             </div>
           </div>
         )}
