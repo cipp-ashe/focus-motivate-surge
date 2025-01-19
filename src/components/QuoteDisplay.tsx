@@ -9,6 +9,11 @@ interface Quote {
   author: string;
 }
 
+interface QuoteDisplayProps {
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+}
+
 const quotes: Quote[] = [
   { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
   { text: "Done is better than perfect.", author: "Sheryl Sandberg" },
@@ -27,13 +32,10 @@ const quotes: Quote[] = [
   { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" }
 ];
 
-export const QuoteDisplay = () => {
+export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => {
   const [currentQuote, setCurrentQuote] = useState<Quote>(quotes[0]);
   const [isLiked, setIsLiked] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [favorites, setFavorites] = useState<Quote[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const quotesPerPage = 6; // 2 columns × 3 rows
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -42,6 +44,10 @@ export const QuoteDisplay = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    setIsLiked(favorites.some(fav => fav.text === currentQuote.text));
+  }, [currentQuote, favorites]);
 
   const getRandomQuote = () => {
     const newQuote = quotes[Math.floor(Math.random() * quotes.length)];
@@ -54,27 +60,13 @@ export const QuoteDisplay = () => {
   };
 
   const handleLike = () => {
-    setIsLiked(!isLiked);
     if (!isLiked) {
       setFavorites(prev => [...prev, currentQuote]);
       toast("Quote added to favorites! ✨");
     } else {
       setFavorites(prev => prev.filter(quote => quote.text !== currentQuote.text));
     }
-  };
-
-  const totalPages = Math.ceil(favorites.length / quotesPerPage);
-  const paginatedFavorites = favorites.slice(
-    currentPage * quotesPerPage,
-    (currentPage + 1) * quotesPerPage
-  );
-
-  const nextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages - 1));
-  };
-
-  const prevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 0));
+    setIsLiked(!isLiked);
   };
 
   return (

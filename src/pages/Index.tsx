@@ -92,7 +92,7 @@ const Index = () => {
                 Select a task to start the timer
               </div>
             )}
-            <QuoteDisplay />
+            <QuoteDisplay favorites={favorites} setFavorites={setFavorites} />
           </div>
         </div>
       </div>
