@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Timer } from "@/components/Timer";
 import { QuoteDisplay } from "@/components/QuoteDisplay";
 import { TaskList, Task } from "@/components/TaskList";
@@ -9,19 +9,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const TIMER_PRESETS = [
-  { value: "900", label: "15 minutes" },
-  { value: "1500", label: "25 minutes" },
-  { value: "2700", label: "45 minutes" },
-  { value: "3600", label: "60 minutes" },
-];
+import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [duration, setDuration] = useState(1500); // 25 minutes default
+  const [duration, setDuration] = useState(1500);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   const handleTaskAdd = useCallback((task: Task) => {
     setTasks((prev) => [...prev, task]);
@@ -40,11 +44,20 @@ const Index = () => {
   }, [selectedTask]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary p-6">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-primary">Focus Timer</h1>
-          <p className="text-muted-foreground">Stay focused, one task at a time</p>
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      <div className="max-w-7xl mx-auto p-4 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+            Focus Timer
+          </h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsDark(!isDark)}
+            className="rounded-full hover:bg-primary/20"
+          >
+            {isDark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -65,15 +78,14 @@ const Index = () => {
                     value={duration.toString()}
                     onValueChange={(value) => setDuration(parseInt(value))}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[180px] bg-card border-primary/20">
                       <SelectValue placeholder="Select duration" />
                     </SelectTrigger>
                     <SelectContent>
-                      {TIMER_PRESETS.map((preset) => (
-                        <SelectItem key={preset.value} value={preset.value}>
-                          {preset.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="900">15 minutes</SelectItem>
+                      <SelectItem value="1500">25 minutes</SelectItem>
+                      <SelectItem value="2700">45 minutes</SelectItem>
+                      <SelectItem value="3600">60 minutes</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -86,7 +98,7 @@ const Index = () => {
                 />
               </>
             ) : (
-              <div className="text-center text-muted-foreground p-8">
+              <div className="text-center text-muted-foreground p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">
                 Select a task to start the timer
               </div>
             )}

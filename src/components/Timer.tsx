@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Clock, Plus, Check } from "lucide-react";
+import { Clock, Plus, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface TimerProps {
@@ -15,6 +15,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -24,8 +25,9 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
 
   const toggleTimer = () => {
     setIsRunning(!isRunning);
+    setIsExpanded(true);
     if (!isRunning) {
-      toast("Timer started! You've got this!");
+      toast("Timer started! You've got this! 🚀");
     }
   };
 
@@ -37,7 +39,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
           if (time <= 1) {
             setIsRunning(false);
             setShowActions(true);
-            toast("Time's up! Great work!");
+            toast("Time's up! Great work! ✨");
           }
           return time - 1;
         });
@@ -49,7 +51,8 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
   const handleComplete = useCallback(() => {
     onComplete();
     setShowActions(false);
-    toast("Task completed! Well done!");
+    setIsExpanded(false);
+    toast("Task completed! You're crushing it! 🎉");
   }, [onComplete]);
 
   const handleAddTime = useCallback(() => {
@@ -57,15 +60,21 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
     setTimeLeft((prev) => prev + 300);
     setShowActions(false);
     setIsRunning(true);
-    toast("Added 5 minutes. Keep going!");
+    toast("Added 5 minutes. Keep the momentum going! 💪");
   }, [onAddTime]);
 
   return (
-    <Card className="p-8 max-w-md mx-auto bg-white/80 backdrop-blur-sm shadow-lg transition-all duration-300">
+    <Card 
+      className={`p-8 mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-300 ${
+        isExpanded ? 'scale-105' : ''
+      }`}
+    >
       <div className="text-center space-y-6">
-        <h2 className="text-2xl font-semibold text-primary truncate">{taskName}</h2>
+        <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
+          {taskName}
+        </h2>
         <div className="relative w-48 h-48 mx-auto">
-          <svg className="timer-circle w-full h-full" viewBox="0 0 100 100">
+          <svg className={`timer-circle ${isRunning ? 'active' : ''}`} viewBox="0 0 100 100">
             <circle
               className="text-muted stroke-current"
               strokeWidth="4"
@@ -86,24 +95,32 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl font-bold">{formatTime(timeLeft)}</span>
+            <span className="text-4xl font-bold font-mono">{formatTime(timeLeft)}</span>
           </div>
         </div>
         
         {!showActions ? (
           <Button
             onClick={toggleTimer}
-            className="w-full transition-transform hover:scale-105"
-            variant={isRunning ? "outline" : "default"}
+            className="w-full transition-all duration-300 hover:scale-105 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
           >
-            <Clock className="mr-2 h-4 w-4" />
-            {isRunning ? "Pause" : "Start"}
+            {isRunning ? (
+              <>
+                <Clock className="mr-2 h-4 w-4" />
+                Pause
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Start
+              </>
+            )}
           </Button>
         ) : (
           <div className="flex gap-4">
             <Button
               onClick={handleComplete}
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
             >
               <Check className="mr-2 h-4 w-4" />
               Complete
@@ -111,7 +128,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime }: TimerProps)
             <Button
               onClick={handleAddTime}
               variant="outline"
-              className="flex-1"
+              className="flex-1 border-primary/20 hover:bg-primary/20"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add 5m
