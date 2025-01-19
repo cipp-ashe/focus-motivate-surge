@@ -5,12 +5,18 @@ import { TaskList, Task } from "@/components/TaskList";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Import the Quote type from QuoteDisplay
+interface Quote {
+  text: string;
+  author: string;
+}
+
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [duration, setDuration] = useState(1500);
-  const [isDark, setIsDark] = useState(true); // Set dark mode as default
+  const [isDark, setIsDark] = useState(true);
   const [favorites, setFavorites] = useState<Quote[]>([]);
 
   useEffect(() => {
