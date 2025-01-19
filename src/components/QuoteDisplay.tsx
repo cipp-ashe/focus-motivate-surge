@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Heart, RefreshCw, Sparkles } from "lucide-react";
+import { Heart, RefreshCw, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 interface Quote {
@@ -32,6 +32,8 @@ export const QuoteDisplay = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [favorites, setFavorites] = useState<Quote[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const quotesPerPage = 6; // 2 columns × 3 rows
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,10 +63,24 @@ export const QuoteDisplay = () => {
     }
   };
 
+  const totalPages = Math.ceil(favorites.length / quotesPerPage);
+  const paginatedFavorites = favorites.slice(
+    currentPage * quotesPerPage,
+    (currentPage + 1) * quotesPerPage
+  );
+
+  const nextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages - 1));
+  };
+
+  const prevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 0));
+  };
+
   return (
     <div className="space-y-6">
       <Card 
-        className={`quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 transition-all duration-500 ${
+        className={`quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 transition-all duration-300 ${
           isFlipped ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
         }`}
       >
@@ -96,21 +112,67 @@ export const QuoteDisplay = () => {
           </div>
         </div>
       </Card>
+    </div>
+  );
+};
 
-      {favorites.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-primary">Favorite Quotes</h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {favorites.map((quote, index) => (
-              <Card 
-                key={index}
-                className="p-3 bg-card/60 backdrop-blur-sm border-primary/20 transform transition-all duration-500 hover:scale-102 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
-              >
-                <p className="text-sm italic">{quote.text}</p>
-                <p className="text-xs text-muted-foreground mt-1">— {quote.author}</p>
-              </Card>
-            ))}
-          </div>
+export const FavoriteQuotes = ({ favorites }: { favorites: Quote[] }) => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const quotesPerPage = 6; // 2 columns × 3 rows
+
+  const totalPages = Math.ceil(favorites.length / quotesPerPage);
+  const paginatedFavorites = favorites.slice(
+    currentPage * quotesPerPage,
+    (currentPage + 1) * quotesPerPage
+  );
+
+  const nextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages - 1));
+  };
+
+  const prevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 0));
+  };
+
+  if (favorites.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-primary">Favorite Quotes</h3>
+      <div className="grid gap-3 grid-cols-2">
+        {paginatedFavorites.map((quote, index) => (
+          <Card 
+            key={index}
+            className="p-3 bg-card/60 backdrop-blur-sm border-primary/20 transform transition-all duration-300 hover:scale-102 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+          >
+            <p className="text-sm italic">{quote.text}</p>
+            <p className="text-xs text-muted-foreground mt-1">— {quote.author}</p>
+          </Card>
+        ))}
+      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={prevPage}
+            disabled={currentPage === 0}
+            className="border-primary/20"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground py-2">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={nextPage}
+            disabled={currentPage === totalPages - 1}
+            className="border-primary/20"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>

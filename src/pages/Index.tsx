@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Timer } from "@/components/Timer";
-import { QuoteDisplay } from "@/components/QuoteDisplay";
+import { QuoteDisplay, FavoriteQuotes } from "@/components/QuoteDisplay";
 import { TaskList, Task } from "@/components/TaskList";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ const Index = () => {
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [duration, setDuration] = useState(1500);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true); // Set dark mode as default
+  const [favorites, setFavorites] = useState<Quote[]>([]);
 
   useEffect(() => {
     if (isDark) {
@@ -19,6 +20,11 @@ const Index = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  // Initialize dark mode
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
   const handleTaskAdd = useCallback((task: Task) => {
     setTasks((prev) => [...prev, task]);
@@ -54,7 +60,7 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Task Management */}
+          {/* Left Column - Task Management and Favorites */}
           <div className="space-y-6">
             <TaskList
               tasks={tasks}
@@ -62,6 +68,7 @@ const Index = () => {
               onTaskAdd={handleTaskAdd}
               onTaskSelect={handleTaskSelect}
             />
+            <FavoriteQuotes favorites={favorites} />
           </div>
 
           {/* Right Column - Timer and Active Quote */}
