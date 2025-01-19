@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Clock, Plus, Check, Sparkles, ChevronUp, ChevronDown } from "lucide-react";
+import { Clock, Plus, Check, Sparkles, ChevronUp, ChevronDown, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 
 interface TimerProps {
   duration: number;
@@ -13,12 +15,20 @@ interface TimerProps {
   onDurationChange?: (minutes: number) => void;
 }
 
+const SOUND_OPTIONS = {
+  bell: "/sounds/bell.mp3",
+  chime: "/sounds/chime.mp3",
+  ding: "/sounds/ding.mp3",
+  none: "",
+};
+
 export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationChange }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [minutes, setMinutes] = useState(Math.floor(duration / 60));
+  const [selectedSound, setSelectedSound] = useState<keyof typeof SOUND_OPTIONS>("bell");
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -32,6 +42,12 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
     const newDuration = newMinutes * 60;
     setTimeLeft(newDuration);
     onDurationChange?.(newMinutes);
+  };
+
+  const playCompletionSound = () => {
+    if (selectedSound === "none") return;
+    const audio = new Audio(SOUND_OPTIONS[selectedSound]);
+    audio.play().catch(error => console.error("Error playing sound:", error));
   };
 
   const toggleTimer = () => {
@@ -50,6 +66,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
           if (time <= 1) {
             setIsRunning(false);
             setShowActions(true);
+            playCompletionSound();
             toast("Time's up! Great work! ✨");
           }
           return time - 1;
@@ -63,6 +80,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
     onComplete();
     setShowActions(false);
     setIsExpanded(false);
+    playCompletionSound();
     toast("Task completed! You're crushing it! 🎉");
   }, [onComplete]);
 
@@ -86,38 +104,56 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
         </h2>
 
         {!isRunning && !showActions && (
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleMinutesChange(minutes - 1)}
-              className="border-primary/20 hover:bg-primary/20"
-              disabled={minutes <= 1}
-            >
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-            <div className="relative w-20">
-              <Input
-                type="number"
-                min={1}
-                max={60}
-                value={minutes}
-                onChange={(e) => handleMinutesChange(parseInt(e.target.value) || 1)}
-                className="text-center font-mono bg-background/50"
-              />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                min
-              </span>
+          <div className="space-y-4">
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleMinutesChange(minutes - 1)}
+                className="border-primary/20 hover:bg-primary/20"
+                disabled={minutes <= 1}
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+              <div className="relative w-20">
+                <Input
+                  type="number"
+                  min={1}
+                  max={60}
+                  value={minutes}
+                  onChange={(e) => handleMinutesChange(parseInt(e.target.value) || 1)}
+                  className="text-center font-mono bg-background/50"
+                />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  min
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleMinutesChange(minutes + 1)}
+                className="border-primary/20 hover:bg-primary/20"
+                disabled={minutes >= 60}
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleMinutesChange(minutes + 1)}
-              className="border-primary/20 hover:bg-primary/20"
-              disabled={minutes >= 60}
-            >
-              <ChevronUp className="h-4 w-4" />
-            </Button>
+
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Completion Sound</Label>
+              <RadioGroup
+                value={selectedSound}
+                onValueChange={(value: keyof typeof SOUND_OPTIONS) => setSelectedSound(value)}
+                className="flex justify-center gap-4"
+              >
+                {Object.keys(SOUND_OPTIONS).map((sound) => (
+                  <div key={sound} className="flex items-center space-x-2">
+                    <RadioGroupItem value={sound} id={sound} />
+                    <Label htmlFor={sound} className="capitalize">{sound}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
           </div>
         )}
 
@@ -148,22 +184,34 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
         </div>
         
         {!showActions ? (
-          <Button
-            onClick={toggleTimer}
-            className="w-full transition-all duration-300 hover:scale-105 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
-          >
-            {isRunning ? (
-              <>
-                <Clock className="mr-2 h-4 w-4" />
-                Pause
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Start
-              </>
+          <div className="space-y-2">
+            <Button
+              onClick={toggleTimer}
+              className="w-full transition-all duration-300 hover:scale-105 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
+            >
+              {isRunning ? (
+                <>
+                  <Clock className="mr-2 h-4 w-4" />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Start
+                </>
+              )}
+            </Button>
+            {isRunning && (
+              <Button
+                onClick={handleComplete}
+                variant="outline"
+                className="w-full border-primary/20 hover:bg-primary/20"
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Complete Early
+              </Button>
             )}
-          </Button>
+          </div>
         ) : (
           <div className="flex gap-4">
             <Button
