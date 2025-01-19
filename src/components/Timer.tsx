@@ -16,9 +16,9 @@ interface TimerProps {
 }
 
 const SOUND_OPTIONS = {
-  bell: "https://assets.mixkit.co/active_storage/sfx/2424/2424-preview.mp3",
-  chime: "https://assets.mixkit.co/active_storage/sfx/2400/2400-preview.mp3",
-  ding: "https://assets.mixkit.co/active_storage/sfx/2404/2404-preview.mp3",
+  bell: "https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3",
+  chime: "https://cdn.freesound.org/previews/411/411089_5121236-lq.mp3",
+  ding: "https://cdn.freesound.org/previews/536/536108_11943129-lq.mp3",
   none: "",
 };
 
