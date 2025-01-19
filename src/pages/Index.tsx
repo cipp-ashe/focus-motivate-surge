@@ -2,13 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import { Timer } from "@/components/Timer";
 import { QuoteDisplay } from "@/components/QuoteDisplay";
 import { TaskList, Task } from "@/components/TaskList";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +9,7 @@ const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [duration, setDuration] = useState(1500); // 25 minutes default
+  const [duration, setDuration] = useState(1500);
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -43,10 +36,6 @@ const Index = () => {
     }
   }, [selectedTask]);
 
-  const handleDurationChange = (minutes: number) => {
-    setDuration(minutes * 60);
-  };
-
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       <div className="max-w-7xl mx-auto p-4 space-y-6">
@@ -64,7 +53,7 @@ const Index = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="space-y-6">
             <TaskList
               tasks={tasks}
@@ -72,23 +61,19 @@ const Index = () => {
               onTaskAdd={handleTaskAdd}
               onTaskSelect={handleTaskSelect}
             />
-          </div>
-
-          <div className="space-y-6">
             {selectedTask ? (
               <Timer
                 duration={duration}
                 taskName={selectedTask.name}
                 onComplete={handleTaskComplete}
                 onAddTime={() => {}}
-                onDurationChange={handleDurationChange}
+                onDurationChange={setDuration}
               />
             ) : (
               <div className="text-center text-muted-foreground p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">
                 Select a task to start the timer
               </div>
             )}
-
             <QuoteDisplay />
           </div>
         </div>

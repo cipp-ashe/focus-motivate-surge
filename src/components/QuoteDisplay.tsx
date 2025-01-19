@@ -62,51 +62,49 @@ export const QuoteDisplay = () => {
   };
 
   return (
-    <div className="flex gap-6">
-      <div className="quote-container flex-1">
-        <Card 
-          className={`quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 ${
-            isFlipped ? 'flipped' : ''
-          }`}
-        >
-          <div className="text-center space-y-4">
-            <Sparkles className="h-6 w-6 mx-auto text-primary" />
-            <p className="text-xl font-medium italic bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-              "{currentQuote.text}"
-            </p>
-            <p className="text-sm text-muted-foreground">— {currentQuote.author}</p>
-            <div className="flex justify-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLike}
-                className={`transition-all duration-300 hover:scale-110 ${
-                  isLiked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
-                <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={getRandomQuote}
-                className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110"
-              >
-                <RefreshCw className="h-5 w-5" />
-              </Button>
-            </div>
+    <div className="space-y-6">
+      <Card 
+        className={`quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 transition-all duration-500 ${
+          isFlipped ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+        }`}
+      >
+        <div className="text-center space-y-4">
+          <Sparkles className="h-6 w-6 mx-auto text-primary" />
+          <p className="text-xl font-medium italic bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+            "{currentQuote.text}"
+          </p>
+          <p className="text-sm text-muted-foreground">— {currentQuote.author}</p>
+          <div className="flex justify-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLike}
+              className={`transition-all duration-300 hover:scale-105 ${
+                isLiked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-primary'
+              }`}
+            >
+              <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={getRandomQuote}
+              className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105"
+            >
+              <RefreshCw className="h-5 w-5" />
+            </Button>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
       {favorites.length > 0 && (
-        <div className="w-64 space-y-4 overflow-y-auto max-h-[400px]">
+        <div className="space-y-4">
           <h3 className="text-lg font-semibold text-primary">Favorite Quotes</h3>
-          <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {favorites.map((quote, index) => (
               <Card 
                 key={index}
-                className="p-3 bg-card/60 backdrop-blur-sm border-primary/20 transform transition-all duration-500 hover:scale-105 animate-pulse-slow hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                className="p-3 bg-card/60 backdrop-blur-sm border-primary/20 transform transition-all duration-500 hover:scale-102 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
               >
                 <p className="text-sm italic">{quote.text}</p>
                 <p className="text-xs text-muted-foreground mt-1">— {quote.author}</p>
