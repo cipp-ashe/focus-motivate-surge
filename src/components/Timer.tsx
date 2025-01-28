@@ -38,16 +38,21 @@ export const Timer = ({
   setFavorites
 }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState<number>(duration);
-
-  // Sync timeLeft with duration prop changes
-  useEffect(() => {
-    setTimeLeft(duration);
-  }, [duration]);
   const [isRunning, setIsRunning] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [minutes, setMinutes] = useState(Math.floor(duration / 60));
   const [selectedSound, setSelectedSound] = useState<keyof typeof SOUND_OPTIONS>("bell");
+
+  // Sync timeLeft with duration prop changes
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration]);
+
+  // Reset timeLeft when minutes change
+  useEffect(() => {
+    setTimeLeft(minutes * 60);
+  }, [minutes]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -58,23 +63,14 @@ export const Timer = ({
   const handleMinutesChange = (value: number) => {
     const newMinutes = Math.max(1, Math.min(60, value));
     setMinutes(newMinutes);
-    const newDuration = newMinutes * 60; // Convert to seconds
+    const newDuration = newMinutes * 60;
     setTimeLeft(newDuration);
-    setMinutes(newMinutes); // Ensure minutes state is updated
     onDurationChange?.(newMinutes);
   };
 
-  // Reset timeLeft when minutes change
-  useEffect(() => {
-    setTimeLeft(minutes * 60);
-  }, [minutes]);
-
-  const playCompletionSound = () => {
+  const playCompletionSound = useCallback(() => {
     if (selectedSound === "none") return;
-    
     const audio = new Audio(SOUND_OPTIONS[selectedSound]);
-    
-    // Test sound on selection
     audio.play()
       .then(() => {
         console.log("Sound played successfully");
@@ -84,9 +80,8 @@ export const Timer = ({
         console.error("Error playing sound:", error);
         toast.error("Could not play sound. Please check your browser settings.");
       });
-  };
+  }, [selectedSound]);
 
-  // Add a test sound button
   const testSound = () => {
     if (selectedSound === "none") {
       toast("No sound selected");
@@ -137,146 +132,130 @@ export const Timer = ({
     toast("Added 5 minutes. Keep the momentum going! 💪");
   }, [onAddTime]);
 
+  const renderTimer = (size: 'normal' | 'large') => (
+    <div className={`relative mx-auto ${size === 'large' ? 'w-96 h-96' : 'w-48 h-48'}`}>
+      <svg className={`timer-circle ${isRunning ? 'active' : ''}`} viewBox="0 0 100 100">
+        <circle
+          className="text-muted/10 stroke-current"
+          strokeWidth="4"
+          fill="transparent"
+          r="45"
+          cx="50"
+          cy="50"
+        />
+        <circle
+          className={`stroke-current transition-all duration-1000 ${
+            isRunning
+              ? 'text-primary drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+              : 'text-primary/50'
+          }`}
+          strokeWidth="4"
+          fill="transparent"
+          r="45"
+          cx="50"
+          cy="50"
+          strokeLinecap="round"
+          strokeDasharray={CIRCLE_CIRCUMFERENCE}
+          strokeDashoffset={CIRCLE_CIRCUMFERENCE * ((minutes * 60 - timeLeft) / (minutes * 60))}
+          transform="rotate(-90 50 50)"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className={`font-mono font-bold ${size === 'large' ? 'text-6xl' : 'text-3xl'}`}>
+          {formatTime(timeLeft)}
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <Card
-        className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-700 ${
-          isExpanded
-            ? 'fixed left-1/4 right-1/4 top-8 z-50 p-8 flex flex-col items-center justify-center rounded-2xl min-h-[40vh]'
-            : 'p-6'
-        }`}
-      >
-        <div className="text-center space-y-6">
-        <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
-          {taskName}
-        </h2>
-
-        {/* Settings section - collapsible when timer is running */}
-        <div className={`overflow-hidden transition-all duration-700 ${
-          isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-6'
-        }`}>
-          <div className="space-y-6">
-            <div className="flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleMinutesChange(minutes - 1)}
-                className="border-primary/20 hover:bg-primary/20"
-                disabled={minutes <= 1}
-              >
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              <div className="relative w-20">
-                <Input
-                  type="number"
-                  min={1}
-                  max={60}
-                  value={minutes}
-                  onChange={(e) => handleMinutesChange(parseInt(e.target.value) || 1)}
-                  className="text-center font-mono bg-background/50"
-                />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                  min
-                </span>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleMinutesChange(minutes + 1)}
-                className="border-primary/20 hover:bg-primary/20"
-                disabled={minutes >= 60}
-              >
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">Completion Sound</Label>
-              <RadioGroup
-                value={selectedSound}
-                onValueChange={(value: keyof typeof SOUND_OPTIONS) => setSelectedSound(value)}
-                className="flex flex-wrap justify-center gap-4"
-              >
-                {Object.keys(SOUND_OPTIONS).map((sound) => (
-                  <div key={sound} className="flex items-center space-x-2">
-                    <RadioGroupItem value={sound} id={sound} />
-                    <Label htmlFor={sound} className="capitalize">{sound}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={testSound}
-                className="mt-2"
-              >
-                Test Sound
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Task name and timer section */}
-        <div className={`relative mx-auto transition-all duration-700 ${
-          isExpanded ? 'w-96 h-96' : 'w-48 h-48'
-        }`}>
-          <svg className={`timer-circle ${isRunning ? 'active' : ''}`} viewBox="0 0 100 100">
-            <circle
-              className="text-muted/10 stroke-current"
-              strokeWidth="4"
-              fill="transparent"
-              r="45"
-              cx="50"
-              cy="50"
-            />
-            <circle
-              className={`stroke-current transition-all duration-1000 ${
-                isRunning
-                  ? 'text-primary drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]'
-                  : 'text-primary/50'
-              }`}
-              strokeWidth="4"
-              fill="transparent"
-              r="45"
-              cx="50"
-              cy="50"
-              strokeLinecap="round"
-              strokeDasharray={CIRCLE_CIRCUMFERENCE}
-              strokeDashoffset={CIRCLE_CIRCUMFERENCE * ((minutes * 60 - timeLeft) / (minutes * 60))}
-              transform="rotate(-90 50 50)"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-            <h2 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate transition-all duration-700 ${
-              isExpanded ? 'text-4xl max-w-[80%]' : 'text-xl max-w-[90%]'
-            }`}>
+      {!isExpanded ? (
+        <Card className="mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-6">
+          <div className="text-center space-y-6">
+            <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
               {taskName}
             </h2>
-            <span className={`font-mono font-bold transition-all duration-700 ${
-              isExpanded ? 'text-6xl' : 'text-3xl'
+
+            <div className={`overflow-hidden transition-all duration-700 ${
+              isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-6'
             }`}>
-              {formatTime(timeLeft)}
-            </span>
-          </div>
-        </div>
-        
-        <div className={`transition-all duration-700 ${isExpanded ? 'mt-8 w-full max-w-lg' : 'mt-4'}`}>
-          {!showActions ? (
-            <div className="space-y-3">
+              <div className="space-y-6">
+                <div className="flex items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleMinutesChange(minutes - 1)}
+                    className="border-primary/20 hover:bg-primary/20"
+                    disabled={minutes <= 1}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                  <div className="relative w-20">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={minutes}
+                      onChange={(e) => handleMinutesChange(parseInt(e.target.value) || 1)}
+                      className="text-center font-mono bg-background/50"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      min
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleMinutesChange(minutes + 1)}
+                    className="border-primary/20 hover:bg-primary/20"
+                    disabled={minutes >= 60}
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Completion Sound</Label>
+                  <RadioGroup
+                    value={selectedSound}
+                    onValueChange={(value: keyof typeof SOUND_OPTIONS) => setSelectedSound(value)}
+                    className="flex flex-wrap justify-center gap-4"
+                  >
+                    {Object.keys(SOUND_OPTIONS).map((sound) => (
+                      <div key={sound} className="flex items-center space-x-2">
+                        <RadioGroupItem value={sound} id={sound} />
+                        <Label htmlFor={sound} className="capitalize">{sound}</Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={testSound}
+                    className="mt-2"
+                  >
+                    Test Sound
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {renderTimer('normal')}
+
+            <div className="mt-4 space-y-2">
               <Button
                 onClick={toggleTimer}
-                className={`w-full transition-all duration-300 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${
-                  isExpanded ? 'text-lg py-6' : ''
-                }`}
+                className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
               >
                 {isRunning ? (
                   <>
-                    <Clock className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                    <Clock className="mr-2 h-4 w-4" />
                     Pause
                   </>
                 ) : (
                   <>
-                    <Sparkles className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                    <Sparkles className="mr-2 h-4 w-4" />
                     Start
                   </>
                 )}
@@ -285,64 +264,72 @@ export const Timer = ({
                 <Button
                   onClick={handleComplete}
                   variant="outline"
-                  className={`w-full border-primary/20 hover:bg-primary/20 ${
-                    isExpanded ? 'text-lg py-6' : ''
-                  }`}
+                  className="w-full border-primary/20 hover:bg-primary/20"
                 >
-                  <Check className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                  <Check className="mr-2 h-4 w-4" />
                   Complete Early
                 </Button>
               )}
             </div>
-          ) : (
-            <div className="flex gap-4">
-              <Button
-                onClick={handleComplete}
-                className={`flex-1 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${
-                  isExpanded ? 'text-lg py-6' : ''
-                }`}
-              >
-                <Check className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
-                Complete
-              </Button>
-              <Button
-                onClick={handleAddTime}
-                variant="outline"
-                className={`flex-1 border-primary/20 hover:bg-primary/20 ${
-                  isExpanded ? 'text-lg py-6' : ''
-                }`}
-              >
-                <Plus className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
-                Add 5m
-              </Button>
+          </div>
+        </Card>
+      ) : (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-background" />
+          
+          <div className="relative h-full flex flex-col items-center justify-start pt-8 px-4">
+            <div className="w-full max-w-2xl">
+              <Card className="bg-card shadow-lg p-8 border-primary/20">
+                <div className="text-center space-y-8">
+                  <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                    {taskName}
+                  </h2>
+                  
+                  {renderTimer('large')}
+                  
+                  <div className="space-y-4">
+                    <Button
+                      onClick={toggleTimer}
+                      className="w-full text-lg py-6 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
+                    >
+                      {isRunning ? (
+                        <>
+                          <Clock className="mr-2 h-5 w-5" />
+                          Pause
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Start
+                        </>
+                      )}
+                    </Button>
+                    {isRunning && (
+                      <Button
+                        onClick={handleComplete}
+                        variant="outline"
+                        className="w-full text-lg py-6 border-primary/20 hover:bg-primary/20"
+                      >
+                        <Check className="mr-2 h-5 w-5" />
+                        Complete Early
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </Card>
             </div>
-          )}
-        </div>
 
-      </div>
-    </Card>
-
-    {/* Background overlay when expanded */}
-    {isExpanded && (
-      <>
-        <div
-          className="fixed inset-0 bg-background/90 backdrop-blur-sm -z-10"
-          onClick={() => {
-            if (!isRunning) {
-              setIsExpanded(false);
-            }
-          }}
-        />
-        <div className="fixed left-4 right-4 bottom-4 top-[45vh] overflow-y-auto pt-8 px-4">
-          <QuoteDisplay
-            showAsOverlay
-            currentTask={taskName}
-            favorites={favorites}
-            setFavorites={setFavorites}
-          />
+            <div className="w-full max-w-2xl mt-8">
+              <QuoteDisplay
+                showAsOverlay
+                currentTask={taskName}
+                favorites={favorites}
+                setFavorites={setFavorites}
+              />
+            </div>
+          </div>
         </div>
-      </>
-    )}
-  </>
-);
+      )}
+    </>
+  );
 };
