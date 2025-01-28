@@ -7,6 +7,14 @@ import { toast } from "sonner";
 interface Quote {
   text: string;
   author: string;
+  timestamp?: string;
+  task?: string;
+}
+
+interface QuoteDisplayProps {
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  currentTask?: string;
 }
 
 interface QuoteDisplayProps {
@@ -55,8 +63,8 @@ const quotes: Quote[] = [
   { text: "Purpose is not something you find; it’s something you create through your actions.", author: "Unknown" },
   { text: "Vision without strategy is a dream; vision with execution is a legacy.", author: "Unknown" }
 ];
+export const QuoteDisplay = ({ favorites = [], setFavorites, currentTask }: QuoteDisplayProps) => {
 
-export const QuoteDisplay = ({ favorites = [], setFavorites }: QuoteDisplayProps) => {
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -107,8 +115,14 @@ export const QuoteDisplay = ({ favorites = [], setFavorites }: QuoteDisplayProps
     if (!currentQuote) return;
 
     if (!isLiked) {
-      setFavorites(prev => [...prev, currentQuote]);
-      toast("Quote added to favorites! ✨");
+      const now = new Date();
+      const favoriteQuote = {
+        ...currentQuote,
+        timestamp: now.toLocaleString(),
+        task: currentTask
+      };
+      setFavorites(prev => [...prev, favoriteQuote]);
+      toast(`Quote added to favorites${currentTask ? ` while working on: ${currentTask}` : ''}! ✨`);
     } else {
       setFavorites(prev => prev.filter(quote => quote.text !== currentQuote.text));
     }
@@ -121,7 +135,7 @@ export const QuoteDisplay = ({ favorites = [], setFavorites }: QuoteDisplayProps
 
   return (
     <div className="space-y-6">
-      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20">
+      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 sticky top-[70vh] z-50">
         <div className="text-center space-y-4">
           <Sparkles className="h-6 w-6 mx-auto text-primary" />
           <div className={`transition-all duration-300 ${
@@ -187,12 +201,26 @@ export const FavoriteQuotes = ({ favorites }: FavoriteQuotesProps) => {
       <h3 className="text-lg font-semibold text-primary">Favorite Quotes</h3>
       <div className="grid gap-3 grid-cols-2">
         {paginatedFavorites.map((quote, index) => (
-          <Card 
+          <Card
             key={index}
-            className="p-3 bg-card/60 backdrop-blur-sm border-primary/20 transform transition-all duration-300 hover:scale-102 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+            className="p-4 bg-card/60 backdrop-blur-sm border-primary/20 transform transition-all duration-300 hover:scale-102 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] relative z-40"
           >
-            <p className="text-sm italic">{quote.text}</p>
-            <p className="text-xs text-muted-foreground mt-1">— {quote.author}</p>
+            <div className="space-y-2">
+              <p className="text-sm italic">{quote.text}</p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">— {quote.author}</p>
+                {quote.task && (
+                  <p className="text-xs text-primary/70">
+                    Added during: {quote.task}
+                  </p>
+                )}
+                {quote.timestamp && (
+                  <p className="text-xs text-muted-foreground/70">
+                    {quote.timestamp}
+                  </p>
+                )}
+              </div>
+            </div>
           </Card>
         ))}
       </div>

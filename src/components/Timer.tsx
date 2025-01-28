@@ -91,6 +91,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
           if (time <= 1) {
             setIsRunning(false);
             setShowActions(true);
+            setIsExpanded(false);
             playCompletionSound();
             toast("Time's up! Great work! ✨");
           }
@@ -120,7 +121,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
     <Card 
       className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-700 ${
         isExpanded
-          ? 'fixed inset-4 z-50 p-8 flex flex-col items-center justify-center'
+          ? 'fixed left-4 right-4 top-4 bottom-1/3 z-50 p-8 flex flex-col items-center justify-center'
           : 'p-6'
       }`}
     >
@@ -220,7 +221,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
               cy="50"
               strokeLinecap="round"
               strokeDasharray="283"
-              strokeDashoffset={283 * (1 - (timeLeft / (Math.floor(timeLeft / 60) * 60 || 60)))}
+              strokeDashoffset={283 * (1 - (timeLeft / (minutes * 60)))}
               transform="rotate(-90 50 50)"
             />
           </svg>
