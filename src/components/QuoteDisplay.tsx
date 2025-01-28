@@ -143,7 +143,11 @@ export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => 
   );
 };
 
-export const FavoriteQuotes = ({ favorites }: { favorites: Quote[] }) => {
+export interface FavoriteQuotesProps {
+  favorites: Quote[];
+}
+
+export const FavoriteQuotes = ({ favorites }: FavoriteQuotesProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const quotesPerPage = 6;
 
