@@ -171,6 +171,7 @@ export const Timer = ({
   return (
     <>
       {!isExpanded ? (
+        // Normal view
         <Card className="mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-6">
           <div className="text-center space-y-6">
             <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
@@ -289,21 +290,23 @@ export const Timer = ({
           )}
           
           {/* Content container */}
-          <div className="flex flex-col items-center min-h-full py-8 px-4">
-            {/* Timer section */}
-            <div className="w-full max-w-2xl">
-              <Card className="bg-card shadow-lg p-8 border-primary/20">
-                <div className="text-center space-y-8">
-                  <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+          <div className="flex flex-col items-center max-h-screen overflow-auto py-6 px-4">
+            {/* Timer card */}
+            <div className="w-full max-w-xl">
+              <Card className="bg-card shadow-lg p-6 border-primary/20">
+                <div className="text-center space-y-6">
+                  <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                     {taskName}
                   </h2>
                   
-                  {renderTimer('large')}
+                  <div className="w-72 h-72 mx-auto">
+                    {renderTimer('large')}
+                  </div>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <Button
                       onClick={toggleTimer}
-                      className="w-full text-lg py-6 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
+                      className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
                     >
                       {isRunning ? (
                         <>
@@ -318,14 +321,24 @@ export const Timer = ({
                       )}
                     </Button>
                     {isRunning && (
-                      <Button
-                        onClick={handleComplete}
-                        variant="outline"
-                        className="w-full text-lg py-6 border-primary/20 hover:bg-primary/20"
-                      >
-                        <Check className="mr-2 h-5 w-5" />
-                        Complete Early
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleComplete}
+                          variant="outline"
+                          className="flex-1 border-primary/20 hover:bg-primary/20"
+                        >
+                          <Check className="mr-2 h-5 w-5" />
+                          Complete
+                        </Button>
+                        <Button
+                          onClick={handleAddTime}
+                          variant="outline"
+                          className="flex-1 border-primary/20 hover:bg-primary/20"
+                        >
+                          <Plus className="mr-2 h-5 w-5" />
+                          Add 5m
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -333,8 +346,8 @@ export const Timer = ({
             </div>
 
             {/* Quotes section */}
-            <div className="w-full max-w-2xl mt-8">
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4">
+            <div className="w-full max-w-xl mt-4">
+              <div className="bg-card/30 rounded-lg">
                 <QuoteDisplay
                   showAsOverlay
                   currentTask={taskName}
