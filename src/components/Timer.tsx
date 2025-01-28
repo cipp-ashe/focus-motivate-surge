@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
+import { QuoteDisplay } from "./QuoteDisplay";
 
 interface TimerProps {
   duration: number;
@@ -13,6 +14,8 @@ interface TimerProps {
   onComplete: () => void;
   onAddTime: () => void;
   onDurationChange?: (minutes: number) => void;
+  favorites: { text: string; author: string; timestamp?: string; task?: string; }[];
+  setFavorites: React.Dispatch<React.SetStateAction<{ text: string; author: string; timestamp?: string; task?: string; }[]>>;
 }
 
 // Circle circumference (2πr) where r=45 is the radius of the SVG circle
@@ -25,7 +28,15 @@ const SOUND_OPTIONS = {
   none: "",
 };
 
-export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationChange }: TimerProps) => {
+export const Timer = ({
+  duration,
+  taskName,
+  onComplete,
+  onAddTime,
+  onDurationChange,
+  favorites,
+  setFavorites
+}: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState<number>(duration);
 
   // Sync timeLeft with duration prop changes
@@ -127,14 +138,15 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
   }, [onAddTime]);
 
   return (
-    <Card 
-      className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-700 ${
-        isExpanded
-          ? 'fixed left-1/4 right-1/4 top-8 z-50 p-8 flex flex-col items-center justify-center rounded-2xl min-h-[40vh]'
-          : 'p-6'
-      }`}
-    >
-      <div className="text-center space-y-6">
+    <>
+      <Card
+        className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-700 ${
+          isExpanded
+            ? 'fixed left-1/4 right-1/4 top-8 z-50 p-8 flex flex-col items-center justify-center rounded-2xl min-h-[40vh]'
+            : 'p-6'
+        }`}
+      >
+        <div className="text-center space-y-6">
         <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
           {taskName}
         </h2>
@@ -307,18 +319,30 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
           )}
         </div>
 
-        {/* Background overlay when expanded */}
-        {isExpanded && (
-          <div
-            className="fixed inset-0 bg-background/90 backdrop-blur-sm -z-10"
-            onClick={() => {
-              if (!isRunning) {
-                setIsExpanded(false);
-              }
-            }}
-          />
-        )}
       </div>
     </Card>
-  );
+
+    {/* Background overlay when expanded */}
+    {isExpanded && (
+      <>
+        <div
+          className="fixed inset-0 bg-background/90 backdrop-blur-sm -z-10"
+          onClick={() => {
+            if (!isRunning) {
+              setIsExpanded(false);
+            }
+          }}
+        />
+        <div className="fixed left-4 right-4 bottom-4 top-[45vh] overflow-y-auto pt-8 px-4">
+          <QuoteDisplay
+            showAsOverlay
+            currentTask={taskName}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
+        </div>
+      </>
+    )}
+  </>
+);
 };

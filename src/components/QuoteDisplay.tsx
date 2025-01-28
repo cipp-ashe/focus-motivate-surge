@@ -185,7 +185,7 @@ export interface FavoriteQuotesProps {
   showAsOverlay?: boolean;
 }
 
-export const FavoriteQuotes = ({ favorites }: FavoriteQuotesProps) => {
+export const FavoriteQuotes = ({ favorites, showAsOverlay = false }: FavoriteQuotesProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const quotesPerPage = 6;
 
@@ -203,10 +203,10 @@ export const FavoriteQuotes = ({ favorites }: FavoriteQuotesProps) => {
     setCurrentPage(prev => Math.max(prev - 1, 0));
   };
 
-  if (favorites.length === 0) return null;
+  if (favorites.length === 0 || showAsOverlay) return null;
 
   return (
-    <div className="space-y-4 mt-8 max-w-5xl mx-auto">
+    <div className="space-y-4 mt-8 max-w-5xl mx-auto opacity-100 transition-opacity duration-700">
       <h3 className="text-lg font-semibold text-primary">Favorite Quotes</h3>
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {paginatedFavorites.map((quote, index) => (
