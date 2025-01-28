@@ -118,17 +118,22 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
 
   return (
     <Card 
-      className={`p-8 mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-300 ${
-        isExpanded ? 'scale-[1.02]' : ''
-      } origin-center`}
+      className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-700 ${
+        isExpanded
+          ? 'fixed inset-4 z-50 p-8 flex flex-col items-center justify-center'
+          : 'p-6'
+      }`}
     >
       <div className="text-center space-y-6">
         <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
           {taskName}
         </h2>
 
-        {!isRunning && !showActions && (
-          <div className="space-y-4">
+        {/* Settings section - collapsible when timer is running */}
+        <div className={`overflow-hidden transition-all duration-700 ${
+          isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-6'
+        }`}>
+          <div className="space-y-6">
             <div className="flex items-center justify-center gap-2">
               <Button
                 variant="outline"
@@ -168,7 +173,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
               <RadioGroup
                 value={selectedSound}
                 onValueChange={(value: keyof typeof SOUND_OPTIONS) => setSelectedSound(value)}
-                className="flex justify-center gap-4"
+                className="flex flex-wrap justify-center gap-4"
               >
                 {Object.keys(SOUND_OPTIONS).map((sound) => (
                   <div key={sound} className="flex items-center space-x-2">
@@ -187,12 +192,15 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
               </Button>
             </div>
           </div>
-        )}
+        </div>
 
-        <div className="relative w-48 h-48 mx-auto">
+        {/* Task name and timer section */}
+        <div className={`relative mx-auto transition-all duration-700 ${
+          isExpanded ? 'w-96 h-96' : 'w-48 h-48'
+        }`}>
           <svg className={`timer-circle ${isRunning ? 'active' : ''}`} viewBox="0 0 100 100">
             <circle
-              className="text-muted stroke-current"
+              className="text-muted/10 stroke-current"
               strokeWidth="4"
               fill="transparent"
               r="45"
@@ -200,68 +208,105 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
               cy="50"
             />
             <circle
-              className="text-primary stroke-current transition-all duration-1000"
+              className={`stroke-current transition-all duration-1000 ${
+                isRunning
+                  ? 'text-primary drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                  : 'text-primary/50'
+              }`}
               strokeWidth="4"
               fill="transparent"
               r="45"
               cx="50"
               cy="50"
+              strokeLinecap="round"
               strokeDasharray="283"
-              strokeDashoffset={283 * (timeLeft / (minutes * 60))}
+              strokeDashoffset={283 - (283 * (timeLeft / (minutes * 60)))}
+              transform="rotate(-90 50 50)"
             />
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-4xl font-bold font-mono">{formatTime(timeLeft)}</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+            <h2 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate transition-all duration-700 ${
+              isExpanded ? 'text-4xl max-w-[80%]' : 'text-xl max-w-[90%]'
+            }`}>
+              {taskName}
+            </h2>
+            <span className={`font-mono font-bold transition-all duration-700 ${
+              isExpanded ? 'text-6xl' : 'text-3xl'
+            }`}>
+              {formatTime(timeLeft)}
+            </span>
           </div>
         </div>
         
-        {!showActions ? (
-          <div className="space-y-2">
-            <Button
-              onClick={toggleTimer}
-              className="w-full transition-all duration-300 hover:scale-105 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
-            >
-              {isRunning ? (
-                <>
-                  <Clock className="mr-2 h-4 w-4" />
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Start
-                </>
+        <div className={`transition-all duration-700 ${isExpanded ? 'mt-8 w-full max-w-lg' : 'mt-4'}`}>
+          {!showActions ? (
+            <div className="space-y-3">
+              <Button
+                onClick={toggleTimer}
+                className={`w-full transition-all duration-300 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${
+                  isExpanded ? 'text-lg py-6' : ''
+                }`}
+              >
+                {isRunning ? (
+                  <>
+                    <Clock className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                    Pause
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                    Start
+                  </>
+                )}
+              </Button>
+              {isRunning && (
+                <Button
+                  onClick={handleComplete}
+                  variant="outline"
+                  className={`w-full border-primary/20 hover:bg-primary/20 ${
+                    isExpanded ? 'text-lg py-6' : ''
+                  }`}
+                >
+                  <Check className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                  Complete Early
+                </Button>
               )}
-            </Button>
-            {isRunning && (
+            </div>
+          ) : (
+            <div className="flex gap-4">
               <Button
                 onClick={handleComplete}
-                variant="outline"
-                className="w-full border-primary/20 hover:bg-primary/20"
+                className={`flex-1 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${
+                  isExpanded ? 'text-lg py-6' : ''
+                }`}
               >
-                <Check className="mr-2 h-4 w-4" />
-                Complete Early
+                <Check className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                Complete
               </Button>
-            )}
-          </div>
-        ) : (
-          <div className="flex gap-4">
-            <Button
-              onClick={handleComplete}
-              className="flex-1 bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Complete
-            </Button>
-            <Button
-              onClick={handleAddTime}
-              variant="outline"
-              className="flex-1 border-primary/20 hover:bg-primary/20"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add 5m
-            </Button>
-          </div>
+              <Button
+                onClick={handleAddTime}
+                variant="outline"
+                className={`flex-1 border-primary/20 hover:bg-primary/20 ${
+                  isExpanded ? 'text-lg py-6' : ''
+                }`}
+              >
+                <Plus className={`mr-2 ${isExpanded ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                Add 5m
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Background overlay when expanded */}
+        {isExpanded && (
+          <div
+            className="fixed inset-0 bg-background/90 backdrop-blur-sm -z-10"
+            onClick={() => {
+              if (!isRunning) {
+                setIsExpanded(false);
+              }
+            }}
+          />
         )}
       </div>
     </Card>
