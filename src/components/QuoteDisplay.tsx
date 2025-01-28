@@ -134,8 +134,8 @@ export const QuoteDisplay = ({ favorites = [], setFavorites, currentTask }: Quot
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 sticky top-[70vh] z-50">
+    <div className={`space-y-6 mt-6 transition-all duration-700 quotes-container max-w-5xl mx-auto`}>
+      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 mx-auto max-w-2xl">
         <div className="text-center space-y-4">
           <Sparkles className="h-6 w-6 mx-auto text-primary" />
           <div className={`transition-all duration-300 ${
@@ -197,9 +197,9 @@ export const FavoriteQuotes = ({ favorites }: FavoriteQuotesProps) => {
   if (favorites.length === 0) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-8 max-w-5xl mx-auto">
       <h3 className="text-lg font-semibold text-primary">Favorite Quotes</h3>
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {paginatedFavorites.map((quote, index) => (
           <Card
             key={index}
