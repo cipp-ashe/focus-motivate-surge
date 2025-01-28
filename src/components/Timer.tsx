@@ -275,11 +275,14 @@ export const Timer = ({
         </Card>
       ) : (
         <div className="fixed inset-0 z-50">
+          {/* Background overlay */}
           <div className="absolute inset-0 bg-background" />
           
-          <div className="relative h-full flex flex-col items-center justify-start pt-8 px-4">
-            <div className="w-full max-w-2xl">
-              <Card className="bg-card shadow-lg p-8 border-primary/20">
+          {/* Content container */}
+          <div className="relative h-full overflow-auto pt-8 px-4">
+            {/* Timer section */}
+            <div className="w-full max-w-2xl mx-auto mb-8">
+              <Card className="bg-card shadow-lg p-8 border-primary/20 relative z-20">
                 <div className="text-center space-y-8">
                   <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                     {taskName}
@@ -319,13 +322,16 @@ export const Timer = ({
               </Card>
             </div>
 
-            <div className="w-full max-w-2xl mt-8">
-              <QuoteDisplay
-                showAsOverlay
-                currentTask={taskName}
-                favorites={favorites}
-                setFavorites={setFavorites}
-              />
+            {/* Quotes section */}
+            <div className="w-full max-w-2xl mx-auto pb-8">
+              <div className="relative z-10">
+                <QuoteDisplay
+                  showAsOverlay
+                  currentTask={taskName}
+                  favorites={favorites}
+                  setFavorites={setFavorites}
+                />
+              </div>
             </div>
           </div>
         </div>
