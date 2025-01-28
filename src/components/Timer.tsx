@@ -130,7 +130,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
     <Card 
       className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-700 ${
         isExpanded
-          ? 'fixed left-1/4 right-1/4 top-4 z-50 p-8 flex flex-col items-center justify-center rounded-2xl'
+          ? 'fixed left-1/4 right-1/4 top-8 z-50 p-8 flex flex-col items-center justify-center rounded-2xl min-h-[40vh]'
           : 'p-6'
       }`}
     >

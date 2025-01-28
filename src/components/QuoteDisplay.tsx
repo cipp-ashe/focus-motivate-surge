@@ -15,6 +15,7 @@ interface QuoteDisplayProps {
   favorites: Quote[];
   setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
   currentTask?: string;
+  showAsOverlay?: boolean;
 }
 
 interface QuoteDisplayProps {
@@ -63,7 +64,12 @@ const quotes: Quote[] = [
   { text: "Purpose is not something you find; it’s something you create through your actions.", author: "Unknown" },
   { text: "Vision without strategy is a dream; vision with execution is a legacy.", author: "Unknown" }
 ];
-export const QuoteDisplay = ({ favorites = [], setFavorites, currentTask }: QuoteDisplayProps) => {
+export const QuoteDisplay = ({
+  favorites = [],
+  setFavorites,
+  currentTask,
+  showAsOverlay = false
+}: QuoteDisplayProps) => {
 
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -134,8 +140,10 @@ export const QuoteDisplay = ({ favorites = [], setFavorites, currentTask }: Quot
   }
 
   return (
-    <div className={`space-y-6 mt-6 transition-all duration-700 quotes-container max-w-5xl mx-auto`}>
-      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 mx-auto max-w-2xl">
+    <div className={`space-y-6 transition-all duration-700 quotes-container max-w-5xl mx-auto ${
+      showAsOverlay ? 'fixed left-1/4 right-1/4 top-[45%] z-40' : 'mt-6'
+    }`}>
+      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 mx-auto max-w-2xl shadow-lg">
         <div className="text-center space-y-4">
           <Sparkles className="h-6 w-6 mx-auto text-primary" />
           <div className={`transition-all duration-300 ${
@@ -174,6 +182,7 @@ export const QuoteDisplay = ({ favorites = [], setFavorites, currentTask }: Quot
 
 export interface FavoriteQuotesProps {
   favorites: Quote[];
+  showAsOverlay?: boolean;
 }
 
 export const FavoriteQuotes = ({ favorites }: FavoriteQuotesProps) => {
