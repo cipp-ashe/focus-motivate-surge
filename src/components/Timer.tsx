@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Clock, Plus, Check, Sparkles, ChevronUp, ChevronDown } from "lucide-react";
+import { Clock, Plus, Check, Sparkles, ChevronUp, ChevronDown, X } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
@@ -146,7 +146,7 @@ export const Timer = ({
         <circle
           className={`stroke-current transition-all duration-1000 ${
             isRunning
-              ? 'text-primary drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+              ? 'text-primary filter drop-shadow-[0_0_6px_rgba(168,85,247,0.3)]'
               : 'text-primary/50'
           }`}
           strokeWidth="4"
@@ -278,11 +278,21 @@ export const Timer = ({
           {/* Background overlay */}
           <div className="absolute inset-0 bg-background" />
           
+          {/* Close button */}
+          {!isRunning && (
+            <button
+              onClick={() => setIsExpanded(false)}
+              className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-50"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          )}
+          
           {/* Content container */}
-          <div className="relative h-full overflow-auto pt-8 px-4">
+          <div className="flex flex-col items-center min-h-full py-8 px-4">
             {/* Timer section */}
-            <div className="w-full max-w-2xl mx-auto mb-8">
-              <Card className="bg-card shadow-lg p-8 border-primary/20 relative z-20">
+            <div className="w-full max-w-2xl">
+              <Card className="bg-card shadow-lg p-8 border-primary/20">
                 <div className="text-center space-y-8">
                   <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                     {taskName}
@@ -323,8 +333,8 @@ export const Timer = ({
             </div>
 
             {/* Quotes section */}
-            <div className="w-full max-w-2xl mx-auto pb-8">
-              <div className="relative z-10">
+            <div className="w-full max-w-2xl mt-8">
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4">
                 <QuoteDisplay
                   showAsOverlay
                   currentTask={taskName}
