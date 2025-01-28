@@ -29,13 +29,51 @@ const quotes: Quote[] = [
   { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
   { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
   { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
-  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" }
+  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+  { text: "The world needs people who see things differently.", author: "Unknown" },
+  { text: "Logic will get you from A to B. Imagination will take you everywhere.", author: "Albert Einstein" },
+  { text: "The cave you fear to enter holds the treasure you seek.", author: "Joseph Campbell" },
+  { text: "Life is not a matter of holding good cards, but of playing a poor hand well.", author: "Robert Louis Stevenson" },
+  { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
+  { text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.", author: "Albert Einstein" },
+  { text: "The ability to simplify means to eliminate the unnecessary so that the necessary may speak.", author: "Hans Hofmann" },
+  { text: "Have no fear of perfection - you'll never reach it.", author: "Salvador Dalí" },
+  { text: "If I have seen further than others, it is by standing upon the shoulders of giants.", author: "Isaac Newton" },
+  { text: "The secret of change is to focus all your energy, not on fighting the old, but on building the new.", author: "Socrates" },
+  { text: "The best way to predict the future is to invent it.", author: "Alan Kay" },
+  { text: "You do not rise to the level of your goals. You fall to the level of your systems.", author: "James Clear" },
+  { text: "Go confidently in the direction of your dreams. Live the life you have imagined.", author: "Henry David Thoreau" },
+  { text: "What you get by achieving your goals is not as important as what you become by achieving your goals.", author: "Zig Ziglar" },
+  { text: "Knowing is not enough; we must apply. Willing is not enough; we must do.", author: "Johann Wolfgang von Goethe" },
+  { text: "Try not to become a person of success, but rather try to become a person of value.", author: "Albert Einstein" },
+  { text: "Never do anything by halves.", author: "Roald Dahl" },
+  { text: "Finish each day and be done with it.", author: "Ralph Waldo Emerson" },
+  { text: "Impossible is just a big word.", author: "Muhammad Ali" },
+  { text: "Never stop fighting.", author: "E.E. Cummings" },
+  { text: "You must not be defeated.", author: "Maya Angelou" },
+  { text: "If it's not OK, it's not the end.", author: "John Lennon" },
+  { text: "It's not that I'm so smart, it's just that I stay with problems longer.", author: "Albert Einstein" },
+  { text: "There are no great limits to growth because there are no limits of human intelligence, imagination, and wonder.", author: "Ronald Reagan" },
+  { text: "It's not that I'm so smart, it's just that I stay with problems longer.", author: "Albert Einstein" },
+  { text: "The key to success is not in changing the direction of the wind, but in knowing how to set your sails.", author: "Unknown" },
+  { text: "ADHD is not a deficit of attention, but a wandering of attention to the most interesting nearby stimulus.", author: "Unknown" },
+  { text: "Your ADHD brain may not follow the usual path, but it can lead you to remarkable places.", author: "Unknown" },
+  { text: "Success with ADHD is not about overcoming the condition, but about finding strategies that work for you.", author: "Unknown" },
+  { text: "Your ADHD brain may process social cues differently, and that's okay. You bring unique energy and creativity to relationships.", author: "Unknown" },
+  { text: "Having ADHD doesn't mean you're a bad friend. You might show care differently, which makes your friendships special.", author: "Unknown" },
+  { text: "Impulsivity can lead to surprises, and with a pause, those surprises can turn into opportunities.", author: "Unknown" },
+  { text: "Managing ADHD isn't about controlling everything. It's about understanding when to act and when to pause.", author: "Unknown" },
+  { text: "You don't have to see the whole staircase. Just take the first step.", author: "Martin Luther King Jr." },
+  { text: "Every small task you complete is a victory. Your path doesn't have to look like everyone else's.", author: "Unknown" },
+  { text: "Sometimes, irritability is just your brain asking for a break. Step away, take a breath, and come back with a clearer mind.", author: "Unknown" },
+  { text: "Having strong emotions means you feel deeply — and that can be a strength when you learn to channel it.", author: "Unknown" }
 ];
 
-export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => {
+const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => {
   const [currentQuote, setCurrentQuote] = useState<Quote>(quotes[0]);
   const [isLiked, setIsLiked] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [quotePool, setQuotePool] = useState<Quote[]>([...quotes]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -43,15 +81,25 @@ export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => 
     }, 15000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [quotePool]);
 
   useEffect(() => {
     setIsLiked(favorites.some(fav => fav.text === currentQuote.text));
   }, [currentQuote, favorites]);
 
+  const shuffleQuotes = (quotes: Quote[]) => {
+    return [...quotes].sort(() => Math.random() - 0.5);
+  };
+
   const getRandomQuote = () => {
-    const newQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    if (quotePool.length === 0) {
+      setQuotePool(shuffleQuotes(quotes)); // Refill and shuffle when pool is empty
+    }
+
+    const newQuote = quotePool[0]; // Select the first quote from the pool
+    setQuotePool(prev => prev.slice(1)); // Remove the used quote
     setIsFlipped(true);
+
     setTimeout(() => {
       setCurrentQuote(newQuote);
       setIsLiked(favorites.some(fav => fav.text === newQuote.text));
@@ -104,69 +152,6 @@ export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => 
           </div>
         </div>
       </Card>
-    </div>
-  );
-};
-
-export const FavoriteQuotes = ({ favorites }: { favorites: Quote[] }) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const quotesPerPage = 6; // 2 columns × 3 rows
-
-  const totalPages = Math.ceil(favorites.length / quotesPerPage);
-  const paginatedFavorites = favorites.slice(
-    currentPage * quotesPerPage,
-    (currentPage + 1) * quotesPerPage
-  );
-
-  const nextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages - 1));
-  };
-
-  const prevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 0));
-  };
-
-  if (favorites.length === 0) return null;
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-primary">Favorite Quotes</h3>
-      <div className="grid gap-3 grid-cols-2">
-        {paginatedFavorites.map((quote, index) => (
-          <Card 
-            key={index}
-            className="p-3 bg-card/60 backdrop-blur-sm border-primary/20 transform transition-all duration-300 hover:scale-102 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]"
-          >
-            <p className="text-sm italic">{quote.text}</p>
-            <p className="text-xs text-muted-foreground mt-1">— {quote.author}</p>
-          </Card>
-        ))}
-      </div>
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={prevPage}
-            disabled={currentPage === 0}
-            className="border-primary/20"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground py-2">
-            {currentPage + 1} / {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={nextPage}
-            disabled={currentPage === totalPages - 1}
-            className="border-primary/20"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
