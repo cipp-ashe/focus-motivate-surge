@@ -15,6 +15,9 @@ interface TimerProps {
   onDurationChange?: (minutes: number) => void;
 }
 
+// Circle circumference (2πr) where r=45 is the radius of the SVG circle
+const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 45;
+
 const SOUND_OPTIONS = {
   bell: "https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3",
   chime: "https://cdn.freesound.org/previews/411/411089_5121236-lq.mp3",
@@ -44,10 +47,16 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
   const handleMinutesChange = (value: number) => {
     const newMinutes = Math.max(1, Math.min(60, value));
     setMinutes(newMinutes);
-    const newDuration = newMinutes * 60;
+    const newDuration = newMinutes * 60; // Convert to seconds
     setTimeLeft(newDuration);
+    setMinutes(newMinutes); // Ensure minutes state is updated
     onDurationChange?.(newMinutes);
   };
+
+  // Reset timeLeft when minutes change
+  useEffect(() => {
+    setTimeLeft(minutes * 60);
+  }, [minutes]);
 
   const playCompletionSound = () => {
     if (selectedSound === "none") return;
@@ -220,8 +229,8 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
               cx="50"
               cy="50"
               strokeLinecap="round"
-              strokeDasharray="283"
-              strokeDashoffset={283 * (1 - (timeLeft / (minutes * 60)))}
+              strokeDasharray={CIRCLE_CIRCUMFERENCE}
+              strokeDashoffset={CIRCLE_CIRCUMFERENCE * ((minutes * 60 - timeLeft) / (minutes * 60))}
               transform="rotate(-90 50 50)"
             />
           </svg>
