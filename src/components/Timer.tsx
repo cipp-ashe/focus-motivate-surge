@@ -119,8 +119,8 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
   return (
     <Card 
       className={`p-8 mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg transition-all duration-300 ${
-        isExpanded ? 'scale-105' : ''
-      }`}
+        isExpanded ? 'scale-[1.02]' : ''
+      } origin-center`}
     >
       <div className="text-center space-y-6">
         <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate">
