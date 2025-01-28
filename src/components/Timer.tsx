@@ -23,7 +23,12 @@ const SOUND_OPTIONS = {
 };
 
 export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationChange }: TimerProps) => {
-  const [timeLeft, setTimeLeft] = useState(duration);
+  const [timeLeft, setTimeLeft] = useState<number>(duration);
+
+  // Sync timeLeft with duration prop changes
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration]);
   const [isRunning, setIsRunning] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -79,9 +84,9 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
   };
 
   useEffect(() => {
-    let interval: number;
+    let interval: NodeJS.Timeout;
     if (isRunning && timeLeft > 0) {
-      interval = window.setInterval(() => {
+      interval = setInterval(() => {
         setTimeLeft((time) => {
           if (time <= 1) {
             setIsRunning(false);
@@ -94,13 +99,12 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, timeLeft, playCompletionSound]);
 
   const handleComplete = useCallback(() => {
     onComplete();
     setShowActions(false);
     setIsExpanded(false);
-    playCompletionSound();
     toast("Task completed! You're crushing it! 🎉");
   }, [onComplete]);
 
