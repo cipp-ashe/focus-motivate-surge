@@ -220,7 +220,7 @@ export const Timer = ({ duration, taskName, onComplete, onAddTime, onDurationCha
               cy="50"
               strokeLinecap="round"
               strokeDasharray="283"
-              strokeDashoffset={283 - (283 * (timeLeft / (minutes * 60)))}
+              strokeDashoffset={283 * (1 - (timeLeft / (Math.floor(timeLeft / 60) * 60 || 60)))}
               transform="rotate(-90 50 50)"
             />
           </svg>
