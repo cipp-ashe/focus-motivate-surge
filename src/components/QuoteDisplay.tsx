@@ -56,11 +56,17 @@ const quotes: Quote[] = [
   { text: "Vision without strategy is a dream; vision with execution is a legacy.", author: "Unknown" }
 ];
 
-export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => {
-  const [currentQuote, setCurrentQuote] = useState<Quote>(quotes[0]);
+export const QuoteDisplay = ({ favorites = [], setFavorites }: QuoteDisplayProps) => {
+  const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [quotePool, setQuotePool] = useState<Quote[]>([...quotes]);
+
+  useEffect(() => {
+    if (quotePool.length > 0 && !currentQuote) {
+      setCurrentQuote(quotePool[0]);
+    }
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,7 +77,9 @@ export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => 
   }, [quotePool]);
 
   useEffect(() => {
-    setIsLiked(favorites.some(fav => fav.text === currentQuote.text));
+    if (currentQuote) {
+      setIsLiked(favorites.some(fav => fav.text === currentQuote.text));
+    }
   }, [currentQuote, favorites]);
 
   const shuffleQuotes = (quotes: Quote[]) => {
@@ -81,6 +89,7 @@ export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => 
   const getRandomQuote = () => {
     if (quotePool.length === 0) {
       setQuotePool(shuffleQuotes(quotes));
+      return;
     }
 
     const newQuote = quotePool[0];
@@ -95,6 +104,8 @@ export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => 
   };
 
   const handleLike = () => {
+    if (!currentQuote) return;
+
     if (!isLiked) {
       setFavorites(prev => [...prev, currentQuote]);
       toast("Quote added to favorites! ✨");
@@ -103,6 +114,10 @@ export const QuoteDisplay = ({ favorites, setFavorites }: QuoteDisplayProps) => 
     }
     setIsLiked(!isLiked);
   };
+
+  if (!currentQuote) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
