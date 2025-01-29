@@ -1,7 +1,4 @@
 import { memo } from "react";
-
-// The ExpandedTimer component displays a detailed view of the timer with controls and motivational quotes.
-import styles from "./ExpandedTimer.module.css";
 import { Card } from "./ui/card";
 import { X } from "lucide-react";
 import { TimerCircle } from "./TimerCircle";
