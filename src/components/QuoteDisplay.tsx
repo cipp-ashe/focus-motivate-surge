@@ -18,11 +18,6 @@ interface QuoteDisplayProps {
   showAsOverlay?: boolean;
 }
 
-interface QuoteDisplayProps {
-  favorites: Quote[];
-  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
-}
-
 const quotes: Quote[] = [
   { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
   { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
@@ -64,6 +59,7 @@ const quotes: Quote[] = [
   { text: "Purpose is not something you find; it’s something you create through your actions.", author: "Unknown" },
   { text: "Vision without strategy is a dream; vision with execution is a legacy.", author: "Unknown" }
 ];
+
 export const QuoteDisplay = ({
   favorites = [],
   setFavorites,
@@ -141,7 +137,7 @@ export const QuoteDisplay = ({
 
   return (
     <div className={`space-y-6 transition-all duration-700 quotes-container max-w-5xl mx-auto ${
-      showAsOverlay ? 'fixed left-1/4 right-1/4 top-[45%] z-40' : 'mt-6'
+      showAsOverlay ? 'mt-6' : 'mt-6'
     }`}>
       <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 mx-auto max-w-2xl shadow-lg">
         <div className="text-center space-y-4">
