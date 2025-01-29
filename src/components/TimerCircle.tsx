@@ -66,10 +66,10 @@ export const TimerCircle = memo(({
   }, [timeLeft, minutes, circumference]);
 
   return (
-    <div 
-      className={`relative mx-auto ${size === 'large' ? 'w-96 h-96' : 'w-48 h-48'}`}
-      {...a11yProps}
-    >
+<div 
+  className={`relative mx-auto ${size === 'large' ? 'w-72 h-72' : 'w-48 h-48'}`}
+  {...a11yProps}
+>
       <svg 
         className={`timer-circle ${isRunning ? 'active' : ''}`} 
         viewBox="0 0 100 100"
@@ -87,7 +87,7 @@ export const TimerCircle = memo(({
           ref={progressRef}
           className={`stroke-current transition-colors duration-300 ${
             isRunning
-              ? 'text-primary filter drop-shadow-[0_0_6px_rgba(168,85,247,0.3)]'
+              ? 'text-primary filter drop-shadow-md'
               : 'text-primary/50'
           }`}
           strokeWidth="4"
@@ -107,7 +107,7 @@ export const TimerCircle = memo(({
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span 
           ref={textRef}
-          className={`font-mono font-bold ${size === 'large' ? 'text-6xl' : 'text-3xl'}`}
+          className={`font-mono font-bold ${size === 'large' ? 'text-5xl' : 'text-2xl'}`}
           style={{
             transition: prefersReducedMotion ? 'none' : 'color 300ms'
           }}

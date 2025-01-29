@@ -1,4 +1,7 @@
 import { memo } from "react";
+
+// The ExpandedTimer component displays a detailed view of the timer with controls and motivational quotes.
+import styles from "./ExpandedTimer.module.css";
 import { Card } from "./ui/card";
 import { X } from "lucide-react";
 import { TimerCircle } from "./TimerCircle";
@@ -15,11 +18,10 @@ export const ExpandedTimer = memo(({
   timerCircleProps,
   timerControlsProps,
   favorites,
-  setFavorites,
-  a11yProps
+  setFavorites
 }: ExpandedTimerProps) => {
   const { isRendered, getTransitionProps } = useTransition({ 
-    isVisible: true,
+    isVisible: isRunning,
     options: {
       duration: 300,
       onEnter: () => document.body.style.overflow = 'hidden',
@@ -28,18 +30,21 @@ export const ExpandedTimer = memo(({
   });
 
   const { containerRef } = useFocusTrap({
-    enabled: true,
+    enabled: isRendered,
     onEscape: !isRunning ? onClose : undefined,
   });
-
+  if (!isRendered) return null;
+  
+  ExpandedTimer.displayName = "ExpandedTimer";
   if (!isRendered) return null;
 
   const transitionProps = getTransitionProps();
+  const a11yProps = {}; // Define a11yProps as an empty object or with appropriate properties
 
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="timer-heading"
@@ -47,8 +52,8 @@ export const ExpandedTimer = memo(({
       {...transitionProps}
     >
       <div 
-        className="absolute inset-0 bg-background transition-opacity duration-300"
-        style={{ opacity: transitionProps.style.opacity }}
+        className="absolute inset-0 bg-background backgroundOverlay"
+        style={{ '--transition-opacity': transitionProps.style.opacity } as React.CSSProperties}
         aria-hidden="true"
       />
       
@@ -64,7 +69,7 @@ export const ExpandedTimer = memo(({
       )}
       
       <div 
-        className="flex flex-col items-center justify-start h-full max-h-screen overflow-auto py-6 px-4"
+        className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4"
         style={transitionProps.style}
       >
         <div className="w-full max-w-xl">
@@ -75,7 +80,7 @@ export const ExpandedTimer = memo(({
             <div className="flex flex-col items-center min-h-[500px]">
               <h2 
                 id="timer-heading" 
-                className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 mb-8"
+                className={styles.heading}
               >
                 {taskName}
               </h2>
