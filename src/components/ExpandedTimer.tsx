@@ -72,15 +72,15 @@ export const ExpandedTimer = memo(({
             className="bg-card shadow-lg p-6 border-primary/20"
             {...focusOrder(2)}
           >
-            <div className="flex flex-col items-center space-y-8">
+            <div className="flex flex-col items-center min-h-[500px]">
               <h2 
                 id="timer-heading" 
-                className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500"
+                className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 mb-8"
               >
                 {taskName}
               </h2>
               
-              <div className="flex flex-col items-center space-y-6">
+              <div className="flex-1 flex flex-col items-center justify-center gap-8">
                 <div 
                   className="relative w-72 h-72"
                   aria-live="polite"
