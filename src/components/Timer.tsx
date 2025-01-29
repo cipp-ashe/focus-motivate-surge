@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
+import { Card } from "./ui/card";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 import { CompactTimer } from "./CompactTimer";
 import { ExpandedTimer } from "./ExpandedTimer";
-import { TimerErrorBoundary } from "./TimerErrorBoundary";
-import { ShortcutsInfo } from "./ShortcutsInfo";
 import { useAudio } from "../hooks/useAudio";
 import { useTimer } from "../hooks/useTimer";
 import { useTimerShortcuts } from "../hooks/useTimerShortcuts";
@@ -33,7 +33,16 @@ export const Timer = ({
 }: TimerProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
-  const { play: playSound, testSound } = useAudio(SOUND_OPTIONS[selectedSound]);
+  
+  const { play: playSound, testSound, isLoadingAudio } = useAudio({
+    audioUrl: SOUND_OPTIONS[selectedSound],
+    options: {
+      onError: (error) => {
+        console.error('Audio error:', error);
+        toast.error("Could not play sound. Please check your browser settings.");
+      }
+    }
+  });
 
   const {
     timeLeft,
@@ -75,33 +84,11 @@ export const Timer = ({
     start();
   }, [addMinutes, onAddTime, start]);
 
-  // Set up keyboard shortcuts
-  const { shortcuts } = useTimerShortcuts({
-    isRunning,
-    onToggle: toggleTimer,
-    onComplete: handleComplete,
-    onAddTime: handleAddTime,
-  });
-
-  // Set up accessibility features
-  const {
-    getTimerA11yProps,
-    getToggleButtonA11yProps,
-    getCompleteButtonA11yProps,
-    getAddTimeButtonA11yProps,
-  } = useTimerA11y({
-    isRunning,
-    timeLeft,
-    taskName,
-    isExpanded,
-  });
-
   const timerCircleProps = {
     isRunning,
     timeLeft,
     minutes,
     circumference: CIRCLE_CIRCUMFERENCE,
-    a11yProps: getTimerA11yProps(),
   };
 
   const timerControlsProps = {
@@ -109,9 +96,6 @@ export const Timer = ({
     onToggle: toggleTimer,
     onComplete: handleComplete,
     onAddTime: handleAddTime,
-    toggleButtonA11yProps: getToggleButtonA11yProps(),
-    completeButtonA11yProps: getCompleteButtonA11yProps(),
-    addTimeButtonA11yProps: getAddTimeButtonA11yProps(),
   };
 
   const commonProps = {
@@ -121,34 +105,28 @@ export const Timer = ({
     timerControlsProps,
   };
 
-  const timerContent = isExpanded ? (
-    <ExpandedTimer
-      {...commonProps}
-      onClose={() => setIsExpanded(false)}
-      favorites={favorites}
-      setFavorites={setFavorites}
-      a11yProps={getTimerA11yProps()}
-    />
-  ) : (
-    <div className="relative">
-      <CompactTimer
+  if (isExpanded) {
+    return (
+      <ExpandedTimer
         {...commonProps}
-        minutes={minutes}
-        selectedSound={selectedSound}
-        onSoundChange={setSelectedSound}
-        onTestSound={testSound}
-        onMinutesChange={handleMinutesChange}
-        minMinutes={MIN_MINUTES}
-        maxMinutes={MAX_MINUTES}
-        a11yProps={getTimerA11yProps()}
+        onClose={() => setIsExpanded(false)}
+        favorites={favorites}
+        setFavorites={setFavorites}
       />
-      <ShortcutsInfo shortcuts={shortcuts} />
-    </div>
-  );
+    );
+  }
 
   return (
-    <TimerErrorBoundary>
-      {timerContent}
-    </TimerErrorBoundary>
+    <CompactTimer
+      {...commonProps}
+      minutes={minutes}
+      selectedSound={selectedSound}
+      onSoundChange={setSelectedSound}
+      onTestSound={testSound}
+      onMinutesChange={handleMinutesChange}
+      minMinutes={MIN_MINUTES}
+      maxMinutes={MAX_MINUTES}
+      isLoadingAudio={isLoadingAudio}
+    />
   );
 };

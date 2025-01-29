@@ -1,35 +1,40 @@
-import { useCallback } from "react";
-import { toast } from "sonner";
-import { useLoadingState } from "./useLoadingState";
+import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 
 interface UseAudioOptions {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
 
-export const useAudio = (audioUrl: string, options: UseAudioOptions = {}) => {
-  const { isLoading, wrapPromise } = useLoadingState({
-    errorMessage: "Could not play sound. Please check your browser settings.",
-    successMessage: "Sound played successfully!"
-  });
+interface UseAudioConfig {
+  audioUrl: string;
+  options?: UseAudioOptions;
+}
+
+export function useAudio({ audioUrl, options }: UseAudioConfig) {
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
 
   const play = useCallback(async () => {
     if (!audioUrl) return;
 
+    setIsLoadingAudio(true);
     try {
       const audio = new Audio(audioUrl);
-      await wrapPromise(audio.play());
-      options.onSuccess?.();
+      await audio.play();
+      setIsLoadingAudio(false);
+      options?.onSuccess?.();
     } catch (error) {
-      console.error("Error playing sound:", error);
-      const err = error instanceof Error ? error : new Error("Failed to play sound");
-      options.onError?.(err);
+      setIsLoadingAudio(false);
+      console.error('Error playing sound:', error);
+      const err = error instanceof Error ? error : new Error('Failed to play sound');
+      options?.onError?.(err);
+      toast.error('Could not play sound. Please check your browser settings.');
     }
-  }, [audioUrl, options, wrapPromise]);
+  }, [audioUrl, options]);
 
   const testSound = useCallback(() => {
     if (!audioUrl) {
-      toast("No sound selected");
+      toast('No sound selected');
       return;
     }
     play();
@@ -38,6 +43,6 @@ export const useAudio = (audioUrl: string, options: UseAudioOptions = {}) => {
   return {
     play,
     testSound,
-    isLoadingAudio: isLoading
+    isLoadingAudio,
   };
-};
+}

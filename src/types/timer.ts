@@ -87,6 +87,7 @@ export interface CompactTimerProps {
   minMinutes: number;
   maxMinutes: number;
   a11yProps?: TimerA11yProps;
+  isLoadingAudio?: boolean;
 }
 
 // Sound types
@@ -96,6 +97,7 @@ export interface SoundSelectorProps {
   selectedSound: SoundOption;
   onSoundChange: (sound: SoundOption) => void;
   onTestSound: () => void;
+  isLoadingAudio?: boolean;
 }
 
 // Constants
