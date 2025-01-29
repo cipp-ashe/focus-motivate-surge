@@ -64,7 +64,7 @@ export const ExpandedTimer = memo(({
       )}
       
       <div 
-        className="flex flex-col items-center justify-start max-h-screen overflow-auto py-6 px-4"
+        className="flex flex-col items-center justify-start h-full max-h-screen overflow-auto py-6 px-4"
         style={transitionProps.style}
       >
         <div className="w-full max-w-xl">
@@ -72,7 +72,7 @@ export const ExpandedTimer = memo(({
             className="bg-card shadow-lg p-6 border-primary/20"
             {...focusOrder(2)}
           >
-            <div className="flex flex-col items-center justify-center space-y-8">
+            <div className="flex flex-col items-center space-y-8">
               <h2 
                 id="timer-heading" 
                 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500"
@@ -80,23 +80,25 @@ export const ExpandedTimer = memo(({
                 {taskName}
               </h2>
               
-              <div 
-                className="relative w-72 h-72 mx-auto"
-                aria-live="polite"
-                {...focusOrder(3)}
-              >
-                <TimerCircle size="large" {...timerCircleProps} />
-              </div>
-              
-              <div 
-                className="w-full"
-                {...focusOrder(4)}
-              >
-                <TimerControls 
-                  {...timerControlsProps} 
-                  size="large" 
-                  showAddTime 
-                />
+              <div className="flex flex-col items-center space-y-6">
+                <div 
+                  className="relative w-72 h-72"
+                  aria-live="polite"
+                  {...focusOrder(3)}
+                >
+                  <TimerCircle size="large" {...timerCircleProps} />
+                </div>
+                
+                <div 
+                  className="w-full max-w-md"
+                  {...focusOrder(4)}
+                >
+                  <TimerControls 
+                    {...timerControlsProps} 
+                    size="large" 
+                    showAddTime 
+                  />
+                </div>
               </div>
             </div>
           </Card>
