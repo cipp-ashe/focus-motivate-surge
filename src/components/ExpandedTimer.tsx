@@ -4,7 +4,6 @@ import { X } from "lucide-react";
 import { TimerCircle } from "./TimerCircle";
 import { TimerControls } from "./TimerControls";
 import { QuoteDisplay } from "./QuoteDisplay";
-import { ExpandedTimerProps } from "../types/timer";
 import { useTransition } from "../hooks/useTransition";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
 
@@ -77,7 +76,7 @@ export const ExpandedTimer = memo(({
             <div className="flex flex-col items-center min-h-[500px]">
               <h2 
                 id="timer-heading" 
-                className={styles.heading}
+                className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 mb-8"
               >
                 {taskName}
               </h2>
