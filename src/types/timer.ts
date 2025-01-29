@@ -75,20 +75,21 @@ export interface ExpandedTimerProps {
 }
 
 export interface CompactTimerProps {
-  taskName: string;
-  isRunning: boolean;
-  minutes: number;
-  timerCircleProps: Omit<TimerCircleProps, 'size'>;
-  timerControlsProps: TimerControlsProps;
-  selectedSound: SoundOption;
-  onSoundChange: (sound: SoundOption) => void;
-  onTestSound: () => void;
-  onMinutesChange: (minutes: number) => void;
-  minMinutes: number;
-  maxMinutes: number;
-  a11yProps?: TimerA11yProps;
-  isLoadingAudio?: boolean;
-}
+    taskName: string;
+    isRunning: boolean;
+    minutes: number;
+    timerCircleProps: Omit<TimerCircleProps, "size">;
+    timerControlsProps: TimerControlsProps;
+    selectedSound: SoundOption;
+    onSoundChange: (sound: SoundOption) => void;
+    onTestSound: () => void;
+    onMinutesChange: (minutes: number) => void;
+    minMinutes: number;
+    maxMinutes: number;
+    a11yProps?: TimerA11yProps;
+    isLoadingAudio?: boolean;
+    onClick?: () => void;
+  }  
 
 // Sound types
 export type SoundOption = 'bell' | 'chime' | 'ding' | 'none';

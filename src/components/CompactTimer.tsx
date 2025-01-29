@@ -21,6 +21,7 @@ export const CompactTimer = memo(({
   maxMinutes,
   a11yProps,
   isLoadingAudio,
+  onClick,
 }: CompactTimerProps) => {
   // Use focus trap for settings panel when it's visible
   const { containerRef } = useFocusTrap({
@@ -29,8 +30,9 @@ export const CompactTimer = memo(({
 
   return (
     <Card 
-      ref={containerRef}
-      className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-6 ${focusClass}`}
+    ref={containerRef}
+    className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-6 ${focusClass} cursor-pointer`}
+    onClick={onClick}
       {...a11yProps}
     >
       <div className="text-center space-y-6">
