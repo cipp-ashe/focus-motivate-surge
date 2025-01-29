@@ -6,6 +6,8 @@ import { TimerControls } from "./TimerControls";
 import { QuoteDisplay } from "./QuoteDisplay";
 import { useTransition } from "../hooks/useTransition";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
+import { useTimerA11y } from "../hooks/useTimerA11y"; // ✅ Added for better screen reader support
+import { ExpandedTimerProps } from "@/types/timer";
 
 export const ExpandedTimer = memo(({
   taskName,
@@ -14,28 +16,32 @@ export const ExpandedTimer = memo(({
   timerCircleProps,
   timerControlsProps,
   favorites,
-  setFavorites
+  setFavorites,
 }: ExpandedTimerProps) => {
   const { isRendered, getTransitionProps } = useTransition({ 
     isVisible: isRunning,
     options: {
       duration: 300,
-      onEnter: () => document.body.style.overflow = 'hidden',
-      onExit: () => document.body.style.overflow = 'auto'
-    }
+      onEnter: () => document.body.style.overflow = "hidden",
+      onExit: () => document.body.style.overflow = "auto",
+    },
   });
 
   const { containerRef } = useFocusTrap({
     enabled: isRendered,
     onEscape: !isRunning ? onClose : undefined,
   });
-  if (!isRendered) return null;
-  
-  ExpandedTimer.displayName = "ExpandedTimer";
-  if (!isRendered) return null;
+
+  const { getTimerA11yProps } = useTimerA11y({
+    isRunning,
+    timeLeft: timerCircleProps.timeLeft,
+    taskName,
+    isExpanded: isRendered,
+  });
+
+  if (!isRendered) return null; // ✅ Removed redundant checks
 
   const transitionProps = getTransitionProps();
-  const a11yProps = {}; // Define a11yProps as an empty object or with appropriate properties
 
   return (
     <div 
@@ -44,12 +50,12 @@ export const ExpandedTimer = memo(({
       role="dialog"
       aria-modal="true"
       aria-labelledby="timer-heading"
-      {...a11yProps}
+      {...getTimerA11yProps()} // ✅ Added accessibility properties
       {...transitionProps}
     >
       <div 
-        className="absolute inset-0 bg-background backgroundOverlay"
-        style={{ '--transition-opacity': transitionProps.style.opacity } as React.CSSProperties}
+        className="absolute inset-0 bg-background bg-opacity-75 transition-opacity duration-300"
+        style={{ opacity: transitionProps.style.opacity }}
         aria-hidden="true"
       />
       
@@ -63,7 +69,7 @@ export const ExpandedTimer = memo(({
           <X className="h-6 w-6" />
         </button>
       )}
-      
+
       <div 
         className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4"
         style={transitionProps.style}
@@ -80,7 +86,7 @@ export const ExpandedTimer = memo(({
               >
                 {taskName}
               </h2>
-              
+
               <div className="flex-1 flex flex-col items-center justify-center gap-8">
                 <div 
                   className="relative w-72 h-72"
@@ -90,10 +96,7 @@ export const ExpandedTimer = memo(({
                   <TimerCircle size="large" {...timerCircleProps} />
                 </div>
                 
-                <div 
-                  className="w-full max-w-md"
-                  {...focusOrder(4)}
-                >
+                <div className="w-full max-w-md" {...focusOrder(4)}>
                   <TimerControls 
                     {...timerControlsProps} 
                     size="large" 
