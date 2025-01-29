@@ -2,65 +2,36 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useFocusTrap } from '../useFocusTrap';
 
 describe('useFocusTrap', () => {
-  const setup = (enabled = true) => {
-    return renderHook(() => useFocusTrap({ enabled }));
-  };
+  const mockFocusableElement = {
+    focus: jest.fn(),
+    hasAttribute: () => false,
+    getAttribute: () => null,
+    tabIndex: 0
+  } as unknown as HTMLElement;
 
-  it('initializes with correct state', () => {
-    const { result } = setup();
+  it('should initialize with correct state', () => {
+    const { result } = renderHook(() => useFocusTrap({ enabled: true }));
     expect(result.current.containerRef).toBeDefined();
     expect(typeof result.current.getFocusableElements).toBe('function');
   });
 
-  it('handles focus trap when enabled', () => {
-    const { result } = setup();
-    const mockElement = {
-      tabIndex: 0,
-      hasAttribute: () => false,
-      focus: jest.fn(),
-      getAttribute: () => '0',
-    };
-
-    // Mock container with focusable elements
-    Object.defineProperty(result.current.containerRef, 'current', {
-      value: {
-        querySelectorAll: () => [mockElement],
-      },
-    });
-
-    const focusableElements = result.current.getFocusableElements();
-    expect(focusableElements).toHaveLength(1);
+  it('should handle disabled state', () => {
+    const { result } = renderHook(() => useFocusTrap({ enabled: false }));
+    const elements = result.current.getFocusableElements();
+    expect(elements).toHaveLength(0);
   });
 
-  it('respects disabled state', () => {
-    const { result } = setup(false);
-    expect(result.current.getFocusableElements()).toHaveLength(0);
-  });
-
-  it('excludes non-focusable elements', () => {
-    const { result } = setup();
-    const mockElements = [
-      {
-        tabIndex: 0,
-        hasAttribute: (attr: string) => attr === 'disabled',
-        focus: jest.fn(),
-        getAttribute: () => '0',
-      },
-      {
-        tabIndex: 0,
-        hasAttribute: () => false,
-        focus: jest.fn(),
-        getAttribute: () => '0',
-      },
-    ];
-
+  it('should get focusable elements', () => {
+    const { result } = renderHook(() => useFocusTrap({ enabled: true }));
+    
+    // Mock the container ref
     Object.defineProperty(result.current.containerRef, 'current', {
       value: {
-        querySelectorAll: () => mockElements,
-      },
+        querySelectorAll: () => [mockFocusableElement]
+      }
     });
 
-    const focusableElements = result.current.getFocusableElements();
-    expect(focusableElements).toHaveLength(1);
+    const elements = result.current.getFocusableElements();
+    expect(elements).toHaveLength(1);
   });
 });

@@ -14,23 +14,16 @@ declare global {
 }
 
 // Mock window.matchMedia
-const mockMatchMedia = (query: string): MediaQueryList => ({
+window.matchMedia = (query: string): MediaQueryList => ({
   matches: false,
   media: query,
   onchange: null,
-  addListener: () => undefined,
-  removeListener: () => undefined,
-  addEventListener: (type: string, listener: EventListenerOrEventListenerObject) => undefined,
-  removeEventListener: (type: string, listener: EventListenerOrEventListenerObject) => undefined,
+  addListener: () => {},
+  removeListener: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
   dispatchEvent: () => false,
 });
-
-if (typeof window !== 'undefined') {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: mockMatchMedia,
-  });
-}
 
 // Mock Audio API
 class MockAudio implements Partial<HTMLAudioElement> {
@@ -57,10 +50,8 @@ class MockIntersectionObserver implements Partial<IntersectionObserver> {
 }
 
 // Set up global mocks
-if (typeof window !== 'undefined') {
-  global.Audio = MockAudio as any;
-  global.IntersectionObserver = MockIntersectionObserver as any;
-}
+global.Audio = MockAudio as any;
+global.IntersectionObserver = MockIntersectionObserver as any;
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -5,7 +5,7 @@ import { TimerCircle } from "./TimerCircle";
 import { TimerControls } from "./TimerControls";
 import { QuoteDisplay } from "./QuoteDisplay";
 import { ExpandedTimerProps } from "../types/timer";
-import { useTransition, prefersReducedMotion } from "../hooks/useTransition";
+import { useTransition } from "../hooks/useTransition";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
 
 export const ExpandedTimer = memo(({
@@ -19,10 +19,13 @@ export const ExpandedTimer = memo(({
   a11yProps
 }: ExpandedTimerProps) => {
   // Manage transitions
-  const { isRendered, getTransitionProps } = useTransition(true, {
-    duration: prefersReducedMotion ? 0 : 300,
-    onEnter: () => document.body.style.overflow = 'hidden',
-    onExit: () => document.body.style.overflow = 'auto'
+  const { isRendered, getTransitionProps } = useTransition({ 
+    isVisible: true,
+    options: {
+      duration: 300,
+      onEnter: () => document.body.style.overflow = 'hidden',
+      onExit: () => document.body.style.overflow = 'auto'
+    }
   });
 
   // Manage focus trap
