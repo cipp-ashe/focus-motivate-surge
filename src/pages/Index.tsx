@@ -66,7 +66,6 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Task Management and Favorites */}
           <div className="space-y-6">
             <TaskList
               tasks={tasks}
@@ -77,7 +76,6 @@ const Index = () => {
             <FavoriteQuotes favorites={favorites} />
           </div>
 
-          {/* Right Column - Timer and Active Quote */}
           <div className="space-y-6">
             {selectedTask ? (
               <Timer
@@ -86,6 +84,8 @@ const Index = () => {
                 onComplete={handleTaskComplete}
                 onAddTime={() => {}}
                 onDurationChange={setDuration}
+                favorites={favorites}
+                setFavorites={setFavorites}
               />
             ) : (
               <div className="text-center text-muted-foreground p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">

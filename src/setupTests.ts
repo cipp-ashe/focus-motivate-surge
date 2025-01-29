@@ -1,5 +1,7 @@
 /// <reference types="@testing-library/jest-dom" />
 
+import '@testing-library/jest-dom';
+
 declare global {
   namespace jest {
     interface Matchers<R> {
@@ -9,27 +11,7 @@ declare global {
       toHaveAttribute(attr: string, value?: string): R;
     }
   }
-
-  interface Window {
-    matchMedia(query: string): MediaQueryList;
-  }
-
-  // Define types for our mocks
-  interface MediaQueryList {
-    matches: boolean;
-    media: string;
-    onchange: ((this: MediaQueryList, ev: MediaQueryListEvent) => any) | null;
-    addListener: (callback: (this: MediaQueryList, ev: MediaQueryListEvent) => any) => void;
-    removeListener: (callback: (this: MediaQueryList, ev: MediaQueryListEvent) => any) => void;
-    addEventListener: (type: string, listener: EventListener) => void;
-    removeEventListener: (type: string, listener: EventListener) => void;
-    dispatchEvent: (event: Event) => boolean;
-  }
 }
-
-// Mock requestAnimationFrame and cancelAnimationFrame
-declare const requestAnimationFrame: (callback: FrameRequestCallback) => number;
-declare const cancelAnimationFrame: (handle: number) => void;
 
 // Mock window.matchMedia
 const mockMatchMedia = (query: string): MediaQueryList => ({
@@ -38,8 +20,8 @@ const mockMatchMedia = (query: string): MediaQueryList => ({
   onchange: null,
   addListener: () => undefined,
   removeListener: () => undefined,
-  addEventListener: () => undefined,
-  removeEventListener: () => undefined,
+  addEventListener: (type: string, listener: EventListenerOrEventListenerObject) => undefined,
+  removeEventListener: (type: string, listener: EventListenerOrEventListenerObject) => undefined,
   dispatchEvent: () => false,
 });
 
@@ -80,11 +62,8 @@ if (typeof window !== 'undefined') {
   global.IntersectionObserver = MockIntersectionObserver as any;
 }
 
-// Clear all mocks before each test
 beforeEach(() => {
-  // This will be replaced by the actual jest.clearAllMocks() when jest is installed
-  const mockClear = () => {};
-  mockClear();
+  jest.clearAllMocks();
 });
 
 export {};
