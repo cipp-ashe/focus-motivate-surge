@@ -29,7 +29,7 @@ export const ExpandedTimer = memo(({
 
   const { containerRef } = useFocusTrap({
     enabled: isRendered,
-    onEscape: !isRunning ? onClose : undefined,
+    onEscape: onClose,
   });
 
   const { getTimerA11yProps } = useTimerA11y({
@@ -59,7 +59,6 @@ export const ExpandedTimer = memo(({
         aria-hidden="true"
       />
       
-      {!isRunning && (
         <button
           onClick={onClose}
           className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-50 ${focusClass}`}
@@ -68,7 +67,6 @@ export const ExpandedTimer = memo(({
         >
           <X className="h-6 w-6" />
         </button>
-      )}
 
       <div 
         className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4"
