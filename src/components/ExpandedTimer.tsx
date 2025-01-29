@@ -18,7 +18,6 @@ export const ExpandedTimer = memo(({
   setFavorites,
   a11yProps
 }: ExpandedTimerProps) => {
-  // Manage transitions
   const { isRendered, getTransitionProps } = useTransition({ 
     isVisible: true,
     options: {
@@ -28,7 +27,6 @@ export const ExpandedTimer = memo(({
     }
   });
 
-  // Manage focus trap
   const { containerRef } = useFocusTrap({
     enabled: true,
     onEscape: !isRunning ? onClose : undefined,
@@ -66,7 +64,7 @@ export const ExpandedTimer = memo(({
       )}
       
       <div 
-        className="flex flex-col items-center max-h-screen overflow-auto py-6 px-4"
+        className="flex flex-col items-center justify-start max-h-screen overflow-auto py-6 px-4"
         style={transitionProps.style}
       >
         <div className="w-full max-w-xl">
@@ -74,7 +72,7 @@ export const ExpandedTimer = memo(({
             className="bg-card shadow-lg p-6 border-primary/20"
             {...focusOrder(2)}
           >
-            <div className="text-center space-y-6">
+            <div className="flex flex-col items-center justify-center space-y-8">
               <h2 
                 id="timer-heading" 
                 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500"
@@ -83,14 +81,17 @@ export const ExpandedTimer = memo(({
               </h2>
               
               <div 
-                className="w-72 h-72 mx-auto"
+                className="relative w-72 h-72 mx-auto"
                 aria-live="polite"
                 {...focusOrder(3)}
               >
                 <TimerCircle size="large" {...timerCircleProps} />
               </div>
               
-              <div {...focusOrder(4)}>
+              <div 
+                className="w-full"
+                {...focusOrder(4)}
+              >
                 <TimerControls 
                   {...timerControlsProps} 
                   size="large" 
@@ -102,18 +103,16 @@ export const ExpandedTimer = memo(({
         </div>
 
         <div 
-          className="w-full max-w-xl mt-4"
+          className="w-full max-w-xl mt-8"
           aria-label="Motivational quotes"
           {...focusOrder(5)}
         >
-          <div className={`bg-card/30 rounded-lg ${focusClass}`}>
-            <QuoteDisplay
-              showAsOverlay
-              currentTask={taskName}
-              favorites={favorites}
-              setFavorites={setFavorites}
-            />
-          </div>
+          <QuoteDisplay
+            showAsOverlay
+            currentTask={taskName}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
         </div>
       </div>
     </div>
