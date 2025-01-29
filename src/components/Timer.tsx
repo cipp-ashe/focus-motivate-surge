@@ -110,7 +110,7 @@ export const Timer = ({
       <ExpandedTimer
         {...commonProps}
         onClose={() => setIsExpanded(false)}
-        favorites={favorites}
+        favorites={favorites || []}
         setFavorites={setFavorites}
       />
     );
