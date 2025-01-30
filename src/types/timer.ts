@@ -24,6 +24,14 @@ export interface ButtonA11yProps {
   "aria-pressed"?: boolean;
 }
 
+export interface TimerMetrics {
+  startTime: Date | null;
+  endTime: Date | null;
+  pauseCount: number;
+  originalDuration: number;
+  actualDuration: number;
+}
+
 // Component Props
 export interface TimerProps {
   duration: number;
@@ -68,28 +76,30 @@ export interface ExpandedTimerProps {
   isRunning: boolean;
   onClose: () => void;
   timerCircleProps: Omit<TimerCircleProps, 'size'>;
-  timerControlsProps: Omit<TimerControlsProps, 'size' | 'showAddTime'>;
+  timerControlsProps: Omit<TimerControlsProps, 'size' | 'showAddTime'> & {
+    metrics?: TimerMetrics;
+  };
   favorites: Quote[];
   setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
   a11yProps?: TimerA11yProps;
 }
 
 export interface CompactTimerProps {
-    taskName: string;
-    isRunning: boolean;
-    minutes: number;
-    timerCircleProps: Omit<TimerCircleProps, "size">;
-    timerControlsProps: TimerControlsProps;
-    selectedSound: SoundOption;
-    onSoundChange: (sound: SoundOption) => void;
-    onTestSound: () => void;
-    onMinutesChange: (minutes: number) => void;
-    minMinutes: number;
-    maxMinutes: number;
-    a11yProps?: TimerA11yProps;
-    isLoadingAudio?: boolean;
-    onClick?: () => void;
-  }  
+  taskName: string;
+  isRunning: boolean;
+  minutes: number;
+  timerCircleProps: Omit<TimerCircleProps, "size">;
+  timerControlsProps: TimerControlsProps;
+  selectedSound: SoundOption;
+  onSoundChange: (sound: SoundOption) => void;
+  onTestSound: () => void;
+  onMinutesChange: (minutes: number) => void;
+  minMinutes: number;
+  maxMinutes: number;
+  a11yProps?: TimerA11yProps;
+  isLoadingAudio?: boolean;
+  onClick?: () => void;
+}
 
 // Sound types
 export type SoundOption = 'bell' | 'chime' | 'ding' | 'none';

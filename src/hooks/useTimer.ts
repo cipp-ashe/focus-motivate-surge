@@ -7,15 +7,25 @@ interface UseTimerOptions {
   onDurationChange?: (minutes: number) => void;
 }
 
+interface TimerMetrics {
+  startTime: Date | null;
+  endTime: Date | null;
+  pauseCount: number;
+  originalDuration: number;
+  actualDuration: number;
+}
+
 interface UseTimerReturn {
   timeLeft: number;
   minutes: number;
   isRunning: boolean;
+  metrics: TimerMetrics;
   start: () => void;
   pause: () => void;
   reset: () => void;
   addTime: (minutes: number) => void;
   setMinutes: (minutes: number) => void;
+  completeTimer: () => void;
 }
 
 export const useTimer = ({
@@ -26,6 +36,13 @@ export const useTimer = ({
   const [timeLeft, setTimeLeft] = useState<number>(initialDuration);
   const [minutes, setMinutesState] = useState(Math.floor(initialDuration / 60));
   const [isRunning, setIsRunning] = useState(false);
+  const [metrics, setMetrics] = useState<TimerMetrics>({
+    startTime: null,
+    endTime: null,
+    pauseCount: 0,
+    originalDuration: initialDuration,
+    actualDuration: 0,
+  });
 
   // Sync timeLeft with minutes changes
   const setMinutes = useCallback((newMinutes: number) => {
@@ -43,6 +60,13 @@ export const useTimer = ({
         setTimeLeft((time) => {
           if (time <= 1) {
             setIsRunning(false);
+            setMetrics(prev => ({
+              ...prev,
+              endTime: new Date(),
+              actualDuration: prev.startTime 
+                ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
+                : prev.actualDuration,
+            }));
             onTimeUp?.();
             return 0;
           }
@@ -56,16 +80,33 @@ export const useTimer = ({
 
   const start = useCallback(() => {
     setIsRunning(true);
+    if (!metrics.startTime) {
+      setMetrics(prev => ({
+        ...prev,
+        startTime: new Date(),
+      }));
+    }
     toast("Timer started! You've got this! 🚀");
-  }, []);
+  }, [metrics.startTime]);
 
   const pause = useCallback(() => {
     setIsRunning(false);
+    setMetrics(prev => ({
+      ...prev,
+      pauseCount: prev.pauseCount + 1,
+    }));
   }, []);
 
   const reset = useCallback(() => {
     setIsRunning(false);
     setTimeLeft(minutes * 60);
+    setMetrics({
+      startTime: null,
+      endTime: null,
+      pauseCount: 0,
+      originalDuration: minutes * 60,
+      actualDuration: 0,
+    });
   }, [minutes]);
 
   const addTime = useCallback((additionalMinutes: number) => {
@@ -73,14 +114,27 @@ export const useTimer = ({
     toast(`Added ${additionalMinutes} minutes. Keep the momentum going! 💪`);
   }, []);
 
+  const completeTimer = useCallback(() => {
+    setIsRunning(false);
+    setMetrics(prev => ({
+      ...prev,
+      endTime: new Date(),
+      actualDuration: prev.startTime 
+        ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
+        : prev.actualDuration,
+    }));
+  }, []);
+
   return {
     timeLeft,
     minutes,
     isRunning,
+    metrics,
     start,
     pause,
     reset,
     addTime,
     setMinutes,
+    completeTimer,
   };
 };

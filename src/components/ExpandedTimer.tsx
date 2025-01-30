@@ -10,6 +10,7 @@ import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
 import { useTimerA11y } from "../hooks/useTimerA11y";
 import { ExpandedTimerProps } from "@/types/timer";
 import ReactConfetti from "react-confetti";
+import { CompletionModal } from "./CompletionModal";
 
 export const ExpandedTimer = memo(({
   taskName,
@@ -21,6 +22,7 @@ export const ExpandedTimer = memo(({
   setFavorites,
 }: ExpandedTimerProps) => {
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -61,12 +63,22 @@ export const ExpandedTimer = memo(({
 
   const handleComplete = () => {
     setShowConfetti(true);
+    // Show completion modal after a short delay to let confetti start
+    setTimeout(() => {
+      setShowCompletionModal(true);
+    }, 500);
+
+    // Let confetti continue in background while showing modal
     setTimeout(() => {
       setShowConfetti(false);
-      if (timerControlsProps.onComplete) {
-        timerControlsProps.onComplete();
-      }
-    }, 2500);
+    }, 4000); // Longer confetti duration
+  };
+
+  const handleCloseModal = () => {
+    setShowCompletionModal(false);
+    if (timerControlsProps.onComplete) {
+      timerControlsProps.onComplete();
+    }
   };
 
   // Modify timerControlsProps to use our custom complete handler
@@ -94,10 +106,10 @@ export const ExpandedTimer = memo(({
           width={windowSize.width}
           height={windowSize.height}
           gravity={0.15}
-          numberOfPieces={150}
+          numberOfPieces={200}
           recycle={false}
-          colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD']} // Theme purple colors
-          tweenDuration={2500}
+          colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD']}
+          tweenDuration={4000}
         />
       )}
       
@@ -123,7 +135,7 @@ export const ExpandedTimer = memo(({
         className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4"
         style={transitionProps.style}
       >
-        <div className="w-full max-w-xl">
+        <div className="w-full expanded-timer-card">
           <Card 
             className="bg-card shadow-lg p-6 border-primary/20"
             {...focusOrder(2)}
@@ -136,7 +148,7 @@ export const ExpandedTimer = memo(({
                 {taskName}
               </h2>
 
-              <div className="flex-1 flex flex-col items-center justify-center gap-8">
+              <div className="flex-1 flex flex-col items-center justify-center gap-8 py-8">
                 <div 
                   className="relative w-72 h-72"
                   aria-live="polite"
@@ -158,7 +170,7 @@ export const ExpandedTimer = memo(({
         </div>
 
         <div 
-          className="w-full max-w-xl mt-8"
+          className="w-full expanded-timer-card mt-8"
           aria-label="Motivational quotes"
           {...focusOrder(5)}
         >
@@ -170,6 +182,22 @@ export const ExpandedTimer = memo(({
           />
         </div>
       </div>
+
+      {showCompletionModal && timerControlsProps.metrics && (
+        <CompletionModal
+          isOpen={showCompletionModal}
+          onClose={handleCloseModal}
+          metrics={{
+            startTime: timerControlsProps.metrics.startTime || new Date(),
+            endTime: timerControlsProps.metrics.endTime || new Date(),
+            pauseCount: timerControlsProps.metrics.pauseCount,
+            favoriteQuotes: favorites.length,
+            originalDuration: timerControlsProps.metrics.originalDuration,
+            actualDuration: timerControlsProps.metrics.actualDuration,
+          }}
+          taskName={taskName}
+        />
+      )}
     </div>
   );
 });

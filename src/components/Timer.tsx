@@ -48,13 +48,16 @@ export const Timer = ({
     timeLeft,
     minutes,
     isRunning,
+    metrics,
     start,
     pause,
     addTime: addMinutes,
     setMinutes: handleMinutesChange,
+    completeTimer,
   } = useTimer({
     initialDuration: duration,
     onTimeUp: () => {
+      completeTimer();
       setIsExpanded(false);
       playSound();
       toast("Time's up! Great work! ✨");
@@ -72,11 +75,12 @@ export const Timer = ({
   }, [isRunning, start, pause]);
 
   const handleComplete = useCallback(() => {
+    completeTimer();
     pause();
     onComplete();
     setIsExpanded(false);
     toast("Task completed! You're crushing it! 🎉");
-  }, [pause, onComplete]);
+  }, [pause, onComplete, completeTimer]);
 
   const handleAddTime = useCallback(() => {
     addMinutes(ADD_TIME_MINUTES);
@@ -98,6 +102,7 @@ export const Timer = ({
     onToggle: toggleTimer,
     onComplete: handleComplete,
     onAddTime: handleAddTime,
+    metrics, // Pass metrics to controls
   };
 
   const commonProps = {
