@@ -18,8 +18,8 @@ export const ExpandedTimer = memo(({
   favorites,
   setFavorites,
 }: ExpandedTimerProps) => {
-  const { isRendered, getTransitionProps } = useTransition({ 
-    isVisible: isRunning,
+  const { isRendered, getTransitionProps } = useTransition({
+    isVisible: true, // Always show when component is mounted
     options: {
       duration: 300,
       onEnter: () => document.body.style.overflow = "hidden",
