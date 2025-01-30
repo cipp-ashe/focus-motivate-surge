@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { FloatingQuotes } from "./FloatingQuotes";
 import { Card } from "./ui/card";
 import { X } from "lucide-react";
 import { TimerCircle } from "./TimerCircle";
@@ -53,11 +54,14 @@ export const ExpandedTimer = memo(({
       {...getTimerA11yProps()} // ✅ Added accessibility properties
       {...transitionProps}
     >
-      <div 
+      <div
         className="absolute inset-0 bg-background bg-opacity-75 transition-opacity duration-300"
         style={{ opacity: transitionProps.style.opacity }}
         aria-hidden="true"
       />
+      
+      {/* Floating quotes in background */}
+      <FloatingQuotes favorites={favorites} />
       
         <button
           onClick={onClose}
