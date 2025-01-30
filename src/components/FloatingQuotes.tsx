@@ -12,9 +12,9 @@ interface QuotePosition {
   vy: number;
 }
 
-// Adjusted velocity for better motion
+// Adjusted velocity for a smoother effect
 const VELOCITY = 0.08;
-const MAX_WIDTH = 300; // Ensures quotes stay readable and don’t collapse at edges
+const MAX_WIDTH = 300; // Keeps quotes from stretching too wide
 
 export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +49,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
           x += vx;
           y += vy;
 
-          // Bounce when reaching container edges while respecting max width
+          // Bounce logic while respecting max width
           if (x < 5 || x > 95) {
             vx = -vx;
             x = x < 5 ? 5 : 95;
@@ -86,19 +86,19 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
         return (
           <div
             key={index}
-            className="absolute backdrop-blur-lg brightness-110"
+            className="absolute"
             style={{
               left: `${position.x}%`,
               top: `${position.y}%`,
               transform: "translate(-50%, -50%)",
-              maxWidth: `${MAX_WIDTH}px`, // Keeps the text block consistent
+              maxWidth: `${MAX_WIDTH}px`,
               textAlign: "center",
             }}
           >
             <div
               className="text-lg font-light italic text-primary/80 leading-relaxed"
               style={{
-                textShadow: "1px 1px 5px rgba(0, 0, 0, 0.5)", // Increases readability
+                textShadow: "1px 1px 5px rgba(0, 0, 0, 0.5)", // Ensures visibility on any background
               }}
             >
               "{quote.text}"
