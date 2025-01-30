@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Quote } from "../types/timer";
+import { Card } from "./ui/card";
 
 interface FloatingQuotesProps {
   favorites: Quote[];
@@ -11,22 +12,26 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {favorites.map((quote, index) => (
-        <div
+        <Card
           key={index}
           className={`
-            absolute text-primary/10 font-medium text-lg whitespace-nowrap
-            animate-float-${index % 3} // Three different float animations
+            absolute p-4 shadow-lg max-w-[300px] 
+            bg-card/90 backdrop-blur-sm border-primary/30
+            animate-bounce-around-${(index % 3) + 1}
           `}
           style={{
-            // Distribute quotes across the screen
-            left: `${(index * 25) % 75}%`,
-            top: `${(index * 30) % 70}%`,
-            // Alternate between left and right for natural distribution
-            transform: `translateX(${index % 2 ? "-25%" : "0"})`,
+            // Initial positions distributed around the edges
+            left: `${[20, 60, 40][index % 3]}%`,
+            top: `${[30, 20, 60][index % 3]}%`,
           }}
         >
-          {quote.text}
-        </div>
+          <div className="text-primary font-medium">
+            {quote.text}
+          </div>
+          <div className="text-primary/60 text-sm mt-1 text-right">
+            - {quote.author}
+          </div>
+        </Card>
       ))}
     </div>
   );

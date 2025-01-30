@@ -12,8 +12,25 @@ interface Quote {
 }
 
 const Index = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    try {
+      const saved = localStorage.getItem('taskList');
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      return [];
+    }
+  });
+  
+  const [completedTasks, setCompletedTasks] = useState<Task[]>(() => {
+    try {
+      const saved = localStorage.getItem('completedTasks');
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('Error loading completed tasks:', error);
+      return [];
+    }
+  });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [duration, setDuration] = useState(1500);
   const [isDark, setIsDark] = useState(true);
@@ -39,14 +56,26 @@ const Index = () => {
   const handleTaskSelect = useCallback((task: Task) => {
     setSelectedTask(task);
   }, []);
+// Save tasks to localStorage when they change
+useEffect(() => {
+  localStorage.setItem('taskList', JSON.stringify(tasks));
+  localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+}, [tasks, completedTasks]);
 
-  const handleTaskComplete = useCallback(() => {
-    if (selectedTask) {
-      setCompletedTasks((prev) => [...prev, { ...selectedTask, completed: true }]);
-      setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
-      setSelectedTask(null);
-    }
-  }, [selectedTask]);
+const handleTaskComplete = useCallback(() => {
+  if (selectedTask) {
+    setCompletedTasks((prev) => [...prev, { ...selectedTask, completed: true }]);
+    setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
+    setSelectedTask(null);
+  }
+}, [selectedTask]);
+
+const handleTasksClear = useCallback(() => {
+  setTasks([]);
+  setCompletedTasks([]);
+  setSelectedTask(null);
+}, []);
+
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -72,6 +101,7 @@ const Index = () => {
               completedTasks={completedTasks}
               onTaskAdd={handleTaskAdd}
               onTaskSelect={handleTaskSelect}
+              onTasksClear={handleTasksClear}
             />
             <FavoriteQuotes favorites={favorites} />
           </div>

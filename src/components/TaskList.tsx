@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -9,8 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
 } from "./ui/dialog";
-import { Plus, List, CheckCircle2, Sparkles } from "lucide-react";
+import { Plus, List, CheckCircle2, Sparkles, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export interface Task {
@@ -24,12 +26,35 @@ interface TaskListProps {
   onTaskAdd: (task: Task) => void;
   onTaskSelect: (task: Task) => void;
   completedTasks: Task[];
+  onTasksClear: () => void;
 }
 
-export const TaskList = ({ tasks, onTaskAdd, onTaskSelect, completedTasks }: TaskListProps) => {
+// Load tasks from localStorage
+const loadSavedTasks = () => {
+  try {
+    const savedTasks = localStorage.getItem('taskList');
+    const savedCompletedTasks = localStorage.getItem('completedTasks');
+    return {
+      tasks: savedTasks ? JSON.parse(savedTasks) : [],
+      completedTasks: savedCompletedTasks ? JSON.parse(savedCompletedTasks) : [],
+    };
+  } catch (error) {
+    console.error('Error loading saved tasks:', error);
+    return { tasks: [], completedTasks: [] };
+  }
+};
+
+export const TaskList = ({ tasks, onTaskAdd, onTaskSelect, completedTasks, onTasksClear }: TaskListProps) => {
   const [newTask, setNewTask] = useState("");
   const [bulkTasks, setBulkTasks] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Save tasks to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('taskList', JSON.stringify(tasks));
+    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+  }, [tasks, completedTasks]);
 
   const handleAddTask = () => {
     if (newTask.trim()) {
@@ -60,6 +85,12 @@ export const TaskList = ({ tasks, onTaskAdd, onTaskSelect, completedTasks }: Tas
 
     setBulkTasks("");
     toast(`Added ${taskNames.length} tasks! Time to crush some goals! 🎯`);
+  };
+
+  const handleClearTasks = () => {
+    setShowClearConfirm(false);
+    onTasksClear();
+    toast("Tasks cleared! Starting fresh! 🌟");
   };
 
   return (
@@ -101,6 +132,33 @@ export const TaskList = ({ tasks, onTaskAdd, onTaskSelect, completedTasks }: Tas
               >
                 Add Tasks
               </Button>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-destructive/20 hover:bg-destructive/20">
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border-primary/20">
+              <DialogHeader>
+                <DialogTitle>Clear All Tasks</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to clear all tasks? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleClearTasks}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  Clear All
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
