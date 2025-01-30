@@ -12,8 +12,8 @@ interface QuotePosition {
   vy: number;
 }
 
-// Slower velocity for more subtle movement
-const VELOCITY = 0.04;
+// Slightly increased velocity for better visibility
+const VELOCITY = 0.08;
 
 export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -23,7 +23,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   // Initialize random positions and directions
   useEffect(() => {
     if (!favorites.length) return;
-    
+
     const newPositions = favorites.map(() => {
       const x = Math.random() * 80 + 10;
       const y = Math.random() * 80 + 10;
@@ -32,7 +32,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
       const vy = Math.sin(angle) * VELOCITY;
       return { x, y, vx, vy };
     });
-    
+
     setPositions(newPositions);
   }, [favorites.length]);
 
@@ -41,10 +41,10 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
     if (!positions.length || !containerRef.current) return;
 
     const animate = () => {
-      setPositions(prevPositions => {
-        return prevPositions.map(pos => {
+      setPositions(prevPositions =>
+        prevPositions.map(pos => {
           let { x, y, vx, vy } = pos;
-          
+
           x += vx;
           y += vy;
 
@@ -58,8 +58,8 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
           }
 
           return { x, y, vx, vy };
-        });
-      });
+        })
+      );
 
       animationFrameRef.current = requestAnimationFrame(animate);
     };
@@ -84,17 +84,19 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
         return (
           <div
             key={index}
-            className="absolute whitespace-nowrap text-primary/20 backdrop-blur-sm"
+            className="absolute text-primary/50 backdrop-blur-md"
             style={{
               left: `${position.x}%`,
               top: `${position.y}%`,
-              transform: 'translate(-50%, -50%)',
-              transition: 'opacity 0.3s ease-in-out'
+              transform: "translate(-50%, -50%)",
+              maxWidth: "300px", // Enforce max width for wrapping
+              textAlign: "center", // Center the text within the block
             }}
           >
-            <div className="text-lg font-light italic">
-              "{quote.text}" <span className="text-primary/15">— {quote.author}</span>
+            <div className="text-lg font-light italic leading-relaxed">
+              "{quote.text}"
             </div>
+            <div className="text-sm text-primary/40 mt-1">— {quote.author}</div>
           </div>
         );
       })}
