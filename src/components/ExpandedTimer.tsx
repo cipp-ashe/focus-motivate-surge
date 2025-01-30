@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import { FloatingQuotes } from "./FloatingQuotes";
 import { Card } from "./ui/card";
 import { X } from "lucide-react";
@@ -7,8 +7,9 @@ import { TimerControls } from "./TimerControls";
 import { QuoteDisplay } from "./QuoteDisplay";
 import { useTransition } from "../hooks/useTransition";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
-import { useTimerA11y } from "../hooks/useTimerA11y"; // ✅ Added for better screen reader support
+import { useTimerA11y } from "../hooks/useTimerA11y";
 import { ExpandedTimerProps } from "@/types/timer";
+import ReactConfetti from "react-confetti";
 
 export const ExpandedTimer = memo(({
   taskName,
@@ -19,8 +20,26 @@ export const ExpandedTimer = memo(({
   favorites,
   setFavorites,
 }: ExpandedTimerProps) => {
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const { isRendered, getTransitionProps } = useTransition({
-    isVisible: true, // Always show when component is mounted
+    isVisible: true,
     options: {
       duration: 300,
       onEnter: () => document.body.style.overflow = "hidden",
@@ -40,7 +59,23 @@ export const ExpandedTimer = memo(({
     isExpanded: isRendered,
   });
 
-  if (!isRendered) return null; // ✅ Removed redundant checks
+  const handleComplete = () => {
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false);
+      if (timerControlsProps.onComplete) {
+        timerControlsProps.onComplete();
+      }
+    }, 2500);
+  };
+
+  // Modify timerControlsProps to use our custom complete handler
+  const modifiedTimerControlsProps = {
+    ...timerControlsProps,
+    onComplete: handleComplete,
+  };
+
+  if (!isRendered) return null;
 
   const transitionProps = getTransitionProps();
 
@@ -51,9 +86,21 @@ export const ExpandedTimer = memo(({
       role="dialog"
       aria-modal="true"
       aria-labelledby="timer-heading"
-      {...getTimerA11yProps()} // ✅ Added accessibility properties
+      {...getTimerA11yProps()}
       {...transitionProps}
     >
+      {showConfetti && (
+        <ReactConfetti
+          width={windowSize.width}
+          height={windowSize.height}
+          gravity={0.15}
+          numberOfPieces={150}
+          recycle={false}
+          colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD']} // Theme purple colors
+          tweenDuration={2500}
+        />
+      )}
+      
       <div
         className="absolute inset-0 bg-background bg-opacity-75 transition-opacity duration-300"
         style={{ opacity: transitionProps.style.opacity }}
@@ -63,14 +110,14 @@ export const ExpandedTimer = memo(({
       {/* Floating quotes in background */}
       <FloatingQuotes favorites={favorites} />
       
-        <button
-          onClick={onClose}
-          className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-50 ${focusClass}`}
-          aria-label="Close expanded view"
-          {...focusOrder(1)}
-        >
-          <X className="h-6 w-6" />
-        </button>
+      <button
+        onClick={onClose}
+        className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-50 ${focusClass}`}
+        aria-label="Close expanded view"
+        {...focusOrder(1)}
+      >
+        <X className="h-6 w-6" />
+      </button>
 
       <div 
         className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4"
@@ -100,7 +147,7 @@ export const ExpandedTimer = memo(({
                 
                 <div className="w-full max-w-md" {...focusOrder(4)}>
                   <TimerControls 
-                    {...timerControlsProps} 
+                    {...modifiedTimerControlsProps}
                     size="large" 
                     showAddTime 
                   />
