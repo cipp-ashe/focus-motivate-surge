@@ -68,13 +68,12 @@ export const ExpandedTimer = memo(({
       setShowCompletionModal(true);
     }, 500);
 
-    // Let confetti continue in background while showing modal
-    setTimeout(() => {
-      setShowConfetti(false);
-    }, 4000); // Longer confetti duration
+    // Keep confetti going while they read the stats
+    // Will be cleaned up when modal is closed
   };
 
   const handleCloseModal = () => {
+    setShowConfetti(false); // Stop confetti when closing modal
     setShowCompletionModal(false);
     if (timerControlsProps.onComplete) {
       timerControlsProps.onComplete();
@@ -101,30 +100,34 @@ export const ExpandedTimer = memo(({
       {...getTimerA11yProps()}
       {...transitionProps}
     >
-      {showConfetti && (
-        <ReactConfetti
-          width={windowSize.width}
-          height={windowSize.height}
-          gravity={0.15}
-          numberOfPieces={200}
-          recycle={false}
-          colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD']}
-          tweenDuration={4000}
-        />
-      )}
-      
       <div
         className="absolute inset-0 bg-background bg-opacity-75 transition-opacity duration-300"
         style={{ opacity: transitionProps.style.opacity }}
         aria-hidden="true"
       />
       
+      {showConfetti && (
+        <div className="fixed inset-0 z-[51]">
+          <ReactConfetti
+            width={windowSize.width}
+            height={windowSize.height}
+            gravity={0.12}
+            numberOfPieces={300}
+            recycle={true}
+            colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#EDE9FE']}
+            tweenDuration={5000}
+            wind={0.01}
+            initialVelocityY={-2}
+          />
+        </div>
+      )}
+      
       {/* Floating quotes in background */}
       <FloatingQuotes favorites={favorites} />
       
       <button
         onClick={onClose}
-        className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-50 ${focusClass}`}
+        className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-[53] ${focusClass}`}
         aria-label="Close expanded view"
         {...focusOrder(1)}
       >
@@ -132,7 +135,7 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div 
-        className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4"
+        className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4 z-[52]"
         style={transitionProps.style}
       >
         <div className="w-full expanded-timer-card">
@@ -184,19 +187,21 @@ export const ExpandedTimer = memo(({
       </div>
 
       {showCompletionModal && timerControlsProps.metrics && (
-        <CompletionModal
-          isOpen={showCompletionModal}
-          onClose={handleCloseModal}
-          metrics={{
-            startTime: timerControlsProps.metrics.startTime || new Date(),
-            endTime: timerControlsProps.metrics.endTime || new Date(),
-            pauseCount: timerControlsProps.metrics.pauseCount,
-            favoriteQuotes: favorites.length,
-            originalDuration: timerControlsProps.metrics.originalDuration,
-            actualDuration: timerControlsProps.metrics.actualDuration,
-          }}
-          taskName={taskName}
-        />
+        <div className="z-[54]">
+          <CompletionModal
+            isOpen={showCompletionModal}
+            onClose={handleCloseModal}
+            metrics={{
+              startTime: timerControlsProps.metrics.startTime || new Date(),
+              endTime: timerControlsProps.metrics.endTime || new Date(),
+              pauseCount: timerControlsProps.metrics.pauseCount,
+              favoriteQuotes: favorites.length,
+              originalDuration: timerControlsProps.metrics.originalDuration,
+              actualDuration: timerControlsProps.metrics.actualDuration,
+            }}
+            taskName={taskName}
+          />
+        </div>
       )}
     </div>
   );
