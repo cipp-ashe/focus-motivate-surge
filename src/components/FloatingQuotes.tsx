@@ -12,8 +12,9 @@ interface QuotePosition {
   vy: number;
 }
 
-// Slightly increased velocity for better visibility
+// Adjusted velocity for better motion
 const VELOCITY = 0.08;
+const MAX_WIDTH = 300; // Ensures quotes stay readable and don’t collapse at edges
 
 export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,13 +49,14 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
           x += vx;
           y += vy;
 
-          if (x < 0 || x > 100) {
+          // Bounce when reaching container edges while respecting max width
+          if (x < 5 || x > 95) {
             vx = -vx;
-            x = x < 0 ? 0 : 100;
+            x = x < 5 ? 5 : 95;
           }
-          if (y < 0 || y > 100) {
+          if (y < 5 || y > 95) {
             vy = -vy;
-            y = y < 0 ? 0 : 100;
+            y = y < 5 ? 5 : 95;
           }
 
           return { x, y, vx, vy };
@@ -84,19 +86,24 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
         return (
           <div
             key={index}
-            className="absolute text-primary/50 backdrop-blur-md"
+            className="absolute backdrop-blur-lg brightness-110"
             style={{
               left: `${position.x}%`,
               top: `${position.y}%`,
               transform: "translate(-50%, -50%)",
-              maxWidth: "300px", // Enforce max width for wrapping
-              textAlign: "center", // Center the text within the block
+              maxWidth: `${MAX_WIDTH}px`, // Keeps the text block consistent
+              textAlign: "center",
             }}
           >
-            <div className="text-lg font-light italic leading-relaxed">
+            <div
+              className="text-lg font-light italic text-primary/80 leading-relaxed"
+              style={{
+                textShadow: "1px 1px 5px rgba(0, 0, 0, 0.5)", // Increases readability
+              }}
+            >
               "{quote.text}"
             </div>
-            <div className="text-sm text-primary/40 mt-1">— {quote.author}</div>
+            <div className="text-sm text-primary/60 mt-1">— {quote.author}</div>
           </div>
         );
       })}
