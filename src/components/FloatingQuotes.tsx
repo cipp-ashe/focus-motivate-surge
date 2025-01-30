@@ -12,9 +12,10 @@ interface QuotePosition {
   vy: number;
 }
 
-// Adjusted velocity for a smoother effect
+// Adjusted velocity for more fluid motion
 const VELOCITY = 0.08;
-const MAX_WIDTH = 300; // Keeps quotes from stretching too wide
+const MAX_WIDTH = 300; // Fixed max width for proper wrapping
+const SAFE_MARGIN = (MAX_WIDTH / window.innerWidth) * 100; // Prevents text from hitting edges
 
 export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +27,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
     if (!favorites.length) return;
 
     const newPositions = favorites.map(() => {
-      const x = Math.random() * 80 + 10;
+      const x = Math.random() * (90 - SAFE_MARGIN) + SAFE_MARGIN / 2;
       const y = Math.random() * 80 + 10;
       const angle = Math.random() * Math.PI * 2;
       const vx = Math.cos(angle) * VELOCITY;
@@ -49,14 +50,14 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
           x += vx;
           y += vy;
 
-          // Bounce logic while respecting max width
-          if (x < 5 || x > 95) {
+          // Bounce logic considering max width to prevent weird wrapping
+          if (x < SAFE_MARGIN || x > 100 - SAFE_MARGIN) {
             vx = -vx;
-            x = x < 5 ? 5 : 95;
+            x = x < SAFE_MARGIN ? SAFE_MARGIN : 100 - SAFE_MARGIN;
           }
-          if (y < 5 || y > 95) {
+          if (y < 10 || y > 90) {
             vy = -vy;
-            y = y < 5 ? 5 : 95;
+            y = y < 10 ? 10 : 90;
           }
 
           return { x, y, vx, vy };
@@ -93,6 +94,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
               transform: "translate(-50%, -50%)",
               maxWidth: `${MAX_WIDTH}px`,
               textAlign: "center",
+              whiteSpace: "normal", // Ensures proper wrapping
             }}
           >
             <div
