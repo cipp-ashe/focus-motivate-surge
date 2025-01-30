@@ -67,7 +67,7 @@ export const Timer = ({
       pause();
     } else {
       start();
-      setIsExpanded(true);
+      setIsExpanded(true); // Expand when explicitly starting the timer
     }
   }, [isRunning, start, pause]);
 
