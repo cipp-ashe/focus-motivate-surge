@@ -73,10 +73,13 @@ export const QuoteDisplay = ({
   const [quotePool, setQuotePool] = useState<Quote[]>([...quotes]);
 
   useEffect(() => {
-    if (quotePool.length > 0 && !currentQuote) {
-      setCurrentQuote(quotePool[0]);
-    }
-  }, []);
+   if (!currentQuote) {
+     // Start with a shuffled pool
+     const shuffledQuotes = shuffleQuotes(quotes);
+     setQuotePool(shuffledQuotes.slice(1));
+     setCurrentQuote(shuffledQuotes[0]);
+   }
+ }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
