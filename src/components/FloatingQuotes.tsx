@@ -13,27 +13,30 @@ interface QuotePosition {
   vy: number;
 }
 
-// Physics parameters
-const DAMPENING = 0.995; // Very subtle slowdown
-const MIN_VELOCITY = 0.1;
-const MAX_VELOCITY = 0.3;
-const BOUNCE_FORCE = 0.2; // Gentle bounce force
+// Simple velocity parameters
+const VELOCITY = 0.15; // Constant velocity for smooth motion
 
 export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<QuotePosition[]>([]);
   const animationFrameRef = useRef<number>();
 
-  // Initialize random positions and velocities
+  // Initialize random positions and directions
   useEffect(() => {
     if (!favorites.length) return;
     
-    const newPositions = favorites.map(() => ({
-      x: Math.random() * 80 + 10, // 10-90%
-      y: Math.random() * 80 + 10, // 10-90%
-      vx: (Math.random() - 0.5) * MAX_VELOCITY,
-      vy: (Math.random() - 0.5) * MAX_VELOCITY
-    }));
+    const newPositions = favorites.map(() => {
+      // Random initial position
+      const x = Math.random() * 80 + 10; // 10-90%
+      const y = Math.random() * 80 + 10; // 10-90%
+      
+      // Random direction with constant velocity
+      const angle = Math.random() * Math.PI * 2;
+      const vx = Math.cos(angle) * VELOCITY;
+      const vy = Math.sin(angle) * VELOCITY;
+      
+      return { x, y, vx, vy };
+    });
     
     setPositions(newPositions);
   }, [favorites.length]);
@@ -41,14 +44,6 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   // Animation loop
   useEffect(() => {
     if (!positions.length || !containerRef.current) return;
-
-    const container = containerRef.current;
-    const containerRect = container.getBoundingClientRect();
-    const timerCenter = {
-      x: containerRect.width / 2,
-      y: containerRect.height / 2
-    };
-    const timerRadius = Math.min(containerRect.width, containerRect.height) * 0.2;
 
     const animate = () => {
       setPositions(prevPositions => {
@@ -59,7 +54,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
           x += vx;
           y += vy;
 
-          // Gently bounce off edges
+          // Simple edge bouncing
           if (x < 0 || x > 100) {
             vx = -vx;
             x = x < 0 ? 0 : 100;
@@ -68,36 +63,6 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
             vy = -vy;
             y = y < 0 ? 0 : 100;
           }
-
-          // Very gentle interaction with timer area
-          const dx = (x / 100 * containerRect.width) - timerCenter.x;
-          const dy = (y / 100 * containerRect.height) - timerCenter.y;
-          const distanceToTimer = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distanceToTimer < timerRadius) {
-            const angle = Math.atan2(dy, dx);
-            vx += Math.cos(angle) * BOUNCE_FORCE;
-            vy += Math.sin(angle) * BOUNCE_FORCE;
-          }
-
-          // Apply minimum velocity for constant motion
-          const speed = Math.sqrt(vx * vx + vy * vy);
-          if (speed < MIN_VELOCITY) {
-            const angle = Math.random() * Math.PI * 2;
-            vx = Math.cos(angle) * MIN_VELOCITY;
-            vy = Math.sin(angle) * MIN_VELOCITY;
-          }
-
-          // Smooth velocity limiting
-          if (speed > MAX_VELOCITY) {
-            const factor = MAX_VELOCITY / speed;
-            vx *= factor;
-            vy *= factor;
-          }
-
-          // Very subtle dampening
-          vx *= DAMPENING;
-          vy *= DAMPENING;
 
           return { x, y, vx, vy };
         });
