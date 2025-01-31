@@ -47,7 +47,7 @@ serve(async (req) => {
             ${summaryData.completedTasks.map((task: any) => `
               <details style="margin-bottom: 16px;">
                 <summary style="cursor: pointer; padding: 12px; background: #f1f5f9; border-radius: 6px; color: #0f172a; font-weight: 500; display: flex; justify-content: space-between; align-items: center;">
-                  <span style="text-decoration: line-through;">${task.taskName}</span>
+                  <span>${task.taskName}</span>
                   <span style="color: #64748b; font-size: 14px;">${task.completedAt ? new Date(task.completedAt).toLocaleTimeString() : ''}</span>
                 </summary>
                 <div style="padding: 16px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 6px 6px;">
