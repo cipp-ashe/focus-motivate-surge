@@ -72,7 +72,7 @@ serve(async (req) => {
 
     // Send email using Resend
     const emailResponse = await resend.emails.send({
-      from: "Focus Timer <onboarding@resend.dev>",
+      from: "Focus Timer <success@focustimer.org>",
       to: [email],
       subject: "Your Daily Task Summary",
       html: emailContent,
