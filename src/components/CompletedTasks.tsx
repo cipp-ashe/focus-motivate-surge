@@ -25,28 +25,24 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
   return (
     <div className="mt-4">
       <div className="flex flex-col space-y-2">
-        <div className="flex justify-between items-center bg-card rounded-lg px-4 py-2">
-          <h3 className="text-sm font-medium">Completed Tasks</h3>
-          <Button
-            variant="outline"
-            onClick={onSendSummary}
-            className="text-primary hover:text-primary"
-          >
-            <Send className="w-4 h-4 mr-2" />
-            Send Summary
-          </Button>
-        </div>
-        
+        {/* Header row with completed tasks count */}
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="completed-tasks" className="border-b-0">
-            <AccordionTrigger className="text-sm font-medium hover:no-underline py-2">
-              <span className="flex items-center gap-2">
-                View List
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                  {tasks.length}
-                </span>
-              </span>
-            </AccordionTrigger>
+            <div className="flex justify-between items-center bg-card rounded-lg px-4 py-2">
+              {/* AccordionTrigger becomes the visible clickable text */}
+              <AccordionTrigger className="text-sm font-medium hover:no-underline py-2">
+                Completed Tasks ({tasks.length})
+              </AccordionTrigger>
+              <Button
+                variant="outline"
+                onClick={onSendSummary}
+                className="text-primary hover:text-primary"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Send Summary
+              </Button>
+            </div>
+            {/* Expanded content shows the list of completed tasks */}
             <AccordionContent>
               <Table>
                 <TableBody>
