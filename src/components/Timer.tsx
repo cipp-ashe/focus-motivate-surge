@@ -60,6 +60,7 @@ export const Timer = ({
       completeTimer();
       setIsExpanded(false);
       playSound();
+      onComplete();
       toast("Time's up! Great work! ✨");
     },
     onDurationChange,
