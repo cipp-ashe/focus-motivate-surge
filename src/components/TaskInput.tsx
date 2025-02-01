@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { Plus, List, X } from "lucide-react";
+import { Plus, List, X, Send } from "lucide-react";
 import { Task } from "./TaskList";
 import {
   DropdownMenu,
@@ -49,6 +49,22 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
   const handleClear = () => {
     setNewTaskName("");
   };
+
+  // Handle Ctrl/Cmd + Enter shortcut for bulk mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isBulkAdd && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        const form = document.querySelector('form');
+        if (form) {
+          form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isBulkAdd]);
 
   return (
     <Card className="p-4 w-full">
@@ -97,6 +113,11 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {isBulkAdd && (
+            <Button type="submit" variant="default" size="icon">
+              <Send className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </form>
     </Card>
