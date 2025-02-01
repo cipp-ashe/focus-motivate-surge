@@ -16,10 +16,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
-    react({
-      jsxImportSource: 'react',
-      jsx: 'automatic'
-    }),
+    react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
