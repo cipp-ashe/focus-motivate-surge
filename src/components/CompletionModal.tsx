@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Timer, Clock, Pause, Quote } from "lucide-react";
+import { Timer, Clock, Pause, Quote, type LucideIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { formatDistanceToNow } from "date-fns";
 
