@@ -28,15 +28,22 @@ export const TaskTable = ({
 }: TaskTableProps) => {
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
 
-  const handleDurationBlur = (taskId: string) => {
-    setEditingDuration(null);
+  const handleDurationClick = (e: React.MouseEvent, taskId: string) => {
+    e.stopPropagation();
+    setEditingDuration(taskId);
   };
 
   const handleDurationChange = (taskId: string, minutes: number) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      task.duration = minutes;
+    const taskIndex = tasks.findIndex(t => t.id === taskId);
+    if (taskIndex !== -1) {
+      const updatedTask = { ...tasks[taskIndex], duration: minutes };
+      tasks[taskIndex] = updatedTask;
+      console.log(`Updated task ${taskId} duration to ${minutes} minutes`);
     }
+  };
+
+  const handleDurationBlur = () => {
+    setEditingDuration(null);
   };
 
   return (
@@ -66,10 +73,10 @@ export const TaskTable = ({
             <TableRow
               key={task.id}
               className={`cursor-pointer transition-colors duration-200
-              ${selectedTasks.includes(task.id) 
-                ? 'bg-accent/10' 
-                : 'hover:bg-accent/5'
-              }`}
+                ${selectedTasks.includes(task.id) 
+                  ? 'bg-accent/10' 
+                  : 'hover:bg-accent/5'
+                }`}
               onClick={(e) => onTaskClick(task, e)}
             >
               <TableCell className="py-2">
@@ -78,23 +85,24 @@ export const TaskTable = ({
               <TableCell className="py-2 text-right">
                 <div 
                   className="flex items-center justify-end gap-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingDuration(task.id);
-                  }}
+                  onClick={(e) => handleDurationClick(e, task.id)}
                 >
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   {editingDuration === task.id ? (
-                    <div onClick={e => e.stopPropagation()} className="w-32">
+                    <div 
+                      onClick={e => e.stopPropagation()} 
+                      className="w-32"
+                    >
                       <MinutesInput
                         minutes={task.duration || 0}
                         onMinutesChange={(minutes) => handleDurationChange(task.id, minutes)}
                         minMinutes={1}
                         maxMinutes={60}
+                        onBlur={handleDurationBlur}
                       />
                     </div>
                   ) : (
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground hover:text-foreground transition-colors">
                       {task.duration || '–'}
                     </span>
                   )}
