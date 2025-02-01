@@ -136,7 +136,7 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div
-        className="flex flex-col items-center justify-center h-full px-4 sm:px-8 py-8 sm:py-12 z-[52] mx-auto w-full max-w-[95%] sm:max-w-[85%] md:max-w-[600px] space-y-8"
+        className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-8 py-8 sm:py-12 z-[52] mx-auto w-full max-w-[95%] sm:max-w-[85%] md:max-w-[600px] space-y-12"
         style={transitionProps.style}
       >
         <Card className="w-full bg-card shadow-lg p-6 sm:p-8 border-primary/20" {...focusOrder(2)}>
@@ -145,7 +145,7 @@ export const ExpandedTimer = memo(({
               {taskName}
             </h2>
 
-            <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 py-8 sm:py-10">
+            <div className="flex flex-col items-center justify-center gap-16 sm:gap-20 py-8 sm:py-12">
               <div className="relative w-56 h-56 sm:w-72 sm:h-72" aria-live="polite" {...focusOrder(3)}>
                 <TimerCircle size="large" {...timerCircleProps} />
               </div>
@@ -157,7 +157,7 @@ export const ExpandedTimer = memo(({
           </div>
         </Card>
 
-        <div className="w-full">
+        <div className="w-full mb-12">
           <QuoteDisplay showAsOverlay currentTask={taskName} favorites={favorites} setFavorites={setFavorites} />
         </div>
       </div>
