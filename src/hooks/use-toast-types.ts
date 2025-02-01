@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { ToastProps } from "@/components/ui/toast";
 
-export type ToastActionElement = React.ReactElement<typeof ToastAction>;
+export type ToastActionElement = React.ReactElement<any>;
 
 export type ToasterToast = ToastProps & {
   id: string;
