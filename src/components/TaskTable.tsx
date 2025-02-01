@@ -9,7 +9,6 @@ import {
 import { Trash2, Clock } from "lucide-react";
 import { Task } from "./TaskList";
 import { useState, useCallback } from "react";
-import { MinutesInput } from "./MinutesInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TaskTableProps {
@@ -27,33 +26,7 @@ export const TaskTable = ({
   onTaskDelete,
   onTasksClear,
 }: TaskTableProps) => {
-  const [editingDuration, setEditingDuration] = useState<string | null>(null);
   const isMobile = useIsMobile();
-
-  const handleDurationClick = useCallback((e: React.MouseEvent | React.TouchEvent, taskId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setEditingDuration(taskId);
-  }, []);
-
-  const handleDurationChange = useCallback((taskId: string, minutes: number) => {
-    const taskIndex = tasks.findIndex(t => t.id === taskId);
-    if (taskIndex !== -1) {
-      const updatedTask = { ...tasks[taskIndex], duration: minutes };
-      tasks[taskIndex] = updatedTask;
-      console.log(`Updated task ${taskId} duration to ${minutes} minutes`);
-    }
-  }, [tasks]);
-
-  const handleDurationBlur = useCallback(() => {
-    if (isMobile) {
-      setTimeout(() => {
-        setEditingDuration(null);
-      }, 300);
-    } else {
-      setEditingDuration(null);
-    }
-  }, [isMobile]);
 
   const preventPropagation = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -98,38 +71,11 @@ export const TaskTable = ({
                 <span className="line-clamp-2">{task.name}</span>
               </TableCell>
               <TableCell className="py-2 text-right">
-                <div 
-                  className="flex items-center justify-end gap-2 touch-manipulation"
-                  onClick={(e) => handleDurationClick(e, task.id)}
-                  onTouchStart={(e) => {
-                    preventPropagation(e);
-                    handleDurationClick(e, task.id);
-                  }}
-                >
+                <div className="flex items-center justify-end gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  {editingDuration === task.id ? (
-                    <div 
-                      onClick={preventPropagation}
-                      onTouchStart={preventPropagation}
-                      onTouchEnd={preventPropagation}
-                      onTouchMove={preventPropagation}
-                      className="w-32 touch-manipulation"
-                    >
-                      <MinutesInput
-                        minutes={task.duration || 0}
-                        onMinutesChange={(minutes) => handleDurationChange(task.id, minutes)}
-                        minMinutes={1}
-                        maxMinutes={60}
-                        onBlur={handleDurationBlur}
-                      />
-                    </div>
-                  ) : (
-                    <span 
-                      className="text-muted-foreground hover:text-foreground transition-colors min-h-[24px] min-w-[24px] flex items-center justify-end touch-manipulation"
-                    >
-                      {task.duration || '–'}
-                    </span>
-                  )}
+                  <span className="text-muted-foreground min-h-[24px] min-w-[24px] flex items-center justify-end">
+                    {task.duration || '25'}
+                  </span>
                 </div>
               </TableCell>
               <TableCell className="py-2 text-right">

@@ -31,7 +31,22 @@ const Index = () => {
     }
   });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [duration, setDuration] = useState(1500);
+  const [duration, setDuration] = useState(1500); // Default to 25 minutes
+
+  useEffect(() => {
+    if (selectedTask?.duration) {
+      console.log('Setting duration from selected task:', selectedTask.duration * 60);
+      setDuration(selectedTask.duration * 60);
+    } else {
+      console.log('Setting default duration of 25 minutes');
+      setDuration(1500); // 25 minutes default
+    }
+  }, [selectedTask]);
+
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   const [isDark, setIsDark] = useState(true);
   const [favorites, setFavorites] = useState<Quote[]>([]);
 
@@ -43,11 +58,6 @@ const Index = () => {
     }
   }, [isDark]);
 
-  // Initialize dark mode
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
   const handleTaskAdd = useCallback((task: Task) => {
     setTasks((prev) => [...prev, task]);
   }, []);
@@ -56,7 +66,6 @@ const Index = () => {
     setSelectedTask(task);
   }, []);
   
-  // Save tasks to localStorage when they change
   useEffect(() => {
     localStorage.setItem('taskList', JSON.stringify(tasks));
     localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
@@ -107,6 +116,7 @@ const Index = () => {
               onTaskSelect={handleTaskSelect}
               onTasksClear={handleTasksClear}
               onSelectedTasksClear={handleSelectedTasksClear}
+              favorites={favorites}
             />
             <FavoriteQuotes favorites={favorites} />
           </div>
@@ -118,7 +128,10 @@ const Index = () => {
                 taskName={selectedTask.name}
                 onComplete={handleTaskComplete}
                 onAddTime={() => {}}
-                onDurationChange={setDuration}
+                onDurationChange={(minutes) => {
+                  console.log('Duration changed to:', minutes * 60);
+                  setDuration(minutes * 60);
+                }}
                 favorites={favorites}
                 setFavorites={setFavorites}
               />
