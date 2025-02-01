@@ -28,6 +28,10 @@ export const useTimerEffects = ({
   useEffect(() => {
     console.log("Task changed, resetting states for:", taskName);
     resetStates();
+    return () => {
+      console.log("Cleaning up timer effects for:", taskName);
+      resetStates();
+    };
   }, [taskName, resetStates]);
 
   const handleComplete = useCallback(() => {
