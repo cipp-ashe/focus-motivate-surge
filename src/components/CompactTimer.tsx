@@ -41,8 +41,20 @@ export const CompactTimer = memo(({
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      // Reset states on cleanup
+      setShowCompletionModal(false);
+      setShowConfetti(false);
+    };
   }, []);
+
+  // Reset states when task changes
+  useEffect(() => {
+    console.log("Task changed in CompactTimer, resetting states");
+    setShowCompletionModal(false);
+    setShowConfetti(false);
+  }, [taskName]);
 
   // Handle timer completion when time runs out
   useEffect(() => {
@@ -63,7 +75,7 @@ export const CompactTimer = memo(({
   };
 
   const handleCloseModal = () => {
-    console.log("Closing completion modal in compact mode.");
+    console.log("Closing completion modal in compact mode and cleaning up states.");
     setShowConfetti(false);
     setShowCompletionModal(false);
     if (timerControlsProps.onComplete) {
@@ -72,9 +84,8 @@ export const CompactTimer = memo(({
   };
 
   const handleTimerClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    // Only handle clicks/touches when the timer is running and we want to expand
     if (isRunning && onClick) {
-      e.stopPropagation(); // Allow scrolling while preventing unwanted interactions
+      e.stopPropagation();
       onClick();
     }
   };
@@ -115,7 +126,6 @@ export const CompactTimer = memo(({
             {taskName}
           </h2>
 
-          {/* Configuration options only shown when not running */}
           <div className={`overflow-hidden transition-all duration-700 ${
             isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-4 sm:mt-6'
           }`}>

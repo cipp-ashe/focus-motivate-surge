@@ -28,6 +28,13 @@ export const ExpandedTimer = memo(({
     height: window.innerHeight,
   });
 
+  // Reset states when task changes
+  useEffect(() => {
+    console.log("Task changed in ExpandedTimer, resetting states");
+    setShowCompletionModal(false);
+    setShowConfetti(false);
+  }, [taskName]);
+
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
@@ -37,7 +44,12 @@ export const ExpandedTimer = memo(({
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      // Reset states on cleanup
+      setShowCompletionModal(false);
+      setShowConfetti(false);
+    };
   }, []);
 
   const { isRendered, getTransitionProps } = useTransition({
@@ -45,7 +57,12 @@ export const ExpandedTimer = memo(({
     options: {
       duration: 300,
       onEnter: () => (document.body.style.overflow = "hidden"),
-      onExit: () => (document.body.style.overflow = "auto"),
+      onExit: () => {
+        document.body.style.overflow = "auto";
+        // Reset states when transitioning out
+        setShowCompletionModal(false);
+        setShowConfetti(false);
+      },
     },
   });
 
@@ -67,7 +84,6 @@ export const ExpandedTimer = memo(({
     setShowCompletionModal(true);
   }, []);
 
-  // Add effect to handle timer completion when time runs out
   useEffect(() => {
     if (timerCircleProps.timeLeft === 0 && isRunning) {
       console.log("Time is up in expanded mode! Showing modal and confetti.");
@@ -76,7 +92,7 @@ export const ExpandedTimer = memo(({
   }, [timerCircleProps.timeLeft, isRunning, handleComplete]);
 
   const handleCloseModal = useCallback(() => {
-    console.log("Closing completion modal.");
+    console.log("Closing completion modal and cleaning up states.");
     setShowConfetti(false);
     setShowCompletionModal(false);
     if (timerControlsProps.onComplete) {
