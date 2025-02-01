@@ -74,7 +74,7 @@ export const CompactTimer = memo(({
   const handleTimerClick = (e: React.MouseEvent | React.TouchEvent) => {
     // Only handle clicks/touches when the timer is running and we want to expand
     if (isRunning && onClick) {
-      e.stopPropagation(); // Stop event from bubbling but allow scrolling
+      e.stopPropagation(); // Allow scrolling while preventing unwanted interactions
       onClick();
     }
   };
@@ -87,7 +87,7 @@ export const CompactTimer = memo(({
   return (
     <>
       {showConfetti && (
-        <div className="fixed inset-0 z-40">
+        <div className="fixed inset-0 z-40 pointer-events-none">
           <ReactConfetti
             width={windowSize.width}
             height={windowSize.height}
