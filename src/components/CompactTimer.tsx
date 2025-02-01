@@ -71,7 +71,7 @@ export const CompactTimer = memo(({
     }
   };
 
-  const handleTimerClick = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleTimerClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     // Only handle clicks/touches when the timer is running and we want to expand
     if (isRunning && onClick) {
       e.stopPropagation(); // Allow scrolling while preventing unwanted interactions
@@ -85,7 +85,7 @@ export const CompactTimer = memo(({
   };
 
   return (
-    <>
+    <div className="w-full overflow-visible">
       {showConfetti && (
         <div className="fixed inset-0 z-40 pointer-events-none">
           <ReactConfetti
@@ -104,7 +104,7 @@ export const CompactTimer = memo(({
       
       <Card 
         ref={containerRef}
-        className="w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-4 sm:p-6"
+        className="w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-4 sm:p-6 relative"
         {...a11yProps}
       >
         <div className="text-center space-y-4 sm:space-y-6">
@@ -169,7 +169,7 @@ export const CompactTimer = memo(({
           taskName={taskName} 
         />
       )}
-    </>
+    </div>
   );
 });
 
