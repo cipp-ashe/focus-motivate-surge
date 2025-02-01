@@ -23,10 +23,23 @@ export const MinutesInput = memo(({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value === '' ? minMinutes : parseInt(e.target.value);
-    // Ensure the value is within bounds
-    value = Math.min(Math.max(value, minMinutes), maxMinutes);
-    onMinutesChange(value);
+    const inputValue = e.target.value;
+    
+    // Allow empty input while typing
+    if (inputValue === '') {
+      onMinutesChange(minMinutes);
+      return;
+    }
+
+    // Parse the input value
+    const parsedValue = parseInt(inputValue, 10);
+    
+    // Only update if it's a valid number
+    if (!isNaN(parsedValue)) {
+      // Clamp the value between min and max
+      const clampedValue = Math.min(Math.max(parsedValue, minMinutes), maxMinutes);
+      onMinutesChange(clampedValue);
+    }
   };
 
   return (
