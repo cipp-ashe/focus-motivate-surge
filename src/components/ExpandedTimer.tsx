@@ -67,9 +67,10 @@ export const ExpandedTimer = memo(({
     setShowCompletionModal(true);
   }, []);
 
+  // Add effect to handle timer completion when time runs out
   useEffect(() => {
     if (timerCircleProps.timeLeft === 0 && isRunning) {
-      console.log("Time is up, triggering handleComplete.");
+      console.log("Time is up in expanded mode! Showing modal and confetti.");
       handleComplete();
     }
   }, [timerCircleProps.timeLeft, isRunning, handleComplete]);

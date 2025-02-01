@@ -44,6 +44,14 @@ export const CompactTimer = memo(({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Add effect to handle timer completion when time runs out
+  useEffect(() => {
+    if (timerCircleProps.timeLeft === 0 && isRunning) {
+      console.log("Time is up in compact mode! Showing modal and confetti.");
+      handleComplete();
+    }
+  }, [timerCircleProps.timeLeft, isRunning]);
+
   const { containerRef } = useFocusTrap({
     enabled: !isRunning,
   });
@@ -141,15 +149,16 @@ export const CompactTimer = memo(({
           </div>
         </div>
 
-        {showCompletionModal && timerControlsProps.metrics && (
-          <CompletionModal 
-            isOpen={showCompletionModal} 
-            onClose={handleCloseModal} 
-            metrics={timerControlsProps.metrics} 
-            taskName={taskName} 
-          />
-        )}
       </Card>
+
+      {showCompletionModal && timerControlsProps.metrics && (
+        <CompletionModal 
+          isOpen={showCompletionModal} 
+          onClose={handleCloseModal} 
+          metrics={timerControlsProps.metrics} 
+          taskName={taskName} 
+        />
+      )}
     </>
   );
 });
