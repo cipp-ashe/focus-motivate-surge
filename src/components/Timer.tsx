@@ -65,15 +65,14 @@ export const Timer = ({
     onDurationChange,
   });
 
-  // Update internal minutes when task duration changes
+  // Only update internal minutes when duration changes and timer is not running
   useEffect(() => {
-    if (!isRunning && duration > 0) {
-      const newMinutes = Math.floor(duration / 60);
-      console.log(`Task duration changed to ${newMinutes} minutes`);
-      setInternalMinutes(newMinutes);
-      setMinutes(newMinutes);
+    if (!isRunning && duration > 0 && duration !== internalMinutes * 60) {
+      console.log(`Task duration changed externally to ${Math.floor(duration / 60)} minutes`);
+      setInternalMinutes(Math.floor(duration / 60));
+      setMinutes(Math.floor(duration / 60));
     }
-  }, [duration, setMinutes, isRunning]);
+  }, [duration, setMinutes, isRunning, internalMinutes]);
 
   const handleMinutesChange = useCallback((newMinutes: number) => {
     console.log(`Updating timer duration to ${newMinutes} minutes`);
