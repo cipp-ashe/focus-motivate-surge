@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { MinutesInputProps } from "../types/timer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const MinutesInput = memo(({
   minutes,
@@ -11,14 +12,20 @@ export const MinutesInput = memo(({
   maxMinutes,
   onBlur
 }: MinutesInputProps) => {
-  const handleIncrement = () => {
+  const isMobile = useIsMobile();
+
+  const handleIncrement = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const step = minutes < 5 ? 1 : 5;
     const newValue = Math.min(minutes + step, maxMinutes);
     console.log('Incrementing to:', newValue);
     onMinutesChange(newValue);
   };
 
-  const handleDecrement = () => {
+  const handleDecrement = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const step = minutes <= 5 ? 1 : 5;
     const newValue = Math.max(minutes - step, minMinutes);
     console.log('Decrementing to:', newValue);
@@ -26,6 +33,7 @@ export const MinutesInput = memo(({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const value = e.target.value;
     console.log('Input value changed to:', value);
     
@@ -45,7 +53,8 @@ export const MinutesInput = memo(({
     }
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     // Ensure valid number on blur
     if (isNaN(minutes) || minutes < minMinutes) {
       onMinutesChange(minMinutes);
@@ -56,12 +65,17 @@ export const MinutesInput = memo(({
   };
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div 
+      className="flex items-center justify-center gap-2"
+      onClick={e => e.stopPropagation()}
+      onTouchStart={e => e.stopPropagation()}
+    >
       <Button
         variant="outline"
         size="icon"
         onClick={handleDecrement}
-        className="border-primary/20 hover:bg-primary/20"
+        onTouchStart={handleDecrement}
+        className="border-primary/20 hover:bg-primary/20 touch-manipulation"
         disabled={minutes <= minMinutes}
         aria-label="Decrease minutes"
       >
@@ -75,7 +89,9 @@ export const MinutesInput = memo(({
           value={minutes}
           onChange={handleInputChange}
           onBlur={handleBlur}
-          className="text-center font-mono bg-background/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          onClick={e => e.stopPropagation()}
+          onTouchStart={e => e.stopPropagation()}
+          className="text-center font-mono bg-background/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none touch-manipulation"
           aria-label="Minutes input"
         />
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -86,7 +102,8 @@ export const MinutesInput = memo(({
         variant="outline"
         size="icon"
         onClick={handleIncrement}
-        className="border-primary/20 hover:bg-primary/20"
+        onTouchStart={handleIncrement}
+        className="border-primary/20 hover:bg-primary/20 touch-manipulation"
         disabled={minutes >= maxMinutes}
         aria-label="Increase minutes"
       >

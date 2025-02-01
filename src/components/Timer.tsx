@@ -65,7 +65,7 @@ export const Timer = ({
     onDurationChange,
   });
 
-  // Update internal minutes when a new task is selected OR when task duration changes
+  // Update internal minutes when task duration changes
   useEffect(() => {
     if (!isRunning) {
       const newMinutes = Math.floor(duration / 60);

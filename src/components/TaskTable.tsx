@@ -30,7 +30,7 @@ export const TaskTable = ({
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
-  const handleDurationClick = (e: React.MouseEvent, taskId: string) => {
+  const handleDurationClick = (e: React.MouseEvent | React.TouchEvent, taskId: string) => {
     e.preventDefault();
     e.stopPropagation();
     setEditingDuration(taskId);
@@ -46,11 +46,10 @@ export const TaskTable = ({
   };
 
   const handleDurationBlur = () => {
-    // Add a small delay before removing editing state on mobile
     if (isMobile) {
       setTimeout(() => {
         setEditingDuration(null);
-      }, 200);
+      }, 300);
     } else {
       setEditingDuration(null);
     }
@@ -94,11 +93,11 @@ export const TaskTable = ({
               </TableCell>
               <TableCell className="py-2 text-right">
                 <div 
-                  className="flex items-center justify-end gap-2"
+                  className="flex items-center justify-end gap-2 touch-manipulation"
                   onClick={(e) => handleDurationClick(e, task.id)}
                   onTouchStart={(e) => {
                     e.stopPropagation();
-                    handleDurationClick(e as any, task.id);
+                    handleDurationClick(e, task.id);
                   }}
                 >
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -106,7 +105,7 @@ export const TaskTable = ({
                     <div 
                       onClick={e => e.stopPropagation()} 
                       onTouchStart={e => e.stopPropagation()}
-                      className={`w-32 ${isMobile ? 'touch-manipulation' : ''}`}
+                      className="w-32 touch-manipulation"
                     >
                       <MinutesInput
                         minutes={task.duration || 0}
@@ -118,7 +117,7 @@ export const TaskTable = ({
                     </div>
                   ) : (
                     <span 
-                      className="text-muted-foreground hover:text-foreground transition-colors min-h-[24px] min-w-[24px] flex items-center justify-end"
+                      className="text-muted-foreground hover:text-foreground transition-colors min-h-[24px] min-w-[24px] flex items-center justify-end touch-manipulation"
                     >
                       {task.duration || '–'}
                     </span>
@@ -131,7 +130,11 @@ export const TaskTable = ({
                     e.stopPropagation();
                     onTaskDelete(task.id);
                   }}
-                  className="ml-2 text-muted-foreground hover:text-destructive transition-colors duration-200"
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    onTaskDelete(task.id);
+                  }}
+                  className="ml-2 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
