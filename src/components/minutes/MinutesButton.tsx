@@ -16,10 +16,10 @@ export const MinutesButton = ({
   className,
   ...props
 }: MinutesButtonProps) => {
-  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleInteraction = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onClick) onClick(e as React.MouseEvent);
+    if (onClick && 'type' in e) onClick(e as React.MouseEvent<HTMLButtonElement>);
   };
 
   return (
