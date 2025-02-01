@@ -12,7 +12,8 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     sourcemap: mode === 'development',
     commonjsOptions: {
-      include: [],
+      include: [/node_modules/],
+      transformMixedEsModules: true,
     },
   },
   plugins: [
@@ -22,12 +23,10 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "react": path.resolve(__dirname, "./node_modules/react"),
-      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime"),
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    include: ['react', 'react-dom', 'react/jsx-runtime'],
     esbuildOptions: {
       target: 'es2020',
     },
