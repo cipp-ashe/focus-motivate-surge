@@ -38,11 +38,13 @@ export const useTimer = ({
     favoriteQuotes: 0,
   });
 
-  // Effect to handle initialDuration changes
+  // Handle duration updates
   useEffect(() => {
     console.log('Initial duration changed:', initialDuration);
-    setTimeLeft(initialDuration);
-    setMinutesState(Math.floor(initialDuration / 60));
+    if (initialDuration > 0) {
+      setTimeLeft(initialDuration);
+      setMinutesState(Math.floor(initialDuration / 60));
+    }
   }, [initialDuration]);
 
   const setMinutes = useCallback((newMinutes: number) => {
@@ -51,26 +53,6 @@ export const useTimer = ({
     setTimeLeft(newMinutes * 60);
     onDurationChange?.(newMinutes);
   }, [onDurationChange]);
-
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((time) => {
-          if (time <= 1) {
-            completeTimer();
-            onTimeUp?.();
-            return 0;
-          }
-          return time - 1;
-        });
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft, onTimeUp]);
 
   const start = useCallback(() => {
     setIsRunning(true);
@@ -119,6 +101,26 @@ export const useTimer = ({
         : prev.actualDuration,
     }));
   }, []);
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((time) => {
+          if (time <= 1) {
+            completeTimer();
+            onTimeUp?.();
+            return 0;
+          }
+          return time - 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [isRunning, timeLeft, onTimeUp, completeTimer]);
 
   return {
     timeLeft,
