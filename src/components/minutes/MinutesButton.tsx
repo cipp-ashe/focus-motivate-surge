@@ -17,11 +17,14 @@ export const MinutesButton = ({
   ...props
 }: MinutesButtonProps) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onClick) onClick(e);
   };
 
   const handleTouch = (e: React.TouchEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     if (onTouchStart) onTouchStart(e);
   };
 
