@@ -67,8 +67,10 @@ export const Timer = ({
   // Effect to update timer duration when a task with predefined duration is selected
   useEffect(() => {
     if (duration) {
-      handleMinutesChange(Math.floor(duration / 60));
-      console.log(`Setting timer to ${Math.floor(duration / 60)} minutes from task duration`);
+      const durationInMinutes = Math.floor(duration / 60);
+      handleMinutesChange(durationInMinutes);
+      console.log(`Setting timer to ${durationInMinutes} minutes from task duration`);
+      toast.info(`Timer set to ${durationInMinutes} minutes`);
     }
   }, [duration, handleMinutesChange]);
 
@@ -109,7 +111,7 @@ export const Timer = ({
     onToggle: toggleTimer,
     onComplete: handleComplete,
     onAddTime: handleAddTime,
-    metrics, // Pass metrics to controls
+    metrics,
   };
 
   const commonProps = {
