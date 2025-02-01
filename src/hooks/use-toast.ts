@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { ToasterToast } from "./use-toast-types";
+import type { ToasterToast, State, Action } from "./use-toast-types";
 import { reducer } from "./use-toast-reducer";
 
 let count = 0;
