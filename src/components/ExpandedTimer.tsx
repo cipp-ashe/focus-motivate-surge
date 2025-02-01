@@ -136,30 +136,28 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div
-        className="flex flex-col items-center justify-center h-full px-4 sm:px-8 py-4 sm:py-8 z-[52] mx-auto w-full max-w-[95%] sm:max-w-[85%] md:max-w-[600px]"
+        className="flex flex-col items-center justify-center h-full px-4 sm:px-8 py-8 sm:py-12 z-[52] mx-auto w-full max-w-[95%] sm:max-w-[85%] md:max-w-[600px] space-y-8"
         style={transitionProps.style}
       >
-        <div className="w-full mb-6 sm:mb-8">
-          <Card className="bg-card shadow-lg p-6 sm:p-8 border-primary/20" {...focusOrder(2)}>
-            <div className="flex flex-col items-center space-y-6 sm:space-y-8">
-              <h2 id="timer-heading" className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-                {taskName}
-              </h2>
+        <Card className="w-full bg-card shadow-lg p-6 sm:p-8 border-primary/20" {...focusOrder(2)}>
+          <div className="flex flex-col items-center space-y-8">
+            <h2 id="timer-heading" className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+              {taskName}
+            </h2>
 
-              <div className="flex flex-col items-center justify-center gap-8 sm:gap-10 py-6 sm:py-8">
-                <div className="relative w-56 h-56 sm:w-72 sm:h-72" aria-live="polite" {...focusOrder(3)}>
-                  <TimerCircle size="large" {...timerCircleProps} />
-                </div>
+            <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 py-8 sm:py-10">
+              <div className="relative w-56 h-56 sm:w-72 sm:h-72" aria-live="polite" {...focusOrder(3)}>
+                <TimerCircle size="large" {...timerCircleProps} />
+              </div>
 
-                <div className="w-full max-w-md px-4 mb-4" {...focusOrder(4)}>
-                  <TimerControls {...modifiedTimerControlsProps} size="large" showAddTime />
-                </div>
+              <div className="w-full max-w-md px-4" {...focusOrder(4)}>
+                <TimerControls {...modifiedTimerControlsProps} size="large" showAddTime />
               </div>
             </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
 
-        <div className="w-full mt-6 sm:mt-8">
+        <div className="w-full">
           <QuoteDisplay showAsOverlay currentTask={taskName} favorites={favorites} setFavorites={setFavorites} />
         </div>
       </div>
