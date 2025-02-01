@@ -1,18 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { TimerMetrics } from '../types/timer';
 
 interface UseTimerOptions {
   initialDuration: number;
   onTimeUp?: () => void;
   onDurationChange?: (minutes: number) => void;
-}
-
-interface TimerMetrics {
-  startTime: Date | null;
-  endTime: Date | null;
-  pauseCount: number;
-  originalDuration: number;
-  actualDuration: number;
 }
 
 interface UseTimerReturn {
@@ -42,9 +35,9 @@ export const useTimer = ({
     pauseCount: 0,
     originalDuration: initialDuration,
     actualDuration: 0,
+    favoriteQuotes: 0,
   });
 
-  // Sync timeLeft with minutes changes
   const setMinutes = useCallback((newMinutes: number) => {
     setMinutesState(newMinutes);
     setTimeLeft(newMinutes * 60);

@@ -30,6 +30,7 @@ export interface TimerMetrics {
   pauseCount: number;
   originalDuration: number;
   actualDuration: number;
+  favoriteQuotes: number;
 }
 
 // Component Props
