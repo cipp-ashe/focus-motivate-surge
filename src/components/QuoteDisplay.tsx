@@ -35,15 +35,15 @@ export const QuoteDisplay = ({
 
   return (
     <div className="w-full transition-all duration-700">
-      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg">
-        <div className="text-center space-y-4">
+      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg h-[200px] flex flex-col justify-between">
+        <div className="text-center space-y-4 overflow-y-auto">
           <Sparkles className="h-6 w-6 mx-auto text-primary" />
           <div
             className={`transition-all duration-300 ${
               isFlipped ? 'opacity-0 transform -translate-y-2' : 'opacity-100 transform translate-y-0'
             }`}
           >
-            <p className="text-xl font-medium italic bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+            <p className="text-lg font-medium italic bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 line-clamp-3">
               "{currentQuote.text}"
             </p>
             <p className="text-sm text-muted-foreground mt-2">— {currentQuote.author}</p>

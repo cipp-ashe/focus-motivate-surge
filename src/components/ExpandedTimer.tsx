@@ -96,7 +96,7 @@ export const ExpandedTimer = memo(({
       {...transitionProps}
     >
       <div
-        className="absolute inset-0 bg-background bg-opacity-75 transition-opacity duration-300"
+        className="absolute inset-0 bg-background/60 backdrop-blur-sm transition-opacity duration-300"
         style={{ opacity: transitionProps.style.opacity }}
         aria-hidden="true"
       />
@@ -107,7 +107,7 @@ export const ExpandedTimer = memo(({
             width={windowSize.width}
             height={windowSize.height}
             gravity={0.12}
-            numberOfPieces={300}
+            numberOfPieces={400}
             recycle={true}
             colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD', '#EDE9FE']}
             tweenDuration={5000}
@@ -117,13 +117,12 @@ export const ExpandedTimer = memo(({
         </div>
       )}
       
-      {/* Floating quotes in background */}
       <FloatingQuotes favorites={favorites} />
       
       <button
         onClick={onClose}
-        className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-[53] ${focusClass}`}
-        aria-label="Close expanded view"
+        className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-[53] transition-all duration-300 hover:scale-105 ${focusClass}`}
+        aria-label="Minimize expanded view"
         {...focusOrder(1)}
       >
         <Minimize2 className="h-6 w-6" />

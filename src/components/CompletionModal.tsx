@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Timer, Clock, Pause, Heart, Quote, LucideIcon } from "lucide-react";
+import { Timer, Clock, Pause, Quote } from "lucide-react";
 import { Button } from "./ui/button";
 import { formatDistanceToNow } from "date-fns";
 
@@ -36,11 +36,8 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
   } = metrics;
 
   const calculateEfficiency = () => {
-    // If actualDuration is 0, return 100% to avoid division by zero
     if (actualDuration === 0) return "100.0";
-    // If actual duration is less than original, cap at 100%
     if (actualDuration < originalDuration) return "100.0";
-    // Otherwise calculate percentage of time on task
     return ((originalDuration / actualDuration) * 100).toFixed(1);
   };
 
@@ -52,7 +49,7 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
   };
 
   const MetricItem = ({ icon: Icon, label, value }: { icon: LucideIcon, label: string, value: string }) => (
-    <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg">
+    <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg hover:bg-muted/40 transition-colors duration-300">
       <div className="p-2 bg-primary/10 rounded-full">
         <Icon className="h-5 w-5 text-primary" />
       </div>
@@ -65,7 +62,7 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-sm border-primary/20">
         <DialogHeader>
           <DialogTitle className="text-center">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
@@ -114,7 +111,7 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
         <div className="flex justify-center">
           <Button 
             onClick={onClose}
-            className="bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
+            className="bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary transition-all duration-300 hover:scale-105"
           >
             Close
           </Button>

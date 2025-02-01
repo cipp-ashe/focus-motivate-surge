@@ -31,10 +31,10 @@ export const TaskTable = ({
           {tasks.map((task) => (
             <TableRow
               key={task.id}
-              className={`cursor-pointer transition-all duration-200 
-                hover:bg-accent/20 hover:shadow-md hover:translate-y-[-1px]
+              className={`cursor-pointer transition-all duration-300 ease-in-out
+                hover:bg-accent/10 hover:shadow-lg hover:shadow-primary/5 hover:translate-y-[-2px]
                 ${selectedTasks.includes(task.id) 
-                  ? 'bg-accent/30 shadow-lg translate-y-[-1px]' 
+                  ? 'bg-accent/20 shadow-lg shadow-primary/10 translate-y-[-2px] border-l-2 border-l-primary' 
                   : ''
                 }`}
               onClick={(e) => onTaskClick(task, e)}
