@@ -23,9 +23,10 @@ export const MinutesInput = memo(({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || minMinutes;
-    const newValue = Math.min(Math.max(value, minMinutes), maxMinutes);
-    onMinutesChange(newValue);
+    let value = e.target.value === '' ? minMinutes : parseInt(e.target.value);
+    // Ensure the value is within bounds
+    value = Math.min(Math.max(value, minMinutes), maxMinutes);
+    onMinutesChange(value);
   };
 
   return (
@@ -47,7 +48,15 @@ export const MinutesInput = memo(({
           max={maxMinutes}
           value={minutes}
           onChange={handleInputChange}
-          className="text-center font-mono bg-background/50 [&::-webkit-scrollbar]:hidden [&::-webkit-inner-spin-button]:appearance-none"
+          onBlur={() => {
+            // Ensure valid number on blur
+            if (isNaN(minutes) || minutes < minMinutes) {
+              onMinutesChange(minMinutes);
+            } else if (minutes > maxMinutes) {
+              onMinutesChange(maxMinutes);
+            }
+          }}
+          className="text-center font-mono bg-background/50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           aria-label="Minutes input"
         />
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
