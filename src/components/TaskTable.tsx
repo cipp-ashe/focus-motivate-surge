@@ -30,6 +30,18 @@ export const TaskTable = ({
   const [durationValues, setDurationValues] = useState<Record<string, number>>({});
 
   const handleDurationChange = (taskId: string, value: string) => {
+    // Handle MM:SS format
+    if (value.includes(':')) {
+      const [minutes, seconds] = value.split(':').map(v => parseInt(v) || 0);
+      const totalMinutes = minutes + (seconds / 60);
+      setDurationValues(prev => ({
+        ...prev,
+        [taskId]: totalMinutes
+      }));
+      return;
+    }
+
+    // Handle direct minute input
     const duration = parseInt(value) || 0;
     setDurationValues(prev => ({
       ...prev,
@@ -50,8 +62,8 @@ export const TaskTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50%]">Active Tasks</TableHead>
-            <TableHead className="w-[30%]">Duration (min)</TableHead>
+            <TableHead className="w-[60%]">Active Tasks</TableHead>
+            <TableHead className="w-[20%] text-right">Duration (min)</TableHead>
             <TableHead className="w-[20%] text-right">
               {tasks.length > 0 && (
                 <button
@@ -81,9 +93,9 @@ export const TaskTable = ({
               <TableCell className="py-2">
                 <span className="line-clamp-2">{task.name}</span>
               </TableCell>
-              <TableCell className="py-2">
+              <TableCell className="py-2 text-right">
                 <div 
-                  className="flex items-center gap-2"
+                  className="flex items-center justify-end gap-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     setEditingDuration(task.id);
@@ -92,13 +104,12 @@ export const TaskTable = ({
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   {editingDuration === task.id ? (
                     <Input
-                      type="number"
-                      min={1}
-                      max={60}
+                      type="text"
+                      placeholder="5 or 5:00"
                       value={durationValues[task.id] || task.duration || ''}
                       onChange={(e) => handleDurationChange(task.id, e.target.value)}
                       onBlur={() => handleDurationBlur(task.id)}
-                      className="w-20 h-8"
+                      className="w-24 h-8 text-right"
                       autoFocus
                       onClick={(e) => e.stopPropagation()}
                     />
