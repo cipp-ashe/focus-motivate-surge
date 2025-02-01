@@ -107,6 +107,7 @@ export const CompactTimer = memo(({
             {taskName}
           </h2>
 
+          {/* Configuration options only shown when not running */}
           <div className={`overflow-hidden transition-all duration-700 ${
             isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-4 sm:mt-6'
           }`}>

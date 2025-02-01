@@ -82,14 +82,10 @@ export const Timer = ({
     setMinutes(newMinutes);
   }, [setMinutes]);
 
-  const toggleTimer = useCallback(() => {
-    if (isRunning) {
-      pause();
-    } else {
-      start();
-      setIsExpanded(true);
-    }
-  }, [isRunning, start, pause]);
+  const handleStart = useCallback(() => {
+    start();
+    setIsExpanded(true); // Automatically expand when starting
+  }, [start]);
 
   const handleComplete = useCallback(() => {
     completeTimer();
@@ -114,26 +110,24 @@ export const Timer = ({
 
   const timerControlsProps = {
     isRunning,
-    onToggle: toggleTimer,
+    onToggle: isRunning ? pause : handleStart,
     onComplete: handleComplete,
     onAddTime: handleAddTime,
     metrics,
   };
 
-  const commonProps = {
-    taskName,
-    isRunning,
-    timerCircleProps,
-    timerControlsProps,
-  };
-
   if (isExpanded) {
     return (
       <ExpandedTimer
-        {...commonProps}
-        onClose={() => setIsExpanded(false)}
-        favorites={favorites || []}
-        setFavorites={setFavorites}
+        {...{
+          taskName,
+          isRunning,
+          onClose: () => setIsExpanded(false),
+          timerCircleProps,
+          timerControlsProps,
+          favorites: favorites || [],
+          setFavorites,
+        }}
       />
     );
   }
@@ -141,16 +135,24 @@ export const Timer = ({
   return (
     <div className="w-full flex flex-col items-center justify-start">
       <CompactTimer
-        {...commonProps}
-        minutes={internalMinutes}
-        selectedSound={selectedSound}
-        onSoundChange={setSelectedSound}
-        onTestSound={testSound}
-        onMinutesChange={handleMinutesChange}
-        minMinutes={MIN_MINUTES}
-        maxMinutes={MAX_MINUTES}
-        isLoadingAudio={isLoadingAudio}
-        onClick={() => isRunning && setIsExpanded(true)}
+        {...{
+          taskName,
+          isRunning,
+          minutes: internalMinutes,
+          selectedSound,
+          onSoundChange: setSelectedSound,
+          onTestSound: testSound,
+          onMinutesChange: handleMinutesChange,
+          minMinutes: MIN_MINUTES,
+          maxMinutes: MAX_MINUTES,
+          isLoadingAudio,
+          timerCircleProps,
+          timerControlsProps: {
+            ...timerControlsProps,
+            onToggle: handleStart, // In compact config mode, always start and expand
+          },
+          onClick: () => isRunning && setIsExpanded(true),
+        }}
       />
     </div>
   );
