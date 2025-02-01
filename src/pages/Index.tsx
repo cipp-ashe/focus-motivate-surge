@@ -4,6 +4,7 @@ import { QuoteDisplay, FavoriteQuotes } from "@/components/QuoteDisplay";
 import { TaskList, Task } from "@/components/TaskList";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Quote {
   text: string;
@@ -32,6 +33,20 @@ const Index = () => {
   });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [duration, setDuration] = useState(1500); // Default to 25 minutes
+  const [isDark, setIsDark] = useState(true);
+  const [favorites, setFavorites] = useState<Quote[]>([]);
+
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   useEffect(() => {
     if (selectedTask?.duration) {
@@ -44,19 +59,9 @@ const Index = () => {
   }, [selectedTask]);
 
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
-  const [isDark, setIsDark] = useState(true);
-  const [favorites, setFavorites] = useState<Quote[]>([]);
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+    localStorage.setItem('taskList', JSON.stringify(tasks));
+    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+  }, [tasks, completedTasks]);
 
   const handleTaskAdd = useCallback((task: Task) => {
     setTasks((prev) => [...prev, task]);
@@ -65,11 +70,6 @@ const Index = () => {
   const handleTaskSelect = useCallback((task: Task) => {
     setSelectedTask(task);
   }, []);
-  
-  useEffect(() => {
-    localStorage.setItem('taskList', JSON.stringify(tasks));
-    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-  }, [tasks, completedTasks]);
 
   const handleTaskComplete = useCallback(() => {
     if (selectedTask) {
@@ -88,6 +88,11 @@ const Index = () => {
   const handleSelectedTasksClear = useCallback((taskIds: string[]) => {
     setTasks(prev => prev.filter(task => !taskIds.includes(task.id)));
     setSelectedTask(prev => prev && taskIds.includes(prev.id) ? null : prev);
+  }, []);
+
+  const handleSummaryEmailSent = useCallback(() => {
+    setCompletedTasks([]); // Clear completed tasks after sending summary
+    toast.success("Summary sent! Completed tasks have been cleared.");
   }, []);
 
   // Listen for task updates
@@ -129,6 +134,7 @@ const Index = () => {
               onTaskSelect={handleTaskSelect}
               onTasksClear={handleTasksClear}
               onSelectedTasksClear={handleSelectedTasksClear}
+              onSummaryEmailSent={handleSummaryEmailSent}
               favorites={favorites}
             />
           </div>

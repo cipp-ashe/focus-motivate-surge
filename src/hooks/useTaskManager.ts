@@ -12,6 +12,7 @@ interface UseTaskManagerProps {
   onTaskSelect: (task: Task) => void;
   onTasksClear: () => void;
   onSelectedTasksClear: (taskIds: string[]) => void;
+  onSummaryEmailSent?: () => void;
   favorites?: Quote[];
 }
 
@@ -22,6 +23,7 @@ export const useTaskManager = ({
   onTaskSelect,
   onTasksClear,
   onSelectedTasksClear,
+  onSummaryEmailSent,
   favorites = [],
 }: UseTaskManagerProps) => {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
@@ -73,6 +75,9 @@ export const useTaskManager = ({
     );
 
     await sendTaskSummaryEmail(email, summaryData);
+    if (onSummaryEmailSent) {
+      onSummaryEmailSent();
+    }
   };
 
   return {

@@ -9,101 +9,108 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface TaskMetrics {
+  originalDuration: number;
+  actualDuration: number;
+  pauseCount: number;
+  favoriteQuotes: number;
+}
+
+interface TaskSummary {
+  taskName: string;
+  completed: boolean;
+  metrics?: TaskMetrics;
+  relatedQuotes: Array<{ text: string; author: string }>;
+}
+
 interface RequestBody {
   email: string;
-  summaryData: any;
+  summaryData: {
+    completedTasks: TaskSummary[];
+    unfinishedTasks: TaskSummary[];
+    totalTimeSpent: number;
+    favoriteQuotes: Array<{ text: string; author: string }>;
+  };
 }
+
+const formatDuration = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (hours > 0) {
+    return `${hours}h ${remainingMinutes}m`;
+  }
+  return `${remainingMinutes}m`;
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { email, summaryData } = (await req.json()) as RequestBody;
 
-    // Create Supabase client with service role
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    // Format email content with improved styling and metrics
-    const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 32px; border-radius: 12px;">
-        <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 24px; border-radius: 8px; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 28px; text-align: center;">Congrats on Your Achievements! 🎉</h1>
-        </div>
-        
-        <div style="background: white; padding: 24px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h2 style="color: #4f46e5; margin-top: 0;">Today's Accomplishments</h2>
-          <p style="color: #64748b; font-size: 16px;">Here's a detailed breakdown of your productive day:</p>
-          
-          <div style="margin: 24px 0;">
-            <h3 style="color: #0f172a; display: flex; align-items: center; gap: 8px;">
-              <span style="background: #4f46e5; color: white; width: 24px; height: 24px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">✓</span>
-              Completed Tasks (${summaryData.completedTasks.length})
-            </h3>
-            ${summaryData.completedTasks.map((task: any) => `
-              <details style="margin-bottom: 16px;">
-                <summary style="cursor: pointer; padding: 12px; background: #f1f5f9; border-radius: 6px; color: #0f172a; font-weight: 500; display: flex; justify-content: space-between; align-items: center;">
-                  <span>${task.taskName}</span>
-                  <span style="color: #64748b; font-size: 14px;">${task.completedAt ? new Date(task.completedAt).toLocaleTimeString() : ''}</span>
-                </summary>
-                <div style="padding: 16px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 6px 6px;">
-                  ${task.timeSpent ? `<p style="color: #64748b; margin: 0 0 8px 0;">⏱️ Time spent: ${Math.floor(task.timeSpent / 60)} minutes</p>` : ''}
-                  ${task.relatedQuotes.length > 0 ? `
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
-                      <p style="color: #64748b; margin: 0 0 8px 0;">✨ Inspiring quotes:</p>
-                      ${task.relatedQuotes.map((quote: any) => `
-                        <blockquote style="margin: 8px 0; padding: 12px; background: #f8fafc; border-left: 3px solid #6366f1; border-radius: 0 6px 6px 0;">
-                          <p style="margin: 0 0 4px 0; color: #1e293b; font-style: italic;">"${quote.text}"</p>
-                          <footer style="color: #64748b; font-size: 14px;">- ${quote.author}</footer>
-                        </blockquote>
-                      `).join('')}
-                    </div>
-                  ` : ''}
-                </div>
-              </details>
+    const taskDetailsHtml = summaryData.completedTasks.map(task => `
+      <div style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <h3 style="margin: 0 0 12px 0; color: #1a1a1a;">${task.taskName}</h3>
+        ${task.metrics ? `
+          <div style="margin-bottom: 16px;">
+            <p style="margin: 4px 0; color: #4a5568;">⏱️ Planned duration: ${formatDuration(task.metrics.originalDuration / 60)}</p>
+            <p style="margin: 4px 0; color: #4a5568;">⌛ Actual duration: ${formatDuration(task.metrics.actualDuration / 60)}</p>
+            <p style="margin: 4px 0; color: #4a5568;">⏸️ Number of breaks: ${task.metrics.pauseCount}</p>
+            <p style="margin: 4px 0; color: #4a5568;">⭐ Quotes saved: ${task.metrics.favoriteQuotes}</p>
+          </div>
+        ` : ''}
+        ${task.relatedQuotes.length > 0 ? `
+          <div style="margin-top: 16px;">
+            <p style="margin: 0 0 8px 0; color: #4a5568; font-weight: 500;">📝 Saved quotes:</p>
+            ${task.relatedQuotes.map(quote => `
+              <div style="margin: 8px 0; padding: 12px; background: white; border-left: 3px solid #6366f1; border-radius: 0 4px 4px 0;">
+                <p style="margin: 0 0 4px 0; color: #1a1a1a; font-style: italic;">"${quote.text}"</p>
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
+              </div>
             `).join('')}
           </div>
+        ` : ''}
+      </div>
+    `).join('');
 
-          ${summaryData.unfinishedTasks.length > 0 ? `
-            <div style="margin: 24px 0;">
-              <h3 style="color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                <span style="background: #f59e0b; color: white; width: 24px; height: 24px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">!</span>
-                Tasks for Tomorrow (${summaryData.unfinishedTasks.length})
-              </h3>
-              ${summaryData.unfinishedTasks.map((task: any) => `
-                <div style="margin-bottom: 12px; padding: 12px; background: #fef3c7; border-radius: 6px;">
-                  <p style="margin: 0; color: #92400e;">${task.taskName}</p>
-                </div>
-              `).join('')}
-            </div>
-          ` : ''}
+    const totalQuotes = summaryData.favoriteQuotes.length;
+    const totalTime = formatDuration(Math.floor(summaryData.totalTimeSpent / 60));
 
-          <div style="margin-top: 24px; padding: 20px; background: #f1f5f9; border-radius: 8px;">
-            <h3 style="color: #0f172a; margin-top: 0;">Daily Insights 📊</h3>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px;">
-              <div style="text-align: center;">
-                <p style="margin: 0; color: #64748b; font-size: 14px;">Time Focused</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${Math.floor(summaryData.totalTimeSpent / 60)}m</p>
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
+        <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 24px; border-radius: 8px; margin-bottom: 24px;">
+          <h1 style="color: white; margin: 0; font-size: 28px; text-align: center;">Your Focus Timer Summary</h1>
+        </div>
+
+        <div style="margin-bottom: 32px;">
+          <div style="background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h2 style="color: #4f46e5; margin-top: 0;">Session Overview</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; text-align: center;">
+              <div>
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">Total Time</p>
+                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalTime}</p>
               </div>
-              <div style="text-align: center;">
-                <p style="margin: 0; color: #64748b; font-size: 14px;">Tasks Done</p>
+              <div>
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">Tasks Completed</p>
                 <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${summaryData.completedTasks.length}</p>
               </div>
-              <div style="text-align: center;">
-                <p style="margin: 0; color: #64748b; font-size: 14px;">Quotes Saved</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${summaryData.favoriteQuotes.length}</p>
+              <div>
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">Quotes Saved</p>
+                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalQuotes}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div style="text-align: center; padding-top: 24px; color: #64748b;">
-          <p style="margin: 0;">Keep up the fantastic work! 💪</p>
-          <p style="margin: 8px 0 0 0; font-size: 14px;">Ready for another productive day tomorrow!</p>
+        <div style="margin-top: 32px;">
+          <h2 style="color: #1a1a1a; margin-bottom: 16px;">Completed Tasks</h2>
+          ${taskDetailsHtml}
+        </div>
+
+        <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
+          <p style="color: #6b7280; margin: 0;">Keep up the great work! 🎉</p>
         </div>
       </div>
     `;
@@ -112,16 +119,21 @@ serve(async (req) => {
     const emailResponse = await resend.emails.send({
       from: "Focus Timer <success@focustimer.org>",
       to: [email],
-      subject: "Your Daily Task Summary",
+      subject: "Your Focus Timer Summary",
       html: emailContent,
     });
 
     // Log the email in the database
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
     const { error: dbError } = await supabaseAdmin
       .from('email_logs')
       .insert({
         recipient_email: email,
-        subject: "Your Daily Task Summary",
+        subject: "Your Focus Timer Summary",
         content: emailContent,
         status: 'sent',
       });
@@ -152,7 +164,7 @@ serve(async (req) => {
       .from('email_logs')
       .insert({
         recipient_email: (await req.json()).email,
-        subject: "Your Daily Task Summary",
+        subject: "Your Focus Timer Summary",
         status: 'error',
         error_message: error.message,
       });

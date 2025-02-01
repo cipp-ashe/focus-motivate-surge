@@ -19,6 +19,7 @@ interface TaskListProps {
   onTaskSelect: (task: Task) => void;
   onTasksClear: () => void;
   onSelectedTasksClear?: (taskIds: string[]) => void;
+  onSummaryEmailSent?: () => void;
   favorites?: Quote[];
 }
 
@@ -29,6 +30,7 @@ export const TaskList = ({
   onTaskSelect,
   onTasksClear,
   onSelectedTasksClear,
+  onSummaryEmailSent,
   favorites = [],
 }: TaskListProps) => {
   const {
@@ -46,6 +48,7 @@ export const TaskList = ({
     onTaskSelect,
     onTasksClear,
     onSelectedTasksClear: onSelectedTasksClear!,
+    onSummaryEmailSent,
     favorites,
   });
 
