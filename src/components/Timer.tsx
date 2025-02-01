@@ -142,7 +142,7 @@ export const Timer = ({
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full min-h-[500px] flex flex-col items-center justify-start pb-16 sm:pb-0">
       <CompactTimer
         {...commonProps}
         minutes={internalMinutes}
