@@ -12,5 +12,8 @@ export interface DailySummary {
   completedTasks: TaskSummary[];
   unfinishedTasks: TaskSummary[];
   totalTimeSpent: number;
+  totalPlannedTime: number;
+  totalPauses: number;
+  averageEfficiency: number;
   favoriteQuotes: Quote[];
 }
