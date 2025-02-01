@@ -12,18 +12,20 @@ export const MinutesInput = memo(({
 }: MinutesInputProps) => {
   const handleIncrement = () => {
     const step = minutes < 5 ? 1 : 5;
-    const newValue = minutes + step;
-    if (newValue <= maxMinutes) {
-      onMinutesChange(newValue);
-    }
+    const newValue = Math.min(minutes + step, maxMinutes);
+    onMinutesChange(newValue);
   };
 
   const handleDecrement = () => {
     const step = minutes <= 5 ? 1 : 5;
-    const newValue = minutes - step;
-    if (newValue >= minMinutes) {
-      onMinutesChange(newValue);
-    }
+    const newValue = Math.max(minutes - step, minMinutes);
+    onMinutesChange(newValue);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || minMinutes;
+    const newValue = Math.min(Math.max(value, minMinutes), maxMinutes);
+    onMinutesChange(newValue);
   };
 
   return (
@@ -34,6 +36,7 @@ export const MinutesInput = memo(({
         onClick={handleDecrement}
         className="border-primary/20 hover:bg-primary/20"
         disabled={minutes <= minMinutes}
+        aria-label="Decrease minutes"
       >
         <ChevronDown className="h-4 w-4" />
       </Button>
@@ -43,8 +46,9 @@ export const MinutesInput = memo(({
           min={minMinutes}
           max={maxMinutes}
           value={minutes}
-          onChange={(e) => onMinutesChange(parseInt(e.target.value) || minMinutes)}
+          onChange={handleInputChange}
           className="text-center font-mono bg-background/50 [&::-webkit-scrollbar]:hidden [&::-webkit-inner-spin-button]:appearance-none"
+          aria-label="Minutes input"
         />
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
           min
@@ -56,6 +60,7 @@ export const MinutesInput = memo(({
         onClick={handleIncrement}
         className="border-primary/20 hover:bg-primary/20"
         disabled={minutes >= maxMinutes}
+        aria-label="Increase minutes"
       >
         <ChevronUp className="h-4 w-4" />
       </Button>
