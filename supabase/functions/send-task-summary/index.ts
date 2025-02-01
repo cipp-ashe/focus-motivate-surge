@@ -33,13 +33,25 @@ interface RequestBody {
   };
 }
 
-const formatDuration = (minutes: number): string => {
+const formatDuration = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
+  
   if (hours > 0) {
     return `${hours}h ${remainingMinutes}m`;
   }
   return `${remainingMinutes}m`;
+};
+
+const calculateEfficiency = (originalDuration: number, actualDuration: number): string => {
+  const ratio = (originalDuration / actualDuration) * 100;
+  if (ratio > 100) {
+    return `🚀 ${Math.round(ratio - 100)}% faster than planned`;
+  } else if (ratio < 100) {
+    return `⏰ ${Math.round(100 - ratio)}% longer than planned`;
+  }
+  return "✅ Completed exactly on time";
 };
 
 serve(async (req) => {
@@ -50,67 +62,104 @@ serve(async (req) => {
   try {
     const { email, summaryData } = (await req.json()) as RequestBody;
 
-    const taskDetailsHtml = summaryData.completedTasks.map(task => `
-      <div style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <h3 style="margin: 0 0 12px 0; color: #1a1a1a;">${task.taskName}</h3>
-        ${task.metrics ? `
-          <div style="margin-bottom: 16px;">
-            <p style="margin: 4px 0; color: #4a5568;">⏱️ Planned duration: ${formatDuration(task.metrics.originalDuration / 60)}</p>
-            <p style="margin: 4px 0; color: #4a5568;">⌛ Actual duration: ${formatDuration(task.metrics.actualDuration / 60)}</p>
-            <p style="margin: 4px 0; color: #4a5568;">⏸️ Number of breaks: ${task.metrics.pauseCount}</p>
-            <p style="margin: 4px 0; color: #4a5568;">⭐ Quotes saved: ${task.metrics.favoriteQuotes}</p>
-          </div>
-        ` : ''}
-        ${task.relatedQuotes.length > 0 ? `
-          <div style="margin-top: 16px;">
-            <p style="margin: 0 0 8px 0; color: #4a5568; font-weight: 500;">📝 Saved quotes:</p>
-            ${task.relatedQuotes.map(quote => `
-              <div style="margin: 8px 0; padding: 12px; background: white; border-left: 3px solid #6366f1; border-radius: 0 4px 4px 0;">
-                <p style="margin: 0 0 4px 0; color: #1a1a1a; font-style: italic;">"${quote.text}"</p>
-                <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-      </div>
-    `).join('');
-
+    // Calculate overall metrics
+    const totalTasks = summaryData.completedTasks.length;
+    const totalTimeSpentFormatted = formatDuration(summaryData.totalTimeSpent);
+    const totalPlannedTime = summaryData.completedTasks.reduce(
+      (acc, task) => acc + (task.metrics?.originalDuration || 0),
+      0
+    );
+    const totalPauses = summaryData.completedTasks.reduce(
+      (acc, task) => acc + (task.metrics?.pauseCount || 0),
+      0
+    );
     const totalQuotes = summaryData.favoriteQuotes.length;
-    const totalTime = formatDuration(Math.floor(summaryData.totalTimeSpent / 60));
+
+    const overallEfficiency = calculateEfficiency(totalPlannedTime, summaryData.totalTimeSpent);
+
+    const taskDetailsHtml = summaryData.completedTasks.map(task => {
+      const metrics = task.metrics;
+      const efficiency = metrics 
+        ? calculateEfficiency(metrics.originalDuration, metrics.actualDuration)
+        : "No metrics available";
+
+      return `
+        <div style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0; color: #1a1a1a; font-size: 18px;">✓ ${task.taskName}</h3>
+            <span style="font-size: 14px; color: #6b7280;">${efficiency}</span>
+          </div>
+          ${metrics ? `
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
+              <div>
+                <p style="margin: 4px 0; color: #4a5568;">⏱️ Planned: ${formatDuration(metrics.originalDuration)}</p>
+                <p style="margin: 4px 0; color: #4a5568;">⌛ Actual: ${formatDuration(metrics.actualDuration)}</p>
+              </div>
+              <div>
+                <p style="margin: 4px 0; color: #4a5568;">⏸️ Breaks taken: ${metrics.pauseCount}</p>
+                <p style="margin: 4px 0; color: #4a5568;">⭐ Quotes saved: ${metrics.favoriteQuotes}</p>
+              </div>
+            </div>
+          ` : ''}
+          ${task.relatedQuotes.length > 0 ? `
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0 0 8px 0; color: #4a5568; font-weight: 500;">📝 Inspiring quotes:</p>
+              ${task.relatedQuotes.map(quote => `
+                <div style="margin: 8px 0; padding: 12px; background: white; border-left: 3px solid #6366f1; border-radius: 0 4px 4px 0;">
+                  <p style="margin: 0 0 4px 0; color: #1a1a1a; font-style: italic;">"${quote.text}"</p>
+                  <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
 
     const emailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
         <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 24px; border-radius: 8px; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 28px; text-align: center;">Your Focus Timer Summary</h1>
+          <h1 style="color: white; margin: 0; font-size: 28px; text-align: center;">Today's Accomplishments 🎯</h1>
+          <p style="color: white; opacity: 0.9; text-align: center; margin: 8px 0 0 0;">Here's a detailed breakdown of your productive day</p>
         </div>
 
         <div style="margin-bottom: 32px;">
           <div style="background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <h2 style="color: #4f46e5; margin-top: 0;">Session Overview</h2>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; text-align: center;">
-              <div>
-                <p style="margin: 0; color: #6b7280; font-size: 14px;">Total Time</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalTime}</p>
+            <h2 style="color: #4f46e5; margin-top: 0;">Daily Insights 📊</h2>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 24px 0;">
+              <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">Time Focused</p>
+                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalTimeSpentFormatted}</p>
               </div>
-              <div>
+              <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
                 <p style="margin: 0; color: #6b7280; font-size: 14px;">Tasks Completed</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${summaryData.completedTasks.length}</p>
+                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalTasks}</p>
               </div>
-              <div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+              <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">Total Breaks</p>
+                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalPauses}</p>
+              </div>
+              <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
                 <p style="margin: 0; color: #6b7280; font-size: 14px;">Quotes Saved</p>
                 <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalQuotes}</p>
               </div>
+            </div>
+            <div style="margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center;">
+              <p style="margin: 0; color: #6b7280; font-size: 14px;">Overall Efficiency</p>
+              <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 18px;">${overallEfficiency}</p>
             </div>
           </div>
         </div>
 
         <div style="margin-top: 32px;">
-          <h2 style="color: #1a1a1a; margin-bottom: 16px;">Completed Tasks</h2>
+          <h2 style="color: #1a1a1a; margin-bottom: 16px;">Completed Tasks (${totalTasks})</h2>
           ${taskDetailsHtml}
         </div>
 
         <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-          <p style="color: #6b7280; margin: 0;">Keep up the great work! 🎉</p>
+          <p style="color: #6b7280; margin: 0;">Great work today! See you tomorrow for another productive session! 🌟</p>
         </div>
       </div>
     `;
@@ -119,7 +168,7 @@ serve(async (req) => {
     const emailResponse = await resend.emails.send({
       from: "Focus Timer <success@focustimer.org>",
       to: [email],
-      subject: "Your Focus Timer Summary",
+      subject: "Your Focus Timer Daily Summary",
       html: emailContent,
     });
 
@@ -133,7 +182,7 @@ serve(async (req) => {
       .from('email_logs')
       .insert({
         recipient_email: email,
-        subject: "Your Focus Timer Summary",
+        subject: "Your Focus Timer Daily Summary",
         content: emailContent,
         status: 'sent',
       });
@@ -164,7 +213,7 @@ serve(async (req) => {
       .from('email_logs')
       .insert({
         recipient_email: (await req.json()).email,
-        subject: "Your Focus Timer Summary",
+        subject: "Your Focus Timer Daily Summary",
         status: 'error',
         error_message: error.message,
       });

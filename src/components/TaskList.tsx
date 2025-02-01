@@ -9,7 +9,13 @@ export interface Task {
   id: string;
   name: string;
   completed: boolean;
-  duration?: number; // Optional duration in minutes
+  duration?: number;
+  metrics?: {
+    originalDuration: number;
+    actualDuration: number;
+    pauseCount: number;
+    favoriteQuotes: number;
+  };
 }
 
 interface TaskListProps {

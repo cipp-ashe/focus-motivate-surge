@@ -8,16 +8,29 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
   TableRow,
 } from "./ui/table";
 import { Task } from "./TaskList";
 import { Button } from "./ui/button";
-import { Send } from "lucide-react";
+import { Send, Clock, Pause, Quote } from "lucide-react";
 
 interface CompletedTasksProps {
   tasks: Task[];
   onSendSummary: () => void;
 }
+
+const formatDuration = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (hours > 0) {
+    return `${hours}h ${remainingMinutes}m`;
+  }
+  return `${remainingMinutes}m`;
+};
 
 export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) => {
   if (tasks.length === 0) return null;
@@ -25,11 +38,9 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
   return (
     <div className="mt-4">
       <div className="flex flex-col space-y-2">
-        {/* Header row with completed tasks count */}
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="completed-tasks" className="border-b-0">
             <div className="flex justify-between items-center bg-card rounded-lg px-4 py-2">
-              {/* AccordionTrigger becomes the visible clickable text */}
               <AccordionTrigger className="text-sm font-medium hover:no-underline py-2">
                 Completed Tasks ({tasks.length})
               </AccordionTrigger>
@@ -42,15 +53,39 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                 Send Summary
               </Button>
             </div>
-            {/* Expanded content shows the list of completed tasks */}
             <AccordionContent>
               <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Task</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Metrics</TableHead>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
                   {tasks.map((task) => (
                     <TableRow key={task.id} className="bg-muted/50">
                       <TableCell className="py-2">
-                        <div className="line-clamp-2 line-through text-muted-foreground">
+                        <div className="line-through text-muted-foreground">
                           {task.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <Clock className="w-4 h-4" />
+                          <span>{formatDuration(task.duration || 0)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <div className="flex items-center space-x-4 text-muted-foreground">
+                          <div className="flex items-center space-x-1">
+                            <Pause className="w-4 h-4" />
+                            <span>{task.metrics?.pauseCount || 0}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Quote className="w-4 h-4" />
+                            <span>{task.metrics?.favoriteQuotes || 0}</span>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>
