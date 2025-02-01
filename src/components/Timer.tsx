@@ -57,10 +57,8 @@ export const Timer = ({
   } = useTimer({
     initialDuration: duration,
     onTimeUp: () => {
-      completeTimer();
-      setIsExpanded(false);
+      handleComplete();
       playSound();
-      onComplete();
       toast("Time's up! Great work! ✨");
     },
     onDurationChange,
