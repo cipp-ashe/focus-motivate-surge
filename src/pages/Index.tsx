@@ -90,6 +90,19 @@ const Index = () => {
     setSelectedTask(prev => prev && taskIds.includes(prev.id) ? null : prev);
   }, []);
 
+  // Listen for task updates
+  useEffect(() => {
+    const handleTasksUpdate = (event: CustomEvent<{ tasks: Task[] }>) => {
+      setTasks(event.detail.tasks);
+    };
+
+    window.addEventListener('tasksUpdated', handleTasksUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('tasksUpdated', handleTasksUpdate as EventListener);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 py-4 sm:p-6">

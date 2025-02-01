@@ -42,15 +42,23 @@ export const TaskTable = ({
     // Parse the new duration, ensuring it's between 1 and 60
     const duration = Math.min(Math.max(parseInt(newDuration) || 25, 1), 60);
     
-    // Update the task's duration in local storage
-    const updatedTasks = tasks.map(t => 
+    // Get existing tasks from localStorage
+    const existingTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+    
+    // Update the task's duration
+    const updatedTasks = existingTasks.map((t: Task) => 
       t.id === taskId ? { ...t, duration } : t
     );
+    
+    // Save back to localStorage
     localStorage.setItem('taskList', JSON.stringify(updatedTasks));
     
-    // Force a page reload to update the state
-    // This is a temporary solution - ideally we'd use proper state management
-    window.location.reload();
+    // Update the tasks in the parent component through state management
+    // This will trigger a re-render with the new duration
+    const event = new CustomEvent('tasksUpdated', { 
+      detail: { tasks: updatedTasks } 
+    });
+    window.dispatchEvent(event);
   }, [tasks]);
 
   return (
