@@ -1,7 +1,7 @@
 import { memo, useState, useEffect } from "react";
 import { FloatingQuotes } from "./FloatingQuotes";
 import { Card } from "./ui/card";
-import { X } from "lucide-react";
+import { Minimize2 } from "lucide-react";
 import { TimerCircle } from "./TimerCircle";
 import { TimerControls } from "./TimerControls";
 import { QuoteDisplay } from "./QuoteDisplay";
@@ -63,13 +63,8 @@ export const ExpandedTimer = memo(({
 
   const handleComplete = () => {
     setShowConfetti(true);
-    // Show completion modal after a short delay to let confetti start
-    setTimeout(() => {
-      setShowCompletionModal(true);
-    }, 500);
-
-    // Keep confetti going while they read the stats
-    // Will be cleaned up when modal is closed
+    setShowCompletionModal(true);
+    // Confetti will stay visible until modal is closed
   };
 
   const handleCloseModal = () => {
@@ -131,7 +126,7 @@ export const ExpandedTimer = memo(({
         aria-label="Close expanded view"
         {...focusOrder(1)}
       >
-        <X className="h-6 w-6" />
+        <Minimize2 className="h-6 w-6" />
       </button>
 
       <div

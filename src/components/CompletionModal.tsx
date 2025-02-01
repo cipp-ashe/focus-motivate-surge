@@ -36,7 +36,19 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
   } = metrics;
 
   const calculateEfficiency = () => {
+    // If actualDuration is 0, return 100% to avoid division by zero
+    if (actualDuration === 0) return "100.0";
+    // If actual duration is less than original, cap at 100%
+    if (actualDuration < originalDuration) return "100.0";
+    // Otherwise calculate percentage of time on task
     return ((originalDuration / actualDuration) * 100).toFixed(1);
+  };
+
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) return `${minutes} min${minutes !== 1 ? 's' : ''}`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    return `${hours}h ${remainingMins > 0 ? `${remainingMins}m` : ''}`;
   };
 
   const MetricItem = ({ icon: Icon, label, value }: { icon: LucideIcon, label: string, value: string }) => (
@@ -69,28 +81,32 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
           </p>
 
           <div className="grid gap-4">
-            <MetricItem 
+            <MetricItem
               icon={Timer}
-              label="Session Duration"
-              value={formatDistanceToNow(startTime, { addSuffix: false })}
+              label="Total Time"
+              value={formatDuration(Math.round(actualDuration))}
             />
             
             <MetricItem
               icon={Clock}
-              label="Time Efficiency"
-              value={`${calculateEfficiency()}%`}
+              label="Focus Time"
+              value={`${calculateEfficiency()}% efficiency`}
             />
+
+            <div className="text-xs text-muted-foreground text-center">
+              (Planned: {formatDuration(Math.round(originalDuration))})
+            </div>
 
             <MetricItem
               icon={Pause}
               label="Focus Breaks"
-              value={`${pauseCount} ${pauseCount === 1 ? 'pause' : 'pauses'}`}
+              value={`${pauseCount} ${pauseCount === 1 ? 'break' : 'breaks'}`}
             />
 
             <MetricItem
               icon={Quote}
               label="Inspiring Quotes"
-              value={`${favoriteQuotes} favorited`}
+              value={`${favoriteQuotes} ${favoriteQuotes === 1 ? 'quote' : 'quotes'} saved`}
             />
           </div>
         </div>
