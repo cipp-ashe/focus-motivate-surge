@@ -82,27 +82,21 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
               </button>
             )}
           </div>
-          <div className="flex gap-2">
-            <Button type="submit" className="whitespace-nowrap">
-              <Plus className="h-4 w-4 mr-2" />
-              Add {isBulkAdd ? 'Tasks' : 'Task'}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button type="button" variant="outline" size="icon">
-                  <List className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsBulkAdd(false)}>
-                  Single Task Mode
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsBulkAdd(true)}>
-                  Bulk Add Mode
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="outline" size="icon">
+                <List className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsBulkAdd(false)}>
+                Single Task Mode
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsBulkAdd(true)}>
+                Bulk Add Mode
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </form>
     </Card>
