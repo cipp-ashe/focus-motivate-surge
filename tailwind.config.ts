@@ -17,6 +17,9 @@ export default {
       },
     },
     extend: {
+      scale: {
+        '102': '1.02'
+      },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         "accordion-down": "accordion-down 0.2s ease-out",
