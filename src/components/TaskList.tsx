@@ -1,4 +1,4 @@
-import { Button } from "./ui/button";
+import { Button } from "./ui/card";
 import { Trash2, Send, X } from "lucide-react";
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
@@ -53,32 +53,33 @@ export const TaskList = ({
     <div className="space-y-4">
       <TaskInput onTaskAdd={onTaskAdd} />
       
-      <CompletedTasks tasks={completedTasks} />
-      
       <TaskTable
         tasks={tasks}
         selectedTasks={selectedTasks}
         onTaskClick={handleTaskClick}
       />
+      
+      <CompletedTasks tasks={completedTasks} />
 
       <div className="flex justify-between mt-4">
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={onTasksClear}
-            className="text-destructive hover:text-destructive"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Clear All
-          </Button>
-          {selectedTasks.length > 0 && onSelectedTasksClear && (
+          {selectedTasks.length > 0 && onSelectedTasksClear ? (
             <Button
               variant="outline"
               onClick={clearSelectedTasks}
               className="text-destructive hover:text-destructive"
             >
-              <X className="w-4 h-4 mr-2" />
+              <Trash2 className="w-4 h-4 mr-2" />
               Clear Selected ({selectedTasks.length})
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={onTasksClear}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear All
             </Button>
           )}
         </div>
