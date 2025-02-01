@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useCallback } from "react";
 import { Card } from "./ui/card";
 import { TimerCircle } from "./TimerCircle";
 import { SoundSelector } from "./SoundSelector";
@@ -8,6 +8,7 @@ import { CompactTimerProps } from "../types/timer";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
 import { CompletionModal } from "./CompletionModal";
 import ReactConfetti from "react-confetti";
+import { toast } from "sonner";
 
 export const CompactTimer = memo(({
   taskName,
@@ -32,6 +33,14 @@ export const CompactTimer = memo(({
     height: window.innerHeight,
   });
 
+  // Reset all states
+  const resetStates = useCallback(() => {
+    console.log("Resetting CompactTimer states");
+    setShowCompletionModal(false);
+    setShowConfetti(false);
+  }, []);
+
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
@@ -40,26 +49,26 @@ export const CompactTimer = memo(({
       });
     };
 
+    console.log("Setting up resize listener in CompactTimer");
     window.addEventListener('resize', handleResize);
+    
     return () => {
+      console.log("Cleaning up CompactTimer component");
       window.removeEventListener('resize', handleResize);
-      // Reset states on cleanup
-      setShowCompletionModal(false);
-      setShowConfetti(false);
+      resetStates();
     };
-  }, []);
+  }, [resetStates]);
 
   // Reset states when task changes
   useEffect(() => {
-    console.log("Task changed in CompactTimer, resetting states");
-    setShowCompletionModal(false);
-    setShowConfetti(false);
-  }, [taskName]);
+    console.log("Task changed in CompactTimer:", taskName);
+    resetStates();
+  }, [taskName, resetStates]);
 
-  // Handle timer completion when time runs out
+  // Handle timer completion
   useEffect(() => {
     if (timerCircleProps.timeLeft === 0 && isRunning) {
-      console.log("Time is up in compact mode! Showing modal and confetti.");
+      console.log("Timer completed in CompactTimer");
       handleComplete();
     }
   }, [timerCircleProps.timeLeft, isRunning]);
@@ -68,27 +77,28 @@ export const CompactTimer = memo(({
     enabled: !isRunning,
   });
 
-  const handleComplete = () => {
-    console.log("Timer completed in compact mode! Showing modal and confetti.");
+  const handleComplete = useCallback(() => {
+    console.log("Handling timer completion in CompactTimer");
     setShowConfetti(true);
     setShowCompletionModal(true);
-  };
+    toast.success("Timer completed! Great work! 🎉");
+  }, []);
 
-  const handleCloseModal = () => {
-    console.log("Closing completion modal in compact mode and cleaning up states.");
-    setShowConfetti(false);
-    setShowCompletionModal(false);
+  const handleCloseModal = useCallback(() => {
+    console.log("Closing completion modal in CompactTimer");
+    resetStates();
     if (timerControlsProps.onComplete) {
       timerControlsProps.onComplete();
     }
-  };
+  }, [resetStates, timerControlsProps]);
 
-  const handleTimerClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (isRunning && onClick) {
-      e.stopPropagation();
-      onClick();
-    }
-  };
+  const handleTimerClick = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (!isRunning || !onClick) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    onClick();
+  }, [isRunning, onClick]);
 
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
