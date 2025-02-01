@@ -11,30 +11,51 @@ export type Database = {
     Tables: {
       email_logs: {
         Row: {
+          actual_time: number | null
+          completion_status: string | null
           content: string
           created_at: string | null
+          efficiency_ratio: number | null
           error_message: string | null
+          expected_time: number | null
+          extension_time: number | null
           id: string
+          net_effective_time: number | null
+          paused_time: number | null
           recipient_email: string
           status: string
           subject: string
           updated_at: string | null
         }
         Insert: {
+          actual_time?: number | null
+          completion_status?: string | null
           content: string
           created_at?: string | null
+          efficiency_ratio?: number | null
           error_message?: string | null
+          expected_time?: number | null
+          extension_time?: number | null
           id?: string
+          net_effective_time?: number | null
+          paused_time?: number | null
           recipient_email: string
           status: string
           subject: string
           updated_at?: string | null
         }
         Update: {
+          actual_time?: number | null
+          completion_status?: string | null
           content?: string
           created_at?: string | null
+          efficiency_ratio?: number | null
           error_message?: string | null
+          expected_time?: number | null
+          extension_time?: number | null
           id?: string
+          net_effective_time?: number | null
+          paused_time?: number | null
           recipient_email?: string
           status?: string
           subject?: string

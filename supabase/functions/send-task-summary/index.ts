@@ -12,6 +12,11 @@ const corsHeaders = {
 interface TaskMetrics {
   originalDuration: number;
   actualDuration: number;
+  pausedTime: number;
+  extensionTime: number;
+  netEffectiveTime: number;
+  efficiencyRatio: number;
+  completionStatus: string;
   pauseCount: number;
   favoriteQuotes: number;
 }
@@ -44,14 +49,17 @@ const formatDuration = (seconds: number): string => {
   return `${remainingMinutes}m`;
 };
 
-const calculateEfficiency = (originalDuration: number, actualDuration: number): string => {
-  const ratio = (originalDuration / actualDuration) * 100;
-  if (ratio > 100) {
-    return `🚀 ${Math.round(ratio - 100)}% faster than planned`;
-  } else if (ratio < 100) {
-    return `⏰ ${Math.round(100 - ratio)}% longer than planned`;
+const getStatusColor = (status: string): string => {
+  switch (status) {
+    case 'Completed Early':
+      return '#22c55e';
+    case 'Completed On Time':
+      return '#3b82f6';
+    case 'Completed Late':
+      return '#eab308';
+    default:
+      return '#6b7280';
   }
-  return "✅ Completed exactly on time";
 };
 
 serve(async (req) => {
@@ -65,42 +73,31 @@ serve(async (req) => {
     // Calculate overall metrics
     const totalTasks = summaryData.completedTasks.length;
     const totalTimeSpentFormatted = formatDuration(summaryData.totalTimeSpent);
-    const totalPlannedTime = summaryData.completedTasks.reduce(
-      (acc, task) => acc + (task.metrics?.originalDuration || 0),
-      0
-    );
-    const totalPauses = summaryData.completedTasks.reduce(
-      (acc, task) => acc + (task.metrics?.pauseCount || 0),
-      0
-    );
-    const totalQuotes = summaryData.favoriteQuotes.length;
-
-    const overallEfficiency = calculateEfficiency(totalPlannedTime, summaryData.totalTimeSpent);
-
+    
     const taskDetailsHtml = summaryData.completedTasks.map(task => {
       const metrics = task.metrics;
-      const efficiency = metrics 
-        ? calculateEfficiency(metrics.originalDuration, metrics.actualDuration)
-        : "No metrics available";
+      if (!metrics) return '';
+
+      const statusColor = getStatusColor(metrics.completionStatus);
 
       return `
         <div style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h3 style="margin: 0; color: #1a1a1a; font-size: 18px;">✓ ${task.taskName}</h3>
-            <span style="font-size: 14px; color: #6b7280;">${efficiency}</span>
+            <span style="font-size: 14px; color: ${statusColor};">${metrics.completionStatus}</span>
           </div>
-          ${metrics ? `
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
-              <div>
-                <p style="margin: 4px 0; color: #4a5568;">⏱️ Planned: ${formatDuration(metrics.originalDuration)}</p>
-                <p style="margin: 4px 0; color: #4a5568;">⌛ Actual: ${formatDuration(metrics.actualDuration)}</p>
-              </div>
-              <div>
-                <p style="margin: 4px 0; color: #4a5568;">⏸️ Breaks taken: ${metrics.pauseCount}</p>
-                <p style="margin: 4px 0; color: #4a5568;">⭐ Quotes saved: ${metrics.favoriteQuotes}</p>
-              </div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
+            <div>
+              <p style="margin: 4px 0; color: #4a5568;">⏱️ Expected: ${formatDuration(metrics.originalDuration)}</p>
+              <p style="margin: 4px 0; color: #4a5568;">⌛ Actual: ${formatDuration(metrics.actualDuration)}</p>
+              <p style="margin: 4px 0; color: #4a5568;">🎯 Net Time: ${formatDuration(metrics.netEffectiveTime)}</p>
             </div>
-          ` : ''}
+            <div>
+              <p style="margin: 4px 0; color: #4a5568;">⏸️ Paused Time: ${formatDuration(metrics.pausedTime)}</p>
+              <p style="margin: 4px 0; color: #4a5568;">⚡ Added Time: ${formatDuration(metrics.extensionTime)}</p>
+              <p style="margin: 4px 0; color: #4a5568;">📊 Efficiency: ${metrics.efficiencyRatio.toFixed(1)}%</p>
+            </div>
+          </div>
           ${task.relatedQuotes.length > 0 ? `
             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
               <p style="margin: 0 0 8px 0; color: #4a5568; font-weight: 500;">📝 Inspiring quotes:</p>
@@ -135,20 +132,6 @@ serve(async (req) => {
                 <p style="margin: 0; color: #6b7280; font-size: 14px;">Tasks Completed</p>
                 <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalTasks}</p>
               </div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
-              <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
-                <p style="margin: 0; color: #6b7280; font-size: 14px;">Total Breaks</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalPauses}</p>
-              </div>
-              <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
-                <p style="margin: 0; color: #6b7280; font-size: 14px;">Quotes Saved</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalQuotes}</p>
-              </div>
-            </div>
-            <div style="margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center;">
-              <p style="margin: 0; color: #6b7280; font-size: 14px;">Overall Efficiency</p>
-              <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 18px;">${overallEfficiency}</p>
             </div>
           </div>
         </div>
@@ -185,13 +168,18 @@ serve(async (req) => {
         subject: "Your Focus Timer Daily Summary",
         content: emailContent,
         status: 'sent',
+        expected_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.originalDuration || 0), 0),
+        actual_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.actualDuration || 0), 0),
+        paused_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.pausedTime || 0), 0),
+        extension_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.extensionTime || 0), 0),
+        net_effective_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.netEffectiveTime || 0), 0),
+        efficiency_ratio: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.efficiencyRatio || 0), 0) / totalTasks,
+        completion_status: summaryData.completedTasks.length > 0 ? summaryData.completedTasks[0].metrics?.completionStatus : null,
       });
 
     if (dbError) {
       console.error('Error logging email:', dbError);
     }
-
-    console.log('Email sent successfully:', emailResponse);
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,

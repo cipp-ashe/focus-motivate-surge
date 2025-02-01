@@ -14,7 +14,7 @@ import {
 } from "./ui/table";
 import { Task } from "./TaskList";
 import { Button } from "./ui/button";
-import { Send, Clock, Pause, Quote, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Send, Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer } from "lucide-react";
 import { Badge } from "./ui/badge";
 
 interface CompletedTasksProps {
@@ -33,16 +33,30 @@ const formatDuration = (seconds: number): string => {
   return `${remainingMinutes}m`;
 };
 
-const calculateEfficiency = (originalDuration: number, actualDuration: number): number => {
-  if (originalDuration === 0) return 0;
-  return Math.round((originalDuration / actualDuration) * 100);
+const getCompletionStatusColor = (status: string) => {
+  switch (status) {
+    case 'Completed Early':
+      return 'text-green-500';
+    case 'Completed On Time':
+      return 'text-blue-500';
+    case 'Completed Late':
+      return 'text-yellow-500';
+    default:
+      return 'text-muted-foreground';
+  }
 };
 
-const getCompletionStatus = (originalDuration: number, actualDuration: number) => {
-  if (actualDuration <= originalDuration) {
-    return { icon: CheckCircle2, text: "Completed Early", color: "text-green-500" };
+const getCompletionIcon = (status: string) => {
+  switch (status) {
+    case 'Completed Early':
+      return CheckCircle2;
+    case 'Completed On Time':
+      return Timer;
+    case 'Completed Late':
+      return AlertTriangle;
+    default:
+      return Timer;
   }
-  return { icon: AlertTriangle, text: "Took Longer", color: "text-yellow-500" };
 };
 
 export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) => {
@@ -83,14 +97,15 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                       actualDuration: 0,
                       pauseCount: 0,
                       favoriteQuotes: 0,
+                      pausedTime: 0,
+                      extensionTime: 0,
+                      netEffectiveTime: 0,
+                      efficiencyRatio: 100,
+                      completionStatus: 'Completed On Time',
                     };
                     
-                    const status = getCompletionStatus(
-                      metrics.originalDuration,
-                      metrics.actualDuration
-                    );
-                    
-                    const StatusIcon = status.icon;
+                    const StatusIcon = getCompletionIcon(metrics.completionStatus);
+                    const statusColor = getCompletionStatusColor(metrics.completionStatus);
                     
                     return (
                       <TableRow key={task.id} className="bg-muted/50">
@@ -103,32 +118,40 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                           <div className="flex flex-col space-y-1">
                             <div className="flex items-center space-x-2 text-muted-foreground">
                               <Clock className="w-4 h-4" />
-                              <span>Planned: {formatDuration(metrics.originalDuration)}</span>
+                              <span>Expected: {formatDuration(metrics.originalDuration)}</span>
                             </div>
                             <div className="flex items-center space-x-2 text-muted-foreground">
                               <Clock className="w-4 h-4" />
                               <span>Actual: {formatDuration(metrics.actualDuration)}</span>
                             </div>
+                            <div className="flex items-center space-x-2 text-muted-foreground">
+                              <Timer className="w-4 h-4" />
+                              <span>Net: {formatDuration(metrics.netEffectiveTime)}</span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="py-2">
                           <div className="flex items-center space-x-2">
-                            <StatusIcon className={`w-4 h-4 ${status.color}`} />
-                            <span className={status.color}>{status.text}</span>
+                            <StatusIcon className={`w-4 h-4 ${statusColor}`} />
+                            <span className={statusColor}>{metrics.completionStatus}</span>
                           </div>
                           <Badge variant="outline" className="mt-1">
-                            {calculateEfficiency(metrics.originalDuration, metrics.actualDuration)}% efficiency
+                            {metrics.efficiencyRatio.toFixed(1)}% efficiency
                           </Badge>
                         </TableCell>
                         <TableCell className="py-2">
-                          <div className="flex items-center space-x-4 text-muted-foreground">
+                          <div className="flex flex-col space-y-1 text-muted-foreground">
                             <div className="flex items-center space-x-1">
                               <Pause className="w-4 h-4" />
-                              <span>{metrics.pauseCount || 0}</span>
+                              <span>Paused: {formatDuration(metrics.pausedTime)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Timer className="w-4 h-4" />
+                              <span>Added: {formatDuration(metrics.extensionTime)}</span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <Quote className="w-4 h-4" />
-                              <span>{metrics.favoriteQuotes || 0}</span>
+                              <span>Quotes: {metrics.favoriteQuotes}</span>
                             </div>
                           </div>
                         </TableCell>

@@ -5,6 +5,11 @@ export interface TimerMetrics {
   originalDuration: number;
   actualDuration: number;
   favoriteQuotes: number;
+  pausedTime: number;
+  extensionTime: number;
+  netEffectiveTime: number;
+  efficiencyRatio: number;
+  completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
 }
 
 export interface MetricsDisplayProps {
