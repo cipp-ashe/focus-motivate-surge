@@ -99,7 +99,7 @@ export const ExpandedTimer = memo(({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="timer-heading"
@@ -130,7 +130,7 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div
-        className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-8 py-8 sm:py-12 z-[52] mx-auto w-full max-w-[95%] sm:max-w-[85%] md:max-w-[600px] space-y-12"
+        className="relative flex flex-col items-center justify-center min-h-screen w-full max-w-[95%] sm:max-w-[85%] md:max-w-[600px] px-4 sm:px-8 py-8 sm:py-12 z-[52] mx-auto space-y-12"
         style={transitionProps.style}
       >
         <Card className="w-full bg-card shadow-lg p-6 sm:p-8 border-primary/20" {...focusOrder(2)}>
