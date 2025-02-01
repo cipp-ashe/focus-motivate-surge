@@ -1,5 +1,5 @@
 import { Input } from "../ui/input";
-import { InputHTMLAttributes } from "react";
+import { InputHTMLAttributes, useCallback } from "react";
 
 interface MinutesDisplayProps extends InputHTMLAttributes<HTMLInputElement> {
   minutes: number;
@@ -18,8 +18,19 @@ export const MinutesDisplay = ({
   className,
   ...props
 }: MinutesDisplayProps) => {
+  const handleInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
   return (
-    <div className="relative w-20">
+    <div 
+      className="relative w-20"
+      onClick={handleInteraction}
+      onTouchStart={handleInteraction}
+      onTouchEnd={handleInteraction}
+      onTouchMove={handleInteraction}
+    >
       <Input
         type="number"
         min={minMinutes}

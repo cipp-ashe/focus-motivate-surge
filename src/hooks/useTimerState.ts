@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { TimerMetrics } from '../types/timer';
+import { useTimerMetrics } from './useTimerMetrics';
 
 interface UseTimerStateProps {
   initialDuration: number;
@@ -16,31 +16,24 @@ export const useTimerState = ({
   const [timeLeft, setTimeLeft] = useState(initialDuration);
   const [minutes, setMinutesState] = useState(Math.floor(initialDuration / 60));
   const [isRunning, setIsRunning] = useState(false);
-  const [metrics, setMetrics] = useState<TimerMetrics>({
-    startTime: null,
-    endTime: null,
-    pauseCount: 0,
-    originalDuration: initialDuration,
-    actualDuration: 0,
-    favoriteQuotes: 0,
-  });
+  
+  const {
+    metrics,
+    startTimer,
+    pauseTimer,
+    completeTimer,
+    resetMetrics
+  } = useTimerMetrics(initialDuration);
 
-  // Enhanced logging for duration updates
   useEffect(() => {
     console.log('Timer State - Initial duration changed:', initialDuration);
-    console.log('Timer State - Current state:', {
-      timeLeft,
-      minutes,
-      isRunning,
-      metrics,
-    });
-
     if (!isRunning && initialDuration > 0) {
       console.log('Timer State - Updating time left and minutes');
       setTimeLeft(initialDuration);
       setMinutesState(Math.floor(initialDuration / 60));
+      resetMetrics(initialDuration);
     }
-  }, [initialDuration, isRunning]);
+  }, [initialDuration, isRunning, resetMetrics]);
 
   const setMinutes = useCallback((newMinutes: number) => {
     console.log('Timer State - Setting minutes to:', newMinutes);
@@ -52,54 +45,27 @@ export const useTimerState = ({
   const start = useCallback(() => {
     console.log('Timer State - Starting timer');
     setIsRunning(true);
-    if (!metrics.startTime) {
-      setMetrics(prev => ({
-        ...prev,
-        startTime: new Date(),
-      }));
-    }
+    startTimer();
     toast("Timer started! You've got this! 🚀");
-  }, [metrics.startTime]);
+  }, [startTimer]);
 
   const pause = useCallback(() => {
     console.log('Timer State - Pausing timer');
     setIsRunning(false);
-    setMetrics(prev => ({
-      ...prev,
-      pauseCount: prev.pauseCount + 1,
-    }));
-  }, []);
+    pauseTimer();
+  }, [pauseTimer]);
 
   const reset = useCallback(() => {
     console.log('Timer State - Resetting timer');
     setIsRunning(false);
     setTimeLeft(minutes * 60);
-    setMetrics({
-      startTime: null,
-      endTime: null,
-      pauseCount: 0,
-      originalDuration: minutes * 60,
-      actualDuration: 0,
-      favoriteQuotes: 0,
-    });
-  }, [minutes]);
+    resetMetrics(minutes * 60);
+  }, [minutes, resetMetrics]);
 
   const addTime = useCallback((additionalMinutes: number) => {
     console.log('Timer State - Adding minutes:', additionalMinutes);
     setTimeLeft(prev => prev + (additionalMinutes * 60));
     toast(`Added ${additionalMinutes} minutes. Keep going! 💪`);
-  }, []);
-
-  const completeTimer = useCallback(() => {
-    console.log('Timer State - Completing timer');
-    setIsRunning(false);
-    setMetrics(prev => ({
-      ...prev,
-      endTime: new Date(),
-      actualDuration: prev.startTime 
-        ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
-        : prev.actualDuration,
-    }));
   }, []);
 
   useEffect(() => {

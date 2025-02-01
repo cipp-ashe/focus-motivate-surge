@@ -16,12 +16,18 @@ export const MinutesButton = ({
   className,
   ...props
 }: MinutesButtonProps) => {
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) onClick(e as React.MouseEvent);
+  };
+
   return (
     <Button
       variant="outline"
       size="icon"
-      onClick={onClick}
-      onTouchStart={onTouchStart}
+      onClick={handleInteraction}
+      onTouchStart={handleInteraction}
       className={`border-primary/20 hover:bg-primary/20 touch-manipulation ${className}`}
       disabled={disabled}
       {...props}
