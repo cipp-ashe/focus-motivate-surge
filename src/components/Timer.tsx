@@ -1,10 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Card } from "./ui/card";
 import { CompactTimer } from "./CompactTimer";
 import { ExpandedTimer } from "./ExpandedTimer";
 import { useAudio } from "../hooks/useAudio";
 import { useTimerState } from "../hooks/useTimerState";
-import { useTimerShortcuts } from "../hooks/useTimerShortcuts";
 import { useTimerA11y } from "../hooks/useTimerA11y";
 import {
   TimerProps,

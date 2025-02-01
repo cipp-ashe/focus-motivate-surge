@@ -1,8 +1,6 @@
 import { memo, useState, useCallback } from "react";
 import { Card } from "./ui/card";
-import { TimerCircle } from "./TimerCircle";
 import { SoundSelector } from "./SoundSelector";
-import { TimerControls } from "./TimerControls";
 import { MinutesInput } from "./MinutesInput";
 import { CompactTimerProps } from "../types/timer";
 import { useFocusTrap, focusOrder } from "../hooks/useFocusTrap";
@@ -11,6 +9,9 @@ import { useWindowSize } from "../hooks/useWindowSize";
 import { useTimerEffects } from "../hooks/useTimerEffects";
 import { TimerHeader } from "./timer/TimerHeader";
 import { TimerConfetti } from "./timer/TimerConfetti";
+import { TimerDisplay } from "./timer/TimerDisplay";
+import { TimerControls } from "./timer/TimerControls";
+import { TimerMetricsDisplay } from "./timer/TimerMetrics";
 
 export const CompactTimer = memo(({
   taskName,
@@ -59,14 +60,6 @@ export const CompactTimer = memo(({
       timerControlsProps.onComplete();
     }
   }, [resetStates, timerControlsProps]);
-
-  const handleTimerClick = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (!isRunning || !onClick) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    onClick();
-  }, [isRunning, onClick]);
 
   const { containerRef } = useFocusTrap({
     enabled: !isRunning,
@@ -117,24 +110,23 @@ export const CompactTimer = memo(({
             </div>
           </div>
 
-          <div 
-            {...focusOrder(4)}
-            className={`focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isRunning ? 'cursor-pointer' : ''}`}
-            onClick={handleTimerClick}
-            onTouchEnd={handleTimerClick}
-          >
-            <TimerCircle 
-              size="normal" 
-              {...timerCircleProps}
+          <div {...focusOrder(4)}>
+            <TimerDisplay
+              circleProps={timerCircleProps}
+              size="normal"
+              onClick={onClick}
+              isRunning={isRunning}
             />
           </div>
 
-          <div 
-            className="mt-4"
-            {...focusOrder(5)}
-          >
+          <div {...focusOrder(5)}>
             <TimerControls {...modifiedTimerControlsProps} />
           </div>
+
+          <TimerMetricsDisplay 
+            metrics={timerControlsProps.metrics!}
+            isRunning={isRunning}
+          />
         </div>
       </Card>
 

@@ -2,8 +2,6 @@ import { memo, useState, useCallback } from "react";
 import { FloatingQuotes } from "./FloatingQuotes";
 import { Card } from "./ui/card";
 import { Minimize2 } from "lucide-react";
-import { TimerCircle } from "./TimerCircle";
-import { TimerControls } from "./TimerControls";
 import { QuoteDisplay } from "./QuoteDisplay";
 import { useTransition } from "../hooks/useTransition";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
@@ -14,6 +12,9 @@ import { useWindowSize } from "../hooks/useWindowSize";
 import { useTimerEffects } from "../hooks/useTimerEffects";
 import { TimerHeader } from "./timer/TimerHeader";
 import { TimerConfetti } from "./timer/TimerConfetti";
+import { TimerDisplay } from "./timer/TimerDisplay";
+import { TimerControls } from "./timer/TimerControls";
+import { TimerMetricsDisplay } from "./timer/TimerMetrics";
 
 export const ExpandedTimer = memo(({
   taskName,
@@ -87,6 +88,8 @@ export const ExpandedTimer = memo(({
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
     onComplete: timerComplete,
+    size: "large" as const,
+    showAddTime: true,
   };
 
   if (!isRendered) return null;
@@ -136,11 +139,19 @@ export const ExpandedTimer = memo(({
 
             <div className="flex flex-col items-center justify-center gap-16 sm:gap-20 py-8 sm:py-12">
               <div className="relative" aria-live="polite" {...focusOrder(3)}>
-                <TimerCircle size="large" {...timerCircleProps} />
+                <TimerDisplay
+                  circleProps={timerCircleProps}
+                  size="large"
+                  isRunning={isRunning}
+                />
               </div>
 
               <div className="w-full max-w-md px-4" {...focusOrder(4)}>
-                <TimerControls {...modifiedTimerControlsProps} size="large" showAddTime />
+                <TimerControls {...modifiedTimerControlsProps} />
+                <TimerMetricsDisplay 
+                  metrics={timerControlsProps.metrics!}
+                  isRunning={isRunning}
+                />
               </div>
             </div>
           </div>
