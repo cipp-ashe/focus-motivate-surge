@@ -11,7 +11,7 @@ interface UseTaskManagerProps {
   onTaskAdd: (task: Task) => void;
   onTaskSelect: (task: Task) => void;
   onTasksClear: () => void;
-  onSelectedTasksClear?: (taskIds: string[]) => void;
+  onSelectedTasksClear: (taskIds: string[]) => void;  // Made required
   favorites?: Quote[];
 }
 
@@ -42,14 +42,12 @@ export const useTaskManager = ({
   };
 
   const handleTaskDelete = (taskId: string) => {
-    if (onSelectedTasksClear) {
-      onSelectedTasksClear([taskId]);
-      setSelectedTasks(prev => prev.filter(id => id !== taskId));
-    }
+    onSelectedTasksClear([taskId]);
+    setSelectedTasks(prev => prev.filter(id => id !== taskId));
   };
 
   const clearSelectedTasks = () => {
-    if (onSelectedTasksClear && selectedTasks.length > 0) {
+    if (selectedTasks.length > 0) {
       onSelectedTasksClear(selectedTasks);
       setSelectedTasks([]);
     }

@@ -64,18 +64,16 @@ export const ExpandedTimer = memo(({
   const handleComplete = () => {
     setShowConfetti(true);
     setShowCompletionModal(true);
-    // Confetti will stay visible until modal is closed
   };
 
   const handleCloseModal = () => {
-    setShowConfetti(false); // Stop confetti when closing modal
+    setShowConfetti(false);
     setShowCompletionModal(false);
     if (timerControlsProps.onComplete) {
       timerControlsProps.onComplete();
     }
   };
 
-  // Modify timerControlsProps to use our custom complete handler
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
     onComplete: handleComplete,
@@ -129,10 +127,10 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div
-        className="flex flex-col items-center justify-center h-full px-4 sm:px-6 py-4 z-[52] max-w-5xl mx-auto"
+        className="flex flex-col items-center justify-center h-full px-4 sm:px-6 py-4 z-[52] max-w-5xl mx-auto w-[90%] sm:w-[35vw]"
         style={transitionProps.style}
       >
-        <div className="w-full expanded-timer-card max-w-2xl mx-auto">
+        <div className="w-full">
           <Card
             className="bg-card shadow-lg p-4 sm:p-6 border-primary/20"
             {...focusOrder(2)}
@@ -167,7 +165,7 @@ export const ExpandedTimer = memo(({
         </div>
 
         <div
-          className="w-full expanded-timer-card mt-6 sm:mt-8 max-w-2xl mx-auto"
+          className="w-full mt-6 sm:mt-8"
           aria-label="Motivational quotes"
           {...focusOrder(5)}
         >

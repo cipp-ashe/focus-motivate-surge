@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { List, Plus } from "lucide-react";
+import { Plus, List } from "lucide-react";
 import { Task } from "./TaskList";
 
 interface TaskInputProps {
@@ -43,15 +43,6 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
     <Card className="p-4 w-full">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsBulkAdd(!isBulkAdd)}
-            className={isBulkAdd ? "bg-accent" : ""}
-          >
-            {isBulkAdd ? <List className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-          </Button>
           {isBulkAdd ? (
             <Textarea
               ref={textareaRef}
@@ -69,7 +60,22 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
               className="flex-1"
             />
           )}
-          <Button type="submit">Add</Button>
+          <div className="flex flex-col gap-2">
+            <Button type="submit" className="whitespace-nowrap">
+              <Plus className="h-4 w-4 mr-2" />
+              Add {isBulkAdd ? 'Tasks' : 'Task'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsBulkAdd(!isBulkAdd)}
+              className={`whitespace-nowrap ${isBulkAdd ? "bg-accent" : ""}`}
+            >
+              <List className="h-4 w-4 mr-2" />
+              Bulk {isBulkAdd ? 'Mode On' : 'Add'}
+            </Button>
+          </div>
         </div>
       </form>
     </Card>
