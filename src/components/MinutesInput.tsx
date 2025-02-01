@@ -13,31 +13,33 @@ export const MinutesInput = memo(({
   const handleIncrement = () => {
     const step = minutes < 5 ? 1 : 5;
     const newValue = Math.min(minutes + step, maxMinutes);
+    console.log('Incrementing to:', newValue);
     onMinutesChange(newValue);
   };
 
   const handleDecrement = () => {
     const step = minutes <= 5 ? 1 : 5;
     const newValue = Math.max(minutes - step, minMinutes);
+    console.log('Decrementing to:', newValue);
     onMinutesChange(newValue);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const value = e.target.value;
+    console.log('Input value changed to:', value);
     
-    // Allow empty input while typing
-    if (inputValue === '') {
+    // Handle empty input
+    if (value === '') {
+      console.log('Empty input, setting to min minutes:', minMinutes);
       onMinutesChange(minMinutes);
       return;
     }
 
-    // Parse the input value
-    const parsedValue = parseInt(inputValue, 10);
-    
-    // Only update if it's a valid number
+    // Parse and validate the input value
+    const parsedValue = parseInt(value, 10);
     if (!isNaN(parsedValue)) {
-      // Clamp the value between min and max
       const clampedValue = Math.min(Math.max(parsedValue, minMinutes), maxMinutes);
+      console.log('Setting minutes to:', clampedValue);
       onMinutesChange(clampedValue);
     }
   };
@@ -69,7 +71,7 @@ export const MinutesInput = memo(({
               onMinutesChange(maxMinutes);
             }
           }}
-          className="text-center font-mono bg-background/50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="text-center font-mono bg-background/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           aria-label="Minutes input"
         />
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">

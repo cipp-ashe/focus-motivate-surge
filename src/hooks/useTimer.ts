@@ -49,9 +49,13 @@ export const useTimer = ({
 
   const setMinutes = useCallback((newMinutes: number) => {
     console.log('Setting minutes to:', newMinutes);
+    // Update both minutes and timeLeft states
     setMinutesState(newMinutes);
     setTimeLeft(newMinutes * 60);
-    onDurationChange?.(newMinutes);
+    // Notify parent component if callback exists
+    if (onDurationChange) {
+      onDurationChange(newMinutes);
+    }
   }, [onDurationChange]);
 
   const start = useCallback(() => {
