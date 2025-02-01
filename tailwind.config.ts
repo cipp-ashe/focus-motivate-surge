@@ -7,7 +7,7 @@ export default {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
+  ],
   theme: {
     container: {
       center: true,
@@ -17,9 +17,6 @@ export default {
       },
     },
     extend: {
-      scale: {
-        '102': '1.02'
-      },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -77,40 +74,19 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "float-1": {
+        "float-left": {
           "0%": { transform: "translate(0, 0) rotate(0deg)" },
-          "33%": { transform: "translate(-20px, -15px) rotate(-1deg)" },
-          "66%": { transform: "translate(15px, 10px) rotate(1deg)" },
+          "50%": { transform: "translate(-20px, -10px) rotate(-2deg)" },
           "100%": { transform: "translate(0, 0) rotate(0deg)" },
         },
-        "float-2": {
+        "float-right": {
           "0%": { transform: "translate(0, 0) rotate(0deg)" },
-          "33%": { transform: "translate(20px, -20px) rotate(2deg)" },
-          "66%": { transform: "translate(-15px, 15px) rotate(-1deg)" },
+          "50%": { transform: "translate(20px, -5px) rotate(2deg)" },
           "100%": { transform: "translate(0, 0) rotate(0deg)" },
         },
-        "float-3": {
+        "float-top": {
           "0%": { transform: "translate(0, 0) rotate(0deg)" },
-          "33%": { transform: "translate(15px, 20px) rotate(-2deg)" },
-          "66%": { transform: "translate(-20px, -10px) rotate(1deg)" },
-          "100%": { transform: "translate(0, 0) rotate(0deg)" },
-        },
-        "float-4": {
-          "0%": { transform: "translate(0, 0) rotate(0deg)" },
-          "33%": { transform: "translate(-15px, -20px) rotate(1deg)" },
-          "66%": { transform: "translate(20px, -15px) rotate(-2deg)" },
-          "100%": { transform: "translate(0, 0) rotate(0deg)" },
-        },
-        "float-5": {
-          "0%": { transform: "translate(0, 0) rotate(0deg)" },
-          "33%": { transform: "translate(20px, 15px) rotate(-1deg)" },
-          "66%": { transform: "translate(-15px, -20px) rotate(2deg)" },
-          "100%": { transform: "translate(0, 0) rotate(0deg)" },
-        },
-        "float-6": {
-          "0%": { transform: "translate(0, 0) rotate(0deg)" },
-          "33%": { transform: "translate(-20px, 10px) rotate(2deg)" },
-          "66%": { transform: "translate(15px, -15px) rotate(-1deg)" },
+          "50%": { transform: "translate(0, -15px) rotate(1deg)" },
           "100%": { transform: "translate(0, 0) rotate(0deg)" },
         },
       },
