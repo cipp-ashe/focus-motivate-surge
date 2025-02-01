@@ -79,7 +79,7 @@ export const CompactTimer = memo(({
   return (
     <>
       {showConfetti && (
-        <div className="fixed inset-0 z-[51]">
+        <div className="fixed inset-0 z-40">
           <ReactConfetti
             width={windowSize.width}
             height={windowSize.height}
@@ -148,7 +148,6 @@ export const CompactTimer = memo(({
             <TimerControls {...modifiedTimerControlsProps} />
           </div>
         </div>
-
       </Card>
 
       {showCompletionModal && timerControlsProps.metrics && (

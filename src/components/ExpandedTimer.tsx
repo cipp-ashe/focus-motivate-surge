@@ -110,7 +110,7 @@ export const ExpandedTimer = memo(({
       />
 
       {showConfetti && (
-        <div className="fixed inset-0 z-[51]">
+        <div className="fixed inset-0 z-40">
           <ReactConfetti
             width={windowSize.width}
             height={windowSize.height}
@@ -164,8 +164,13 @@ export const ExpandedTimer = memo(({
       </div>
 
       {showCompletionModal && timerControlsProps.metrics && (
-        <div className="z-[54]">
-          <CompletionModal isOpen={showCompletionModal} onClose={handleCloseModal} metrics={timerControlsProps.metrics} taskName={taskName} />
+        <div className="z-50">
+          <CompletionModal 
+            isOpen={showCompletionModal} 
+            onClose={handleCloseModal} 
+            metrics={timerControlsProps.metrics} 
+            taskName={taskName} 
+          />
         </div>
       )}
     </div>
