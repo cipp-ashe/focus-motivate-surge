@@ -22,6 +22,11 @@ export default {
       },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "float-left": "float-left 12s ease-in-out infinite",
+        "float-right": "float-right 15s ease-in-out infinite",
+        "float-top": "float-top 18s ease-in-out infinite",
       },
       colors: {
         border: "hsl(var(--border))",
@@ -109,14 +114,7 @@ export default {
           "100%": { transform: "translate(0, 0) rotate(0deg)" },
         },
       },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "float-left": "float-left 12s ease-in-out infinite",
-        "float-right": "float-right 15s ease-in-out infinite",
-        "float-top": "float-top 18s ease-in-out infinite",
-      },
     },
   },
-  plugins: [import("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate")],
 } satisfies Config;
