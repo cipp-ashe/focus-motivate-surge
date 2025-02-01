@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useTimerMetrics } from './useTimerMetrics';
+import { TimerMetrics } from '../types/metrics';
 
 interface UseTimerStateProps {
   initialDuration: number;
@@ -8,105 +8,154 @@ interface UseTimerStateProps {
   onDurationChange?: (minutes: number) => void;
 }
 
+interface TimerState {
+  timeLeft: number;
+  minutes: number;
+  isRunning: boolean;
+  isPaused: boolean;
+  pausedTimeLeft: number | null;
+  metrics: TimerMetrics;
+}
+
+const initialMetrics = (duration: number): TimerMetrics => ({
+  startTime: null,
+  endTime: null,
+  pauseCount: 0,
+  originalDuration: duration,
+  actualDuration: 0,
+  favoriteQuotes: 0,
+});
+
 export const useTimerState = ({
   initialDuration,
   onTimeUp,
   onDurationChange,
 }: UseTimerStateProps) => {
-  const [timeLeft, setTimeLeft] = useState(initialDuration);
-  const [minutes, setMinutesState] = useState(Math.floor(initialDuration / 60));
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [pausedTimeLeft, setPausedTimeLeft] = useState<number | null>(null);
-  
-  const {
-    metrics,
-    startTimer,
-    pauseTimer,
-    completeTimer,
-    resetMetrics
-  } = useTimerMetrics(initialDuration);
+  const [state, setState] = useState<TimerState>({
+    timeLeft: initialDuration,
+    minutes: Math.floor(initialDuration / 60),
+    isRunning: false,
+    isPaused: false,
+    pausedTimeLeft: null,
+    metrics: initialMetrics(initialDuration),
+  });
 
   // Reset timer when initial duration changes and timer is not running or paused
   useEffect(() => {
     console.log('Timer State - Initial duration changed:', initialDuration);
-    if (!isRunning && !isPaused && initialDuration > 0) {
+    if (!state.isRunning && !state.isPaused && initialDuration > 0) {
       console.log('Timer State - Updating time left and minutes');
-      setTimeLeft(initialDuration);
-      setMinutesState(Math.floor(initialDuration / 60));
-      resetMetrics(initialDuration);
-      setPausedTimeLeft(null);
-      setIsPaused(false);
+      setState(prev => ({
+        ...prev,
+        timeLeft: initialDuration,
+        minutes: Math.floor(initialDuration / 60),
+        metrics: initialMetrics(initialDuration),
+        pausedTimeLeft: null,
+        isPaused: false,
+      }));
     }
-  }, [initialDuration, isRunning, isPaused, resetMetrics]);
+  }, [initialDuration, state.isRunning, state.isPaused]);
 
   const setMinutes = useCallback((newMinutes: number) => {
     console.log('Timer State - Setting minutes to:', newMinutes);
-    if (!isRunning && !isPaused) {
-      setMinutesState(newMinutes);
-      setTimeLeft(newMinutes * 60);
+    if (!state.isRunning && !state.isPaused) {
+      setState(prev => ({
+        ...prev,
+        minutes: newMinutes,
+        timeLeft: newMinutes * 60,
+        pausedTimeLeft: null,
+        isPaused: false,
+      }));
       onDurationChange?.(newMinutes);
-      setPausedTimeLeft(null);
-      setIsPaused(false);
     }
-  }, [onDurationChange, isRunning, isPaused]);
+  }, [onDurationChange, state.isRunning, state.isPaused]);
 
   const start = useCallback(() => {
     console.log('Timer State - Starting timer');
-    setIsRunning(true);
-    setIsPaused(false);
-    startTimer();
+    setState(prev => ({
+      ...prev,
+      isRunning: true,
+      isPaused: false,
+      metrics: {
+        ...prev.metrics,
+        startTime: prev.metrics.startTime || new Date(),
+      },
+      timeLeft: prev.isPaused && prev.pausedTimeLeft !== null 
+        ? prev.pausedTimeLeft 
+        : prev.timeLeft,
+    }));
     
-    // If resuming from pause, use the paused time
-    if (isPaused && pausedTimeLeft !== null) {
-      setTimeLeft(pausedTimeLeft);
-      toast("Timer resumed! Keep going! 💪");
-    } else {
-      toast("Timer started! You've got this! 🚀");
-    }
-  }, [startTimer, isPaused, pausedTimeLeft]);
+    toast(state.isPaused ? "Timer resumed! Keep going! 💪" : "Timer started! You've got this! 🚀");
+  }, [state.isPaused]);
 
   const pause = useCallback(() => {
     console.log('Timer State - Pausing timer');
-    setIsRunning(false);
-    setIsPaused(true);
-    setPausedTimeLeft(timeLeft);
-    pauseTimer();
+    setState(prev => ({
+      ...prev,
+      isRunning: false,
+      isPaused: true,
+      pausedTimeLeft: prev.timeLeft,
+      metrics: {
+        ...prev.metrics,
+        pauseCount: prev.metrics.pauseCount + 1,
+      },
+    }));
     toast("Timer paused! Take a breather 😌");
-  }, [pauseTimer, timeLeft]);
+  }, []);
 
   const reset = useCallback(() => {
     console.log('Timer State - Resetting timer');
-    setIsRunning(false);
-    setIsPaused(false);
-    setTimeLeft(minutes * 60);
-    resetMetrics(minutes * 60);
-    setPausedTimeLeft(null);
-  }, [minutes, resetMetrics]);
+    setState(prev => ({
+      ...prev,
+      isRunning: false,
+      isPaused: false,
+      timeLeft: prev.minutes * 60,
+      metrics: initialMetrics(prev.minutes * 60),
+      pausedTimeLeft: null,
+    }));
+  }, []);
 
   const addTime = useCallback((additionalMinutes: number) => {
     console.log('Timer State - Adding minutes:', additionalMinutes);
-    const newTime = timeLeft + (additionalMinutes * 60);
-    setTimeLeft(newTime);
-    if (isPaused) {
-      setPausedTimeLeft(newTime);
-    }
+    setState(prev => {
+      const newTime = prev.timeLeft + (additionalMinutes * 60);
+      return {
+        ...prev,
+        timeLeft: newTime,
+        pausedTimeLeft: prev.isPaused ? newTime : prev.pausedTimeLeft,
+      };
+    });
     toast(`Added ${additionalMinutes} minutes. Keep going! 💪`);
-  }, [timeLeft, isPaused]);
+  }, []);
+
+  const completeTimer = useCallback(() => {
+    console.log('Timer State - Completing timer');
+    setState(prev => ({
+      ...prev,
+      isRunning: false,
+      metrics: {
+        ...prev.metrics,
+        endTime: new Date(),
+        actualDuration: prev.metrics.startTime 
+          ? Math.floor((Date.now() - prev.metrics.startTime.getTime()) / 1000)
+          : prev.metrics.actualDuration,
+      },
+    }));
+  }, []);
 
   // Timer countdown effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isRunning && timeLeft > 0) {
+    if (state.isRunning && state.timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((time) => {
-          if (time <= 1) {
+        setState(prev => {
+          if (prev.timeLeft <= 1) {
             completeTimer();
             onTimeUp?.();
-            return 0;
+            return { ...prev, timeLeft: 0 };
           }
-          return time - 1;
+          return { ...prev, timeLeft: prev.timeLeft - 1 };
         });
       }, 1000);
     }
@@ -117,13 +166,13 @@ export const useTimerState = ({
         clearInterval(interval);
       }
     };
-  }, [isRunning, timeLeft, onTimeUp, completeTimer]);
+  }, [state.isRunning, state.timeLeft, onTimeUp, completeTimer]);
 
   return {
-    timeLeft,
-    minutes,
-    isRunning,
-    metrics,
+    timeLeft: state.timeLeft,
+    minutes: state.minutes,
+    isRunning: state.isRunning,
+    metrics: state.metrics,
     start,
     pause,
     reset,

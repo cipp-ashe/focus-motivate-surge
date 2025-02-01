@@ -5,13 +5,15 @@ interface WindowSize {
   height: number;
 }
 
-export const useWindowSize = () => {
+export const useWindowSize = (): WindowSize => {
   const [windowSize, setWindowSize] = useState<WindowSize>({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
   });
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
@@ -21,6 +23,9 @@ export const useWindowSize = () => {
 
     console.log("Setting up resize listener");
     window.addEventListener('resize', handleResize);
+    
+    // Initial size set
+    handleResize();
     
     return () => {
       console.log("Cleaning up resize listener");
