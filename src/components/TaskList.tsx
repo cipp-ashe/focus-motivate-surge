@@ -1,4 +1,4 @@
-import { Button } from "./ui/card";
+import { Button } from "./ui/button";
 import { Trash2, Send, X } from "lucide-react";
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
