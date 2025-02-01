@@ -33,6 +33,7 @@ export const Timer = ({
 }: TimerProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
+  const [hasUserInput, setHasUserInput] = useState(false);
   
   const { play: playSound, testSound, isLoadingAudio } = useAudio({
     audioUrl: SOUND_OPTIONS[selectedSound],
@@ -65,14 +66,20 @@ export const Timer = ({
   });
 
   // Effect to update timer duration when a task with predefined duration is selected
+  // Only update if user hasn't manually changed the time
   useEffect(() => {
-    if (duration) {
+    if (duration && !hasUserInput) {
       const durationInMinutes = Math.floor(duration / 60);
       console.log(`Setting timer to ${durationInMinutes} minutes from task duration`);
       handleMinutesChange(durationInMinutes);
       toast.info(`Timer set to ${durationInMinutes} minutes`);
     }
-  }, [duration, handleMinutesChange]);
+  }, [duration, handleMinutesChange, hasUserInput]);
+
+  const handleUserMinutesChange = useCallback((newMinutes: number) => {
+    setHasUserInput(true);
+    handleMinutesChange(newMinutes);
+  }, [handleMinutesChange]);
 
   const toggleTimer = useCallback(() => {
     if (isRunning) {
@@ -88,6 +95,7 @@ export const Timer = ({
     pause();
     onComplete();
     setIsExpanded(false);
+    setHasUserInput(false); // Reset user input flag when timer completes
     toast("Task completed! You're crushing it! 🎉");
   }, [pause, onComplete, completeTimer]);
 
@@ -140,7 +148,7 @@ export const Timer = ({
         selectedSound={selectedSound}
         onSoundChange={setSelectedSound}
         onTestSound={testSound}
-        onMinutesChange={handleMinutesChange}
+        onMinutesChange={handleUserMinutesChange}
         minMinutes={MIN_MINUTES}
         maxMinutes={MAX_MINUTES}
         isLoadingAudio={isLoadingAudio}
