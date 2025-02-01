@@ -33,7 +33,7 @@ export const Timer = ({
 }: TimerProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
-  const [timerMinutes, setTimerMinutes] = useState(Math.floor(duration / 60));
+  const [internalMinutes, setInternalMinutes] = useState(Math.floor(duration / 60));
   
   const { play: playSound, testSound, isLoadingAudio } = useAudio({
     audioUrl: SOUND_OPTIONS[selectedSound],
@@ -53,10 +53,10 @@ export const Timer = ({
     start,
     pause,
     addTime: addMinutes,
-    setMinutes: handleMinutesChange,
+    setMinutes,
     completeTimer,
   } = useTimer({
-    initialDuration: timerMinutes * 60,
+    initialDuration: internalMinutes * 60,
     onTimeUp: () => {
       completeTimer();
       playSound();
@@ -65,21 +65,21 @@ export const Timer = ({
     onDurationChange,
   });
 
-  // Update timer minutes when a new task is selected
+  // Only update internal minutes when a new task is selected AND timer is not running
   useEffect(() => {
-    if (duration) {
+    if (duration && !isRunning) {
       const newMinutes = Math.floor(duration / 60);
-      console.log(`New task selected, setting initial timer duration to ${newMinutes} minutes`);
-      setTimerMinutes(newMinutes);
-      handleMinutesChange(newMinutes);
+      console.log(`New task selected, initializing timer to ${newMinutes} minutes`);
+      setInternalMinutes(newMinutes);
+      setMinutes(newMinutes);
     }
-  }, [duration, handleMinutesChange]);
+  }, [duration, setMinutes, isRunning]);
 
-  const handleUserMinutesChange = useCallback((newMinutes: number) => {
-    console.log(`User changed timer duration to ${newMinutes} minutes`);
-    setTimerMinutes(newMinutes);
-    handleMinutesChange(newMinutes);
-  }, [handleMinutesChange]);
+  const handleMinutesChange = useCallback((newMinutes: number) => {
+    console.log(`Updating timer duration to ${newMinutes} minutes`);
+    setInternalMinutes(newMinutes);
+    setMinutes(newMinutes);
+  }, [setMinutes]);
 
   const toggleTimer = useCallback(() => {
     if (isRunning) {
@@ -143,11 +143,11 @@ export const Timer = ({
     <div className="relative">
       <CompactTimer
         {...commonProps}
-        minutes={timerMinutes}
+        minutes={internalMinutes}
         selectedSound={selectedSound}
         onSoundChange={setSelectedSound}
         onTestSound={testSound}
-        onMinutesChange={handleUserMinutesChange}
+        onMinutesChange={handleMinutesChange}
         minMinutes={MIN_MINUTES}
         maxMinutes={MAX_MINUTES}
         isLoadingAudio={isLoadingAudio}
