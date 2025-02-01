@@ -33,7 +33,7 @@ export const Timer = ({
 }: TimerProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
-  const [hasUserInput, setHasUserInput] = useState(false);
+  const [timerMinutes, setTimerMinutes] = useState(Math.floor(duration / 60));
   
   const { play: playSound, testSound, isLoadingAudio } = useAudio({
     audioUrl: SOUND_OPTIONS[selectedSound],
@@ -56,7 +56,7 @@ export const Timer = ({
     setMinutes: handleMinutesChange,
     completeTimer,
   } = useTimer({
-    initialDuration: duration,
+    initialDuration: timerMinutes * 60,
     onTimeUp: () => {
       completeTimer();
       playSound();
@@ -65,19 +65,19 @@ export const Timer = ({
     onDurationChange,
   });
 
-  // Effect to update timer duration when a task with predefined duration is selected
-  // Only update if user hasn't manually changed the time
+  // Update timer minutes when a new task is selected
   useEffect(() => {
-    if (duration && !hasUserInput) {
-      const durationInMinutes = Math.floor(duration / 60);
-      console.log(`Setting timer to ${durationInMinutes} minutes from task duration`);
-      handleMinutesChange(durationInMinutes);
-      toast.info(`Timer set to ${durationInMinutes} minutes`);
+    if (duration) {
+      const newMinutes = Math.floor(duration / 60);
+      console.log(`New task selected, setting initial timer duration to ${newMinutes} minutes`);
+      setTimerMinutes(newMinutes);
+      handleMinutesChange(newMinutes);
     }
-  }, [duration, handleMinutesChange, hasUserInput]);
+  }, [duration, handleMinutesChange]);
 
   const handleUserMinutesChange = useCallback((newMinutes: number) => {
-    setHasUserInput(true);
+    console.log(`User changed timer duration to ${newMinutes} minutes`);
+    setTimerMinutes(newMinutes);
     handleMinutesChange(newMinutes);
   }, [handleMinutesChange]);
 
@@ -95,7 +95,6 @@ export const Timer = ({
     pause();
     onComplete();
     setIsExpanded(false);
-    setHasUserInput(false); // Reset user input flag when timer completes
     toast("Task completed! You're crushing it! 🎉");
   }, [pause, onComplete, completeTimer]);
 
@@ -144,7 +143,7 @@ export const Timer = ({
     <div className="relative">
       <CompactTimer
         {...commonProps}
-        minutes={minutes}
+        minutes={timerMinutes}
         selectedSound={selectedSound}
         onSoundChange={setSelectedSound}
         onTestSound={testSound}
