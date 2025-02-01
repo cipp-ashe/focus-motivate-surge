@@ -14,6 +14,7 @@ interface TaskTableProps {
   selectedTasks: string[];
   onTaskClick: (task: Task, event: React.MouseEvent) => void;
   onTaskDelete: (taskId: string) => void;
+  onTasksClear: () => void;
 }
 
 export const TaskTable = ({
@@ -21,13 +22,27 @@ export const TaskTable = ({
   selectedTasks,
   onTaskClick,
   onTaskDelete,
+  onTasksClear,
 }: TaskTableProps) => {
   return (
     <div className="mt-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-full">Active Tasks</TableHead>
+            <TableHead>
+              <div className="flex justify-between items-center">
+                <span>Active Tasks</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTasksClear();
+                  }}
+                  className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
+                >
+                  Clear All
+                </button>
+              </div>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
