@@ -11,8 +11,6 @@ export const MinutesInput = memo(({
   onBlur
 }: MinutesInputProps) => {
   const handleIncrement = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
     const step = minutes < 5 ? 1 : 5;
     const newValue = Math.min(minutes + step, maxMinutes);
     console.log('Incrementing to:', newValue);
@@ -20,8 +18,6 @@ export const MinutesInput = memo(({
   }, [minutes, maxMinutes, onMinutesChange]);
 
   const handleDecrement = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
     const step = minutes <= 5 ? 1 : 5;
     const newValue = Math.max(minutes - step, minMinutes);
     console.log('Decrementing to:', newValue);
@@ -29,8 +25,6 @@ export const MinutesInput = memo(({
   }, [minutes, minMinutes, onMinutesChange]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
     const value = e.target.value;
     console.log('Input value changed to:', value);
     
@@ -49,8 +43,6 @@ export const MinutesInput = memo(({
   }, [minMinutes, maxMinutes, onMinutesChange]);
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
     if (isNaN(minutes) || minutes < minMinutes) {
       onMinutesChange(minMinutes);
     } else if (minutes > maxMinutes) {
@@ -59,19 +51,8 @@ export const MinutesInput = memo(({
     onBlur?.();
   }, [minutes, minMinutes, maxMinutes, onMinutesChange, onBlur]);
 
-  const preventPropagation = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
   return (
-    <div 
-      className="flex items-center justify-center gap-2"
-      onClick={preventPropagation}
-      onTouchStart={preventPropagation}
-      onTouchEnd={preventPropagation}
-      onTouchMove={preventPropagation}
-    >
+    <div className="flex items-center justify-center gap-2">
       <MinutesButton
         direction="down"
         onClick={handleDecrement}
@@ -84,10 +65,6 @@ export const MinutesInput = memo(({
         minutes={minutes}
         onChange={handleInputChange}
         onBlur={handleBlur}
-        onClick={preventPropagation}
-        onTouchStart={preventPropagation}
-        onTouchEnd={preventPropagation}
-        onTouchMove={preventPropagation}
         minMinutes={minMinutes}
         maxMinutes={maxMinutes}
       />
