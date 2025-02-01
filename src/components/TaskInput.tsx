@@ -3,8 +3,14 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { Plus, List } from "lucide-react";
+import { Plus, ChevronDown } from "lucide-react";
 import { Task } from "./TaskList";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
@@ -42,40 +48,42 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
   return (
     <Card className="p-4 w-full">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex items-center gap-2">
-          {isBulkAdd ? (
-            <Textarea
-              ref={textareaRef}
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              placeholder="Add multiple tasks (one per line)..."
-              className="flex-1 min-h-[100px] resize-y"
-            />
-          ) : (
-            <Input
-              type="text"
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              placeholder="Add a new task..."
-              className="flex-1"
-            />
-          )}
-          <div className="flex flex-col gap-2">
-            <Button type="submit" className="whitespace-nowrap">
-              <Plus className="h-4 w-4 mr-2" />
-              Add {isBulkAdd ? 'Tasks' : 'Task'}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsBulkAdd(!isBulkAdd)}
-              className={`whitespace-nowrap ${isBulkAdd ? "bg-accent" : ""}`}
-            >
-              <List className="h-4 w-4 mr-2" />
-              Bulk {isBulkAdd ? 'Mode On' : 'Add'}
-            </Button>
+        <div className="flex items-start gap-2">
+          <div className="flex-1">
+            {isBulkAdd ? (
+              <Textarea
+                ref={textareaRef}
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                placeholder="Add multiple tasks (one per line)..."
+                className="min-h-[100px] resize-y"
+              />
+            ) : (
+              <Input
+                type="text"
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                placeholder="Add a new task..."
+              />
+            )}
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="submit" className="whitespace-nowrap">
+                <Plus className="h-4 w-4 mr-2" />
+                Add {isBulkAdd ? 'Tasks' : 'Task'}
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setIsBulkAdd(false)}>
+                Single Task Mode
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsBulkAdd(true)}>
+                Bulk Add Mode
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </form>
     </Card>
