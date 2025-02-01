@@ -15,6 +15,11 @@ export interface Task {
     actualDuration: number;
     pauseCount: number;
     favoriteQuotes: number;
+    pausedTime: number;
+    extensionTime: number;
+    netEffectiveTime: number;
+    efficiencyRatio: number;
+    completionStatus: string;
   };
 }
 
