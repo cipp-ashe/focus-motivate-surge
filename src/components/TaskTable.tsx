@@ -30,8 +30,7 @@ export const TaskTable = ({
   const isMobile = useIsMobile();
 
   const preventPropagation = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.stopPropagation(); // Changed from preventDefault to stopPropagation
   }, []);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
@@ -54,7 +53,6 @@ export const TaskTable = ({
     localStorage.setItem('taskList', JSON.stringify(updatedTasks));
     
     // Update the tasks in the parent component through state management
-    // This will trigger a re-render with the new duration
     const event = new CustomEvent('tasksUpdated', { 
       detail: { tasks: updatedTasks } 
     });
@@ -72,10 +70,7 @@ export const TaskTable = ({
               {tasks.length > 0 && (
                 <button
                   onClick={preventPropagation}
-                  onTouchStart={(e) => {
-                    preventPropagation(e);
-                    onTasksClear();
-                  }}
+                  onTouchStart={preventPropagation}
                   className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
                 >
                   Clear All

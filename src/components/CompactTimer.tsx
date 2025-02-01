@@ -104,7 +104,7 @@ export const CompactTimer = memo(({
       
       <Card 
         ref={containerRef}
-        className={`w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-4 sm:p-6 ${focusClass}`}
+        className="w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-4 sm:p-6"
         {...a11yProps}
       >
         <div className="text-center space-y-4 sm:space-y-6">
