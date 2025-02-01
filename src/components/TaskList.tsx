@@ -6,6 +6,14 @@ import { Textarea } from "./ui/textarea";
 import { Trash2, Send, Plus, List } from "lucide-react";
 import { EmailSummaryModal } from "./EmailSummaryModal";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 import { sendTaskSummaryEmail } from "../lib/supabase";
 import { formatDailySummary } from "../utils/summaryFormatter";
 import { TaskSummary } from "../types/summary";
@@ -121,36 +129,55 @@ export const TaskList = ({
         </form>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tasks.map((task) => (
-          <Card
-            key={task.id}
-            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors h-[100px] flex items-center"
-            onClick={() => onTaskSelect(task)}
-          >
-            <div className="line-clamp-3 w-full">
-              {task.name}
-            </div>
-          </Card>
-        ))}
+      {completedTasks.length > 0 && (
+        <div className="text-sm text-muted-foreground mt-2">
+          Completed Tasks: {completedTasks.length}
+        </div>
+      )}
+
+      <div className="mt-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-full">Active Tasks</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tasks.map((task) => (
+              <TableRow
+                key={task.id}
+                className="cursor-pointer hover:bg-accent/50 transition-colors"
+                onClick={() => onTaskSelect(task)}
+              >
+                <TableCell className="py-4">
+                  <div className="line-clamp-2">{task.name}</div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
       {completedTasks.length > 0 && (
-        <Accordion type="single" collapsible className="mt-8">
+        <Accordion type="single" collapsible className="mt-4">
           <AccordionItem value="completed-tasks">
-            <AccordionTrigger className="text-lg font-semibold">
-              Completed Tasks ({completedTasks.length})
+            <AccordionTrigger className="text-sm font-medium">
+              View Completed Tasks
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                {completedTasks.map((task) => (
-                  <Card key={task.id} className="p-4 bg-muted h-[100px] flex items-center">
-                    <div className="line-clamp-3 w-full line-through">
-                      {task.name}
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <Table>
+                <TableBody>
+                  {completedTasks.map((task) => (
+                    <TableRow key={task.id} className="bg-muted/50">
+                      <TableCell className="py-3">
+                        <div className="line-clamp-2 line-through text-muted-foreground">
+                          {task.name}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </AccordionContent>
           </AccordionItem>
         </Accordion>

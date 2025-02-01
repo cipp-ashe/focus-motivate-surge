@@ -134,37 +134,37 @@ export const ExpandedTimer = memo(({
         <X className="h-6 w-6" />
       </button>
 
-      <div 
-        className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4 z-[52]"
+      <div
+        className="flex flex-col items-center justify-center h-full px-4 sm:px-6 py-4 z-[52] max-w-5xl mx-auto"
         style={transitionProps.style}
       >
-        <div className="w-full expanded-timer-card">
-          <Card 
-            className="bg-card shadow-lg p-6 border-primary/20"
+        <div className="w-full expanded-timer-card max-w-2xl mx-auto">
+          <Card
+            className="bg-card shadow-lg p-4 sm:p-6 border-primary/20"
             {...focusOrder(2)}
           >
-            <div className="flex flex-col items-center min-h-[500px]">
-              <h2 
-                id="timer-heading" 
-                className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 mb-8"
+            <div className="flex flex-col items-center">
+              <h2
+                id="timer-heading"
+                className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 mb-6"
               >
                 {taskName}
               </h2>
 
-              <div className="flex-1 flex flex-col items-center justify-center gap-8 py-8">
-                <div 
-                  className="relative w-72 h-72"
+              <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 py-4 sm:py-6">
+                <div
+                  className="relative w-56 h-56 sm:w-72 sm:h-72"
                   aria-live="polite"
                   {...focusOrder(3)}
                 >
                   <TimerCircle size="large" {...timerCircleProps} />
                 </div>
                 
-                <div className="w-full max-w-md" {...focusOrder(4)}>
-                  <TimerControls 
+                <div className="w-full max-w-md px-2" {...focusOrder(4)}>
+                  <TimerControls
                     {...modifiedTimerControlsProps}
-                    size="large" 
-                    showAddTime 
+                    size="large"
+                    showAddTime
                   />
                 </div>
               </div>
@@ -172,8 +172,8 @@ export const ExpandedTimer = memo(({
           </Card>
         </div>
 
-        <div 
-          className="w-full expanded-timer-card mt-8"
+        <div
+          className="w-full expanded-timer-card mt-6 sm:mt-8 max-w-2xl mx-auto"
           aria-label="Motivational quotes"
           {...focusOrder(5)}
         >
