@@ -38,7 +38,15 @@ export const useTimer = ({
     favoriteQuotes: 0,
   });
 
+  // Effect to handle initialDuration changes
+  useEffect(() => {
+    console.log('Initial duration changed:', initialDuration);
+    setTimeLeft(initialDuration);
+    setMinutesState(Math.floor(initialDuration / 60));
+  }, [initialDuration]);
+
   const setMinutes = useCallback((newMinutes: number) => {
+    console.log('Setting minutes to:', newMinutes);
     setMinutesState(newMinutes);
     setTimeLeft(newMinutes * 60);
     onDurationChange?.(newMinutes);

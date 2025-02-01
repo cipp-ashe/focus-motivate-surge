@@ -68,8 +68,8 @@ export const Timer = ({
   useEffect(() => {
     if (duration) {
       const durationInMinutes = Math.floor(duration / 60);
-      handleMinutesChange(durationInMinutes);
       console.log(`Setting timer to ${durationInMinutes} minutes from task duration`);
+      handleMinutesChange(durationInMinutes);
       toast.info(`Timer set to ${durationInMinutes} minutes`);
     }
   }, [duration, handleMinutesChange]);
@@ -79,7 +79,7 @@ export const Timer = ({
       pause();
     } else {
       start();
-      setIsExpanded(true); // Expand when explicitly starting the timer
+      setIsExpanded(true);
     }
   }, [isRunning, start, pause]);
 
