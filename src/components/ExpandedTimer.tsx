@@ -148,7 +148,7 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div
-        className="flex flex-col items-center justify-center h-full px-4 sm:px-6 py-4 z-[52] max-w-5xl mx-auto w-[90%] sm:w-[35vw]"
+        className="flex flex-col items-center justify-center h-full px-2 sm:px-6 py-2 sm:py-4 z-[52] mx-auto w-[95%] sm:w-[85%] md:w-[500px]"
         style={transitionProps.style}
       >
         <div className="w-full">
