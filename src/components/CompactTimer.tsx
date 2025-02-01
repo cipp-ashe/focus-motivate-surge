@@ -133,7 +133,8 @@ export const CompactTimer = memo(({
 
           <div 
             {...focusOrder(4)}
-            className={focusClass}
+            className={`${focusClass} ${isRunning ? 'cursor-pointer' : ''}`}
+            onClick={onClick}
           >
             <TimerCircle 
               size="normal" 

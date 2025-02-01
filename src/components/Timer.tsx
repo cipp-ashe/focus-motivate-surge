@@ -1,7 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Card } from "./ui/card";
-import { X, Maximize2 } from "lucide-react";
-import { toast } from "sonner";
 import { CompactTimer } from "./CompactTimer";
 import { ExpandedTimer } from "./ExpandedTimer";
 import { useAudio } from "../hooks/useAudio";
@@ -14,6 +12,7 @@ import {
   SOUND_OPTIONS,
   type SoundOption,
 } from "../types/timer";
+import { toast } from "sonner";
 
 const {
   MIN_MINUTES,
@@ -106,8 +105,6 @@ export const Timer = ({
     start();
   }, [addMinutes, onAddTime, start]);
 
-  const toggleExpand = () => setIsExpanded(!isExpanded);
-
   const timerCircleProps = {
     isRunning,
     timeLeft,
@@ -153,16 +150,8 @@ export const Timer = ({
         minMinutes={MIN_MINUTES}
         maxMinutes={MAX_MINUTES}
         isLoadingAudio={isLoadingAudio}
-        onClick={toggleExpand}
+        onClick={() => isRunning && setIsExpanded(true)}
       />
-
-      <button
-        onClick={toggleExpand}
-        className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground"
-        aria-label="Expand timer view"
-      >
-        <Maximize2 className="h-6 w-6" />
-      </button>
     </div>
   );
 };
