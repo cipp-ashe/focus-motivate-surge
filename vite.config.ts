@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -10,7 +9,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: mode === 'development',
     commonjsOptions: {
       include: [],
     },
@@ -23,6 +22,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "react": path.resolve(__dirname, "./node_modules/react"),
+      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime"),
     },
   },
   optimizeDeps: {
