@@ -70,6 +70,7 @@ export interface MinutesInputProps {
   onMinutesChange: (minutes: number) => void;
   minMinutes: number;
   maxMinutes: number;
+  onBlur?: () => void;
 }
 
 export interface ExpandedTimerProps {

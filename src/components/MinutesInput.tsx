@@ -45,6 +45,16 @@ export const MinutesInput = memo(({
     }
   };
 
+  const handleBlur = () => {
+    // Ensure valid number on blur
+    if (isNaN(minutes) || minutes < minMinutes) {
+      onMinutesChange(minMinutes);
+    } else if (minutes > maxMinutes) {
+      onMinutesChange(maxMinutes);
+    }
+    onBlur?.();
+  };
+
   return (
     <div className="flex items-center justify-center gap-2">
       <Button
@@ -64,7 +74,7 @@ export const MinutesInput = memo(({
           max={maxMinutes}
           value={minutes}
           onChange={handleInputChange}
-          onBlur={onBlur}
+          onBlur={handleBlur}
           className="text-center font-mono bg-background/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           aria-label="Minutes input"
         />
