@@ -49,7 +49,7 @@ export const useTaskManager = ({
   };
 
   const clearSelectedTasks = () => {
-    if (onSelectedTasksClear) {
+    if (onSelectedTasksClear && selectedTasks.length > 0) {
       onSelectedTasksClear(selectedTasks);
       setSelectedTasks([]);
     }

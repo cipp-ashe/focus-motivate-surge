@@ -1,5 +1,5 @@
 import { Button } from "./ui/button";
-import { Trash2, Send } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "./CompletedTasks";
@@ -61,7 +61,7 @@ export const TaskList = ({
         onTaskDelete={handleTaskDelete}
       />
       
-      <div className="flex justify-between items-center mt-4 mb-6">
+      <div className="flex justify-start items-center mt-4">
         <Button
           variant="outline"
           onClick={selectedTasks.length > 0 ? clearSelectedTasks : onTasksClear}
@@ -70,17 +70,12 @@ export const TaskList = ({
           <Trash2 className="w-4 h-4 mr-2" />
           {selectedTasks.length > 0 ? `Clear Selected (${selectedTasks.length})` : 'Clear All'}
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => setShowEmailModal(true)}
-          className="text-primary hover:text-primary"
-        >
-          <Send className="w-4 h-4 mr-2" />
-          Send Summary
-        </Button>
       </div>
 
-      <CompletedTasks tasks={completedTasks} />
+      <CompletedTasks 
+        tasks={completedTasks} 
+        onSendSummary={() => setShowEmailModal(true)} 
+      />
 
       <EmailSummaryModal
         isOpen={showEmailModal}
