@@ -63,6 +63,7 @@ export interface TimerControlsProps {
   toggleButtonA11yProps?: ButtonA11yProps;
   completeButtonA11yProps?: ButtonA11yProps;
   addTimeButtonA11yProps?: ButtonA11yProps;
+  metrics?: TimerMetrics;
 }
 
 export interface MinutesInputProps {
