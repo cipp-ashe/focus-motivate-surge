@@ -131,7 +131,6 @@ const Index = () => {
               onSelectedTasksClear={handleSelectedTasksClear}
               favorites={favorites}
             />
-            <FavoriteQuotes favorites={favorites} />
           </div>
 
           <div className="space-y-4 sm:space-y-6 order-2 mb-6">
@@ -155,6 +154,10 @@ const Index = () => {
             )}
             <QuoteDisplay favorites={favorites} setFavorites={setFavorites} />
           </div>
+        </div>
+        
+        <div className="mt-8">
+          <FavoriteQuotes favorites={favorites} />
         </div>
       </div>
     </div>
