@@ -25,23 +25,32 @@ export const useTimerState = ({
     favoriteQuotes: 0,
   });
 
-  // Handle duration updates
+  // Enhanced logging for duration updates
   useEffect(() => {
-    console.log('Initial duration changed:', initialDuration);
+    console.log('Timer State - Initial duration changed:', initialDuration);
+    console.log('Timer State - Current state:', {
+      timeLeft,
+      minutes,
+      isRunning,
+      metrics,
+    });
+
     if (!isRunning && initialDuration > 0) {
+      console.log('Timer State - Updating time left and minutes');
       setTimeLeft(initialDuration);
       setMinutesState(Math.floor(initialDuration / 60));
     }
   }, [initialDuration, isRunning]);
 
   const setMinutes = useCallback((newMinutes: number) => {
-    console.log('Setting minutes to:', newMinutes);
+    console.log('Timer State - Setting minutes to:', newMinutes);
     setMinutesState(newMinutes);
     setTimeLeft(newMinutes * 60);
     onDurationChange?.(newMinutes);
   }, [onDurationChange]);
 
   const start = useCallback(() => {
+    console.log('Timer State - Starting timer');
     setIsRunning(true);
     if (!metrics.startTime) {
       setMetrics(prev => ({
@@ -53,6 +62,7 @@ export const useTimerState = ({
   }, [metrics.startTime]);
 
   const pause = useCallback(() => {
+    console.log('Timer State - Pausing timer');
     setIsRunning(false);
     setMetrics(prev => ({
       ...prev,
@@ -61,6 +71,7 @@ export const useTimerState = ({
   }, []);
 
   const reset = useCallback(() => {
+    console.log('Timer State - Resetting timer');
     setIsRunning(false);
     setTimeLeft(minutes * 60);
     setMetrics({
@@ -74,11 +85,13 @@ export const useTimerState = ({
   }, [minutes]);
 
   const addTime = useCallback((additionalMinutes: number) => {
+    console.log('Timer State - Adding minutes:', additionalMinutes);
     setTimeLeft(prev => prev + (additionalMinutes * 60));
     toast(`Added ${additionalMinutes} minutes. Keep going! 💪`);
   }, []);
 
   const completeTimer = useCallback(() => {
+    console.log('Timer State - Completing timer');
     setIsRunning(false);
     setMetrics(prev => ({
       ...prev,
@@ -105,7 +118,12 @@ export const useTimerState = ({
       }, 1000);
     }
 
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) {
+        console.log('Timer State - Cleaning up interval');
+        clearInterval(interval);
+      }
+    };
   }, [isRunning, timeLeft, onTimeUp, completeTimer]);
 
   return {
