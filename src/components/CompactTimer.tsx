@@ -44,7 +44,7 @@ export const CompactTimer = memo(({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Add effect to handle timer completion when time runs out
+  // Handle timer completion when time runs out
   useEffect(() => {
     if (timerCircleProps.timeLeft === 0 && isRunning) {
       console.log("Time is up in compact mode! Showing modal and confetti.");

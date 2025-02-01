@@ -33,7 +33,7 @@ export const Timer = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
   
-  // Convert duration from seconds to minutes, defaulting to 25 if not provided
+  // Convert duration from seconds to minutes for internal state
   const initialMinutes = Math.floor(duration / 60) || 25;
   const [internalMinutes, setInternalMinutes] = useState(initialMinutes);
   
@@ -82,9 +82,10 @@ export const Timer = ({
     setMinutes(newMinutes);
   }, [setMinutes]);
 
+  // Start handler that automatically expands the view
   const handleStart = useCallback(() => {
     start();
-    setIsExpanded(true); // Automatically expand when starting
+    setIsExpanded(true);
   }, [start]);
 
   const handleComplete = useCallback(() => {
@@ -93,13 +94,13 @@ export const Timer = ({
     onComplete();
     setIsExpanded(false);
     toast("Task completed! You're crushing it! 🎉");
-  }, [pause, onComplete, completeTimer]);
+  }, [completeTimer, pause, onComplete]);
 
   const handleAddTime = useCallback(() => {
     addMinutes(ADD_TIME_MINUTES);
     onAddTime();
-    start();
-  }, [addMinutes, onAddTime, start]);
+    toast(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
+  }, [addMinutes, onAddTime]);
 
   const timerCircleProps = {
     isRunning,
@@ -149,9 +150,9 @@ export const Timer = ({
           timerCircleProps,
           timerControlsProps: {
             ...timerControlsProps,
-            onToggle: handleStart, // In compact config mode, always start and expand
+            onToggle: handleStart, // In configuration mode, always start and expand
           },
-          onClick: () => isRunning && setIsExpanded(true),
+          onClick: () => isRunning && setIsExpanded(true), // Only allow expanding when running
         }}
       />
     </div>
