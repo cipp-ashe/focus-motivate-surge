@@ -1,11 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from 'react';
 import { Card } from "./ui/card";
 import { X, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { CompactTimer } from "./CompactTimer";
 import { ExpandedTimer } from "./ExpandedTimer";
 import { useAudio } from "../hooks/useAudio";
-import { useTimer } from "../hooks/useTimer";
+import { useTimerState } from "../hooks/useTimerState";
 import { useTimerShortcuts } from "../hooks/useTimerShortcuts";
 import { useTimerA11y } from "../hooks/useTimerA11y";
 import {
@@ -55,7 +55,7 @@ export const Timer = ({
     addTime: addMinutes,
     setMinutes,
     completeTimer,
-  } = useTimer({
+  } = useTimerState({
     initialDuration: internalMinutes * 60,
     onTimeUp: () => {
       completeTimer();
@@ -67,7 +67,7 @@ export const Timer = ({
 
   // Update internal minutes when task duration changes
   useEffect(() => {
-    if (!isRunning) {
+    if (!isRunning && duration > 0) {
       const newMinutes = Math.floor(duration / 60);
       console.log(`Task duration changed to ${newMinutes} minutes`);
       setInternalMinutes(newMinutes);

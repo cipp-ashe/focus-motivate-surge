@@ -8,7 +8,7 @@ import {
 } from "./ui/table";
 import { Trash2, Clock } from "lucide-react";
 import { Task } from "./TaskList";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { MinutesInput } from "./MinutesInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -30,22 +30,22 @@ export const TaskTable = ({
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
-  const handleDurationClick = (e: React.MouseEvent | React.TouchEvent, taskId: string) => {
+  const handleDurationClick = useCallback((e: React.MouseEvent | React.TouchEvent, taskId: string) => {
     e.preventDefault();
     e.stopPropagation();
     setEditingDuration(taskId);
-  };
+  }, []);
 
-  const handleDurationChange = (taskId: string, minutes: number) => {
+  const handleDurationChange = useCallback((taskId: string, minutes: number) => {
     const taskIndex = tasks.findIndex(t => t.id === taskId);
     if (taskIndex !== -1) {
       const updatedTask = { ...tasks[taskIndex], duration: minutes };
       tasks[taskIndex] = updatedTask;
       console.log(`Updated task ${taskId} duration to ${minutes} minutes`);
     }
-  };
+  }, [tasks]);
 
-  const handleDurationBlur = () => {
+  const handleDurationBlur = useCallback(() => {
     if (isMobile) {
       setTimeout(() => {
         setEditingDuration(null);
@@ -53,7 +53,12 @@ export const TaskTable = ({
     } else {
       setEditingDuration(null);
     }
-  };
+  }, [isMobile]);
+
+  const preventPropagation = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
   return (
     <div className="mt-4">
@@ -65,8 +70,9 @@ export const TaskTable = ({
             <TableHead className="w-[20%] text-right">
               {tasks.length > 0 && (
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={preventPropagation}
+                  onTouchStart={(e) => {
+                    preventPropagation(e);
                     onTasksClear();
                   }}
                   className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
@@ -96,15 +102,17 @@ export const TaskTable = ({
                   className="flex items-center justify-end gap-2 touch-manipulation"
                   onClick={(e) => handleDurationClick(e, task.id)}
                   onTouchStart={(e) => {
-                    e.stopPropagation();
+                    preventPropagation(e);
                     handleDurationClick(e, task.id);
                   }}
                 >
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   {editingDuration === task.id ? (
                     <div 
-                      onClick={e => e.stopPropagation()} 
-                      onTouchStart={e => e.stopPropagation()}
+                      onClick={preventPropagation}
+                      onTouchStart={preventPropagation}
+                      onTouchEnd={preventPropagation}
+                      onTouchMove={preventPropagation}
                       className="w-32 touch-manipulation"
                     >
                       <MinutesInput
@@ -126,12 +134,9 @@ export const TaskTable = ({
               </TableCell>
               <TableCell className="py-2 text-right">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onTaskDelete(task.id);
-                  }}
+                  onClick={preventPropagation}
                   onTouchStart={(e) => {
-                    e.stopPropagation();
+                    preventPropagation(e);
                     onTaskDelete(task.id);
                   }}
                   className="ml-2 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation"
