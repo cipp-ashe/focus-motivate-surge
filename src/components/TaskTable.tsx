@@ -10,6 +10,7 @@ import { Trash2, Clock } from "lucide-react";
 import { Task } from "./TaskList";
 import { useState, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Input } from "./ui/input";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -32,6 +33,25 @@ export const TaskTable = ({
     e.preventDefault();
     e.stopPropagation();
   }, []);
+
+  const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
+    // Find the task in the tasks array
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Parse the new duration, ensuring it's between 1 and 60
+    const duration = Math.min(Math.max(parseInt(newDuration) || 25, 1), 60);
+    
+    // Update the task's duration in local storage
+    const updatedTasks = tasks.map(t => 
+      t.id === taskId ? { ...t, duration } : t
+    );
+    localStorage.setItem('taskList', JSON.stringify(updatedTasks));
+    
+    // Force a page reload to update the state
+    // This is a temporary solution - ideally we'd use proper state management
+    window.location.reload();
+  }, [tasks]);
 
   return (
     <div className="mt-4">
@@ -71,11 +91,22 @@ export const TaskTable = ({
                 <span className="line-clamp-2">{task.name}</span>
               </TableCell>
               <TableCell className="py-2 text-right">
-                <div className="flex items-center justify-end gap-2">
+                <div 
+                  className="flex items-center justify-end gap-2"
+                  onClick={preventPropagation}
+                  onTouchStart={preventPropagation}
+                >
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground min-h-[24px] min-w-[24px] flex items-center justify-end">
-                    {task.duration || '25'}
-                  </span>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={60}
+                    defaultValue={task.duration || 25}
+                    className="w-16 text-right"
+                    onChange={(e) => handleDurationChange(task.id, e.target.value)}
+                    onClick={preventPropagation}
+                    onTouchStart={preventPropagation}
+                  />
                 </div>
               </TableCell>
               <TableCell className="py-2 text-right">

@@ -33,7 +33,10 @@ export const Timer = ({
 }: TimerProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
-  const [internalMinutes, setInternalMinutes] = useState(Math.floor(duration / 60));
+  
+  // Convert duration from seconds to minutes, defaulting to 25 if not provided
+  const initialMinutes = Math.floor(duration / 60) || 25;
+  const [internalMinutes, setInternalMinutes] = useState(initialMinutes);
   
   const { play: playSound, testSound, isLoadingAudio } = useAudio({
     audioUrl: SOUND_OPTIONS[selectedSound],
@@ -68,7 +71,7 @@ export const Timer = ({
   // Only update internal minutes when duration changes and timer is not running
   useEffect(() => {
     if (!isRunning && duration > 0 && duration !== internalMinutes * 60) {
-      console.log(`Task duration changed externally to ${Math.floor(duration / 60)} minutes`);
+      console.log(`Task duration changed to ${Math.floor(duration / 60)} minutes`);
       setInternalMinutes(Math.floor(duration / 60));
       setMinutes(Math.floor(duration / 60));
     }
@@ -163,3 +166,5 @@ export const Timer = ({
     </div>
   );
 };
+
+Timer.displayName = 'Timer';
