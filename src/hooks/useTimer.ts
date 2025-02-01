@@ -92,7 +92,7 @@ export const useTimer = ({
       pauseCount: 0,
       originalDuration: minutes * 60,
       actualDuration: 0,
-      favoriteQuotes: 0, // Added this line to fix the TypeScript error
+      favoriteQuotes: 0,
     });
   }, [minutes]);
 
