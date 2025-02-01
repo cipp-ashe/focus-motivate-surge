@@ -14,7 +14,8 @@ import {
 } from "./ui/table";
 import { Task } from "./TaskList";
 import { Button } from "./ui/button";
-import { Send, Clock, Pause, Quote } from "lucide-react";
+import { Send, Clock, Pause, Quote, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Badge } from "./ui/badge";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -30,6 +31,18 @@ const formatDuration = (seconds: number): string => {
     return `${hours}h ${remainingMinutes}m`;
   }
   return `${remainingMinutes}m`;
+};
+
+const calculateEfficiency = (originalDuration: number, actualDuration: number): number => {
+  if (originalDuration === 0) return 0;
+  return Math.round((originalDuration / actualDuration) * 100);
+};
+
+const getCompletionStatus = (originalDuration: number, actualDuration: number) => {
+  if (actualDuration <= originalDuration) {
+    return { icon: CheckCircle2, text: "Completed Early", color: "text-green-500" };
+  }
+  return { icon: AlertTriangle, text: "Took Longer", color: "text-yellow-500" };
 };
 
 export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) => {
@@ -58,38 +71,70 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Task</TableHead>
-                    <TableHead>Duration</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Metrics</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tasks.map((task) => (
-                    <TableRow key={task.id} className="bg-muted/50">
-                      <TableCell className="py-2">
-                        <div className="line-through text-muted-foreground">
-                          {task.name}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <div className="flex items-center space-x-2 text-muted-foreground">
-                          <Clock className="w-4 h-4" />
-                          <span>{formatDuration(task.duration || 0)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <div className="flex items-center space-x-4 text-muted-foreground">
-                          <div className="flex items-center space-x-1">
-                            <Pause className="w-4 h-4" />
-                            <span>{task.metrics?.pauseCount || 0}</span>
+                  {tasks.map((task) => {
+                    const metrics = task.metrics || {
+                      originalDuration: 0,
+                      actualDuration: 0,
+                      pauseCount: 0,
+                      favoriteQuotes: 0,
+                    };
+                    
+                    const status = getCompletionStatus(
+                      metrics.originalDuration,
+                      metrics.actualDuration
+                    );
+                    
+                    const StatusIcon = status.icon;
+                    
+                    return (
+                      <TableRow key={task.id} className="bg-muted/50">
+                        <TableCell className="py-2">
+                          <div className="line-through text-muted-foreground">
+                            {task.name}
                           </div>
-                          <div className="flex items-center space-x-1">
-                            <Quote className="w-4 h-4" />
-                            <span>{task.metrics?.favoriteQuotes || 0}</span>
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <div className="flex flex-col space-y-1">
+                            <div className="flex items-center space-x-2 text-muted-foreground">
+                              <Clock className="w-4 h-4" />
+                              <span>Planned: {formatDuration(metrics.originalDuration)}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-muted-foreground">
+                              <Clock className="w-4 h-4" />
+                              <span>Actual: {formatDuration(metrics.actualDuration)}</span>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <div className="flex items-center space-x-2">
+                            <StatusIcon className={`w-4 h-4 ${status.color}`} />
+                            <span className={status.color}>{status.text}</span>
+                          </div>
+                          <Badge variant="outline" className="mt-1">
+                            {calculateEfficiency(metrics.originalDuration, metrics.actualDuration)}% efficiency
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <div className="flex items-center space-x-4 text-muted-foreground">
+                            <div className="flex items-center space-x-1">
+                              <Pause className="w-4 h-4" />
+                              <span>{metrics.pauseCount || 0}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Quote className="w-4 h-4" />
+                              <span>{metrics.favoriteQuotes || 0}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </AccordionContent>
