@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Card } from "./ui/card";
 import { TimerCircle } from "./TimerCircle";
 import { SoundSelector } from "./SoundSelector";
@@ -6,6 +6,7 @@ import { TimerControls } from "./TimerControls";
 import { MinutesInput } from "./MinutesInput";
 import { CompactTimerProps } from "../types/timer";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
+import { CompletionModal } from "./CompletionModal";
 
 export const CompactTimer = memo(({
   taskName,
@@ -23,9 +24,28 @@ export const CompactTimer = memo(({
   isLoadingAudio,
   onClick,
 }: CompactTimerProps) => {
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const { containerRef } = useFocusTrap({
     enabled: !isRunning,
   });
+
+  const handleComplete = () => {
+    console.log("Timer completed in compact mode! Showing modal.");
+    setShowCompletionModal(true);
+  };
+
+  const handleCloseModal = () => {
+    console.log("Closing completion modal in compact mode.");
+    setShowCompletionModal(false);
+    if (timerControlsProps.onComplete) {
+      timerControlsProps.onComplete();
+    }
+  };
+
+  const modifiedTimerControlsProps = {
+    ...timerControlsProps,
+    onComplete: handleComplete,
+  };
 
   return (
     <Card 
@@ -79,9 +99,18 @@ export const CompactTimer = memo(({
           className="mt-4"
           {...focusOrder(5)}
         >
-          <TimerControls {...timerControlsProps} />
+          <TimerControls {...modifiedTimerControlsProps} />
         </div>
       </div>
+
+      {showCompletionModal && timerControlsProps.metrics && (
+        <CompletionModal 
+          isOpen={showCompletionModal} 
+          onClose={handleCloseModal} 
+          metrics={timerControlsProps.metrics} 
+          taskName={taskName} 
+        />
+      )}
     </Card>
   );
 });
