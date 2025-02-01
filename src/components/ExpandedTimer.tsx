@@ -151,7 +151,7 @@ export const ExpandedTimer = memo(({
         className="flex flex-col items-center justify-center h-full px-2 sm:px-6 py-2 sm:py-4 z-[52] mx-auto w-[95%] sm:w-[85%] md:w-[500px]"
         style={transitionProps.style}
       >
-        <div className="w-full">
+        <div className="w-full mb-4 sm:mb-6">
           <Card className="bg-card shadow-lg p-4 sm:p-6 border-primary/20" {...focusOrder(2)}>
             <div className="flex flex-col items-center">
               <h2 id="timer-heading" className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 mb-6">
@@ -163,7 +163,7 @@ export const ExpandedTimer = memo(({
                   <TimerCircle size="large" {...timerCircleProps} />
                 </div>
 
-                <div className="w-full max-w-md px-2" {...focusOrder(4)}>
+                <div className="w-full max-w-md px-2 mb-2 sm:mb-4" {...focusOrder(4)}>
                   <TimerControls {...modifiedTimerControlsProps} size="large" showAddTime />
                 </div>
               </div>
@@ -171,7 +171,9 @@ export const ExpandedTimer = memo(({
           </Card>
         </div>
 
-        <QuoteDisplay showAsOverlay currentTask={taskName} favorites={favorites} setFavorites={setFavorites} />
+        <div className="w-full mt-4 sm:mt-6">
+          <QuoteDisplay showAsOverlay currentTask={taskName} favorites={favorites} setFavorites={setFavorites} />
+        </div>
       </div>
 
       {showCompletionModal && timerControlsProps.metrics && (
