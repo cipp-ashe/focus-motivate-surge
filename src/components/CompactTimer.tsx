@@ -71,6 +71,14 @@ export const CompactTimer = memo(({
     }
   };
 
+  const handleTimerClick = (e: React.MouseEvent | React.TouchEvent) => {
+    // Only handle clicks/touches when the timer is running
+    if (isRunning && onClick) {
+      e.preventDefault(); // Prevent default only when we're handling the click
+      onClick();
+    }
+  };
+
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
     onComplete: handleComplete,
@@ -134,8 +142,9 @@ export const CompactTimer = memo(({
 
           <div 
             {...focusOrder(4)}
-            className={`${focusClass} ${isRunning ? 'cursor-pointer' : ''}`}
-            onClick={onClick}
+            className={`${focusClass} ${isRunning ? 'cursor-pointer touch-none' : ''}`}
+            onClick={handleTimerClick}
+            onTouchEnd={handleTimerClick}
           >
             <TimerCircle 
               size="normal" 
