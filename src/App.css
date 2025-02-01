@@ -4,8 +4,9 @@
   padding: 1rem;
   text-align: center;
   min-height: 100vh;
-  height: auto; /* Changed from max-height to allow content to expand */
-  overflow-y: visible; /* Changed from auto to visible to allow content to flow */
+  height: auto;
+  position: relative;
+  overflow-y: auto;
 }
 
 @media (min-width: 640px) {

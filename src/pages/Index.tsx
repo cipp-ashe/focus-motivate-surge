@@ -109,8 +109,8 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:p-6">
+    <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:p-6 pb-24">
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
             Focus Timer
@@ -139,7 +139,7 @@ const Index = () => {
             />
           </div>
 
-          <div className="space-y-4 sm:space-y-6 order-2 mb-6">
+          <div className="space-y-4 sm:space-y-6 order-2">
             {selectedTask ? (
               <Timer
                 duration={duration}
