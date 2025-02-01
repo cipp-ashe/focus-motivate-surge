@@ -59,14 +59,7 @@ export const useTimer = ({
       interval = setInterval(() => {
         setTimeLeft((time) => {
           if (time <= 1) {
-            setIsRunning(false);
-            setMetrics(prev => ({
-              ...prev,
-              endTime: new Date(),
-              actualDuration: prev.startTime 
-                ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
-                : prev.actualDuration,
-            }));
+            completeTimer();
             onTimeUp?.();
             return 0;
           }
