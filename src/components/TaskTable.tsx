@@ -6,8 +6,10 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Trash2 } from "lucide-react";
+import { Trash2, Clock } from "lucide-react";
 import { Task } from "./TaskList";
+import { Input } from "./ui/input";
+import { useState } from "react";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -24,12 +26,31 @@ export const TaskTable = ({
   onTaskDelete,
   onTasksClear,
 }: TaskTableProps) => {
+  const [editingDuration, setEditingDuration] = useState<string | null>(null);
+  const [durationValues, setDurationValues] = useState<Record<string, number>>({});
+
+  const handleDurationChange = (taskId: string, value: string) => {
+    const duration = parseInt(value) || 0;
+    setDurationValues(prev => ({
+      ...prev,
+      [taskId]: duration
+    }));
+  };
+
+  const handleDurationBlur = (taskId: string) => {
+    setEditingDuration(null);
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      task.duration = durationValues[taskId];
+    }
+  };
+
   return (
     <div className="mt-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>
+            <TableHead className="w-[70%]">
               <div className="flex justify-between items-center">
                 <span>Active Tasks</span>
                 {tasks.length > 0 && (
@@ -45,6 +66,7 @@ export const TaskTable = ({
                 )}
               </div>
             </TableHead>
+            <TableHead className="w-[30%]">Duration (min)</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -70,6 +92,34 @@ export const TaskTable = ({
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
+                </div>
+              </TableCell>
+              <TableCell className="py-2">
+                <div 
+                  className="flex items-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingDuration(task.id);
+                  }}
+                >
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  {editingDuration === task.id ? (
+                    <Input
+                      type="number"
+                      min={1}
+                      max={60}
+                      value={durationValues[task.id] || task.duration || ''}
+                      onChange={(e) => handleDurationChange(task.id, e.target.value)}
+                      onBlur={() => handleDurationBlur(task.id)}
+                      className="w-20 h-8"
+                      autoFocus
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <span className="text-muted-foreground">
+                      {task.duration || '–'}
+                    </span>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

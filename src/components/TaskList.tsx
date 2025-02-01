@@ -9,6 +9,7 @@ export interface Task {
   id: string;
   name: string;
   completed: boolean;
+  duration?: number; // Optional duration in minutes
 }
 
 interface TaskListProps {
