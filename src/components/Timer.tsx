@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Card } from "./ui/card";
 import { X, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
@@ -63,6 +63,14 @@ export const Timer = ({
     },
     onDurationChange,
   });
+
+  // Effect to update timer duration when a task with predefined duration is selected
+  useEffect(() => {
+    if (duration) {
+      handleMinutesChange(Math.floor(duration / 60));
+      console.log(`Setting timer to ${Math.floor(duration / 60)} minutes from task duration`);
+    }
+  }, [duration, handleMinutesChange]);
 
   const toggleTimer = useCallback(() => {
     if (isRunning) {
@@ -137,7 +145,6 @@ export const Timer = ({
         onClick={toggleExpand}
       />
 
-      {/* ✅ "Expand" Button */}
       <button
         onClick={toggleExpand}
         className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground"
