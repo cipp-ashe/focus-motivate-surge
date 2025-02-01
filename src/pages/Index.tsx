@@ -76,6 +76,11 @@ const handleTasksClear = useCallback(() => {
   setSelectedTask(null);
 }, []);
 
+const handleSelectedTasksClear = useCallback((taskIds: string[]) => {
+  setTasks(prev => prev.filter(task => !taskIds.includes(task.id)));
+  setSelectedTask(prev => prev && taskIds.includes(prev.id) ? null : prev);
+}, []);
+
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -102,6 +107,7 @@ const handleTasksClear = useCallback(() => {
               onTaskAdd={handleTaskAdd}
               onTaskSelect={handleTaskSelect}
               onTasksClear={handleTasksClear}
+              onSelectedTasksClear={handleSelectedTasksClear}
             />
             <FavoriteQuotes favorites={favorites} />
           </div>
