@@ -34,27 +34,26 @@ export const TaskTable = ({
           {tasks.map((task) => (
             <TableRow
               key={task.id}
-              className={`group cursor-pointer transition-all duration-300 ease-in-out
-                hover:bg-accent/10 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-[1px]
-                ${selectedTasks.includes(task.id) 
-                  ? 'bg-accent/20 shadow-lg shadow-primary/10 -translate-y-[1px] border-l-2 border-l-primary' 
-                  : ''
-                }`}
+              className={`cursor-pointer transition-colors duration-200
+              ${selectedTasks.includes(task.id) 
+                ? 'bg-accent/10' 
+                : 'hover:bg-accent/5'
+              }`}
               onClick={(e) => onTaskClick(task, e)}
             >
               <TableCell className="py-2">
-                <div className="flex justify-between items-center">
-                  <div className="line-clamp-2">{task.name}</div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTaskDelete(task.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+              <div className="flex justify-between items-center">
+                <span className="line-clamp-2">{task.name}</span>
+                <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTaskDelete(task.id);
+                }}
+                className="ml-2 text-muted hover:text-destructive transition-colors duration-200"
+                >
+                <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
               </TableCell>
             </TableRow>
           ))}
