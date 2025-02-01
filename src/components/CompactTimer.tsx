@@ -1,14 +1,16 @@
-import { memo, useState, useEffect, useCallback } from "react";
+import { memo, useState, useCallback } from "react";
 import { Card } from "./ui/card";
 import { TimerCircle } from "./TimerCircle";
 import { SoundSelector } from "./SoundSelector";
 import { TimerControls } from "./TimerControls";
 import { MinutesInput } from "./MinutesInput";
 import { CompactTimerProps } from "../types/timer";
-import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
+import { useFocusTrap, focusOrder } from "../hooks/useFocusTrap";
 import { CompletionModal } from "./CompletionModal";
-import ReactConfetti from "react-confetti";
-import { toast } from "sonner";
+import { useWindowSize } from "../hooks/useWindowSize";
+import { useTimerEffects } from "../hooks/useTimerEffects";
+import { TimerHeader } from "./timer/TimerHeader";
+import { TimerConfetti } from "./timer/TimerConfetti";
 
 export const CompactTimer = memo(({
   taskName,
@@ -28,61 +30,27 @@ export const CompactTimer = memo(({
 }: CompactTimerProps) => {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const windowSize = useWindowSize();
 
-  // Reset all states
   const resetStates = useCallback(() => {
     console.log("Resetting CompactTimer states");
     setShowCompletionModal(false);
     setShowConfetti(false);
   }, []);
 
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    console.log("Setting up resize listener in CompactTimer");
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      console.log("Cleaning up CompactTimer component");
-      window.removeEventListener('resize', handleResize);
-      resetStates();
-    };
-  }, [resetStates]);
-
-  // Reset states when task changes
-  useEffect(() => {
-    console.log("Task changed in CompactTimer:", taskName);
-    resetStates();
-  }, [taskName, resetStates]);
-
-  // Handle timer completion
-  useEffect(() => {
-    if (timerCircleProps.timeLeft === 0 && isRunning) {
-      console.log("Timer completed in CompactTimer");
-      handleComplete();
-    }
-  }, [timerCircleProps.timeLeft, isRunning]);
-
-  const { containerRef } = useFocusTrap({
-    enabled: !isRunning,
-  });
-
   const handleComplete = useCallback(() => {
     console.log("Handling timer completion in CompactTimer");
     setShowConfetti(true);
     setShowCompletionModal(true);
-    toast.success("Timer completed! Great work! 🎉");
   }, []);
+
+  const { handleComplete: timerComplete } = useTimerEffects({
+    timeLeft: timerCircleProps.timeLeft,
+    isRunning,
+    onComplete: handleComplete,
+    taskName,
+    resetStates,
+  });
 
   const handleCloseModal = useCallback(() => {
     console.log("Closing completion modal in CompactTimer");
@@ -100,28 +68,22 @@ export const CompactTimer = memo(({
     onClick();
   }, [isRunning, onClick]);
 
+  const { containerRef } = useFocusTrap({
+    enabled: !isRunning,
+  });
+
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
-    onComplete: handleComplete,
+    onComplete: timerComplete,
   };
 
   return (
     <div className="w-full overflow-visible">
-      {showConfetti && (
-        <div className="fixed inset-0 z-40 pointer-events-none">
-          <ReactConfetti
-            width={windowSize.width}
-            height={windowSize.height}
-            gravity={0.12}
-            numberOfPieces={400}
-            recycle={true}
-            colors={["#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD", "#EDE9FE"]}
-            tweenDuration={5000}
-            wind={0.01}
-            initialVelocityY={-2}
-          />
-        </div>
-      )}
+      <TimerConfetti 
+        show={showConfetti}
+        width={windowSize.width}
+        height={windowSize.height}
+      />
       
       <Card 
         ref={containerRef}
@@ -129,12 +91,7 @@ export const CompactTimer = memo(({
         {...a11yProps}
       >
         <div className="text-center space-y-4 sm:space-y-6">
-          <h2 
-            className="text-xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate px-2"
-            {...focusOrder(1)}
-          >
-            {taskName}
-          </h2>
+          <TimerHeader taskName={taskName} focusOrder={1} />
 
           <div className={`overflow-hidden transition-all duration-700 ${
             isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-4 sm:mt-6'
@@ -162,7 +119,7 @@ export const CompactTimer = memo(({
 
           <div 
             {...focusOrder(4)}
-            className={`${focusClass} ${isRunning ? 'cursor-pointer' : ''}`}
+            className={`focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isRunning ? 'cursor-pointer' : ''}`}
             onClick={handleTimerClick}
             onTouchEnd={handleTimerClick}
           >

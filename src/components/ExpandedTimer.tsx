@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback } from "react";
+import { memo, useState, useCallback } from "react";
 import { FloatingQuotes } from "./FloatingQuotes";
 import { Card } from "./ui/card";
 import { Minimize2 } from "lucide-react";
@@ -9,9 +9,11 @@ import { useTransition } from "../hooks/useTransition";
 import { useFocusTrap, focusOrder, focusClass } from "../hooks/useFocusTrap";
 import { useTimerA11y } from "../hooks/useTimerA11y";
 import { ExpandedTimerProps } from "@/types/timer";
-import ReactConfetti from "react-confetti";
 import { CompletionModal } from "./CompletionModal";
-import { toast } from "sonner";
+import { useWindowSize } from "../hooks/useWindowSize";
+import { useTimerEffects } from "../hooks/useTimerEffects";
+import { TimerHeader } from "./timer/TimerHeader";
+import { TimerConfetti } from "./timer/TimerConfetti";
 
 export const ExpandedTimer = memo(({
   taskName,
@@ -24,42 +26,27 @@ export const ExpandedTimer = memo(({
 }: ExpandedTimerProps) => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const windowSize = useWindowSize();
 
-  // Reset all states
   const resetStates = useCallback(() => {
     console.log("Resetting ExpandedTimer states");
     setShowCompletionModal(false);
     setShowConfetti(false);
   }, []);
 
-  // Reset states when task changes
-  useEffect(() => {
-    console.log("Task changed in ExpandedTimer:", taskName);
-    resetStates();
-  }, [taskName, resetStates]);
+  const handleComplete = useCallback(() => {
+    console.log("Handling timer completion in ExpandedTimer");
+    setShowConfetti(true);
+    setShowCompletionModal(true);
+  }, []);
 
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    console.log("Setting up resize listener in ExpandedTimer");
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      console.log("Cleaning up ExpandedTimer component");
-      window.removeEventListener('resize', handleResize);
-      resetStates();
-    };
-  }, [resetStates]);
+  const { handleComplete: timerComplete } = useTimerEffects({
+    timeLeft: timerCircleProps.timeLeft,
+    isRunning,
+    onComplete: handleComplete,
+    taskName,
+    resetStates,
+  });
 
   const { isRendered, getTransitionProps } = useTransition({
     isVisible: true,
@@ -89,21 +76,6 @@ export const ExpandedTimer = memo(({
     isExpanded: isRendered,
   });
 
-  const handleComplete = useCallback(() => {
-    console.log("Timer completed in expanded mode");
-    setShowConfetti(true);
-    setShowCompletionModal(true);
-    toast.success("Timer completed! Great work! 🎉");
-  }, []);
-
-  // Handle timer completion
-  useEffect(() => {
-    if (timerCircleProps.timeLeft === 0 && isRunning) {
-      console.log("Time is up in expanded mode");
-      handleComplete();
-    }
-  }, [timerCircleProps.timeLeft, isRunning, handleComplete]);
-
   const handleCloseModal = useCallback(() => {
     console.log("Closing completion modal in expanded mode");
     resetStates();
@@ -114,7 +86,7 @@ export const ExpandedTimer = memo(({
 
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
-    onComplete: handleComplete,
+    onComplete: timerComplete,
   };
 
   if (!isRendered) return null;
@@ -137,21 +109,11 @@ export const ExpandedTimer = memo(({
         aria-hidden="true"
       />
 
-      {showConfetti && (
-        <div className="fixed inset-0 z-40">
-          <ReactConfetti
-            width={windowSize.width}
-            height={windowSize.height}
-            gravity={0.12}
-            numberOfPieces={400}
-            recycle={true}
-            colors={["#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD", "#EDE9FE"]}
-            tweenDuration={5000}
-            wind={0.01}
-            initialVelocityY={-2}
-          />
-        </div>
-      )}
+      <TimerConfetti 
+        show={showConfetti}
+        width={windowSize.width}
+        height={windowSize.height}
+      />
 
       <FloatingQuotes favorites={favorites} />
 
@@ -170,9 +132,7 @@ export const ExpandedTimer = memo(({
       >
         <Card className="w-full bg-card shadow-lg p-6 sm:p-8 border-primary/20" {...focusOrder(2)}>
           <div className="flex flex-col items-center space-y-8">
-            <h2 id="timer-heading" className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-              {taskName}
-            </h2>
+            <TimerHeader taskName={taskName} />
 
             <div className="flex flex-col items-center justify-center gap-16 sm:gap-20 py-8 sm:py-12">
               <div className="relative" aria-live="polite" {...focusOrder(3)}>
