@@ -1,5 +1,3 @@
-import { Button } from "./ui/button";
-import { Trash2 } from "lucide-react";
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "./CompletedTasks";
@@ -59,19 +57,8 @@ export const TaskList = ({
         selectedTasks={selectedTasks}
         onTaskClick={handleTaskClick}
         onTaskDelete={handleTaskDelete}
-        onTasksClear={onTasksClear}
+        onTasksClear={selectedTasks.length > 0 ? clearSelectedTasks : onTasksClear}
       />
-      
-      <div className="flex justify-start items-center mt-4">
-        <Button
-          variant="outline"
-          onClick={selectedTasks.length > 0 ? clearSelectedTasks : onTasksClear}
-          className="text-destructive hover:text-destructive"
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          {selectedTasks.length > 0 ? `Clear Selected (${selectedTasks.length})` : 'Clear All'}
-        </Button>
-      </div>
 
       <CompletedTasks 
         tasks={completedTasks} 
