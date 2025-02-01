@@ -42,7 +42,7 @@ export const TaskTable = ({
                 }`}
               onClick={(e) => onTaskClick(task, e)}
             >
-              <TableCell className="py-4">
+              <TableCell className="py-2">
                 <div className="flex justify-between items-center">
                   <div className="line-clamp-2">{task.name}</div>
                   <button
