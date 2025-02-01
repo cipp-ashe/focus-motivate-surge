@@ -146,7 +146,7 @@ export const ExpandedTimer = memo(({
             </h2>
 
             <div className="flex flex-col items-center justify-center gap-16 sm:gap-20 py-8 sm:py-12">
-              <div className="relative w-56 h-56 sm:w-72 sm:h-72" aria-live="polite" {...focusOrder(3)}>
+              <div className="relative w-48 h-48 sm:w-64 sm:h-64" aria-live="polite" {...focusOrder(3)}>
                 <TimerCircle size="large" {...timerCircleProps} />
               </div>
 
