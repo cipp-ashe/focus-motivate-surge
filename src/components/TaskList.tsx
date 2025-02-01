@@ -46,7 +46,7 @@ export const TaskList = ({
     onTaskAdd,
     onTaskSelect,
     onTasksClear,
-    onSelectedTasksClear,
+    onSelectedTasksClear: onSelectedTasksClear!,
     favorites,
   });
 
@@ -62,7 +62,18 @@ export const TaskList = ({
         onTasksClear={onTasksClear}
       />
       
-      <CompletedTasks
+      <div className="flex justify-start items-center mt-4">
+        <Button
+          variant="outline"
+          onClick={selectedTasks.length > 0 ? clearSelectedTasks : onTasksClear}
+          className="text-destructive hover:text-destructive"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          {selectedTasks.length > 0 ? `Clear Selected (${selectedTasks.length})` : 'Clear All'}
+        </Button>
+      </div>
+
+      <CompletedTasks 
         tasks={completedTasks} 
         onSendSummary={() => setShowEmailModal(true)} 
       />

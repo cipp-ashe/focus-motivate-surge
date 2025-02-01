@@ -11,7 +11,7 @@ interface UseTaskManagerProps {
   onTaskAdd: (task: Task) => void;
   onTaskSelect: (task: Task) => void;
   onTasksClear: () => void;
-  onSelectedTasksClear: (taskIds: string[]) => void;  // Made required
+  onSelectedTasksClear: (taskIds: string[]) => void;
   favorites?: Quote[];
 }
 
