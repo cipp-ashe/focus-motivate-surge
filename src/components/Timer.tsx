@@ -57,7 +57,7 @@ export const Timer = ({
   } = useTimer({
     initialDuration: duration,
     onTimeUp: () => {
-      handleComplete();
+      timerControlsProps.onComplete?.();
       playSound();
       toast("Time's up! Great work! ✨");
     },
