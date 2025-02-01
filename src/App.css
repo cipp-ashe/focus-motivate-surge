@@ -1,11 +1,17 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
   min-height: 100vh;
   max-height: 100vh;
   overflow-y: auto;
+}
+
+@media (min-width: 640px) {
+  #root {
+    padding: 2rem;
+  }
 }
 
 /* Themed Scrollbars */
@@ -59,7 +65,13 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 1em;
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: 2em;
+  }
 }
 
 .read-the-docs {
@@ -70,6 +82,12 @@
 .expanded-timer-card {
   min-width: 90%;
   max-width: 800px;
-  min-height: 600px;
+  min-height: auto;
   margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .expanded-timer-card {
+    min-height: 600px;
+  }
 }

@@ -23,29 +23,28 @@ export const CompactTimer = memo(({
   isLoadingAudio,
   onClick,
 }: CompactTimerProps) => {
-  // Use focus trap for settings panel when it's visible
   const { containerRef } = useFocusTrap({
-    enabled: !isRunning, // Only trap focus when settings are visible
+    enabled: !isRunning,
   });
 
   return (
     <Card 
-    ref={containerRef}
-    className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-6 ${focusClass}`}
+      ref={containerRef}
+      className={`mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-4 sm:p-6 ${focusClass}`}
       {...a11yProps}
     >
-      <div className="text-center space-y-6">
+      <div className="text-center space-y-4 sm:space-y-6">
         <h2 
-          className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate"
+          className="text-xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 truncate px-2"
           {...focusOrder(1)}
         >
           {taskName}
         </h2>
 
         <div className={`overflow-hidden transition-all duration-700 ${
-          isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-6'
+          isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100 mt-4 sm:mt-6'
         }`}>
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div {...focusOrder(2)}>
               <MinutesInput
                 minutes={minutes}
