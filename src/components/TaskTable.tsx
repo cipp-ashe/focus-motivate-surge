@@ -10,6 +10,7 @@ import { Trash2, Clock } from "lucide-react";
 import { Task } from "./TaskList";
 import { useState } from "react";
 import { MinutesInput } from "./MinutesInput";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -27,8 +28,10 @@ export const TaskTable = ({
   onTasksClear,
 }: TaskTableProps) => {
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const handleDurationClick = (e: React.MouseEvent, taskId: string) => {
+    e.preventDefault();
     e.stopPropagation();
     setEditingDuration(taskId);
   };
@@ -43,7 +46,14 @@ export const TaskTable = ({
   };
 
   const handleDurationBlur = () => {
-    setEditingDuration(null);
+    // Add a small delay before removing editing state on mobile
+    if (isMobile) {
+      setTimeout(() => {
+        setEditingDuration(null);
+      }, 200);
+    } else {
+      setEditingDuration(null);
+    }
   };
 
   return (
@@ -86,12 +96,17 @@ export const TaskTable = ({
                 <div 
                   className="flex items-center justify-end gap-2"
                   onClick={(e) => handleDurationClick(e, task.id)}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    handleDurationClick(e as any, task.id);
+                  }}
                 >
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   {editingDuration === task.id ? (
                     <div 
                       onClick={e => e.stopPropagation()} 
-                      className="w-32"
+                      onTouchStart={e => e.stopPropagation()}
+                      className={`w-32 ${isMobile ? 'touch-manipulation' : ''}`}
                     >
                       <MinutesInput
                         minutes={task.duration || 0}
@@ -102,7 +117,9 @@ export const TaskTable = ({
                       />
                     </div>
                   ) : (
-                    <span className="text-muted-foreground hover:text-foreground transition-colors">
+                    <span 
+                      className="text-muted-foreground hover:text-foreground transition-colors min-h-[24px] min-w-[24px] flex items-center justify-end"
+                    >
                       {task.duration || '–'}
                     </span>
                   )}
