@@ -7,7 +7,6 @@ import {
 } from "./ui/dialog";
 import { Timer, Clock, Pause, Quote, type LucideIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import { formatDistanceToNow } from "date-fns";
 
 interface CompletionMetrics {
   startTime: Date;
@@ -60,8 +59,16 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
     </div>
   );
 
+  const handleClose = () => {
+    console.log("Closing completion modal and cleaning up state");
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={() => handleClose()}
+    >
       <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-sm border-primary/20">
         <DialogHeader>
           <DialogTitle className="text-center">
@@ -81,7 +88,7 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
             <MetricItem
               icon={Timer}
               label="Total Time"
-              value={formatDuration(Math.round(actualDuration))}
+              value={formatDuration(Math.round(actualDuration / 60))}
             />
             
             <MetricItem
@@ -91,7 +98,7 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
             />
 
             <div className="text-xs text-muted-foreground text-center">
-              (Planned: {formatDuration(Math.round(originalDuration))})
+              (Planned: {formatDuration(Math.round(originalDuration / 60))})
             </div>
 
             <MetricItem
@@ -110,7 +117,7 @@ export const CompletionModal = memo(({ isOpen, onClose, metrics, taskName }: Com
 
         <div className="flex justify-center">
           <Button 
-            onClick={onClose}
+            onClick={handleClose}
             className="bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary transition-all duration-300 hover:scale-105"
           >
             Close

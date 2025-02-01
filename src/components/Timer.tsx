@@ -57,6 +57,7 @@ export const Timer = ({
     addTime: addMinutes,
     setMinutes,
     completeTimer,
+    reset: resetTimer,
   } = useTimerState({
     initialDuration: internalMinutes * 60,
     onTimeUp: () => {
@@ -93,14 +94,24 @@ export const Timer = ({
     pause();
     onComplete();
     setIsExpanded(false);
+    resetTimer();
     toast("Task completed! You're crushing it! 🎉");
-  }, [completeTimer, pause, onComplete]);
+  }, [completeTimer, pause, onComplete, resetTimer]);
 
   const handleAddTime = useCallback(() => {
     addMinutes(ADD_TIME_MINUTES);
     onAddTime();
     toast(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
   }, [addMinutes, onAddTime]);
+
+  // Cleanup effect when component unmounts or task changes
+  useEffect(() => {
+    return () => {
+      console.log("Timer cleanup - resetting states");
+      resetTimer();
+      setIsExpanded(false);
+    };
+  }, [resetTimer, taskName]);
 
   const timerCircleProps = {
     isRunning,
