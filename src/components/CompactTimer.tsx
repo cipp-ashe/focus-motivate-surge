@@ -72,9 +72,9 @@ export const CompactTimer = memo(({
   };
 
   const handleTimerClick = (e: React.MouseEvent | React.TouchEvent) => {
-    // Only handle clicks/touches when the timer is running
+    // Only handle clicks/touches when the timer is running and we want to expand
     if (isRunning && onClick) {
-      e.preventDefault(); // Prevent default only when we're handling the click
+      e.stopPropagation(); // Stop event from bubbling but allow scrolling
       onClick();
     }
   };
@@ -142,7 +142,7 @@ export const CompactTimer = memo(({
 
           <div 
             {...focusOrder(4)}
-            className={`${focusClass} ${isRunning ? 'cursor-pointer touch-none' : ''}`}
+            className={`${focusClass} ${isRunning ? 'cursor-pointer' : ''}`}
             onClick={handleTimerClick}
             onTouchEnd={handleTimerClick}
           >
