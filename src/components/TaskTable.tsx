@@ -50,23 +50,21 @@ export const TaskTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[70%]">
-              <div className="flex justify-between items-center">
-                <span>Active Tasks</span>
-                {tasks.length > 0 && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTasksClear();
-                    }}
-                    className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
-                  >
-                    Clear All
-                  </button>
-                )}
-              </div>
-            </TableHead>
+            <TableHead className="w-[50%]">Active Tasks</TableHead>
             <TableHead className="w-[30%]">Duration (min)</TableHead>
+            <TableHead className="w-[20%] text-right">
+              {tasks.length > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTasksClear();
+                  }}
+                  className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
+                >
+                  Clear All
+                </button>
+              )}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,18 +79,7 @@ export const TaskTable = ({
               onClick={(e) => onTaskClick(task, e)}
             >
               <TableCell className="py-2">
-                <div className="flex justify-between items-center">
-                  <span className="line-clamp-2">{task.name}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTaskDelete(task.id);
-                    }}
-                    className="ml-2 text-muted-foreground hover:text-destructive transition-colors duration-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                <span className="line-clamp-2">{task.name}</span>
               </TableCell>
               <TableCell className="py-2">
                 <div 
@@ -121,6 +108,17 @@ export const TaskTable = ({
                     </span>
                   )}
                 </div>
+              </TableCell>
+              <TableCell className="py-2 text-right">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTaskDelete(task.id);
+                  }}
+                  className="ml-2 text-muted-foreground hover:text-destructive transition-colors duration-200"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </TableCell>
             </TableRow>
           ))}
