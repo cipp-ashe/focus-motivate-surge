@@ -16,6 +16,7 @@ export const useTimerState = ({
   const [timeLeft, setTimeLeft] = useState(initialDuration);
   const [minutes, setMinutesState] = useState(Math.floor(initialDuration / 60));
   const [isRunning, setIsRunning] = useState(false);
+  const [lastPausedTime, setLastPausedTime] = useState<number | null>(null);
   
   const {
     metrics,
@@ -32,6 +33,7 @@ export const useTimerState = ({
       setTimeLeft(initialDuration);
       setMinutesState(Math.floor(initialDuration / 60));
       resetMetrics(initialDuration);
+      setLastPausedTime(null);
     }
   }, [initialDuration, isRunning, resetMetrics]);
 
@@ -40,26 +42,34 @@ export const useTimerState = ({
     setMinutesState(newMinutes);
     setTimeLeft(newMinutes * 60);
     onDurationChange?.(newMinutes);
+    setLastPausedTime(null);
   }, [onDurationChange]);
 
   const start = useCallback(() => {
     console.log('Timer State - Starting timer');
     setIsRunning(true);
     startTimer();
-    toast("Timer started! You've got this! 🚀");
-  }, [startTimer]);
+    if (lastPausedTime === null) {
+      toast("Timer started! You've got this! 🚀");
+    } else {
+      toast("Timer resumed! Keep going! 💪");
+    }
+  }, [startTimer, lastPausedTime]);
 
   const pause = useCallback(() => {
     console.log('Timer State - Pausing timer');
     setIsRunning(false);
+    setLastPausedTime(timeLeft);
     pauseTimer();
-  }, [pauseTimer]);
+    toast("Timer paused! Take a breather 😌");
+  }, [pauseTimer, timeLeft]);
 
   const reset = useCallback(() => {
     console.log('Timer State - Resetting timer');
     setIsRunning(false);
     setTimeLeft(minutes * 60);
     resetMetrics(minutes * 60);
+    setLastPausedTime(null);
   }, [minutes, resetMetrics]);
 
   const addTime = useCallback((additionalMinutes: number) => {
