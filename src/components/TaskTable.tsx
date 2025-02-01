@@ -8,8 +8,8 @@ import {
 } from "./ui/table";
 import { Trash2, Clock } from "lucide-react";
 import { Task } from "./TaskList";
-import { Input } from "./ui/input";
 import { useState } from "react";
+import { MinutesInput } from "./MinutesInput";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -27,33 +27,15 @@ export const TaskTable = ({
   onTasksClear,
 }: TaskTableProps) => {
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
-  const [durationValues, setDurationValues] = useState<Record<string, number>>({});
-
-  const handleDurationChange = (taskId: string, value: string) => {
-    // Handle MM:SS format
-    if (value.includes(':')) {
-      const [minutes, seconds] = value.split(':').map(v => parseInt(v) || 0);
-      const totalMinutes = minutes + (seconds / 60);
-      setDurationValues(prev => ({
-        ...prev,
-        [taskId]: totalMinutes
-      }));
-      return;
-    }
-
-    // Handle direct minute input
-    const duration = parseInt(value) || 0;
-    setDurationValues(prev => ({
-      ...prev,
-      [taskId]: duration
-    }));
-  };
 
   const handleDurationBlur = (taskId: string) => {
     setEditingDuration(null);
+  };
+
+  const handleDurationChange = (taskId: string, minutes: number) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      task.duration = durationValues[taskId];
+      task.duration = minutes;
     }
   };
 
@@ -103,16 +85,14 @@ export const TaskTable = ({
                 >
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   {editingDuration === task.id ? (
-                    <Input
-                      type="text"
-                      placeholder="5 or 5:00"
-                      value={durationValues[task.id] || task.duration || ''}
-                      onChange={(e) => handleDurationChange(task.id, e.target.value)}
-                      onBlur={() => handleDurationBlur(task.id)}
-                      className="w-24 h-8 text-right"
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()}
-                    />
+                    <div onClick={e => e.stopPropagation()} className="w-32">
+                      <MinutesInput
+                        minutes={task.duration || 0}
+                        onMinutesChange={(minutes) => handleDurationChange(task.id, minutes)}
+                        minMinutes={1}
+                        maxMinutes={60}
+                      />
+                    </div>
                   ) : (
                     <span className="text-muted-foreground">
                       {task.duration || '–'}
