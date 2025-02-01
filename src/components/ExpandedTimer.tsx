@@ -61,18 +61,12 @@ export const ExpandedTimer = memo(({
     isExpanded: isRendered,
   });
 
-  /**
-   * Handles task completion, whether manual or automatic.
-   */
   const handleComplete = useCallback(() => {
     console.log("Timer completed! Showing confetti and modal.");
     setShowConfetti(true);
     setShowCompletionModal(true);
   }, []);
 
-  /**
-   * Ensures that when the timer runs out, it calls `handleComplete`.
-   */
   useEffect(() => {
     if (timerCircleProps.timeLeft === 0 && isRunning) {
       console.log("Time is up, triggering handleComplete.");
@@ -80,9 +74,6 @@ export const ExpandedTimer = memo(({
     }
   }, [timerCircleProps.timeLeft, isRunning, handleComplete]);
 
-  /**
-   * Handles closing of the completion modal and triggering any additional logic.
-   */
   const handleCloseModal = useCallback(() => {
     console.log("Closing completion modal.");
     setShowConfetti(false);
@@ -92,12 +83,9 @@ export const ExpandedTimer = memo(({
     }
   }, [timerControlsProps]);
 
-  /**
-   * Ensures that `onComplete` prop is always bound to `handleComplete`.
-   */
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
-    onComplete: handleComplete, // Ensures manual & auto completion use the same function
+    onComplete: handleComplete,
   };
 
   if (!isRendered) return null;
@@ -140,7 +128,7 @@ export const ExpandedTimer = memo(({
 
       <button
         onClick={onClose}
-        className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-[53] transition-all duration-300 hover:scale-105 ${focusClass}`}
+        className={`absolute top-6 right-6 p-2 text-muted-foreground hover:text-foreground z-[53] transition-all duration-300 hover:scale-105 ${focusClass}`}
         aria-label="Minimize expanded view"
         {...focusOrder(1)}
       >
@@ -148,22 +136,22 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div
-        className="flex flex-col items-center justify-center h-full px-2 sm:px-6 py-2 sm:py-4 z-[52] mx-auto w-[95%] sm:w-[85%] md:w-[500px]"
+        className="flex flex-col items-center justify-center h-full px-4 sm:px-8 py-4 sm:py-8 z-[52] mx-auto w-full max-w-[95%] sm:max-w-[85%] md:max-w-[600px]"
         style={transitionProps.style}
       >
-        <div className="w-full mb-4 sm:mb-6">
-          <Card className="bg-card shadow-lg p-4 sm:p-6 border-primary/20" {...focusOrder(2)}>
-            <div className="flex flex-col items-center">
-              <h2 id="timer-heading" className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 mb-6">
+        <div className="w-full mb-6 sm:mb-8">
+          <Card className="bg-card shadow-lg p-6 sm:p-8 border-primary/20" {...focusOrder(2)}>
+            <div className="flex flex-col items-center space-y-6 sm:space-y-8">
+              <h2 id="timer-heading" className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                 {taskName}
               </h2>
 
-              <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 py-4 sm:py-6">
+              <div className="flex flex-col items-center justify-center gap-8 sm:gap-10 py-6 sm:py-8">
                 <div className="relative w-56 h-56 sm:w-72 sm:h-72" aria-live="polite" {...focusOrder(3)}>
                   <TimerCircle size="large" {...timerCircleProps} />
                 </div>
 
-                <div className="w-full max-w-md px-2 mb-2 sm:mb-4" {...focusOrder(4)}>
+                <div className="w-full max-w-md px-4 mb-4" {...focusOrder(4)}>
                   <TimerControls {...modifiedTimerControlsProps} size="large" showAddTime />
                 </div>
               </div>
@@ -171,7 +159,7 @@ export const ExpandedTimer = memo(({
           </Card>
         </div>
 
-        <div className="w-full mt-4 sm:mt-6">
+        <div className="w-full mt-6 sm:mt-8">
           <QuoteDisplay showAsOverlay currentTask={taskName} favorites={favorites} setFavorites={setFavorites} />
         </div>
       </div>
