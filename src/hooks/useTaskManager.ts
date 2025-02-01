@@ -41,6 +41,13 @@ export const useTaskManager = ({
     }
   };
 
+  const handleTaskDelete = (taskId: string) => {
+    if (onSelectedTasksClear) {
+      onSelectedTasksClear([taskId]);
+      setSelectedTasks(prev => prev.filter(id => id !== taskId));
+    }
+  };
+
   const clearSelectedTasks = () => {
     if (onSelectedTasksClear) {
       onSelectedTasksClear(selectedTasks);
@@ -77,5 +84,6 @@ export const useTaskManager = ({
     handleTaskClick,
     clearSelectedTasks,
     handleSendSummary,
+    handleTaskDelete,
   };
 };
