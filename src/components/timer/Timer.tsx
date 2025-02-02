@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAudio } from "@/hooks/useAudio";
 import { useTimerState } from "@/hooks/useTimerState";
-import { useTimerEffects } from "@/hooks/useTimerEffects";
 import { useTransition } from "@/hooks/useTransition";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { TimerDisplay } from "./TimerDisplay";
@@ -74,6 +73,7 @@ export const Timer = ({
         
         if (!finalMetrics) {
           console.error('No metrics returned from completeTimer');
+          toast.error("An error occurred while completing the timer");
           return;
         }
 
@@ -109,6 +109,7 @@ export const Timer = ({
       
       if (!finalMetrics) {
         console.error('No metrics returned from manual completion');
+        toast.error("An error occurred while completing the timer");
         return;
       }
 
