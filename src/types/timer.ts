@@ -95,6 +95,7 @@ export interface Task {
   name: string;
   completed: boolean;
   duration?: number;
+  completedAt?: string;
 }
 
 export type SoundOption = 'bell' | 'chime' | 'ding' | 'none';
