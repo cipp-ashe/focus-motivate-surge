@@ -1,28 +1,40 @@
-export interface TaskMetrics {
-  originalDuration: number;
-  actualDuration: number;
-  pausedTime: number;
-  extensionTime: number;
-  netEffectiveTime: number;
-  efficiencyRatio: number;
-  completionStatus: string;
-  pauseCount: number;
-  favoriteQuotes: number;
+export interface Task {
+  id: string;
+  name: string;
+  completed: boolean;
+  metrics?: {
+    originalDuration: number;
+    actualDuration: number;
+    pauseCount: number;
+    favoriteQuotes: number;
+    pausedTime: number;
+    extensionTime: number;
+    netEffectiveTime: number;
+    efficiencyRatio: number;
+    completionStatus: string;
+  };
 }
 
-export interface TaskSummary {
-  taskName: string;
-  completed: boolean;
-  metrics?: TaskMetrics;
-  relatedQuotes: Array<{ text: string; author: string }>;
+export interface Quote {
+  text: string;
+  author: string;
+  timestamp?: string;
+  task?: string;
+}
+
+export interface DailySummary {
+  completedTasks: Array<{
+    taskName: string;
+    metrics?: {
+      actualDuration: number;
+      efficiencyRatio: number;
+    };
+  }>;
+  totalTimeSpent: number;
+  favoriteQuotes: Quote[];
 }
 
 export interface RequestBody {
   email: string;
-  summaryData: {
-    completedTasks: TaskSummary[];
-    unfinishedTasks: TaskSummary[];
-    totalTimeSpent: number;
-    favoriteQuotes: Array<{ text: string; author: string }>;
-  };
+  summaryData: DailySummary;
 }
