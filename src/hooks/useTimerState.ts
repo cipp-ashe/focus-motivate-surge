@@ -178,6 +178,8 @@ export const useTimerState = ({
     
     return new Promise((resolve) => {
       setState(prev => {
+        console.debug('Completing timer with state:', prev);
+        
         const elapsedMs = prev.metrics.startTime
           ? completionTime.getTime() - prev.metrics.startTime.getTime()
           : 0;
@@ -211,6 +213,8 @@ export const useTimerState = ({
           extensionTime: prev.metrics.extensionTime
         };
 
+        console.debug('Timer completed with metrics:', finalMetrics);
+
         return {
           ...prev,
           isRunning: false,
@@ -218,7 +222,6 @@ export const useTimerState = ({
         };
       });
 
-      // Resolve with the final metrics after state is updated
       resolve(finalMetrics!);
     });
   }, []);
@@ -277,7 +280,6 @@ export const useTimerState = ({
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    let completionTimeout: NodeJS.Timeout;
     
     if (state.isRunning && state.timeLeft > 0) {
       interval = setInterval(() => {
@@ -286,10 +288,16 @@ export const useTimerState = ({
           
           if (newTimeLeft <= 0) {
             clearInterval(interval);
-            completionTimeout = setTimeout(() => {
-              completeTimer();
-              onTimeUp?.();
-            }, 0);
+            // Ensure we complete the timer immediately when time is up
+            completeTimer().then(metrics => {
+              console.debug('Natural completion metrics:', metrics);
+              if (onTimeUp) {
+                onTimeUp();
+              }
+            }).catch(error => {
+              console.error('Error during natural completion:', error);
+              toast.error("An error occurred while completing the timer");
+            });
             
             return { ...prev, timeLeft: 0, isRunning: false };
           }
@@ -300,7 +308,6 @@ export const useTimerState = ({
 
     return () => {
       if (interval) clearInterval(interval);
-      if (completionTimeout) clearTimeout(completionTimeout);
     };
   }, [state.isRunning, state.timeLeft, onTimeUp, completeTimer]);
 
