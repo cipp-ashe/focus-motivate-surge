@@ -57,14 +57,14 @@ export const TimerCompactView = memo(({
   setFavorites,
 }: TimerCompactViewProps) => {
   return (
-    <Card className="w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-4 sm:p-6">
-      <div className="space-y-4 sm:space-y-6">
+    <Card className="w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-3 sm:p-4">
+      <div className="space-y-3 sm:space-y-4">
         <TimerHeader taskName={taskName} />
 
         <div className={`overflow-hidden transition-all duration-700 ${
           timerCircleProps.isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'
         }`}>
-          <div className="flex flex-col items-center space-y-4 pt-2">
+          <div className="flex flex-col items-center space-y-3 pt-1">
             <MinutesInput
               minutes={internalMinutes}
               onMinutesChange={onMinutesChange}
