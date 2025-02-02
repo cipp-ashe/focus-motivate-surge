@@ -45,7 +45,7 @@ export const TimerControls = memo(({
             {...completeButtonA11yProps}
           >
             <Check className={`mr-2 ${iconSize}`} />
-            {showAddTime ? "Complete" : "Complete Early"}
+            Complete Early
           </Button>
           {showAddTime && onAddTime && (
             <Button

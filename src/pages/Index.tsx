@@ -1,18 +1,16 @@
-import { useState, useCallback, useEffect } from "react";
-import { Timer } from "@/components/Timer";
-import { QuoteDisplay, FavoriteQuotes } from "@/components/QuoteDisplay";
-import { TaskList, Task } from "@/components/TaskList";
+import { useState, useEffect } from "react";
+import { useTheme } from "@/hooks/useTheme";
+import { TaskManager } from "@/components/tasks/TaskManager";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-
-interface Quote {
-  text: string;
-  author: string;
-}
+import type { Task } from "@/components/TaskList";
+import type { Quote } from "@/types/timer";
 
 const Index = () => {
-  const [tasks, setTasks] = useState<Task[]>(() => {
+  const { isDark, toggleTheme } = useTheme(true);
+  
+  // Load initial tasks from localStorage
+  const [initialTasks] = useState<Task[]>(() => {
     try {
       const saved = localStorage.getItem('taskList');
       return saved ? JSON.parse(saved) : [];
@@ -21,8 +19,8 @@ const Index = () => {
       return [];
     }
   });
-  
-  const [completedTasks, setCompletedTasks] = useState<Task[]>(() => {
+
+  const [initialCompletedTasks] = useState<Task[]>(() => {
     try {
       const saved = localStorage.getItem('completedTasks');
       return saved ? JSON.parse(saved) : [];
@@ -31,82 +29,32 @@ const Index = () => {
       return [];
     }
   });
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [duration, setDuration] = useState(1500); // Default to 25 minutes
-  const [isDark, setIsDark] = useState(true);
-  const [favorites, setFavorites] = useState<Quote[]>([]);
 
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+  const [favorites, setFavorites] = useState<Quote[]>(() => {
+    try {
+      const saved = localStorage.getItem('favoriteQuotes');
+      return saved && saved !== "undefined" ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('Error loading favorite quotes:', error);
+      return [];
     }
-  }, [isDark]);
+  });
 
-  useEffect(() => {
-    if (selectedTask?.duration) {
-      console.log('Setting duration from selected task:', selectedTask.duration * 60);
-      setDuration(selectedTask.duration * 60);
-    } else {
-      console.log('Setting default duration of 25 minutes');
-      setDuration(1500); // 25 minutes default
-    }
-  }, [selectedTask]);
-
-  useEffect(() => {
+  // Handle task updates
+  const handleTasksUpdate = (tasks: Task[]) => {
     localStorage.setItem('taskList', JSON.stringify(tasks));
-    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-  }, [tasks, completedTasks]);
+    window.dispatchEvent(new CustomEvent('tasksUpdated', { detail: { tasks } }));
+  };
 
-  const handleTaskAdd = useCallback((task: Task) => {
-    setTasks((prev) => [...prev, task]);
-  }, []);
+  const handleCompletedTasksUpdate = (tasks: Task[]) => {
+    localStorage.setItem('completedTasks', JSON.stringify(tasks));
+  };
 
-  const handleTaskSelect = useCallback((task: Task) => {
-    setSelectedTask(task);
-  }, []);
-
-  const handleTaskComplete = useCallback(() => {
-    if (selectedTask) {
-      setCompletedTasks((prev) => [...prev, { ...selectedTask, completed: true }]);
-      setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
-      setSelectedTask(null);
-    }
-  }, [selectedTask]);
-
-  const handleTasksClear = useCallback(() => {
-    setTasks([]);
-    setCompletedTasks([]);
-    setSelectedTask(null);
-  }, []);
-
-  const handleSelectedTasksClear = useCallback((taskIds: string[]) => {
-    setTasks(prev => prev.filter(task => !taskIds.includes(task.id)));
-    setSelectedTask(prev => prev && taskIds.includes(prev.id) ? null : prev);
-  }, []);
-
-  const handleSummaryEmailSent = useCallback(() => {
-    setCompletedTasks([]); // Clear completed tasks after sending summary
-    toast.success("Summary sent! Completed tasks have been cleared.");
-  }, []);
-
-  // Listen for task updates
-  useEffect(() => {
-    const handleTasksUpdate = (event: CustomEvent<{ tasks: Task[] }>) => {
-      setTasks(event.detail.tasks);
-    };
-
-    window.addEventListener('tasksUpdated', handleTasksUpdate as EventListener);
-    
-    return () => {
-      window.removeEventListener('tasksUpdated', handleTasksUpdate as EventListener);
-    };
-  }, []);
+  // Handle favorites updates
+  const handleFavoritesUpdate = (newFavorites: Quote[]) => {
+    setFavorites(newFavorites);
+    localStorage.setItem('favoriteQuotes', JSON.stringify(newFavorites));
+  };
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
@@ -118,53 +66,25 @@ const Index = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsDark(!isDark)}
+            onClick={toggleTheme}
             className="rounded-full hover:bg-primary/20"
           >
-            {isDark ? <Sun className="h-5 w-5 sm:h-6 sm:w-6" /> : <Moon className="h-5 w-5 sm:h-6 sm:w-6" />}
+            {isDark ? (
+              <Sun className="h-5 w-5 sm:h-6 sm:w-6" />
+            ) : (
+              <Moon className="h-5 w-5 sm:h-6 sm:w-6" />
+            )}
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div className="space-y-4 sm:space-y-6 order-1">
-            <TaskList
-              tasks={tasks}
-              completedTasks={completedTasks}
-              onTaskAdd={handleTaskAdd}
-              onTaskSelect={handleTaskSelect}
-              onTasksClear={handleTasksClear}
-              onSelectedTasksClear={handleSelectedTasksClear}
-              onSummaryEmailSent={handleSummaryEmailSent}
-              favorites={favorites}
-            />
-          </div>
-
-          <div className="space-y-4 sm:space-y-6 order-2">
-            {selectedTask ? (
-              <Timer
-                duration={duration}
-                taskName={selectedTask.name}
-                onComplete={handleTaskComplete}
-                onAddTime={() => {}}
-                onDurationChange={(minutes) => {
-                  console.log('Duration changed to:', minutes * 60);
-                  setDuration(minutes * 60);
-                }}
-                favorites={favorites}
-                setFavorites={setFavorites}
-              />
-            ) : (
-              <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">
-                Select a task to start the timer
-              </div>
-            )}
-            <QuoteDisplay favorites={favorites} setFavorites={setFavorites} />
-          </div>
-        </div>
-        
-        <div className="mt-8">
-          <FavoriteQuotes favorites={favorites} />
-        </div>
+        <TaskManager
+          initialTasks={initialTasks}
+          initialCompletedTasks={initialCompletedTasks}
+          initialFavorites={favorites}
+          onTasksUpdate={handleTasksUpdate}
+          onCompletedTasksUpdate={handleCompletedTasksUpdate}
+          onFavoritesChange={handleFavoritesUpdate}
+        />
       </div>
     </div>
   );

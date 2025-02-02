@@ -6,6 +6,7 @@ export interface TimerMetrics {
   actualDuration: number;
   favoriteQuotes: number;
   pausedTime: number;
+  lastPauseTimestamp: Date | null;
   extensionTime: number;
   netEffectiveTime: number;
   efficiencyRatio: number;

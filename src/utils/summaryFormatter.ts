@@ -28,9 +28,26 @@ export const formatDailySummary = (
   unfinishedTasks: TaskSummary[],
   favoriteQuotes: Quote[]
 ): DailySummary => {
+  console.log('Summary Formatter - Input tasks:', completedTasks.map(task => ({
+    taskName: task.taskName,
+    metrics: task.metrics ? {
+      originalDuration: task.metrics.originalDuration,
+      actualDuration: task.metrics.actualDuration,
+      netEffectiveTime: task.metrics.netEffectiveTime,
+      efficiencyRatio: task.metrics.efficiencyRatio
+    } : null
+  })));
+
   const metrics = completedTasks
     .map(task => task.metrics)
     .filter((metrics): metrics is TimerMetrics => metrics !== undefined);
+
+  console.log('Summary Formatter - Filtered metrics:', metrics.map(m => ({
+    originalDuration: m.originalDuration,
+    actualDuration: m.actualDuration,
+    netEffectiveTime: m.netEffectiveTime,
+    efficiencyRatio: m.efficiencyRatio
+  })));
 
   const totalTimeSpent = metrics.reduce((total, metric) => {
     return total + (metric.actualDuration || 0);

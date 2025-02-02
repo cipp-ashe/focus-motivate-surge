@@ -1,46 +1,22 @@
-import { useEffect, useCallback } from 'react';
-import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 interface UseTimerEffectsProps {
-  timeLeft: number;
-  isRunning: boolean;
-  onComplete: () => void;
+  timeLeft?: number;
+  isRunning?: boolean;
   taskName: string;
   resetStates: () => void;
 }
 
 export const useTimerEffects = ({
-  timeLeft,
-  isRunning,
-  onComplete,
   taskName,
   resetStates,
+  isRunning,
 }: UseTimerEffectsProps) => {
-  // Handle timer completion
+  // Reset states when task changes and timer is not running
   useEffect(() => {
-    if (timeLeft === 0 && isRunning) {
-      console.log(`Timer completed for task: ${taskName}`);
-      onComplete();
-    }
-  }, [timeLeft, isRunning, onComplete, taskName]);
-
-  // Reset states when task changes
-  useEffect(() => {
-    console.log("Task changed, resetting states for:", taskName);
-    resetStates();
-    return () => {
-      console.log("Cleaning up timer effects for:", taskName);
+    if (!isRunning) {
       resetStates();
-    };
-  }, [taskName, resetStates]);
-
-  const handleComplete = useCallback(() => {
-    console.log("Handling timer completion for:", taskName);
-    onComplete();
-    toast.success("Timer completed! Great work! 🎉");
-  }, [onComplete, taskName]);
-
-  return {
-    handleComplete,
-  };
+    }
+    return () => resetStates();
+  }, [taskName, resetStates, isRunning]);
 };

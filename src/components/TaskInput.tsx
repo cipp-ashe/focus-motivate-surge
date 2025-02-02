@@ -16,6 +16,15 @@ interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
 }
 
+// Generate a more reliable UUID for task IDs
+const generateId = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
   const [newTaskName, setNewTaskName] = useState("");
   const [isBulkAdd, setIsBulkAdd] = useState(false);
@@ -30,7 +39,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
       tasks.forEach(taskName => {
         if (taskName.trim()) {
           onTaskAdd({
-            id: Math.random().toString(),
+            id: generateId(),
             name: taskName.trim(),
             completed: false,
           });
@@ -38,7 +47,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
       });
     } else {
       onTaskAdd({
-        id: Math.random().toString(),
+        id: generateId(),
         name: newTaskName.trim(),
         completed: false,
       });
@@ -98,26 +107,26 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
               </button>
             )}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button type="button" variant="outline" size="icon">
-                <List className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setIsBulkAdd(false)}>
-                Single Task Mode
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsBulkAdd(true)}>
-                Bulk Add Mode
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {isBulkAdd && (
-            <Button type="submit" variant="default" size="icon">
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="outline" size="icon">
+                  <List className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setIsBulkAdd(false)}>
+                  Single Task Mode
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsBulkAdd(true)}>
+                  Bulk Add Mode
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button type="submit" variant="default" size="icon" disabled={!newTaskName.trim()}>
               <Send className="h-4 w-4" />
             </Button>
-          )}
+          </div>
         </div>
       </form>
     </Card>

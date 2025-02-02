@@ -39,7 +39,7 @@ export const SoundSelector = memo(({
       variant="outline"
       size="sm"
       onClick={onTestSound}
-      className="mt-2"
+      className="mt-2 mx-auto block"
       disabled={isLoadingAudio || selectedSound === "none"}
       aria-label={`Test ${selectedSound} sound`}
     >

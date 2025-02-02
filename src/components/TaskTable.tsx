@@ -30,8 +30,13 @@ export const TaskTable = ({
   const isMobile = useIsMobile();
 
   const preventPropagation = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.stopPropagation(); // Changed from preventDefault to stopPropagation
+    e.stopPropagation();
   }, []);
+
+  const handleClearAll = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    preventPropagation(e);
+    onTasksClear();
+  }, [onTasksClear, preventPropagation]);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
     // Find the task in the tasks array
@@ -41,36 +46,30 @@ export const TaskTable = ({
     // Parse the new duration, ensuring it's between 1 and 60
     const duration = Math.min(Math.max(parseInt(newDuration) || 25, 1), 60);
     
-    // Get existing tasks from localStorage
-    const existingTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+    // Create an updated task with the new duration
+    const updatedTask = { ...task, duration };
     
-    // Update the task's duration
-    const updatedTasks = existingTasks.map((t: Task) => 
-      t.id === taskId ? { ...t, duration } : t
-    );
-    
-    // Save back to localStorage
-    localStorage.setItem('taskList', JSON.stringify(updatedTasks));
-    
-    // Update the tasks in the parent component through state management
-    const event = new CustomEvent('tasksUpdated', { 
-      detail: { tasks: updatedTasks } 
-    });
-    window.dispatchEvent(event);
-  }, [tasks]);
+    // Simulate a click event to update the selected task with new duration
+    onTaskClick(updatedTask, new MouseEvent('click') as unknown as React.MouseEvent);
+  }, [tasks, onTaskClick]);
+
+  const handleTaskDelete = useCallback((e: React.MouseEvent | React.TouchEvent, taskId: string) => {
+    preventPropagation(e);
+    onTaskDelete(taskId);
+  }, [onTaskDelete, preventPropagation]);
 
   return (
     <div className="mt-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[60%]">Active Tasks</TableHead>
-            <TableHead className="w-[20%] text-right">Duration (min)</TableHead>
-            <TableHead className="w-[20%] text-right">
+            <TableHead className="w-[55%]">Active Tasks</TableHead>
+            <TableHead className="w-[30%] text-right">Estimate (min)</TableHead>
+            <TableHead className="w-[15%] text-right">
               {tasks.length > 0 && (
                 <button
-                  onClick={preventPropagation}
-                  onTouchStart={preventPropagation}
+                  onClick={handleClearAll}
+                  onTouchStart={handleClearAll}
                   className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
                 >
                   Clear All
@@ -114,11 +113,8 @@ export const TaskTable = ({
               </TableCell>
               <TableCell className="py-2 text-right">
                 <button
-                  onClick={preventPropagation}
-                  onTouchStart={(e) => {
-                    preventPropagation(e);
-                    onTaskDelete(task.id);
-                  }}
+                  onClick={(e) => handleTaskDelete(e, task.id)}
+                  onTouchStart={(e) => handleTaskDelete(e, task.id)}
                   className="ml-2 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation"
                 >
                   <Trash2 className="h-4 w-4" />

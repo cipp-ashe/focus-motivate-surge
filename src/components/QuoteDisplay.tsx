@@ -7,6 +7,7 @@ import { useQuoteManager } from "@/hooks/useQuoteManager";
 interface QuoteDisplayProps {
   favorites: Quote[];
   setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  onLike?: () => void;
   currentTask?: string;
   showAsOverlay?: boolean;
 }
@@ -14,9 +15,8 @@ interface QuoteDisplayProps {
 export const QuoteDisplay = ({
   favorites,
   setFavorites,
-  currentTask,
-  showAsOverlay = false
-}: QuoteDisplayProps) => {
+  onLike,
+  currentTask}: QuoteDisplayProps) => {
   const {
     currentQuote,
     isLiked,
@@ -52,8 +52,11 @@ export const QuoteDisplay = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleLike}
-              className={`transition-all duration-300 hover:scale-105 ${
+              onClick={() => {
+                handleLike();
+                if (!isLiked) onLike?.();
+              }}
+              className={`transition-all duration-300 hover:scale-105 hover:bg-transparent ${
                 isLiked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-primary'
               }`}
             >
@@ -63,7 +66,7 @@ export const QuoteDisplay = ({
               variant="ghost"
               size="sm"
               onClick={getRandomQuote}
-              className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105"
+              className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-105 hover:bg-transparent"
             >
               <RefreshCw className="h-5 w-5" />
             </Button>
