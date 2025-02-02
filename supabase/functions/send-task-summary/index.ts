@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { DailySummary } from "./types.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -32,19 +31,6 @@ const formatDuration = (seconds: number): string => {
   return `${remainingSeconds}s`;
 };
 
-const getStatusColor = (status: string): string => {
-  switch (status) {
-    case 'Completed Early':
-      return '#22c55e';
-    case 'Completed On Time':
-      return '#3b82f6';
-    case 'Completed Late':
-      return '#eab308';
-    default:
-      return '#6b7280';
-  }
-};
-
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -61,49 +47,52 @@ serve(async (req: Request) => {
     const averageEfficiency = summaryData.averageEfficiency;
 
     const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; background: #f8fafc; padding: 32px;">
-        <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 48px 32px; border-radius: 12px; margin-bottom: 32px; text-align: center; position: relative;">
-          <img src="https://focustimer.org/logo.png" alt="Focus Timer" style="width: 64px; height: 64px; margin: 0 auto 16px;" />
-          <h1 style="color: white; margin: 0; font-size: 32px; font-weight: bold;">Your Daily Focus Timer Summary</h1>
-          <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">Here's what you accomplished today!</p>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
-          <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="font-size: 24px; color: #6366f1; margin-bottom: 8px;">✨</div>
-            <div style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Tasks Completed</div>
-            <div style="font-size: 24px; font-weight: 600; color: #1e293b;">${totalTasks}</div>
-          </div>
-          
-          <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="font-size: 24px; color: #6366f1; margin-bottom: 8px;">⏱️</div>
-            <div style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Total Time</div>
-            <div style="font-size: 24px; font-weight: 600; color: #1e293b;">${Math.round(totalTimeSpent / 60)}m</div>
-          </div>
-          
-          <div style="background: white; padding: 24px; border-radius: 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="font-size: 24px; color: #6366f1; margin-bottom: 8px;">📈</div>
-            <div style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Avg. Efficiency</div>
-            <div style="font-size: 24px; font-weight: 600; color: #1e293b;">${averageEfficiency.toFixed(1)}%</div>
-          </div>
-        </div>
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Focus Timer Summary</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f8fafc;">
+          <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 32px 24px; text-align: center;">
+              <h1 style="margin: 0; font-size: 24px; color: white;">Your Focus Timer Summary</h1>
+              <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9);">Here's what you accomplished today!</p>
+            </div>
+            
+            <!-- Stats Overview -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 24px; background: white;">
+              <div style="text-align: center; padding: 16px; background: #f1f5f9; border-radius: 8px;">
+                <div style="font-size: 24px; color: #6366f1; margin-bottom: 8px;">✨</div>
+                <div style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Tasks Completed</div>
+                <div style="font-size: 20px; font-weight: 600; color: #1e293b;">${totalTasks}</div>
+              </div>
+              
+              <div style="text-align: center; padding: 16px; background: #f1f5f9; border-radius: 8px;">
+                <div style="font-size: 24px; color: #6366f1; margin-bottom: 8px;">⏱️</div>
+                <div style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Total Time</div>
+                <div style="font-size: 20px; font-weight: 600; color: #1e293b;">${formatDuration(totalTimeSpent)}</div>
+              </div>
+              
+              <div style="text-align: center; padding: 16px; background: #f1f5f9; border-radius: 8px;">
+                <div style="font-size: 24px; color: #6366f1; margin-bottom: 8px;">📈</div>
+                <div style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Avg. Efficiency</div>
+                <div style="font-size: 20px; font-weight: 600; color: #1e293b;">${averageEfficiency.toFixed(1)}%</div>
+              </div>
+            </div>
 
-        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 32px;">
-          <div style="background: #f1f5f9; padding: 16px 24px;">
-            <h2 style="margin: 0; color: #1e293b; font-size: 18px;">Completed Tasks</h2>
-          </div>
-          <div style="padding: 0;">
-            ${summaryData.completedTasks.map((task, index) => `
-              <div style="padding: 24px; ${index !== summaryData.completedTasks.length - 1 ? 'border-bottom: 1px solid #e2e8f0;' : ''}">
-                <div style="margin-bottom: 16px;">
-                  <h3 style="margin: 0 0 8px; color: #1e293b; font-size: 16px;">${task.taskName}</h3>
+            <!-- Completed Tasks -->
+            <div style="padding: 0 24px 24px;">
+              <h2 style="color: #1e293b; font-size: 20px; margin: 0 0 16px;">Completed Tasks</h2>
+              ${summaryData.completedTasks.map(task => `
+                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                  <h3 style="margin: 0 0 12px; color: #1e293b; font-size: 16px;">${task.taskName}</h3>
                   ${task.metrics ? `
-                    <div style="display: inline-block; padding: 4px 12px; background: ${getStatusColor(task.metrics.completionStatus)}; color: white; border-radius: 9999px; font-size: 12px;">
-                      ${task.metrics.completionStatus}
-                    </div>
-                    <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                       <div>
-                        <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Time Metrics</div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Time Metrics</div>
                         <div style="color: #475569; font-size: 14px;">
                           <div style="margin-bottom: 4px;">⏱️ Expected: ${formatDuration(task.metrics.originalDuration)}</div>
                           <div style="margin-bottom: 4px;">⚡ Actual: ${formatDuration(task.metrics.actualDuration)}</div>
@@ -111,9 +100,9 @@ serve(async (req: Request) => {
                         </div>
                       </div>
                       <div>
-                        <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Performance</div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Performance</div>
                         <div style="color: #475569; font-size: 14px;">
-                          <div style="margin-bottom: 4px;">⏸️ Pauses: ${task.metrics.pauseCount} (${formatDuration(task.metrics.pausedTime)})</div>
+                          <div style="margin-bottom: 4px;">⏸️ Pauses: ${task.metrics.pauseCount}</div>
                           <div style="margin-bottom: 4px;">⏲️ Added: ${formatDuration(task.metrics.extensionTime)}</div>
                           <div>📊 Efficiency: ${task.metrics.efficiencyRatio.toFixed(1)}%</div>
                         </div>
@@ -121,34 +110,32 @@ serve(async (req: Request) => {
                     </div>
                   ` : ''}
                 </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        ${summaryData.favoriteQuotes.length > 0 ? `
-          <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <div style="background: #f1f5f9; padding: 16px 24px;">
-              <h2 style="margin: 0; color: #1e293b; font-size: 18px;">Favorite Quotes</h2>
-            </div>
-            <div style="padding: 24px;">
-              ${summaryData.favoriteQuotes.map(quote => `
-                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #6366f1;">
-                  <p style="margin: 0 0 8px; color: #1e293b; font-style: italic; font-size: 16px;">"${quote.text}"</p>
-                  <p style="margin: 0; color: #6366f1; font-size: 14px;">— ${quote.author}</p>
-                </div>
               `).join('')}
             </div>
-          </div>
-        ` : ''}
 
-        <div style="text-align: center; margin-top: 32px; padding-top: 32px; border-top: 1px solid #e2e8f0;">
-          <p style="color: #64748b; margin: 0; font-size: 14px;">
-            Generated by Focus Timer<br>
-            <span style="color: #6366f1;">Keep building great habits!</span>
-          </p>
-        </div>
-      </div>
+            ${summaryData.favoriteQuotes.length > 0 ? `
+              <!-- Favorite Quotes -->
+              <div style="padding: 0 24px 24px;">
+                <h2 style="color: #1e293b; font-size: 20px; margin: 0 0 16px;">Favorite Quotes</h2>
+                ${summaryData.favoriteQuotes.map(quote => `
+                  <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #6366f1;">
+                    <p style="margin: 0 0 8px; color: #1e293b; font-style: italic;">"${quote.text}"</p>
+                    <p style="margin: 0; color: #6366f1;">— ${quote.author}</p>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 24px; border-top: 1px solid #e2e8f0;">
+              <p style="color: #64748b; margin: 0; font-size: 14px;">
+                Generated by Focus Timer<br>
+                <span style="color: #6366f1;">Keep building great habits!</span>
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
     `;
 
     const emailResponse = await resend.emails.send({
