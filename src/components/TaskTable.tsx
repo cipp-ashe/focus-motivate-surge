@@ -49,7 +49,7 @@ export const TaskTable = ({
     // Create an updated task with the new duration
     const updatedTask = { ...task, duration };
     
-    // Simulate a click event to update the selected task with new duration
+    // Trigger a click event with the updated task to sync state
     onTaskClick(updatedTask, new MouseEvent('click') as unknown as React.MouseEvent);
   }, [tasks, onTaskClick]);
 
@@ -103,7 +103,7 @@ export const TaskTable = ({
                     type="number"
                     min={1}
                     max={60}
-                    defaultValue={task.duration || 25}
+                    value={task.duration || 25}
                     className="w-16 text-right"
                     onChange={(e) => handleDurationChange(task.id, e.target.value)}
                     onClick={preventPropagation}
