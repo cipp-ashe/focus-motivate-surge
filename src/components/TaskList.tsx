@@ -68,7 +68,6 @@ export const TaskList = ({
   };
 
   const handleClearTasks = () => {
-    // Call onTasksClear directly without any additional state management
     onTasksClear();
     setShowClearConfirm(false);
     toast("All tasks cleared! Starting fresh! 🌟");
@@ -79,7 +78,11 @@ export const TaskList = ({
     if (!taskToUpdate) return;
 
     const updatedTask = { ...taskToUpdate, ...updates };
-    onTaskAdd(updatedTask);
+    const remainingTasks = tasks.filter(t => t.id !== taskId);
+    
+    // Clear and re-add all tasks to maintain order
+    onTasksClear();
+    [...remainingTasks, updatedTask].forEach(t => onTaskAdd(t));
   };
 
   const handleDeleteTask = (taskId: string, taskName: string) => {
