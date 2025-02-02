@@ -27,6 +27,7 @@ export const TaskTable = ({
   onTaskDelete,
   onTasksClear,
 }: TaskTableProps) => {
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const preventPropagation = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -44,12 +45,22 @@ export const TaskTable = ({
     const duration = Math.min(Math.max(parseInt(newDuration) || 25, 1), 60);
     const updatedTask = { ...task, duration };
     onTaskClick(updatedTask, new MouseEvent('click') as unknown as React.MouseEvent);
+    setEditingTaskId(null);
   }, [tasks, onTaskClick]);
 
   const handleTaskDelete = useCallback((e: React.MouseEvent | React.TouchEvent, taskId: string) => {
     preventPropagation(e);
     onTaskDelete(taskId);
   }, [onTaskDelete, preventPropagation]);
+
+  const handleDurationClick = useCallback((e: React.MouseEvent | React.TouchEvent, taskId: string) => {
+    preventPropagation(e);
+    setEditingTaskId(taskId);
+  }, []);
+
+  const handleInputBlur = useCallback(() => {
+    setEditingTaskId(null);
+  }, []);
 
   return (
     <div className="mt-4 space-y-2">
@@ -79,16 +90,28 @@ export const TaskTable = ({
               onTouchStart={preventPropagation}
             >
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <Input
-                type="number"
-                min={1}
-                max={60}
-                value={task.duration || 25}
-                className="w-16 text-right bg-transparent"
-                onChange={(e) => handleDurationChange(task.id, e.target.value)}
-                onClick={preventPropagation}
-                onTouchStart={preventPropagation}
-              />
+              {editingTaskId === task.id ? (
+                <Input
+                  type="number"
+                  min={1}
+                  max={60}
+                  value={task.duration || 25}
+                  className="w-16 text-right bg-transparent"
+                  onChange={(e) => handleDurationChange(task.id, e.target.value)}
+                  onBlur={handleInputBlur}
+                  autoFocus
+                  onClick={preventPropagation}
+                  onTouchStart={preventPropagation}
+                />
+              ) : (
+                <span 
+                  className="w-16 text-right text-muted-foreground cursor-text"
+                  onClick={(e) => handleDurationClick(e, task.id)}
+                  onTouchStart={(e) => handleDurationClick(e, task.id)}
+                >
+                  {task.duration || 25}
+                </span>
+              )}
               <span className="text-muted-foreground">m</span>
             </div>
             
