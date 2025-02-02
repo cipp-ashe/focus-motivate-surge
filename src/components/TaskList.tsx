@@ -140,11 +140,7 @@ export const TaskList = ({
           ))}
         </div>
 
-        <CompletedTasks
-          tasks={completedTasks}
-          showCompleted={showCompleted}
-          onToggleShow={() => setShowCompleted(!showCompleted)}
-        />
+        <CompletedTasks tasks={completedTasks} />
 
         <BulkTaskDialog
           open={showBulkAdd}

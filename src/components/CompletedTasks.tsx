@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Task } from "../types/timer";
 import { Card } from "./ui/card";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface CompletedTasksProps {
@@ -15,6 +15,11 @@ export const CompletedTasks = ({ tasks }: CompletedTasksProps) => {
   const totalTasks = tasks.length;
   const totalTimeSpent = tasks.reduce((acc, task) => acc + (task.duration || 25), 0);
   const averageDuration = totalTasks > 0 ? Math.round(totalTimeSpent / totalTasks) : 0;
+  const totalCompletedToday = tasks.filter(task => {
+    const taskDate = new Date(task.completedAt || Date.now());
+    const today = new Date();
+    return taskDate.toDateString() === today.toDateString();
+  }).length;
 
   if (tasks.length === 0) return null;
 
@@ -23,10 +28,16 @@ export const CompletedTasks = ({ tasks }: CompletedTasksProps) => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold">Completed Tasks</h2>
-            <div className="flex gap-4 text-sm text-muted-foreground">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-primary" />
+              Completed Tasks
+            </h2>
+            <div className="grid grid-cols-2 md:flex md:gap-6 text-sm text-muted-foreground">
               <div>
-                Tasks: <span className="font-mono">{totalTasks}</span>
+                Total Tasks: <span className="font-mono">{totalTasks}</span>
+              </div>
+              <div>
+                Today: <span className="font-mono">{totalCompletedToday}</span>
               </div>
               <div>
                 Total Time: <span className="font-mono">{totalTimeSpent}m</span>
@@ -55,14 +66,24 @@ export const CompletedTasks = ({ tasks }: CompletedTasksProps) => {
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="completed-task-enter completed-task-enter-active p-2 text-sm text-muted-foreground line-through bg-background/30 rounded-lg border border-primary/10"
+                className="completed-task-enter completed-task-enter-active p-2 text-sm text-muted-foreground line-through bg-background/30 rounded-lg border border-primary/10 flex justify-between items-center"
               >
-                {task.name}
-                {task.duration && (
-                  <span className="ml-2 text-xs">
-                    ({task.duration}m)
-                  </span>
-                )}
+                <span>{task.name}</span>
+                <div className="flex items-center gap-2">
+                  {task.duration && (
+                    <span className="text-xs bg-primary/10 px-2 py-1 rounded-full">
+                      {task.duration}m
+                    </span>
+                  )}
+                  {task.completedAt && (
+                    <span className="text-xs">
+                      {new Date(task.completedAt).toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
