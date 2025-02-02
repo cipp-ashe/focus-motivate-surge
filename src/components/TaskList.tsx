@@ -73,6 +73,21 @@ export const TaskList = ({
     toast(`Added ${taskLines.length} tasks! Time to crush some goals! 🎯`);
   };
 
+  const handleUpdateDuration = (taskId: string, duration: number) => {
+    const updatedTasks = tasks.map(task => 
+      task.id === taskId ? { ...task, duration } : task
+    );
+    // Update tasks through the parent component
+    onTaskAdd(updatedTasks.find(t => t.id === taskId)!);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    const updatedTasks = tasks.filter(task => task.id !== taskId);
+    // Update tasks through the parent component by removing the task
+    onTasksClear();
+    updatedTasks.forEach(task => onTaskAdd(task));
+  };
+
   return (
     <Card className="p-6 bg-card/80 backdrop-blur-sm border-primary/20">
       <div className="space-y-4">
@@ -112,6 +127,8 @@ export const TaskList = ({
               key={task.id} 
               task={task} 
               onSelect={onTaskSelect}
+              onDelete={handleDeleteTask}
+              onUpdateDuration={handleUpdateDuration}
             />
           ))}
         </div>

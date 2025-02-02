@@ -1,4 +1,3 @@
-// Common types
 export interface Quote {
   text: string;
   author: string;
@@ -91,7 +90,13 @@ export interface CompactTimerProps {
     onClick?: () => void;
   }  
 
-// Sound types
+export interface Task {
+  id: string;
+  name: string;
+  completed: boolean;
+  duration?: number;
+}
+
 export type SoundOption = 'bell' | 'chime' | 'ding' | 'none';
 
 export interface SoundSelectorProps {
