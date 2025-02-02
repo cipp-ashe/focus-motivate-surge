@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { Timer } from "@/components/Timer";
 import { QuoteDisplay, FavoriteQuotes } from "@/components/QuoteDisplay";
-import { TaskList, Task } from "@/components/TaskList";
+import { TaskList } from "@/components/TaskList";
+import { Task } from "@/types/timer";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
