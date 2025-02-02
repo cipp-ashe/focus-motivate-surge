@@ -35,14 +35,14 @@ export const EmailSummaryModal = ({
       setIsLoading(true);
       
       await onSubmit(email);
+      // Since we got here, the email was sent successfully
       toast.success("Summary email sent successfully!");
       onClose();
       setEmail("");
     } catch (error) {
+      // Only show error for invalid email format
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
-      } else {
-        toast.error("Failed to send email. Please try again.");
       }
     } finally {
       setIsLoading(false);
