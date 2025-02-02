@@ -36,11 +36,11 @@ export const CompletedTasks = ({
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="completed-task-enter completed-task-enter-active p-2 text-sm text-muted-foreground/90 line-through bg-muted/30 rounded-lg border border-primary/5 hover:bg-muted/40 transition-colors"
+              className="completed-task-enter completed-task-enter-active p-2 text-sm text-muted-foreground line-through bg-background/30 rounded-lg border border-primary/10"
             >
               {task.name}
               {task.duration && (
-                <span className="ml-2 text-xs text-muted-foreground/75">
+                <span className="ml-2 text-xs">
                   ({task.duration}m)
                 </span>
               )}
