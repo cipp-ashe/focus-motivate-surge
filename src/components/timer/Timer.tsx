@@ -9,6 +9,8 @@ import { TIMER_CONSTANTS, SOUND_OPTIONS, type SoundOption, type TimerProps } fro
 import { TimerExpandedView } from "./views/TimerExpandedView";
 import { TimerCompactView } from "./views/TimerCompactView";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Button } from "../ui/button";
 
 const { MIN_MINUTES, MAX_MINUTES, ADD_TIME_MINUTES, CIRCLE_CIRCUMFERENCE } = TIMER_CONSTANTS;
 
@@ -24,6 +26,7 @@ export const Timer = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
   const [showCompletion, setShowCompletion] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [completionMetrics, setCompletionMetrics] = useState<TimerStateMetrics | null>(null);
   const initialMinutes = duration ? Math.floor(duration / 60) : 25;
   const [internalMinutes, setInternalMinutes] = useState(initialMinutes);
@@ -54,13 +57,8 @@ export const Timer = ({
     initialDuration: internalMinutes * 60,
     onTimeUp: async () => {
       try {
-        const finalMetrics = await completeTimer();
-        if (!finalMetrics) {
-          toast.error("An error occurred while completing the timer");
-          return;
-        }
-        await playSound();
-        handleTimerCompletion(finalMetrics);
+        pause();
+        setShowConfirmation(true);
       } catch (error) {
         console.error('Error in timer completion flow:', error);
         toast.error("An error occurred while completing the timer");
@@ -69,14 +67,7 @@ export const Timer = ({
     onDurationChange,
   });
 
-  const handleTimerCompletion = useCallback((currentMetrics: TimerStateMetrics) => {
-    setTimeout(() => {
-      setCompletionMetrics(currentMetrics);
-      setShowCompletion(true);
-    }, 0);
-  }, []);
-
-  const handleComplete = useCallback(async () => {
+  const handleTimerCompletion = useCallback(async () => {
     try {
       const finalMetrics = await completeTimer();
       if (!finalMetrics) {
@@ -84,12 +75,30 @@ export const Timer = ({
         return;
       }
       await playSound();
-      handleTimerCompletion(finalMetrics);
+      setTimeout(() => {
+        setCompletionMetrics(finalMetrics);
+        setShowCompletion(true);
+      }, 0);
     } catch (error) {
-      console.error('Error in manual completion:', error);
+      console.error('Error in timer completion flow:', error);
       toast.error("An error occurred while completing the timer");
     }
-  }, [completeTimer, playSound, handleTimerCompletion]);
+  }, [completeTimer, playSound]);
+
+  const handleComplete = useCallback(async () => {
+    setShowConfirmation(false);
+    await handleTimerCompletion();
+  }, [handleTimerCompletion]);
+
+  const handleAddTimeAndContinue = useCallback(() => {
+    setShowConfirmation(false);
+    addMinutes(ADD_TIME_MINUTES);
+    if (typeof onAddTime === 'function') {
+      onAddTime();
+    }
+    start();
+    toast(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
+  }, [addMinutes, onAddTime, start]);
 
   const handleMinutesChange = useCallback((newMinutes: number) => {
     setInternalMinutes(newMinutes);
@@ -213,6 +222,32 @@ export const Timer = ({
           setFavorites={setFavorites}
         />
       )}
+
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Timer Complete</DialogTitle>
+            <DialogDescription>
+              Are you finished with this task, or would you like to add more time?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={handleAddTimeAndContinue}
+              className="w-full sm:w-auto"
+            >
+              Add 5 Minutes
+            </Button>
+            <Button
+              onClick={handleComplete}
+              className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
+            >
+              Complete Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
