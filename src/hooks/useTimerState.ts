@@ -196,14 +196,26 @@ export const useTimerState = ({
         // Calculate actual working time (elapsed time minus paused time)
         const actualWorkingTime = Math.max(0, Math.floor(totalElapsedMs / 1000) - finalPausedTime);
         
-        console.debug('Timer completion metrics:', {
-          originalDuration: prev.metrics.originalDuration,
-          totalElapsedTime: Math.floor(totalElapsedMs / 1000),
-          pausedTime: finalPausedTime,
-          actualWorkingTime,
-          startTime: prev.metrics.startTime?.toISOString(),
-          endTime: completionTime.toISOString()
+        console.group('Timer Completion Metrics');
+        console.log('Original Duration:', {
+          seconds: prev.metrics.originalDuration,
+          formatted: formatTime(prev.metrics.originalDuration)
         });
+        console.log('Total Elapsed Time:', {
+          seconds: Math.floor(totalElapsedMs / 1000),
+          formatted: formatTime(Math.floor(totalElapsedMs / 1000))
+        });
+        console.log('Paused Time:', {
+          seconds: finalPausedTime,
+          formatted: formatTime(finalPausedTime)
+        });
+        console.log('Actual Working Time:', {
+          seconds: actualWorkingTime,
+          formatted: formatTime(actualWorkingTime)
+        });
+        console.log('Start Time:', prev.metrics.startTime?.toISOString());
+        console.log('End Time:', completionTime.toISOString());
+        console.groupEnd();
 
         const efficiencyRatio = calculateEfficiencyRatio(
           prev.metrics.originalDuration,
@@ -338,4 +350,10 @@ export const useTimerState = ({
     incrementFavorites,
     completeTimer,
   };
+};
+
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
