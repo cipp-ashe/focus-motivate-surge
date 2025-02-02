@@ -50,7 +50,10 @@ export const TaskManager = ({
   const handleSummaryEmailSent = useCallback(() => {
     console.log('Sending summary email and clearing completed tasks');
     onCompletedTasksUpdate?.([]);
-    toast.success("Summary sent! Completed tasks have been cleared.");
+    toast({
+      title: "Summary Sent",
+      description: "Completed tasks have been cleared."
+    });
   }, [onCompletedTasksUpdate]);
 
   const handleTaskDurationChange = useCallback((minutes: number) => {

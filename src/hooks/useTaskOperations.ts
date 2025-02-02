@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Task } from "@/components/TaskList";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 export const useTaskOperations = ({
   initialTasks = [],
@@ -37,7 +37,10 @@ export const useTaskOperations = ({
     const updatedTasks = storedTasks.map((t: Task) => t.id === task.id ? { ...t, ...task } : t);
     localStorage.setItem('taskList', JSON.stringify(updatedTasks));
     setSelectedTask(task);
-    toast(`Selected task: ${task.name}`);
+    toast({
+      title: "Task Selected",
+      description: `Selected task: ${task.name}`
+    });
   }, []);
 
   const handleTaskComplete = useCallback((metrics: TimerStateMetrics) => {
@@ -64,7 +67,10 @@ export const useTaskOperations = ({
       });
       
       setSelectedTask(null);
-      toast.success(`Task completed: ${selectedTask.name}`);
+      toast({
+        title: "Task Completed",
+        description: `Task completed: ${selectedTask.name}`
+      });
     }
   }, [selectedTask, onTasksUpdate, onCompletedTasksUpdate]);
 
@@ -89,6 +95,7 @@ export const useTaskOperations = ({
 
   return {
     tasks,
+    setTasks,
     completedTasks,
     selectedTask,
     handleTaskAdd,
