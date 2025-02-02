@@ -36,11 +36,14 @@ export const EmailSummaryModal = ({
       await onSubmit(email);
       toast.success("Summary email sent successfully!");
       onClose();
+      setEmail(""); // Reset the email input after successful submission
     } catch (error) {
+      console.error("Email submission error:", error);
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
-        toast.error("Failed to send email. Please try again.");
+        const errorMessage = error instanceof Error ? error.message : "Failed to send email. Please try again.";
+        toast.error(errorMessage);
       }
     } finally {
       setIsLoading(false);
