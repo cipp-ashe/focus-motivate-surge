@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Trash2, Clock } from "lucide-react";
+import { Trash2, Clock, Sparkles, X } from "lucide-react";
 import { Task } from "./TaskList";
 import { useState, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,17 +39,10 @@ export const TaskTable = ({
   }, [onTasksClear, preventPropagation]);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
-    // Find the task in the tasks array
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
-
-    // Parse the new duration, ensuring it's between 1 and 60
     const duration = Math.min(Math.max(parseInt(newDuration) || 25, 1), 60);
-    
-    // Create an updated task with the new duration
     const updatedTask = { ...task, duration };
-    
-    // Trigger a click event with the updated task to sync state
     onTaskClick(updatedTask, new MouseEvent('click') as unknown as React.MouseEvent);
   }, [tasks, onTaskClick]);
 
@@ -59,71 +52,66 @@ export const TaskTable = ({
   }, [onTaskDelete, preventPropagation]);
 
   return (
-    <div className="mt-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[55%]">Active Tasks</TableHead>
-            <TableHead className="w-[30%] text-right">Estimate (min)</TableHead>
-            <TableHead className="w-[15%] text-right">
-              {tasks.length > 0 && (
-                <button
-                  onClick={handleClearAll}
-                  onTouchStart={handleClearAll}
-                  className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
-                >
-                  Clear All
-                </button>
-              )}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tasks.map((task) => (
-            <TableRow
-              key={task.id}
-              className={`cursor-pointer transition-colors duration-200
-                ${selectedTasks.includes(task.id) 
-                  ? 'bg-accent/10' 
-                  : 'hover:bg-accent/5'
-                }`}
-              onClick={(e) => onTaskClick(task, e)}
+    <div className="mt-4 space-y-2">
+      {tasks.map((task) => (
+        <div
+          key={task.id}
+          className={`
+            relative flex items-center justify-between
+            p-4 rounded-lg border border-primary/20 bg-card/50 backdrop-blur-sm
+            cursor-pointer transition-all duration-200
+            ${selectedTasks.includes(task.id) 
+              ? 'bg-accent/10 border-primary/40' 
+              : 'hover:border-primary/30 hover:bg-accent/5'
+            }
+          `}
+          onClick={(e) => onTaskClick(task, e)}
+        >
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-foreground line-clamp-1">{task.name}</span>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div 
+              className="flex items-center gap-2"
+              onClick={preventPropagation}
+              onTouchStart={preventPropagation}
             >
-              <TableCell className="py-2">
-                <span className="line-clamp-2">{task.name}</span>
-              </TableCell>
-              <TableCell className="py-2 text-right">
-                <div 
-                  className="flex items-center justify-end gap-2"
-                  onClick={preventPropagation}
-                  onTouchStart={preventPropagation}
-                >
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="number"
-                    min={1}
-                    max={60}
-                    value={task.duration || 25}
-                    className="w-16 text-right"
-                    onChange={(e) => handleDurationChange(task.id, e.target.value)}
-                    onClick={preventPropagation}
-                    onTouchStart={preventPropagation}
-                  />
-                </div>
-              </TableCell>
-              <TableCell className="py-2 text-right">
-                <button
-                  onClick={(e) => handleTaskDelete(e, task.id)}
-                  onTouchStart={(e) => handleTaskDelete(e, task.id)}
-                  className="ml-2 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="number"
+                min={1}
+                max={60}
+                value={task.duration || 25}
+                className="w-16 text-right bg-transparent"
+                onChange={(e) => handleDurationChange(task.id, e.target.value)}
+                onClick={preventPropagation}
+                onTouchStart={preventPropagation}
+              />
+              <span className="text-muted-foreground">m</span>
+            </div>
+            
+            <button
+              onClick={(e) => handleTaskDelete(e, task.id)}
+              onTouchStart={(e) => handleTaskDelete(e, task.id)}
+              className="text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      ))}
+      
+      {tasks.length > 0 && (
+        <button
+          onClick={handleClearAll}
+          onTouchStart={handleClearAll}
+          className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200 mt-2"
+        >
+          Clear All
+        </button>
+      )}
     </div>
   );
 };
