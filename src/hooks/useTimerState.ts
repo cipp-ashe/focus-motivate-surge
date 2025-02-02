@@ -174,11 +174,16 @@ export const useTimerState = ({
 
   const completeTimer = useCallback(async (): Promise<TimerStateMetrics> => {
     const completionTime = new Date();
-    let finalMetrics: TimerStateMetrics;
     
     return new Promise((resolve) => {
+      let finalMetrics: TimerStateMetrics;
+      
       setState(prev => {
-        console.debug('Completing timer with state:', prev);
+        console.debug('Starting timer completion with state:', prev);
+        
+        if (!prev.metrics.startTime) {
+          console.warn('No start time found in metrics');
+        }
         
         const elapsedMs = prev.metrics.startTime
           ? completionTime.getTime() - prev.metrics.startTime.getTime()
@@ -213,7 +218,17 @@ export const useTimerState = ({
           extensionTime: prev.metrics.extensionTime
         };
 
-        console.debug('Timer completed with metrics:', finalMetrics);
+        console.debug('Completed timer with metrics:', finalMetrics);
+
+        // Use setTimeout to ensure state is updated before resolving
+        setTimeout(() => {
+          if (!finalMetrics) {
+            console.error('No metrics available after completion');
+            toast.error('An error occurred while completing the timer');
+          } else {
+            resolve(finalMetrics);
+          }
+        }, 0);
 
         return {
           ...prev,
@@ -221,8 +236,6 @@ export const useTimerState = ({
           metrics: finalMetrics,
         };
       });
-
-      resolve(finalMetrics!);
     });
   }, []);
 
@@ -288,6 +301,7 @@ export const useTimerState = ({
           
           if (newTimeLeft <= 0) {
             clearInterval(interval);
+            
             // Ensure we complete the timer immediately when time is up
             completeTimer().then(metrics => {
               console.debug('Natural completion metrics:', metrics);
