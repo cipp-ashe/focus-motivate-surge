@@ -3,6 +3,7 @@ import { TaskList, Task } from "../TaskList";
 import { TimerSection } from "./TimerSection";
 import { Quote } from "@/types/timer";
 import { useTaskOperations } from "@/hooks/useTaskOperations";
+import { toast } from "@/hooks/use-toast";
 
 interface TaskManagerProps {
   initialTasks?: Task[];
@@ -25,6 +26,7 @@ export const TaskManager = ({
   
   const {
     tasks,
+    setTasks,
     completedTasks,
     selectedTask,
     handleTaskAdd,
@@ -60,7 +62,7 @@ export const TaskManager = ({
           : task
       ));
     }
-  }, [selectedTask]);
+  }, [selectedTask, setTasks]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
