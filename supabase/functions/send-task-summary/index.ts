@@ -72,61 +72,38 @@ const generateTaskMetrics = (task: TaskSummary) => {
                          Number(efficiency) >= 75 ? '#3b82f6' : '#eab308';
 
   return `
-    <div style="margin-bottom: 24px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="margin: 0; color: #1a1a1a; font-size: 18px;">✓ ${task.taskName}</h3>
-        <span style="font-size: 14px; padding: 4px 12px; background: ${statusColor}20; color: ${statusColor}; border-radius: 999px; font-weight: 500;">
+    <tr style="border-bottom: 1px solid #e2e8f0;">
+      <td style="padding: 16px; text-align: left;">
+        <div style="font-weight: 500; color: #1a1a1a;">${task.taskName}</div>
+        <span style="display: inline-block; margin-top: 4px; font-size: 12px; padding: 2px 8px; background: ${statusColor}20; color: ${statusColor}; border-radius: 9999px;">
           ${metrics.completionStatus}
         </span>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px;">
-        <div style="background: white; padding: 12px; border-radius: 6px;">
-          <p style="margin: 4px 0; color: #4b5563; display: flex; align-items: center; gap: 8px;">
-            <span style="color: #6366f1;">⏱️</span> Expected: ${formatDuration(metrics.originalDuration)}
-          </p>
-          <p style="margin: 4px 0; color: #4b5563; display: flex; align-items: center; gap: 8px;">
-            <span style="color: #6366f1;">⌛</span> Actual: ${formatDuration(metrics.actualDuration)}
-          </p>
-          <p style="margin: 4px 0; color: #4b5563; display: flex; align-items: center; gap: 8px;">
-            <span style="color: #6366f1;">🎯</span> Net Time: ${formatDuration(metrics.netEffectiveTime)}
-          </p>
+      </td>
+      <td style="padding: 16px; text-align: left;">
+        <div style="color: #4b5563; font-size: 14px;">
+          Expected: ${formatDuration(metrics.originalDuration)}<br>
+          Actual: ${formatDuration(metrics.actualDuration)}<br>
+          Net: ${formatDuration(metrics.netEffectiveTime)}
         </div>
-        <div style="background: white; padding: 12px; border-radius: 6px;">
-          <p style="margin: 4px 0; color: #4b5563; display: flex; align-items: center; gap: 8px;">
-            <span style="color: #6366f1;">⏸️</span> Pauses: ${metrics.pauseCount} (${formatDuration(metrics.pausedTime)})
-          </p>
-          <p style="margin: 4px 0; color: #4b5563; display: flex; align-items: center; gap: 8px;">
-            <span style="color: #6366f1;">⚡</span> Added: ${formatDuration(metrics.extensionTime)}
-          </p>
-          <p style="margin: 4px 0; display: flex; align-items: center; gap: 8px; color: ${efficiencyColor};">
-            <span>📊</span> Efficiency: ${efficiency}%
-          </p>
+      </td>
+      <td style="padding: 16px; text-align: left;">
+        <div style="color: #4b5563; font-size: 14px;">
+          Pauses: ${metrics.pauseCount} (${formatDuration(metrics.pausedTime)})<br>
+          Added: ${formatDuration(metrics.extensionTime)}<br>
+          <span style="color: ${efficiencyColor};">Efficiency: ${efficiency}%</span>
         </div>
-      </div>
-      
-      ${task.relatedQuotes.length > 0 ? `
-        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
-          <p style="margin: 0 0 12px 0; color: #6366f1; font-weight: 500; font-size: 14px;">📝 Inspiring quotes:</p>
-          ${task.relatedQuotes.map(quote => `
-            <div style="margin: 8px 0; padding: 12px; background: white; border-left: 3px solid #6366f1; border-radius: 0 6px 6px 0;">
-              <p style="margin: 0 0 4px 0; color: #1a1a1a; font-style: italic;">"${quote.text}"</p>
-              <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-    </div>
+      </td>
+      <td style="padding: 16px; text-align: left;">
+        ${task.relatedQuotes.map(quote => `
+          <div style="margin: 8px 0; padding: 12px; background: #f8fafc; border-left: 3px solid #7c3aed; border-radius: 0 6px 6px 0;">
+            <p style="margin: 0 0 4px 0; color: #1a1a1a; font-style: italic; font-size: 14px;">"${quote.text}"</p>
+            <p style="margin: 0; color: #6b7280; font-size: 12px;">— ${quote.author}</p>
+          </div>
+        `).join('')}
+      </td>
+    </tr>
   `;
 };
-
-const generateInsightCard = (label: string, value: string, icon: string) => `
-  <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-    <div style="color: #6366f1; font-size: 24px; margin-bottom: 8px;">${icon}</div>
-    <p style="margin: 0; color: #6b7280; font-size: 14px;">${label}</p>
-    <p style="margin: 4px 0 0 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">${value}</p>
-  </div>
-`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -144,46 +121,64 @@ serve(async (req) => {
     ) / (totalTasks || 1);
 
     const emailContent = `
-      <div style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
-        <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 32px; border-radius: 12px; margin-bottom: 32px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700;">Today's Accomplishments 🎯</h1>
-          <p style="color: white; opacity: 0.9; margin: 12px 0 0 0; font-size: 16px;">Here's a detailed breakdown of your productive day</p>
+      <div style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 32px; text-align: center; border-radius: 12px 12px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700;">Focus Timer Summary</h1>
+          <p style="color: white; opacity: 0.9; margin: 12px 0 0 0;">Here's your detailed productivity report</p>
         </div>
 
-        <div style="margin-bottom: 32px;">
-          <div style="background: #f8fafc; padding: 24px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <h2 style="color: #6366f1; margin: 0 0 24px 0; font-size: 24px;">Daily Insights 📊</h2>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-              ${generateInsightCard("Time Focused", totalTimeSpentFormatted, "⏱️")}
-              ${generateInsightCard("Tasks Completed", totalTasks.toString(), "✅")}
-              ${generateInsightCard("Avg. Efficiency", `${averageEfficiency.toFixed(1)}%`, "📈")}
+        <div style="padding: 32px;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
+            <div style="background: #f8fafc; padding: 24px; border-radius: 12px; text-align: center;">
+              <div style="color: #7c3aed; font-size: 24px; margin-bottom: 8px;">⏱️</div>
+              <div style="color: #6b7280; font-size: 14px;">Time Focused</div>
+              <div style="color: #1a1a1a; font-size: 24px; font-weight: 600;">${totalTimeSpentFormatted}</div>
+            </div>
+            <div style="background: #f8fafc; padding: 24px; border-radius: 12px; text-align: center;">
+              <div style="color: #7c3aed; font-size: 24px; margin-bottom: 8px;">✅</div>
+              <div style="color: #6b7280; font-size: 14px;">Tasks Completed</div>
+              <div style="color: #1a1a1a; font-size: 24px; font-weight: 600;">${totalTasks}</div>
+            </div>
+            <div style="background: #f8fafc; padding: 24px; border-radius: 12px; text-align: center;">
+              <div style="color: #7c3aed; font-size: 24px; margin-bottom: 8px;">📈</div>
+              <div style="color: #6b7280; font-size: 14px;">Avg. Efficiency</div>
+              <div style="color: #1a1a1a; font-size: 24px; font-weight: 600;">${averageEfficiency.toFixed(1)}%</div>
             </div>
           </div>
-        </div>
 
-        <div style="margin-top: 32px;">
-          <h2 style="color: #1a1a1a; margin: 0 0 24px 0; font-size: 24px; display: flex; align-items: center; gap: 8px;">
-            <span style="color: #6366f1;">📋</span> Completed Tasks (${totalTasks})
-          </h2>
-          ${summaryData.completedTasks.map(task => generateTaskMetrics(task)).join('')}
-        </div>
-
-        ${summaryData.favoriteQuotes.length > 0 ? `
-          <div style="margin-top: 32px; background: #f8fafc; padding: 24px; border-radius: 12px;">
-            <h2 style="color: #6366f1; margin: 0 0 20px 0; font-size: 24px;">✨ Today's Favorite Quotes</h2>
-            <div style="display: grid; gap: 16px;">
-              ${summaryData.favoriteQuotes.map(quote => `
-                <div style="background: white; padding: 16px; border-radius: 8px; border-left: 4px solid #6366f1;">
-                  <p style="margin: 0 0 8px 0; color: #1a1a1a; font-style: italic; font-size: 16px;">"${quote.text}"</p>
-                  <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
-                </div>
-              `).join('')}
-            </div>
+          <div style="background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                  <th style="padding: 16px; text-align: left; color: #7c3aed; font-weight: 600;">Task</th>
+                  <th style="padding: 16px; text-align: left; color: #7c3aed; font-weight: 600;">Time</th>
+                  <th style="padding: 16px; text-align: left; color: #7c3aed; font-weight: 600;">Metrics</th>
+                  <th style="padding: 16px; text-align: left; color: #7c3aed; font-weight: 600;">Quotes</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${summaryData.completedTasks.map(task => generateTaskMetrics(task)).join('')}
+              </tbody>
+            </table>
           </div>
-        ` : ''}
 
-        <div style="text-align: center; margin-top: 40px; padding-top: 32px; border-top: 1px solid #e2e8f0;">
-          <p style="color: #6b7280; margin: 0; font-size: 16px;">Great work today! See you tomorrow for another productive session! 🌟</p>
+          ${summaryData.favoriteQuotes.length > 0 ? `
+            <div style="margin-top: 32px; background: #f8fafc; padding: 24px; border-radius: 12px;">
+              <h2 style="color: #7c3aed; margin: 0 0 20px 0; font-size: 24px;">✨ Today's Favorite Quotes</h2>
+              <div style="display: grid; gap: 16px;">
+                ${summaryData.favoriteQuotes.map(quote => `
+                  <div style="background: white; padding: 16px; border-radius: 8px; border-left: 4px solid #7c3aed;">
+                    <p style="margin: 0 0 8px 0; color: #1a1a1a; font-style: italic; font-size: 16px;">"${quote.text}"</p>
+                    <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <div style="text-align: center; margin-top: 32px; padding-top: 32px; border-top: 1px solid #e2e8f0;">
+            <p style="color: #6b7280; margin: 0;">Keep up the great work! 🌟</p>
+          </div>
         </div>
       </div>
     `;
