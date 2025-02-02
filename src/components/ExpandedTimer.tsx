@@ -66,7 +66,7 @@ export const ExpandedTimer = memo(({
       if (timerControlsProps.onComplete) {
         timerControlsProps.onComplete();
       }
-    }, 2500);
+    }, 5000); // Extended to 5 seconds for better visibility
   };
 
   const modifiedTimerControlsProps = {
@@ -93,10 +93,11 @@ export const ExpandedTimer = memo(({
           width={windowSize.width}
           height={windowSize.height}
           gravity={0.15}
-          numberOfPieces={150}
+          numberOfPieces={200}
           recycle={false}
-          colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD']} // Theme purple colors
-          tweenDuration={2500}
+          colors={['#7C3AED', '#8B5CF6', '#A78BFA', '#C4B5FD']}
+          tweenDuration={5000}
+          run={showConfetti}
         />
       )}
       
@@ -106,7 +107,6 @@ export const ExpandedTimer = memo(({
         aria-hidden="true"
       />
       
-      {/* Floating quotes in background */}
       <FloatingQuotes favorites={favorites} />
       
       <button
@@ -119,7 +119,7 @@ export const ExpandedTimer = memo(({
       </button>
 
       <div 
-        className="flex flex-col items-center justify-center h-full max-h-screen overflow-auto py-6 px-4"
+        className="flex flex-col items-center justify-center h-full w-full max-h-screen overflow-auto py-6 px-4 sm:px-6"
         style={transitionProps.style}
       >
         <div className="w-full max-w-xl">
@@ -137,7 +137,7 @@ export const ExpandedTimer = memo(({
 
               <div className="flex-1 flex flex-col items-center justify-center gap-8">
                 <div 
-                  className="relative w-72 h-72"
+                  className="relative w-72 h-72 sm:w-64 sm:h-64"
                   aria-live="polite"
                   {...focusOrder(3)}
                 >
