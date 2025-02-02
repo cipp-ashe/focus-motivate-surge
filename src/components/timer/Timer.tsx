@@ -68,11 +68,16 @@ export const Timer = ({
   } = useTimerState({
     initialDuration: internalMinutes * 60,
     onTimeUp: async () => {
-      // First complete the timer to finalize metrics
-      await completeTimer();
-      // Then play sound and show completion
-      playSound();
-      handleTimerCompletion(metrics);
+      try {
+        // First complete the timer to finalize metrics
+        const finalMetrics = await completeTimer();
+        console.debug('Timer completed with metrics:', finalMetrics);
+        // Then play sound and show completion with the finalized metrics
+        playSound();
+        handleTimerCompletion(finalMetrics);
+      } catch (error) {
+        console.error('Error completing timer:', error);
+      }
     },
     onDurationChange: onDurationChange || (() => {}),
   });
@@ -84,14 +89,17 @@ export const Timer = ({
       taskName
     });
 
-    // Ensure metrics are finalized before showing completion
+    // Double check that metrics are finalized
     if (!currentMetrics.endTime) {
       console.warn('Timer completion called but metrics not finalized', { metrics: currentMetrics });
       return;
     }
 
-    setCompletionMetrics(currentMetrics);
-    setShowCompletion(true);
+    // Use setTimeout to ensure state updates are complete
+    setTimeout(() => {
+      setCompletionMetrics(currentMetrics);
+      setShowCompletion(true);
+    }, 0);
   }, [isRunning, taskName]);
 
   useEffect(() => {
@@ -125,12 +133,17 @@ export const Timer = ({
   }, [isRunning, handlePause, handleStart]);
 
   const handleComplete = useCallback(async () => {
-    // First complete the timer to finalize metrics
-    await completeTimer();
-    // Then play sound and show completion
-    playSound();
-    handleTimerCompletion(metrics);
-  }, [completeTimer, playSound, metrics, handleTimerCompletion]);
+    try {
+      // First complete the timer to finalize metrics
+      const finalMetrics = await completeTimer();
+      console.debug('Manual completion with metrics:', finalMetrics);
+      // Then play sound and show completion with the finalized metrics
+      playSound();
+      handleTimerCompletion(finalMetrics);
+    } catch (error) {
+      console.error('Error completing timer:', error);
+    }
+  }, [completeTimer, playSound, handleTimerCompletion]);
 
   const handleCloseCompletion = useCallback(() => {
     if (!completionMetrics) return;
