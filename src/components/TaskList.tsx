@@ -33,12 +33,13 @@ export const TaskList = ({
 
   const handleAddTask = () => {
     if (newTask.trim()) {
-      onTaskAdd({
+      const task: Task = {
         id: Date.now().toString(),
         name: newTask.trim(),
         completed: false,
         duration: 25,
-      });
+      };
+      onTaskAdd(task);
       setNewTask("");
       toast("Task added! Let's make it happen! ✨");
     }
@@ -54,12 +55,13 @@ export const TaskList = ({
       const [name, durationStr] = line.split(',').map(s => s.trim());
       const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || 25, 1), 60) : 25;
 
-      onTaskAdd({
+      const task: Task = {
         id: `${Date.now()}-${Math.random()}`,
         name,
         completed: false,
         duration,
-      });
+      };
+      onTaskAdd(task);
     });
 
     setBulkTasks("");
@@ -80,7 +82,6 @@ export const TaskList = ({
     const updatedTask = { ...taskToUpdate, ...updates };
     const remainingTasks = tasks.filter(t => t.id !== taskId);
     
-    // Clear and re-add all tasks to maintain order
     onTasksClear();
     [...remainingTasks, updatedTask].forEach(t => onTaskAdd(t));
   };
