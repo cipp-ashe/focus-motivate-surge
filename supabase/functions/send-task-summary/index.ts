@@ -58,7 +58,7 @@ serve(async (req: Request) => {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in send-task-summary function:", error);
     
     return new Response(
