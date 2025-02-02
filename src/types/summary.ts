@@ -1,4 +1,5 @@
-import { Quote, TimerMetrics } from "./timer";
+import { Quote } from "./timer";
+import { TimerMetrics } from "./metrics";
 
 export interface TaskSummary {
   taskName: string;

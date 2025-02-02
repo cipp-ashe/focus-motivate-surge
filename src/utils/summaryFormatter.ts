@@ -1,5 +1,6 @@
 import { TaskSummary, DailySummary } from "../types/summary";
-import { Quote, TimerMetrics } from "../types/timer";
+import { Quote } from "../types/timer";
+import { TimerMetrics } from "../types/metrics";
 
 const formatDuration = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);

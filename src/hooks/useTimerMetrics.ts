@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { TimerMetrics } from '../types/timer';
+import { TimerMetrics } from '../types/metrics';
 
 export const useTimerMetrics = (initialDuration: number) => {
   const [metrics, setMetrics] = useState<TimerMetrics>({

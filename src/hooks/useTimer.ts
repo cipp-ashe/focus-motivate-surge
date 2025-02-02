@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { TimerMetrics } from '../types/timer';
+import { TimerMetrics } from '../types/metrics';
 
 interface UseTimerOptions {
   initialDuration: number;
