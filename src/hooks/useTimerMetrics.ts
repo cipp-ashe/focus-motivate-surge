@@ -9,6 +9,12 @@ export const useTimerMetrics = (initialDuration: number) => {
     originalDuration: initialDuration,
     actualDuration: 0,
     favoriteQuotes: 0,
+    pausedTime: 0,
+    lastPauseTimestamp: null,
+    extensionTime: 0,
+    netEffectiveTime: 0,
+    efficiencyRatio: 0,
+    completionStatus: 'Completed On Time'
   });
 
   const startTimer = useCallback(() => {
@@ -47,6 +53,12 @@ export const useTimerMetrics = (initialDuration: number) => {
       originalDuration: newDuration,
       actualDuration: 0,
       favoriteQuotes: 0,
+      pausedTime: 0,
+      lastPauseTimestamp: null,
+      extensionTime: 0,
+      netEffectiveTime: 0,
+      efficiencyRatio: 0,
+      completionStatus: 'Completed On Time'
     });
   }, []);
 

@@ -36,6 +36,12 @@ export const useTimer = ({
     originalDuration: initialDuration,
     actualDuration: 0,
     favoriteQuotes: 0,
+    pausedTime: 0,
+    lastPauseTimestamp: null,
+    extensionTime: 0,
+    netEffectiveTime: 0,
+    efficiencyRatio: 0,
+    completionStatus: 'Completed On Time'
   });
 
   // Handle duration updates
@@ -87,6 +93,12 @@ export const useTimer = ({
       originalDuration: minutes * 60,
       actualDuration: 0,
       favoriteQuotes: 0,
+      pausedTime: 0,
+      lastPauseTimestamp: null,
+      extensionTime: 0,
+      netEffectiveTime: 0,
+      efficiencyRatio: 0,
+      completionStatus: 'Completed On Time'
     });
   }, [minutes]);
 
