@@ -1,5 +1,5 @@
 import { TimerConfetti } from "./TimerConfetti";
-import { TimerMetrics } from "@/types/metrics";
+import { TimerStateMetrics } from "@/types/metrics";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 
 interface CompletionCelebrationProps {
   show: boolean;
-  metrics: TimerMetrics;
+  metrics: TimerStateMetrics;
   taskName: string;
   onClose: () => void;
   width: number;
@@ -65,9 +65,10 @@ export const CompletionCelebration = ({
     </div>
   );
 
-  if (!show || !metrics || !Object.keys(metrics).length) return null;
+  // Early return if modal shouldn't be shown or metrics are invalid
+  if (!show || !metrics) return null;
 
-  // Ensure all required metric properties exist
+  // Ensure all required metric properties exist with safe defaults
   const safeMetrics = {
     originalDuration: metrics.originalDuration ?? 0,
     actualDuration: metrics.actualDuration ?? 0,
@@ -75,6 +76,9 @@ export const CompletionCelebration = ({
     efficiencyRatio: metrics.efficiencyRatio ?? 0,
     pauseCount: metrics.pauseCount ?? 0,
     favoriteQuotes: metrics.favoriteQuotes ?? 0,
+    pausedTime: metrics.pausedTime ?? 0,
+    extensionTime: metrics.extensionTime ?? 0,
+    completionStatus: metrics.completionStatus ?? 'Completed',
   };
 
   return (
@@ -113,37 +117,45 @@ export const CompletionCelebration = ({
                 <MetricItem
                   icon={Timer}
                   label="Planned Duration"
-                  value={formatDuration(metrics.originalDuration)}
+                  value={formatDuration(safeMetrics.originalDuration)}
                 />
                 
                 <MetricItem
                   icon={Clock}
                   label="Total Time Spent"
-                  value={formatDuration(metrics.actualDuration)}
+                  value={formatDuration(safeMetrics.actualDuration)}
                 />
 
                 <MetricItem
                   icon={Clock}
                   label="Active Working Time"
-                  value={formatDuration(metrics.netEffectiveTime)}
+                  value={formatDuration(safeMetrics.netEffectiveTime)}
                 />
 
                 <div className="text-xs text-muted-foreground text-center">
-                  Efficiency Score: {metrics.efficiencyRatio.toFixed(1)}%
-                  {metrics.efficiencyRatio > 80 && " 🎯"}
-                  {metrics.efficiencyRatio > 95 && " 🌟"}
+                  Efficiency Score: {safeMetrics.efficiencyRatio.toFixed(1)}%
+                  {safeMetrics.efficiencyRatio > 80 && " 🎯"}
+                  {safeMetrics.efficiencyRatio > 95 && " 🌟"}
                 </div>
 
                 <MetricItem
                   icon={Pause}
                   label="Focus Breaks"
-                  value={`${metrics.pauseCount} ${metrics.pauseCount === 1 ? 'break' : 'breaks'}`}
+                  value={`${safeMetrics.pauseCount} ${safeMetrics.pauseCount === 1 ? 'break' : 'breaks'} (${formatDuration(safeMetrics.pausedTime)})`}
                 />
+
+                {safeMetrics.extensionTime > 0 && (
+                  <MetricItem
+                    icon={Timer}
+                    label="Added Time"
+                    value={formatDuration(safeMetrics.extensionTime)}
+                  />
+                )}
 
                 <MetricItem
                   icon={Quote}
                   label="Inspiring Quotes"
-                  value={`${metrics.favoriteQuotes} ${metrics.favoriteQuotes === 1 ? 'quote' : 'quotes'} saved`}
+                  value={`${safeMetrics.favoriteQuotes} ${safeMetrics.favoriteQuotes === 1 ? 'quote' : 'quotes'} saved`}
                 />
               </div>
             </div>
