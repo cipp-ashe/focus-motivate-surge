@@ -48,7 +48,16 @@ const Index = () => {
   }, []);
 
   const handleTaskAdd = useCallback((task: Task) => {
-    setTasks((prev) => [...prev, task]);
+    setTasks(prev => {
+      const updatedTasks = [...prev];
+      const existingIndex = updatedTasks.findIndex(t => t.id === task.id);
+      if (existingIndex >= 0) {
+        updatedTasks[existingIndex] = task;
+      } else {
+        updatedTasks.push(task);
+      }
+      return updatedTasks;
+    });
   }, []);
 
   const handleTaskSelect = useCallback((task: Task) => {
@@ -62,8 +71,8 @@ const Index = () => {
 
   const handleTaskComplete = useCallback(() => {
     if (selectedTask) {
-      setCompletedTasks((prev) => [...prev, { ...selectedTask, completed: true }]);
-      setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
+      setCompletedTasks(prev => [...prev, { ...selectedTask, completed: true }]);
+      setTasks(prev => prev.filter(t => t.id !== selectedTask.id));
       setSelectedTask(null);
     }
   }, [selectedTask]);
@@ -110,6 +119,14 @@ const Index = () => {
                 taskName={selectedTask.name}
                 onComplete={handleTaskComplete}
                 onAddTime={() => {}}
+                onDurationChange={(minutes) => {
+                  if (selectedTask) {
+                    handleTaskAdd({
+                      ...selectedTask,
+                      duration: minutes
+                    });
+                  }
+                }}
                 favorites={favorites}
                 setFavorites={setFavorites}
               />

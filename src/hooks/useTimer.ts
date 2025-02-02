@@ -32,13 +32,11 @@ export const useTimer = ({
 
   // Update timer when initialDuration changes
   useEffect(() => {
-    if (!isRunning) {
-      const newMinutes = Math.floor(initialDuration / 60);
-      setMinutesState(newMinutes);
-      setTimeLeft(initialDuration);
-      onDurationChange?.(newMinutes);
-    }
-  }, [initialDuration, isRunning, onDurationChange]);
+    const newMinutes = Math.floor(initialDuration / 60);
+    setMinutesState(newMinutes);
+    setTimeLeft(initialDuration);
+    onDurationChange?.(newMinutes);
+  }, [initialDuration, onDurationChange]);
 
   // Sync timeLeft with minutes changes
   const setMinutes = useCallback((newMinutes: number) => {
