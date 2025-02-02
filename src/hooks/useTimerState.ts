@@ -179,21 +179,26 @@ export const useTimerState = ({
       let finalMetrics: TimerStateMetrics;
       
       setState(prev => {
-        console.debug('Starting timer completion with state:', prev);
-        
         if (!prev.metrics.startTime) {
           console.warn('No start time found in metrics');
         }
         
+        // Calculate actual duration precisely
         const elapsedMs = prev.metrics.startTime
           ? completionTime.getTime() - prev.metrics.startTime.getTime()
           : 0;
         
-        const actualDuration = Math.max(1, Math.round(elapsedMs / 1000));
-        const netEffectiveTime = actualDuration - prev.metrics.pausedTime;
-        const efficiencyRatio = Math.min(100, Math.max(0,
-          netEffectiveTime > 0 ? (prev.metrics.originalDuration / netEffectiveTime) * 100 : 0
-        ));
+        // Round to nearest second to avoid fractional seconds
+        const actualDuration = Math.round(elapsedMs / 1000);
+        
+        // Calculate net effective time (actual - paused)
+        const netEffectiveTime = Math.max(0, actualDuration - prev.metrics.pausedTime);
+        
+        // Calculate efficiency ratio
+        const efficiencyRatio = calculateEfficiencyRatio(
+          prev.metrics.originalDuration,
+          netEffectiveTime
+        );
 
         const completionStatus = determineCompletionStatus(
           prev.metrics.originalDuration,
@@ -210,25 +215,17 @@ export const useTimerState = ({
           isPaused: false,
           pausedTimeLeft: null,
           lastPauseTimestamp: null,
-          pausedTime: prev.metrics.pausedTime,
-          pauseCount: prev.metrics.pauseCount,
-          favoriteQuotes: prev.metrics.favoriteQuotes,
-          originalDuration: prev.metrics.originalDuration,
-          startTime: prev.metrics.startTime,
-          extensionTime: prev.metrics.extensionTime
         };
 
-        console.debug('Completed timer with metrics:', finalMetrics);
+        console.debug('Timer completion metrics:', {
+          originalDuration: finalMetrics.originalDuration,
+          actualDuration: finalMetrics.actualDuration,
+          netEffectiveTime: finalMetrics.netEffectiveTime,
+          pausedTime: finalMetrics.pausedTime,
+          efficiencyRatio: finalMetrics.efficiencyRatio
+        });
 
-        // Use setTimeout to ensure state is updated before resolving
-        setTimeout(() => {
-          if (!finalMetrics) {
-            console.error('No metrics available after completion');
-            toast.error('An error occurred while completing the timer');
-          } else {
-            resolve(finalMetrics);
-          }
-        }, 0);
+        setTimeout(() => resolve(finalMetrics), 0);
 
         return {
           ...prev,

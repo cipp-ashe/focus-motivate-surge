@@ -23,14 +23,19 @@ interface CompletedTasksProps {
 }
 
 const formatDuration = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
+  if (seconds === 0) return '0s';
+  
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
   
   if (hours > 0) {
-    return `${hours}h ${remainingMinutes}m`;
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
   }
-  return `${remainingMinutes}m`;
+  if (minutes > 0) {
+    return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+  }
+  return `${remainingSeconds}s`;
 };
 
 const getCompletionStatusColor = (status: string) => {
