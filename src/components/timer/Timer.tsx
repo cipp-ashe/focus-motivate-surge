@@ -67,25 +67,28 @@ export const Timer = ({
     reset: resetTimer,
   } = useTimerState({
     initialDuration: internalMinutes * 60,
-    onTimeUp: () => {
+    onTimeUp: async () => {
+      // First complete the timer to finalize metrics
+      await completeTimer();
+      // Then play sound and show completion
       playSound();
-      completeTimer();
       handleTimerCompletion(metrics);
     },
     onDurationChange: onDurationChange || (() => {}),
   });
 
   const handleTimerCompletion = useCallback((currentMetrics: TimerStateMetrics) => {
-    if (!currentMetrics.endTime) {
-      console.warn('Timer completion called but metrics not finalized', { metrics: currentMetrics });
-      return;
-    }
-
     console.debug('Timer completion flow - Starting:', {
       currentMetrics,
       isRunning,
       taskName
     });
+
+    // Ensure metrics are finalized before showing completion
+    if (!currentMetrics.endTime) {
+      console.warn('Timer completion called but metrics not finalized', { metrics: currentMetrics });
+      return;
+    }
 
     setCompletionMetrics(currentMetrics);
     setShowCompletion(true);
@@ -121,9 +124,11 @@ export const Timer = ({
     }
   }, [isRunning, handlePause, handleStart]);
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
+    // First complete the timer to finalize metrics
+    await completeTimer();
+    // Then play sound and show completion
     playSound();
-    completeTimer();
     handleTimerCompletion(metrics);
   }, [completeTimer, playSound, metrics, handleTimerCompletion]);
 
