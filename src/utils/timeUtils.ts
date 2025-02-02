@@ -4,14 +4,15 @@ export const formatTime = (seconds: number): string => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-export const calculateEfficiencyRatio = (originalDuration: number, netEffectiveTime: number): number => {
-  if (netEffectiveTime === 0) return 0;
-  const ratio = (originalDuration / netEffectiveTime) * 100;
-  return Math.min(ratio, 100);
+export const calculateEfficiencyRatio = (expectedTime: number, netEffectiveTime: number): number => {
+  if (netEffectiveTime === 0 || expectedTime === 0) return 0;
+  // Cap efficiency ratio at 200% to avoid extreme values
+  const ratio = (expectedTime / netEffectiveTime) * 100;
+  return Math.min(ratio, 200);
 };
 
-export const determineCompletionStatus = (originalDuration: number, netEffectiveTime: number) => {
-  if (netEffectiveTime < originalDuration) return 'Completed Early';
-  if (netEffectiveTime === originalDuration) return 'Completed On Time';
+export const determineCompletionStatus = (expectedTime: number, netEffectiveTime: number) => {
+  if (netEffectiveTime < expectedTime) return 'Completed Early';
+  if (netEffectiveTime === expectedTime) return 'Completed On Time';
   return 'Completed Late';
 };

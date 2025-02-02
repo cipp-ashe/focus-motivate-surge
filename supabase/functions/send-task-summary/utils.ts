@@ -18,10 +18,27 @@ export const generateEmailContent = (summaryData: DailySummary): string => {
   } = summaryData;
 
   const taskList = completedTasks.map(task => `
-    <li style="margin-bottom: 10px;">
-      <strong>${task.name}</strong><br>
-      Time spent: ${formatDuration(task.metrics?.actualDuration || 0)}<br>
-      Efficiency: ${task.metrics?.efficiencyRatio.toFixed(1)}%
+    <li style="margin-bottom: 15px; padding: 10px; background-color: #FFFFFF; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+      <strong style="color: #1F2937; font-size: 16px;">${task.taskName}</strong>
+      <div style="margin-top: 8px; color: #4B5563;">
+        <div>Expected time: ${formatDuration(task.metrics?.expectedTime || 0)}</div>
+        <div>Net effective time: ${formatDuration(task.metrics?.netEffectiveTime || 0)}</div>
+        <div>Efficiency: ${task.metrics?.efficiencyRatio.toFixed(1)}%</div>
+        <div style="margin-top: 5px;">
+          <span style="
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            ${task.metrics?.completionStatus === 'Completed Early' ? 'background-color: #DEF7EC; color: #03543F;' :
+              task.metrics?.completionStatus === 'Completed On Time' ? 'background-color: #E1EFFE; color: #1E429F;' :
+              'background-color: #FDE8E8; color: #9B1C1C;'
+            }
+          ">
+            ${task.metrics?.completionStatus}
+          </span>
+        </div>
+      </div>
     </li>
   `).join('');
 

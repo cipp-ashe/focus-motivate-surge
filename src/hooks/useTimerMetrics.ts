@@ -2,12 +2,12 @@ import { useState, useCallback } from 'react';
 import { TimerStateMetrics } from '../types/metrics';
 import { calculateEfficiencyRatio, determineCompletionStatus, formatTime } from '../utils/timeUtils';
 
-export const useTimerMetrics = (initialDuration: number) => {
+export const useTimerMetrics = (initialDurationSeconds: number) => {
   const [metrics, setMetrics] = useState<TimerStateMetrics>({
     startTime: null,
     endTime: null,
     pauseCount: 0,
-    originalDuration: initialDuration,
+    expectedTime: initialDurationSeconds,
     actualDuration: 0,
     favoriteQuotes: 0,
     pausedTime: 0,
@@ -22,9 +22,9 @@ export const useTimerMetrics = (initialDuration: number) => {
 
   const logMetrics = useCallback((metrics: TimerStateMetrics) => {
     console.group('Timer Metrics');
-    console.log('Original Duration:', {
-      seconds: metrics.originalDuration,
-      formatted: formatTime(metrics.originalDuration)
+    console.log('Expected Time:', {
+      seconds: metrics.expectedTime,
+      formatted: formatTime(metrics.expectedTime)
     });
     if (metrics.actualDuration) {
       console.log('Total Elapsed Time:', {
@@ -90,8 +90,8 @@ export const useTimerMetrics = (initialDuration: number) => {
           actualDuration: Math.floor(totalElapsedMs / 1000),
           pausedTime: finalPausedTime,
           netEffectiveTime: actualWorkingTime,
-          efficiencyRatio: calculateEfficiencyRatio(prev.originalDuration, actualWorkingTime),
-          completionStatus: determineCompletionStatus(prev.originalDuration, actualWorkingTime),
+          efficiencyRatio: calculateEfficiencyRatio(prev.expectedTime, actualWorkingTime),
+          completionStatus: determineCompletionStatus(prev.expectedTime, actualWorkingTime),
           isPaused: false,
           pausedTimeLeft: null,
           lastPauseTimestamp: null,

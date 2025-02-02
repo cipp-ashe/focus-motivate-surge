@@ -29,7 +29,7 @@ serve(async (req: Request) => {
     console.log("Summary data:", JSON.stringify(summaryData, null, 2));
 
     const { error } = await resend.emails.send({
-      from: "Lovable Timer <timer@resend.dev>",
+      from: "Focus Timer <success@focustimer.org>",
       to: email,
       subject: "Your Daily Task Summary",
       html: generateEmailContent(summaryData),

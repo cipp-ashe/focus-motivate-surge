@@ -41,6 +41,9 @@ export const Timer = ({
     },
   });
 
+  // Convert minutes to seconds for timer state
+  const durationInSeconds = internalMinutes * 60;
+
   const {
     timeLeft,
     minutes,
@@ -54,7 +57,7 @@ export const Timer = ({
     completeTimer,
     reset: resetTimer,
   } = useTimerState({
-    initialDuration: internalMinutes * 60,
+    initialDuration: durationInSeconds,
     onTimeUp: async () => {
       try {
         pause();

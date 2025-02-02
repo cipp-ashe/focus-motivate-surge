@@ -30,7 +30,7 @@ export const useTimerState = ({
     metrics,
     updateMetrics,
     calculateFinalMetrics,
-  } = useTimerMetrics(initialDuration);
+  } = useTimerMetrics(initialDuration); // initialDuration is already in seconds, which is what we want
 
   const startTimer = useCallback(() => {
     // If resuming from pause, calculate accumulated pause time
@@ -77,7 +77,7 @@ export const useTimerState = ({
     const additionalSeconds = additionalMinutes * 60;
     updateMetrics({
       extensionTime: metrics.extensionTime + additionalSeconds,
-      originalDuration: metrics.originalDuration + additionalSeconds,
+      expectedTime: metrics.expectedTime + additionalSeconds,
       pausedTimeLeft: metrics.isPaused ? timeLeft + additionalSeconds : metrics.pausedTimeLeft,
     });
     addTimeControl(additionalMinutes);
@@ -95,7 +95,7 @@ export const useTimerState = ({
       startTime: null,
       endTime: null,
       pauseCount: 0,
-      originalDuration: minutes * 60,
+      expectedTime: minutes * 60,
       actualDuration: 0,
       favoriteQuotes: metrics.favoriteQuotes,
       pausedTime: 0,

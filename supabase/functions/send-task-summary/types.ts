@@ -3,12 +3,12 @@ export interface Task {
   metrics?: {
     actualDuration: number;
     efficiencyRatio: number;
-    originalDuration: number;
+    expectedTime: number;
     pauseCount: number;
     pausedTime: number;
     extensionTime: number;
     netEffectiveTime: number;
-    completionStatus: string;
+    completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
   };
 }
 

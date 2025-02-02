@@ -11,7 +11,7 @@ export interface Task {
   completed: boolean;
   duration?: number;
   metrics?: {
-    originalDuration: number;
+    expectedTime: number;
     actualDuration: number;
     pauseCount: number;
     favoriteQuotes: number;
@@ -19,7 +19,7 @@ export interface Task {
     extensionTime: number;
     netEffectiveTime: number;
     efficiencyRatio: number;
-    completionStatus: string;
+    completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
   };
 }
 
