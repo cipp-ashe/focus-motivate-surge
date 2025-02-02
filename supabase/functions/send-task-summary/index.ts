@@ -52,14 +52,30 @@ const formatDuration = (seconds: number): string => {
 const getStatusColor = (status: string): string => {
   switch (status) {
     case 'Completed Early':
-      return '#22c55e';
+      return '#22c55e'; // Green
     case 'Completed On Time':
-      return '#3b82f6';
+      return '#3b82f6'; // Blue
     case 'Completed Late':
-      return '#eab308';
+      return '#eab308'; // Yellow
     default:
-      return '#6b7280';
+      return '#6b7280'; // Gray
   }
+};
+
+const generateQuoteSection = (quotes: Array<{ text: string; author: string }>) => {
+  if (quotes.length === 0) return '';
+  
+  return `
+    <div style="margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 8px;">
+      <h3 style="margin: 0 0 12px 0; color: #6366f1; font-size: 16px;">✨ Inspiring Quotes</h3>
+      ${quotes.map(quote => `
+        <div style="margin: 8px 0; padding: 12px; background: white; border-left: 3px solid #6366f1; border-radius: 0 4px 4px 0;">
+          <p style="margin: 0 0 4px 0; color: #1a1a1a; font-style: italic;">"${quote.text}"</p>
+          <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
 };
 
 serve(async (req) => {
@@ -73,19 +89,29 @@ serve(async (req) => {
     // Calculate overall metrics
     const totalTasks = summaryData.completedTasks.length;
     const totalTimeSpentFormatted = formatDuration(summaryData.totalTimeSpent);
+    const averageEfficiency = summaryData.completedTasks.reduce(
+      (acc, task) => acc + (task.metrics?.efficiencyRatio || 0),
+      0
+    ) / totalTasks;
     
     const taskDetailsHtml = summaryData.completedTasks.map(task => {
       const metrics = task.metrics;
       if (!metrics) return '';
 
       const statusColor = getStatusColor(metrics.completionStatus);
+      const efficiency = metrics.efficiencyRatio.toFixed(1);
+      const efficiencyColor = Number(efficiency) >= 90 ? '#22c55e' : 
+                             Number(efficiency) >= 75 ? '#3b82f6' : '#eab308';
 
       return `
         <div style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h3 style="margin: 0; color: #1a1a1a; font-size: 18px;">✓ ${task.taskName}</h3>
-            <span style="font-size: 14px; color: ${statusColor};">${metrics.completionStatus}</span>
+            <span style="font-size: 14px; padding: 4px 8px; background: ${statusColor}20; color: ${statusColor}; border-radius: 4px;">
+              ${metrics.completionStatus}
+            </span>
           </div>
+          
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
             <div>
               <p style="margin: 4px 0; color: #4a5568;">⏱️ Expected: ${formatDuration(metrics.originalDuration)}</p>
@@ -93,44 +119,39 @@ serve(async (req) => {
               <p style="margin: 4px 0; color: #4a5568;">🎯 Net Time: ${formatDuration(metrics.netEffectiveTime)}</p>
             </div>
             <div>
-              <p style="margin: 4px 0; color: #4a5568;">⏸️ Paused Time: ${formatDuration(metrics.pausedTime)}</p>
+              <p style="margin: 4px 0; color: #4a5568;">⏸️ Pauses: ${metrics.pauseCount} (${formatDuration(metrics.pausedTime)})</p>
               <p style="margin: 4px 0; color: #4a5568;">⚡ Added Time: ${formatDuration(metrics.extensionTime)}</p>
-              <p style="margin: 4px 0; color: #4a5568;">📊 Efficiency: ${metrics.efficiencyRatio.toFixed(1)}%</p>
+              <p style="margin: 4px 0; color: ${efficiencyColor};">📊 Efficiency: ${efficiency}%</p>
             </div>
           </div>
-          ${task.relatedQuotes.length > 0 ? `
-            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
-              <p style="margin: 0 0 8px 0; color: #4a5568; font-weight: 500;">📝 Inspiring quotes:</p>
-              ${task.relatedQuotes.map(quote => `
-                <div style="margin: 8px 0; padding: 12px; background: white; border-left: 3px solid #6366f1; border-radius: 0 4px 4px 0;">
-                  <p style="margin: 0 0 4px 0; color: #1a1a1a; font-style: italic;">"${quote.text}"</p>
-                  <p style="margin: 0; color: #6b7280; font-size: 14px;">— ${quote.author}</p>
-                </div>
-              `).join('')}
-            </div>
-          ` : ''}
+          
+          ${task.relatedQuotes.length > 0 ? generateQuoteSection(task.relatedQuotes) : ''}
         </div>
       `;
     }).join('');
 
     const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
-        <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 24px; border-radius: 8px; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 28px; text-align: center;">Today's Accomplishments 🎯</h1>
-          <p style="color: white; opacity: 0.9; text-align: center; margin: 8px 0 0 0;">Here's a detailed breakdown of your productive day</p>
+      <div style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
+        <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 24px; border-radius: 8px; margin-bottom: 24px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px;">Today's Focus Summary 🎯</h1>
+          <p style="color: white; opacity: 0.9; margin: 8px 0 0 0;">Here's what you accomplished today</p>
         </div>
 
         <div style="margin-bottom: 32px;">
           <div style="background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <h2 style="color: #4f46e5; margin-top: 0;">Daily Insights 📊</h2>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 24px 0;">
+            <h2 style="color: #6366f1; margin-top: 0;">Daily Insights 📊</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0;">
               <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
                 <p style="margin: 0; color: #6b7280; font-size: 14px;">Time Focused</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalTimeSpentFormatted}</p>
+                <p style="margin: 4px 0 0 0; color: #6366f1; font-size: 24px; font-weight: 600;">${totalTimeSpentFormatted}</p>
               </div>
               <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
                 <p style="margin: 0; color: #6b7280; font-size: 14px;">Tasks Completed</p>
-                <p style="margin: 4px 0 0 0; color: #4f46e5; font-size: 24px; font-weight: 600;">${totalTasks}</p>
+                <p style="margin: 4px 0 0 0; color: #6366f1; font-size: 24px; font-weight: 600;">${totalTasks}</p>
+              </div>
+              <div style="text-align: center; padding: 16px; background: #f8fafc; border-radius: 8px;">
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">Avg. Efficiency</p>
+                <p style="margin: 4px 0 0 0; color: #6366f1; font-size: 24px; font-weight: 600;">${averageEfficiency.toFixed(1)}%</p>
               </div>
             </div>
           </div>
@@ -140,6 +161,13 @@ serve(async (req) => {
           <h2 style="color: #1a1a1a; margin-bottom: 16px;">Completed Tasks (${totalTasks})</h2>
           ${taskDetailsHtml}
         </div>
+
+        ${summaryData.favoriteQuotes.length > 0 ? `
+          <div style="margin-top: 32px;">
+            <h2 style="color: #1a1a1a; margin-bottom: 16px;">Today's Favorite Quotes ✨</h2>
+            ${generateQuoteSection(summaryData.favoriteQuotes)}
+          </div>
+        ` : ''}
 
         <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
           <p style="color: #6b7280; margin: 0;">Great work today! See you tomorrow for another productive session! 🌟</p>
@@ -173,7 +201,7 @@ serve(async (req) => {
         paused_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.pausedTime || 0), 0),
         extension_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.extensionTime || 0), 0),
         net_effective_time: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.netEffectiveTime || 0), 0),
-        efficiency_ratio: summaryData.completedTasks.reduce((acc, task) => acc + (task.metrics?.efficiencyRatio || 0), 0) / totalTasks,
+        efficiency_ratio: averageEfficiency,
         completion_status: summaryData.completedTasks.length > 0 ? summaryData.completedTasks[0].metrics?.completionStatus : null,
       });
 
