@@ -34,14 +34,14 @@ const initialMetrics = (duration: number): TimerStateMetrics => ({
   originalDuration: duration,
   actualDuration: 0,
   favoriteQuotes: 0,
-  isPaused: false,
-  pausedTimeLeft: null,
   pausedTime: 0,
   lastPauseTimestamp: null,
   extensionTime: 0,
   netEffectiveTime: 0,
   efficiencyRatio: 0,
   completionStatus: 'Completed On Time',
+  isPaused: false,
+  pausedTimeLeft: null,
 });
 
 export const useTimerState = ({
@@ -174,7 +174,6 @@ export const useTimerState = ({
 
   const completeTimer = useCallback((): TimerStateMetrics => {
     const completionTime = new Date();
-    
     let finalMetrics: TimerStateMetrics;
     
     setState(prev => {
@@ -218,7 +217,7 @@ export const useTimerState = ({
       };
     });
 
-    return finalMetrics;
+    return finalMetrics!;
   }, []);
 
   const reset = useCallback(() => {

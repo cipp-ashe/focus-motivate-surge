@@ -5,7 +5,7 @@ import { useTimerEffects } from "@/hooks/useTimerEffects";
 import { useTransition } from "@/hooks/useTransition";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { TimerDisplay } from "./TimerDisplay";
-import { TimerControls } from "./TimerControls";
+import { TimerControls } from "../TimerControls";
 import { TimerMetricsDisplay } from "./TimerMetrics";
 import { TimerHeader } from "./TimerHeader";
 import { CompletionCelebration } from "./CompletionCelebration";
@@ -67,13 +67,19 @@ export const Timer = ({
     reset: resetTimer,
   } = useTimerState({
     initialDuration: internalMinutes * 60,
-    onTimeUp: () => {
+    onTimeUp: async () => {
       try {
         // First complete the timer to finalize metrics
-        const finalMetrics = completeTimer();
+        const finalMetrics = await completeTimer();
         console.debug('Timer completed with metrics:', finalMetrics);
+        
+        if (!finalMetrics) {
+          console.error('No metrics returned from completeTimer');
+          return;
+        }
+        
         // Then play sound and show completion with the finalized metrics
-        playSound();
+        await playSound();
         handleTimerCompletion(finalMetrics);
       } catch (error) {
         console.error('Error completing timer:', error);
@@ -89,7 +95,6 @@ export const Timer = ({
       taskName
     });
 
-    // Double check that metrics are finalized
     if (!currentMetrics.endTime) {
       console.warn('Timer completion called but metrics not finalized', { metrics: currentMetrics });
       return;
@@ -135,10 +140,16 @@ export const Timer = ({
   const handleComplete = useCallback(async () => {
     try {
       // First complete the timer to finalize metrics
-      const finalMetrics = completeTimer();
+      const finalMetrics = await completeTimer();
       console.debug('Manual completion with metrics:', finalMetrics);
+      
+      if (!finalMetrics) {
+        console.error('No metrics returned from completeTimer');
+        return;
+      }
+      
       // Then play sound and show completion with the finalized metrics
-      playSound();
+      await playSound();
       handleTimerCompletion(finalMetrics);
     } catch (error) {
       console.error('Error completing timer:', error);
