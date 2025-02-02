@@ -26,6 +26,14 @@ export const TaskItem = ({ task, onSelect, onDelete, onUpdateDuration }: TaskIte
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent form submission
+      handleDurationChange(duration);
+      (e.target as HTMLInputElement).blur(); // Remove focus after handling
+    }
+  };
+
   return (
     <div
       className="task-list-item p-3 rounded-lg bg-background/50 hover:bg-primary/20 cursor-pointer transition-all duration-300 border border-primary/20"
@@ -45,7 +53,7 @@ export const TaskItem = ({ task, onSelect, onDelete, onUpdateDuration }: TaskIte
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               onBlur={() => handleDurationChange(duration)}
-              onKeyPress={(e) => e.key === "Enter" && handleDurationChange(duration)}
+              onKeyDown={handleKeyDown}
               className="w-16 h-8 text-sm"
               min={1}
               max={60}
