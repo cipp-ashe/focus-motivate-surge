@@ -74,16 +74,17 @@ export const TaskList = ({
   };
 
   const handleUpdateDuration = (taskId: string, duration: number) => {
-    const updatedTasks = tasks.map(task => 
-      task.id === taskId ? { ...task, duration } : task
-    );
-    // Update tasks through the parent component
-    onTaskAdd(updatedTasks.find(t => t.id === taskId)!);
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      onTaskAdd({
+        ...task,
+        duration: Math.max(1, Math.min(60, duration)) // Ensure duration is between 1 and 60
+      });
+    }
   };
 
   const handleDeleteTask = (taskId: string) => {
     const updatedTasks = tasks.filter(task => task.id !== taskId);
-    // Update tasks through the parent component by removing the task
     onTasksClear();
     updatedTasks.forEach(task => onTaskAdd(task));
   };
