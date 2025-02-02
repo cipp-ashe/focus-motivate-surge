@@ -18,6 +18,7 @@ interface RequestBody {
 }
 
 serve(async (req: Request) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -63,7 +64,7 @@ serve(async (req: Request) => {
     
     return new Response(
       JSON.stringify({ 
-        error: error.message || "Failed to send email",
+        error: error instanceof Error ? error.message : "Failed to send email",
         details: error
       }),
       {
