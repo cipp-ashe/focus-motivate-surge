@@ -54,13 +54,13 @@ export const CompletionCelebration = ({
   };
 
   const MetricItem = ({ icon: Icon, label, value }: { icon: LucideIcon, label: string, value: string }) => (
-    <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/40 transition-colors duration-300">
-      <div className="p-2 bg-primary/10 rounded-full">
-        <Icon className="h-4 w-4 text-primary" />
+    <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg hover:bg-muted/40 transition-colors duration-300">
+      <div className="p-1.5 bg-primary/10 rounded-full">
+        <Icon className="h-3.5 w-3.5 text-primary" />
       </div>
       <div>
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="font-medium text-sm">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="font-medium text-xs">{value}</p>
       </div>
     </div>
   );
@@ -94,24 +94,24 @@ export const CompletionCelebration = ({
       {/* Modal layer */}
       <div className="fixed inset-0 z-[2] flex items-center justify-center p-4">
         <Dialog open={show} onOpenChange={onClose}>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-sm border-primary/20">
-            <DialogHeader>
-              <DialogTitle className="text-center">
+          <DialogContent className="max-w-[85vw] sm:max-w-md w-full bg-background/95 backdrop-blur-sm border-primary/20">
+            <DialogHeader className="space-y-1">
+              <DialogTitle className="text-center text-lg sm:text-xl">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                   Task Complete! 🎉
                 </span>
               </DialogTitle>
-              <DialogDescription className="text-center">
+              <DialogDescription className="text-center text-sm">
                 {taskName}
               </DialogDescription>
             </DialogHeader>
             
-            <div className="py-4">
-              <p className="text-sm text-muted-foreground text-center mb-4">
+            <div className="py-2">
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mb-3">
                 Here's how your session went
               </p>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1.5">
                 <MetricItem
                   icon={Timer}
                   label="Planned Duration"
@@ -130,7 +130,7 @@ export const CompletionCelebration = ({
                   value={formatDuration(safeMetrics.netEffectiveTime)}
                 />
 
-                <div className="text-xs text-muted-foreground text-center">
+                <div className="text-[10px] sm:text-xs text-muted-foreground text-center">
                   Efficiency Score: {safeMetrics.efficiencyRatio.toFixed(1)}%
                   {safeMetrics.efficiencyRatio > 80 && " 🎯"}
                   {safeMetrics.efficiencyRatio > 95 && " 🌟"}
@@ -158,7 +158,7 @@ export const CompletionCelebration = ({
               </div>
             </div>
 
-            <div className="flex justify-center pt-2">
+            <div className="flex justify-center">
               <Button
                 onClick={onClose}
                 className="bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary transition-all duration-300 hover:scale-105"
