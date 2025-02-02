@@ -183,47 +183,44 @@ export const useTimerState = ({
           console.warn('No start time found in metrics');
         }
         
-        // Calculate actual duration (total elapsed time including pauses)
-        const elapsedMs = prev.metrics.startTime
+        // Calculate total elapsed time from start to completion
+        const totalElapsedMs = prev.metrics.startTime
           ? completionTime.getTime() - prev.metrics.startTime.getTime()
           : 0;
         
-        // Round to nearest second
-        const actualDuration = Math.floor(elapsedMs / 1000);
-        
-        // Calculate additional paused time if timer was paused when completed
+        // Calculate final paused time including current pause if timer was paused
         const finalPausedTime = prev.metrics.lastPauseTimestamp
           ? prev.metrics.pausedTime + Math.floor((completionTime.getTime() - prev.metrics.lastPauseTimestamp.getTime()) / 1000)
           : prev.metrics.pausedTime;
         
-        // Calculate net effective time (actual time minus paused time)
-        const netEffectiveTime = Math.max(0, actualDuration - finalPausedTime);
+        // Calculate actual working time (elapsed time minus paused time)
+        const actualWorkingTime = Math.max(0, Math.floor(totalElapsedMs / 1000) - finalPausedTime);
         
         console.debug('Timer completion metrics:', {
           originalDuration: prev.metrics.originalDuration,
-          actualDuration,
+          totalElapsedTime: Math.floor(totalElapsedMs / 1000),
           pausedTime: finalPausedTime,
-          netEffectiveTime,
+          actualWorkingTime,
           startTime: prev.metrics.startTime?.toISOString(),
           endTime: completionTime.toISOString()
         });
 
         const efficiencyRatio = calculateEfficiencyRatio(
           prev.metrics.originalDuration,
-          netEffectiveTime
+          actualWorkingTime
         );
 
         const completionStatus = determineCompletionStatus(
           prev.metrics.originalDuration,
-          netEffectiveTime
+          actualWorkingTime
         );
 
         finalMetrics = {
           ...prev.metrics,
           endTime: completionTime,
-          actualDuration,
+          actualDuration: Math.floor(totalElapsedMs / 1000), // Total elapsed time
           pausedTime: finalPausedTime,
-          netEffectiveTime,
+          netEffectiveTime: actualWorkingTime, // Actual working time
           efficiencyRatio,
           completionStatus,
           isPaused: false,
