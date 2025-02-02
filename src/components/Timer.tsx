@@ -56,8 +56,7 @@ export const Timer = ({
     initialDuration: duration,
     onTimeUp: () => {
       playSound();
-      toast("Time's up! Great work! ✨");
-      onComplete();
+      handleComplete();
     },
     onDurationChange,
   });
@@ -72,15 +71,16 @@ export const Timer = ({
 
   const handleComplete = useCallback(() => {
     pause();
-    onComplete();
     setIsExpanded(false);
-    toast("Task completed! You're crushing it! 🎉");
+    onComplete();
+    toast.success("Task completed! You're crushing it! 🎉");
   }, [pause, onComplete]);
 
   const handleAddTime = useCallback(() => {
     addMinutes(ADD_TIME_MINUTES);
     onAddTime();
     start();
+    toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
   }, [addMinutes, onAddTime, start]);
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
