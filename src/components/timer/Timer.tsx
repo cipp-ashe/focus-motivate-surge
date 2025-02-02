@@ -1,22 +1,13 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useAudio } from "@/hooks/useAudio";
 import { useTimerState } from "@/hooks/useTimerState";
-import { useTransition } from "@/hooks/useTransition";
-import { useWindowSize } from "@/hooks/useWindowSize";
-import { TimerDisplay } from "./TimerDisplay";
-import { TimerControls } from "../TimerControls";
-import { TimerMetricsDisplay } from "./TimerMetrics";
-import { TimerHeader } from "./TimerHeader";
+import { TimerStateMetrics } from "@/types/metrics";
 import { CompletionCelebration } from "./CompletionCelebration";
-import { SoundSelector } from "../SoundSelector";
-import { MinutesInput } from "../MinutesInput";
-import { QuoteDisplay } from "../QuoteDisplay";
 import { FloatingQuotes } from "../FloatingQuotes";
-import { Card } from "../ui/card";
 import { Minimize2 } from "lucide-react";
 import { TIMER_CONSTANTS, SOUND_OPTIONS, type SoundOption, type TimerProps } from "@/types/timer";
-import { TimerStateMetrics } from "@/types/metrics";
-import { focusOrder, useFocusTrap } from "@/hooks/useFocusTrap";
+import { TimerExpandedView } from "./views/TimerExpandedView";
+import { TimerCompactView } from "./views/TimerCompactView";
 import { toast } from "sonner";
 
 const { MIN_MINUTES, MAX_MINUTES, ADD_TIME_MINUTES, CIRCLE_CIRCUMFERENCE } = TIMER_CONSTANTS;
@@ -36,11 +27,6 @@ export const Timer = ({
   const [completionMetrics, setCompletionMetrics] = useState<TimerStateMetrics | null>(null);
   const initialMinutes = duration ? Math.floor(duration / 60) : 25;
   const [internalMinutes, setInternalMinutes] = useState(initialMinutes);
-  const windowSize = useWindowSize();
-
-  const { containerRef: focusRef } = useFocusTrap({
-    enabled: !isExpanded,
-  });
 
   const { play: playSound, testSound, isLoadingAudio } = useAudio({
     audioUrl: SOUND_OPTIONS[selectedSound],
@@ -68,16 +54,11 @@ export const Timer = ({
     initialDuration: internalMinutes * 60,
     onTimeUp: async () => {
       try {
-        console.debug('Timer up - Starting completion flow');
         const finalMetrics = await completeTimer();
-        
         if (!finalMetrics) {
-          console.error('No metrics returned from completeTimer');
           toast.error("An error occurred while completing the timer");
           return;
         }
-
-        console.debug('Timer completed with metrics:', finalMetrics);
         await playSound();
         handleTimerCompletion(finalMetrics);
       } catch (error) {
@@ -85,35 +66,23 @@ export const Timer = ({
         toast.error("An error occurred while completing the timer");
       }
     },
-    onDurationChange: onDurationChange || (() => {}),
+    onDurationChange,
   });
 
   const handleTimerCompletion = useCallback((currentMetrics: TimerStateMetrics) => {
-    console.debug('Timer completion flow - Starting:', {
-      currentMetrics,
-      isRunning,
-      taskName
-    });
-
-    // Use setTimeout to ensure state updates are complete
     setTimeout(() => {
       setCompletionMetrics(currentMetrics);
       setShowCompletion(true);
     }, 0);
-  }, [isRunning, taskName]);
+  }, []);
 
   const handleComplete = useCallback(async () => {
     try {
-      console.debug('Manual completion - Starting');
       const finalMetrics = await completeTimer();
-      
       if (!finalMetrics) {
-        console.error('No metrics returned from manual completion');
         toast.error("An error occurred while completing the timer");
         return;
       }
-
-      console.debug('Manual completion with metrics:', finalMetrics);
       await playSound();
       handleTimerCompletion(finalMetrics);
     } catch (error) {
@@ -190,120 +159,58 @@ export const Timer = ({
     size: isExpanded ? "large" as const : "normal" as const,
   };
 
+  if (showCompletion && completionMetrics) {
+    return (
+      <CompletionCelebration
+        show={showCompletion}
+        metrics={completionMetrics}
+        taskName={taskName}
+        onClose={handleCloseCompletion}
+        width={window.innerWidth}
+        height={window.innerHeight}
+      />
+    );
+  }
+
   return (
     <>
-      {!showCompletion && (
-        isExpanded ? (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 bg-background/95 backdrop-blur-md transition-opacity duration-300" />
-
-            <FloatingQuotes favorites={favorites} />
-
-            <button
-              onClick={handleCloseTimer}
-              className="absolute top-6 right-6 p-2 text-muted-foreground hover:text-foreground z-[102] transition-all duration-300 hover:scale-110"
-            >
-              <Minimize2 className="h-6 w-6" />
-            </button>
-
-            <div className="relative w-full max-w-[600px] mx-auto px-4 py-8 z-[101]">
-              <Card className="w-full bg-card/90 backdrop-blur-md shadow-lg p-6 sm:p-8 border-primary/20">
-                <div className="space-y-8 sm:space-y-12">
-                  <TimerHeader taskName={taskName} />
-                  
-                  <div className="flex flex-col items-center gap-8 sm:gap-12">
-                    <div className="scale-110 sm:scale-125 transform-gpu">
-                      <TimerDisplay
-                        circleProps={timerCircleProps}
-                        size="large"
-                        isRunning={isRunning}
-                      />
-                    </div>
-
-                    <div className="w-full max-w-md px-4">
-                      <TimerControls {...timerControlsProps} />
-                      <TimerMetricsDisplay 
-                        metrics={metrics}
-                        isRunning={isRunning}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <div className="mt-8">
-                <QuoteDisplay 
-                  showAsOverlay
-                  currentTask={taskName}
-                  onLike={() => incrementFavorites()}
-                  favorites={favorites}
-                  setFavorites={setFavorites}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="w-full">
-            <Card 
-              ref={focusRef}
-              className="w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-4 sm:p-6"
-            >
-              <div className="space-y-4 sm:space-y-6">
-                <TimerHeader taskName={taskName} />
-
-                <div className={`overflow-hidden transition-all duration-700 ${
-                  isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'
-                }`}>
-                  <div className="flex flex-col items-center space-y-4 pt-2">
-                    <MinutesInput
-                      minutes={internalMinutes}
-                      onMinutesChange={handleMinutesChange}
-                      minMinutes={MIN_MINUTES}
-                      maxMinutes={MAX_MINUTES}
-                    />
-
-                    <SoundSelector
-                      selectedSound={selectedSound}
-                      onSoundChange={setSelectedSound}
-                      onTestSound={testSound}
-                      isLoadingAudio={isLoadingAudio}
-                    />
-                  </div>
-                </div>
-
-                <TimerDisplay
-                  circleProps={timerCircleProps}
-                  size="normal"
-                  onClick={() => isRunning && setIsExpanded(true)}
-                  isRunning={isRunning}
-                />
-
-                <TimerControls {...timerControlsProps} />
-
-                <TimerMetricsDisplay
-                  metrics={metrics}
-                  isRunning={isRunning}
-                />
-
-                <QuoteDisplay
-                  currentTask={taskName}
-                  onLike={() => incrementFavorites()}
-                  favorites={favorites}
-                  setFavorites={setFavorites}
-                />
-              </div>
-            </Card>
-          </div>
-        )
-      )}
-      {completionMetrics && (
-        <CompletionCelebration
-          show={showCompletion}
-          metrics={completionMetrics}
+      {isExpanded ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-background/95 backdrop-blur-md transition-opacity duration-300" />
+          <FloatingQuotes favorites={favorites} />
+          <button
+            onClick={handleCloseTimer}
+            className="absolute top-6 right-6 p-2 text-muted-foreground hover:text-foreground z-[102] transition-all duration-300 hover:scale-110"
+          >
+            <Minimize2 className="h-6 w-6" />
+          </button>
+          <TimerExpandedView
+            taskName={taskName}
+            timerCircleProps={timerCircleProps}
+            timerControlsProps={{...timerControlsProps, size: "large"}}
+            metrics={metrics}
+            onClose={handleCloseTimer}
+            onLike={incrementFavorites}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
+        </div>
+      ) : (
+        <TimerCompactView
           taskName={taskName}
-          onClose={handleCloseCompletion}
-          width={windowSize.width}
-          height={windowSize.height}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={{...timerControlsProps, size: "normal"}}
+          metrics={metrics}
+          internalMinutes={internalMinutes}
+          onMinutesChange={handleMinutesChange}
+          selectedSound={selectedSound}
+          onSoundChange={setSelectedSound}
+          onTestSound={testSound}
+          isLoadingAudio={isLoadingAudio}
+          onExpand={() => isRunning && setIsExpanded(true)}
+          onLike={incrementFavorites}
+          favorites={favorites}
+          setFavorites={setFavorites}
         />
       )}
     </>
