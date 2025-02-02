@@ -5,7 +5,6 @@ import { TaskList, Task } from "@/components/TaskList";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Import the Quote type from QuoteDisplay
 interface Quote {
   text: string;
   author: string;
@@ -32,7 +31,6 @@ const Index = () => {
     }
   });
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [duration, setDuration] = useState(1500);
   const [isDark, setIsDark] = useState(true);
   const [favorites, setFavorites] = useState<Quote[]>([]);
 
@@ -56,26 +54,25 @@ const Index = () => {
   const handleTaskSelect = useCallback((task: Task) => {
     setSelectedTask(task);
   }, []);
-// Save tasks to localStorage when they change
-useEffect(() => {
-  localStorage.setItem('taskList', JSON.stringify(tasks));
-  localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-}, [tasks, completedTasks]);
 
-const handleTaskComplete = useCallback(() => {
-  if (selectedTask) {
-    setCompletedTasks((prev) => [...prev, { ...selectedTask, completed: true }]);
-    setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
+  useEffect(() => {
+    localStorage.setItem('taskList', JSON.stringify(tasks));
+    localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+  }, [tasks, completedTasks]);
+
+  const handleTaskComplete = useCallback(() => {
+    if (selectedTask) {
+      setCompletedTasks((prev) => [...prev, { ...selectedTask, completed: true }]);
+      setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id));
+      setSelectedTask(null);
+    }
+  }, [selectedTask]);
+
+  const handleTasksClear = useCallback(() => {
+    setTasks([]);
+    setCompletedTasks([]);
     setSelectedTask(null);
-  }
-}, [selectedTask]);
-
-const handleTasksClear = useCallback(() => {
-  setTasks([]);
-  setCompletedTasks([]);
-  setSelectedTask(null);
-}, []);
-
+  }, []);
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -109,11 +106,10 @@ const handleTasksClear = useCallback(() => {
           <div className="space-y-6">
             {selectedTask ? (
               <Timer
-                duration={duration}
+                duration={selectedTask.duration ? selectedTask.duration * 60 : 1500}
                 taskName={selectedTask.name}
                 onComplete={handleTaskComplete}
                 onAddTime={() => {}}
-                onDurationChange={setDuration}
                 favorites={favorites}
                 setFavorites={setFavorites}
               />

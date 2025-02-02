@@ -54,7 +54,7 @@ export const Timer = ({
     addTime: addMinutes,
     setMinutes: handleMinutesChange,
   } = useTimer({
-    initialDuration: duration || 25, // Use task duration or default to 25
+    initialDuration: duration,
     onTimeUp: () => {
       setIsExpanded(false);
       playSound();
@@ -68,7 +68,7 @@ export const Timer = ({
       pause();
     } else {
       start();
-      setIsExpanded(true); // Expand when explicitly starting the timer
+      setIsExpanded(true);
     }
   }, [isRunning, start, pause]);
 
