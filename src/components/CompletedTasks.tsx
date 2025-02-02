@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Task } from "../types/timer";
 import { Card } from "./ui/card";
-import { CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Send } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface CompletedTasksProps {
@@ -27,67 +27,87 @@ export const CompletedTasks = ({ tasks }: CompletedTasksProps) => {
     <Card className="bg-card/80 backdrop-blur-sm border-primary/20 p-4">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-primary" />
-              Completed Tasks
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">
+              Completed Tasks ({totalTasks})
             </h2>
-            <div className="grid grid-cols-2 md:flex md:gap-6 text-sm text-muted-foreground">
-              <div>
-                Total Tasks: <span className="font-mono">{totalTasks}</span>
-              </div>
-              <div>
-                Today: <span className="font-mono">{totalCompletedToday}</span>
-              </div>
-              <div>
-                Total Time: <span className="font-mono">{totalTimeSpent}m</span>
-              </div>
-              <div>
-                Average: <span className="font-mono">{averageDuration}m</span>
-              </div>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="hover:bg-primary/20"
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-          <Button
-            variant="ghost"
+          <Button 
+            variant="outline" 
             size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="hover:bg-primary/20"
+            className="text-primary hover:bg-primary/20 gap-2"
           >
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            <Send className="h-4 w-4" />
+            Send Summary
           </Button>
         </div>
 
         {isExpanded && (
           <div className="space-y-2">
+            <div className="grid grid-cols-4 gap-4 px-2 py-1 text-sm text-muted-foreground">
+              <div>Task</div>
+              <div>Time</div>
+              <div>Status</div>
+              <div>Metrics</div>
+            </div>
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="completed-task-enter completed-task-enter-active p-2 text-sm text-muted-foreground line-through bg-background/30 rounded-lg border border-primary/10 flex justify-between items-center"
+                className="grid grid-cols-4 gap-4 p-2 text-sm bg-background/30 rounded-lg border border-primary/10"
               >
-                <span>{task.name}</span>
-                <div className="flex items-center gap-2">
-                  {task.duration && (
-                    <span className="text-xs bg-primary/10 px-2 py-1 rounded-full">
-                      {task.duration}m
-                    </span>
-                  )}
-                  {task.completedAt && (
-                    <span className="text-xs">
-                      {new Date(task.completedAt).toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </span>
-                  )}
+                <div className="line-through">{task.name}</div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Planned:</span>
+                    <span>{task.duration || 0}m</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Actual:</span>
+                    <span>{task.duration || 0}m</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-emerald-500">Completed Early</div>
+                  <div className="text-sm text-muted-foreground">
+                    0% efficiency
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="font-mono">0</span>
+                  <span className="font-mono">0</span>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        <div className="grid grid-cols-2 md:flex md:gap-6 text-sm text-muted-foreground mt-2">
+          <div>
+            Total Tasks: <span className="font-mono">{totalTasks}</span>
+          </div>
+          <div>
+            Today: <span className="font-mono">{totalCompletedToday}</span>
+          </div>
+          <div>
+            Total Time: <span className="font-mono">{totalTimeSpent}m</span>
+          </div>
+          <div>
+            Average: <span className="font-mono">{averageDuration}m</span>
+          </div>
+        </div>
       </div>
     </Card>
   );
