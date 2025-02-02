@@ -1,5 +1,6 @@
+// deno-lint-ignore-file
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { Resend } from "npm:resend@2.0.0";
 import { DailySummary } from "./types.ts";
 import { generateEmailContent } from "./utils.ts";
@@ -61,7 +62,6 @@ serve(async (req: Request) => {
   } catch (error: any) {
     console.error("Error in send-task-summary function:", error);
     
-    // Return a proper error response
     return new Response(
       JSON.stringify({ 
         error: error.message || "Failed to send email",
