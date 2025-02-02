@@ -98,7 +98,7 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                 <TableBody>
                   {tasks.map((task) => {
                     const metrics = task.metrics || {
-                      originalDuration: 0,
+                      expectedTime: 0,
                       actualDuration: 0,
                       pauseCount: 0,
                       favoriteQuotes: 0,
@@ -123,7 +123,7 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                           <div className="flex flex-col space-y-1">
                             <div className="flex items-center space-x-2 text-muted-foreground">
                               <Clock className="w-4 h-4" />
-                              <span>Expected: {formatDuration(metrics.originalDuration)}</span>
+                              <span>Expected: {formatDuration(metrics.expectedTime)}</span>
                             </div>
                             <div className="flex items-center space-x-2 text-muted-foreground">
                               <Clock className="w-4 h-4" />

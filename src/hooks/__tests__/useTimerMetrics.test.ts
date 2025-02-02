@@ -7,7 +7,7 @@ const createMetricsTester = createHookTester(useTimerMetrics);
 describe('useTimerMetrics', () => {
   test('initializes with correct values', () => {
     const { result } = createMetricsTester(300);
-    expect(result.metrics.originalDuration).toBe(300);
+    expect(result.metrics.expectedTime).toBe(300);
     expect(result.metrics.pauseCount).toBe(0);
     expect(result.metrics.isPaused).toBe(false);
   });

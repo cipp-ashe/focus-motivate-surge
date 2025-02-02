@@ -17,8 +17,8 @@ const calculateEfficiency = (metrics: TimerMetrics[]): number => {
   if (metrics.length === 0) return 0;
   
   const totalEfficiency = metrics.reduce((acc, metric) => {
-    if (metric.originalDuration === 0) return acc;
-    return acc + (metric.originalDuration / metric.actualDuration) * 100;
+    if (metric.expectedTime === 0) return acc;
+    return acc + (metric.expectedTime / metric.actualDuration) * 100;
   }, 0);
   
   return Math.round(totalEfficiency / metrics.length);
@@ -32,7 +32,7 @@ export const formatDailySummary = (
   console.log('Summary Formatter - Input tasks:', completedTasks.map(task => ({
     taskName: task.taskName,
     metrics: task.metrics ? {
-      originalDuration: task.metrics.originalDuration,
+      expectedTime: task.metrics.expectedTime,
       actualDuration: task.metrics.actualDuration,
       netEffectiveTime: task.metrics.netEffectiveTime,
       efficiencyRatio: task.metrics.efficiencyRatio
@@ -44,7 +44,7 @@ export const formatDailySummary = (
     .filter((metrics): metrics is TimerMetrics => metrics !== undefined);
 
   console.log('Summary Formatter - Filtered metrics:', metrics.map(m => ({
-    originalDuration: m.originalDuration,
+    expectedTime: m.expectedTime,
     actualDuration: m.actualDuration,
     netEffectiveTime: m.netEffectiveTime,
     efficiencyRatio: m.efficiencyRatio
@@ -55,7 +55,7 @@ export const formatDailySummary = (
   }, 0);
 
   const totalPlannedTime = metrics.reduce((total, metric) => {
-    return total + (metric.originalDuration || 0);
+    return total + (metric.expectedTime || 0);
   }, 0);
 
   const totalPauses = metrics.reduce((total, metric) => {
@@ -67,9 +67,10 @@ export const formatDailySummary = (
   const formattedCompletedTasks = completedTasks.map(task => ({
     ...task,
     formattedMetrics: task.metrics ? {
-      plannedDuration: formatDuration(task.metrics.originalDuration),
+      plannedDuration: formatDuration(task.metrics.expectedTime),
       actualDuration: formatDuration(task.metrics.actualDuration),
-      efficiency: Math.round((task.metrics.originalDuration / task.metrics.actualDuration) * 100),
+      netEffectiveTime: formatDuration(task.metrics.netEffectiveTime),
+      efficiency: task.metrics.efficiencyRatio,
       pauseCount: task.metrics.pauseCount,
       favoriteQuotes: task.metrics.favoriteQuotes,
     } : null

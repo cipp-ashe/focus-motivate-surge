@@ -68,7 +68,7 @@ export const CompletionCelebration = ({
   if (!show || !metrics) return null;
 
   const safeMetrics = {
-    originalDuration: metrics.originalDuration ?? 0,
+    expectedTime: metrics.expectedTime ?? 0,
     actualDuration: metrics.actualDuration ?? 0,
     netEffectiveTime: metrics.netEffectiveTime ?? 0,
     efficiencyRatio: metrics.efficiencyRatio ?? 0,
@@ -115,7 +115,7 @@ export const CompletionCelebration = ({
                 <MetricItem
                   icon={Timer}
                   label="Planned Duration"
-                  value={formatDuration(safeMetrics.originalDuration)}
+                  value={formatDuration(safeMetrics.expectedTime)}
                 />
                 
                 <MetricItem
