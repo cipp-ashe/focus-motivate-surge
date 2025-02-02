@@ -46,7 +46,7 @@ export const TaskItem = ({ task, onSelect, onDelete, onUpdateDuration }: TaskIte
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           {isEditing ? (
             <Input
               type="number"
