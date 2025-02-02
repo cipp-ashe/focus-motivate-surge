@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useEffect, useCallback } from 'react';
 import { TimerStateMetrics } from '../types/metrics';
+import { useTimerMetrics } from './useTimerMetrics';
+import { useTimerControls } from './useTimerControls';
 
 interface UseTimerStateProps {
   initialDuration: number;
@@ -8,352 +9,119 @@ interface UseTimerStateProps {
   onDurationChange?: (minutes: number) => void;
 }
 
-interface TimerState {
-  timeLeft: number;
-  minutes: number;
-  isRunning: boolean;
-  metrics: TimerStateMetrics;
-}
-
-const calculateEfficiencyRatio = (originalDuration: number, netEffectiveTime: number): number => {
-  if (netEffectiveTime === 0) return 0;
-  const ratio = (originalDuration / netEffectiveTime) * 100;
-  return Math.min(ratio, 100);
-};
-
-const determineCompletionStatus = (originalDuration: number, netEffectiveTime: number) => {
-  if (netEffectiveTime < originalDuration) return 'Completed Early';
-  if (netEffectiveTime === originalDuration) return 'Completed On Time';
-  return 'Completed Late';
-};
-
-const initialMetrics = (duration: number): TimerStateMetrics => ({
-  startTime: null,
-  endTime: null,
-  pauseCount: 0,
-  originalDuration: duration,
-  actualDuration: 0,
-  favoriteQuotes: 0,
-  pausedTime: 0,
-  lastPauseTimestamp: null,
-  extensionTime: 0,
-  netEffectiveTime: 0,
-  efficiencyRatio: 0,
-  completionStatus: 'Completed On Time',
-  isPaused: false,
-  pausedTimeLeft: null,
-});
-
 export const useTimerState = ({
   initialDuration,
   onTimeUp,
   onDurationChange,
 }: UseTimerStateProps) => {
-  const [state, setState] = useState<TimerState>(() => ({
-    timeLeft: Math.max(0, initialDuration),
-    minutes: Math.floor(Math.max(0, initialDuration) / 60),
-    isRunning: false,
-    metrics: initialMetrics(initialDuration),
-  }));
+  const {
+    timeLeft,
+    minutes,
+    isRunning,
+    setMinutes,
+    start,
+    pause,
+    addTime: addTimeControl,
+    reset: resetControl,
+    decrementTime,
+  } = useTimerControls({ initialDuration, onTimeUp, onDurationChange });
 
-  useEffect(() => {
-    if (!state.isRunning && !state.metrics.isPaused && initialDuration > 0 && !state.metrics.endTime) {
-      setState(prev => ({
-        ...prev,
-        timeLeft: initialDuration,
-        minutes: Math.floor(initialDuration / 60),
-        metrics: initialMetrics(initialDuration),
-      }));
-    }
-  }, [initialDuration, state.isRunning, state.metrics.isPaused, state.metrics.endTime]);
+  const {
+    metrics,
+    updateMetrics,
+    calculateFinalMetrics,
+  } = useTimerMetrics(initialDuration);
 
-  const setMinutes = useCallback((newMinutes: number) => {
-    if (!state.isRunning && !state.metrics.isPaused) {
-      setState(prev => ({
-        ...prev,
-        minutes: newMinutes,
-        timeLeft: newMinutes * 60,
-        metrics: {
-          ...initialMetrics(newMinutes * 60),
-          pausedTimeLeft: null,
-          isPaused: false,
-        },
-      }));
-      onDurationChange?.(newMinutes);
-    }
-  }, [onDurationChange, state.isRunning, state.metrics.isPaused]);
-
-  const start = useCallback(() => {
-    setState(prev => {
-      const now = new Date();
-      const additionalPausedTime = prev.metrics.lastPauseTimestamp
-        ? Math.floor((now.getTime() - prev.metrics.lastPauseTimestamp.getTime()) / 1000)
-        : 0;
-
-      const updatedMetrics = {
-        ...prev.metrics,
-        startTime: prev.metrics.startTime || now,
-        pausedTime: prev.metrics.pausedTime + additionalPausedTime,
-        lastPauseTimestamp: null,
-        isPaused: false,
-        pausedTimeLeft: null,
-      };
-
-      const newTimeLeft = prev.metrics.isPaused && prev.metrics.pausedTimeLeft !== null
-        ? prev.metrics.pausedTimeLeft
-        : prev.timeLeft;
-
-      return {
-        ...prev,
-        isRunning: true,
-        timeLeft: newTimeLeft,
-        metrics: updatedMetrics,
-      };
+  const startTimer = useCallback(() => {
+    updateMetrics({
+      startTime: metrics.startTime || new Date(),
+      isPaused: false,
+      pausedTimeLeft: null,
+      lastPauseTimestamp: null,
     });
-    
-    toast(state.metrics.isPaused ? "Timer resumed! Keep going! 💪" : "Timer started! You've got this! 🚀");
-  }, [state.metrics.isPaused]);
+    start();
+  }, [metrics.startTime, start, updateMetrics]);
 
-  const pause = useCallback(() => {
-    setState(prev => {
-      if (prev.metrics.isPaused || prev.metrics.endTime) {
-        return prev;
-      }
+  const pauseTimer = useCallback(() => {
+    if (metrics.isPaused || metrics.endTime) return;
 
-      const now = new Date();
-      const updatedMetrics = {
-        ...prev.metrics,
-        isPaused: true,
-        pausedTimeLeft: prev.timeLeft,
-        lastPauseTimestamp: now,
-        pauseCount: prev.metrics.pauseCount + 1,
-      };
-
-      return {
-        ...prev,
-        isRunning: false,
-        metrics: updatedMetrics,
-      };
+    updateMetrics({
+      isPaused: true,
+      pausedTimeLeft: timeLeft,
+      lastPauseTimestamp: new Date(),
+      pauseCount: metrics.pauseCount + 1,
     });
-
-    toast("Timer paused! Take a breather 😌");
-  }, []);
+    pause();
+  }, [metrics.isPaused, metrics.endTime, metrics.pauseCount, timeLeft, updateMetrics, pause]);
 
   const addTime = useCallback((additionalMinutes: number) => {
-    if (additionalMinutes <= 0) {
-      console.warn('Invalid addTime value:', additionalMinutes);
+    if (metrics.endTime) {
+      console.warn('Cannot add time to completed timer');
       return;
     }
 
-    setState(prev => {
-      if (prev.metrics.endTime) {
-        console.warn('Cannot add time to completed timer');
-        return prev;
-      }
-
-      const additionalSeconds = additionalMinutes * 60;
-      const newTime = Math.max(0, prev.timeLeft + additionalSeconds);
-      
-      const updatedMetrics = {
-        ...prev.metrics,
-        pausedTimeLeft: prev.metrics.isPaused ? newTime : prev.metrics.pausedTimeLeft,
-        extensionTime: prev.metrics.extensionTime + additionalSeconds,
-        originalDuration: prev.metrics.originalDuration + additionalSeconds
-      };
-
-      return {
-        ...prev,
-        timeLeft: newTime,
-        minutes: Math.ceil(newTime / 60),
-        metrics: updatedMetrics,
-      };
+    const additionalSeconds = additionalMinutes * 60;
+    updateMetrics({
+      extensionTime: metrics.extensionTime + additionalSeconds,
+      originalDuration: metrics.originalDuration + additionalSeconds,
+      pausedTimeLeft: metrics.isPaused ? timeLeft + additionalSeconds : metrics.pausedTimeLeft,
     });
-
-    toast(`Added ${additionalMinutes} minutes. Keep going! 💪`);
-  }, []);
+    addTimeControl(additionalMinutes);
+  }, [metrics, timeLeft, updateMetrics, addTimeControl]);
 
   const completeTimer = useCallback(async (): Promise<TimerStateMetrics> => {
-    const completionTime = new Date();
-    
-    return new Promise((resolve) => {
-      let finalMetrics: TimerStateMetrics;
-      
-      setState(prev => {
-        if (!prev.metrics.startTime) {
-          console.warn('No start time found in metrics');
-        }
-        
-        // Calculate total elapsed time from start to completion
-        const totalElapsedMs = prev.metrics.startTime
-          ? completionTime.getTime() - prev.metrics.startTime.getTime()
-          : 0;
-        
-        // Calculate final paused time including current pause if timer was paused
-        const finalPausedTime = prev.metrics.lastPauseTimestamp
-          ? prev.metrics.pausedTime + Math.floor((completionTime.getTime() - prev.metrics.lastPauseTimestamp.getTime()) / 1000)
-          : prev.metrics.pausedTime;
-        
-        // Calculate actual working time (elapsed time minus paused time)
-        const actualWorkingTime = Math.max(0, Math.floor(totalElapsedMs / 1000) - finalPausedTime);
-        
-        console.group('Timer Completion Metrics');
-        console.log('Original Duration:', {
-          seconds: prev.metrics.originalDuration,
-          formatted: formatTime(prev.metrics.originalDuration)
-        });
-        console.log('Total Elapsed Time:', {
-          seconds: Math.floor(totalElapsedMs / 1000),
-          formatted: formatTime(Math.floor(totalElapsedMs / 1000))
-        });
-        console.log('Paused Time:', {
-          seconds: finalPausedTime,
-          formatted: formatTime(finalPausedTime)
-        });
-        console.log('Actual Working Time:', {
-          seconds: actualWorkingTime,
-          formatted: formatTime(actualWorkingTime)
-        });
-        console.log('Start Time:', prev.metrics.startTime?.toISOString());
-        console.log('End Time:', completionTime.toISOString());
-        console.groupEnd();
-
-        const efficiencyRatio = calculateEfficiencyRatio(
-          prev.metrics.originalDuration,
-          actualWorkingTime
-        );
-
-        const completionStatus = determineCompletionStatus(
-          prev.metrics.originalDuration,
-          actualWorkingTime
-        );
-
-        finalMetrics = {
-          ...prev.metrics,
-          endTime: completionTime,
-          actualDuration: Math.floor(totalElapsedMs / 1000), // Total elapsed time
-          pausedTime: finalPausedTime,
-          netEffectiveTime: actualWorkingTime, // Actual working time
-          efficiencyRatio,
-          completionStatus,
-          isPaused: false,
-          pausedTimeLeft: null,
-          lastPauseTimestamp: null,
-        };
-
-        setTimeout(() => resolve(finalMetrics), 0);
-
-        return {
-          ...prev,
-          isRunning: false,
-          metrics: finalMetrics,
-        };
-      });
-    });
-  }, []);
+    const finalMetrics = await calculateFinalMetrics(new Date());
+    resetControl();
+    return finalMetrics;
+  }, [calculateFinalMetrics, resetControl]);
 
   const reset = useCallback(() => {
-    setState(prev => {
-      const duration = prev.minutes * 60;
-      
-      if (prev.metrics.endTime) {
-        return {
-          ...prev,
-          isRunning: false,
-          timeLeft: duration,
-          metrics: initialMetrics(duration),
-        };
-      }
-      
-      if (prev.metrics.isPaused) {
-        return {
-          ...prev,
-          isRunning: false,
-          timeLeft: duration,
-          metrics: {
-            ...initialMetrics(duration),
-            startTime: null,
-            pausedTimeLeft: null,
-            isPaused: false,
-            lastPauseTimestamp: null,
-          },
-        };
-      }
-      
-      return {
-        ...prev,
-        isRunning: false,
-        timeLeft: duration,
-        metrics: {
-          ...initialMetrics(duration),
-          favoriteQuotes: prev.metrics.favoriteQuotes,
-        },
-      };
+    resetControl();
+    updateMetrics({
+      startTime: null,
+      endTime: null,
+      pauseCount: 0,
+      originalDuration: minutes * 60,
+      actualDuration: 0,
+      favoriteQuotes: metrics.favoriteQuotes,
+      pausedTime: 0,
+      lastPauseTimestamp: null,
+      extensionTime: 0,
+      netEffectiveTime: 0,
+      efficiencyRatio: 0,
+      completionStatus: 'Completed On Time',
+      isPaused: false,
+      pausedTimeLeft: null,
     });
-
-    console.debug('Timer reset');
-  }, []);
+  }, [minutes, metrics.favoriteQuotes, resetControl, updateMetrics]);
 
   const incrementFavorites = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      metrics: {
-        ...prev.metrics,
-        favoriteQuotes: prev.metrics.favoriteQuotes + 1,
-      },
-    }));
-  }, []);
+    updateMetrics({
+      favoriteQuotes: metrics.favoriteQuotes + 1,
+    });
+  }, [metrics.favoriteQuotes, updateMetrics]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (state.isRunning && state.timeLeft > 0) {
-      interval = setInterval(() => {
-        setState(prev => {
-          const newTimeLeft = prev.timeLeft - 1;
-          
-          if (newTimeLeft <= 0) {
-            clearInterval(interval);
-            
-            // Ensure we complete the timer immediately when time is up
-            completeTimer().then(metrics => {
-              console.debug('Natural completion metrics:', metrics);
-              if (onTimeUp) {
-                onTimeUp();
-              }
-            }).catch(error => {
-              console.error('Error during natural completion:', error);
-              toast.error("An error occurred while completing the timer");
-            });
-            
-            return { ...prev, timeLeft: 0, isRunning: false };
-          }
-          return { ...prev, timeLeft: newTimeLeft };
-        });
-      }, 1000);
+    if (isRunning && timeLeft > 0) {
+      interval = setInterval(decrementTime, 1000);
     }
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [state.isRunning, state.timeLeft, onTimeUp, completeTimer]);
+    return () => clearInterval(interval);
+  }, [isRunning, timeLeft, decrementTime]);
 
   return {
-    timeLeft: state.timeLeft,
-    minutes: state.minutes,
-    isRunning: state.isRunning,
-    metrics: state.metrics,
-    start,
-    pause,
+    timeLeft,
+    minutes,
+    isRunning,
+    metrics,
+    start: startTimer,
+    pause: pauseTimer,
     reset,
     addTime,
     setMinutes,
     incrementFavorites,
     completeTimer,
   };
-};
-
-const formatTime = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
