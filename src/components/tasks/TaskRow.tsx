@@ -27,6 +27,20 @@ export const TaskRow = ({
     e.stopPropagation();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+    e.stopPropagation();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^\d{1,2}$/.test(value)) {
+      onDurationChange(task.id, value);
+    }
+  };
+
   return (
     <div
       className={`
@@ -54,13 +68,14 @@ export const TaskRow = ({
           <Clock className="h-4 w-4 text-muted-foreground" />
           {editingTaskId === task.id ? (
             <Input
-              type="number"
-              min={1}
-              max={60}
+              type="text"
+              inputMode="numeric"
+              pattern="\d*"
               value={task.duration || 25}
-              className="w-16 text-right bg-transparent"
-              onChange={(e) => onDurationChange(task.id, e.target.value)}
+              className="w-16 text-right bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              onChange={handleChange}
               onBlur={onInputBlur}
+              onKeyDown={handleKeyDown}
               autoFocus
               onClick={preventPropagation}
               onTouchStart={preventPropagation}
