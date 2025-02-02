@@ -23,8 +23,11 @@ export const useTimer = ({
   onTimeUp,
   onDurationChange,
 }: UseTimerOptions): UseTimerReturn => {
+  // Convert initial duration to minutes for the minutes state
+  const initialMinutes = Math.floor(initialDuration / 60) || 25;
+  
   const [timeLeft, setTimeLeft] = useState<number>(initialDuration);
-  const [minutes, setMinutesState] = useState(Math.floor(initialDuration / 60));
+  const [minutes, setMinutesState] = useState(initialMinutes);
   const [isRunning, setIsRunning] = useState(false);
 
   // Sync timeLeft with minutes changes

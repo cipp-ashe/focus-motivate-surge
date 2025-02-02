@@ -44,6 +44,7 @@ export const Timer = ({
     },
   });
 
+  // Initialize the timer with the task's duration
   const {
     timeLeft,
     minutes,
@@ -53,7 +54,7 @@ export const Timer = ({
     addTime: addMinutes,
     setMinutes: handleMinutesChange,
   } = useTimer({
-    initialDuration: duration,
+    initialDuration: duration || 25, // Use task duration or default to 25
     onTimeUp: () => {
       setIsExpanded(false);
       playSound();
@@ -133,7 +134,6 @@ export const Timer = ({
         onClick={toggleExpand}
       />
 
-      {/* ✅ "Expand" Button */}
       <button
         onClick={toggleExpand}
         className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground"
