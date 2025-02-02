@@ -69,20 +69,19 @@ export const Timer = ({
     initialDuration: internalMinutes * 60,
     onTimeUp: async () => {
       try {
-        // First complete the timer to finalize metrics
+        console.debug('Timer up - Starting completion flow');
         const finalMetrics = await completeTimer();
-        console.debug('Timer completed with metrics:', finalMetrics);
         
-        if (!finalMetrics) {
-          console.error('No metrics returned from completeTimer');
+        if (!finalMetrics || !finalMetrics.endTime) {
+          console.error('Invalid metrics returned from completeTimer:', finalMetrics);
           return;
         }
-        
-        // Then play sound and show completion with the finalized metrics
+
+        console.debug('Timer completed with metrics:', finalMetrics);
         await playSound();
         handleTimerCompletion(finalMetrics);
       } catch (error) {
-        console.error('Error completing timer:', error);
+        console.error('Error in timer completion flow:', error);
       }
     },
     onDurationChange: onDurationChange || (() => {}),
@@ -107,13 +106,23 @@ export const Timer = ({
     }, 0);
   }, [isRunning, taskName]);
 
-  useEffect(() => {
-    if (!isRunning) {
-      const newMinutes = Math.floor(duration / 60);
-      setInternalMinutes(newMinutes);
-      setMinutes(newMinutes);
+  const handleComplete = useCallback(async () => {
+    try {
+      console.debug('Manual completion - Starting');
+      const finalMetrics = await completeTimer();
+      
+      if (!finalMetrics || !finalMetrics.endTime) {
+        console.error('Invalid metrics returned from manual completion:', finalMetrics);
+        return;
+      }
+
+      console.debug('Manual completion with metrics:', finalMetrics);
+      await playSound();
+      handleTimerCompletion(finalMetrics);
+    } catch (error) {
+      console.error('Error in manual completion:', error);
     }
-  }, [duration, taskName, isRunning, setMinutes]);
+  }, [completeTimer, playSound, handleTimerCompletion]);
 
   const handleMinutesChange = useCallback((newMinutes: number) => {
     setInternalMinutes(newMinutes);
@@ -136,25 +145,6 @@ export const Timer = ({
       handleStart();
     }
   }, [isRunning, handlePause, handleStart]);
-
-  const handleComplete = useCallback(async () => {
-    try {
-      // First complete the timer to finalize metrics
-      const finalMetrics = await completeTimer();
-      console.debug('Manual completion with metrics:', finalMetrics);
-      
-      if (!finalMetrics) {
-        console.error('No metrics returned from completeTimer');
-        return;
-      }
-      
-      // Then play sound and show completion with the finalized metrics
-      await playSound();
-      handleTimerCompletion(finalMetrics);
-    } catch (error) {
-      console.error('Error completing timer:', error);
-    }
-  }, [completeTimer, playSound, handleTimerCompletion]);
 
   const handleCloseCompletion = useCallback(() => {
     if (!completionMetrics) return;

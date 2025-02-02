@@ -172,52 +172,55 @@ export const useTimerState = ({
     toast(`Added ${additionalMinutes} minutes. Keep going! 💪`);
   }, []);
 
-  const completeTimer = useCallback((): TimerStateMetrics => {
+  const completeTimer = useCallback(async (): Promise<TimerStateMetrics> => {
     const completionTime = new Date();
     let finalMetrics: TimerStateMetrics;
     
-    setState(prev => {
-      const elapsedMs = prev.metrics.startTime
-        ? completionTime.getTime() - prev.metrics.startTime.getTime()
-        : 0;
-      
-      const actualDuration = Math.max(1, Math.round(elapsedMs / 1000));
-      const netEffectiveTime = actualDuration - prev.metrics.pausedTime;
-      const efficiencyRatio = Math.min(100, Math.max(0,
-        netEffectiveTime > 0 ? (prev.metrics.originalDuration / netEffectiveTime) * 100 : 0
-      ));
+    return new Promise((resolve) => {
+      setState(prev => {
+        const elapsedMs = prev.metrics.startTime
+          ? completionTime.getTime() - prev.metrics.startTime.getTime()
+          : 0;
+        
+        const actualDuration = Math.max(1, Math.round(elapsedMs / 1000));
+        const netEffectiveTime = actualDuration - prev.metrics.pausedTime;
+        const efficiencyRatio = Math.min(100, Math.max(0,
+          netEffectiveTime > 0 ? (prev.metrics.originalDuration / netEffectiveTime) * 100 : 0
+        ));
 
-      const completionStatus = determineCompletionStatus(
-        prev.metrics.originalDuration,
-        netEffectiveTime
-      );
+        const completionStatus = determineCompletionStatus(
+          prev.metrics.originalDuration,
+          netEffectiveTime
+        );
 
-      finalMetrics = {
-        ...prev.metrics,
-        endTime: completionTime,
-        actualDuration,
-        netEffectiveTime,
-        efficiencyRatio,
-        completionStatus,
-        isPaused: false,
-        pausedTimeLeft: null,
-        lastPauseTimestamp: null,
-        pausedTime: prev.metrics.pausedTime,
-        pauseCount: prev.metrics.pauseCount,
-        favoriteQuotes: prev.metrics.favoriteQuotes,
-        originalDuration: prev.metrics.originalDuration,
-        startTime: prev.metrics.startTime,
-        extensionTime: prev.metrics.extensionTime
-      };
+        finalMetrics = {
+          ...prev.metrics,
+          endTime: completionTime,
+          actualDuration,
+          netEffectiveTime,
+          efficiencyRatio,
+          completionStatus,
+          isPaused: false,
+          pausedTimeLeft: null,
+          lastPauseTimestamp: null,
+          pausedTime: prev.metrics.pausedTime,
+          pauseCount: prev.metrics.pauseCount,
+          favoriteQuotes: prev.metrics.favoriteQuotes,
+          originalDuration: prev.metrics.originalDuration,
+          startTime: prev.metrics.startTime,
+          extensionTime: prev.metrics.extensionTime
+        };
 
-      return {
-        ...prev,
-        isRunning: false,
-        metrics: finalMetrics,
-      };
+        return {
+          ...prev,
+          isRunning: false,
+          metrics: finalMetrics,
+        };
+      });
+
+      // Resolve with the final metrics after state is updated
+      resolve(finalMetrics!);
     });
-
-    return finalMetrics!;
   }, []);
 
   const reset = useCallback(() => {
