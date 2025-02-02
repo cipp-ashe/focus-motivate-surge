@@ -16,13 +16,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const sendTaskSummaryEmail = async (email: string, summaryData: DailySummary) => {
+  console.log('Attempting to send email summary:', {
+    to: email,
+    summaryData: {
+      completedTasks: summaryData.completedTasks.length,
+      unfinishedTasks: summaryData.unfinishedTasks.length,
+      totalTimeSpent: summaryData.totalTimeSpent,
+      averageEfficiency: summaryData.averageEfficiency,
+    }
+  });
+
   try {
+    console.log('Invoking Supabase Edge Function: send-task-summary');
     const response = await supabase.functions.invoke<EdgeFunctionResponse>('send-task-summary', {
       body: { email, summaryData },
     });
 
+    console.log('Edge function response:', response);
+
     if (response.error) {
-      console.error('Edge function error:', {
+      console.error('Edge function error details:', {
         message: response.error.message,
         name: response.error.name,
         details: response.error,
@@ -30,15 +43,14 @@ export const sendTaskSummaryEmail = async (email: string, summaryData: DailySumm
       throw new Error(`Failed to send email: ${response.error.message || 'Unknown error'}`);
     }
 
+    console.log('Email sent successfully:', response.data);
     return response.data;
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Send email error details:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-      });
-    }
+    console.error('Send email error details:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     throw error;
   }
 };

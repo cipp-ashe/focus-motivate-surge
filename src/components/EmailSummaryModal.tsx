@@ -29,16 +29,26 @@ export const EmailSummaryModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Email form submitted with:', email);
     
     try {
       emailSchema.parse(email);
       setIsLoading(true);
+      console.log('Email validation passed, attempting to send...');
+      
       await onSubmit(email);
+      console.log('Email sent successfully');
+      
       toast.success("Summary email sent successfully!");
       onClose();
       setEmail(""); // Reset the email input after successful submission
     } catch (error) {
-      console.error("Email submission error:", error);
+      console.error("Email submission error:", {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        validation: error instanceof z.ZodError ? error.errors : undefined,
+      });
+      
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
