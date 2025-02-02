@@ -20,22 +20,43 @@ export const useTaskOperations = ({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleTaskAdd = useCallback((task: Task) => {
-    console.log('Adding task:', task.name);
+    console.log('Adding new task:', {
+      taskId: task.id,
+      taskName: task.name,
+      duration: task.duration
+    });
+    
     setTasks(prev => {
       const newTasks = [...prev, task];
+      console.log('Updated task list:', newTasks.map(t => ({ id: t.id, name: t.name })));
       onTasksUpdate?.(newTasks);
       return newTasks;
     });
   }, [onTasksUpdate]);
 
   const handleTaskSelect = useCallback((task: Task) => {
-    console.log('Selecting task:', task.name);
-    setTasks(prev => prev.map(t => 
-      t.id === task.id ? { ...t, ...task } : t
-    ));
+    console.log('Selecting task:', {
+      taskId: task.id,
+      taskName: task.name,
+      duration: task.duration
+    });
+    
+    setTasks(prev => {
+      const updatedTasks = prev.map(t => 
+        t.id === task.id ? { ...t, ...task } : t
+      );
+      console.log('Updated task properties:', {
+        taskId: task.id,
+        updates: task
+      });
+      return updatedTasks;
+    });
+
     const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
     const updatedTasks = storedTasks.map((t: Task) => t.id === task.id ? { ...t, ...task } : t);
     localStorage.setItem('taskList', JSON.stringify(updatedTasks));
+    console.log('Updated localStorage with new task state');
+    
     setSelectedTask(task);
     toast({
       title: "Task Selected",
@@ -44,34 +65,41 @@ export const useTaskOperations = ({
   }, []);
 
   const handleTaskComplete = useCallback((metrics: TimerStateMetrics) => {
-    console.log('TaskManager - Task completion flow:', {
-      incomingMetrics: metrics,
-      selectedTask
+    console.log('Completing task:', {
+      selectedTask: selectedTask?.name,
+      metrics: metrics
     });
     
-    if (selectedTask) {
-      setCompletedTasks(prev => {
-        const newCompleted = [...prev, {
-          ...selectedTask,
-          completed: true,
-          metrics: metrics
-        }];
-        onCompletedTasksUpdate?.(newCompleted);
-        return newCompleted;
-      });
-      
-      setTasks(prev => {
-        const newTasks = prev.filter(t => t.id !== selectedTask.id);
-        onTasksUpdate?.(newTasks);
-        return newTasks;
-      });
-      
-      setSelectedTask(null);
-      toast({
-        title: "Task Completed",
-        description: `Task completed: ${selectedTask.name}`
-      });
+    if (!selectedTask) {
+      console.error('No task selected for completion');
+      return;
     }
+    
+    setCompletedTasks(prev => {
+      const newCompleted = [...prev, {
+        ...selectedTask,
+        completed: true,
+        metrics: metrics
+      }];
+      console.log('Updated completed tasks list:', 
+        newCompleted.map(t => ({ id: t.id, name: t.name }))
+      );
+      onCompletedTasksUpdate?.(newCompleted);
+      return newCompleted;
+    });
+    
+    setTasks(prev => {
+      const newTasks = prev.filter(t => t.id !== selectedTask.id);
+      console.log('Removed completed task from active tasks');
+      onTasksUpdate?.(newTasks);
+      return newTasks;
+    });
+    
+    setSelectedTask(null);
+    toast({
+      title: "Task Completed",
+      description: `Task completed: ${selectedTask.name}`
+    });
   }, [selectedTask, onTasksUpdate, onCompletedTasksUpdate]);
 
   const handleTasksClear = useCallback(() => {
@@ -82,13 +110,18 @@ export const useTaskOperations = ({
 
   const handleSelectedTasksClear = useCallback((taskIds: string[]) => {
     console.log('Clearing selected tasks:', taskIds);
+    
     setTasks(prev => {
       const newTasks = prev.filter(task => !taskIds.includes(task.id));
+      console.log('Remaining tasks after clear:', 
+        newTasks.map(t => ({ id: t.id, name: t.name }))
+      );
       onTasksUpdate?.(newTasks);
       return newTasks;
     });
     
     if (selectedTask && taskIds.includes(selectedTask.id)) {
+      console.log('Currently selected task was cleared, resetting selection');
       setSelectedTask(null);
     }
   }, [selectedTask, onTasksUpdate]);
