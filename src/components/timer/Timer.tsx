@@ -72,8 +72,8 @@ export const Timer = ({
         console.debug('Timer up - Starting completion flow');
         const finalMetrics = await completeTimer();
         
-        if (!finalMetrics || !finalMetrics.endTime) {
-          console.error('Invalid metrics returned from completeTimer:', finalMetrics);
+        if (!finalMetrics) {
+          console.error('No metrics returned from completeTimer');
           return;
         }
 
@@ -82,6 +82,7 @@ export const Timer = ({
         handleTimerCompletion(finalMetrics);
       } catch (error) {
         console.error('Error in timer completion flow:', error);
+        toast.error("An error occurred while completing the timer");
       }
     },
     onDurationChange: onDurationChange || (() => {}),
@@ -93,11 +94,6 @@ export const Timer = ({
       isRunning,
       taskName
     });
-
-    if (!currentMetrics.endTime) {
-      console.warn('Timer completion called but metrics not finalized', { metrics: currentMetrics });
-      return;
-    }
 
     // Use setTimeout to ensure state updates are complete
     setTimeout(() => {
@@ -111,8 +107,8 @@ export const Timer = ({
       console.debug('Manual completion - Starting');
       const finalMetrics = await completeTimer();
       
-      if (!finalMetrics || !finalMetrics.endTime) {
-        console.error('Invalid metrics returned from manual completion:', finalMetrics);
+      if (!finalMetrics) {
+        console.error('No metrics returned from manual completion');
         return;
       }
 
@@ -121,6 +117,7 @@ export const Timer = ({
       handleTimerCompletion(finalMetrics);
     } catch (error) {
       console.error('Error in manual completion:', error);
+      toast.error("An error occurred while completing the timer");
     }
   }, [completeTimer, playSound, handleTimerCompletion]);
 
