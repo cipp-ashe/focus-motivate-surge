@@ -69,7 +69,6 @@ export const ExpandedTimer = memo(({
     }, 2500);
   };
 
-  // Modify timerControlsProps to use our custom complete handler
   const modifiedTimerControlsProps = {
     ...timerControlsProps,
     onComplete: handleComplete,

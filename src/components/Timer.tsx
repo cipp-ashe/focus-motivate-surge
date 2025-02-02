@@ -44,7 +44,6 @@ export const Timer = ({
     },
   });
 
-  // Initialize the timer with the task's duration
   const {
     timeLeft,
     minutes,
@@ -56,7 +55,6 @@ export const Timer = ({
   } = useTimer({
     initialDuration: duration,
     onTimeUp: () => {
-      setIsExpanded(false);
       playSound();
       toast("Time's up! Great work! ✨");
     },

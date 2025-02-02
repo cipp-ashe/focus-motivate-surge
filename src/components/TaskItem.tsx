@@ -28,25 +28,29 @@ export const TaskItem = ({ task, onSelect, onDelete, onUpdateDuration }: TaskIte
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // Prevent form submission
+      e.preventDefault();
+      e.currentTarget.blur();
       handleDurationChange(duration);
-      (e.target as HTMLInputElement).blur(); // Remove focus after handling
     }
   };
 
   return (
     <div
       className="task-list-item p-3 rounded-lg bg-background/50 hover:bg-primary/20 cursor-pointer transition-all duration-300 border border-primary/20"
+      onClick={() => !isEditing && onSelect(task)}
     >
       <div className="flex items-center gap-2">
-        <div className="flex-1" onClick={() => onSelect(task)}>
+        <div className="flex-1">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <span>{task.name}</span>
           </div>
         </div>
         
-        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="flex items-center gap-2" 
+          onClick={(e) => e.stopPropagation()}
+        >
           {isEditing ? (
             <Input
               type="number"
