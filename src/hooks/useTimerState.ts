@@ -183,18 +183,31 @@ export const useTimerState = ({
           console.warn('No start time found in metrics');
         }
         
-        // Calculate actual duration precisely
+        // Calculate actual duration (total elapsed time including pauses)
         const elapsedMs = prev.metrics.startTime
           ? completionTime.getTime() - prev.metrics.startTime.getTime()
           : 0;
         
-        // Round to nearest second to avoid fractional seconds
-        const actualDuration = Math.round(elapsedMs / 1000);
+        // Round to nearest second
+        const actualDuration = Math.floor(elapsedMs / 1000);
         
-        // Calculate net effective time (actual - paused)
-        const netEffectiveTime = Math.max(0, actualDuration - prev.metrics.pausedTime);
+        // Calculate additional paused time if timer was paused when completed
+        const finalPausedTime = prev.metrics.lastPauseTimestamp
+          ? prev.metrics.pausedTime + Math.floor((completionTime.getTime() - prev.metrics.lastPauseTimestamp.getTime()) / 1000)
+          : prev.metrics.pausedTime;
         
-        // Calculate efficiency ratio
+        // Calculate net effective time (actual time minus paused time)
+        const netEffectiveTime = Math.max(0, actualDuration - finalPausedTime);
+        
+        console.debug('Timer completion metrics:', {
+          originalDuration: prev.metrics.originalDuration,
+          actualDuration,
+          pausedTime: finalPausedTime,
+          netEffectiveTime,
+          startTime: prev.metrics.startTime?.toISOString(),
+          endTime: completionTime.toISOString()
+        });
+
         const efficiencyRatio = calculateEfficiencyRatio(
           prev.metrics.originalDuration,
           netEffectiveTime
@@ -209,6 +222,7 @@ export const useTimerState = ({
           ...prev.metrics,
           endTime: completionTime,
           actualDuration,
+          pausedTime: finalPausedTime,
           netEffectiveTime,
           efficiencyRatio,
           completionStatus,
@@ -216,14 +230,6 @@ export const useTimerState = ({
           pausedTimeLeft: null,
           lastPauseTimestamp: null,
         };
-
-        console.debug('Timer completion metrics:', {
-          originalDuration: finalMetrics.originalDuration,
-          actualDuration: finalMetrics.actualDuration,
-          netEffectiveTime: finalMetrics.netEffectiveTime,
-          pausedTime: finalMetrics.pausedTime,
-          efficiencyRatio: finalMetrics.efficiencyRatio
-        });
 
         setTimeout(() => resolve(finalMetrics), 0);
 
