@@ -67,10 +67,10 @@ export const Timer = ({
     reset: resetTimer,
   } = useTimerState({
     initialDuration: internalMinutes * 60,
-    onTimeUp: async () => {
+    onTimeUp: () => {
       try {
         // First complete the timer to finalize metrics
-        const finalMetrics = await completeTimer();
+        const finalMetrics = completeTimer();
         console.debug('Timer completed with metrics:', finalMetrics);
         // Then play sound and show completion with the finalized metrics
         playSound();
@@ -135,7 +135,7 @@ export const Timer = ({
   const handleComplete = useCallback(async () => {
     try {
       // First complete the timer to finalize metrics
-      const finalMetrics = await completeTimer();
+      const finalMetrics = completeTimer();
       console.debug('Manual completion with metrics:', finalMetrics);
       // Then play sound and show completion with the finalized metrics
       playSound();
