@@ -28,61 +28,40 @@ serve(async (req: Request) => {
     console.log("Received request to send summary email to:", email);
     console.log("Summary data:", JSON.stringify(summaryData, null, 2));
 
-    const totalTasks = summaryData.completedTasks.length;
-    const totalTimeSpent = formatDuration(summaryData.totalTimeSpent);
-    const averageEfficiency = summaryData.averageEfficiency;
-
-    const emailContent = generateEmailContent(
-      totalTasks,
-      totalTimeSpent,
-      averageEfficiency,
-      summaryData.completedTasks,
-      summaryData.favoriteQuotes
-    );
-
-    const data = await resend.emails.send({
-      from: "Focus Timer <noreply@focustimer.org>",
-      to: [email],
-      subject: "Your Focus Timer Summary",
-      html: emailContent,
+    const { error } = await resend.emails.send({
+      from: "Lovable Timer <timer@resend.dev>",
+      to: email,
+      subject: "Your Daily Task Summary",
+      html: generateEmailContent(summaryData),
     });
 
-    console.log("Email sent successfully:", data);
+    if (error) {
+      console.error("Failed to send email:", error);
+      return new Response(
+        JSON.stringify({ error: "Failed to send email" }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
 
     return new Response(
-      JSON.stringify({ success: true, message: "Email sent successfully" }),
-      {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+      JSON.stringify({ message: "Email sent successfully" }),
+      { 
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
+
   } catch (error) {
-    console.error("Error in send-task-summary function:", error);
-    
+    console.error("Error processing request:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : "Failed to send email",
-        details: error
-      }),
-      {
+      JSON.stringify({ error: error.message }),
+      { 
         status: 500,
-        headers: { 
-          "Content-Type": "application/json",
-          ...corsHeaders 
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
   }
 });
-
-function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-}
