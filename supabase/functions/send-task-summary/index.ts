@@ -1,9 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from '@supabase/supabase-js';
 import { Resend } from "npm:resend@2.0.0";
 import { DailySummary } from "./types.ts";
 import { generateEmailContent } from "./utils.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+// Initialize Supabase client
+const supabaseClient = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+  {
+    auth: {
+      persistSession: false
+    }
+  }
+);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
