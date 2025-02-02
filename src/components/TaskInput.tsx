@@ -36,12 +36,18 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
 
     if (isBulkAdd) {
       const tasks = newTaskName.split('\n').filter(task => task.trim());
-      tasks.forEach(taskName => {
-        if (taskName.trim()) {
+      tasks.forEach(taskLine => {
+        if (taskLine.trim()) {
+          // Split the line by comma to check for duration
+          const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
+          // Parse duration, default to 25 if not provided or invalid
+          const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || 25, 1), 60) : 25;
+          
           onTaskAdd({
             id: generateId(),
-            name: taskName.trim(),
+            name: taskName,
             completed: false,
+            duration: duration,
           });
         }
       });
@@ -50,6 +56,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         id: generateId(),
         name: newTaskName.trim(),
         completed: false,
+        duration: 25,
       });
     }
     setNewTaskName("");
@@ -85,7 +92,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
                 ref={textareaRef}
                 value={newTaskName}
                 onChange={(e) => setNewTaskName(e.target.value)}
-                placeholder="Add multiple tasks (one per line)..."
+                placeholder="Add multiple tasks (one per line)...&#10;Task name, duration (optional)&#10;Example:&#10;Read book, 30&#10;Write code"
                 className="min-h-[100px] resize-y pr-8"
               />
             ) : (
