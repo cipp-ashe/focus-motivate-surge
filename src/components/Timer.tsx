@@ -57,6 +57,7 @@ export const Timer = ({
     onTimeUp: () => {
       playSound();
       toast("Time's up! Great work! ✨");
+      onComplete();
     },
     onDurationChange,
   });

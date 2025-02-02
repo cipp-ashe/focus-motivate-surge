@@ -73,20 +73,10 @@ export const TaskList = ({
     toast(`Added ${taskLines.length} tasks! Time to crush some goals! 🎯`);
   };
 
-  const handleUpdateDuration = (taskId: string, duration: number) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      onTaskAdd({
-        ...task,
-        duration: Math.max(1, Math.min(60, duration)) // Ensure duration is between 1 and 60
-      });
-    }
-  };
-
-  const handleDeleteTask = (taskId: string) => {
-    const updatedTasks = tasks.filter(task => task.id !== taskId);
+  const handleClearTasks = () => {
     onTasksClear();
-    updatedTasks.forEach(task => onTaskAdd(task));
+    setShowClearConfirm(false);
+    toast("All tasks cleared! Starting fresh! 🌟");
   };
 
   return (
@@ -128,8 +118,21 @@ export const TaskList = ({
               key={task.id} 
               task={task} 
               onSelect={onTaskSelect}
-              onDelete={handleDeleteTask}
-              onUpdateDuration={handleUpdateDuration}
+              onDelete={(taskId) => {
+                const updatedTasks = tasks.filter(t => t.id !== taskId);
+                onTasksClear();
+                updatedTasks.forEach(t => onTaskAdd(t));
+                toast(`Removed task "${task.name}"`);
+              }}
+              onUpdateDuration={(taskId, duration) => {
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                  onTaskAdd({
+                    ...task,
+                    duration: Math.max(1, Math.min(60, duration))
+                  });
+                }
+              }}
             />
           ))}
         </div>
@@ -162,11 +165,7 @@ export const TaskList = ({
               </Button>
               <Button 
                 variant="destructive" 
-                onClick={() => {
-                  onTasksClear();
-                  setShowClearConfirm(false);
-                  toast("Tasks cleared! Starting fresh! 🌟");
-                }}
+                onClick={handleClearTasks}
                 className="bg-destructive hover:bg-destructive/90"
               >
                 Clear All

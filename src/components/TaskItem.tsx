@@ -34,6 +34,11 @@ export const TaskItem = ({ task, onSelect, onDelete, onUpdateDuration }: TaskIte
     }
   };
 
+  const handleBlur = () => {
+    handleDurationChange(duration);
+    setIsEditing(false);
+  };
+
   return (
     <div
       className="task-list-item p-3 rounded-lg bg-background/50 hover:bg-primary/20 cursor-pointer transition-all duration-300 border border-primary/20"
@@ -56,7 +61,7 @@ export const TaskItem = ({ task, onSelect, onDelete, onUpdateDuration }: TaskIte
               type="number"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
-              onBlur={() => handleDurationChange(duration)}
+              onBlur={handleBlur}
               onKeyDown={handleKeyDown}
               className="w-16 h-8 text-sm"
               min={1}
@@ -86,7 +91,6 @@ export const TaskItem = ({ task, onSelect, onDelete, onUpdateDuration }: TaskIte
             onClick={(e) => {
               e.stopPropagation();
               onDelete(task.id);
-              toast(`Removed task "${task.name}"`);
             }}
             className="h-8 w-8 p-0 hover:bg-destructive/20"
           >
