@@ -1,6 +1,7 @@
 import { Task } from "../TaskList";
 import { Sparkles, Clock, X } from "lucide-react";
 import { Input } from "../ui/input";
+import { useState } from "react";
 
 interface TaskRowProps {
   task: Task;
@@ -23,6 +24,8 @@ export const TaskRow = ({
   onDurationClick,
   onInputBlur,
 }: TaskRowProps) => {
+  const [inputValue, setInputValue] = useState(task.duration?.toString() || "25");
+
   const preventPropagation = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
   };
@@ -37,8 +40,21 @@ export const TaskRow = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^\d{1,2}$/.test(value)) {
-      onDurationChange(task.id, value);
+      setInputValue(value);
     }
+  };
+
+  const handleBlur = () => {
+    if (inputValue === '') {
+      setInputValue('25');
+      onDurationChange(task.id, '25');
+    } else {
+      const numValue = parseInt(inputValue, 10);
+      const clampedValue = Math.min(Math.max(numValue, 1), 60).toString();
+      setInputValue(clampedValue);
+      onDurationChange(task.id, clampedValue);
+    }
+    onInputBlur();
   };
 
   return (
@@ -71,10 +87,10 @@ export const TaskRow = ({
               type="text"
               inputMode="numeric"
               pattern="\d*"
-              value={task.duration || 25}
+              value={inputValue}
               className="w-16 text-right bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               onChange={handleChange}
-              onBlur={onInputBlur}
+              onBlur={handleBlur}
               onKeyDown={handleKeyDown}
               autoFocus
               onClick={preventPropagation}
