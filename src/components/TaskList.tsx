@@ -61,7 +61,7 @@ export const TaskList = ({
       const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || 25, 1), 60) : 25;
 
       onTaskAdd({
-        id: Date.now().toString(),
+        id: Date.now().toString() + Math.random(),
         name,
         completed: false,
         duration,
@@ -77,6 +77,26 @@ export const TaskList = ({
     onTasksClear();
     setShowClearConfirm(false);
     toast("All tasks cleared! Starting fresh! 🌟");
+  };
+
+  const handleUpdateTask = (taskId: string, updates: Partial<Task>) => {
+    const taskIndex = tasks.findIndex(t => t.id === taskId);
+    if (taskIndex === -1) return;
+
+    const updatedTask = { ...tasks[taskIndex], ...updates };
+    const newTasks = [...tasks];
+    newTasks[taskIndex] = updatedTask;
+    
+    // Update the parent state by clearing and re-adding all tasks
+    onTasksClear();
+    newTasks.forEach(t => onTaskAdd(t));
+  };
+
+  const handleDeleteTask = (taskId: string, taskName: string) => {
+    const newTasks = tasks.filter(t => t.id !== taskId);
+    onTasksClear();
+    newTasks.forEach(t => onTaskAdd(t));
+    toast(`Removed task "${taskName}"`);
   };
 
   return (
@@ -118,20 +138,9 @@ export const TaskList = ({
               key={task.id} 
               task={task} 
               onSelect={onTaskSelect}
-              onDelete={(taskId) => {
-                const updatedTasks = tasks.filter(t => t.id !== taskId);
-                onTasksClear();
-                updatedTasks.forEach(t => onTaskAdd(t));
-                toast(`Removed task "${task.name}"`);
-              }}
+              onDelete={(taskId) => handleDeleteTask(taskId, task.name)}
               onUpdateDuration={(taskId, duration) => {
-                const task = tasks.find(t => t.id === taskId);
-                if (task) {
-                  onTaskAdd({
-                    ...task,
-                    duration: Math.max(1, Math.min(60, duration))
-                  });
-                }
+                handleUpdateTask(taskId, { duration: Math.max(1, Math.min(60, duration)) });
               }}
             />
           ))}
