@@ -1,7 +1,7 @@
 import { memo, useState, useEffect } from "react";
 import { FloatingQuotes } from "./FloatingQuotes";
 import { Card } from "./ui/card";
-import { X } from "lucide-react";
+import { Minimize2 } from "lucide-react";
 import { TimerCircle } from "./TimerCircle";
 import { TimerControls } from "./TimerControls";
 import { QuoteDisplay } from "./QuoteDisplay";
@@ -113,10 +113,10 @@ export const ExpandedTimer = memo(({
       <button
         onClick={onClose}
         className={`absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-50 ${focusClass}`}
-        aria-label="Close expanded view"
+        aria-label="Minimize timer view"
         {...focusOrder(1)}
       >
-        <X className="h-6 w-6" />
+        <Minimize2 className="h-6 w-6" />
       </button>
 
       <div 

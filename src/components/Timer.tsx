@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Card } from "./ui/card";
-import { X, Maximize2 } from "lucide-react";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
 import { CompactTimer } from "./CompactTimer";
 import { ExpandedTimer } from "./ExpandedTimer";
@@ -68,7 +68,6 @@ export const Timer = ({
       pause();
     } else {
       start();
-      setIsExpanded(true);
     }
   }, [isRunning, start, pause]);
 
@@ -137,9 +136,13 @@ export const Timer = ({
       <button
         onClick={toggleExpand}
         className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground"
-        aria-label="Expand timer view"
+        aria-label={isExpanded ? "Minimize timer view" : "Expand timer view"}
       >
-        <Maximize2 className="h-6 w-6" />
+        {isExpanded ? (
+          <Minimize2 className="h-6 w-6" />
+        ) : (
+          <Maximize2 className="h-6 w-6" />
+        )}
       </button>
     </div>
   );
