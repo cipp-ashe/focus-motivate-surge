@@ -54,21 +54,19 @@ export const CompletionCelebration = ({
   };
 
   const MetricItem = ({ icon: Icon, label, value }: { icon: LucideIcon, label: string, value: string }) => (
-    <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg hover:bg-muted/40 transition-colors duration-300">
+    <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/40 transition-colors duration-300">
       <div className="p-2 bg-primary/10 rounded-full">
-        <Icon className="h-5 w-5 text-primary" />
+        <Icon className="h-4 w-4 text-primary" />
       </div>
       <div>
         <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="font-medium">{value}</p>
+        <p className="font-medium text-sm">{value}</p>
       </div>
     </div>
   );
 
-  // Early return if modal shouldn't be shown or metrics are invalid
   if (!show || !metrics) return null;
 
-  // Ensure all required metric properties exist with safe defaults
   const safeMetrics = {
     originalDuration: metrics.originalDuration ?? 0,
     actualDuration: metrics.actualDuration ?? 0,
@@ -84,7 +82,7 @@ export const CompletionCelebration = ({
   return (
     <>
       {/* Background and confetti layer */}
-      <div className="fixed inset-0 z-[1] flex items-center justify-center">
+      <div className="fixed inset-0 z-[1]">
         <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
         <TimerConfetti
           show={show}
@@ -94,9 +92,9 @@ export const CompletionCelebration = ({
       </div>
 
       {/* Modal layer */}
-      <div className="fixed inset-0 z-[2] flex items-center justify-center">
+      <div className="fixed inset-0 z-[2] flex items-center justify-center p-4">
         <Dialog open={show} onOpenChange={onClose}>
-          <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-sm border-primary/20">
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-sm border-primary/20">
             <DialogHeader>
               <DialogTitle className="text-center">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
@@ -109,11 +107,11 @@ export const CompletionCelebration = ({
             </DialogHeader>
             
             <div className="py-4">
-              <p className="text-sm text-muted-foreground text-center mb-6">
+              <p className="text-sm text-muted-foreground text-center mb-4">
                 Here's how your session went
               </p>
 
-              <div className="grid gap-4">
+              <div className="grid gap-2">
                 <MetricItem
                   icon={Timer}
                   label="Planned Duration"
@@ -160,7 +158,7 @@ export const CompletionCelebration = ({
               </div>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-2">
               <Button
                 onClick={onClose}
                 className="bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary transition-all duration-300 hover:scale-105"
