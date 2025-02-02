@@ -49,7 +49,21 @@ export const useTimerMetrics = (initialDuration: number) => {
 
   const updateMetrics = useCallback((updates: Partial<TimerStateMetrics>) => {
     setMetrics(prev => {
-      const newMetrics = { ...prev, ...updates };
+      // Calculate accumulated pause time if we're updating from a paused state
+      let updatedPausedTime = prev.pausedTime;
+      if (prev.lastPauseTimestamp && updates.lastPauseTimestamp === null) {
+        const pauseDuration = Math.floor(
+          (new Date().getTime() - prev.lastPauseTimestamp.getTime()) / 1000
+        );
+        updatedPausedTime += pauseDuration;
+      }
+
+      const newMetrics = {
+        ...prev,
+        ...updates,
+        pausedTime: updatedPausedTime,
+      };
+
       logMetrics(newMetrics);
       return newMetrics;
     });

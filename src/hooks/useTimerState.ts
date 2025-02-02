@@ -33,14 +33,28 @@ export const useTimerState = ({
   } = useTimerMetrics(initialDuration);
 
   const startTimer = useCallback(() => {
-    updateMetrics({
-      startTime: metrics.startTime || new Date(),
-      isPaused: false,
-      pausedTimeLeft: null,
-      lastPauseTimestamp: null,
-    });
+    // If resuming from pause, calculate accumulated pause time
+    if (metrics.isPaused && metrics.lastPauseTimestamp) {
+      const pauseDuration = Math.floor(
+        (new Date().getTime() - metrics.lastPauseTimestamp.getTime()) / 1000
+      );
+      updateMetrics({
+        pausedTime: metrics.pausedTime + pauseDuration,
+        isPaused: false,
+        pausedTimeLeft: null,
+        lastPauseTimestamp: null,
+      });
+    } else {
+      // Starting fresh
+      updateMetrics({
+        startTime: metrics.startTime || new Date(),
+        isPaused: false,
+        pausedTimeLeft: null,
+        lastPauseTimestamp: null,
+      });
+    }
     start();
-  }, [metrics.startTime, start, updateMetrics]);
+  }, [metrics, start, updateMetrics]);
 
   const pauseTimer = useCallback(() => {
     if (metrics.isPaused || metrics.endTime) return;
@@ -52,7 +66,7 @@ export const useTimerState = ({
       pauseCount: metrics.pauseCount + 1,
     });
     pause();
-  }, [metrics.isPaused, metrics.endTime, metrics.pauseCount, timeLeft, updateMetrics, pause]);
+  }, [metrics, timeLeft, updateMetrics, pause]);
 
   const addTime = useCallback((additionalMinutes: number) => {
     if (metrics.endTime) {
