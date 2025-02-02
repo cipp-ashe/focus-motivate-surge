@@ -50,6 +50,7 @@ export const Timer = ({
     isRunning,
     start,
     pause,
+    reset,
     addTime: addMinutes,
     setMinutes: handleMinutesChange,
   } = useTimer({
@@ -64,17 +65,20 @@ export const Timer = ({
   const toggleTimer = useCallback(() => {
     if (isRunning) {
       pause();
+      toast("Timer paused. Take a breather! ⏸️");
     } else {
       start();
+      toast.success("Timer started! You've got this! 🚀");
     }
   }, [isRunning, start, pause]);
 
   const handleComplete = useCallback(() => {
     pause();
+    reset();
     setIsExpanded(false);
     onComplete();
-    toast.success("Task completed! You're crushing it! 🎉");
-  }, [pause, onComplete]);
+    toast.success("Task completed! Ready for the next challenge! 🎉");
+  }, [pause, reset, onComplete]);
 
   const handleAddTime = useCallback(() => {
     addMinutes(ADD_TIME_MINUTES);
@@ -83,7 +87,12 @@ export const Timer = ({
     toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
   }, [addMinutes, onAddTime, start]);
 
-  const toggleExpand = () => setIsExpanded(!isExpanded);
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+    if (!isExpanded) {
+      toast("Expanded view. Stay focused! 🎯");
+    }
+  };
 
   const timerCircleProps = {
     isRunning,
