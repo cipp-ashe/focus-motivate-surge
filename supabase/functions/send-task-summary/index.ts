@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { Resend } from "npm:resend@2.0.0";
-import { RequestBody } from "./types.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import { DailySummary } from "./types.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -10,6 +10,11 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+interface RequestBody {
+  email: string;
+  summaryData: DailySummary;
+}
 
 serve(async (req: Request) => {
   // Handle CORS preflight requests
@@ -25,14 +30,8 @@ serve(async (req: Request) => {
 
     // Calculate metrics
     const totalTasks = summaryData.completedTasks.length;
-    const totalTimeSpent = summaryData.completedTasks.reduce(
-      (acc, task) => acc + (task.metrics?.actualDuration || 0),
-      0
-    );
-    const averageEfficiency = summaryData.completedTasks.reduce(
-      (acc, task) => acc + (task.metrics?.efficiencyRatio || 0),
-      0
-    ) / (totalTasks || 1);
+    const totalTimeSpent = summaryData.totalTimeSpent;
+    const averageEfficiency = summaryData.averageEfficiency;
 
     // Generate email content
     const emailContent = `
@@ -43,7 +42,7 @@ serve(async (req: Request) => {
           <h2 style="color: #4f46e5;">Task Summary</h2>
           <p>Total Tasks Completed: ${totalTasks}</p>
           <p>Total Time Spent: ${Math.round(totalTimeSpent / 60)} minutes</p>
-          <p>Average Efficiency: ${(averageEfficiency * 100).toFixed(1)}%</p>
+          <p>Average Efficiency: ${averageEfficiency.toFixed(1)}%</p>
         </div>
 
         ${summaryData.completedTasks.length > 0 ? `
@@ -92,6 +91,32 @@ serve(async (req: Request) => {
     });
 
     console.log("Email sent successfully:", emailResponse);
+
+    // Create Supabase client
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
+    );
+
+    // Log the email sending attempt
+    const { error: logError } = await supabaseAdmin
+      .from('email_logs')
+      .insert({
+        recipient_email: email,
+        subject: "Your Focus Timer Summary",
+        content: emailContent,
+        status: 'sent',
+        expected_time: summaryData.totalPlannedTime,
+        actual_time: summaryData.totalTimeSpent,
+        paused_time: summaryData.totalPauses,
+        efficiency_ratio: averageEfficiency,
+        completion_status: 'Completed'
+      });
+
+    if (logError) {
+      console.error("Error logging email:", logError);
+    }
 
     return new Response(
       JSON.stringify({ success: true, message: "Email sent successfully" }),
