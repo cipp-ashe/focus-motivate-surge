@@ -39,7 +39,6 @@ export const Timer = ({
   const [internalMinutes, setInternalMinutes] = useState(initialMinutes);
   const windowSize = useWindowSize();
 
-  // Focus trap for accessibility
   const { containerRef: focusRef } = useFocusTrap({
     enabled: !isExpanded,
   });
@@ -70,21 +69,28 @@ export const Timer = ({
     initialDuration: internalMinutes * 60,
     onTimeUp: () => {
       playSound();
-      console.debug('Timer completion flow - Starting:', {
-        currentMetrics: metrics,
-        isRunning,
-        taskName
-      });
-      
-      // Note: completeTimer is now called by the interval effect
-      // This ensures proper state synchronization
-      setCompletionMetrics(metrics);
-      setShowCompletion(true);
+      completeTimer();
+      handleTimerCompletion(metrics);
     },
     onDurationChange: onDurationChange || (() => {}),
   });
 
-  // Initialize timer when task or duration changes
+  const handleTimerCompletion = useCallback((currentMetrics: TimerStateMetrics) => {
+    if (!currentMetrics.endTime) {
+      console.warn('Timer completion called but metrics not finalized', { metrics: currentMetrics });
+      return;
+    }
+
+    console.debug('Timer completion flow - Starting:', {
+      currentMetrics,
+      isRunning,
+      taskName
+    });
+
+    setCompletionMetrics(currentMetrics);
+    setShowCompletion(true);
+  }, [isRunning, taskName]);
+
   useEffect(() => {
     if (!isRunning) {
       const newMinutes = Math.floor(duration / 60);
@@ -94,22 +100,19 @@ export const Timer = ({
   }, [duration, taskName, isRunning, setMinutes]);
 
   const handleMinutesChange = useCallback((newMinutes: number) => {
-      setInternalMinutes(newMinutes);
-      setMinutes(newMinutes);
-    }, [setMinutes]);
+    setInternalMinutes(newMinutes);
+    setMinutes(newMinutes);
+  }, [setMinutes]);
 
-  // Start handler
   const handleStart = useCallback(() => {
     start();
     setIsExpanded(true);
   }, [start]);
 
-  // Pause handler
   const handlePause = useCallback(() => {
     pause();
   }, [pause]);
 
-  // Toggle handler for controls
   const handleToggle = useCallback(() => {
     if (isRunning) {
       handlePause();
@@ -118,37 +121,27 @@ export const Timer = ({
     }
   }, [isRunning, handlePause, handleStart]);
 
-  // Complete handler - used for manual completion
   const handleComplete = useCallback(() => {
     playSound();
     completeTimer();
-    if (metrics.endTime) {
-      setCompletionMetrics(metrics);
-      setShowCompletion(true);
-    } else {
-      console.warn('Timer completion called but metrics not finalized', {
-        metrics
-      });
-    }
-  }, [completeTimer, playSound, metrics]);
+    handleTimerCompletion(metrics);
+  }, [completeTimer, playSound, metrics, handleTimerCompletion]);
 
   const handleCloseCompletion = useCallback(() => {
     if (!completionMetrics) return;
     
-    // Call onComplete with the stored completion metrics
     if (typeof onComplete === 'function') {
       onComplete(completionMetrics);
     }
     
-    // Reset UI states
     setShowCompletion(false);
     setIsExpanded(false);
     setCompletionMetrics(null);
-    
-    // Reset timer state
     resetTimer();
+    
     toast("Task completed! You're crushing it! 🎉");
   }, [onComplete, completionMetrics, resetTimer]);
+
   const handleAddTime = useCallback(() => {
     addMinutes(ADD_TIME_MINUTES);
     if (typeof onAddTime === 'function') {
@@ -291,7 +284,7 @@ export const Timer = ({
           show={showCompletion}
           metrics={completionMetrics}
           taskName={taskName}
-          onClose={handleCloseTimer}
+          onClose={handleCloseCompletion}
           width={windowSize.width}
           height={windowSize.height}
         />
