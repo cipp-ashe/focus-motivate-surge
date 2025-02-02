@@ -8,13 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { TaskItem } from "./TaskItem";
 import { CompletedTasks } from "./CompletedTasks";
 import { BulkTaskDialog } from "./BulkTaskDialog";
-
-export interface Task {
-  id: string;
-  name: string;
-  completed: boolean;
-  duration?: number;
-}
+import { Task } from "../types/timer";
 
 interface TaskListProps {
   tasks: Task[];
@@ -61,7 +55,7 @@ export const TaskList = ({
       const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || 25, 1), 60) : 25;
 
       onTaskAdd({
-        id: Date.now().toString() + Math.random(),
+        id: `${Date.now()}-${Math.random()}`,
         name,
         completed: false,
         duration,
@@ -80,22 +74,21 @@ export const TaskList = ({
   };
 
   const handleUpdateTask = (taskId: string, updates: Partial<Task>) => {
-    const taskIndex = tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return;
+    const taskToUpdate = tasks.find(t => t.id === taskId);
+    if (!taskToUpdate) return;
 
-    const updatedTask = { ...tasks[taskIndex], ...updates };
-    const newTasks = [...tasks];
-    newTasks[taskIndex] = updatedTask;
+    const updatedTask = { ...taskToUpdate, ...updates };
+    const newTasks = tasks.map(t => t.id === taskId ? updatedTask : t);
     
-    // Update the parent state by clearing and re-adding all tasks
-    onTasksClear();
-    newTasks.forEach(t => onTaskAdd(t));
+    // Only update the changed task
+    onTaskAdd(updatedTask);
   };
 
   const handleDeleteTask = (taskId: string, taskName: string) => {
-    const newTasks = tasks.filter(t => t.id !== taskId);
+    // Filter out the deleted task from the current tasks
+    const remainingTasks = tasks.filter(t => t.id !== taskId);
     onTasksClear();
-    newTasks.forEach(t => onTaskAdd(t));
+    remainingTasks.forEach(t => onTaskAdd(t));
     toast(`Removed task "${taskName}"`);
   };
 
