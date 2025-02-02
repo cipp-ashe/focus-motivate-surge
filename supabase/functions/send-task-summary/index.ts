@@ -40,14 +40,14 @@ serve(async (req: Request) => {
       summaryData.favoriteQuotes
     );
 
-    const emailResponse = await resend.emails.send({
+    const data = await resend.emails.send({
       from: "Focus Timer <noreply@focustimer.org>",
       to: [email],
       subject: "Your Focus Timer Summary",
       html: emailContent,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email sent successfully:", data);
 
     return new Response(
       JSON.stringify({ success: true, message: "Email sent successfully" }),
