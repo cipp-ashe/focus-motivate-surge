@@ -8,6 +8,7 @@ export const TimerControls = memo(({
   onToggle,
   onComplete,
   onAddTime,
+  isPaused = false,
   showAddTime = false,
   size = "normal",
   toggleButtonA11yProps,
@@ -32,11 +33,11 @@ export const TimerControls = memo(({
         ) : (
           <>
             <Sparkles className={`mr-2 ${iconSize}`} />
-            Start
+            {isPaused ? 'Resume' : 'Start'}
           </>
         )}
       </Button>
-      {isRunning && (
+      {(isRunning || isPaused) && (
         <div className={showAddTime ? "flex gap-2" : ""}>
           <Button
             onClick={onComplete}

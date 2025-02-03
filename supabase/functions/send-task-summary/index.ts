@@ -33,14 +33,14 @@ serve(async (req: Request) => {
     console.log("Received request to send summary email to:", email);
     console.log("Summary data:", JSON.stringify(summaryData, null, 2));
 
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "Focus Timer <success@focustimer.org>",
       to: email,
       subject: "Your Daily Task Summary",
       html: generateEmailContent(summaryData),
     });
 
-    if (error) {
+    if (error || !data) {
       console.error("Failed to send email:", error);
       return new Response(
         JSON.stringify({ error: "Failed to send email" }),
@@ -52,7 +52,10 @@ serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ message: "Email sent successfully" }),
+      JSON.stringify({ 
+        data: { id: data.id },
+        message: "Email sent successfully" 
+      }),
       { 
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }

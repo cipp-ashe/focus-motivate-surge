@@ -9,7 +9,8 @@ import { TIMER_CONSTANTS, SOUND_OPTIONS, type SoundOption, type TimerProps } fro
 import { TimerExpandedView } from "./views/TimerExpandedView";
 import { TimerCompactView } from "./views/TimerCompactView";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { TimerCompletionDialog, TimerCompletionDialogContent } from "./TimerCompletionDialog";
 import { Button } from "../ui/button";
 
 const { MIN_MINUTES, MAX_MINUTES, ADD_TIME_MINUTES, CIRCLE_CIRCUMFERENCE } = TIMER_CONSTANTS;
@@ -164,6 +165,7 @@ export const Timer = ({
   const timerControlsProps = {
     isRunning,
     onToggle: handleToggle,
+    isPaused: metrics.isPaused,
     onComplete: handleComplete,
     onAddTime: handleAddTime,
     metrics,
@@ -226,31 +228,33 @@ export const Timer = ({
         />
       )}
 
-      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Timer Complete</DialogTitle>
-            <DialogDescription>
-              Are you finished with this task, or would you like to add more time?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={handleAddTimeAndContinue}
-              className="w-full sm:w-auto"
-            >
-              Add 5 Minutes
-            </Button>
-            <Button
-              onClick={handleComplete}
-              className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
-            >
-              Complete Task
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div>
+        <TimerCompletionDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+          <TimerCompletionDialogContent>
+            <DialogHeader>
+              <DialogTitle>Timer Complete</DialogTitle>
+              <DialogDescription>
+                Are you finished with this task, or would you like to add more time?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={handleAddTimeAndContinue}
+                className="w-full sm:w-auto"
+              >
+                Add 5 Minutes
+              </Button>
+              <Button
+                onClick={handleComplete}
+                className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
+              >
+                Complete Task
+              </Button>
+            </DialogFooter>
+          </TimerCompletionDialogContent>
+        </TimerCompletionDialog>
+      </div>
     </>
   );
 };

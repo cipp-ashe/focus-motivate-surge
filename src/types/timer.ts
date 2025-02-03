@@ -48,6 +48,7 @@ export interface TimerCircleProps {
 
 export interface TimerControlsProps {
   isRunning: boolean;
+  isPaused?: boolean;
   onToggle: () => void;
   onComplete: () => void;
   onAddTime?: () => void;

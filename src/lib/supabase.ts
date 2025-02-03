@@ -2,8 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { DailySummary } from '../types/summary';
 
 interface EdgeFunctionResponse {
-  data: { id: string } | null;
-  error: Error | null;
+  data?: { id: string };
+  message?: string;
+  error?: string
 }
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -34,13 +35,13 @@ export const sendTaskSummaryEmail = async (email: string, summaryData: DailySumm
 
     console.log('Edge function response:', response);
 
-    if (response.error) {
+    if (response.error || !response.data) {
       console.error('Edge function error details:', {
-        message: response.error.message,
-        name: response.error.name,
-        details: response.error,
+        message: response.error,
+        details: response,
       });
-      throw new Error(`Failed to send email: ${response.error.message || 'Unknown error'}`);
+      const errorMessage = response.error || 'Unknown error';
+      throw new Error(`Failed to send email: ${errorMessage}`);
     }
 
     console.log('Email sent successfully:', response.data);
