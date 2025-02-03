@@ -33,8 +33,30 @@ serve(async (req: Request) => {
     
     console.log("Received request to send summary email to:", email);
     console.log("Summary data:", JSON.stringify(summaryData, null, 2));
-    if (summaryData.averageEfficiency === null || summaryData.averageEfficiency === undefined) {
-  summaryData.averageEfficiency = 0; // Default to 0 instead of null
+    console.log("Summary data before sanitization:", JSON.stringify(summaryData, null, 2));
+
+// Ensure all numerical values are properly set
+summaryData.averageEfficiency = typeof summaryData.averageEfficiency === "number"
+  ? summaryData.averageEfficiency
+  : 0;
+
+summaryData.totalTimeSpent = typeof summaryData.totalTimeSpent === "number"
+  ? summaryData.totalTimeSpent
+  : 0;
+
+// Ensure all task metrics have default values
+summaryData.completedTasks = summaryData.completedTasks.map(task => ({
+  ...task,
+  metrics: {
+    actualDuration: typeof task.metrics?.actualDuration === "number" ? task.metrics.actualDuration : 0,
+    efficiencyRatio: typeof task.metrics?.efficiencyRatio === "number" ? task.metrics.efficiencyRatio : 0,
+    expectedTime: typeof task.metrics?.expectedTime === "number" ? task.metrics.expectedTime : 0,
+    netEffectiveTime: typeof task.metrics?.netEffectiveTime === "number" ? task.metrics.netEffectiveTime : 0,
+  }
+}));
+
+console.log("Summary data after sanitization:", JSON.stringify(summaryData, null, 2));
+
 }
     
     const { data, error } = await resend.emails.send({
