@@ -39,7 +39,7 @@ export const generateEmailContent = (summaryData: DailySummary): string => {
         </div>
         <div style="background-color: #F5F3FF; padding: 20px; border-radius: 8px; text-align: center;">
           <div style="color: #7C3AED; font-size: 24px; font-weight: 600; margin-bottom: 8px;">
-            ${averageEfficiency !== null && averageEfficiency !== undefined ? Math.min(averageEfficiency, 100).toFixed(1) : "N/A"}%
+            ${averageEfficiency !== null && !isNaN(Number(averageEfficiency)) ? Math.min(Number(averageEfficiency), 100).toFixed(1) : "N/A"}%
           </div>
           <div style="color: #6B7280; font-size: 14px;">Avg. Efficiency</div>
         </div>
