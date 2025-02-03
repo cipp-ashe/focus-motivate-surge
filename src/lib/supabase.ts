@@ -31,9 +31,10 @@ export const sendTaskSummaryEmail = async (email: string, summaryData: DailySumm
 
   try {
     console.log('Invoking Supabase Edge Function: send-task-summary');
-    const response = await supabase.functions.invoke<EdgeFunctionResponse>('send-task-summary', {
-      body: { email, summaryData },
-    });
+    const supabase = getSupabaseClient();
+const response = await supabase.functions.invoke<EdgeFunctionResponse>('send-task-summary', {
+  body: { email, summaryData },
+});
 
     console.log('Edge function response:', response);
 
