@@ -11,7 +11,7 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? import.meta.env?.VITE_SUPABA
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? import.meta.env?.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.warn("⚠️ Supabase environment variables are missing!");
 }
 
 export const getSupabaseClient = () => {
