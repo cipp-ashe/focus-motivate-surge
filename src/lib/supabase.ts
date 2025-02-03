@@ -14,7 +14,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const getSupabaseClient = () => {
+  return createClient(supabaseUrl, supabaseAnonKey);
+};
 
 export const sendTaskSummaryEmail = async (email: string, summaryData: DailySummary) => {
   console.log('Attempting to send email summary:', {
