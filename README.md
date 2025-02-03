@@ -1,6 +1,6 @@
-# Focus Motivate Surge
+# Get Focused, Get Motivated, Surge Ahead
 
-A modern, feature-rich productivity application that combines a customizable timer with task management and motivational quotes to help you stay focused and productive.
+A modern lightweight productivity app that combines a customizable timer with task management and motivational quotes to help you stay focused and productive.
 
 ## Features
 
