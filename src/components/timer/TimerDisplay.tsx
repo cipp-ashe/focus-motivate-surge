@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { TimerCircle } from "../TimerCircle";
+import { TimerCircle } from "../timer/TimerCircle";
 import { TimerCircleProps } from "@/types/timer";
 
 interface TimerDisplayProps {

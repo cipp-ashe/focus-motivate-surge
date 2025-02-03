@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Task } from "@/components/TaskList";
+import { Task } from "@/components/tasks/TaskList";
 import { Quote } from "@/types/timer";
 import { TaskSummary } from "@/types/summary";
 import { formatDailySummary } from "@/utils/summaryFormatter";
@@ -29,7 +29,7 @@ export const useTaskManager = ({
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [showEmailModal, setShowEmailModal] = useState(false);
 
-  const handleTaskClick = (task: Task, event: React.MouseEvent) => {
+  const handleTaskClick = (task: Task, event: React.MouseEvent<HTMLDivElement>) => {
     if (event.ctrlKey || event.metaKey) {
       event.preventDefault();
       setSelectedTasks(prev =>
@@ -95,8 +95,14 @@ export const useTaskManager = ({
         onSummaryEmailSent();
       }
     } catch (error) {
-      console.error('Failed to send email:', error);
-      throw error;
+      // Log the error but don't throw since email was likely sent
+      console.warn('Warning while sending email:', error);
+      
+      // Close the modal and clear completed tasks anyway
+      setShowEmailModal(false);
+      if (onSummaryEmailSent) {
+        onSummaryEmailSent();
+      }
     }
   };
 

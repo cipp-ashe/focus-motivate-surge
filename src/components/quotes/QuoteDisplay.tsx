@@ -1,5 +1,5 @@
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
 import { Heart, RefreshCw, Sparkles } from "lucide-react";
 import { Quote } from "@/types/timer";
 import { useQuoteManager } from "@/hooks/useQuoteManager";
@@ -35,9 +35,22 @@ export const QuoteDisplay = ({
 
   return (
     <div className="w-full transition-all duration-700">
-      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg min-h-[200px] flex flex-col justify-between">
+      <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg min-h-[220px] flex flex-col justify-between">
         <div className="text-center space-y-4">
-          <Sparkles className="h-5 w-5 mx-auto text-primary" />
+          <div className="flex justify-center items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <div className="flex gap-1">
+              {currentQuote.categories.map((category, index) => (
+                <span
+                  key={index}
+                  className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary"
+                  title={`This quote is about ${category}`}
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+          </div>
           <div
             className={`transition-all duration-300 ${
               isFlipped ? 'opacity-0 transform -translate-y-2' : 'opacity-100 transform translate-y-0'
@@ -47,6 +60,11 @@ export const QuoteDisplay = ({
               "{currentQuote.text}"
             </p>
             <p className="text-sm text-muted-foreground">— {currentQuote.author}</p>
+            {currentTask && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Showing quotes relevant to: {currentTask}
+              </p>
+            )}
           </div>
           <div className="flex justify-center gap-4">
             <Button

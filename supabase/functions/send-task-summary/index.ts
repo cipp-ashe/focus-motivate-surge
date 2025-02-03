@@ -1,100 +1,136 @@
-// deno-lint-ignore-file no-explicit-any
-import { DailySummary } from "./types.ts";
-import { generateEmailContent } from "./utils.ts";
+import { serve } from "std/http";
+import { corsHeaders } from './utils';
+import { getSupabaseClient } from './supabase';
+import { DailySummary, formatSummaryEmail } from './utils';
 
-// @ts-expect-error: Deno imports
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-// @ts-expect-error: Deno imports
-import { Resend } from "https://esm.sh/resend@2.0.0";
-import { getSupabaseClient } from "../lib/supabase.ts";
-const supabase = getSupabaseClient();
-// @ts-expect-error: Deno env
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-interface RequestBody {
+interface EmailRequest {
   email: string;
   summaryData: DailySummary;
 }
 
-serve(async (req: Request) => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+serve(async (req) => {
+  console.log("Received request");
   try {
-    const { email, summaryData } = await req.json() as RequestBody;
-    
-    console.log("Received request to send summary email to:", email);
-    console.log("Summary data:", JSON.stringify(summaryData, null, 2));
-    console.log("Summary data before sanitization:", JSON.stringify(summaryData, null, 2));
+    // Handle CORS
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: corsHeaders });
+    }
 
-// Ensure all numerical values are properly set
-summaryData.averageEfficiency = typeof summaryData.averageEfficiency === "number"
-  ? summaryData.averageEfficiency
-  : 0;
-
-summaryData.totalTimeSpent = typeof summaryData.totalTimeSpent === "number"
-  ? summaryData.totalTimeSpent
-  : 0;
-
-// Ensure all task metrics have default values
-summaryData.completedTasks = summaryData.completedTasks.map(task => ({
-  ...task,
-  metrics: {
-    actualDuration: typeof task.metrics?.actualDuration === "number" ? task.metrics.actualDuration : 0,
-    efficiencyRatio: typeof task.metrics?.efficiencyRatio === "number" ? task.metrics.efficiencyRatio : 0,
-    expectedTime: typeof task.metrics?.expectedTime === "number" ? task.metrics.expectedTime : 0,
-    netEffectiveTime: typeof task.metrics?.netEffectiveTime === "number" ? task.metrics.netEffectiveTime : 0,
-  }
-}));
-
-console.log("Summary data after sanitization:", JSON.stringify(summaryData, null, 2));
-
-}
-    
-    const { data, error } = await resend.emails.send({
-      from: "Focus Timer <success@focustimer.org>",
-      to: email,
-      subject: "Your Daily Task Summary",
-      html: generateEmailContent(summaryData),
-    });
-
-    if (error || !data) {
-      console.error("Failed to send email:", error);
+    // Validate request method
+    if (req.method !== 'POST') {
       return new Response(
-        JSON.stringify({ error: "Failed to send email" }),
+        JSON.stringify({ error: 'Method not allowed' }),
         { 
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 405 
         }
       );
     }
 
-    return new Response(
-      JSON.stringify({ 
-        data: { id: data.id },
-        message: "Email sent successfully" 
-      }),
-      { 
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+    // Parse and validate request body
+    const requestData = await req.json() as EmailRequest;
+    const { email, summaryData } = requestData;
+
+    if (!email || !summaryData) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields: email and summaryData are required' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400
+        }
+      );
+    }
+
+    console.log('Creating Supabase client...');
+    let supabase;
+    try {
+      supabase = await getSupabaseClient();
+      console.log('Supabase client created successfully');
+    } catch (error) {
+      console.error('Failed to create Supabase client:', error);
+      throw new Error(`Failed to initialize Supabase: ${error.message}`);
+    }
+
+    console.log('Request details:', {
+      email,
+      summaryData: {
+        completedTasks: summaryData.completedTasks.length,
+        unfinishedTasks: summaryData.unfinishedTasks.length,
+        totalTimeSpent: summaryData.totalTimeSpent,
+        averageEfficiency: summaryData.averageEfficiency,
+        totalPauses: summaryData.totalPauses
       }
-    );
+    });
+
+    console.log('Formatting email...');
+    const emailHtml = formatSummaryEmail(summaryData);
+    console.log('Email formatted successfully');
+
+    console.log('Invoking send-email function...');
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        method: 'POST',
+        body: { 
+          to: email,
+          subject: 'Your Daily Focus Summary',
+          html: emailHtml 
+        }
+      });
+
+      if (error) {
+        console.error('Failed to send email:', {
+          error,
+          message: error.message,
+          details: error.cause
+        });
+        throw error;
+      }
+
+      if (!data) {
+        console.error('No data returned from send-email function');
+        throw new Error('No response data from email function');
+      }
+
+      console.log('Email sent successfully:', {
+        data,
+        timestamp: new Date().toISOString()
+      });
+
+      return new Response(
+        JSON.stringify({ 
+          message: 'Email sent successfully',
+          data: { id: crypto.randomUUID() }
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      );
+
+    } catch (invokeError) {
+      console.error('Error invoking send-email function:', {
+        error: invokeError,
+        message: invokeError.message,
+        stack: invokeError.stack
+      });
+      throw new Error(`Failed to send email: ${invokeError.message}`);
+    }
 
   } catch (error) {
-    console.error("Error processing request:", error);
+    console.error('Error processing request:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      }),
       { 
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
       }
     );
   }

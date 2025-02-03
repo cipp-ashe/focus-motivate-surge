@@ -1,16 +1,16 @@
-import { Task } from "../TaskList";
+import { Task } from "./TaskList";
 import { Sparkles, Clock, X } from "lucide-react";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TaskRowProps {
   task: Task;
   isSelected: boolean;
   editingTaskId: string | null;
-  onTaskClick: (task: Task, event: React.MouseEvent) => void;
+  onTaskClick: (task: Task, event: React.MouseEvent<HTMLDivElement>) => void;
   onTaskDelete: (taskId: string) => void;
   onDurationChange: (taskId: string, newDuration: string) => void;
-  onDurationClick: (e: React.MouseEvent | React.TouchEvent, taskId: string) => void;
+  onDurationClick: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => void;
   onInputBlur: () => void;
 }
 
@@ -26,7 +26,14 @@ export const TaskRow = ({
 }: TaskRowProps) => {
   const [inputValue, setInputValue] = useState(task.duration?.toString() || "25");
 
-  const preventPropagation = (e: React.MouseEvent | React.TouchEvent) => {
+  // Update input value when task duration changes
+  useEffect(() => {
+    if (task.duration) {
+      setInputValue(task.duration.toString());
+    }
+  }, [task.duration]);
+
+  const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
     e.stopPropagation();
   };
 
@@ -39,21 +46,24 @@ export const TaskRow = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === '' || /^\d{1,2}$/.test(value)) {
+    // Allow any numeric input, we'll clamp it on blur
+    if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
     }
   };
 
   const handleBlur = () => {
-    if (inputValue === '') {
-      setInputValue('25');
-      onDurationChange(task.id, '25');
-    } else {
+    let finalValue = '25';
+    
+    if (inputValue !== '') {
       const numValue = parseInt(inputValue, 10);
-      const clampedValue = Math.min(Math.max(numValue, 1), 60).toString();
-      setInputValue(clampedValue);
-      onDurationChange(task.id, clampedValue);
+      if (!isNaN(numValue)) {
+        finalValue = Math.min(Math.max(numValue, 1), 60).toString();
+      }
     }
+    
+    setInputValue(finalValue);
+    onDurationChange(task.id, finalValue);
     onInputBlur();
   };
 
@@ -68,7 +78,7 @@ export const TaskRow = ({
           : 'hover:border-primary/30 hover:bg-accent/5'
         }
       `}
-      onClick={(e) => onTaskClick(task, e)}
+      onClick={(e: React.MouseEvent<HTMLDivElement>) => onTaskClick(task, e)}
     >
       <div className="flex items-center gap-3">
         <Sparkles className="h-4 w-4 text-primary" />

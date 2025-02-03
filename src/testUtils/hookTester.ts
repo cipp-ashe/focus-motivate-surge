@@ -1,24 +1,12 @@
-// Types for mock React hooks environment
-type SetStateAction<T> = T | ((prev: T) => T);
-type EffectCallback = () => (void | (() => void));
-type DependencyList = ReadonlyArray<unknown>;
-type CleanupFunction = () => void;
-
-// Generic function type with explicit unknown parameters
-type AnyFunction = {
-  (...args: unknown[]): unknown;
-};
-
-interface HookStates {
-  [key: string]: unknown;
-}
-
-interface HookTester<T> {
-  result: T;
-  rerender: () => void;
-  advanceTime: (ms: number) => void;
-  getState: <S>(key: string) => S;
-}
+import {
+  SetStateAction,
+  EffectCallback,
+  DependencyList,
+  CleanupFunction,
+  AnyFunction,
+  HookStates,
+  HookTester
+} from './types';
 
 export class HookEnvironment {
   private states: HookStates = {};

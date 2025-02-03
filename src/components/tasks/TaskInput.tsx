@@ -1,16 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import { Plus, List, X, Send } from "lucide-react";
-import { Task } from "./TaskList";
+import { Task } from "../tasks/TaskList";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;

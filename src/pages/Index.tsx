@@ -3,7 +3,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { TaskManager } from "@/components/tasks/TaskManager";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Task } from "@/components/TaskList";
+import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 
 const Index = () => {

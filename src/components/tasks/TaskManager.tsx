@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
-import { TaskList, Task } from "../TaskList";
-import { TimerSection } from "./TimerSection";
+import { TaskList, Task } from "./TaskList";
+import { TimerSection } from "../timer/TimerSection";
 import { Quote } from "@/types/timer";
 import { useTaskOperations } from "@/hooks/useTaskOperations";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/toast/use-toast";
 
 interface TaskManagerProps {
   initialTasks?: Task[];
@@ -28,6 +28,7 @@ export const TaskManager = ({
     tasks,
     setTasks,
     completedTasks,
+    setCompletedTasks,
     selectedTask,
     handleTaskAdd,
     handleTaskSelect,
@@ -49,12 +50,14 @@ export const TaskManager = ({
 
   const handleSummaryEmailSent = useCallback(() => {
     console.log('Sending summary email and clearing completed tasks');
+    // Update both local state and parent
+    setCompletedTasks([]);
     onCompletedTasksUpdate?.([]);
     toast({
       title: "Summary Sent",
       description: "Completed tasks have been cleared."
     });
-  }, [onCompletedTasksUpdate]);
+  }, [onCompletedTasksUpdate, setCompletedTasks]);
 
   const handleTaskDurationChange = useCallback((minutes: number) => {
     console.log('Updating task duration:', minutes);
@@ -80,6 +83,7 @@ export const TaskManager = ({
             onSelectedTasksClear={handleSelectedTasksClear}
             onSummaryEmailSent={handleSummaryEmailSent}
             favorites={favorites}
+            onTasksUpdate={onTasksUpdate}
           />
         </div>
 

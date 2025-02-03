@@ -1,24 +1,4 @@
-// Types for mock React hooks environment
-type SetStateAction<T> = T | ((prev: T) => T);
-type EffectCallback = () => (void | (() => void));
-type DependencyList = ReadonlyArray<unknown>;
-type CleanupFunction = () => void;
-
-// Generic function type with explicit unknown parameters
-type AnyFunction = {
-  (...args: unknown[]): unknown;
-};
-
-interface HookStates {
-  [key: string]: unknown;
-}
-
-interface HookTester<T> {
-  result: T;
-  rerender: () => void;
-  advanceTime: (ms: number) => void;
-  getState: <S>(key: string) => S;
-}
+import { TestSuite, TestResult } from './types';
 
 type AssertionValue<T> = {
   toBe: (expected: T) => void;
@@ -36,19 +16,8 @@ type AssertionValue<T> = {
 };
 
 class TestRunner {
-  private suites: Array<{
-    name: string;
-    tests: Array<{ name: string; fn: () => void | Promise<void> }>;
-    beforeEach?: () => void;
-    afterEach?: () => void;
-  }> = [];
-
-  private currentSuite: {
-    name: string;
-    tests: Array<{ name: string; fn: () => void | Promise<void> }>;
-    beforeEach?: () => void;
-    afterEach?: () => void;
-  } | null = null;
+  private suites: TestSuite[] = [];
+  private currentSuite: TestSuite | null = null;
 
   describe(name: string, fn: () => void): void {
     this.currentSuite = { name, tests: [] };
@@ -78,7 +47,7 @@ class TestRunner {
     this.currentSuite.afterEach = fn;
   }
 
-  async run(): Promise<{ total: number; passed: number; failed: number }> {
+  async run(): Promise<TestResult> {
     console.log('\n🔬 Starting tests...\n');
     
     let totalTests = 0;

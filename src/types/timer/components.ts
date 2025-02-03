@@ -1,12 +1,5 @@
-import { TimerMetrics } from './metrics';
-
-// Common types
-export interface Quote {
-  text: string;
-  author: string;
-  timestamp?: string;
-  task?: string;
-}
+import { TimerMetrics } from '../metrics';
+import type { Quote } from './models';
 
 // A11y props types
 export interface TimerA11yProps {
@@ -77,19 +70,3 @@ export interface SoundSelectorProps {
   onTestSound: () => void;
   isLoadingAudio?: boolean;
 }
-
-// Constants
-export const TIMER_CONSTANTS = {
-  MIN_MINUTES: 1,
-  MAX_MINUTES: 60,
-  ADD_TIME_MINUTES: 5,
-  TIMER_INTERVAL: 1000,
-  CIRCLE_CIRCUMFERENCE: 2 * Math.PI * 45,
-} as const;
-
-export const SOUND_OPTIONS = {
-  bell: "https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3",
-  chime: "https://cdn.freesound.org/previews/411/411089_5121236-lq.mp3",
-  ding: "https://cdn.freesound.org/previews/536/536108_11943129-lq.mp3",
-  none: "",
-} as const;

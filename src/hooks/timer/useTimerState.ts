@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
-import { TimerStateMetrics } from '../types/metrics';
+import { TimerStateMetrics } from '@/types/metrics';
+import { useTimer } from './useTimer';
 import { useTimerMetrics } from './useTimerMetrics';
-import { useTimerControls } from './useTimerControls';
 
 interface UseTimerStateProps {
   initialDuration: number;
@@ -18,22 +18,26 @@ export const useTimerState = ({
     timeLeft,
     minutes,
     isRunning,
-    setMinutes,
+    metrics: timerMetrics,
     start,
     pause,
-    addTime: addTimeControl,
-    reset: resetControl,
-    decrementTime,
-  } = useTimerControls({ initialDuration, onTimeUp, onDurationChange });
+    reset: resetTimer,
+    addTime: addTimeBase,
+    setMinutes,
+    completeTimer: completeTimerBase,
+  } = useTimer({
+    initialDuration,
+    onTimeUp,
+    onDurationChange,
+  });
 
   const {
     metrics,
     updateMetrics,
     calculateFinalMetrics,
-  } = useTimerMetrics(initialDuration); // initialDuration is already in seconds, which is what we want
+  } = useTimerMetrics(initialDuration);
 
   const startTimer = useCallback(() => {
-    // If resuming from pause, calculate accumulated pause time
     if (metrics.isPaused && metrics.lastPauseTimestamp) {
       const pauseDuration = Math.floor(
         (new Date().getTime() - metrics.lastPauseTimestamp.getTime()) / 1000
@@ -45,7 +49,6 @@ export const useTimerState = ({
         lastPauseTimestamp: null,
       });
     } else {
-      // Starting fresh
       updateMetrics({
         startTime: metrics.startTime || new Date(),
         isPaused: false,
@@ -80,17 +83,17 @@ export const useTimerState = ({
       expectedTime: metrics.expectedTime + additionalSeconds,
       pausedTimeLeft: metrics.isPaused ? timeLeft + additionalSeconds : metrics.pausedTimeLeft,
     });
-    addTimeControl(additionalMinutes);
-  }, [metrics, timeLeft, updateMetrics, addTimeControl]);
+    addTimeBase(additionalMinutes);
+  }, [metrics, timeLeft, updateMetrics, addTimeBase]);
 
   const completeTimer = useCallback(async (): Promise<TimerStateMetrics> => {
     const finalMetrics = await calculateFinalMetrics(new Date());
-    resetControl();
+    completeTimerBase();
     return finalMetrics;
-  }, [calculateFinalMetrics, resetControl]);
+  }, [calculateFinalMetrics, completeTimerBase]);
 
   const reset = useCallback(() => {
-    resetControl();
+    resetTimer();
     updateMetrics({
       startTime: null,
       endTime: null,
@@ -107,23 +110,13 @@ export const useTimerState = ({
       isPaused: false,
       pausedTimeLeft: null,
     });
-  }, [minutes, metrics.favoriteQuotes, resetControl, updateMetrics]);
+  }, [minutes, metrics.favoriteQuotes, resetTimer, updateMetrics]);
 
   const incrementFavorites = useCallback(() => {
     updateMetrics({
       favoriteQuotes: metrics.favoriteQuotes + 1,
     });
   }, [metrics.favoriteQuotes, updateMetrics]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(decrementTime, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft, decrementTime]);
 
   return {
     timeLeft,

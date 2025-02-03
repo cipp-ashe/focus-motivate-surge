@@ -1,5 +1,5 @@
+import React, { InputHTMLAttributes, useCallback, useState } from "react";
 import { Input } from "../ui/input";
-import { InputHTMLAttributes, useCallback, useState } from "react";
 
 interface MinutesDisplayProps extends InputHTMLAttributes<HTMLInputElement> {
   minutes: number;

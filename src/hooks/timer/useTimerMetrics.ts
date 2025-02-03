@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { TimerStateMetrics } from '../types/metrics';
-import { calculateEfficiencyRatio, determineCompletionStatus, formatTime } from '../utils/timeUtils';
+import { TimerStateMetrics } from '@/types/metrics';
+import { calculateEfficiencyRatio, determineCompletionStatus, formatTime } from '@/utils/timeUtils';
 
 export const useTimerMetrics = (initialDurationSeconds: number) => {
   const [metrics, setMetrics] = useState<TimerStateMetrics>({

@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
-import { Task } from "@/components/TaskList";
+import { Task } from "@/components/tasks/TaskList";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/toast/use-toast";
 
 export const useTaskOperations = ({
   initialTasks = [],
@@ -34,35 +34,37 @@ export const useTaskOperations = ({
     });
   }, [onTasksUpdate]);
 
-  const handleTaskSelect = useCallback((task: Task) => {
-    console.log('Selecting task:', {
-      taskId: task.id,
-      taskName: task.name,
-      duration: task.duration
-    });
-    
+  const handleTaskSelect = useCallback((task: Task, event?: React.MouseEvent) => {
+    // Only handle selection if it's not a ctrl+click
+    if (event?.ctrlKey) return;
+
+    // Find existing task to preserve any existing properties
+    const existingTask = tasks.find(t => t.id === task.id);
+    if (!existingTask) return;
+
+    // Create updated task with all properties
+    const updatedTask = { ...existingTask, ...task };
+
+    // Always update task list to ensure state is in sync
     setTasks(prev => {
       const updatedTasks = prev.map(t => 
-        t.id === task.id ? { ...t, ...task } : t
+        t.id === task.id ? updatedTask : t
       );
-      console.log('Updated task properties:', {
-        taskId: task.id,
-        updates: task
-      });
+      onTasksUpdate?.(updatedTasks);
       return updatedTasks;
     });
 
-    const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-    const updatedTasks = storedTasks.map((t: Task) => t.id === task.id ? { ...t, ...task } : t);
-    localStorage.setItem('taskList', JSON.stringify(updatedTasks));
-    console.log('Updated localStorage with new task state');
+    // Always update selection to ensure timer gets latest task state
+    setSelectedTask(updatedTask);
     
-    setSelectedTask(task);
-    toast({
-      title: "Task Selected",
-      description: `Selected task: ${task.name}`
-    });
-  }, []);
+    // Only show toast if it's a selection, not a duration update
+    if (!task.duration || task.duration === existingTask.duration) {
+      toast({
+        title: "Task Selected",
+        description: `Selected task: ${task.name}`
+      });
+    }
+  }, [tasks, onTasksUpdate]);
 
   const handleTaskComplete = useCallback((metrics: TimerStateMetrics) => {
     console.log('Completing task:', {
@@ -130,6 +132,7 @@ export const useTaskOperations = ({
     tasks,
     setTasks,
     completedTasks,
+    setCompletedTasks,
     selectedTask,
     handleTaskAdd,
     handleTaskSelect,

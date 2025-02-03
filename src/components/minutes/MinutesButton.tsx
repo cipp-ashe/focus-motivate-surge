@@ -1,6 +1,6 @@
+import React, { ButtonHTMLAttributes } from "react";
 import { Button } from "../ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { ButtonHTMLAttributes } from "react";
 
 interface MinutesButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   direction: "up" | "down";

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
+import { Card } from "./../ui/card.tsx";
+import { Button } from "./../ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Quote } from "@/types/timer";
 

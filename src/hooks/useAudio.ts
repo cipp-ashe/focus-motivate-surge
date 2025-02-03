@@ -19,8 +19,21 @@ export function useAudio({ audioUrl, options }: UseAudioConfig) {
 
     setIsLoadingAudio(true);
     try {
+      console.log('Attempting to play sound:', audioUrl);
       const audio = new Audio(audioUrl);
+      
+      // Add load event listener
+      await new Promise((resolve, reject) => {
+        audio.addEventListener('canplaythrough', resolve);
+        audio.addEventListener('error', (e) => {
+          console.error('Audio load error:', e);
+          reject(new Error('Failed to load audio'));
+        });
+        audio.load();
+      });
+
       await audio.play();
+      console.log('Sound played successfully');
       setIsLoadingAudio(false);
       options?.onSuccess?.();
     } catch (error) {

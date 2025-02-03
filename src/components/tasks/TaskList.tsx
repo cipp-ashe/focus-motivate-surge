@@ -1,7 +1,7 @@
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
-import { CompletedTasks } from "./CompletedTasks";
-import { EmailSummaryModal } from "./EmailSummaryModal";
+import { CompletedTasks } from "../CompletedTasks";
+import { EmailSummaryModal } from "../EmailSummaryModal";
 import { Quote } from "@/types/timer";
 import { useTaskManager } from "@/hooks/useTaskManager";
 
@@ -27,10 +27,11 @@ interface TaskListProps {
   tasks: Task[];
   completedTasks: Task[];
   onTaskAdd: (task: Task) => void;
-  onTaskSelect: (task: Task) => void;
+  onTaskSelect: (task: Task, event?: React.MouseEvent<HTMLDivElement>) => void;
   onTasksClear: () => void;
   onSelectedTasksClear?: (taskIds: string[]) => void;
   onSummaryEmailSent?: () => void;
+  onTasksUpdate?: (tasks: Task[]) => void;
   favorites?: Quote[];
 }
 
@@ -43,6 +44,7 @@ export const TaskList = ({
   onSelectedTasksClear,
   onSummaryEmailSent,
   favorites = [],
+  onTasksUpdate,
 }: TaskListProps) => {
   const {
     selectedTasks,
@@ -73,6 +75,7 @@ export const TaskList = ({
         onTaskClick={handleTaskClick}
         onTaskDelete={handleTaskDelete}
         onTasksClear={selectedTasks.length > 0 ? clearSelectedTasks : onTasksClear}
+        onTasksUpdate={onTasksUpdate}
       />
 
       <CompletedTasks 

@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAudio } from "@/hooks/useAudio";
-import { useTimerState } from "@/hooks/useTimerState";
+import { useTimerState } from "@/hooks/timer/useTimerState";
 import { TimerStateMetrics } from "@/types/metrics";
 import { CompletionCelebration } from "./CompletionCelebration";
-import { FloatingQuotes } from "../FloatingQuotes";
+import { FloatingQuotes } from "../quotes/FloatingQuotes";
 import { Minimize2 } from "lucide-react";
 import { TIMER_CONSTANTS, SOUND_OPTIONS, type SoundOption, type TimerProps } from "@/types/timer";
 import { TimerExpandedView } from "./views/TimerExpandedView";
@@ -29,20 +29,7 @@ export const Timer = ({
   const [showCompletion, setShowCompletion] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [completionMetrics, setCompletionMetrics] = useState<TimerStateMetrics | null>(null);
-  const initialMinutes = duration ? Math.floor(duration / 60) : 25;
-  const [internalMinutes, setInternalMinutes] = useState(initialMinutes);
-
-  const { play: playSound, testSound, isLoadingAudio } = useAudio({
-    audioUrl: SOUND_OPTIONS[selectedSound],
-    options: {
-      onError: (error) => {
-        console.error("Audio error:", error);
-        toast.error("Could not play sound. Please check your browser settings.");
-      },
-    },
-  });
-
-  // Convert minutes to seconds for timer state
+  const [internalMinutes, setInternalMinutes] = useState(duration ? Math.floor(duration / 60) : 25);
   const durationInSeconds = internalMinutes * 60;
 
   const {
@@ -70,6 +57,17 @@ export const Timer = ({
     },
     onDurationChange,
   });
+
+  const { play: playSound, testSound, isLoadingAudio } = useAudio({
+    audioUrl: SOUND_OPTIONS[selectedSound],
+    options: {
+      onError: (error) => {
+        console.error("Audio error:", error);
+        toast.error("Could not play sound. Please check your browser settings.");
+      },
+    },
+  });
+
 
   const handleTimerCompletion = useCallback(async () => {
     try {
@@ -104,10 +102,23 @@ export const Timer = ({
     toast(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
   }, [addMinutes, onAddTime, start]);
 
+  // Update internal minutes when task duration changes
+  useEffect(() => {
+    if (duration) {
+      const newMinutes = Math.floor(duration / 60);
+      setInternalMinutes(newMinutes);
+      setMinutes(newMinutes);
+    }
+  }, [duration, setMinutes]);
+
   const handleMinutesChange = useCallback((newMinutes: number) => {
-    setInternalMinutes(newMinutes);
-    setMinutes(newMinutes);
-  }, [setMinutes]);
+    const clampedMinutes = Math.min(Math.max(newMinutes, 1), 60);
+    setInternalMinutes(clampedMinutes);
+    setMinutes(clampedMinutes);
+    if (onDurationChange) {
+      onDurationChange(clampedMinutes);
+    }
+  }, [setMinutes, onDurationChange]);
 
   const handleStart = useCallback(() => {
     start();

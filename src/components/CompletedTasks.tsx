@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Task } from "./TaskList";
+import { Task } from "./tasks/TaskList";
 import { Button } from "./ui/button";
 import { Send, Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer } from "lucide-react";
 import { Badge } from "./ui/badge";

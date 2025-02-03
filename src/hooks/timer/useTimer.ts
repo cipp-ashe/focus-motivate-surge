@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { TimerMetrics } from '../types/metrics';
+import { TimerMetrics } from '@/types/metrics';
 
 interface UseTimerOptions {
   initialDuration: number;
@@ -55,10 +55,8 @@ export const useTimer = ({
 
   const setMinutes = useCallback((newMinutes: number) => {
     console.log('Setting minutes to:', newMinutes);
-    // Update both minutes and timeLeft states
     setMinutesState(newMinutes);
     setTimeLeft(newMinutes * 60);
-    // Notify parent component if callback exists
     if (onDurationChange) {
       onDurationChange(newMinutes);
     }
@@ -118,7 +116,6 @@ export const useTimer = ({
     }));
   }, []);
 
-  // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
     

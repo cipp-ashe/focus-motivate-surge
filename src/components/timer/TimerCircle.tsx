@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef } from "react";
-import { TimerCircleProps } from "../types/timer";
-import { prefersReducedMotion } from "../hooks/useTransition";
+import { TimerCircleProps } from "../../types/timer";
+import { prefersReducedMotion } from "../../hooks/useTransition";
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);

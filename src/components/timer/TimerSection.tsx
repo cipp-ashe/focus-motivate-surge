@@ -1,5 +1,5 @@
-import { Timer } from "../timer/Timer";
-import { Task } from "../TaskList";
+import { Timer } from "./Timer";
+import { Task } from "../tasks/TaskList";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 

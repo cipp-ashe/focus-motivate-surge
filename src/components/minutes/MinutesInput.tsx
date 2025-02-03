@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import React, { memo } from "react";
 import { MinutesInputProps } from "../../types/timer";
 import { MinutesButton } from "./MinutesButton";
 import { MinutesDisplay } from "./MinutesDisplay";

@@ -1,4 +1,4 @@
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { Clock, Plus, Check, Sparkles } from "lucide-react";
 import { TimerControlsProps } from "@/types/timer";
 import { memo } from "react";
@@ -46,7 +46,7 @@ export const TimerControls = memo(({
             {...completeButtonA11yProps}
           >
             <Check className={`mr-2 ${iconSize}`} />
-            Complete Early
+            {showAddTime ? "Complete" : "Complete Early"}
           </Button>
           {showAddTime && onAddTime && (
             <Button

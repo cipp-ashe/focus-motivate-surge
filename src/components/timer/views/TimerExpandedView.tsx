@@ -2,9 +2,9 @@ import { memo } from "react";
 import { Card } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
 import { TimerDisplay } from "../TimerDisplay";
-import { TimerControls } from "../TimerControls";
+import { TimerControls } from "../controls/TimerControls";
 import { TimerMetricsDisplay } from "../TimerMetrics";
-import { QuoteDisplay } from "../../QuoteDisplay";
+import { QuoteDisplay } from "../../quotes/QuoteDisplay";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 
