@@ -6,7 +6,8 @@ import { generateEmailContent } from "./utils.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // @ts-expect-error: Deno imports
 import { Resend } from "https://esm.sh/resend@2.0.0";
-
+// Import Supabase client
+import { supabase } from "../lib/supabase.ts";
 // @ts-expect-error: Deno env
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
