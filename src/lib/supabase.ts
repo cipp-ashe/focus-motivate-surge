@@ -7,8 +7,8 @@ interface EdgeFunctionResponse {
   error?: string
 }
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? import.meta.env?.VITE_SUPABASE_URL;
+const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? import.meta.env?.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
