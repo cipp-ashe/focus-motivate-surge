@@ -33,7 +33,10 @@ serve(async (req: Request) => {
     
     console.log("Received request to send summary email to:", email);
     console.log("Summary data:", JSON.stringify(summaryData, null, 2));
-
+    if (summaryData.averageEfficiency === null || summaryData.averageEfficiency === undefined) {
+  summaryData.averageEfficiency = 0; // Default to 0 instead of null
+}
+    
     const { data, error } = await resend.emails.send({
       from: "Focus Timer <success@focustimer.org>",
       to: email,
