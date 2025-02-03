@@ -1,136 +1,291 @@
-# Testing Documentation
-
-## Setup Instructions
-
-To run the tests, you'll need to install the following dependencies:
-
-```bash
-# Using npm
-npm install --save-dev @testing-library/react @testing-library/jest-dom @types/jest jest ts-jest jest-environment-jsdom identity-obj-proxy @jest/types
-
-# Using Bun
-bun add -d @testing-library/react @testing-library/jest-dom @types/jest jest ts-jest jest-environment-jsdom identity-obj-proxy @jest/types
-```
+# Testing Guide
 
 ## Test Structure
 
-The tests are organized as follows:
+The project uses a comprehensive testing setup with both Jest and custom test utilities for different testing scenarios.
 
+### Test Utilities
+
+1. **HookTester (`src/testUtils/hookTester.ts`)**
+   - Custom utility for testing React hooks
+   - Provides mock React environment with state management
+   - Supports useState, useEffect, and useCallback
+   - Includes methods for:
+     - State management
+     - Effect handling
+     - Time advancement simulation
+     - State inspection
+
+2. **TestRunner (`src/testUtils/testRunner.ts`)**
+   - Custom test runner with Jest-like syntax
+   - Supports describe, test, beforeEach, and afterEach blocks
+   - Includes comprehensive assertion utilities:
+     - toBe: Strict equality comparison
+     - toEqual: Deep equality comparison
+     - toContain: Array/string inclusion check
+     - toBeTruthy/toBeFalsy: Truthiness checks
+     - toThrow: Exception testing
+     - Numeric comparisons (greater/less than)
+
+### Jest Configuration
+
+```typescript
+// jest.config.ts highlights
+{
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80
+    }
+  }
+}
 ```
-src/
-  components/
-    __tests__/           # Component tests
-      TimerCircle.test.tsx
-      Timer.test.tsx
-      ...
-  hooks/
-    __tests__/          # Hook tests
-      useTimer.test.ts
-      useAudio.test.ts
-      ...
-```
 
-## Running Tests
+### Test Environment Setup
 
-Once dependencies are installed, you can run tests using:
+The project includes comprehensive test environment setup in `setupTests.ts`:
 
-```bash
-# Using npm
-npm test
+1. **Testing Library Extensions**
+   - Adds Jest DOM matchers
+   - Custom matcher types for TypeScript
 
-# Using Bun
-bun test
-```
+2. **Browser API Mocks**
+   ```typescript
+   // Mock window.matchMedia
+   window.matchMedia = (query) => ({
+     matches: false,
+     media: query,
+     // ... other MediaQueryList properties
+   });
 
-## Test Coverage
+   // Mock Audio API
+   class MockAudio {
+     play(): Promise<void> {
+       return Promise.resolve();
+     }
+   }
 
-To generate coverage reports:
+   // Mock IntersectionObserver
+   class MockIntersectionObserver {
+     observe(): void {}
+     unobserve(): void {}
+     disconnect(): void {}
+   }
+   ```
 
-```bash
-# Using npm
-npm test -- --coverage
-
-# Using Bun
-bun test --coverage
-```
-
-## Current Test Status
-
-The test files currently include:
-1. Basic utility functions for testing
-2. Documented test cases to be implemented
-3. Example implementations for reference
-
-When dependencies are installed, the placeholder tests will be replaced with proper test implementations using Jest and React Testing Library.
+3. **Global Test Setup**
+   - Clears all mocks before each test
+   - Sets up global browser API mocks
+   - Provides TypeScript type extensions
 
 ## Writing Tests
 
-### Component Tests
-
-Example of a component test:
+### Hook Testing Example
 
 ```typescript
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { TimerCircle } from '../TimerCircle';
-
-describe('TimerCircle', () => {
-  test('renders correctly', () => {
-    render(<TimerCircle {...props} />);
-    expect(screen.getByText('05:00')).toBeInTheDocument();
-  });
-});
-```
-
-### Hook Tests
-
-Example of a hook test:
-
-```typescript
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useTimer } from '../useTimer';
+import { createHookTester } from '../testUtils/hookTester';
+import { useTimer } from '../hooks/timer/useTimer';
 
 describe('useTimer', () => {
+  const createTimer = createHookTester(useTimer);
+
   test('initializes with correct duration', () => {
-    const { result } = renderHook(() => useTimer({ duration: 300 }));
-    expect(result.current.timeLeft).toBe(300);
+    const { result } = createTimer({ initialDuration: 300 });
+    expect(result.timeLeft).toBe(300);
+    expect(result.minutes).toBe(5);
+    expect(result.isRunning).toBeFalsy();
+  });
+
+  test('handles time updates', () => {
+    const { result } = createTimer({ initialDuration: 300 });
+    result.start();
+    expect(result.isRunning).toBeTruthy();
+    result.pause();
+    expect(result.isRunning).toBeFalsy();
+  });
+
+  test('adds time correctly', () => {
+    const { result } = createTimer({ initialDuration: 300 });
+    const initialTime = result.timeLeft;
+    result.addTime(5); // Add 5 minutes
+    expect(result.timeLeft).toBe(initialTime + 300);
+  });
+
+  test('handles cleanup on unmount', () => {
+    const { result, rerender } = createTimer({ initialDuration: 300 });
+    result.start();
+    expect(result.isRunning).toBeTruthy();
+    rerender(); // Simulate unmount
+    expect(result.isRunning).toBeFalsy();
   });
 });
 ```
+
+Key features demonstrated:
+- State initialization testing
+- Action handlers (start/pause)
+- Time manipulation
+- Cleanup verification
+- Edge case handling
+
+### Component Testing Example
+
+```typescript
+import { describe, test, expect } from '../../testUtils/testRunner';
+import { TimerCircle } from '../TimerCircle';
+
+describe('TimerCircle Component', () => {
+  const defaultProps = {
+    size: 'normal' as const,
+    isRunning: false,
+    timeLeft: 300,
+    minutes: 5,
+    circumference: 2 * Math.PI * 45,
+  };
+
+  test('renders with correct time format', () => {
+    const result = TimerCircle(defaultProps);
+    const timeString = formatTime(defaultProps.timeLeft);
+    expect(result).toBeTruthy();
+    expect(JSON.stringify(result)).toContain(timeString);
+  });
+
+  test('uses correct size classes', () => {
+    const normalResult = TimerCircle(defaultProps);
+    const largeResult = TimerCircle({ ...defaultProps, size: 'large' });
+    expect(JSON.stringify(normalResult)).toContain('w-48');
+    expect(JSON.stringify(largeResult)).toContain('w-96');
+  });
+
+  test('applies running styles when active', () => {
+    const runningResult = TimerCircle({ ...defaultProps, isRunning: true });
+    expect(JSON.stringify(runningResult)).toContain('active');
+  });
+
+  test('calculates progress correctly', () => {
+    const halfwayProps = {
+      ...defaultProps,
+      timeLeft: 150, // Half of total time
+    };
+    const result = TimerCircle(halfwayProps);
+    expect(JSON.stringify(result)).toContain(
+      (defaultProps.circumference * 0.5).toString()
+    );
+  });
+});
+```
+
+Key features demonstrated:
+- Props validation
+- Style and class testing
+- State-dependent rendering
+- Visual calculations
+- Component composition
 
 ## Test Coverage Requirements
 
-- Minimum coverage requirements:
-  - Statements: 80%
-  - Branches: 80%
-  - Functions: 80%
-  - Lines: 80%
+- Minimum 80% coverage required for:
+  - Branches
+  - Functions
+  - Lines
+  - Statements
 
-## Accessibility Testing
+## Running Tests
 
-All component tests should include accessibility checks:
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm test -- --coverage
+
+# Run specific test file
+npm test -- src/components/__tests__/TimerCircle.test.tsx
+
+# Run tests in watch mode
+npm test -- --watch
+```
+
+## Best Practices
+
+1. **Test Organization**
+   - Place tests in `__tests__` directories near the code they test
+   - Use descriptive test file names: `ComponentName.test.tsx`
+   - Group related tests using describe blocks
+   - Use clear test descriptions that explain the expected behavior
+
+2. **Hook Testing**
+   - Use HookTester for complex hook logic
+   - Test state updates and side effects
+   - Verify cleanup functions are called
+   - Test edge cases and error conditions
+
+3. **Component Testing**
+   - Test rendering and user interactions
+   - Verify accessibility features
+   - Test error boundaries
+   - Check component lifecycle behavior
+
+4. **Mocking**
+   - Mock external dependencies
+   - Use Jest mock functions for callbacks
+   - Mock browser APIs when needed
+   - Create test data factories for complex objects
+
+5. **Assertions**
+   - Use specific assertions over generic ones
+   - Test both positive and negative cases
+   - Verify error states and messages
+   - Check boundary conditions
+
+## Common Testing Patterns
+
+### Testing Async Operations
 
 ```typescript
-import { axe } from 'jest-axe';
-
-test('has no accessibility violations', async () => {
-  const { container } = render(<Component />);
-  const results = await axe(container);
-  expect(results).toHaveNoViolations();
+test('handles async operations', async () => {
+  const { result } = createHookTester(useAsyncHook);
+  await result.fetchData();
+  expect(result.data).toBeDefined();
+  expect(result.loading).toBe(false);
 });
 ```
 
-## Mocking
+### Testing Error Handling
 
-Common mocks are provided in `src/setupTests.ts`:
-- Window.matchMedia
-- requestAnimationFrame
-- Audio API
-- IntersectionObserver
+```typescript
+test('handles errors gracefully', () => {
+  const { result } = createHookTester(useErrorProne);
+  expect(() => result.throwError()).toThrow('Expected error');
+});
+```
 
-## Future Improvements
+### Testing Side Effects
 
-1. Add E2E tests using Playwright or Cypress
-2. Add Visual Regression tests
-3. Add Performance testing
-4. Add State management tests
+```typescript
+test('cleans up side effects', () => {
+  const cleanup = jest.fn();
+  const { result } = createHookTester(useEffect);
+  result.rerender();
+  expect(cleanup).toHaveBeenCalled();
+});
+```
+
+## Debugging Tests
+
+1. Use `console.log` in tests (removed in production)
+2. Use Jest's `--verbose` flag for detailed output
+3. Use the debugger statement in tests
+4. Check Jest snapshot files for unexpected changes
+
+## Continuous Integration
+
+- Tests run automatically on pull requests
+- Coverage reports generated and checked
+- Failed tests block merging
+- Test results posted as PR comments
