@@ -8,10 +8,18 @@ export const TIMER_CONSTANTS = {
 
 // Use absolute paths for local audio files
 const BASE_URL = window.location.origin;
+export type SoundOption = 'bell' | 'chime' | 'ding' | 'none';
+
+export interface SoundSelectorProps {
+  selectedSound: SoundOption;
+  onSoundChange: (sound: SoundOption) => void;
+  onTestSound: () => void;
+  isLoadingAudio?: boolean;
+}
 
 export const SOUND_OPTIONS = {
-  bell: `${BASE_URL}/sounds/bell.mp3`,
-  chime: `${BASE_URL}/sounds/chime.mp3`,
-  ding: `${BASE_URL}/sounds/ding.mp3`,
+  bell: "https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3",
+  chime: "https://cdn.freesound.org/previews/411/411089_5121236-lq.mp3",
+  ding: "https://cdn.freesound.org/previews/536/536108_11943129-lq.mp3",
   none: "",
 } as const;
