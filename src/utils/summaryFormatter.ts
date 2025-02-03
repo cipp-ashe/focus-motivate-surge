@@ -17,8 +17,9 @@ const calculateEfficiency = (metrics: TimerMetrics[]): number => {
   if (metrics.length === 0) return 0;
   
   const totalEfficiency = metrics.reduce((acc, metric) => {
-    if (metric.expectedTime === 0) return acc;
-    return acc + (metric.expectedTime / metric.actualDuration) * 100;
+    if (metric.expectedTime === 0 || metric.netEffectiveTime === 0) return acc;
+    // Calculate efficiency as defined in TimerMetrics type
+    return acc + Math.min((metric.netEffectiveTime / metric.expectedTime) * 100, 200); // Cap at 200% efficiency
   }, 0);
   
   return Math.round(totalEfficiency / metrics.length);

@@ -43,6 +43,9 @@ export const EmailSummaryModal = ({
       // Only show error for invalid email format
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
+      } else {
+        // Show API errors
+        toast.error(error instanceof Error ? error.message : 'Failed to send email');
       }
     } finally {
       setIsLoading(false);

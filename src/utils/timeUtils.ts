@@ -6,8 +6,8 @@ export const formatTime = (seconds: number): string => {
 
 export const calculateEfficiencyRatio = (expectedTime: number, netEffectiveTime: number): number => {
   if (netEffectiveTime === 0 || expectedTime === 0) return 0;
-  // Cap efficiency ratio at 200% to avoid extreme values
-  const ratio = (expectedTime / netEffectiveTime) * 100;
+  // Calculate as defined in TimerMetrics type: (netEffectiveTime / expectedTime) * 100
+  const ratio = (netEffectiveTime / expectedTime) * 100;
   return Math.min(ratio, 200);
 };
 

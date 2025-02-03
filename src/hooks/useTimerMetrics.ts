@@ -82,14 +82,16 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
           ? prev.pausedTime + Math.floor((completionTime.getTime() - prev.lastPauseTimestamp.getTime()) / 1000)
           : prev.pausedTime;
         
-        const actualWorkingTime = Math.max(0, Math.floor(totalElapsedMs / 1000) - finalPausedTime);
+        const totalElapsedSeconds = Math.floor(totalElapsedMs / 1000);
+        const actualWorkingTime = Math.max(0, totalElapsedSeconds - finalPausedTime);
+        const netEffectiveTime = actualWorkingTime + prev.extensionTime;
         
         const finalMetrics: TimerStateMetrics = {
           ...prev,
           endTime: completionTime,
-          actualDuration: Math.floor(totalElapsedMs / 1000),
+          actualDuration: totalElapsedSeconds,
           pausedTime: finalPausedTime,
-          netEffectiveTime: actualWorkingTime,
+          netEffectiveTime: netEffectiveTime,
           efficiencyRatio: calculateEfficiencyRatio(prev.expectedTime, actualWorkingTime),
           completionStatus: determineCompletionStatus(prev.expectedTime, actualWorkingTime),
           isPaused: false,

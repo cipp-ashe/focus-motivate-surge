@@ -17,60 +17,103 @@ export const generateEmailContent = (summaryData: DailySummary): string => {
     averageEfficiency,
   } = summaryData;
 
-  const taskList = completedTasks.map(task => `
-    <li style="margin-bottom: 15px; padding: 10px; background-color: #FFFFFF; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-      <strong style="color: #1F2937; font-size: 16px;">${task.taskName}</strong>
-      <div style="margin-top: 8px; color: #4B5563;">
-        <div>Expected time: ${formatDuration(task.metrics?.expectedTime || 0)}</div>
-        <div>Net effective time: ${formatDuration(task.metrics?.netEffectiveTime || 0)}</div>
-        <div>Efficiency: ${task.metrics?.efficiencyRatio.toFixed(1)}%</div>
-        <div style="margin-top: 5px;">
-          <span style="
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            ${task.metrics?.completionStatus === 'Completed Early' ? 'background-color: #DEF7EC; color: #03543F;' :
-              task.metrics?.completionStatus === 'Completed On Time' ? 'background-color: #E1EFFE; color: #1E429F;' :
-              'background-color: #FDE8E8; color: #9B1C1C;'
-            }
-          ">
-            ${task.metrics?.completionStatus}
-          </span>
-        </div>
-      </div>
-    </li>
-  `).join('');
-
   return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h1 style="color: #7C3AED; margin-bottom: 20px;">Your Daily Task Summary</h1>
-      
-      <div style="background-color: #F3F4F6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <h2 style="color: #1F2937; margin-top: 0;">Overview</h2>
-        <p>Total tasks completed: ${completedTasks.length}</p>
-        <p>Total time spent: ${formatDuration(totalTimeSpent)}</p>
-        <p>Average efficiency: ${averageEfficiency.toFixed(1)}%</p>
+    <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #7C3AED; color: white; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 32px;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Your Focus Timer Summary</h1>
+        <p style="margin: 8px 0 0; opacity: 0.9;">Here's what you accomplished today!</p>
       </div>
 
-      ${completedTasks.length > 0 ? `
-        <div style="margin-top: 20px;">
-          <h2 style="color: #1F2937;">Completed Tasks</h2>
-          <ul style="list-style-type: none; padding: 0;">
-            ${taskList}
-          </ul>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px;">
+        <div style="background-color: #F5F3FF; padding: 20px; border-radius: 8px; text-align: center;">
+          <div style="color: #7C3AED; font-size: 24px; font-weight: 600; margin-bottom: 8px;">
+            ${completedTasks.length}
+          </div>
+          <div style="color: #6B7280; font-size: 14px;">Tasks Completed</div>
         </div>
-      ` : ''}
+        <div style="background-color: #F5F3FF; padding: 20px; border-radius: 8px; text-align: center;">
+          <div style="color: #7C3AED; font-size: 24px; font-weight: 600; margin-bottom: 8px;">
+            ${formatDuration(totalTimeSpent)}
+          </div>
+          <div style="color: #6B7280; font-size: 14px;">Total Time</div>
+        </div>
+        <div style="background-color: #F5F3FF; padding: 20px; border-radius: 8px; text-align: center;">
+          <div style="color: #7C3AED; font-size: 24px; font-weight: 600; margin-bottom: 8px;">
+            ${Math.min((averageEfficiency ?? 0), 100).toFixed(1)}%
+          </div>
+          <div style="color: #6B7280; font-size: 14px;">Avg. Efficiency</div>
+        </div>
+      </div>
+
+      <div style="background-color: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 32px;">
+        <div style="background-color: #7C3AED; padding: 16px 24px;">
+          <h2 style="color: white; margin: 0; font-size: 18px;">Completed Tasks</h2>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #F5F3FF;">
+              <th style="padding: 12px 24px; text-align: left; color: #6B7280; font-weight: 500; border-bottom: 1px solid #E5E7EB;">Task</th>
+              <th style="padding: 12px 24px; text-align: left; color: #6B7280; font-weight: 500; border-bottom: 1px solid #E5E7EB;">Duration</th>
+              <th style="padding: 12px 24px; text-align: left; color: #6B7280; font-weight: 500; border-bottom: 1px solid #E5E7EB;">Status</th>
+              <th style="padding: 12px 24px; text-align: left; color: #6B7280; font-weight: 500; border-bottom: 1px solid #E5E7EB;">Metrics</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${completedTasks.map(task => `
+              <tr style="border-bottom: 1px solid #E5E7EB;">
+                <td style="padding: 16px 24px; color: #1F2937;">
+                  ${task.taskName}
+                </td>
+                <td style="padding: 16px 24px;">
+                  <div style="color: #6B7280;">
+                    <div>Planned: ${formatDuration(task.metrics?.expectedTime || 0)}</div>
+                    <div>Actual: ${formatDuration(task.metrics?.actualDuration || 0)}</div>
+                  </div>
+                </td>
+                <td style="padding: 16px 24px;">
+                  <span style="
+                    display: inline-block;
+                    padding: 4px 12px;
+                    border-radius: 9999px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    ${task.metrics?.completionStatus === 'Completed Early' ? 'background-color: #D1FAE5; color: #065F46;' :
+                      task.metrics?.completionStatus === 'Completed On Time' ? 'background-color: #DBEAFE; color: #1E40AF;' :
+                      'background-color: #FEE2E2; color: #991B1B;'
+                    }
+                  ">
+        
+            ${task.metrics?.completionStatus}
+                  </span>
+                  <div style="color: #6B7280; margin-top: 4px;">
+                    ${Math.min((task.metrics?.efficiencyRatio ?? 0), 100).toFixed(1)}% efficiency
+                  </div>
+                </td>
+                <td style="padding: 16px 24px;">
+                  <div style="color: #6B7280;">
+                    <div>⏸️ ${task.metrics?.pauseCount || 0} pauses (${formatDuration(task.metrics?.pausedTime || 0)})</div>
+                    <div>⏱️ ${formatDuration(task.metrics?.extensionTime || 0)} extended</div>
+                    <div>⭐ ${task.metrics?.favoriteQuotes || 0} quotes saved</div>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
 
       ${unfinishedTasks.length > 0 ? `
-        <div style="margin-top: 20px;">
-          <h2 style="color: #1F2937;">Pending Tasks</h2>
-          <p>You have ${unfinishedTasks.length} task${unfinishedTasks.length !== 1 ? 's' : ''} remaining.</p>
+  
+      <div style="background-color: #F5F3FF; padding: 20px; border-radius: 12px; margin-top: 32px;">
+  
+        <h2 style="color: #7C3AED; margin: 0 0 8px;">Pending Tasks</h2>
+          <p style="color: #6B7280; margin: 0;">You have ${unfinishedTasks.length} task${unfinishedTasks.length !== 1 ? 's' : ''} remaining.</p>
         </div>
       ` : ''}
 
-      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E7EB; color: #6B7280; font-size: 14px;">
-        <p>Keep up the great work! 🎉</p>
+      <div style="text-align: center; margin-top: 32px; color: #7C3AED;">
+        <p style="font-size: 16px;">
+Keep up the great work! 🎉</p>
       </div>
     </div>
   `;

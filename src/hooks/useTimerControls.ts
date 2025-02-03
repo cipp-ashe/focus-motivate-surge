@@ -54,10 +54,10 @@ export const useTimerControls = ({
   const decrementTime = useCallback(() => {
     setTimeLeft(prev => {
       const newTimeLeft = prev - 1;
-      if (newTimeLeft <= 0) {
-        setIsRunning(false);
+      // Show confirmation at 1 second left instead of 0
+      if (newTimeLeft <= 1) {
         onTimeUp?.();
-        return 0;
+        return 1;
       }
       return newTimeLeft;
     });

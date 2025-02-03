@@ -56,27 +56,47 @@ export const useTaskManager = ({
   };
 
   const handleSendSummary = async (email: string) => {
-    const completedTaskSummaries: TaskSummary[] = completedTasks.map(task => ({
-      taskName: task.name,
-      completed: true,
-      relatedQuotes: favorites.filter(quote => quote.task === task.name),
-    }));
+    try {
+      const completedTaskSummaries: TaskSummary[] = completedTasks.map(task => ({
+        taskName: task.name,
+        completed: true,
+        metrics: {
+          ...task.metrics,
+          startTime: null,
+          endTime: null,
+          lastPauseTimestamp: null
+        },
+        relatedQuotes: favorites.filter(quote => quote.task === task.name),
+      }));
 
-    const unfinishedTaskSummaries: TaskSummary[] = tasks.map(task => ({
-      taskName: task.name,
-      completed: false,
-      relatedQuotes: favorites.filter(quote => quote.task === task.name),
-    }));
+      const unfinishedTaskSummaries: TaskSummary[] = tasks.map(task => ({
+        taskName: task.name,
+        completed: false,
+        metrics: task.metrics ? {
+          ...task.metrics,
+          startTime: null,
+          endTime: null,
+          lastPauseTimestamp: null
+        } : undefined,
+        relatedQuotes: favorites.filter(quote => quote.task === task.name),
+      }));
 
-    const summaryData = formatDailySummary(
-      completedTaskSummaries,
-      unfinishedTaskSummaries,
-      favorites
-    );
+      const summaryData = formatDailySummary(
+        completedTaskSummaries,
+        unfinishedTaskSummaries,
+        favorites
+      );
 
-    await sendTaskSummaryEmail(email, summaryData);
-    if (onSummaryEmailSent) {
-      onSummaryEmailSent();
+      await sendTaskSummaryEmail(email, summaryData);
+      
+      // Close the modal and clear completed tasks
+      setShowEmailModal(false);
+      if (onSummaryEmailSent) {
+        onSummaryEmailSent();
+      }
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      throw error;
     }
   };
 
