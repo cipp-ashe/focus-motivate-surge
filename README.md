@@ -34,7 +34,8 @@ A modern lightweight productivity app that combines a customizable timer with ta
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **UI Components**: shadcn/ui with Radix UI primitives
-- **Backend**: Supabase
+- **Edge Functions**: Supabase
+- **Email Relay**: Resend
 - **State Management**: React Query
 - **Form Handling**: React Hook Form with Zod validation
 - **Testing**: Jest with React Testing Library
