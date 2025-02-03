@@ -4,14 +4,14 @@ import { DailySummary } from '../types/summary';
 interface EdgeFunctionResponse {
   data?: { id: string };
   message?: string;
-  error?: string
+  error?: string;
 }
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? import.meta.env?.VITE_SUPABASE_URL;
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? import.meta.env?.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("⚠️ Supabase environment variables are missing!");
+  throw new Error("❌ Supabase environment variables are missing! Check environment variables.");
 }
 
 export const getSupabaseClient = () => {
@@ -25,26 +25,26 @@ export const sendTaskSummaryEmail = async (email: string, summaryData: DailySumm
       completedTasks: summaryData.completedTasks.length,
       unfinishedTasks: summaryData.unfinishedTasks.length,
       totalTimeSpent: summaryData.totalTimeSpent,
-      averageEfficiency: summaryData.averageEfficiency,
+      averageEfficiency: summaryData.averageEfficiency ? summaryData.averageEfficiency.toFixed(1) : "N/A",
     }
   });
 
   try {
     console.log('Invoking Supabase Edge Function: send-task-summary');
     const supabase = getSupabaseClient();
-const response = await supabase.functions.invoke<EdgeFunctionResponse>('send-task-summary', {
-  body: { email, summaryData },
-});
+    
+    const response = await supabase.functions.invoke<EdgeFunctionResponse>('send-task-summary', {
+      body: { email, summaryData },
+    });
 
     console.log('Edge function response:', response);
 
-    if (response.error || !response.data) {
+    if (!response || !response.data || response.error) {
       console.error('Edge function error details:', {
-        message: response.error,
+        message: response?.error || 'Unknown error',
         details: response,
       });
-      const errorMessage = response.error || 'Unknown error';
-      throw new Error(`Failed to send email: ${errorMessage}`);
+      throw new Error(`Failed to send email: ${response?.error || 'Unknown error'}`);
     }
 
     console.log('Email sent successfully:', response.data);
