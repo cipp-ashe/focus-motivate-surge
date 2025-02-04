@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ComponentExamples from "./pages/ComponentExamples";
+import NotesPage from "./pages/Notes";
 
 // Suppress specific React Router v7 warnings
 window.__reactRouterFutureWarnings = {
@@ -23,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/components" element={<ComponentExamples />} />
+          <Route path="/notes" element={<NotesPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

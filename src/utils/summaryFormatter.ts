@@ -1,6 +1,7 @@
-import { TaskSummary, DailySummary } from "../types/summary";
+import { TaskSummary, DailySummary, NotesSummary } from "../types/summary";
 import { Quote } from "../types/timer";
 import { TimerMetrics } from "../types/metrics";
+import { Note } from "@/components/notes/Notes";
 
 const formatDuration = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
@@ -25,10 +26,21 @@ const calculateEfficiency = (metrics: TimerMetrics[]): number => {
   return Math.round(totalEfficiency / metrics.length);
 };
 
+export const formatNotesSummary = (notes: Note[]): NotesSummary => {
+  const allTags = Array.from(new Set(notes.flatMap(note => note.tags)));
+  
+  return {
+    notes,
+    tags: allTags,
+    totalNotes: notes.length
+  };
+};
+
 export const formatDailySummary = (
   completedTasks: TaskSummary[],
   unfinishedTasks: TaskSummary[],
-  favoriteQuotes: Quote[]
+  favoriteQuotes: Quote[],
+  notes?: Note[]
 ): DailySummary => {
   console.log('Summary Formatter - Input tasks:', completedTasks.map(task => ({
     taskName: task.taskName,
@@ -86,5 +98,6 @@ export const formatDailySummary = (
     totalPauses,
     averageEfficiency,
     favoriteQuotes,
+    notes: notes ? formatNotesSummary(notes) : undefined,
   };
 };

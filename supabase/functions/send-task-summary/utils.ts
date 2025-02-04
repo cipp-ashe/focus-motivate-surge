@@ -5,6 +5,20 @@ export const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+export interface Note {
+  id: string;
+  content: string;
+  title: string;
+  tags: string[];
+  createdAt: string;
+}
+
+export interface NotesSummary {
+  notes: Note[];
+  tags: string[];
+  totalNotes: number;
+}
+
 export interface DailySummary {
   averageEfficiency: number;
   totalTimeSpent: number;
@@ -12,6 +26,7 @@ export interface DailySummary {
   totalPauses: number;
   completedTasks: { taskName: string }[];
   unfinishedTasks: { taskName: string }[];
+  notes?: NotesSummary;
 }
 
 // Helper function to format minutes into hours and minutes
@@ -26,6 +41,39 @@ const formatMinutes = (totalMinutes: number): string => {
     return `${hours} hour${hours > 1 ? 's' : ''}`;
   }
   return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes} minute${minutes > 1 ? 's' : ''}`;
+};
+
+const formatNotesSection = (notes?: NotesSummary): string => {
+  if (!notes || notes.notes.length === 0) return '';
+
+  const notesHtml = notes.notes.map(note => `
+    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+      <h3 style="margin: 0 0 10px 0; color: #2563eb;">${note.title}</h3>
+      ${note.tags.length > 0 ? `
+        <div style="margin-bottom: 10px;">
+          ${note.tags.map(tag => `
+            <span style="display: inline-block; padding: 4px 8px; margin: 0 4px 4px 0; background: #e2e8f0; border-radius: 4px; font-size: 12px;">
+              ${tag}
+            </span>
+          `).join('')}
+        </div>
+      ` : ''}
+      <div style="white-space: pre-wrap;">${note.content}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div style="margin-top: 30px;">
+      <h2>Your Notes</h2>
+      <p>Total Notes: <span class="highlight">${notes.totalNotes}</span></p>
+      ${notes.tags.length > 0 ? `
+        <p>Tags Used: <span class="highlight">${notes.tags.join(', ')}</span></p>
+      ` : ''}
+      <div class="notes-container">
+        ${notesHtml}
+      </div>
+    </div>
+  `;
 };
 
 // Helper function to format summary email
@@ -51,6 +99,7 @@ export const formatSummaryEmail = (data: DailySummary): string => {
           <li>Unfinished Tasks: <span class="highlight">${data.unfinishedTasks.length}</span></li>
           <li>Total Pauses: <span class="highlight">${data.totalPauses}</span></li>
         </ul>
+        ${data.notes ? formatNotesSection(data.notes) : ''}
         <p>Keep up the great work! 💪</p>
       </body>
     </html>

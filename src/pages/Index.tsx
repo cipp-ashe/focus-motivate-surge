@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { TaskManager } from "@/components/tasks/TaskManager";
-import { Moon, Sun, Code2 } from "lucide-react";
+import { Moon, Sun, Code2, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import type { Task } from "@/components/tasks/TaskList";
@@ -65,6 +65,13 @@ const Index = () => {
             Focus Timer
           </h1>
           <div className="flex items-center gap-2">
+            <Link 
+              to="/notes" 
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+              title="View All Notes"
+            >
+              <StickyNote className="h-5 w-5" />
+            </Link>
             <Link 
               to="/components" 
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"
