@@ -6,9 +6,10 @@ export const formatTime = (seconds: number): string => {
 
 export const calculateEfficiencyRatio = (expectedTime: number, netEffectiveTime: number): number => {
   if (netEffectiveTime === 0 || expectedTime === 0) return 0;
-  // Calculate as defined in TimerMetrics type: (netEffectiveTime / expectedTime) * 100
+  // Calculate efficiency as (netEffectiveTime / expectedTime) * 100
+  // Lower ratio means more efficient (completed in less time than expected)
   const ratio = (netEffectiveTime / expectedTime) * 100;
-  return Math.min(ratio, 200);
+  return Math.min(ratio, 100);
 };
 
 export const determineCompletionStatus = (expectedTime: number, netEffectiveTime: number) => {

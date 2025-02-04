@@ -1,115 +1,195 @@
-import { describe, test, expect } from '../../testUtils/testRunner';
-import { useTimer } from '../useTimer';
+import { describe, test, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import { createHookTester } from '../../testUtils/hookTester';
-
-// Create typed hook tester
-const createTimerTester = createHookTester(useTimer);
+import { useTimer } from '../timer/useTimer';
+import { setupTimerTests, cleanupTimerTests } from '../../testUtils/timerTestSetup';
 
 describe('useTimer', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    setupTimerTests();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    cleanupTimerTests();
+  });
+
   test('initializes with correct duration', () => {
-    const { result } = createTimerTester({ initialDuration: 300 });
+    const { result } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
+
     expect(result.timeLeft).toBe(300);
     expect(result.minutes).toBe(5);
     expect(result.isRunning).toBeFalsy();
+    expect(result.metrics).toBeDefined();
+    expect(result.metrics.expectedTime).toBe(300);
+  });
+
+  test('initializes with minimum duration if initialDuration is less than 60', () => {
+    const { result } = createHookTester(useTimer)({
+      initialDuration: 30,
+    });
+
+    expect(result.timeLeft).toBe(60);
+    expect(result.minutes).toBe(1);
+    expect(result.isRunning).toBeFalsy();
+    expect(result.metrics).toBeDefined();
+    expect(result.metrics.expectedTime).toBe(60);
   });
 
   test('handles time updates correctly', () => {
-    const { result } = createTimerTester({ initialDuration: 300 });
+    const { result, rerender } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
     
-    // Start timer
     result.start();
+    rerender();
     expect(result.isRunning).toBeTruthy();
+    expect(result.metrics.startTime).toBeDefined();
     
-    // Pause timer
+    jest.advanceTimersByTime(1000);
+    rerender();
+    expect(result.timeLeft).toBe(299);
+    
     result.pause();
+    rerender();
     expect(result.isRunning).toBeFalsy();
+    expect(result.metrics.pauseCount).toBe(1);
   });
 
   test('adds time correctly', () => {
-    const { result } = createTimerTester({ initialDuration: 300 });
-    const initialTime = result.timeLeft;
+    const { result, rerender } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
     
-    result.addTime(5); // Add 5 minutes
-    expect(result.timeLeft).toBe(initialTime + 300); // 5 minutes = 300 seconds
+    result.start();
+    rerender();
+    
+    jest.advanceTimersByTime(1000);
+    rerender();
+    
+    result.addTime(5);
+    rerender();
+    
+    expect(result.timeLeft).toBe(599); // 299 + (5 * 60)
+    expect(result.metrics.extensionTime).toBe(300); // 5 minutes = 300 seconds
   });
 
   test('updates minutes and resets timeLeft', () => {
-    const { result } = createTimerTester({ initialDuration: 300 });
+    const { result, rerender } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
     
     result.setMinutes(10);
+    rerender();
+    
     expect(result.minutes).toBe(10);
     expect(result.timeLeft).toBe(600); // 10 minutes = 600 seconds
+    expect(result.metrics.expectedTime).toBe(600);
   });
 
   test('calls onTimeUp when timer completes', () => {
-    let timeUpCalled = false;
-    const { result, advanceTime } = createTimerTester({
+    const onTimeUp = jest.fn();
+    const { result, rerender } = createHookTester(useTimer)({
       initialDuration: 2,
-      onTimeUp: () => { timeUpCalled = true; }
+      onTimeUp,
     });
 
     result.start();
-    advanceTime(2000); // Advance 2 seconds
-    expect(timeUpCalled).toBeTruthy();
+    rerender();
+    
+    jest.advanceTimersByTime(2000);
+    rerender();
+    
+    expect(onTimeUp).toHaveBeenCalled();
+    expect(result.timeLeft).toBe(0);
+    expect(result.isRunning).toBeFalsy();
   });
 
   test('notifies of duration changes', () => {
-    let lastDuration = 0;
-    const { result } = createTimerTester({
+    const onDurationChange = jest.fn();
+    const { result, rerender } = createHookTester(useTimer)({
       initialDuration: 300,
-      onDurationChange: (minutes) => { lastDuration = minutes; }
+      onDurationChange,
     });
 
     result.setMinutes(10);
-    expect(lastDuration).toBe(10);
+    rerender();
+    
+    expect(onDurationChange).toHaveBeenCalledWith(10);
   });
 
   test('maintains state during pause/resume', () => {
-    const { result } = createTimerTester({ initialDuration: 300 });
+    const { result, rerender } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
     
     result.start();
+    rerender();
     expect(result.isRunning).toBeTruthy();
+    
+    jest.advanceTimersByTime(5000);
+    rerender();
+    const timeBeforePause = result.timeLeft;
     
     result.pause();
+    rerender();
     expect(result.isRunning).toBeFalsy();
-    const pausedTime = result.timeLeft;
+    expect(result.timeLeft).toBe(timeBeforePause);
     
     result.start();
+    rerender();
     expect(result.isRunning).toBeTruthy();
-    expect(result.timeLeft).toBe(pausedTime);
+    expect(result.timeLeft).toBe(timeBeforePause);
   });
 
   test('respects minimum and maximum minutes', () => {
-    const { result } = createTimerTester({ initialDuration: 300 });
+    const { result, rerender } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
     
-    result.setMinutes(0); // Should clamp to minimum
+    result.setMinutes(0);
+    rerender();
     expect(result.minutes).toBeGreaterThanOrEqual(1);
     
-    result.setMinutes(100); // Should clamp to maximum
+    result.setMinutes(100);
+    rerender();
     expect(result.minutes).toBeLessThanOrEqual(60);
   });
 
   test('updates time correctly', () => {
-    const { result } = createTimerTester({ initialDuration: 300 });
+    const { result, rerender } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
     
     result.start();
-    expect(result.timeLeft).toBeLessThanOrEqual(300);
-    expect(result.timeLeft).toBeGreaterThanOrEqual(0);
+    rerender();
+    expect(result.isRunning).toBeTruthy();
+    
+    jest.advanceTimersByTime(1000);
+    rerender();
+    expect(result.timeLeft).toBe(299);
   });
 
   test('handles cleanup on timer stop', () => {
-    const { result, rerender } = createTimerTester({ initialDuration: 300 });
+    const { result, rerender } = createHookTester(useTimer)({
+      initialDuration: 300,
+    });
     
     result.start();
+    rerender();
     expect(result.isRunning).toBeTruthy();
     
-    // Simulate component unmount
+    result.completeTimer();
     rerender();
     expect(result.isRunning).toBeFalsy();
   });
 
   test('validates duration input', () => {
-    const { result } = createTimerTester({ initialDuration: -100 });
+    const { result } = createHookTester(useTimer)({
+      initialDuration: -100,
+    });
     expect(result.timeLeft).toBeGreaterThan(0);
     expect(result.minutes).toBeGreaterThan(0);
   });

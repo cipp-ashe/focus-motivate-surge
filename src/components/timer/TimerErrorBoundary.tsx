@@ -1,6 +1,6 @@
 import React from "react";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCcw } from "lucide-react";
 
 interface Props {

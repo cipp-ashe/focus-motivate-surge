@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { TimerMetrics } from '@/types/metrics';
 
@@ -26,14 +26,16 @@ export const useTimer = ({
   onTimeUp,
   onDurationChange,
 }: UseTimerOptions): UseTimerReturn => {
-  const [timeLeft, setTimeLeft] = useState<number>(initialDuration);
-  const [minutes, setMinutesState] = useState(Math.floor(initialDuration / 60));
+  // Ensure initial duration is positive
+  const validInitialDuration = Math.max(60, initialDuration);
+  const [timeLeft, setTimeLeft] = useState<number>(validInitialDuration);
+  const [minutes, setMinutesState] = useState(Math.floor(validInitialDuration / 60));
   const [isRunning, setIsRunning] = useState(false);
   const [metrics, setMetrics] = useState<TimerMetrics>({
     startTime: null,
     endTime: null,
     pauseCount: 0,
-    expectedTime: initialDuration,
+    expectedTime: validInitialDuration,
     actualDuration: 0,
     favoriteQuotes: 0,
     pausedTime: 0,
@@ -44,51 +46,80 @@ export const useTimer = ({
     completionStatus: 'Completed On Time'
   });
 
+  const isMountedRef = useRef(true);
+  const intervalRef = useRef<NodeJS.Timeout>();
+
   // Handle duration updates
   useEffect(() => {
-    console.log('Initial duration changed:', initialDuration);
-    if (initialDuration > 0) {
-      setTimeLeft(initialDuration);
-      setMinutesState(Math.floor(initialDuration / 60));
-    }
+    if (!isMountedRef.current) return;
+
+    const validDuration = Math.max(60, initialDuration); // Minimum 1 minute
+    setTimeLeft(validDuration);
+    setMinutesState(Math.floor(validDuration / 60));
+    setMetrics(prev => ({
+      ...prev,
+      expectedTime: validDuration
+    }));
+
+    return () => {
+      setIsRunning(false);
+    };
   }, [initialDuration]);
 
   const setMinutes = useCallback((newMinutes: number) => {
-    console.log('Setting minutes to:', newMinutes);
-    setMinutesState(newMinutes);
-    setTimeLeft(newMinutes * 60);
+    if (!isMountedRef.current) return;
+
+    // Clamp minutes between 1 and 60
+    const clampedMinutes = Math.max(1, Math.min(60, newMinutes));
+    const newSeconds = clampedMinutes * 60;
+    
+    setMinutesState(clampedMinutes);
+    setTimeLeft(newSeconds);
+    setMetrics(prev => ({
+      ...prev,
+      expectedTime: newSeconds
+    }));
+    
     if (onDurationChange) {
-      onDurationChange(newMinutes);
+      onDurationChange(clampedMinutes);
     }
   }, [onDurationChange]);
 
   const start = useCallback(() => {
+    if (!isMountedRef.current) return;
+
     setIsRunning(true);
-    if (!metrics.startTime) {
-      setMetrics(prev => ({
-        ...prev,
-        startTime: new Date(),
-      }));
+    setMetrics(prev => ({
+      ...prev,
+      startTime: prev.startTime || new Date(),
+    }));
+    if (toast) {
+      toast("Timer started! You've got this! 🚀");
     }
-    toast("Timer started! You've got this! 🚀");
-  }, [metrics.startTime]);
+  }, []);
 
   const pause = useCallback(() => {
+    if (!isMountedRef.current) return;
+
     setIsRunning(false);
     setMetrics(prev => ({
       ...prev,
       pauseCount: prev.pauseCount + 1,
+      lastPauseTimestamp: new Date()
     }));
   }, []);
 
   const reset = useCallback(() => {
+    if (!isMountedRef.current) return;
+
+    const newSeconds = minutes * 60;
     setIsRunning(false);
-    setTimeLeft(minutes * 60);
+    setTimeLeft(newSeconds);
     setMetrics({
       startTime: null,
       endTime: null,
       pauseCount: 0,
-      expectedTime: minutes * 60,
+      expectedTime: newSeconds,
       actualDuration: 0,
       favoriteQuotes: 0,
       pausedTime: 0,
@@ -101,11 +132,24 @@ export const useTimer = ({
   }, [minutes]);
 
   const addTime = useCallback((additionalMinutes: number) => {
-    setTimeLeft((prev) => prev + (additionalMinutes * 60));
-    toast(`Added ${additionalMinutes} minutes. Keep the momentum going! 💪`);
+    if (!isMountedRef.current) return;
+
+    const additionalSeconds = additionalMinutes * 60;
+    setTimeLeft(prev => prev + additionalSeconds);
+    setMinutesState(prev => prev + additionalMinutes);
+    setMetrics(prev => ({
+      ...prev,
+      extensionTime: prev.extensionTime + additionalSeconds,
+      expectedTime: prev.expectedTime + additionalSeconds
+    }));
+    if (toast) {
+      toast(`Added ${additionalMinutes} minutes. Keep the momentum going! 💪`);
+    }
   }, []);
 
   const completeTimer = useCallback(() => {
+    if (!isMountedRef.current) return;
+
     setIsRunning(false);
     setMetrics(prev => ({
       ...prev,
@@ -117,10 +161,10 @@ export const useTimer = ({
   }, []);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
     if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
+        if (!isMountedRef.current) return;
+
         setTimeLeft((time) => {
           if (time <= 1) {
             completeTimer();
@@ -132,8 +176,23 @@ export const useTimer = ({
       }, 1000);
     }
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
+      }
+    };
   }, [isRunning, timeLeft, onTimeUp, completeTimer]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
+      }
+    };
+  }, []);
 
   return {
     timeLeft,

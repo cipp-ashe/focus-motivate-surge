@@ -40,48 +40,69 @@ export function useTransition({ isVisible, options = {} }: UseTransitionConfig) 
   );
   const [isRendered, setIsRendered] = useState(isVisible);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const isMountedRef = useRef(true);
 
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = undefined;
     }
-  };
+  }, []);
 
   const updateVisibility = useCallback((visible: boolean) => {
+    if (!isMountedRef.current) return;
+
     cleanup();
 
     if (visible) {
       setIsRendered(true);
+      setState('entering');
+      onEnter?.();
+
       timeoutRef.current = setTimeout(() => {
-        setState('entering');
-        onEnter?.();
-        timeoutRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
           setState('entered');
-        }, duration);
-      }, delay);
+        }
+      }, duration);
     } else {
       setState('exiting');
       onExit?.();
+
       timeoutRef.current = setTimeout(() => {
-        setState('exited');
-        setIsRendered(false);
+        if (isMountedRef.current) {
+          setState('exited');
+          setIsRendered(false);
+        }
       }, duration);
     }
-  }, [duration, delay, onEnter, onExit]);
+  }, [duration, onEnter, onExit, cleanup]);
 
   useEffect(() => {
-    updateVisibility(isVisible);
-    return cleanup;
-  }, [isVisible, updateVisibility]);
+    if (delay > 0) {
+      const delayTimeout = setTimeout(() => {
+        updateVisibility(isVisible);
+      }, delay);
+      return () => clearTimeout(delayTimeout);
+    } else {
+      updateVisibility(isVisible);
+    }
+  }, [isVisible, delay, updateVisibility]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      cleanup();
+    };
+  }, [cleanup]);
 
   const getTransitionProps = useCallback((): TransitionProps => {
-    const transitionDuration = prefersReducedMotion ? 0 : duration;
+    const transitionStyle = prefersReducedMotion 
+      ? 'none' 
+      : `opacity ${duration}ms, transform ${duration}ms`;
     
     return {
       style: {
-        transition: transitionDuration === 0 
-          ? 'none' 
-          : `opacity ${transitionDuration}ms, transform ${transitionDuration}ms`,
+        transition: transitionStyle,
         opacity: state === 'entering' || state === 'entered' ? 1 : 0,
         transform: state === 'entering' || state === 'entered'
           ? 'translateY(0) scale(1)'

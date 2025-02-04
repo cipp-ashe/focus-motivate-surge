@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react";
-import { Quote } from "../types/timer";
+import { Quote } from "@/types/timer/models";
 
 interface FloatingQuotesProps {
   favorites: Quote[];

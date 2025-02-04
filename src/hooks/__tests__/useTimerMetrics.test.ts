@@ -1,31 +1,120 @@
-import { describe, test, expect } from '../../testUtils/testRunner';
-import { useTimerMetrics } from '../useTimerMetrics';
+import { describe, test, expect, jest, beforeEach } from '@jest/globals';
 import { createHookTester } from '../../testUtils/hookTester';
-
-const createMetricsTester = createHookTester(useTimerMetrics);
+import { useTimerMetrics } from '../timer/useTimerMetrics';
 
 describe('useTimerMetrics', () => {
-  test('initializes with correct values', () => {
-    const { result } = createMetricsTester(300);
-    expect(result.metrics.expectedTime).toBe(300);
-    expect(result.metrics.pauseCount).toBe(0);
-    expect(result.metrics.isPaused).toBe(false);
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-02-03T12:00:00.000Z'));
   });
 
-  test('calculates final metrics correctly', async () => {
-    const { result } = createMetricsTester(60);
-    
-    // Set initial state
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test('initializes with default values', () => {
+    const { result } = createHookTester(useTimerMetrics)(300);
+
+    expect(result.metrics.expectedTime).toBe(300);
+    expect(result.metrics.actualDuration).toBe(0);
+    expect(result.metrics.pauseCount).toBe(0);
+    expect(result.metrics.favoriteQuotes).toBe(0);
+    expect(result.metrics.pausedTime).toBe(0);
+    expect(result.metrics.extensionTime).toBe(0);
+    expect(result.metrics.netEffectiveTime).toBe(0);
+    expect(result.metrics.efficiencyRatio).toBe(0);
+    expect(result.metrics.completionStatus).toBe('Completed On Time');
+  });
+
+  test('updates metrics correctly', () => {
+    const { result } = createHookTester(useTimerMetrics)(300);
+
     result.updateMetrics({
-      startTime: new Date(Date.now() - 70000), // 70 seconds ago
-      pausedTime: 10, // 10 seconds paused
+      startTime: new Date('2025-02-03T12:00:00.000Z'),
+      actualDuration: 150,
+      pauseCount: 1,
+      favoriteQuotes: 2,
+      pausedTime: 30,
+      extensionTime: 60,
+      lastPauseTimestamp: null
     });
 
-    const finalMetrics = await result.calculateFinalMetrics(new Date());
-    
-    expect(finalMetrics.actualDuration).toBe(70);
-    expect(finalMetrics.pausedTime).toBe(10);
-    expect(finalMetrics.netEffectiveTime).toBe(60);
-    expect(finalMetrics.completionStatus).toBe('Completed On Time');
+    expect(result.metrics.actualDuration).toBe(150);
+    expect(result.metrics.pauseCount).toBe(1);
+    expect(result.metrics.favoriteQuotes).toBe(2);
+    expect(result.metrics.pausedTime).toBe(30);
+    expect(result.metrics.extensionTime).toBe(60);
+  });
+
+  test('calculates final metrics correctly for early completion', async () => {
+    const { result } = createHookTester(useTimerMetrics)(300);
+
+    result.updateMetrics({
+      startTime: new Date('2025-02-03T12:00:00.000Z'),
+      actualDuration: 150,
+      pauseCount: 1,
+      favoriteQuotes: 0,
+      pausedTime: 0,
+      extensionTime: 0,
+      lastPauseTimestamp: null
+    });
+
+    await result.calculateFinalMetrics(new Date('2025-02-03T12:02:30.000Z')); // 2.5 minutes later
+
+    expect(result.metrics.netEffectiveTime).toBe(150);
+    expect(result.metrics.completionStatus).toBe('Completed Early');
+  });
+
+  test('calculates final metrics correctly for late completion', async () => {
+    const { result } = createHookTester(useTimerMetrics)(300);
+
+    result.updateMetrics({
+      startTime: new Date('2025-02-03T12:00:00.000Z'),
+      actualDuration: 450,
+      pauseCount: 2,
+      favoriteQuotes: 1,
+      pausedTime: 60,
+      extensionTime: 0,
+      lastPauseTimestamp: null
+    });
+
+    await result.calculateFinalMetrics(new Date('2025-02-03T12:07:30.000Z')); // 7.5 minutes later
+
+    expect(result.metrics.netEffectiveTime).toBe(390); // 450 - 60 (paused time)
+    expect(result.metrics.completionStatus).toBe('Completed Late');
+  });
+
+  test('handles paused time correctly', () => {
+    const { result } = createHookTester(useTimerMetrics)(300);
+
+    result.updateMetrics({
+      startTime: new Date('2025-02-03T11:58:00.000Z'), // Started 2 minutes ago
+      actualDuration: 100,
+      pauseCount: 1,
+      favoriteQuotes: 0,
+      pausedTime: 50,
+      extensionTime: 0,
+      lastPauseTimestamp: new Date('2025-02-03T12:00:00.000Z')
+    });
+
+    expect(result.metrics.pauseCount).toBe(1);
+    expect(result.metrics.pausedTime).toBe(50);
+  });
+
+  test('handles extension time correctly', () => {
+    const { result } = createHookTester(useTimerMetrics)(300);
+
+    result.updateMetrics({
+      startTime: new Date('2025-02-03T12:00:00.000Z'),
+      actualDuration: 300,
+      pauseCount: 0,
+      favoriteQuotes: 0,
+      pausedTime: 0,
+      extensionTime: 120,
+      lastPauseTimestamp: null
+    });
+
+    expect(result.metrics.extensionTime).toBe(120);
+    expect(result.metrics.expectedTime).toBe(300); // Initial duration remains unchanged
   });
 });

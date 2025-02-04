@@ -189,27 +189,64 @@ Key features demonstrated:
 
 ## Test Coverage Requirements
 
+Current coverage is significantly below requirements:
+
+```
+------------------------|---------|----------|---------|---------|-------------------
+File                    | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+------------------------|---------|----------|---------|---------|-------------------
+All files              |    3.69 |     2.26 |    2.92 |    3.47 |
+```
+
+Target coverage requirements (not currently met):
 - Minimum 80% coverage required for:
-  - Branches
-  - Functions
-  - Lines
-  - Statements
+  - Branches (currently 2.26%)
+  - Functions (currently 2.92%)
+  - Lines (currently 3.47%)
+  - Statements (currently 3.69%)
+
+Key areas needing test coverage:
+1. Hooks
+   - Timer hooks (useTimer, useTimerState, useTimerControls, etc.)
+   - Audio hooks (useAudio)
+   - Task management hooks (useTaskManager, useTaskOperations)
+   - Quote management hooks (useQuoteManager)
+
+2. Components
+   - Timer components (TimerDisplay, TimerCircle, etc.)
+   - Task components (TaskList, TaskRow, etc.)
+   - Quote components (QuoteDisplay)
+
+3. Utilities
+   - Time formatting (timeUtils)
+   - Summary formatting (summaryFormatter)
+   - Test utilities (hookTester, testRunner)
 
 ## Running Tests
+
+Since this project uses ES modules, tests need to be run with the experimental VM modules flag:
 
 ```bash
 # Run all tests
 npm test
+# Which runs: node --experimental-vm-modules node_modules/jest/bin/jest.js
 
 # Run tests with coverage report
-npm test -- --coverage
+npm run test:coverage
+# Which runs: node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage
 
 # Run specific test file
 npm test -- src/components/__tests__/TimerCircle.test.tsx
 
 # Run tests in watch mode
-npm test -- --watch
+npm run test:watch
+# Which runs: node --experimental-vm-modules node_modules/jest/bin/jest.js --watch
 ```
+
+Note: The test scripts are configured to handle ES modules properly. This is necessary because:
+1. The project uses `"type": "module"` in package.json
+2. Jest needs the `--experimental-vm-modules` flag to support ES modules
+3. The direct path to Jest binary is used to ensure proper execution
 
 ## Best Practices
 

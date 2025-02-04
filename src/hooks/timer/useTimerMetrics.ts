@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
 import { calculateEfficiencyRatio, determineCompletionStatus, formatTime } from '@/utils/timeUtils';
 
@@ -20,7 +20,16 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
     pausedTimeLeft: null,
   });
 
+  const isMountedRef = useRef(true);
+  const metricsRef = useRef(metrics);
+
+  useEffect(() => {
+    metricsRef.current = metrics;
+  }, [metrics]);
+
   const logMetrics = useCallback((metrics: TimerStateMetrics) => {
+    if (!isMountedRef.current) return;
+
     console.group('Timer Metrics');
     console.log('Expected Time:', {
       seconds: metrics.expectedTime,
@@ -48,12 +57,15 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
   }, []);
 
   const updateMetrics = useCallback((updates: Partial<TimerStateMetrics>) => {
+    if (!isMountedRef.current) return;
+
     setMetrics(prev => {
       // Calculate accumulated pause time if we're updating from a paused state
       let updatedPausedTime = prev.pausedTime;
       if (prev.lastPauseTimestamp && updates.lastPauseTimestamp === null) {
+        const now = new Date();
         const pauseDuration = Math.floor(
-          (new Date().getTime() - prev.lastPauseTimestamp.getTime()) / 1000
+          (now.getTime() - prev.lastPauseTimestamp.getTime()) / 1000
         );
         updatedPausedTime += pauseDuration;
       }
@@ -61,7 +73,7 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
       const newMetrics = {
         ...prev,
         ...updates,
-        pausedTime: updatedPausedTime,
+        pausedTime: updates.pausedTime !== undefined ? updates.pausedTime : updatedPausedTime,
       };
 
       logMetrics(newMetrics);
@@ -71,6 +83,11 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
 
   const calculateFinalMetrics = useCallback((completionTime: Date) => {
     return new Promise<TimerStateMetrics>((resolve) => {
+      if (!isMountedRef.current) {
+        resolve(metricsRef.current);
+        return;
+      }
+
       setMetrics(prev => {
         if (!prev.startTime) {
           console.warn('No start time found in metrics');
@@ -105,6 +122,12 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
       });
     });
   }, [logMetrics]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   return {
     metrics,

@@ -14,57 +14,94 @@ export class HookEnvironment {
   private cleanups: (CleanupFunction | undefined)[] = [];
   private currentEffect = 0;
 
+  private stateIndex = 0;
+  private effectIndex = 0;
+  private prevDeps: Array<DependencyList | undefined> = [];
+
   useState<T>(initialValue: T): [T, (value: SetStateAction<T>) => void] {
-    const key = Object.keys(this.states).length.toString();
-    if (!(key in this.states)) {
-      this.states[key] = initialValue;
+    const index = this.stateIndex++;
+    if (!(index in this.states)) {
+      this.states[index] = typeof initialValue === 'function' ? initialValue() : initialValue;
     }
     
-    return [
-      this.states[key] as T,
-      (value: SetStateAction<T>) => {
-        this.states[key] = value instanceof Function ? value(this.states[key] as T) : value;
-      },
-    ];
+    const setState = (value: SetStateAction<T>) => {
+      const nextState = value instanceof Function ? value(this.states[index] as T) : value;
+      if (this.states[index] !== nextState) {
+        this.states[index] = nextState;
+        this.rerender();
+      }
+    };
+    
+    return [this.states[index] as T, setState];
   }
 
   useEffect(effect: EffectCallback, deps?: DependencyList): void {
-    if (!this.effects[this.currentEffect]) {
-      this.effects[this.currentEffect] = effect;
-      const maybeCleanup = effect();
-      if (typeof maybeCleanup === 'function') {
-        this.cleanups[this.currentEffect] = maybeCleanup;
+    const index = this.effectIndex++;
+    const prevDeps = this.prevDeps[index];
+    const hasChanged = !prevDeps || !deps || 
+      deps.length !== prevDeps.length ||
+      deps.some((dep, i) => !Object.is(dep, prevDeps[i]));
+
+    if (hasChanged) {
+      // Cleanup previous effect
+      if (this.cleanups[index]) {
+        this.cleanups[index]();
+      }
+      this.effects[index] = effect;
+      const cleanup = effect();
+      if (typeof cleanup === 'function') {
+        this.cleanups[index] = cleanup;
       }
     }
-    this.currentEffect++;
+    this.prevDeps[index] = deps;
   }
 
   useCallback<T extends AnyFunction>(callback: T, deps?: DependencyList): T {
     return callback;
   }
 
-  rerender(): void {
-    this.currentEffect = 0;
-    // Execute cleanups in reverse order
-    for (let i = this.cleanups.length - 1; i >= 0; i--) {
-      const cleanup = this.cleanups[i];
-      if (cleanup) {
-        cleanup();
-      }
+  useMemo<T>(factory: () => T, deps?: DependencyList): T {
+    return factory();
+  }
+
+  useRef<T>(initialValue: T) {
+    const index = this.stateIndex++;
+    if (!(index in this.states)) {
+      this.states[index] = { current: initialValue };
     }
-    // Run effects and collect new cleanups
+    return this.states[index] as { current: T };
+  }
+
+  getState<S>(key: string): S {
+    return this.states[key] as S;
+  }
+
+  rerender(): void {
+    this.stateIndex = 0;
+    this.effectIndex = 0;
+    
+    // Run effects that have changed
     this.effects.forEach((effect, i) => {
-      const maybeCleanup = effect();
-      if (typeof maybeCleanup === 'function') {
-        this.cleanups[i] = maybeCleanup;
-      } else {
-        this.cleanups[i] = undefined;
+      if (effect) {
+        if (this.cleanups[i]) {
+          this.cleanups[i]();
+        }
+        const cleanup = effect();
+        if (typeof cleanup === 'function') {
+          this.cleanups[i] = cleanup;
+        }
       }
     });
   }
 
-  getState<T>(key: string): T {
-    return this.states[key] as T;
+  cleanup(): void {
+    this.cleanups.forEach(cleanup => cleanup && cleanup());
+    this.states = {};
+    this.effects = [];
+    this.cleanups = [];
+    this.stateIndex = 0;
+    this.effectIndex = 0;
+    this.prevDeps = [];
   }
 }
 
@@ -74,37 +111,36 @@ export function createHookTester<TParams extends unknown[], TResult>(
   return (params: TParams[0]) => {
     const env = new HookEnvironment();
 
-    // Mock React hooks
-    const React = {
-      useState: env.useState.bind(env),
-      useEffect: env.useEffect.bind(env),
-      useCallback: env.useCallback.bind(env),
-    };
+    // Import mockReactHooks from setupTests
+    const { mockReactHooks } = require('../setupTests');
+
+    // Set up hook implementations for this test
+    mockReactHooks.useState.mockImplementation(env.useState.bind(env));
+    mockReactHooks.useEffect.mockImplementation(env.useEffect.bind(env));
+    mockReactHooks.useCallback.mockImplementation(env.useCallback.bind(env));
+    mockReactHooks.useMemo.mockImplementation(env.useMemo.bind(env));
+    mockReactHooks.useRef.mockImplementation(env.useRef.bind(env));
 
     // Run hook with mocked React environment
-    const result = hook.call(null, params);
+    let currentResult = hook.call(null, params);
 
     return {
-      result,
-      rerender: () => env.rerender(),
-      advanceTime: (ms: number) => {
-        // Simulate time passing
-        setTimeout(() => env.rerender(), ms);
+      result: currentResult,
+      rerender: () => {
+        env.rerender();
+        currentResult = hook.call(null, params);
+        return currentResult;
       },
-      getState: <T>(key: string) => env.getState<T>(key),
+      advanceTime: (ms: number) => {
+        jest.advanceTimersByTime(ms);
+        env.rerender();
+        currentResult = hook.call(null, params);
+        return currentResult;
+      },
+      cleanup: () => {
+        env.cleanup();
+      },
+      getState: <S>(key: string): S => env.getState<S>(key)
     };
   };
 }
-
-// Export mock React for use in tests
-export const mockReact = {
-  useState: <T>(initialValue: T): [T, (value: SetStateAction<T>) => void] => {
-    throw new Error('useState called outside of test environment');
-  },
-  useEffect: (effect: EffectCallback, deps?: DependencyList): void => {
-    throw new Error('useEffect called outside of test environment');
-  },
-  useCallback: <T extends AnyFunction>(callback: T, deps?: DependencyList): T => {
-    throw new Error('useCallback called outside of test environment');
-  },
-};

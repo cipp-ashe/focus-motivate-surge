@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { TaskManager } from "@/components/tasks/TaskManager";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Code2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 
 const Index = () => {
   const { isDark, toggleTheme } = useTheme(true);
-  
+
   // Load initial tasks from localStorage
   const [initialTasks] = useState<Task[]>(() => {
     try {
@@ -63,18 +64,27 @@ const Index = () => {
           <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
             Focus Timer
           </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="rounded-full hover:bg-primary/20"
-          >
-            {isDark ? (
-              <Sun className="h-5 w-5 sm:h-6 sm:w-6" />
-            ) : (
-              <Moon className="h-5 w-5 sm:h-6 sm:w-6" />
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link 
+              to="/components" 
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+              title="Developer Documentation"
+            >
+              <Code2 className="h-5 w-5" />
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full hover:bg-primary/20"
+            >
+              {isDark ? (
+                <Sun className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <Moon className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
+            </Button>
+          </div>
         </div>
 
         <TaskManager

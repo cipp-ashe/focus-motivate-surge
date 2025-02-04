@@ -35,16 +35,13 @@ export const EmailSummaryModal = ({
       setIsLoading(true);
       
       await onSubmit(email);
-      // Since we got here, the email was sent successfully
       toast.success("Summary email sent successfully!");
       onClose();
       setEmail("");
     } catch (error) {
-      // Only show error for invalid email format
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
-        // Show API errors
         toast.error(error instanceof Error ? error.message : 'Failed to send email');
       }
     } finally {
@@ -54,23 +51,26 @@ export const EmailSummaryModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader className="space-y-3">
           <DialogTitle>Send Daily Summary</DialogTitle>
           <DialogDescription>
             Enter your email address to receive a summary of your day's tasks,
             metrics, and favorite quotes.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-          />
-          <div className="flex justify-end gap-3">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-6">
+          <div className="space-y-2">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              className="w-full [-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:[-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:shadow-[0_0_0px_1000px_hsl(var(--muted))_inset] dark:[&:-webkit-autofill]:shadow-[0_0_0px_1000px_hsl(var(--muted))_inset]"
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
             <Button
               type="button"
               variant="outline"
