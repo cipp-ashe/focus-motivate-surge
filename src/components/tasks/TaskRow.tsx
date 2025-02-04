@@ -135,3 +135,5 @@ export const TaskRow = ({
     </div>
   );
 };
+
+export default TaskRow;
