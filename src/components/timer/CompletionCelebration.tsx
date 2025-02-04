@@ -1,4 +1,5 @@
-import { TimerStateMetrics } from "@/types/metrics";
+import React from 'react';
+import { TimerStateMetrics } from '@/types/metrics';
 
 export interface CompletionCelebrationProps {
   metrics: TimerStateMetrics;
@@ -9,7 +10,7 @@ export interface CompletionCelebrationProps {
   show: boolean;
 }
 
-const CompletionCelebration: React.FC<CompletionCelebrationProps> = ({
+export const CompletionCelebration: React.FC<CompletionCelebrationProps> = ({
   metrics,
   taskName,
   onClose,
@@ -20,28 +21,60 @@ const CompletionCelebration: React.FC<CompletionCelebrationProps> = ({
   if (!show) return null;
 
   return (
-    <div
-      style={{
-        width,
-        height,
-        backgroundColor: "white",
-        borderRadius: "8px",
-        padding: "16px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <h2 className="text-lg font-bold">Congratulations!</h2>
-      <p>You have completed the task: {taskName}</p>
-      <h3 className="text-md font-medium">Metrics</h3>
-      <p>Expected Time: {metrics.expectedTime} mins</p>
-      <p>Actual Duration: {metrics.actualDuration} mins</p>
-      <p>Efficiency Ratio: {metrics.efficiencyRatio}%</p>
-      <button onClick={onClose} className="mt-4 bg-blue-500 text-white rounded px-4 py-2">
-        Close
-      </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-card p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4 text-primary">Task Completed! 🎉</h2>
+          <p className="text-lg mb-6">{taskName}</p>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-muted p-3 rounded">
+                <p className="text-sm text-muted-foreground">Expected Time</p>
+                <p className="font-medium">{Math.floor(metrics.expectedTime / 60)} min</p>
+              </div>
+              <div className="bg-muted p-3 rounded">
+                <p className="text-sm text-muted-foreground">Actual Duration</p>
+                <p className="font-medium">{Math.floor(metrics.actualDuration / 60)} min</p>
+              </div>
+              <div className="bg-muted p-3 rounded">
+                <p className="text-sm text-muted-foreground">Efficiency</p>
+                <p className="font-medium">{metrics.efficiencyRatio}%</p>
+              </div>
+              <div className="bg-muted p-3 rounded">
+                <p className="text-sm text-muted-foreground">Status</p>
+                <p className="font-medium">{metrics.completionStatus}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Pauses</span>
+                <span>{metrics.pauseCount}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Paused Time</span>
+                <span>{Math.floor(metrics.pausedTime / 60)} min</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Net Effective Time</span>
+                <span>{Math.floor(metrics.netEffectiveTime / 60)} min</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Quotes Favorited</span>
+                <span>{metrics.favoriteQuotes}</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="mt-6 px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
-
-export { CompletionCelebration };
-export default CompletionCelebration;

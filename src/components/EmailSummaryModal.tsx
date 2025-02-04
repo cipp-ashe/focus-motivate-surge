@@ -1,25 +1,29 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React from 'react';
+import { Quote } from '@/types/timer/models';
+import { TimerStateMetrics } from '@/types/metrics';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { TimerStateMetrics } from "@/types/metrics";
-import { Quote } from "@/types/timer/models";
-import { Task } from "./tasks/TaskList";
 
 export interface EmailSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  tasks?: Task[];
+  onSubmit?: (email: string) => Promise<void>;
   favorites: Quote[];
   metrics: TimerStateMetrics;
-  onSubmit?: (email: string) => Promise<void>;
 }
 
 export const EmailSummaryModal: React.FC<EmailSummaryModalProps> = ({
   isOpen,
   onClose,
-  tasks = [],
+  onSubmit,
   favorites,
-  metrics,
-  onSubmit
+  metrics
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -27,36 +31,22 @@ export const EmailSummaryModal: React.FC<EmailSummaryModalProps> = ({
         <DialogHeader>
           <DialogTitle>Email Summary</DialogTitle>
           <DialogDescription>
-            Here's a summary of your completed tasks and favorite quotes.
+            Send a summary of your task completion via email.
           </DialogDescription>
         </DialogHeader>
         <div>
-          <h3 className="text-lg font-medium">Completed Tasks</h3>
-          <ul>
-            {tasks.map((task) => (
-              <li key={task.id} className="py-2">
-                {task.name}
-              </li>
-            ))}
-          </ul>
-          <h3 className="text-lg font-medium">Favorite Quotes</h3>
-          <ul>
-            {favorites.map((quote, index) => (
-              <li key={index} className="py-2">
-                "{quote.text}" - {quote.author}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="mt-4">
-          <h3 className="text-lg font-medium">Metrics</h3>
           <p>Expected Time: {metrics.expectedTime} mins</p>
           <p>Actual Duration: {metrics.actualDuration} mins</p>
           <p>Efficiency Ratio: {metrics.efficiencyRatio}%</p>
+          <p>Favorites:</p>
+          <ul>
+            {favorites.map(quote => (
+              <li key={quote.id}>{quote.text} - {quote.author}</li>
+            ))}
+          </ul>
         </div>
-        <div className="flex justify-end mt-4">
-          <Button onClick={onClose}>Close</Button>
-        </div>
+        <input type="email" placeholder="Enter your email" />
+        <Button onClick={() => onSubmit && onSubmit('example@example.com')}>Send</Button>
       </DialogContent>
     </Dialog>
   );
