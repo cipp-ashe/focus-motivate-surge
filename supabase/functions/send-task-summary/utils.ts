@@ -76,8 +76,8 @@ const formatNotesSection = (notes?: NotesSummary): string => {
   `;
 };
 
-// Helper function to format summary email
-export const formatSummaryEmail = (data: DailySummary): string => {
+// Helper function to format task summary email
+export const formatTaskSummaryEmail = (data: DailySummary): string => {
   return `
     <html>
       <head>
@@ -90,8 +90,8 @@ export const formatSummaryEmail = (data: DailySummary): string => {
         </style>
       </head>
       <body>
-        <h1>Your Daily Focus Summary</h1>
-        <p>Here's what you accomplished today:</p>
+        <h1>Your Daily Task Summary</h1>
+        <p>Here's a summary of your tasks and productivity today:</p>
         <ul>
           <li>Completed Tasks: <span class="highlight">${data.completedTasks.length}</span></li>
           <li>Average Efficiency: <span class="highlight">${data.averageEfficiency.toFixed(1)}%</span></li>
@@ -99,8 +99,49 @@ export const formatSummaryEmail = (data: DailySummary): string => {
           <li>Unfinished Tasks: <span class="highlight">${data.unfinishedTasks.length}</span></li>
           <li>Total Pauses: <span class="highlight">${data.totalPauses}</span></li>
         </ul>
-        ${data.notes ? formatNotesSection(data.notes) : ''}
         <p>Keep up the great work! 💪</p>
+      </body>
+    </html>
+  `;
+};
+
+// Helper function to format notes summary email
+export const formatNotesSummaryEmail = (notes: NotesSummary): string => {
+  return `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          h1 { color: #2563eb; }
+          .highlight { color: #2563eb; font-weight: bold; }
+          .notes-container { margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <h1>Your Notes Summary</h1>
+        <p>Here's a collection of your notes:</p>
+        <p>Total Notes: <span class="highlight">${notes.totalNotes}</span></p>
+        ${notes.tags.length > 0 ? `
+          <p>Tags Used: <span class="highlight">${notes.tags.join(', ')}</span></p>
+        ` : ''}
+        <div class="notes-container">
+          ${notes.notes.map(note => `
+            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+              <h3 style="margin: 0 0 10px 0; color: #2563eb;">${note.title}</h3>
+              ${note.tags.length > 0 ? `
+                <div style="margin-bottom: 10px;">
+                  ${note.tags.map(tag => `
+                    <span style="display: inline-block; padding: 4px 8px; margin: 0 4px 4px 0; background: #e2e8f0; border-radius: 4px; font-size: 12px;">
+                      ${tag}
+                    </span>
+                  `).join('')}
+                </div>
+              ` : ''}
+              <div style="white-space: pre-wrap;">${note.content}</div>
+            </div>
+          `).join('')}
+        </div>
+        <p>Happy note-taking! 📝</p>
       </body>
     </html>
   `;
