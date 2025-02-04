@@ -13,6 +13,21 @@ export interface Note {
   createdAt: string;
 }
 
+export interface FormattedMetrics {
+  plannedDuration: string;
+  actualDuration: string;
+  netEffectiveTime: string;
+  efficiency: number;
+  pauseCount: number;
+  favoriteQuotes: Quote[];
+}
+
+export interface TaskSummary {
+  taskName: string;
+  metrics?: TimerMetrics;
+  formattedMetrics?: FormattedMetrics | null;
+}
+
 export interface NotesSummary {
   notes: Note[];
   tags: string[];
@@ -20,13 +35,33 @@ export interface NotesSummary {
 }
 
 export interface DailySummary {
-  averageEfficiency: number;
+  date: string;
+  completedTasks: TaskSummary[];
+  unfinishedTasks: TaskSummary[];
   totalTimeSpent: number;
   totalPlannedTime: number;
   totalPauses: number;
-  completedTasks: { taskName: string }[];
-  unfinishedTasks: { taskName: string }[];
+  averageEfficiency: number;
+  favoriteQuotes: Quote[];
   notes?: NotesSummary;
+}
+
+export interface Quote {
+  text: string;
+  author: string;
+  task?: string;
+}
+
+export interface TimerMetrics {
+  expectedTime: number;
+  actualDuration: number;
+  pauseCount: number;
+  favoriteQuotes: number;
+  pausedTime: number;
+  extensionTime: number;
+  netEffectiveTime: number;
+  efficiencyRatio: number;
+  completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
 }
 
 // Helper function to format minutes into hours and minutes
@@ -41,39 +76,6 @@ const formatMinutes = (totalMinutes: number): string => {
     return `${hours} hour${hours > 1 ? 's' : ''}`;
   }
   return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes} minute${minutes > 1 ? 's' : ''}`;
-};
-
-const formatNotesSection = (notes?: NotesSummary): string => {
-  if (!notes || notes.notes.length === 0) return '';
-
-  const notesHtml = notes.notes.map(note => `
-    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-      <h3 style="margin: 0 0 10px 0; color: #2563eb;">${note.title}</h3>
-      ${note.tags.length > 0 ? `
-        <div style="margin-bottom: 10px;">
-          ${note.tags.map(tag => `
-            <span style="display: inline-block; padding: 4px 8px; margin: 0 4px 4px 0; background: #e2e8f0; border-radius: 4px; font-size: 12px;">
-              ${tag}
-            </span>
-          `).join('')}
-        </div>
-      ` : ''}
-      <div style="white-space: pre-wrap;">${note.content}</div>
-    </div>
-  `).join('');
-
-  return `
-    <div style="margin-top: 30px;">
-      <h2>Your Notes</h2>
-      <p>Total Notes: <span class="highlight">${notes.totalNotes}</span></p>
-      ${notes.tags.length > 0 ? `
-        <p>Tags Used: <span class="highlight">${notes.tags.join(', ')}</span></p>
-      ` : ''}
-      <div class="notes-container">
-        ${notesHtml}
-      </div>
-    </div>
-  `;
 };
 
 // Helper function to format task summary email
@@ -106,7 +108,12 @@ export const formatTaskSummaryEmail = (data: DailySummary): string => {
 };
 
 // Helper function to format notes summary email
-export const formatNotesSummaryEmail = (notes: NotesSummary): string => {
+export const formatNotesSummaryEmail = (data: any): string => {
+  // Handle both array and object formats
+  const notes = Array.isArray(data) ? data : data.notes ?? [];
+  const tags = Array.isArray(data) ? [] : data.tags ?? [];
+  const totalNotes = Array.isArray(data) ? data.length : data.totalNotes ?? notes.length;
+
   return `
     <html>
       <head>
@@ -115,29 +122,31 @@ export const formatNotesSummaryEmail = (notes: NotesSummary): string => {
           h1 { color: #2563eb; }
           .highlight { color: #2563eb; font-weight: bold; }
           .notes-container { margin-top: 20px; }
+          .note { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+          .note-title { margin: 0 0 10px 0; color: #2563eb; }
+          .tag { display: inline-block; padding: 4px 8px; margin: 0 4px 4px 0; background: #e2e8f0; border-radius: 4px; font-size: 12px; }
+          .note-content { white-space: pre-wrap; }
         </style>
       </head>
       <body>
         <h1>Your Notes Summary</h1>
         <p>Here's a collection of your notes:</p>
-        <p>Total Notes: <span class="highlight">${notes.totalNotes}</span></p>
-        ${notes.tags.length > 0 ? `
-          <p>Tags Used: <span class="highlight">${notes.tags.join(', ')}</span></p>
+        <p>Total Notes: <span class="highlight">${totalNotes}</span></p>
+        ${tags.length > 0 ? `
+          <p>Tags Used: <span class="highlight">${tags.join(', ')}</span></p>
         ` : ''}
         <div class="notes-container">
-          ${notes.notes.map(note => `
-            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-              <h3 style="margin: 0 0 10px 0; color: #2563eb;">${note.title}</h3>
-              ${note.tags.length > 0 ? `
+          ${notes.map(note => `
+            <div class="note">
+              <h3 class="note-title">${note.title ?? 'Untitled Note'}</h3>
+              ${(note.tags ?? []).length > 0 ? `
                 <div style="margin-bottom: 10px;">
                   ${note.tags.map(tag => `
-                    <span style="display: inline-block; padding: 4px 8px; margin: 0 4px 4px 0; background: #e2e8f0; border-radius: 4px; font-size: 12px;">
-                      ${tag}
-                    </span>
+                    <span class="tag">${tag}</span>
                   `).join('')}
                 </div>
               ` : ''}
-              <div style="white-space: pre-wrap;">${note.content}</div>
+              <div class="note-content">${note.content ?? ''}</div>
             </div>
           `).join('')}
         </div>

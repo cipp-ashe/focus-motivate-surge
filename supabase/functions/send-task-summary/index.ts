@@ -1,133 +1,46 @@
-import { serve } from "std/http";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from './utils';
-import { getSupabaseClient } from './supabase';
-import { DailySummary, formatSummaryEmail } from './utils';
+import { formatTaskSummaryEmail, formatNotesSummaryEmail } from './utils';
 
-interface EmailRequest {
-  email: string;
-  summaryData: DailySummary;
-}
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') || '',
+  Deno.env.get('SUPABASE_ANON_KEY') || ''
+);
 
 serve(async (req) => {
-  console.log("Received request");
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
-    // Handle CORS
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', { headers: corsHeaders });
-    }
+    const { email, type, summaryData } = await req.json();
+    console.log('Summary data:', JSON.stringify(summaryData, null, 2));
 
-    // Validate request method
-    if (req.method !== 'POST') {
-      return new Response(
-        JSON.stringify({ error: 'Method not allowed' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 405 
-        }
-      );
-    }
+    const emailHtml = type === 'notes' 
+      ? formatNotesSummaryEmail(summaryData)
+      : formatTaskSummaryEmail(summaryData);
 
-    // Parse and validate request body
-    const requestData = await req.json() as EmailRequest;
-    const { email, summaryData } = requestData;
-
-    if (!email || !summaryData) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields: email and summaryData are required' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        }
-      );
-    }
-
-    console.log('Creating Supabase client...');
-    let supabase;
-    try {
-      supabase = await getSupabaseClient();
-      console.log('Supabase client created successfully');
-    } catch (error) {
-      console.error('Failed to create Supabase client:', error);
-      throw new Error(`Failed to initialize Supabase: ${error.message}`);
-    }
-
-    console.log('Request details:', {
-      email,
-      summaryData: {
-        completedTasks: summaryData.completedTasks.length,
-        unfinishedTasks: summaryData.unfinishedTasks.length,
-        totalTimeSpent: summaryData.totalTimeSpent,
-        averageEfficiency: summaryData.averageEfficiency,
-        totalPauses: summaryData.totalPauses
+    const { error } = await supabase.functions.invoke('send-email', {
+      method: 'POST',
+      body: { 
+        to: email,
+        subject: type === 'notes' ? 'Your Notes Summary' : 'Your Daily Task Summary',
+        html: emailHtml 
       }
     });
 
-    console.log('Formatting email...');
-    const emailHtml = formatSummaryEmail(summaryData);
-    console.log('Email formatted successfully');
+    if (error) throw error;
 
-    console.log('Invoking send-email function...');
-    try {
-      const { data, error } = await supabase.functions.invoke('send-email', {
-        method: 'POST',
-        body: { 
-          to: email,
-          subject: 'Your Daily Focus Summary',
-          html: emailHtml 
-        }
-      });
-
-      if (error) {
-        console.error('Failed to send email:', {
-          error,
-          message: error.message,
-          details: error.cause
-        });
-        throw error;
-      }
-
-      if (!data) {
-        console.error('No data returned from send-email function');
-        throw new Error('No response data from email function');
-      }
-
-      console.log('Email sent successfully:', {
-        data,
-        timestamp: new Date().toISOString()
-      });
-
-      return new Response(
-        JSON.stringify({ 
-          message: 'Email sent successfully',
-          data: { id: crypto.randomUUID() }
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
-        }
-      );
-
-    } catch (invokeError) {
-      console.error('Error invoking send-email function:', {
-        error: invokeError,
-        message: invokeError.message,
-        stack: invokeError.stack
-      });
-      throw new Error(`Failed to send email: ${invokeError.message}`);
-    }
+    return new Response(
+      JSON.stringify({ message: 'Email sent successfully' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
-    console.error('Error processing request:', {
-      error,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString()
-    });
-    
+    console.error('Error:', error);
     return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
-      }),
+      JSON.stringify({ error: error.message }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500

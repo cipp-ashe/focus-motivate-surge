@@ -6,9 +6,9 @@ import { useState } from 'react';
 import { Mail, ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useTheme } from "@/hooks/useTheme";
 import { Link } from 'react-router-dom';
-import { formatDailySummary } from '@/utils/summaryFormatter';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
 import { toast } from 'sonner';
+import type { Note } from '@/components/notes/Notes';
 
 export default function NotesPage() {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -17,11 +17,14 @@ export default function NotesPage() {
   const handleSendSummary = async (email: string, clearNotes?: boolean) => {
     try {
       const savedNotes = localStorage.getItem('notes');
-      const notes = savedNotes ? JSON.parse(savedNotes) : [];
+      const allNotes: Note[] = savedNotes ? JSON.parse(savedNotes) : [];
       
-      const summary = formatDailySummary([], [], [], notes);
+      // Sort notes by creation date, newest first
+      const sortedNotes = [...allNotes].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
       
-      await sendNotesSummaryEmail(email, summary);
+      await sendNotesSummaryEmail(email, sortedNotes, clearNotes);
 
       if (clearNotes) {
         localStorage.removeItem('notes');
