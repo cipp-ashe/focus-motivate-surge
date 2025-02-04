@@ -269,8 +269,8 @@ const useFocusTrap = (isOpen: boolean) => {
 
       {activeModal === 'celebration' && (
         <CompletionCelebration
-          onComplete={() => setActiveModal(null)}
           metrics={demoMetrics}
+          onComplete={() => setActiveModal(null)}
         />
       )}
     </section>

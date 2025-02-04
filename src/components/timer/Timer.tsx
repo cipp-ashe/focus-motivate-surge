@@ -187,12 +187,8 @@ export const Timer = ({
   if (showCompletion && completionMetrics) {
     return (
       <CompletionCelebration
-        show={showCompletion}
         metrics={completionMetrics}
-        taskName={taskName}
-        onClose={handleCloseCompletion}
-        width={window.innerWidth}
-        height={window.innerHeight}
+        onComplete={handleCloseCompletion}
       />
     );
   }

@@ -87,11 +87,115 @@ export const ProjectOverview: React.FC = () => {
                     <li>• Jest 29.7</li>
                     <li>• React Testing Library</li>
                     <li>• Testing Library Hooks</li>
+                    <li>• MSW (API Mocking)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-3">Architecture Overview</h4>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h5 className="text-sm font-medium text-primary">Core Features</h5>
+                  <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+                    <li>• Timer System with Metrics</li>
+                    <li>• Task Management</li>
+                    <li>• Quote Management</li>
+                    <li>• Email Summaries</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="text-sm font-medium text-primary">State Management</h5>
+                  <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+                    <li>• Custom React Hooks</li>
+                    <li>• React Query for API Data</li>
+                    <li>• Supabase Integration</li>
+                    <li>• Local Storage Persistence</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-3">Component Architecture</h4>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h5 className="text-sm font-medium text-primary">Timer Components</h5>
+                  <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+                    <li>• Timer Display & Controls</li>
+                    <li>• Timer Metrics & Statistics</li>
+                    <li>• Completion Celebration</li>
+                    <li>• Sound Management</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="text-sm font-medium text-primary">Task Components</h5>
+                  <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+                    <li>• Task List & Table Views</li>
+                    <li>• Task Input & Management</li>
+                    <li>• Completed Tasks Display</li>
+                    <li>• Email Summary Modal</li>
                   </ul>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Custom Hooks & Utilities */}
+        <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden">
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="hooks-helper">
+              <AccordionTrigger className="px-6 py-4 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-medium">Custom Hooks & Utilities</h3>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="p-6">
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">Timer Hooks</h4>
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        <ul className="space-y-2 text-sm">
+                          <li><strong>useTimer:</strong> Core timer functionality and state management</li>
+                          <li><strong>useTimerMetrics:</strong> Timer statistics and metrics tracking</li>
+                          <li><strong>useTimerControls:</strong> Timer control operations</li>
+                          <li><strong>useAudio:</strong> Sound effect management for timer events</li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">Task Management Hooks</h4>
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        <ul className="space-y-2 text-sm">
+                          <li><strong>useTaskManager:</strong> Central task state management</li>
+                          <li><strong>useTaskOperations:</strong> Task CRUD operations</li>
+                          <li><strong>useMinutesHandlers:</strong> Time input handling</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">UI & Utility Hooks</h4>
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        <ul className="space-y-2 text-sm">
+                          <li><strong>useTheme:</strong> Theme management</li>
+                          <li><strong>useTransition:</strong> Animation transitions</li>
+                          <li><strong>useFocusTrap:</strong> Accessibility focus management</li>
+                          <li><strong>useWindowSize:</strong> Responsive design helper</li>
+                          <li><strong>useLoadingState:</strong> Loading state management</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
 
         {/* Tailwind CSS Helper */}
