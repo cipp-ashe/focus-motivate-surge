@@ -1,71 +1,41 @@
 import { jest } from '@jest/globals';
 
-// Mock sonner toast with proper types
-export const mockToast = {
-  error: jest.fn(),
-  success: jest.fn(),
-  message: jest.fn(),
-  promise: jest.fn(),
-  custom: jest.fn(),
-  dismiss: jest.fn()
-};
-
-// Function to call toast like the real implementation
-const toastFunction = jest.fn().mockImplementation((message: string) => {
-  mockToast.message(message);
-  return { id: 'mock-toast-id' };
+export const mockSetState = jest.fn((newValue: any) => {
+  const key = (mockSetState as any).currentKey;
+  if (typeof newValue === 'function') {
+    mockStates.set(key, newValue(mockStates.get(key)));
+  } else {
+    mockStates.set(key, newValue);
+  }
 });
 
-// Add all properties to the toast function
-Object.assign(toastFunction, mockToast);
+// Mock state storage
+const mockStates = new Map<string, any>();
+let stateCounter = 0;
 
-// Setup mock for sonner module
-jest.mock('sonner', () => ({
-  __esModule: true,
-  toast: toastFunction
-}));
+// Mock useState that uses the stored state
+export const mockUseState = jest.fn((initialValue: any) => {
+  const key = `state_${stateCounter++}`;
+  (mockSetState as any).currentKey = key;
+  
+  if (!mockStates.has(key)) {
+    mockStates.set(key, initialValue);
+  }
+  
+  return [mockStates.get(key), mockSetState];
+});
 
-// Setup function to reset all mocks
-export const setupMocks = () => {
-  // Reset all mock implementations
-  mockToast.error.mockReset();
-  mockToast.success.mockReset();
-  mockToast.message.mockReset();
-  mockToast.promise.mockReset();
-  mockToast.custom.mockReset();
-  mockToast.dismiss.mockReset();
-  toastFunction.mockClear();
+// Setup function to reset all mocks and state
+export const setupMockTests = () => {
+  mockStates.clear();
+  stateCounter = 0;
+  mockSetState.mockClear();
+  mockUseState.mockClear();
 };
 
-// Mock Audio with proper types
-export const mockAudioElement = {
-  addEventListener: jest.fn((event: string, handler: EventListener) => {
-    if (event === 'canplaythrough') {
-      handler(new Event('canplaythrough'));
-    }
-  }),
-  removeEventListener: jest.fn(),
-  load: jest.fn(),
-  play: jest.fn().mockResolvedValue(undefined),
-  pause: jest.fn(),
-  currentTime: 0
-};
-
-// @ts-ignore - partial mock
-global.Audio = jest.fn(() => mockAudioElement);
-
-// Mock console methods
-export const mockConsole = {
-  log: jest.spyOn(console, 'log').mockImplementation(() => {}),
-  error: jest.spyOn(console, 'error').mockImplementation(() => {}),
-  warn: jest.spyOn(console, 'warn').mockImplementation(() => {}),
-  info: jest.spyOn(console, 'info').mockImplementation(() => {})
-};
-
-// Setup function to reset console mocks
-export const resetConsoleMocks = () => {
-  mockConsole.log.mockReset();
-  mockConsole.error.mockReset();
-  mockConsole.warn.mockReset();
-  mockConsole.info.mockReset();
+// Cleanup function to restore all mocks
+export const cleanupMockTests = () => {
+  jest.clearAllMocks();
+  mockStates.clear();
+  stateCounter = 0;
 };

@@ -10,7 +10,7 @@ import {
 import { Timer, Clock, Pause, Quote, type LucideIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
-interface CompletionCelebrationProps {
+export interface CompletionCelebrationProps {
   metrics: TimerStateMetrics;
   onComplete: () => void;
 }

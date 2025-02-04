@@ -1,11 +1,6 @@
 import { act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import { describe as jestDescribe, test as jestTest, expect as jestExpect } from '@jest/globals';
-
-// Re-export test functions with act wrapper
-export const describe = jestDescribe;
-export const test = jestTest;
-export const expect = jestExpect;
+import { describe, test, expect } from '@jest/globals';
 
 // Create a test wrapper that provides React context
 export const createTestWrapper = () => {
@@ -38,11 +33,4 @@ export const createHookTester = <T extends (...args: any[]) => any>(hook: T) => 
   };
 };
 
-// Add proper type definitions
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toHaveClass(...classNames: string[]): R;
-    }
-  }
-}
+export { describe, test, expect };
