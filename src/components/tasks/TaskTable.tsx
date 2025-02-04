@@ -40,9 +40,9 @@ export const TaskTable = ({
     setEditingTaskId(null);
   }, [tasks, onTaskClick]);
 
-  const handleDurationClick = useCallback((e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, task: Task) => {
+    const handleDurationClick = useCallback((e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => {
     e.stopPropagation();
-    setEditingTaskId(task.id);
+    setEditingTaskId(taskId);
   }, []);
 
   const handleInputBlur = useCallback(() => {
