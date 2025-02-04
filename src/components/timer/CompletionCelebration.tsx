@@ -11,21 +11,13 @@ import { Timer, Clock, Pause, Quote, type LucideIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface CompletionCelebrationProps {
-  show: boolean;
   metrics: TimerStateMetrics;
-  taskName: string;
-  onClose: () => void;
-  width: number;
-  height: number;
+  onComplete: () => void;
 }
 
 export const CompletionCelebration = ({
-  show,
   metrics,
-  taskName,
-  onClose,
-  width,
-  height,
+  onComplete,
 }: CompletionCelebrationProps) => {
   const formatDuration = (seconds: number) => {
     // Ensure we're working with a valid number
@@ -65,7 +57,7 @@ export const CompletionCelebration = ({
     </div>
   );
 
-  if (!show || !metrics) return null;
+  if (!metrics) return null;
 
   const safeMetrics = {
     expectedTime: metrics.expectedTime ?? 0,
@@ -85,15 +77,15 @@ export const CompletionCelebration = ({
       <div className="fixed inset-0 z-[1]">
         <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
         <TimerConfetti
-          show={show}
-          width={width}
-          height={height}
+          show={true}
+          width={window.innerWidth}
+          height={window.innerHeight}
         />
       </div>
 
       {/* Modal layer */}
       <div className="fixed inset-0 z-[2] flex items-center justify-center p-4">
-        <Dialog open={show} onOpenChange={onClose}>
+        <Dialog open={true} onOpenChange={onComplete}>
           <DialogContent className="max-w-[85vw] sm:max-w-md w-full bg-background/95 backdrop-blur-sm border-primary/20">
             <DialogHeader className="space-y-1">
               <DialogTitle className="text-center text-lg sm:text-xl">
@@ -102,7 +94,7 @@ export const CompletionCelebration = ({
                 </span>
               </DialogTitle>
               <DialogDescription className="text-center text-sm">
-                {taskName}
+                Great work on completing your task!
               </DialogDescription>
             </DialogHeader>
             
@@ -160,7 +152,7 @@ export const CompletionCelebration = ({
 
             <div className="flex justify-center">
               <Button
-                onClick={onClose}
+                onClick={onComplete}
                 className="bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary transition-all duration-300 hover:scale-105"
               >
                 Close
