@@ -4,7 +4,10 @@ export type QuoteCategory =
   | 'progress'
   | 'productivity'
   | 'persistence'
-  | 'success';
+  | 'success'
+  | 'growth'
+  | 'creativity'
+  | 'learning';
 
 export interface Quote {
   text: string;

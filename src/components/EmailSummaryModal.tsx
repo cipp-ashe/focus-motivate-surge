@@ -1,3 +1,5 @@
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { TimerStateMetrics } from "@/types/metrics";
 import { Quote } from "@/types/timer/models";
 import { Task } from "./tasks/TaskList";
@@ -8,6 +10,7 @@ export interface EmailSummaryModalProps {
   tasks?: Task[];
   favorites: Quote[];
   metrics: TimerStateMetrics;
+  onSubmit?: (email: string) => Promise<void>;
 }
 
 export const EmailSummaryModal: React.FC<EmailSummaryModalProps> = ({
@@ -16,6 +19,7 @@ export const EmailSummaryModal: React.FC<EmailSummaryModalProps> = ({
   tasks = [],
   favorites,
   metrics,
+  onSubmit
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -23,7 +27,7 @@ export const EmailSummaryModal: React.FC<EmailSummaryModalProps> = ({
         <DialogHeader>
           <DialogTitle>Email Summary</DialogTitle>
           <DialogDescription>
-            Here’s a summary of your completed tasks and favorite quotes.
+            Here's a summary of your completed tasks and favorite quotes.
           </DialogDescription>
         </DialogHeader>
         <div>

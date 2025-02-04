@@ -7,7 +7,7 @@ export interface TaskRowProps {
   isSelected: boolean;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({ task, onSelect, onUpdate, isSelected }) => {
+const TaskRow = ({ task, onSelect, onUpdate, isSelected }: TaskRowProps) => {
   const handleSelect = () => {
     if (onSelect) {
       onSelect();

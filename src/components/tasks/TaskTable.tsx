@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Task } from "./TaskList";
-import { TaskRow } from "./TaskRow";
+import TaskRow from "./TaskRow";
 
 interface TaskTableProps {
   tasks: Task[];
