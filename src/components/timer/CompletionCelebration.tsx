@@ -43,4 +43,5 @@ const CompletionCelebration: React.FC<CompletionCelebrationProps> = ({
   );
 };
 
+export { CompletionCelebration };
 export default CompletionCelebration;

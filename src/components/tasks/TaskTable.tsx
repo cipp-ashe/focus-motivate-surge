@@ -30,7 +30,6 @@ export const TaskTable = ({
 
     const updatedTask = { ...task, duration };
     
-    // Update the task through task selection to ensure proper state updates
     onTaskClick(updatedTask, { 
       ctrlKey: false,
       stopPropagation: () => {},
