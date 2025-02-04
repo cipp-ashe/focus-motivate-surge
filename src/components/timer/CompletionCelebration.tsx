@@ -20,7 +20,6 @@ export const CompletionCelebration = ({
   onComplete,
 }: CompletionCelebrationProps) => {
   const formatDuration = (seconds: number) => {
-    // Ensure we're working with a valid number
     if (typeof seconds !== 'number' || isNaN(seconds)) {
       console.warn('Invalid duration received:', seconds);
       return '0 secs';
@@ -73,17 +72,11 @@ export const CompletionCelebration = ({
 
   return (
     <>
-      {/* Background and confetti layer */}
       <div className="fixed inset-0 z-[1]">
         <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
-        <TimerConfetti
-          show={true}
-          width={window.innerWidth}
-          height={window.innerHeight}
-        />
+        <TimerConfetti show={true} />
       </div>
 
-      {/* Modal layer */}
       <div className="fixed inset-0 z-[2] flex items-center justify-center p-4">
         <Dialog open={true} onOpenChange={onComplete}>
           <DialogContent className="max-w-[85vw] sm:max-w-md w-full bg-background/95 backdrop-blur-sm border-primary/20">
@@ -153,7 +146,7 @@ export const CompletionCelebration = ({
             <div className="flex justify-center">
               <Button
                 onClick={onComplete}
-                className="bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary transition-all duration-300 hover:scale-105"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105"
               >
                 Close
               </Button>
