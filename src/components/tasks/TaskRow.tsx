@@ -4,16 +4,15 @@ import { Task } from './TaskList';
 export interface TaskRowProps {
   task: Task;
   isSelected: boolean;
-  editingTaskId?: string;
+  editingTaskId?: string | null;
   onTaskClick: (task: Task, event: React.MouseEvent<HTMLDivElement>) => void;
   onTaskDelete: (taskId: string) => void;
   onDurationChange: (taskId: string, newDuration: string) => void;
-  onDurationClick: (e: React.MouseEvent | React.TouchEvent, task: Task) => void;
-  onSelect?: () => void;
-  onUpdate?: (updatedTask: Task) => void;
+  onDurationClick: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, task: Task) => void;
+  onInputBlur?: () => void;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({
+export const TaskRow: React.FC<TaskRowProps> = ({
   task,
   isSelected,
   editingTaskId,
@@ -21,8 +20,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
   onTaskDelete,
   onDurationChange,
   onDurationClick,
-  onSelect,
-  onUpdate
+  onInputBlur
 }) => {
   return (
     <div
@@ -31,7 +29,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
     >
       <div>
         <h3 className="text-lg font-semibold">{task.name}</h3>
-        <p className="text-sm text-gray-600">{task.description}</p>
       </div>
       <div className="flex items-center">
         <button onClick={() => onDurationChange(task.id, task.duration.toString())}>

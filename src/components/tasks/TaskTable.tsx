@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Task } from "./TaskList";
-import TaskRow from "./TaskRow";
+import { TaskRow } from "./TaskRow";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -39,9 +39,9 @@ export const TaskTable = ({
     setEditingTaskId(null);
   }, [tasks, onTaskClick]);
 
-  const handleDurationClick = useCallback((e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => {
+  const handleDurationClick = useCallback((e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, task: Task) => {
     e.stopPropagation();
-    setEditingTaskId(taskId);
+    setEditingTaskId(task.id);
   }, []);
 
   const handleInputBlur = useCallback(() => {
