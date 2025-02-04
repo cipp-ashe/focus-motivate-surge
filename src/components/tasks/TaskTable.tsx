@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Task } from "./TaskList";
-import TaskRow from "./TaskRow";
+import { TaskRow } from "./TaskRow";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -30,6 +30,7 @@ export const TaskTable = ({
 
     const updatedTask = { ...task, duration };
     
+    // Update the task through task selection to ensure proper state updates
     onTaskClick(updatedTask, { 
       ctrlKey: false,
       stopPropagation: () => {},

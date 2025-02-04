@@ -1,52 +1,89 @@
-import React from 'react';
-import { Quote } from '@/types/timer/models';
-import { TimerStateMetrics } from '@/types/metrics';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { toast } from "sonner";
+import { z } from "zod";
 
-export interface EmailSummaryModalProps {
+interface EmailSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit?: (email: string) => Promise<void>;
-  favorites: Quote[];
-  metrics: TimerStateMetrics;
+  onSubmit: (email: string) => Promise<void>;
 }
 
-export const EmailSummaryModal: React.FC<EmailSummaryModalProps> = ({
+const emailSchema = z.string().email("Please enter a valid email address");
+
+export const EmailSummaryModal = ({
   isOpen,
   onClose,
   onSubmit,
-  favorites,
-  metrics
-}) => {
+}: EmailSummaryModalProps) => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      emailSchema.parse(email);
+      setIsLoading(true);
+      
+      await onSubmit(email);
+      toast.success("Summary email sent successfully!");
+      onClose();
+      setEmail("");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error(error instanceof Error ? error.message : 'Failed to send email');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Email Summary</DialogTitle>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader className="space-y-3">
+          <DialogTitle>Send Daily Summary</DialogTitle>
           <DialogDescription>
-            Send a summary of your task completion via email.
+            Enter your email address to receive a summary of your day's tasks,
+            metrics, and favorite quotes.
           </DialogDescription>
         </DialogHeader>
-        <div>
-          <p>Expected Time: {metrics.expectedTime} mins</p>
-          <p>Actual Duration: {metrics.actualDuration} mins</p>
-          <p>Efficiency Ratio: {metrics.efficiencyRatio}%</p>
-          <p>Favorites:</p>
-          <ul>
-            {favorites.map(quote => (
-              <li key={quote.id}>{quote.text} - {quote.author}</li>
-            ))}
-          </ul>
-        </div>
-        <input type="email" placeholder="Enter your email" />
-        <Button onClick={() => onSubmit && onSubmit('example@example.com')}>Send</Button>
+        <form onSubmit={handleSubmit} className="mt-4 space-y-6">
+          <div className="space-y-2">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              className="w-full [-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:[-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:shadow-[0_0_0px_1000px_hsl(var(--muted))_inset] dark:[&:-webkit-autofill]:shadow-[0_0_0px_1000px_hsl(var(--muted))_inset]"
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Sending..." : "Send Summary"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

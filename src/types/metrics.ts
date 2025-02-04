@@ -1,27 +1,24 @@
-export interface TaskMetrics {
-  expectedTime: number;
-  actualDuration: number;
-  pauseCount: number;
-  favoriteQuotes: number;
-  pausedTime: number;
-  extensionTime: number;
-  netEffectiveTime: number;
-  efficiencyRatio: number;
-  completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
-}
-
-export interface TimerMetrics extends TaskMetrics {
+export interface TimerMetrics {
   startTime: Date | null;
   endTime: Date | null;
+  pauseCount: number;
+  expectedTime: number;  // Renamed from originalDuration for clarity
+  actualDuration: number;
+  favoriteQuotes: number;
+  pausedTime: number;
   lastPauseTimestamp: Date | null;
-}
-
-export interface TimerStateMetrics extends TimerMetrics {
-  isPaused: boolean;
-  pausedTimeLeft: number | null;
+  extensionTime: number;
+  netEffectiveTime: number;  // Computed as: actualDuration - pausedTime + extensionTime
+  efficiencyRatio: number;   // Computed as: (expectedTime / netEffectiveTime) * 100
+  completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
 }
 
 export interface MetricsDisplayProps {
   metrics: TimerMetrics;
   taskName: string;
+}
+
+export interface TimerStateMetrics extends TimerMetrics {
+  isPaused: boolean;
+  pausedTimeLeft: number | null;
 }

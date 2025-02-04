@@ -1,18 +1,9 @@
-export type QuoteCategory = 
-  | 'focus'
-  | 'motivation'
-  | 'persistence'
-  | 'progress'
-  | 'productivity'
-  | 'growth'
-  | 'creativity'
-  | 'learning';
+export type QuoteCategory = 'motivation' | 'focus' | 'creativity' | 'learning' | 'persistence' | 'growth';
 
 export interface Quote {
-  id: string;
   text: string;
   author: string;
   categories: QuoteCategory[];
+  timestamp?: string;
   task?: string;
-  timestamp?: Date;
 }
