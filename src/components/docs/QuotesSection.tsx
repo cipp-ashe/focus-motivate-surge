@@ -32,23 +32,24 @@ export const QuotesSection: React.FC = () => {
 
   return (
     <section id="quotes" className="space-y-8">
-      <header className="text-center space-y-4 max-w-3xl mx-auto">
+      <header className="text-center space-y-4 max-w-4xl mx-auto">
         <h2 className="text-3xl font-semibold text-primary">Motivational Quotes</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Dynamic quote display with physics-based animations and interactive features
         </p>
       </header>
 
-      <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden max-w-4xl mx-auto">
+      <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden max-w-3xl mx-auto">
         <div className="p-8 space-y-8">
-          {/* Interactive Demo */}
           <div className="space-y-4">
-            <h3 className="font-medium">Interactive Demo</h3>
-            <div className="bg-muted/30 p-6 rounded-lg text-center space-y-4">
-              <blockquote className="text-lg font-medium italic">
+            <h3 className="font-medium mb-4">Interactive Demo</h3>
+            
+            {/* Timer-style Quote Display */}
+            <div className="bg-card/30 backdrop-blur-sm p-8 rounded-lg text-center space-y-4">
+              <blockquote className="text-lg font-light italic leading-relaxed text-primary/80" style={{ textShadow: '1px 1px 5px rgba(0, 0, 0, 0.1)' }}>
                 "{allQuotes[currentQuoteIndex].text}"
               </blockquote>
-              <p className="text-sm text-muted-foreground">— {allQuotes[currentQuoteIndex].author}</p>
+              <p className="text-sm text-primary/60">— {allQuotes[currentQuoteIndex].author}</p>
               <button
                 onClick={() => {
                   const quote = allQuotes[currentQuoteIndex];
@@ -64,10 +65,11 @@ export const QuotesSection: React.FC = () => {
               </button>
             </div>
             
-            <div className="h-[400px] relative bg-muted/30 rounded-lg mt-8">
+            {/* Floating Quotes Area */}
+            <div className="h-[300px] relative bg-card/30 backdrop-blur-sm rounded-lg overflow-hidden">
               <FloatingQuotes favorites={likedQuotes} />
               {likedQuotes.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-primary/60">
                   Like quotes to see them float here
                 </div>
               )}
@@ -158,43 +160,6 @@ class PhysicsParticle {
                         </pre>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Performance Optimizations */}
-                  <div>
-                    <h4 className="font-medium mb-2">Performance Optimizations</h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <Code className="h-4 w-4 mt-0.5 shrink-0" />
-                        <div>
-                          <strong className="text-foreground">GPU Acceleration</strong>
-                          <p>Uses transform3d for hardware acceleration</p>
-                          <pre className="bg-muted/30 p-2 rounded mt-1">
-                            <code>transform: translate3d(0, 0, 0);</code>
-                          </pre>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Code className="h-4 w-4 mt-0.5 shrink-0" />
-                        <div>
-                          <strong className="text-foreground">RAF Throttling</strong>
-                          <p>Optimized requestAnimationFrame usage</p>
-                          <pre className="bg-muted/30 p-2 rounded mt-1">
-                            <code>const throttledRAF = useThrottledRAF(16);</code>
-                          </pre>
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Code className="h-4 w-4 mt-0.5 shrink-0" />
-                        <div>
-                          <strong className="text-foreground">Composite Layers</strong>
-                          <p>Proper layer composition for smooth animations</p>
-                          <pre className="bg-muted/30 p-2 rounded mt-1">
-                            <code>will-change: transform, opacity;</code>
-                          </pre>
-                        </div>
-                      </li>
-                    </ul>
                   </div>
                 </div>
               </AccordionContent>
