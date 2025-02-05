@@ -18,6 +18,12 @@ dist-electron
 release/
 dist/
 
+# Test coverage
+coverage/
+
+# Examples
+component-examples/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
