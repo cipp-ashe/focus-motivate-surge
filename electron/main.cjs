@@ -17,8 +17,8 @@ function createWindow() {
     },
     backgroundColor: '#000000',
     resizable: true,
-    minWidth: 800,
-    minHeight: 1200
+    minWidth: 400,
+    minHeight: 600
   });
 
   // Always load from the dist directory for the packaged app
