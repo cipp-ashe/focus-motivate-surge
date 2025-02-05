@@ -17,7 +17,8 @@ export const TimerCircle = memo(({
   timeLeft,
   minutes,
   circumference,
-  a11yProps
+  a11yProps,
+  onClick
 }: TimerCircleProps) => {
   const progressRef = useRef<SVGCircleElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -92,7 +93,8 @@ export const TimerCircle = memo(({
 
   return (
     <div 
-      className={`relative mx-auto ${sizeClasses}`}
+      className={`relative mx-auto ${sizeClasses} ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
       {...a11yProps}
     >
       <svg 

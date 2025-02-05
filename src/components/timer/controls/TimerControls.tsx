@@ -16,33 +16,37 @@ export const TimerControls = memo(({
   addTimeButtonA11yProps,
 }: TimerControlsProps) => {
   const iconSize = size === "large" ? "h-5 w-5" : "h-4 w-4";
-  const buttonSize = size === "large" ? "px-6 py-3" : "px-4 py-2";
+  const buttonSize = size === "large" ? "px-5 py-3" : "px-4 py-2";
 
   return (
-    <div className="space-y-3">
-      <Button
-        onClick={onToggle}
-        className={`w-full bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${buttonSize}`}
-        {...toggleButtonA11yProps}
-      >
-        {isRunning ? (
-          <>
-            <Clock className={`mr-2 ${iconSize}`} />
-            Pause
-          </>
-        ) : (
-          <>
-            <Sparkles className={`mr-2 ${iconSize}`} />
-            {isPaused ? 'Resume' : 'Start'}
-          </>
-        )}
-      </Button>
+    <div className="space-y-2 flex flex-col items-center w-full">
+      <div className="w-full flex justify-center">
+        <Button
+          onClick={() => {
+            if (onToggle) onToggle();
+          }}
+          className={`bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${buttonSize} w-full relative z-50`}
+          {...toggleButtonA11yProps}
+        >
+          {isRunning ? (
+            <>
+              <Clock className={`mr-2 ${iconSize}`} />
+              Pause
+            </>
+          ) : (
+            <>
+              <Sparkles className={`mr-2 ${iconSize}`} />
+              {isPaused ? 'Resume' : 'Start'}
+            </>
+          )}
+        </Button>
+      </div>
       {(isRunning || isPaused) && (
-        <div className={showAddTime ? "flex gap-2" : ""}>
+        <div className="w-full flex gap-2">
           <Button
             onClick={onComplete}
             variant="outline"
-            className={`border-primary/20 hover:bg-primary/20 ${showAddTime ? "flex-1" : "w-full"} ${buttonSize}`}
+            className={`border-primary/20 hover:bg-primary/20 ${buttonSize} flex-1`}
             {...completeButtonA11yProps}
           >
             <Check className={`mr-2 ${iconSize}`} />
@@ -52,7 +56,7 @@ export const TimerControls = memo(({
             <Button
               onClick={onAddTime}
               variant="outline"
-              className={`flex-1 border-primary/20 hover:bg-primary/20 ${buttonSize}`}
+              className={`border-primary/20 hover:bg-primary/20 ${buttonSize} flex-1`}
               {...addTimeButtonA11yProps}
             >
               <Plus className={`mr-2 ${iconSize}`} />

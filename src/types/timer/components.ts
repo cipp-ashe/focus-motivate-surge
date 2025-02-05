@@ -37,6 +37,7 @@ export interface TimerCircleProps {
   minutes: number;
   circumference: number;
   a11yProps?: TimerA11yProps;
+  onClick?: () => void;
 }
 
 export interface TimerControlsProps {
@@ -51,6 +52,7 @@ export interface TimerControlsProps {
   completeButtonA11yProps?: ButtonA11yProps;
   addTimeButtonA11yProps?: ButtonA11yProps;
   metrics?: TimerMetrics;
+  pauseTimeLeft?: number;
 }
 
 export interface MinutesInputProps {

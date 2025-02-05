@@ -30,6 +30,8 @@ export const Timer = ({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [completionMetrics, setCompletionMetrics] = useState<TimerStateMetrics | null>(null);
   const [internalMinutes, setInternalMinutes] = useState(duration ? Math.floor(duration / 60) : 25);
+  const [pauseTimeLeft, setPauseTimeLeft] = useState(0);
+  const pauseTimerRef = useRef<NodeJS.Timeout>();
   const durationInSeconds = internalMinutes * 60;
 
   const {
@@ -68,12 +70,10 @@ export const Timer = ({
     },
   });
 
-
   const expandedViewRef = useRef<TimerExpandedViewRef>(null);
 
   const handleTimerCompletion = useCallback(async () => {
     try {
-      // If we're in expanded view, save any unsaved notes
       if (isExpanded) {
         expandedViewRef.current?.saveNotes();
       }
@@ -109,7 +109,6 @@ export const Timer = ({
     toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
   }, [addMinutes, onAddTime, start]);
 
-  // Update internal minutes when task duration changes
   useEffect(() => {
     if (duration) {
       const newMinutes = Math.floor(duration / 60);
@@ -128,19 +127,44 @@ export const Timer = ({
   }, [setMinutes, onDurationChange]);
 
   const handleStart = useCallback(() => {
+    if (pauseTimerRef.current) {
+      clearInterval(pauseTimerRef.current);
+      setPauseTimeLeft(0);
+    }
     start();
-    setIsExpanded(true);
   }, [start]);
 
   const handlePause = useCallback(() => {
     pause();
-  }, [pause]);
+    setPauseTimeLeft(300); // 5 minutes in seconds
+    pauseTimerRef.current = setInterval(() => {
+      setPauseTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(pauseTimerRef.current);
+          playSound();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [pause, playSound]);
 
-  const handleToggle = useCallback(() => {
+  useEffect(() => {
+    return () => {
+      if (pauseTimerRef.current) {
+        clearInterval(pauseTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleToggle = useCallback((fromExpanded = false) => {
     if (isRunning) {
       handlePause();
     } else {
       handleStart();
+      if (!fromExpanded) {
+        setIsExpanded(true);
+      }
     }
   }, [isRunning, handlePause, handleStart]);
 
@@ -178,6 +202,11 @@ export const Timer = ({
     timeLeft,
     minutes,
     circumference: CIRCLE_CIRCUMFERENCE,
+    onClick: () => {
+      if (isRunning || metrics.isPaused) {
+        setIsExpanded(true);
+      }
+    }
   };
 
   const timerControlsProps = {
@@ -189,6 +218,7 @@ export const Timer = ({
     metrics,
     showAddTime: isExpanded,
     size: isExpanded ? "large" as const : "normal" as const,
+    pauseTimeLeft,
   };
 
   if (showCompletion && completionMetrics) {
@@ -216,7 +246,11 @@ export const Timer = ({
             ref={expandedViewRef}
             taskName={taskName}
             timerCircleProps={timerCircleProps}
-            timerControlsProps={{...timerControlsProps, size: "large"}}
+            timerControlsProps={{
+              ...timerControlsProps,
+              size: "large",
+              onToggle: () => handleToggle(true)
+            }}
             metrics={metrics}
             onClose={handleCloseTimer}
             onLike={incrementFavorites}
@@ -236,7 +270,11 @@ export const Timer = ({
           onSoundChange={setSelectedSound}
           onTestSound={testSound}
           isLoadingAudio={isLoadingAudio}
-          onExpand={() => isRunning && setIsExpanded(true)}
+          onExpand={() => {
+            if (isRunning || metrics.isPaused) {
+              setIsExpanded(true);
+            }
+          }}
           onLike={incrementFavorites}
           favorites={favorites}
           setFavorites={setFavorites}

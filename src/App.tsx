@@ -26,7 +26,7 @@ const App = () => (
               <Route path="/components" element={<ComponentExamples />} />
             </Routes>
           </AppLayout>
-          <Toaster />
+          <Toaster position="bottom-center" closeButton />
         </NotesPanelProvider>
       </BrowserRouter>
     </TooltipProvider>

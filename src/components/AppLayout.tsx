@@ -44,7 +44,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="min-h-screen relative flex overflow-hidden">
-      {/* Main Content - Slides left when notes are open */}
       {/* Mobile Backdrop */}
       <div
         className={cn(
@@ -64,31 +63,31 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         {children}
       </div>
 
-      {/* Notes Panel - Slides in from right */}
+      {/* Notes Panel */}
       <div
         className={cn(
-          "fixed top-0 right-0 h-full w-full lg:w-1/2 bg-background border-l border-border transition-transform duration-300 ease-in-out z-50",
+          "fixed top-0 right-0 h-screen w-full lg:w-1/2 bg-background border-l border-border transition-transform duration-300 ease-in-out z-50 flex flex-col",
           isNotesOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="h-full flex flex-col">
-          <div className="h-full">
-            <div className="max-w-7xl mx-auto px-4 py-7">
-              <div className="flex items-center gap-4 mb-4 sm:mb-7">
-                <button 
-                  onClick={handleCloseNotes}
-                  className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </button>
-                <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-                  Focus Notes
-                </h1>
-              </div>
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-none px-4 py-7">
+            <div className="flex items-center gap-4 mb-4 sm:mb-7">
+              <button 
+                onClick={handleCloseNotes}
+                className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                Focus Notes
+              </h1>
+            </div>
+          </div>
 
-              <div className="relative bg-card/90 backdrop-blur-md shadow-lg rounded-lg p-6 h-[calc(100%-5rem)] before:absolute before:inset-0 before:rounded-lg before:p-[1px] before:bg-gradient-to-r before:from-primary/20 before:via-purple-500/20 before:to-primary/20 before:-z-10 after:absolute after:inset-[1px] after:rounded-[7px] after:bg-card/90 after:-z-10">
-                <Notes onOpenEmailModal={() => setIsEmailModalOpen(true)} />
-              </div>
+          <div className="flex-1 px-4 pb-7 overflow-hidden">
+            <div className="relative bg-card/90 backdrop-blur-md shadow-lg rounded-lg p-6 h-full before:absolute before:inset-0 before:rounded-lg before:p-[1px] before:bg-gradient-to-r before:from-primary/20 before:via-purple-500/20 before:to-primary/20 before:-z-10 after:absolute after:inset-[1px] after:rounded-[7px] after:bg-card/90 after:-z-10">
+              <Notes onOpenEmailModal={() => setIsEmailModalOpen(true)} />
             </div>
           </div>
         </div>
