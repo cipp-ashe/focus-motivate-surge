@@ -4,18 +4,6 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: mode === 'development',
-    commonjsOptions: {
-      include: [/node_modules/],
-      transformMixedEsModules: true,
-    },
-  },
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
@@ -24,6 +12,31 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  base: mode === 'development' ? '/' : './', // Required for electron
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: mode === 'development',
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true,
+    },
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+        },
+      },
+    },
+  },
+  server: {
+    host: "::",
+    port: 8080,
+    strictPort: true,
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime'],
