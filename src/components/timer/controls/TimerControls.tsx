@@ -14,9 +14,16 @@ export const TimerControls = memo(({
   toggleButtonA11yProps,
   completeButtonA11yProps,
   addTimeButtonA11yProps,
+  pauseTimeLeft = 0,
 }: TimerControlsProps) => {
   const iconSize = size === "large" ? "h-5 w-5" : "h-4 w-4";
   const buttonSize = size === "large" ? "px-5 py-3" : "px-4 py-2";
+
+  const formatPauseTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="space-y-2 flex flex-col items-center w-full">
@@ -37,6 +44,11 @@ export const TimerControls = memo(({
             <>
               <Sparkles className={`mr-2 ${iconSize}`} />
               {isPaused ? 'Resume' : 'Start'}
+              {isPaused && pauseTimeLeft > 0 && (
+                <span className="ml-2 text-sm text-foreground">
+                  ({formatPauseTime(pauseTimeLeft)})
+                </span>
+              )}
             </>
           )}
         </Button>

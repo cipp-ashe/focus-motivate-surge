@@ -17,7 +17,7 @@ const formatTime = (seconds: number): string => {
 };
 
 export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayProps) => {
-  if (!metrics || !isRunning) return null;
+  if (!metrics) return null;
 
   return (
     <div className="text-sm text-muted-foreground space-y-2 pt-2">
