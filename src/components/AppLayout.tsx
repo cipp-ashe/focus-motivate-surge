@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { EmailSummaryModal } from './EmailSummaryModal';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
 import { toast } from 'sonner';
-import type { Note } from './notes/Notes';
+import { Note } from './notes/SavedNotes';
 import { cn } from '@/lib/utils';
 import { Notes } from './notes/Notes';
 import { ArrowLeft } from 'lucide-react';

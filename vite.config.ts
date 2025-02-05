@@ -1,30 +1,30 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import { componentTagger } from 'lovable-tagger'
-import { resolve } from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import { componentTagger } from "lovable-tagger";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    process.env.NODE_ENV === 'development' && componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
-    alias: [
-      { find: '@', replacement: resolve(__dirname, 'src') }
-    ]
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
-  base: process.env.NODE_ENV === 'development' ? '/' : './',
+  base: mode === 'development' ? '/' : './', // Required for electron
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: process.env.NODE_ENV === 'development',
+    sourcemap: mode === 'development',
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true,
     },
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
+        main: path.resolve(__dirname, 'index.html'),
       },
       output: {
         manualChunks: {
@@ -38,4 +38,10 @@ export default defineConfig({
     port: 8080,
     strictPort: true,
   },
-})
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react/jsx-runtime'],
+    esbuildOptions: {
+      target: 'es2020',
+    },
+  },
+}));
