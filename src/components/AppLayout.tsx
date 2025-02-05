@@ -45,7 +45,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="min-h-screen relative flex flex-col overflow-hidden">
-      <TitleBar />
+      {/* Only show TitleBar in electron */}
+      {window.electron && <TitleBar />}
       <div className="flex-1 flex relative">
         {/* Mobile Backdrop */}
         <div
