@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Quote } from "../types/timer";
 import { toast } from "sonner";
 
-// Add QuoteCategory type definition
 type QuoteCategory = 
   | 'focus'
   | 'creativity'
@@ -37,12 +36,10 @@ export const useQuoteManager = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [quotePool, setQuotePool] = useState<Quote[]>([...quotes]);
 
-  // Analyze task name to determine relevant categories
   const getRelevantCategories = useCallback((taskName: string = ''): QuoteCategory[] => {
     const taskLower = taskName.toLowerCase();
     const categories: QuoteCategory[] = [];
 
-    // Map keywords to categories
     const categoryKeywords = {
       focus: ['focus', 'concentrate', 'study', 'work', 'read'],
       creativity: ['create', 'design', 'write', 'art', 'brainstorm'],
@@ -52,14 +49,12 @@ export const useQuoteManager = ({
       growth: ['improve', 'develop', 'grow', 'progress', 'advance']
     };
 
-    // Check task name against keywords
     Object.entries(categoryKeywords).forEach(([category, keywords]) => {
       if (keywords.some(keyword => taskLower.includes(keyword))) {
         categories.push(category as QuoteCategory);
       }
     });
 
-    // Default to motivation and focus if no matches
     if (categories.length === 0) {
       categories.push('motivation', 'focus');
     }
@@ -67,14 +62,11 @@ export const useQuoteManager = ({
     return categories;
   }, []);
 
-  // Get quotes matching task context
   const getContextualQuotes = useCallback((allQuotes: Quote[], taskCategories: QuoteCategory[]): Quote[] => {
-    // First try to find quotes matching any task category
     let matchingQuotes = allQuotes.filter(quote => 
       quote.categories.some(category => taskCategories.includes(category))
     );
 
-    // If no matches, fall back to all quotes
     if (matchingQuotes.length === 0) {
       matchingQuotes = allQuotes;
     }
@@ -85,6 +77,8 @@ export const useQuoteManager = ({
   const shuffleQuotes = useCallback((quotesToShuffle: Quote[]) => {
     return [...quotesToShuffle].sort(() => Math.random() - 0.5);
   }, []);
+
+  const TRANSITION_DURATION = 2000;
 
   const getRandomQuote = useCallback(() => {
     if (isTransitioning) return;
@@ -108,31 +102,32 @@ export const useQuoteManager = ({
       setIsLiked(favorites.some(fav => fav.text === newQuote.text));
       setIsFlipped(false);
       setIsTransitioning(false);
-    }, 300);
+    }, TRANSITION_DURATION);
   }, [currentTask, favorites, isTransitioning, getRelevantCategories, getContextualQuotes, shuffleQuotes, quotePool]);
 
   const handleLike = useCallback(() => {
     if (!currentQuote) return;
 
     if (!isLiked) {
-      const now = new Date();
       const favoriteQuote = {
         ...currentQuote,
-        timestamp: now.toLocaleString(),
+        timestamp: new Date().toLocaleString(),
         task: currentTask
       };
       setFavorites(prev => [...prev, favoriteQuote]);
-      toast(`Quote added to favorites${currentTask ? ` while working on: ${currentTask}` : ''}! ✨`, {
-        closeButton: true,
-        duration: 4000
+      toast.success("Quote favorited ❤️", {
+        description: "Added to your favorites ✨"
       });
     } else {
       setFavorites(prev => prev.filter(quote => quote.text !== currentQuote.text));
+      toast.success("Quote removed 💔", {
+        description: "Removed from favorites"
+      });
     }
     setIsLiked(!isLiked);
   }, [currentQuote, currentTask, isLiked, setFavorites]);
 
-  // Initialize with a contextual quote
+  // Initialize quotes
   useEffect(() => {
     if (!currentQuote) {
       const taskCategories = getRelevantCategories(currentTask);
@@ -143,7 +138,7 @@ export const useQuoteManager = ({
     }
   }, [currentTask, currentQuote, getRelevantCategories, getContextualQuotes, shuffleQuotes]);
 
-  // Auto-cycle quotes with task context
+  // Auto-cycle quotes
   useEffect(() => {
     const cycleQuote = () => {
       if (!isTransitioning && quotePool.length > 0) {

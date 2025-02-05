@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { TaskList, Task } from "./TaskList";
+import { TaskLayout } from "./TaskLayout";
 import { TimerSection } from "../timer/TimerSection";
 import { Quote } from "@/types/timer";
 import { useTaskOperations } from "@/hooks/useTaskOperations";
-import { toast } from "@/hooks/toast/use-toast";
+import { toast } from "sonner";
 
 interface TaskManagerProps {
   initialTasks?: Task[];
@@ -50,13 +51,9 @@ export const TaskManager = ({
 
   const handleSummaryEmailSent = useCallback(() => {
     console.log('Sending summary email and clearing completed tasks');
-    // Update both local state and parent
     setCompletedTasks([]);
     onCompletedTasksUpdate?.([]);
-    toast({
-      title: "Summary Sent",
-      description: "Completed tasks have been cleared."
-    });
+    toast.success("Summary sent ✨");
   }, [onCompletedTasksUpdate, setCompletedTasks]);
 
   const handleTaskDurationChange = useCallback((minutes: number) => {
@@ -70,34 +67,35 @@ export const TaskManager = ({
     }
   }, [selectedTask, setTasks]);
 
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <div className="space-y-4 sm:space-y-6 order-1">
-          <TaskList
-            tasks={tasks}
-            completedTasks={completedTasks}
-            onTaskAdd={handleTaskAdd}
-            onTaskSelect={handleTaskSelect}
-            onTasksClear={handleTasksClear}
-            onSelectedTasksClear={handleSelectedTasksClear}
-            onSummaryEmailSent={handleSummaryEmailSent}
-            favorites={favorites}
-            onTasksUpdate={onTasksUpdate}
-          />
-        </div>
+  const taskListComponent = useMemo(() => (
+    <TaskList
+      tasks={tasks}
+      completedTasks={completedTasks}
+      onTaskAdd={handleTaskAdd}
+      onTaskSelect={handleTaskSelect}
+      onTasksClear={handleTasksClear}
+      onSelectedTasksClear={handleSelectedTasksClear}
+      onSummaryEmailSent={handleSummaryEmailSent}
+      favorites={favorites}
+      onTasksUpdate={onTasksUpdate}
+    />
+  ), [tasks, completedTasks, handleTaskAdd, handleTaskSelect, handleTasksClear, handleSelectedTasksClear, handleSummaryEmailSent, favorites, onTasksUpdate]);
 
-        <div className="space-y-4 sm:space-y-6 order-2">
-          <TimerSection
-            selectedTask={selectedTask}
-            onTaskComplete={handleTaskComplete}
-            onDurationChange={handleTaskDurationChange}
-            favorites={favorites}
-            setFavorites={handleFavoritesChange}
-          />
-        </div>
-      </div>
-    </div>
+  const timerComponent = useMemo(() => (
+    <TimerSection
+      selectedTask={selectedTask}
+      onTaskComplete={handleTaskComplete}
+      onDurationChange={handleTaskDurationChange}
+      favorites={favorites}
+      setFavorites={handleFavoritesChange}
+    />
+  ), [selectedTask, handleTaskComplete, handleTaskDurationChange, favorites, handleFavoritesChange]);
+
+  return (
+    <TaskLayout
+      timer={timerComponent}
+      taskList={taskListComponent}
+    />
   );
 };
 

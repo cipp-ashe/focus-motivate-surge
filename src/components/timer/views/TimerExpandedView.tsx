@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Card } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
 import { TimerDisplay } from "../TimerDisplay";
@@ -7,7 +7,7 @@ import { TimerMetricsDisplay } from "../TimerMetrics";
 import { QuoteDisplay } from "../../quotes/QuoteDisplay";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
-import { Notes } from "../../notes/Notes";
+import { Notes, NotesRef } from "../../notes/Notes";
 
 interface TimerExpandedViewProps {
   taskName: string;
@@ -33,16 +33,38 @@ interface TimerExpandedViewProps {
   setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
-export const TimerExpandedView = memo(({
+export interface TimerExpandedViewRef {
+  saveNotes: () => void;
+}
+
+export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpandedViewProps>(({
   taskName,
   timerCircleProps,
-  timerControlsProps,
+  timerControlsProps: originalTimerControlsProps,
   metrics,
   onClose,
   onLike,
   favorites,
   setFavorites,
-}: TimerExpandedViewProps) => {
+}, ref) => {
+  const notesRef = useRef<NotesRef>(null);
+
+  // Expose saveNotes method via ref
+  useImperativeHandle(ref, () => ({
+    saveNotes: () => {
+      notesRef.current?.saveCurrentNote();
+    }
+  }), []);
+
+  // Wrap the original onComplete to save notes first
+  const timerControlsProps = {
+    ...originalTimerControlsProps,
+    onComplete: () => {
+      notesRef.current?.saveCurrentNote();
+      originalTimerControlsProps.onComplete();
+    }
+  };
+
   return (
     <div className="relative w-full max-w-[1200px] mx-auto px-4 py-8 z-[101] flex flex-col lg:flex-row gap-6">
       <div className="lg:w-1/2 flex flex-col gap-4">
@@ -81,11 +103,18 @@ export const TimerExpandedView = memo(({
         </Card>
       </div>
 
-      <Card className="lg:w-1/2 bg-card/90 backdrop-blur-md shadow-lg p-6 border-primary/20 flex flex-col">
-        <Notes compact />
+      <Card className="lg:w-1/2 bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex flex-col">
+        <div className="p-6 flex-1 flex flex-col">
+          <h2 className="text-lg font-semibold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+            Session Notes
+          </h2>
+          <div className="flex-1">
+            <Notes ref={notesRef} compact />
+          </div>
+        </div>
       </Card>
     </div>
   );
-});
+}));
 
 TimerExpandedView.displayName = 'TimerExpandedView';

@@ -20,7 +20,7 @@ export const TimerSection = ({
 }: TimerSectionProps) => {
   if (!selectedTask) {
     return (
-      <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">
+      <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20 flex flex-wrap justify-center items-center">
         Select a task to start the timer
       </div>
     );

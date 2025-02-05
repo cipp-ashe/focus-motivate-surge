@@ -57,7 +57,7 @@ export const TimerCompactView = memo(({
   setFavorites,
 }: TimerCompactViewProps) => {
   return (
-    <Card className="w-full max-w-[600px] mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg p-3 sm:p-4">
+    <Card className="p-4 w-full mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg sm:p-4">
       <div className="space-y-3 sm:space-y-4">
         <TimerHeader taskName={taskName} />
 

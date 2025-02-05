@@ -19,8 +19,9 @@ export const QuoteDisplay = ({
   currentTask}: QuoteDisplayProps) => {
   const {
     currentQuote,
+    nextQuote,
     isLiked,
-    isFlipped,
+    isFading,
     handleLike,
     getRandomQuote,
   } = useQuoteManager({
@@ -34,10 +35,10 @@ export const QuoteDisplay = ({
   }
 
   return (
-    <div className="w-full transition-all duration-700">
+    <div className="w-full">
       <Card className="quote-card p-6 bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg min-h-[220px] flex flex-col justify-between">
-        <div className="text-center space-y-4">
-          <div className="flex justify-center items-center gap-2">
+        <div className="text-center space-y-2">
+          <div className="flex justify-center items-center gap-3">
             <Sparkles className="h-5 w-5 text-primary" />
             <div className="flex gap-1">
               {currentQuote.categories.map((category, index) => (
@@ -51,20 +52,40 @@ export const QuoteDisplay = ({
               ))}
             </div>
           </div>
-          <div
-            className={`transition-all duration-300 ${
-              isFlipped ? 'opacity-0 transform -translate-y-2' : 'opacity-100 transform translate-y-0'
-            }`}
-          >
-            <p className="text-base font-medium italic bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 break-words mb-3">
-              "{currentQuote.text}"
-            </p>
-            <p className="text-sm text-muted-foreground">— {currentQuote.author}</p>
-            {currentTask && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Showing quotes relevant to: {currentTask}
-              </p>
-            )}
+          <div className="relative min-h-[120px] flex flex-col items-center justify-center">
+            <div className="quote-content-wrapper">
+              {/* Current Quote */}
+              <div className={`transition-opacity duration-2000 ease-in-out ${
+                isFading ? 'opacity-0' : 'opacity-100'
+              }`}>
+                <p className="text-base font-medium italic bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 break-words mb-3">
+                  "{currentQuote.text}"
+                </p>
+                <p className="text-sm text-muted-foreground">— {currentQuote.author}</p>
+                {currentTask && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Showing quotes relevant to: {currentTask}
+                  </p>
+                )}
+              </div>
+              
+              {/* Next Quote (pre-loaded) */}
+              {nextQuote && (
+                <div className={`absolute inset-0 transition-opacity duration-2000 ease-in-out ${
+                  isFading ? 'opacity-100' : 'opacity-0'
+                }`}>
+                  <p className="text-base font-medium italic bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 break-words mb-3">
+                    "{nextQuote.text}"
+                  </p>
+                  <p className="text-sm text-muted-foreground">— {nextQuote.author}</p>
+                  {currentTask && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Showing quotes relevant to: {currentTask}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex justify-center gap-4">
             <Button

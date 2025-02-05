@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Task } from "@/components/tasks/TaskList";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
-import { toast } from "@/hooks/toast/use-toast";
+import { toast } from "sonner";
 
 export const useTaskOperations = ({
   initialTasks = [],
@@ -32,6 +32,8 @@ export const useTaskOperations = ({
       onTasksUpdate?.(newTasks);
       return newTasks;
     });
+
+    toast.success("Task added 📝✨");
   }, [onTasksUpdate]);
 
   const handleTaskSelect = useCallback((task: Task, event?: React.MouseEvent) => {
@@ -59,10 +61,7 @@ export const useTaskOperations = ({
     
     // Only show toast if it's a selection, not a duration update
     if (!task.duration || task.duration === existingTask.duration) {
-      toast({
-        title: "Task Selected",
-        description: `Selected task: ${task.name}`
-      });
+      toast(task.name);
     }
   }, [tasks, onTasksUpdate]);
 
@@ -98,16 +97,14 @@ export const useTaskOperations = ({
     });
     
     setSelectedTask(null);
-    toast({
-      title: "Task Completed",
-      description: `Task completed: ${selectedTask.name}`
-    });
+    toast.success("Task Complete 🎯✨");
   }, [selectedTask, onTasksUpdate, onCompletedTasksUpdate]);
 
   const handleTasksClear = useCallback(() => {
     console.log('Clearing all tasks');
     setTasks([]);
     onTasksUpdate?.([]);
+    toast("Tasks cleared 🗑️");
   }, [onTasksUpdate]);
 
   const handleSelectedTasksClear = useCallback((taskIds: string[]) => {
@@ -126,6 +123,8 @@ export const useTaskOperations = ({
       console.log('Currently selected task was cleared, resetting selection');
       setSelectedTask(null);
     }
+
+    toast(`${taskIds.length} task${taskIds.length === 1 ? '' : 's'} removed 🗑️`);
   }, [selectedTask, onTasksUpdate]);
 
   return {

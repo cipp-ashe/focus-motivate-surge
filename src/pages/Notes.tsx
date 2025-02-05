@@ -33,7 +33,7 @@ export default function NotesPage() {
       }
     } catch (error) {
       console.error('Error sending summary:', error);
-      toast.error('Failed to send summary email');
+      toast.error('Failed to send summary email 📧❌');
       throw error;
     }
   };

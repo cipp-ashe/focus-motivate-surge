@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useAudio } from "@/hooks/useAudio";
 import { useTimerState } from "@/hooks/timer/useTimerState";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -6,7 +6,7 @@ import { CompletionCelebration } from "./CompletionCelebration";
 import { FloatingQuotes } from "../quotes/FloatingQuotes";
 import { Minimize2 } from "lucide-react";
 import { TIMER_CONSTANTS, SOUND_OPTIONS, type SoundOption, type TimerProps } from "@/types/timer";
-import { TimerExpandedView } from "./views/TimerExpandedView";
+import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { TimerCompactView } from "./views/TimerCompactView";
 import { toast } from "sonner";
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -52,7 +52,7 @@ export const Timer = ({
         setShowConfirmation(true);
       } catch (error) {
         console.error('Error in timer completion flow:', error);
-        toast.error("An error occurred while completing the timer");
+        toast.error("An error occurred while completing the timer ⚠️");
       }
     },
     onDurationChange,
@@ -63,17 +63,24 @@ export const Timer = ({
     options: {
       onError: (error) => {
         console.error("Audio error:", error);
-        toast.error("Could not play sound. Please check your browser settings.");
+        toast.error("Could not play sound. Please check your browser settings. 🔇");
       },
     },
   });
 
 
+  const expandedViewRef = useRef<TimerExpandedViewRef>(null);
+
   const handleTimerCompletion = useCallback(async () => {
     try {
+      // If we're in expanded view, save any unsaved notes
+      if (isExpanded) {
+        expandedViewRef.current?.saveNotes();
+      }
+
       const finalMetrics = await completeTimer();
       if (!finalMetrics) {
-        toast.error("An error occurred while completing the timer");
+        toast.error("An error occurred while completing the timer ⚠️");
         return;
       }
       await playSound();
@@ -83,9 +90,9 @@ export const Timer = ({
       }, 0);
     } catch (error) {
       console.error('Error in timer completion flow:', error);
-      toast.error("An error occurred while completing the timer");
+      toast.error("An error occurred while completing the timer ⚠️");
     }
-  }, [completeTimer, playSound]);
+  }, [completeTimer, playSound, isExpanded]);
 
   const handleComplete = useCallback(async () => {
     setShowConfirmation(false);
@@ -99,7 +106,7 @@ export const Timer = ({
       onAddTime();
     }
     start();
-    toast(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
+    toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
   }, [addMinutes, onAddTime, start]);
 
   // Update internal minutes when task duration changes
@@ -149,7 +156,7 @@ export const Timer = ({
     setCompletionMetrics(null);
     resetTimer();
     
-    toast("Task completed! You're crushing it! 🎉");
+    toast.success("Task completed! You're crushing it! 🎯🎉");
   }, [onComplete, completionMetrics, resetTimer]);
 
   const handleAddTime = useCallback(() => {
@@ -157,7 +164,7 @@ export const Timer = ({
     if (typeof onAddTime === 'function') {
       onAddTime();
     }
-    toast(`Added ${ADD_TIME_MINUTES} minutes. Keep going! 💪`);
+    toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
   }, [addMinutes, onAddTime]);
 
   const handleCloseTimer = useCallback(() => {
@@ -206,6 +213,7 @@ export const Timer = ({
             <Minimize2 className="h-6 w-6" />
           </button>
           <TimerExpandedView
+            ref={expandedViewRef}
             taskName={taskName}
             timerCircleProps={timerCircleProps}
             timerControlsProps={{...timerControlsProps, size: "large"}}

@@ -28,9 +28,9 @@ export const useLoadingState = (options: UseLoadingStateOptions = {}) => {
     });
 
     if (error) {
-      toast.error(options.errorMessage || error.message);
+      toast.error(`${options.errorMessage || error.message} ⚠️`);
     } else if (options.successMessage) {
-      toast.success(options.successMessage);
+      toast.success(`${options.successMessage} ✨`);
     }
   }, [options.errorMessage, options.successMessage]);
 

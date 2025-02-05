@@ -31,14 +31,14 @@ export const useTimerShortcuts = ({
       case 'k': // Common video player shortcut
         event.preventDefault();
         onToggle();
-        toast.info(`Timer ${isRunning ? 'paused' : 'started'}`);
+        toast.info(`Timer ${isRunning ? 'paused ⏸️' : 'started ▶️'}`);
         break;
       
       case 'c':
         if (isRunning && onComplete) {
           event.preventDefault();
           onComplete();
-          toast.info('Timer completed');
+          toast.info('Timer completed ⏱️✨');
         }
         break;
       
@@ -46,7 +46,7 @@ export const useTimerShortcuts = ({
         if (isRunning && onAddTime) {
           event.preventDefault();
           onAddTime();
-          toast.info('Added time');
+          toast.info('Added time ⌛');
         }
         break;
 

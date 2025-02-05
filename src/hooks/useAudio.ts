@@ -61,7 +61,7 @@ export function useAudio({ audioUrl, options }: UseAudioConfig) {
       const err = error instanceof Error ? error : new Error('Failed to play sound');
       options?.onError?.(err);
       if (toast?.error) {
-        toast.error('Could not play sound. Please check your browser settings.');
+        toast.error('Could not play sound. Please check your browser settings. 🔇');
       }
     } finally {
       safeSetLoading(false);
@@ -72,7 +72,7 @@ export function useAudio({ audioUrl, options }: UseAudioConfig) {
   const testSound = useCallback(() => {
     if (!audioUrl) {
       if (toast) {
-        toast('No sound selected');
+        toast('No sound selected 🔈');
       }
       return;
     }

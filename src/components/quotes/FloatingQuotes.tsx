@@ -10,14 +10,11 @@ interface QuotePosition {
   y: number;
   vx: number;
   vy: number;
-  angle: number;
-  speed: number;
 }
 
 // Animation constants
-const BASE_SPEED = 0.5;
-const SPEED_VARIANCE = 0.3;
-const ROTATION_SPEED = 0.02;
+const BASE_SPEED = 0.2;      // Increased from 0.15
+const SPEED_VARIANCE = 0.15;  // Increased from 0.1
 const MAX_WIDTH = 300;
 const SAFE_MARGIN = (MAX_WIDTH / window.innerWidth) * 100;
 
@@ -38,7 +35,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
       const speed = BASE_SPEED + (Math.random() - 0.5) * SPEED_VARIANCE;
       const vx = Math.cos(angle) * speed;
       const vy = Math.sin(angle) * speed;
-      return { x, y, vx, vy, angle, speed };
+      return { x, y, vx, vy };
     });
 
     setPositions(newPositions);
@@ -49,35 +46,29 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
   useEffect(() => {
     if (!positions.length || !containerRef.current) return;
 
-    const animate = () => {
+    let lastTime = performance.now();
+    const animate = (currentTime: number) => {
+      const deltaTime = (currentTime - lastTime) / 16; // Normalize to ~60fps
+      lastTime = currentTime;
+
       const newPositions = positionsRef.current.map(pos => {
-        let { x, y, vx, vy, angle, speed } = pos;
+        let { x, y, vx, vy } = pos;
 
-        // Update position
-        x += vx;
-        y += vy;
+        // Update position with delta time
+        x += vx * deltaTime;
+        y += vy * deltaTime;
 
-        // Bounce logic with angle adjustment
+        // Gentle bounce logic
         if (x < SAFE_MARGIN || x > 100 - SAFE_MARGIN) {
           vx = -vx;
-          angle = Math.atan2(vy, vx);
           x = x < SAFE_MARGIN ? SAFE_MARGIN : 100 - SAFE_MARGIN;
         }
         if (y < 10 || y > 90) {
           vy = -vy;
-          angle = Math.atan2(vy, vx);
           y = y < 10 ? 10 : 90;
         }
 
-        // Add slight rotation to movement
-        angle += ROTATION_SPEED * (Math.random() > 0.5 ? 1 : -1);
-        vx = Math.cos(angle) * speed;
-        vy = Math.sin(angle) * speed;
-
-        // Add small random variations to prevent stagnation
-        speed = BASE_SPEED + (Math.random() - 0.5) * SPEED_VARIANCE;
-
-        return { x, y, vx, vy, angle, speed };
+        return { x, y, vx, vy };
       });
 
       positionsRef.current = newPositions;
@@ -85,7 +76,7 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
       if (animationFrameRef.current) {
@@ -105,32 +96,26 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
         return (
           <div
             key={quote.text}
-            className="absolute transition-transform duration-[2000ms] ease-out"
+            className="absolute transition-[transform] duration-100 ease-linear"
             style={{
               left: `${position.x}%`,
               top: `${position.y}%`,
-              transform: `translate(-50%, -50%) rotate(${position.angle}rad)`,
+              transform: `translate(-50%, -50%)`,
               maxWidth: `${MAX_WIDTH}px`,
               textAlign: "center",
               whiteSpace: "normal",
               willChange: "transform",
             }}
           >
-            <div
+            <div 
               className="text-lg font-light italic text-primary/80 leading-relaxed backdrop-blur-sm"
               style={{
                 textShadow: "1px 1px 5px rgba(0, 0, 0, 0.5)",
-                transform: `rotate(${-position.angle}rad)`, // Counter-rotate text to keep it readable
               }}
             >
               "{quote.text}"
             </div>
-            <div 
-              className="text-sm text-primary/60 mt-1"
-              style={{
-                transform: `rotate(${-position.angle}rad)`, // Counter-rotate author to keep it readable
-              }}
-            >
+            <div className="text-sm text-primary/60 mt-1">
               — {quote.author}
             </div>
           </div>

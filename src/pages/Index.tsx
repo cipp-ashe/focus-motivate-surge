@@ -4,11 +4,13 @@ import { TaskManager } from "@/components/tasks/TaskManager";
 import { Moon, Sun, Code2, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useNotesPanel } from "@/hooks/useNotesPanel";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 
 const Index = () => {
   const { isDark, toggleTheme } = useTheme(true);
+  const { toggle: toggleNotes } = useNotesPanel();
 
   // Load initial tasks from localStorage
   const [initialTasks] = useState<Task[]>(() => {
@@ -59,19 +61,19 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
-        <div className="flex justify-between items-center mb-4 sm:mb-6">
+      <div className="max-w-7xl mx-auto px-4 py-7">
+        <div className="flex justify-between items-center mb-4 sm:mb-7">
           <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
             Focus Timer
           </h1>
           <div className="flex items-center gap-2">
-            <Link 
-              to="/notes" 
+            <button 
+              onClick={toggleNotes}
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              title="View All Notes"
+              title="Toggle Notes"
             >
               <StickyNote className="h-5 w-5" />
-            </Link>
+            </button>
             <Link 
               to="/components" 
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"

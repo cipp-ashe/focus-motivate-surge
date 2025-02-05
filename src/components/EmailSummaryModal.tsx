@@ -38,14 +38,14 @@ export const EmailSummaryModal = ({
       setIsLoading(true);
       
       await onSubmit(email, clearAfterSend);
-      toast.success("Summary email sent successfully!");
+      toast.success("Summary email sent successfully! 📧✨");
       onClose();
       setEmail("");
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error(`${error.errors[0].message} ⚠️`);
       } else {
-        toast.error(error instanceof Error ? error.message : 'Failed to send email');
+        toast.error(error instanceof Error ? `${error.message} ⚠️` : 'Failed to send email ❌');
       }
     } finally {
       setIsLoading(false);

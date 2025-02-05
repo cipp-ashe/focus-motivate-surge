@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { toast } from 'sonner';
+import { toast } from "sonner";
 import { TimerMetrics } from '@/types/metrics';
 
 interface UseTimerOptions {
@@ -93,9 +93,7 @@ export const useTimer = ({
       ...prev,
       startTime: prev.startTime || new Date(),
     }));
-    if (toast) {
-      toast("Timer started! You've got this! 🚀");
-    }
+    toast.success("Timer started ⏱️🚀");
   }, []);
 
   const pause = useCallback(() => {
@@ -142,9 +140,7 @@ export const useTimer = ({
       extensionTime: prev.extensionTime + additionalSeconds,
       expectedTime: prev.expectedTime + additionalSeconds
     }));
-    if (toast) {
-      toast(`Added ${additionalMinutes} minutes. Keep the momentum going! 💪`);
-    }
+    toast.success(`+${additionalMinutes}m added ⌛💪`);
   }, []);
 
   const completeTimer = useCallback(() => {
