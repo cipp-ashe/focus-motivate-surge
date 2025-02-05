@@ -1,0 +1,110 @@
+C:\Users\ashle\AppData\Local\npm-cache\_logs\2025-02-05T16_34_49_599Z-debug-0._log
+
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.13.1
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\ashle\OneDrive\Documents\GitHub\focus-motivate-surge\.npmrc
+5 silly config load:file:C:\Users\ashle\.npmrc
+6 silly config load:file:C:\Users\ashle\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm install
+8 verbose argv "install"
+9 verbose logfile logs-max:10 dir:C:\Users\ashle\AppData\Local\npm-cache\_logs\2025-02-05T16_34_49_599Z-
+10 verbose logfile C:\Users\ashle\AppData\Local\npm-cache\_logs\2025-02-05T16_34_49_599Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly logfile done cleaning log files
+14 silly idealTree buildDeps
+15 silly fetch manifest cross-env@^7.0.3
+16 silly packumentCache full:https://registry.npmjs.org/cross-env cache-miss
+17 http fetch GET 200 https://registry.npmjs.org/cross-env 1051ms (cache miss)
+18 silly packumentCache full:https://registry.npmjs.org/cross-env set size:undefined disposed:false
+19 silly placeDep ROOT cross-env@7.0.3 OK for: vite_react_shadcn_ts@0.0.0 want: ^7.0.3
+20 silly fetch manifest react@^16.9.0 || ^17.0.0
+21 silly packumentCache full:https://registry.npmjs.org/react cache-miss
+22 http fetch GET 200 https://registry.npmjs.org/react 317ms (cache updated)
+23 silly packumentCache full:https://registry.npmjs.org/react set size:undefined disposed:false
+24 silly fetch manifest @types/react@^16.9.0 || ^17.0.0
+25 silly packumentCache full:https://registry.npmjs.org/@types%2freact cache-miss
+26 http fetch GET 200 https://registry.npmjs.org/@types%2freact 172ms (cache updated)
+27 silly packumentCache full:https://registry.npmjs.org/@types%2freact set size:undefined disposed:false
+28 silly fetch manifest react-dom@^16.9.0 || ^17.0.0
+29 silly packumentCache full:https://registry.npmjs.org/react-dom cache-miss
+30 http fetch GET 200 https://registry.npmjs.org/react-dom 330ms (cache updated)
+31 silly packumentCache full:https://registry.npmjs.org/react-dom set size:undefined disposed:false
+32 verbose stack Error: could not resolve
+32 verbose stack     at PlaceDep.failPeerConflict (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\place-dep.js:503:25)
+32 verbose stack     at new PlaceDep (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\place-dep.js:157:21)
+32 verbose stack     at #buildDepStep (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:920:18)
+32 verbose stack     at async Arborist.buildIdealTree (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:181:7)
+32 verbose stack     at async Promise.all (index 1)
+32 verbose stack     at async Arborist.reify (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:131:5)
+32 verbose stack     at async Install.exec (C:\Program Files\nodejs\node_modules\npm\lib\commands\install.js:150:5)
+32 verbose stack     at async Npm.exec (C:\Program Files\nodejs\node_modules\npm\lib\npm.js:207:9)
+32 verbose stack     at async module.exports (C:\Program Files\nodejs\node_modules\npm\lib\cli\entry.js:74:5)
+33 error code ERESOLVE
+34 error ERESOLVE could not resolve
+35 error
+36 error While resolving: @testing-library/react-hooks@8.0.1
+36 error Found: @types/react@18.3.18[2m[22m
+36 error [2mnode_modules/@types/react[22m
+36 error   [34mdev[39m @types/react@"^18.2.48" from the root project
+36 error   peerOptional @types/react@"*" from @radix-ui/react-accordion@1.2.2[2m[22m
+36 error   [2mnode_modules/@radix-ui/react-accordion[22m
+36 error     @radix-ui/react-accordion@"^1.1.2" from the root project
+36 error   59 more (@radix-ui/react-alert-dialog, @radix-ui/react-arrow, ...)
+36 error
+36 error Could not resolve dependency:
+36 error peerOptional @types/react@"^16.9.0 || ^17.0.0" from @testing-library/react-hooks@8.0.1[2m[22m
+36 error [2mnode_modules/@testing-library/react-hooks[22m
+36 error   @testing-library/react-hooks@"^8.0.1" from the root project
+36 error
+36 error Conflicting peer dependency: @types/react@17.0.83[2m[22m
+36 error [2mnode_modules/@types/react[22m
+36 error   peerOptional @types/react@"^16.9.0 || ^17.0.0" from @testing-library/react-hooks@8.0.1[2m[22m
+36 error   [2mnode_modules/@testing-library/react-hooks[22m
+36 error     @testing-library/react-hooks@"^8.0.1" from the root project
+36 error
+36 error Fix the upstream dependency conflict, or retry
+36 error this command with --force or --legacy-peer-deps
+36 error to accept an incorrect (and potentially broken) dependency resolution.
+37 error
+37 error
+37 error For a full report see:
+37 error C:\Users\ashle\AppData\Local\npm-cache\_logs\2025-02-05T16_34_49_599Z-eresolve-report.txt
+38 silly unfinished npm timer reify 1738773291829
+39 silly unfinished npm timer reify:loadTrees 1738773291833
+40 silly unfinished npm timer idealTree:buildDeps 1738773293701
+41 silly unfinished npm timer idealTree:node_modules/@testing-library/react-hooks 1738773294789
+42 verbose cwd C:\Users\ashle\OneDrive\Documents\GitHub\focus-motivate-surge
+43 verbose os Windows_NT 10.0.26100
+44 verbose node v22.13.1
+45 verbose npm  v10.9.2
+46 verbose exit 1
+47 verbose code 1
+48 error A complete log of this run can be found in: C:\Users\ashle\AppData\Local\npm-cache\_logs\2025-02-05T16_34_49_599Z-debug-0.log
+
+
+
+---
+
+
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.13.1
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\ashle\OneDrive\Documents\GitHub\focus-motivate-surge\.npmrc
+5 silly config load:file:C:\Users\ashle\.npmrc
+6 silly config load:file:C:\Users\ashle\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm test --listTests --json --watchAll=false
+8 verbose argv "test" "--" "--listTests" "--json" "--watchAll=false"
+9 verbose logfile logs-max:10 dir:C:\Users\ashle\AppData\Local\npm-cache\_logs\2025-02-05T16_35_37_606Z-
+10 verbose logfile C:\Users\ashle\AppData\Local\npm-cache\_logs\2025-02-05T16_35_37_606Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files
+13 verbose cwd C:\Users\ashle\OneDrive\Documents\GitHub\focus-motivate-surge
+14 verbose os Windows_NT 10.0.26100
+15 verbose node v22.13.1
+16 verbose npm  v10.9.2
+17 verbose exit 0
+18 info ok
