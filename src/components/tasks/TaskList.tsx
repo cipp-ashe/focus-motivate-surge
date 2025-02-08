@@ -87,6 +87,8 @@ export const TaskList = ({
         isOpen={showEmailModal}
         onClose={() => setShowEmailModal(false)}
         onSubmit={handleSendSummary}
+        favorites={favorites}
+        type="tasks"
       />
     </div>
   );

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Dialog,
@@ -10,12 +11,16 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Quote } from "@/types/timer";
+import { TimerStateMetrics } from "@/types/metrics";
 
 interface EmailSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (email: string, clearData?: boolean) => Promise<void>;
   type?: 'tasks' | 'notes';
+  favorites?: Quote[];
+  metrics?: TimerStateMetrics;
 }
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -24,7 +29,9 @@ export const EmailSummaryModal = ({
   isOpen,
   onClose,
   onSubmit,
-  type = 'tasks'
+  type = 'tasks',
+  favorites = [],
+  metrics,
 }: EmailSummaryModalProps) => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,13 +59,17 @@ export const EmailSummaryModal = ({
     }
   };
 
+  const summaryDescription = type === 'notes' 
+    ? 'Enter your email address to receive a summary of your notes.'
+    : `Enter your email address to receive a summary of your ${metrics ? 'completed tasks' : "tasks"}, favorites, and metrics.`;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-3">
           <DialogTitle>Send {type === 'notes' ? 'Notes' : 'Daily'} Summary</DialogTitle>
           <DialogDescription>
-            Enter your email address to receive a summary of your {type === 'notes' ? 'notes' : "day's tasks, metrics, and favorite quotes"}.
+            {summaryDescription}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="mt-4 space-y-6">
