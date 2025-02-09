@@ -1,9 +1,7 @@
 
 import { Task } from "./TaskList";
 import { useState, useEffect } from "react";
-import { TaskHeader } from "./TaskHeader";
-import { TaskDuration } from "./TaskDuration";
-import { TaskTags } from "./TaskTags";
+import { TaskContent } from "./TaskContent";
 
 interface TaskRowProps {
   task: Task;
@@ -87,28 +85,17 @@ export const TaskRow = ({
       `}
       onClick={(e: React.MouseEvent<HTMLDivElement>) => onTaskClick(task, e)}
     >
-      <TaskHeader 
+      <TaskContent
         task={task}
+        editingTaskId={editingTaskId}
+        inputValue={inputValue}
         onDelete={handleDelete}
+        onDurationClick={(e) => onDurationClick(e, task.id)}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        preventPropagation={preventPropagation}
       />
-      
-      <div className="flex items-center justify-between">
-        <TaskTags 
-          task={task}
-          preventPropagation={preventPropagation}
-        />
-        
-        <TaskDuration
-          durationInMinutes={durationInMinutes}
-          isEditing={editingTaskId === task.id}
-          inputValue={inputValue}
-          onDurationClick={(e) => onDurationClick(e, task.id)}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          preventPropagation={preventPropagation}
-        />
-      </div>
     </div>
   );
 };
