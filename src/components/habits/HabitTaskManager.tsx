@@ -16,35 +16,48 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   const actions = useAppStateActions();
   const { tasks: { items: tasks } } = state;
 
-  // Run only when habits or templates change, not on every task change
   useEffect(() => {
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
     const activeHabitIds = timerHabits.map(habit => `habit-${habit.id}`);
     
-    // Only remove stale timer habit tasks
+    // Clean up stale tasks and relationships
     tasks
       .filter(task => task.id.startsWith('habit-'))
       .forEach(task => {
         if (!activeHabitIds.includes(task.id)) {
+          // Remove both task and its relationships
           actions.deleteTask(task.id);
+          const habitId = task.relationships?.habitId;
+          if (habitId) {
+            actions.removeRelationship(task.id, habitId);
+          }
         }
       });
 
-    // Only add new timer habit tasks
+    // Add new timer habit tasks with proper relationships
     timerHabits.forEach(habit => {
       const taskId = `habit-${habit.id}`;
       if (!tasks.some(t => t.id === taskId)) {
-        // Remove id from the task object as it's handled by addTask
+        // Add task
         actions.addTask({
           name: habit.name,
           completed: false,
           duration: habit.metrics?.target ? Math.round(habit.metrics.target / 60) * 60 : undefined,
           relationships: { habitId: habit.id }
         });
+
+        // Add relationship and tag
+        actions.addRelationship({
+          sourceId: taskId,
+          sourceType: 'task',
+          targetId: habit.id,
+          targetType: 'habit',
+          relationType: 'habit-task'
+        });
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits, activeTemplates]); // Only depend on habits and templates, not tasks
+  }, [todaysHabits, activeTemplates]); // Only depend on habits and templates
 
   return null;
 };

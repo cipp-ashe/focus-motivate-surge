@@ -13,8 +13,19 @@ interface StorageData {
   activeTemplates: ActiveTemplate[];
 }
 
-const MAX_COMPLETED_TASKS = 100; // Keep only last 100 completed tasks
-const STORAGE_CLEANUP_INTERVAL = 1000 * 60 * 60 * 24; // Clean up daily
+const MAX_COMPLETED_TASKS = 100;
+const STORAGE_CLEANUP_INTERVAL = 1000 * 60 * 60; // Clean up hourly instead of daily
+const STORAGE_QUOTA_THRESHOLD = 0.9; // 90% of quota
+
+const estimateStorageSize = (data: any): number => {
+  try {
+    const str = JSON.stringify(data);
+    return str.length * 2; // Approximate bytes
+  } catch (error) {
+    console.error('Error estimating storage size:', error);
+    return 0;
+  }
+};
 
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
   try {
@@ -32,34 +43,50 @@ const loadFromStorage = <T>(key: string, defaultValue: T): T => {
 
 const cleanupStorage = () => {
   try {
-    // Trim completed tasks
+    // Check storage quota
+    if (navigator.storage && navigator.storage.estimate) {
+      navigator.storage.estimate().then(({ usage = 0, quota = 0 }) => {
+        const usageRatio = usage / quota;
+        if (usageRatio > STORAGE_QUOTA_THRESHOLD) {
+          toast.warning("Local storage is nearly full. Cleaning up old data...", {
+            duration: 5000,
+          });
+          
+          // Aggressive cleanup when near quota
+          const completedTasks = loadFromStorage('completedTasks', []);
+          if (completedTasks.length > MAX_COMPLETED_TASKS / 2) {
+            const trimmed = completedTasks.slice(-MAX_COMPLETED_TASKS / 2);
+            localStorage.setItem('completedTasks', JSON.stringify(trimmed));
+          }
+        }
+      });
+    }
+
+    // Regular cleanup
     const completedTasks = loadFromStorage('completedTasks', []);
     if (completedTasks.length > MAX_COMPLETED_TASKS) {
       const trimmed = completedTasks.slice(-MAX_COMPLETED_TASKS);
       localStorage.setItem('completedTasks', JSON.stringify(trimmed));
     }
 
-    // Remove very old tasks (older than 30 days)
+    // Remove old tasks
     const tasks = loadFromStorage('taskList', []);
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const fifteenDaysAgo = new Date();
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15); // Reduced from 30 to 15 days
     
     const filteredTasks = tasks.filter(task => {
       const taskDate = new Date(task.createdAt);
-      return taskDate > thirtyDaysAgo;
+      return taskDate > fifteenDaysAgo;
     });
 
     if (filteredTasks.length < tasks.length) {
       localStorage.setItem('taskList', JSON.stringify(filteredTasks));
+      console.log(`Cleaned up ${tasks.length - filteredTasks.length} old tasks`);
     }
 
-    // Clear any orphaned data
-    const lastCleanup = localStorage.getItem('lastStorageCleanup');
-    if (!lastCleanup || new Date(lastCleanup) < thirtyDaysAgo) {
-      localStorage.setItem('lastStorageCleanup', new Date().toISOString());
-    }
   } catch (error) {
     console.error('Error during storage cleanup:', error);
+    toast.error("Failed to clean up storage");
   }
 };
 
@@ -72,7 +99,7 @@ export const useLocalStorageData = () => {
     activeTemplates: loadFromStorage('habit-templates', [])
   });
 
-  // Run storage cleanup periodically
+  // Run storage cleanup more frequently
   useEffect(() => {
     cleanupStorage(); // Initial cleanup
     const interval = setInterval(cleanupStorage, STORAGE_CLEANUP_INTERVAL);
@@ -84,13 +111,43 @@ export const useLocalStorageData = () => {
     value: StorageData[K], 
     storageKey?: string
   ) => {
+    // Check size before updating
+    const newSize = estimateStorageSize(value);
+    if (newSize > 5 * 1024 * 1024) { // 5MB threshold
+      toast.warning("Data size is getting large. Consider clearing old items.", {
+        duration: 5000,
+      });
+    }
+
     setData(prev => ({ ...prev, [key]: value }));
-    localStorage.setItem(
-      storageKey || key, 
-      key === 'lastSyncDate' 
-        ? (value as Date).toISOString()
-        : JSON.stringify(value)
-    );
+    try {
+      localStorage.setItem(
+        storageKey || key, 
+        key === 'lastSyncDate' 
+          ? (value as Date).toISOString()
+          : JSON.stringify(value)
+      );
+      window.dispatchEvent(new Event('storage'));
+    } catch (error) {
+      if (error.name === 'QuotaExceededError') {
+        toast.error("Storage limit reached. Cleaning up old data...");
+        cleanupStorage();
+        // Retry storage update after cleanup
+        try {
+          localStorage.setItem(
+            storageKey || key,
+            key === 'lastSyncDate' 
+              ? (value as Date).toISOString()
+              : JSON.stringify(value)
+          );
+        } catch (retryError) {
+          toast.error("Unable to save data. Please clear some space manually.");
+        }
+      } else {
+        console.error('Error updating storage:', error);
+        toast.error("Failed to save data");
+      }
+    }
   };
 
   return {
