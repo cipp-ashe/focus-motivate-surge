@@ -14,45 +14,53 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>();
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
-    let resizeTimeout: NodeJS.Timeout;
     
     const observer = new ResizeObserver(() => {
+      console.log('Resize detected');
+      
       // Clear any existing animation frame
       if (frameRef.current) {
+        console.log('Canceling previous animation frame');
         cancelAnimationFrame(frameRef.current);
       }
       
       // Clear any existing timeout
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
+      if (resizeTimeoutRef.current) {
+        console.log('Clearing previous timeout');
+        clearTimeout(resizeTimeoutRef.current);
       }
       
       // Set a new timeout
-      resizeTimeout = setTimeout(() => {
+      resizeTimeoutRef.current = setTimeout(() => {
+        console.log('Timeout triggered, requesting animation frame');
         frameRef.current = requestAnimationFrame(() => {
           if (element && document.contains(element)) {
+            console.log('Applying reflow fix');
             element.style.display = 'none';
             // Force reflow
             void element.offsetHeight;
             element.style.display = '';
           }
         });
-      }, 150); // Increased debounce time
+      }, 200); // Increased debounce time further
     });
 
+    console.log('Setting up ResizeObserver');
     observer.observe(element);
 
     return () => {
+      console.log('Cleaning up ResizeObserver');
       if (frameRef.current) {
         cancelAnimationFrame(frameRef.current);
       }
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
       }
       observer.disconnect();
     };
