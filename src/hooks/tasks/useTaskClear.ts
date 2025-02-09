@@ -10,14 +10,20 @@ export const useTaskClear = (
 ) => {
   const handleTasksClear = useCallback(() => {
     setTasks([]);
-    onTasksUpdate?.([]);
+    setSelectedTask(null);
+    if (onTasksUpdate) {
+      onTasksUpdate([]);
+    }
     toast("Tasks cleared 🗑️");
-  }, [onTasksUpdate, setTasks]);
+  }, [onTasksUpdate, setTasks, setSelectedTask]);
 
   const handleSelectedTasksClear = useCallback((taskIds: string[]) => {
     setTasks(prev => {
       const newTasks = prev.filter(task => !taskIds.includes(task.id));
-      onTasksUpdate?.(newTasks);
+      if (onTasksUpdate) {
+        // Call onTasksUpdate after state update to avoid loop
+        setTimeout(() => onTasksUpdate(newTasks), 0);
+      }
       return newTasks;
     });
     

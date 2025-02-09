@@ -13,23 +13,24 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
-  const isProcessingRef = useRef(false);
+  const rafRef = useRef<number>();
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
-    let rafId: number;
     
     const observer = new ResizeObserver(() => {
-      if (isProcessingRef.current) return;
+      // Cancel any pending rAF
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
       
-      rafId = requestAnimationFrame(() => {
-        isProcessingRef.current = true;
+      // Schedule new update
+      rafRef.current = requestAnimationFrame(() => {
         if (containerRef.current) {
           containerRef.current.style.minHeight = '0';
         }
-        isProcessingRef.current = false;
       });
     });
 
@@ -37,10 +38,9 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
 
     return () => {
       observer.disconnect();
-      if (rafId) {
-        cancelAnimationFrame(rafId);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
       }
-      isProcessingRef.current = false;
     };
   }, []);
 
