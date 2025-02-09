@@ -5,13 +5,20 @@ import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { Header } from "@/components/layout/Header";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
+import { startOfDay, isToday } from "date-fns";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 import type { ActiveTemplate } from "@/components/habits/types";
+import { toast } from "sonner";
 
 const Index = () => {
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
+
+  const [lastSyncDate, setLastSyncDate] = useState(() => {
+    const saved = localStorage.getItem('lastSyncDate');
+    return saved ? new Date(saved) : new Date();
+  });
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     try {
@@ -57,6 +64,28 @@ const Index = () => {
 
   const { todaysHabits } = useTodaysHabits(activeTemplates);
 
+  // Check if we need to reset tasks for a new day
+  useEffect(() => {
+    const today = startOfDay(new Date());
+    const lastSync = startOfDay(new Date(lastSyncDate));
+
+    if (!isToday(lastSync)) {
+      // Clear non-habit tasks and reset habit tasks for the new day
+      const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
+      const resetHabitTasks = habitTasks.map(task => ({
+        ...task,
+        completed: false
+      }));
+
+      setTasks(resetHabitTasks);
+      localStorage.setItem('taskList', JSON.stringify(resetHabitTasks));
+      localStorage.setItem('lastSyncDate', today.toISOString());
+      setLastSyncDate(today);
+      
+      toast.info("Tasks have been reset for the new day");
+    }
+  }, [lastSyncDate, tasks]);
+
   useEffect(() => {
     const handleTemplateUpdate = () => {
       try {
@@ -76,7 +105,7 @@ const Index = () => {
     };
   }, []);
 
-  // Convert only timer-type habits into tasks
+  // Convert timer-type habits into tasks with improved date handling
   useEffect(() => {
     const timerHabits = todaysHabits.filter(habit => 
       habit.metrics.type === 'timer' && 
@@ -89,12 +118,13 @@ const Index = () => {
     // Get non-habit tasks
     const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
     
-    // Convert timer habits to tasks
+    // Convert timer habits to tasks with date tracking
     const habitTasks: Task[] = timerHabits.map(habit => ({
       id: `habit-${habit.id}`,
       name: habit.name,
       completed: false,
-      duration: habit.metrics.target || 30, // Default to 30 minutes if no target specified
+      duration: habit.metrics.target || 30,
+      createdAt: new Date().toISOString(),
     }));
 
     const newTasks = [...nonHabitTasks, ...habitTasks];
@@ -158,3 +188,4 @@ const Index = () => {
 };
 
 export default Index;
+

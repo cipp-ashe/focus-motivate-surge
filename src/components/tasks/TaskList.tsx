@@ -10,6 +10,7 @@ export interface Task {
   name: string;
   completed: boolean;
   duration?: number;
+  createdAt?: string;
   metrics?: {
     expectedTime: number;
     actualDuration: number;

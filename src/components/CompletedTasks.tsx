@@ -38,6 +38,17 @@ const formatDuration = (seconds: number): string => {
   return `${remainingSeconds}s`;
 };
 
+const formatDate = (dateString?: string): string => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 const getCompletionStatusColor = (status: string) => {
   switch (status) {
     case 'Completed Early':
@@ -91,6 +102,7 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Task</TableHead>
+                      <TableHead>Completion Time</TableHead>
                       <TableHead>Time</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Metrics</TableHead>
@@ -119,6 +131,12 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                             <div className="line-through text-muted-foreground">
                               {task.name}
                             </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {formatDate(task.createdAt)}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-2 text-sm text-muted-foreground">
+                            {task.metrics?.endTime ? formatDate(task.metrics.endTime) : '-'}
                           </TableCell>
                           <TableCell className="py-2">
                             <div className="flex flex-col space-y-1">
