@@ -9,16 +9,16 @@ interface HabitTrackerHeaderProps {
 
 const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ onConfigureTemplates }) => {
   return (
-    <div className="flex justify-between items-center">
-      <h2 className="text-2xl font-bold tracking-tight">Habit Configuration</h2>
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Habit Configuration</h2>
       <Button
         onClick={onConfigureTemplates}
         variant="outline"
         size="sm"
-        className="gap-2"
+        className="w-full sm:w-auto gap-2"
       >
         <Settings className="h-4 w-4" />
-        Configure Habit Templates
+        <span className="whitespace-nowrap">Configure Templates</span>
       </Button>
     </div>
   );

@@ -28,7 +28,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
   } = useDragAndDrop(activeTemplates, () => {});
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-2 sm:px-0">
       {activeTemplates.map((template, index) => {
         const templateInfo = habitTemplates.find(t => t.id === template.templateId);
         if (!templateInfo) return null;
@@ -40,7 +40,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
             onDragStart={(e) => handleDragStart(e, index)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragEnd={handleDragEnd}
-            className={`cursor-grab active:cursor-grabbing transition-transform ${
+            className={`transition-transform ${
               draggedIndex === index ? 'scale-[1.02] opacity-75' : ''
             }`}
           >
