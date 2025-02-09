@@ -51,6 +51,7 @@ const Index = () => {
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
+  // Load active templates with their tags
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
       const saved = localStorage.getItem('habit-templates');
