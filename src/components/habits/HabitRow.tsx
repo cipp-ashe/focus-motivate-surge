@@ -1,12 +1,8 @@
+
 import React from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Grid,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { GripVertical, Trash2 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { HabitDetail } from './types';
 import HabitMetric from './HabitMetric';
 
@@ -26,34 +22,35 @@ const HabitRow: React.FC<HabitRowProps> = ({
   dragHandleProps,
 }) => {
   return (
-    <Box sx={{ p: 2, borderRadius: 1, bgcolor: 'background.paper' }}>
-      <Grid container spacing={2} alignItems="center">
+    <Card className="p-4 mb-2">
+      <div className="flex items-center gap-4">
         {dragHandleProps && (
-          <Grid item>
-            <Box {...dragHandleProps}>
-              <DragIndicatorIcon sx={{ cursor: 'grab' }} />
-            </Box>
-          </Grid>
+          <div {...dragHandleProps} className="cursor-grab">
+            <GripVertical className="h-5 w-5 text-muted-foreground" />
+          </div>
         )}
         {onDelete && (
-          <Grid item>
-            <IconButton size="small" onClick={onDelete}>
-              <DeleteIcon />
-            </IconButton>
-          </Grid>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={onDelete}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         )}
-        <Grid item xs>
-          <Typography variant="subtitle2">{habit.name}</Typography>
-        </Grid>
-        <Grid item>
+        <div className="flex-1">
+          <h3 className="text-sm font-medium">{habit.name}</h3>
+        </div>
+        <div>
           <HabitMetric
             habit={habit}
             progress={{ value, streak: 0 }}
             onUpdate={onUpdate}
           />
-        </Grid>
-      </Grid>
-    </Box>
+        </div>
+      </div>
+    </Card>
   );
 };
 

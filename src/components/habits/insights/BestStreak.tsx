@@ -1,10 +1,6 @@
 
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HabitProgress } from '../types';
 
 interface BestStreakProps {
@@ -41,17 +37,17 @@ const BestStreak: React.FC<BestStreakProps> = ({ progress }) => {
   };
 
   return (
-    <Card elevation={0}>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Best Streak</CardTitle>
+      </CardHeader>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Best Streak
-        </Typography>
-        <Typography variant="h4" color="primary">
+        <div className="text-3xl font-bold text-primary">
           {getBestStreak()} days
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">
           Keep building your momentum!
-        </Typography>
+        </p>
       </CardContent>
     </Card>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,7 @@ const HabitTracker: React.FC = () => {
   } = useHabitProgress();
 
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
-  const [dialog, setDialog] = useState<DialogState>({ type: 'template', open: false });
+  const [dialog, setDialog] = useState<DialogState>({ type: 'customize', open: false });
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {

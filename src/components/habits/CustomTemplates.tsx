@@ -1,15 +1,10 @@
+
 import React from 'react';
-import {
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Typography,
-  Box,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { HabitTemplate } from '../../types';
+import { Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { HabitTemplate } from './types';
 
 export interface CustomTemplatesProps {
   templates: HabitTemplate[];
@@ -24,52 +19,42 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
 }) => {
   if (templates.length === 0) {
     return (
-      <Box sx={{ mt: 2, p: 2, textAlign: 'center' }}>
-        <Typography color="text.secondary">
-          No custom templates yet. Create your first template to see it here.
-        </Typography>
-      </Box>
+      <div className="mt-4 p-4 text-center text-muted-foreground">
+        No custom templates yet. Create your first template to see it here.
+      </div>
     );
   }
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <List>
+    <ScrollArea className="mt-4 h-[300px]">
+      <div className="space-y-2 p-1">
         {templates.map((template) => (
-          <ListItem
-            key={template.id}
-            sx={{
-              bgcolor: 'background.paper',
-              mb: 1,
-              borderRadius: 1,
-            }}
-          >
-            <ListItemText
-              primary={template.name}
-              secondary={
-                <>
-                  <Typography variant="body2" color="text.secondary">
+          <Card key={template.id} className="relative">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <h3 className="font-medium">{template.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
                     {template.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
                     {template.category} • {template.defaultHabits.length} habits
-                  </Typography>
-                </>
-              }
-            />
-            <ListItemSecondaryAction>
-              <IconButton
-                edge="end"
-                onClick={() => onSelect(template)}
-                disabled={activeTemplateIds.includes(template.id)}
-              >
-                <AddIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
+                  </p>
+                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => onSelect(template)}
+                  disabled={activeTemplateIds.includes(template.id)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ))}
-      </List>
-    </Box>
+      </div>
+    </ScrollArea>
   );
 };
 

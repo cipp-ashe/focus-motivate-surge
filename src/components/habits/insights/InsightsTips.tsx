@@ -1,12 +1,6 @@
 
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Box,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HabitDetail } from '../types';
 
 interface InsightsTipsProps {
@@ -15,27 +9,25 @@ interface InsightsTipsProps {
 
 const InsightsTips: React.FC<InsightsTipsProps> = ({ habit }) => {
   return (
-    <Card elevation={0}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Insights & Tips
-        </Typography>
-        <Stack spacing={2}>
-          {habit.insights.map((insight, index) => (
-            <Box key={index}>
-              <Typography variant="subtitle2" color="primary" gutterBottom>
-                {insight.type === 'streak' ? '🔥' :
-                 insight.type === 'completion' ? '✅' :
-                 insight.type === 'timing' ? '⏰' : '🔄'} {insight.description}
-              </Typography>
-            </Box>
-          ))}
-          {habit.tips.map((tip, index) => (
-            <Typography key={index} variant="body2" color="text.secondary">
-              💡 {tip}
-            </Typography>
-          ))}
-        </Stack>
+    <Card>
+      <CardHeader>
+        <CardTitle>Insights & Tips</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {habit.insights.map((insight, index) => (
+          <div key={index} className="space-y-1">
+            <p className="text-sm font-medium text-primary">
+              {insight.type === 'streak' ? '🔥' :
+               insight.type === 'completion' ? '✅' :
+               insight.type === 'timing' ? '⏰' : '🔄'} {insight.description}
+            </p>
+          </div>
+        ))}
+        {habit.tips.map((tip, index) => (
+          <p key={index} className="text-sm text-muted-foreground">
+            💡 {tip}
+          </p>
+        ))}
       </CardContent>
     </Card>
   );

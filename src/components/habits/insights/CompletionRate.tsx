@@ -1,13 +1,7 @@
 
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  LinearProgress,
-  useTheme,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { HabitProgress } from '../types';
 
 interface CompletionRateProps {
@@ -15,8 +9,6 @@ interface CompletionRateProps {
 }
 
 const CompletionRate: React.FC<CompletionRateProps> = ({ progress }) => {
-  const theme = useTheme();
-
   const getCompletionRate = (): number => {
     const totalDays = progress.length;
     if (totalDays === 0) return 0;
@@ -29,37 +21,17 @@ const CompletionRate: React.FC<CompletionRateProps> = ({ progress }) => {
   };
 
   return (
-    <Card elevation={0}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Completion Rate
-        </Typography>
-        <Box sx={{ position: 'relative', pt: 2 }}>
-          <LinearProgress
-            variant="determinate"
-            value={getCompletionRate()}
-            sx={{
-              height: 10,
-              borderRadius: 5,
-              bgcolor: theme.palette.grey[200],
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 5,
-              },
-            }}
-          />
-          <Typography
-            variant="h4"
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              color: theme.palette.text.secondary,
-            }}
-          >
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Completion Rate</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex justify-center">
+          <span className="text-3xl font-bold text-primary">
             {Math.round(getCompletionRate())}%
-          </Typography>
-        </Box>
+          </span>
+        </div>
+        <Progress value={getCompletionRate()} className="h-2" />
       </CardContent>
     </Card>
   );
