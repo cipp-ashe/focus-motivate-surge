@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
-import { ActiveTemplate, DayOfWeek } from './types';
+import { ActiveTemplate, DayOfWeek, HabitTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateManager from './TemplateManager';
@@ -18,6 +18,7 @@ const HabitTracker: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
+  const [allTemplates, setAllTemplates] = useState<HabitTemplate[]>(habitTemplates);
 
   const {
     activeTemplates,
@@ -32,12 +33,32 @@ const HabitTracker: React.FC = () => {
     updateProgress,
   } = useHabitProgress();
 
+  // Load custom templates from localStorage
+  useEffect(() => {
+    const loadCustomTemplates = () => {
+      const customTemplatesStr = localStorage.getItem('custom-templates');
+      const customTemplates = customTemplatesStr ? JSON.parse(customTemplatesStr) : [];
+      setAllTemplates([...habitTemplates, ...customTemplates]);
+    };
+
+    loadCustomTemplates();
+    window.addEventListener('templatesUpdated', loadCustomTemplates);
+    
+    return () => {
+      window.removeEventListener('templatesUpdated', loadCustomTemplates);
+    };
+  }, []);
+
   const handleTemplateSelect = (templateId: string) => {
-    const template = habitTemplates.find(t => t.id === templateId);
+    const template = allTemplates.find(t => t.id === templateId);
     if (template) {
-      addTemplate(template);
+      addTemplate({
+        templateId: template.id,
+        habits: template.defaultHabits || [],
+        activeDays: template.defaultDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        customized: false,
+      });
       setIsConfigOpen(false);
-      // Dispatch update event
       window.dispatchEvent(new Event('templatesUpdated'));
     }
   };
@@ -69,7 +90,6 @@ const HabitTracker: React.FC = () => {
     if (!selectedTemplate) return;
     const updatedTemplate = { ...selectedTemplate, ...updates };
     setSelectedTemplate(updatedTemplate);
-    console.log('Template updated:', updatedTemplate);
   };
 
   const handleSaveTemplate = () => {
@@ -86,6 +106,24 @@ const HabitTracker: React.FC = () => {
     }
 
     if (isCreatingTemplate) {
+      // Save as a new custom template
+      const customTemplate: HabitTemplate = {
+        id: selectedTemplate.templateId,
+        name: newTemplateName,
+        description: 'Custom template',
+        category: 'Custom',
+        defaultHabits: selectedTemplate.habits,
+        defaultDays: selectedTemplate.activeDays,
+        duration: null,
+      };
+
+      // Save to localStorage
+      const existingTemplatesStr = localStorage.getItem('custom-templates');
+      const existingTemplates = existingTemplatesStr ? JSON.parse(existingTemplatesStr) : [];
+      const updatedTemplates = [...existingTemplates, customTemplate];
+      localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
+
+      // Add to active templates
       const updatedTemplate = { 
         ...selectedTemplate,
         name: newTemplateName,
@@ -94,17 +132,14 @@ const HabitTracker: React.FC = () => {
       addTemplate(updatedTemplate);
       toast.success('Template saved successfully');
       handleCloseTemplate();
-      // Dispatch update event
       window.dispatchEvent(new Event('templatesUpdated'));
     } else {
       updateTemplate(selectedTemplate.templateId, selectedTemplate);
       toast.success('Template updated successfully');
       handleCloseTemplate();
-      // Dispatch update event
       window.dispatchEvent(new Event('templatesUpdated'));
     }
     
-    // Close the configuration panel
     setIsConfigOpen(false);
   };
 
@@ -135,7 +170,7 @@ const HabitTracker: React.FC = () => {
             </div>
             <div className="flex-1 overflow-hidden">
               <TemplateManager
-                availableTemplates={habitTemplates}
+                availableTemplates={allTemplates}
                 activeTemplateIds={activeTemplates.map(t => t.templateId)}
                 onSelectTemplate={handleTemplateSelect}
                 onCreateTemplate={handleCreateTemplate}
