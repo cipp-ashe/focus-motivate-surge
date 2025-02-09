@@ -20,12 +20,14 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     setTodaysHabits(activeHabits);
   }, [activeTemplates]);
 
-  const convertHabitToTask = useCallback((habit: HabitDetail): Task => ({
-    id: `habit-task-${habit.id}`,
-    name: habit.name,
-    completed: false,
-    duration: habit.duration || 25,
-  }), []);
+  const convertHabitToTask = useCallback((habit: HabitDetail): Task => {
+    return {
+      id: `habit-task-${habit.id}`,
+      name: habit.name,
+      completed: false,
+      duration: habit.duration || 25,
+    };
+  }, []);
 
   return {
     todaysHabits,

@@ -10,7 +10,7 @@ import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
-import type { HabitDetail } from "@/components/habits/types";
+import type { HabitDetail, ActiveTemplate } from "@/components/habits/types";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
@@ -52,7 +52,7 @@ const Index = () => {
   });
 
   // Load active templates from localStorage
-  const [activeTemplates] = useState(() => {
+  const [activeTemplates] = useState<ActiveTemplate[]>(() => {
     try {
       const saved = localStorage.getItem('habit-templates');
       return saved ? JSON.parse(saved) : [];
