@@ -22,14 +22,14 @@ const DaySelector: React.FC<DaySelectorProps> = ({
           onUpdateDays(values as DayOfWeek[]);
         }
       }}
-      className="flex flex-wrap gap-2"
+      className="flex flex-wrap gap-1"
     >
       {DAYS_OF_WEEK.map((day) => (
         <ToggleGroupItem
           key={day}
           value={day}
           aria-label={`Toggle ${day}`}
-          className="flex-1 min-w-[40px] data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+          className="flex-1 min-w-[36px] h-8 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
         >
           {day.charAt(0)}
         </ToggleGroupItem>

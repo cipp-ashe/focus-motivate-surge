@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ActiveTemplate, DayOfWeek } from './types';
 import TemplateManager from './TemplateManager';
+import { toast } from 'sonner';
 
 interface TemplateConfigurationSheetProps {
   selectedTemplate: ActiveTemplate | null;
@@ -28,6 +29,20 @@ const TemplateConfigurationSheet: React.FC<TemplateConfigurationSheetProps> = ({
   onSave,
 }) => {
   if (!selectedTemplate) return null;
+
+  const handleSave = () => {
+    if (isCreatingTemplate && !newTemplateName.trim()) {
+      toast.error('Please enter a template name');
+      return;
+    }
+
+    if (!selectedTemplate.habits?.length) {
+      toast.error('Please add at least one habit to the template');
+      return;
+    }
+
+    onSave();
+  };
 
   return (
     <Sheet 
@@ -64,7 +79,7 @@ const TemplateConfigurationSheet: React.FC<TemplateConfigurationSheetProps> = ({
               onUpdateTemplate={onUpdateTemplate}
               onUpdateDays={(days) => onUpdateDays(selectedTemplate.templateId, days)}
               onClose={onClose}
-              onSave={onSave}
+              onSave={handleSave}
             />
           </div>
         </div>
@@ -74,4 +89,3 @@ const TemplateConfigurationSheet: React.FC<TemplateConfigurationSheetProps> = ({
 };
 
 export default TemplateConfigurationSheet;
-

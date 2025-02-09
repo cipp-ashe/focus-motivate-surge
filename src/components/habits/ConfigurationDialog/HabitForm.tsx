@@ -25,42 +25,44 @@ const HabitForm: React.FC<HabitFormProps> = ({
     habit.metrics.target || '';
 
   return (
-    <Card className="p-4 space-y-4">
-      <div className="flex items-center gap-4">
-        <div
-          className="cursor-grab touch-none"
-          onMouseDown={onDragStart}
-          onTouchStart={onDragStart}
-        >
-          <GripVertical className="h-5 w-5 text-muted-foreground" />
-        </div>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onDelete}
-          className="h-8 w-8"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-
-        <div className="flex-1 space-y-4">
+    <Card className="p-3">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <div
+            className="cursor-grab touch-none"
+            onMouseDown={onDragStart}
+            onTouchStart={onDragStart}
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+          
           <Input
             placeholder="Habit name"
             value={habit.name}
             onChange={(e) => onUpdate({ name: e.target.value })}
+            className="flex-1"
           />
 
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onDelete}
+            className="h-8 w-8 shrink-0"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
           <Select
             value={habit.metrics.type}
             onValueChange={(value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
-              console.log('Changing habit type to:', value);
               onUpdate({
                 metrics: {
                   type: value,
                   ...(value === 'timer' && { 
                     unit: 'seconds', 
-                    target: 1500,
+                    target: 1500, // 25 minutes default
                     min: 60,
                   }),
                   ...(value === 'count' && { target: 1 }),
@@ -69,8 +71,8 @@ const HabitForm: React.FC<HabitFormProps> = ({
               });
             }}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select tracking type" />
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="boolean">Checkbox</SelectItem>
@@ -81,49 +83,51 @@ const HabitForm: React.FC<HabitFormProps> = ({
           </Select>
 
           {habit.metrics.type === 'timer' && (
-            <div className="space-y-2">
+            <div className="flex-1">
               <Input
-                type="text"
-                inputMode="numeric"
-                pattern="\d*"
-                placeholder="Duration in minutes"
+                type="number"
+                placeholder="Minutes"
                 value={displayMinutes}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === '' || /^\d+$/.test(value)) {
                     const minutes = parseInt(value || '0');
                     if (!isNaN(minutes)) {
-                      const seconds = minutes * 60;
-                      console.log(`Setting timer duration: ${minutes} minutes (${seconds} seconds)`);
                       onUpdate({
                         metrics: {
                           ...habit.metrics,
-                          target: seconds,
+                          target: minutes * 60,
                         },
                       });
                     }
                   }
                 }}
+                min={1}
+                max={60}
+                className="w-full"
               />
-              <p className="text-xs text-muted-foreground">
-                Enter duration in minutes (stored as seconds internally)
-              </p>
             </div>
           )}
 
           {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && (
             <Input
               type="number"
-              placeholder="Target value"
+              placeholder="Target"
               value={habit.metrics.target || ''}
-              onChange={(e) => onUpdate({
-                metrics: {
-                  ...habit.metrics,
-                  target: parseInt(e.target.value),
-                },
-              })}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value)) {
+                  onUpdate({
+                    metrics: {
+                      ...habit.metrics,
+                      target: value,
+                    },
+                  });
+                }
+              }}
               min={habit.metrics.type === 'rating' ? 1 : undefined}
               max={habit.metrics.type === 'rating' ? 5 : undefined}
+              className="flex-1"
             />
           )}
         </div>

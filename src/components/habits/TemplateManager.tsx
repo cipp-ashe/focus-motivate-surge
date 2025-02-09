@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, GripVertical, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -69,14 +70,14 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                   onUpdateDays?.(values as DayOfWeek[]);
                 }
               }}
-              className="flex flex-wrap gap-1.5"
+              className="flex flex-wrap gap-1"
             >
               {DAYS_OF_WEEK.map((day) => (
                 <ToggleGroupItem
                   key={day}
                   value={day}
                   aria-label={`Toggle ${day}`}
-                  className="flex-1 min-w-[36px] data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-primary/10 transition-colors"
+                  className="flex-1 min-w-[36px] h-8 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                 >
                   {day.charAt(0)}
                 </ToggleGroupItem>
@@ -96,23 +97,19 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                     habits: [...(templateToEdit.habits || []), newHabit]
                   });
                 }}
-                className="hover:bg-primary/10 transition-colors group"
               >
-                <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                <Plus className="h-4 w-4 mr-2" />
                 Add Habit
               </Button>
             </div>
 
-            <ScrollArea className="relative" style={{ height: `calc(${containerHeight} - 12rem)` }}>
+            <ScrollArea className="h-[calc(100vh-20rem)]">
               <div className="space-y-2 pr-4">
                 {(templateToEdit.habits || []).map((habit, index) => (
                   <div
                     key={habit.id}
-                    className="group relative transition-all hover:scale-[1.01]"
+                    className="transition-all hover:scale-[1.01]"
                   >
-                    <div className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <GripVertical className="h-4 w-4 text-muted-foreground" />
-                    </div>
                     <HabitForm
                       habit={habit}
                       onUpdate={(updates) => {
@@ -133,8 +130,8 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
           </div>
         </div>
 
-        <div className="p-4 border-t bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
-          <Button onClick={onSave} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors" size="lg">
+        <div className="p-4 border-t">
+          <Button onClick={onSave} className="w-full" size="lg">
             <Save className="h-4 w-4 mr-2" />
             Save Template
           </Button>
@@ -150,34 +147,32 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
           <Button 
             onClick={onCreateTemplate}
             variant="outline"
-            className="w-full flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors group"
+            className="w-full"
           >
-            <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
+            <Plus className="h-4 w-4 mr-2" />
             Create New Template
           </Button>
+          
           {inactiveTemplates.map((template) => (
             <Card 
               key={template.id} 
-              className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card to-card/50 border-primary/10"
+              className="p-4 hover:shadow-md transition-shadow"
             >
-              <div className="p-4">
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{template.name}</h3>
-                  <p className="text-sm text-muted-foreground">{template.description}</p>
-                  <div className="flex justify-between items-center pt-2">
-                    <span className="text-sm text-muted-foreground">
-                      {template.defaultHabits.length} habits
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onSelectTemplate?.(template.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Template
-                    </Button>
-                  </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">{template.name}</h3>
+                <p className="text-sm text-muted-foreground">{template.description}</p>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-sm text-muted-foreground">
+                    {template.defaultHabits.length} habits
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSelectTemplate?.(template.id)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Template
+                  </Button>
                 </div>
               </div>
             </Card>
