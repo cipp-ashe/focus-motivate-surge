@@ -64,9 +64,13 @@ const TemplateConfiguration: React.FC<TemplateConfigurationProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onUpdateTemplate?.({
-                habits: [...templateToEdit.habits, createEmptyHabit()]
-              })}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onUpdateTemplate?.({
+                  habits: [...templateToEdit.habits, createEmptyHabit()]
+                });
+              }}
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Habit

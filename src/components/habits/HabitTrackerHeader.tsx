@@ -1,16 +1,14 @@
 
 import React from 'react';
-import { Settings, Plus } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface HabitTrackerHeaderProps {
   onConfigureTemplates: () => void;
-  onCreateTemplate?: () => void;
 }
 
 const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ 
   onConfigureTemplates,
-  onCreateTemplate 
 }) => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
