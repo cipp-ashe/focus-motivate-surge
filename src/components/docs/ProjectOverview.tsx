@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { List, Quote as QuoteIcon, Package, Layers, Code, Settings2 } from "lucide-react";
 import {
@@ -145,7 +146,7 @@ export const ProjectOverview: React.FC = () => {
 
         {/* Custom Hooks & Utilities */}
         <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden">
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible>
             <AccordionItem value="hooks-helper">
               <AccordionTrigger className="px-6 py-4 border-b border-border/50">
                 <div className="flex items-center gap-2">
@@ -200,7 +201,7 @@ export const ProjectOverview: React.FC = () => {
 
         {/* Tailwind CSS Helper */}
         <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden">
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible>
             <AccordionItem value="css-helper">
               <AccordionTrigger className="px-6 py-4 border-b border-border/50">
                 <div className="flex items-center gap-2">
@@ -304,3 +305,4 @@ export const ProjectOverview: React.FC = () => {
     </section>
   );
 };
+
