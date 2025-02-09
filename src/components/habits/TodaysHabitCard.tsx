@@ -14,6 +14,8 @@ interface HabitRowProps {
 }
 
 const HabitRow = ({ habit, isCompleted, onComplete, onAddToTasks }: HabitRowProps) => {
+  console.log('Rendering habit row:', { habitId: habit.id, habitName: habit.name, duration: habit.duration });
+  
   return (
     <div className="flex items-center justify-between p-3 bg-card hover:bg-accent/50 rounded-md transition-colors">
       <div className="flex items-center gap-3">
@@ -62,7 +64,14 @@ export const TodaysHabitCard = ({
   if (habits.length === 0) return null;
 
   const handleAddToTasks = (habit: HabitDetail) => {
+    console.log('Attempting to add habit to tasks:', { 
+      habitId: habit.id, 
+      habitName: habit.name, 
+      duration: habit.duration 
+    });
+    
     if (!habit.duration) {
+      console.warn('Habit has no duration:', habit);
       toast.error("This habit doesn't have a duration set");
       return;
     }
@@ -99,3 +108,4 @@ export const TodaysHabitCard = ({
     </Card>
   );
 };
+
