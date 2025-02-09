@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Plus } from 'lucide-react';
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
@@ -53,15 +52,6 @@ const HabitTracker: React.FC = () => {
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
       <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
-      
-      <Button 
-        onClick={handleCreateTemplate}
-        variant="outline"
-        className="w-full flex items-center justify-center gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Create New Template
-      </Button>
 
       <TemplateList
         activeTemplates={activeTemplates}
@@ -80,6 +70,7 @@ const HabitTracker: React.FC = () => {
             availableTemplates={habitTemplates}
             activeTemplateIds={activeTemplates.map(t => t.templateId)}
             onSelectTemplate={handleTemplateSelect}
+            onCreateTemplate={handleCreateTemplate}
           />
         </SheetContent>
       </Sheet>
@@ -116,4 +107,3 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
-
