@@ -18,32 +18,33 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
-    let rafId: number;
+    let rafId: number | null = null;
+    let queued = false;
     
-    const observer = new ResizeObserver((entries) => {
-      // Cancel any pending rAF
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-      }
+    const handleResize = (entries: ResizeObserverEntry[]) => {
+      const entry = entries[0];
       
-      // Schedule a new update
-      rafId = requestAnimationFrame(() => {
-        entries.forEach(entry => {
-          if (entry.target === element && element) {
-            // Only force reflow if element dimensions actually changed
-            if (entry.contentRect.width !== element.offsetWidth || 
-                entry.contentRect.height !== element.offsetHeight) {
+      if (!queued) {
+        queued = true;
+        rafId = requestAnimationFrame(() => {
+          if (entry && element) {
+            const newWidth = entry.contentRect.width;
+            const newHeight = entry.contentRect.height;
+            
+            if (newWidth !== element.offsetWidth || newHeight !== element.offsetHeight) {
               element.style.display = 'none';
-              // Force reflow
               void element.offsetHeight;
               element.style.display = '';
             }
           }
+          queued = false;
+          rafId = null;
         });
-      });
-    });
+      }
+    };
 
-    observer.observe(element);
+    const observer = new ResizeObserver(handleResize);
+    observer.observe(element, { box: 'border-box' });
 
     return () => {
       if (rafId) {
@@ -73,4 +74,3 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     </div>
   );
 };
-
