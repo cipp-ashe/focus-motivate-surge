@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart, Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, BarChart } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HabitDetail, HabitTemplate } from './types';
@@ -51,9 +51,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2">
           {template.habits.map((habit) => (
-            <div key={habit.id} className="flex items-center space-x-2">
+            <div key={habit.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <span className="text-sm font-medium">{habit.name}</span>
               <HabitMetric
                 habit={habit}
                 progress={getProgress(habit.id)}
@@ -68,4 +69,3 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 };
 
 export default TemplateCard;
-
