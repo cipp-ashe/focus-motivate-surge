@@ -1,6 +1,6 @@
+
 import { useState, useCallback } from "react";
 import { Task } from "@/components/tasks/TaskList";
-import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { toast } from "sonner";
 
@@ -28,7 +28,6 @@ export const useTaskOperations = ({
     
     setTasks(prev => {
       const newTasks = [...prev, task];
-      console.log('Updated task list:', newTasks.map(t => ({ id: t.id, name: t.name })));
       onTasksUpdate?.(newTasks);
       return newTasks;
     });
@@ -37,7 +36,6 @@ export const useTaskOperations = ({
   }, [onTasksUpdate]);
 
   const handleTaskSelect = useCallback((task: Task, event?: React.MouseEvent) => {
-    // Only handle selection if it's not a ctrl+click
     if (event?.ctrlKey) return;
 
     // Find existing task to preserve any existing properties
@@ -47,23 +45,13 @@ export const useTaskOperations = ({
     // Create updated task with all properties
     const updatedTask = { ...existingTask, ...task };
 
-    // Always update task list to ensure state is in sync
-    setTasks(prev => {
-      const updatedTasks = prev.map(t => 
-        t.id === task.id ? updatedTask : t
-      );
-      onTasksUpdate?.(updatedTasks);
-      return updatedTasks;
-    });
-
-    // Always update selection to ensure timer gets latest task state
     setSelectedTask(updatedTask);
     
     // Only show toast if it's a selection, not a duration update
     if (!task.duration || task.duration === existingTask.duration) {
       toast(task.name);
     }
-  }, [tasks, onTasksUpdate]);
+  }, [tasks]);
 
   const handleTaskComplete = useCallback((metrics: TimerStateMetrics) => {
     console.log('Completing task:', {
@@ -82,16 +70,12 @@ export const useTaskOperations = ({
         completed: true,
         metrics: metrics
       }];
-      console.log('Updated completed tasks list:', 
-        newCompleted.map(t => ({ id: t.id, name: t.name }))
-      );
       onCompletedTasksUpdate?.(newCompleted);
       return newCompleted;
     });
     
     setTasks(prev => {
       const newTasks = prev.filter(t => t.id !== selectedTask.id);
-      console.log('Removed completed task from active tasks');
       onTasksUpdate?.(newTasks);
       return newTasks;
     });
@@ -112,9 +96,6 @@ export const useTaskOperations = ({
     
     setTasks(prev => {
       const newTasks = prev.filter(task => !taskIds.includes(task.id));
-      console.log('Remaining tasks after clear:', 
-        newTasks.map(t => ({ id: t.id, name: t.name }))
-      );
       onTasksUpdate?.(newTasks);
       return newTasks;
     });

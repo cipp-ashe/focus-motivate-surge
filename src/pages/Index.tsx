@@ -48,7 +48,6 @@ const Index = () => {
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
-  // Load active templates from localStorage and update when they change
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
       const saved = localStorage.getItem('habit-templates');
@@ -94,8 +93,8 @@ const Index = () => {
   };
 
   const handleTasksUpdate = (newTasks: Task[]) => {
-    setTasks(newTasks);
     localStorage.setItem('taskList', JSON.stringify(newTasks));
+    setTasks(newTasks);
   };
 
   const handleCompletedTasksUpdate = (tasks: Task[]) => {
@@ -103,8 +102,8 @@ const Index = () => {
   };
 
   const handleFavoritesUpdate = (newFavorites: Quote[]) => {
-    setFavorites(newFavorites);
     localStorage.setItem('favoriteQuotes', JSON.stringify(newFavorites));
+    setFavorites(newFavorites);
   };
 
   const handleAddHabitToTasks = (habit: HabitDetail) => {
@@ -123,8 +122,7 @@ const Index = () => {
     };
 
     const updatedTasks = [newTask, ...tasks];
-    setTasks(updatedTasks);
-    localStorage.setItem('taskList', JSON.stringify(updatedTasks));
+    handleTasksUpdate(updatedTasks);
     setSelectedTaskId(newTask.id);
     toast.success(`Started "${habit.name}"`);
   };
@@ -169,4 +167,3 @@ const Index = () => {
 };
 
 export default Index;
-
