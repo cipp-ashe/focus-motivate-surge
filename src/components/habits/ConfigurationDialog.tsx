@@ -1,22 +1,26 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  Grid,
-  Box,
-  Stack,
-  Typography,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, GripVertical } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { HabitDetail, DayOfWeek, DAYS_OF_WEEK } from './types';
-import { habitTemplates } from '../../utils/habitTemplates';
+import { DAYS_OF_WEEK } from './types';
+import { cn } from "@/lib/utils";
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -37,12 +41,11 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
   activeDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
   onUpdateDays = () => {},
 }) => {
-  const [habits, setHabits] = useState<HabitDetail[]>(initialHabits);
-
-  const [currentDays, setCurrentDays] = useState<DayOfWeek[]>(activeDays);
+  const [habits, setHabits] = useState(initialHabits);
+  const [currentDays, setCurrentDays] = useState(activeDays);
   
   const handleAddHabit = () => {
-    const newHabit: HabitDetail = {
+    const newHabit = {
       id: `habit-${Date.now()}`,
       name: 'New Habit',
       description: '',
@@ -57,16 +60,12 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
 
   const handleUpdateHabit = (index: number, updates: Partial<HabitDetail>) => {
     const updatedHabits = [...habits];
-    updatedHabits[index] = {
-      ...updatedHabits[index],
-      ...updates,
-    };
+    updatedHabits[index] = { ...updatedHabits[index], ...updates };
     setHabits(updatedHabits);
   };
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-
     const items = Array.from(habits);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
@@ -78,7 +77,6 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
       ? currentDays.filter(d => d !== day)
       : [...currentDays, day];
     
-    // Ensure at least one day is selected
     if (updatedDays.length > 0) {
       setCurrentDays(updatedDays);
       onUpdateDays(updatedDays);
@@ -86,93 +84,86 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-    >
-      <DialogTitle>Configure Template</DialogTitle>
-      <DialogContent>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle1" gutterBottom>
-            Active Days
-          </Typography>
-          <Stack direction="row" spacing={1}>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogHeader>
+        <DialogTitle>Configure Template</DialogTitle>
+      </DialogHeader>
+      <DialogContent className="max-h-[80vh] overflow-hidden flex flex-col">
+        <div className="mb-6">
+          <h4 className="text-sm font-medium mb-3">Active Days</h4>
+          <div className="flex gap-2">
             {DAYS_OF_WEEK.map((day) => (
               <Button
                 key={day}
-                variant={currentDays.includes(day) ? "contained" : "outlined"}
-                size="small"
+                variant={currentDays.includes(day) ? "default" : "outline"}
+                size="sm"
                 onClick={() => handleDayToggle(day)}
-                sx={{
-                  minWidth: 40,
-                  height: 32,
-                }}
+                className="w-10 h-8 p-0"
               >
-                {day.slice(0, 1)}
+                {day[0]}
               </Button>
             ))}
-          </Stack>
-        </Box>
+          </div>
+        </div>
 
-        <Typography variant="subtitle1" gutterBottom>
-          Configure Habits
-        </Typography>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="habits">
-            {(provided) => (
-              <Stack spacing={3} sx={{ mt: 1 }} ref={provided.innerRef} {...provided.droppableProps}>
-                {habits.map((habit, index) => (
-                  <Draggable key={habit.id} draggableId={habit.id} index={index}>
-                    {(provided) => (
-                      <Box
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        sx={{ bgcolor: 'background.default', p: 2, borderRadius: 2 }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          <Box {...provided.dragHandleProps} sx={{ mr: 1, cursor: 'grab' }}>
-                            <DragIndicatorIcon />
-                          </Box>
-                          <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                              <TextField
-                                fullWidth
-                                label="Habit Name"
+        <div className="mb-4">
+          <h4 className="text-sm font-medium mb-3">Configure Habits</h4>
+        </div>
+
+        <ScrollArea className="flex-1 pr-4">
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="habits">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="space-y-4"
+                >
+                  {habits.map((habit, index) => (
+                    <Draggable key={habit.id} draggableId={habit.id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className="bg-secondary/50 p-4 rounded-lg"
+                        >
+                          <div className="flex gap-4">
+                            <div {...provided.dragHandleProps} className="cursor-grab">
+                              <GripVertical className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1 space-y-4">
+                              <Input
+                                placeholder="Habit Name"
                                 value={habit.name}
                                 onChange={(e) => handleUpdateHabit(index, { name: e.target.value })}
-                                sx={{ mb: 2 }}
                               />
-                              <TextField
-                                fullWidth
-                                label="Tracking Type"
-                                select
+                              <Select
                                 value={habit.metrics.type}
-                                onChange={(e) => {
-                                  const type = e.target.value as 'boolean' | 'duration' | 'count' | 'rating';
+                                onValueChange={(value: 'boolean' | 'duration' | 'count' | 'rating') => {
                                   handleUpdateHabit(index, {
                                     metrics: {
-                                      type,
-                                      ...(type === 'duration' && { unit: 'minutes', min: 5, target: 30 }),
-                                      ...(type === 'count' && { target: 1 }),
-                                      ...(type === 'rating' && { min: 1, max: 5 }),
+                                      type: value,
+                                      ...(value === 'duration' && { unit: 'minutes', min: 5, target: 30 }),
+                                      ...(value === 'count' && { target: 1 }),
+                                      ...(value === 'rating' && { min: 1, max: 5 }),
                                     },
                                   });
                                 }}
                               >
-                                <MenuItem value="boolean">Checkbox</MenuItem>
-                                <MenuItem value="duration">Duration</MenuItem>
-                                <MenuItem value="count">Counter</MenuItem>
-                                <MenuItem value="rating">Rating</MenuItem>
-                              </TextField>
-                            </Grid>
-                            {habit.metrics.type !== 'boolean' && (
-                              <Grid item xs={12}>
-                                <TextField
-                                  fullWidth
-                                  label="Target Value"
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select tracking type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="boolean">Checkbox</SelectItem>
+                                  <SelectItem value="duration">Duration</SelectItem>
+                                  <SelectItem value="count">Counter</SelectItem>
+                                  <SelectItem value="rating">Rating</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              {habit.metrics.type !== 'boolean' && (
+                                <Input
                                   type="number"
+                                  placeholder="Target Value"
                                   value={habit.metrics.target || ''}
                                   onChange={(e) => handleUpdateHabit(index, {
                                     metrics: {
@@ -181,47 +172,44 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
                                     },
                                   })}
                                 />
-                              </Grid>
-                            )}
-                          </Grid>
-                        </Box>
-                      </Box>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </Stack>
-            )}
-          </Droppable>
-        </DragDropContext>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </ScrollArea>
+
+        <div className="mt-6">
+          <Button
+            variant="outline"
+            onClick={handleAddHabit}
+            className="w-full"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Habit
+          </Button>
+        </div>
       </DialogContent>
-      <Box sx={{ px: 3, pb: 2 }}>
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={handleAddHabit}
-        >
-          Add Habit
-        </Button>
-      </Box>
-      <DialogActions>
-        <Button
-          variant="outlined"
-          onClick={onSaveAsTemplate}
-        >
+      <DialogFooter className="flex justify-between items-center">
+        <Button variant="outline" onClick={onSaveAsTemplate}>
           Save as Custom Template
         </Button>
-        <Box sx={{ flex: 1 }} />
-        <Button onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => onSave(habits)}
-        >
-          Apply Changes
-        </Button>
-      </DialogActions>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={() => onSave(habits)}>
+            Apply Changes
+          </Button>
+        </div>
+      </DialogFooter>
     </Dialog>
   );
 };
