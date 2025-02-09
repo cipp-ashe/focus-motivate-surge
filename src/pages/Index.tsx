@@ -46,6 +46,8 @@ const Index = () => {
     }
   });
 
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
   // Load active templates from localStorage and update when they change
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
@@ -56,8 +58,6 @@ const Index = () => {
       return [];
     }
   });
-
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Listen for template updates
   useEffect(() => {
@@ -94,9 +94,8 @@ const Index = () => {
   };
 
   const handleTasksUpdate = (newTasks: Task[]) => {
-    console.log('Updating tasks:', newTasks);
-    localStorage.setItem('taskList', JSON.stringify(newTasks));
     setTasks(newTasks);
+    localStorage.setItem('taskList', JSON.stringify(newTasks));
   };
 
   const handleCompletedTasksUpdate = (tasks: Task[]) => {
@@ -123,13 +122,10 @@ const Index = () => {
       metrics: undefined
     };
 
-    // Update tasks list
     const updatedTasks = [newTask, ...tasks];
-    handleTasksUpdate(updatedTasks);
-    
-    // Select the new task immediately
+    setTasks(updatedTasks);
+    localStorage.setItem('taskList', JSON.stringify(updatedTasks));
     setSelectedTaskId(newTask.id);
-    
     toast.success(`Started "${habit.name}"`);
   };
 
@@ -158,7 +154,7 @@ const Index = () => {
           onCompletedTasksUpdate={handleCompletedTasksUpdate}
           onFavoritesChange={handleFavoritesUpdate}
           selectedTaskId={selectedTaskId}
-          onTaskSelect={(task) => setSelectedTaskId(task.id)}
+          onTaskSelect={setSelectedTaskId}
         />
 
         <TodaysHabitCard
@@ -173,3 +169,4 @@ const Index = () => {
 };
 
 export default Index;
+

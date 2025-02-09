@@ -15,7 +15,7 @@ interface TaskManagerProps {
   onCompletedTasksUpdate?: (tasks: Task[]) => void;
   onFavoritesChange?: (favorites: Quote[]) => void;
   selectedTaskId?: string | null;
-  onTaskSelect?: (task: Task) => void;
+  onTaskSelect?: (taskId: string | null) => void;
 }
 
 export const TaskManager = ({
@@ -55,26 +55,21 @@ export const TaskManager = ({
 
   const handleTaskSelection = useCallback((task: Task) => {
     handleTaskSelect(task);
-    if (onTaskSelect) {
-      onTaskSelect(task);
-    }
+    onTaskSelect?.(task.id);
   }, [handleTaskSelect, onTaskSelect]);
 
   const handleFavoritesChange = (newFavorites: Quote[]) => {
-    console.log('Updating favorites:', newFavorites.length);
     setFavorites(newFavorites);
     onFavoritesChange?.(newFavorites);
   };
 
   const handleSummaryEmailSent = useCallback(() => {
-    console.log('Sending summary email and clearing completed tasks');
     setCompletedTasks([]);
     onCompletedTasksUpdate?.([]);
     toast.success("Summary sent ✨");
   }, [onCompletedTasksUpdate, setCompletedTasks]);
 
   const handleTaskDurationChange = useCallback((minutes: number) => {
-    console.log('Updating task duration:', minutes);
     if (selectedTask) {
       setTasks(prev => prev.map(task =>
         task.id === selectedTask.id
@@ -95,10 +90,9 @@ export const TaskManager = ({
       onSummaryEmailSent={handleSummaryEmailSent}
       favorites={favorites}
       onTasksUpdate={onTasksUpdate}
-      selectedTaskId={selectedTaskId}
     />
   ), [tasks, completedTasks, handleTaskAdd, handleTaskSelection, handleTasksClear, 
-      handleSelectedTasksClear, handleSummaryEmailSent, favorites, onTasksUpdate, selectedTaskId]);
+      handleSelectedTasksClear, handleSummaryEmailSent, favorites, onTasksUpdate]);
 
   const timerComponent = useMemo(() => (
     <TimerSection
@@ -119,3 +113,4 @@ export const TaskManager = ({
 };
 
 TaskManager.displayName = 'TaskManager';
+
