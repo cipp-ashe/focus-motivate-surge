@@ -18,15 +18,18 @@ export const useTaskClear = (
   }, [onTasksUpdate, setTasks, setSelectedTask]);
 
   const handleSelectedTasksClear = useCallback((taskIds: string[]) => {
+    if (!taskIds.length) return;
+
     setTasks(prev => {
       const newTasks = prev.filter(task => !taskIds.includes(task.id));
+      // Update tasks immediately after state change
       if (onTasksUpdate) {
-        // Call onTasksUpdate after state update to avoid loop
-        setTimeout(() => onTasksUpdate(newTasks), 0);
+        onTasksUpdate(newTasks);
       }
       return newTasks;
     });
     
+    // Clear selected task if it was deleted
     setSelectedTask(prev => {
       if (prev && taskIds.includes(prev.id)) {
         return null;
@@ -39,3 +42,4 @@ export const useTaskClear = (
 
   return { handleTasksClear, handleSelectedTasksClear };
 };
+
