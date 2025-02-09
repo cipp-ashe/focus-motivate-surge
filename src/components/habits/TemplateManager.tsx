@@ -2,7 +2,7 @@
 import React from 'react';
 import { Plus, GripVertical, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HabitTemplate, ActiveTemplate, DayOfWeek, DAYS_OF_WEEK } from './types';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -35,7 +35,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   if (templateToEdit) {
     return (
       <div className="flex flex-col h-full max-h-[calc(100vh-8rem)] overflow-hidden">
-        <div className="space-y-4 flex-1 overflow-hidden p-6">
+        <div className="space-y-4 flex-1 overflow-hidden p-4">
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-primary">Active Days</h4>
             <ToggleGroup 
@@ -46,14 +46,14 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                   onUpdateDays?.(values as DayOfWeek[]);
                 }
               }}
-              className="flex flex-wrap gap-2"
+              className="flex flex-wrap gap-1.5"
             >
               {DAYS_OF_WEEK.map((day) => (
                 <ToggleGroupItem
                   key={day}
                   value={day}
                   aria-label={`Toggle ${day}`}
-                  className="flex-1 min-w-[40px] data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  className="flex-1 min-w-[36px] data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-primary/10 transition-colors"
                 >
                   {day.charAt(0)}
                 </ToggleGroupItem>
@@ -61,7 +61,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
             </ToggleGroup>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex justify-between items-center">
               <h4 className="text-sm font-medium text-primary">Habits</h4>
               <Button
@@ -73,15 +73,15 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                     habits: [...(templateToEdit.habits || []), newHabit]
                   });
                 }}
-                className="hover:bg-primary/10"
+                className="hover:bg-primary/10 transition-colors group"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
                 Add Habit
               </Button>
             </div>
 
-            <ScrollArea className="h-[calc(100vh-24rem)]">
-              <div className="space-y-3 pr-4">
+            <ScrollArea className="h-[calc(100vh-26rem)]">
+              <div className="space-y-2 pr-4">
                 {(templateToEdit.habits || []).map((habit, index) => (
                   <div
                     key={habit.id}
@@ -110,8 +110,8 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
           </div>
         </div>
 
-        <div className="p-6 border-t bg-card">
-          <Button onClick={onSave} className="w-full" size="lg">
+        <div className="p-4 border-t bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+          <Button onClick={onSave} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors" size="lg">
             <Save className="h-4 w-4 mr-2" />
             Save Template
           </Button>
@@ -122,20 +122,23 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 
   return (
     <ScrollArea className="h-[calc(100vh-8rem)]">
-      <div className="space-y-4 p-6">
+      <div className="space-y-3 p-4">
         <Button 
           onClick={onCreateTemplate}
           variant="outline"
-          className="w-full flex items-center justify-center gap-2 hover:bg-primary/10"
+          className="w-full flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors group"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
           Create New Template
         </Button>
         {availableTemplates.map((template) => (
-          <Card key={template.id} className="group hover:shadow-md transition-all">
-            <CardContent className="pt-6">
+          <Card 
+            key={template.id} 
+            className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card to-card/50 border-primary/10"
+          >
+            <div className="p-4">
               <div className="space-y-2">
-                <h3 className="font-semibold text-lg">{template.name}</h3>
+                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{template.name}</h3>
                 <p className="text-sm text-muted-foreground">{template.description}</p>
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-sm text-muted-foreground">
@@ -146,14 +149,14 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                     size="sm"
                     onClick={() => onSelectTemplate?.(template.id)}
                     disabled={activeTemplateIds.includes(template.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Template
                   </Button>
                 </div>
               </div>
-            </CardContent>
+            </div>
           </Card>
         ))}
       </div>
