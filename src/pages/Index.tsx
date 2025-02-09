@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
+import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Index = () => {
   const { isDark, toggleTheme } = useTheme(true);
@@ -45,6 +48,19 @@ const Index = () => {
       return [];
     }
   });
+
+  // Load active templates from localStorage
+  const [activeTemplates] = useState(() => {
+    try {
+      const saved = localStorage.getItem('activeTemplates');
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error('Error loading active templates:', error);
+      return [];
+    }
+  });
+
+  const { todaysHabits, convertHabitToTask } = useTodaysHabits(activeTemplates);
 
   const handleNotesClick = () => {
     closeHabits();
@@ -116,6 +132,37 @@ const Index = () => {
           </div>
         </div>
 
+        {todaysHabits.length > 0 && (
+          <Card className="mb-6 p-4">
+            <h2 className="text-lg font-semibold mb-3">Today's Habits</h2>
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-2">
+                {todaysHabits.map((habit) => (
+                  <div key={habit.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                    <div>
+                      <h3 className="font-medium">{habit.name}</h3>
+                      <p className="text-sm text-muted-foreground">{habit.description}</p>
+                    </div>
+                    {habit.duration && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const task = convertHabitToTask(habit);
+                          handleTasksUpdate([task, ...initialTasks]);
+                        }}
+                        className="hover:bg-primary hover:text-primary-foreground"
+                      >
+                        Add as Task
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </Card>
+        )}
+
         <TaskManager
           initialTasks={initialTasks}
           initialCompletedTasks={initialCompletedTasks}
@@ -130,4 +177,3 @@ const Index = () => {
 };
 
 export default Index;
-
