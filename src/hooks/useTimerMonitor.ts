@@ -1,12 +1,14 @@
 
 import { useEffect } from 'react';
 import { useStateMonitor } from './useStateMonitor';
+import { useErrorBoundary } from './useErrorBoundary';
 import { toast } from 'sonner';
+import type { TimerStateMetrics } from '@/types/metrics';
 
 interface TimerMonitorProps {
   timeLeft: number;
   isRunning: boolean;
-  metrics: any; // Type this according to your metrics interface
+  metrics: TimerStateMetrics;
   componentName: string;
 }
 
@@ -16,6 +18,8 @@ export const useTimerMonitor = ({
   metrics,
   componentName
 }: TimerMonitorProps) => {
+  const { error } = useErrorBoundary(componentName);
+
   // Monitor time left
   useStateMonitor({
     value: timeLeft,
@@ -33,20 +37,79 @@ export const useTimerMonitor = ({
   useStateMonitor({
     value: { isRunning, metrics },
     name: 'timerState',
+    validate: (state) => {
+      if (state.isRunning && state.metrics.totalPauses > 10) {
+        toast.warning('High number of pauses detected', {
+          description: 'Consider taking a longer break'
+        });
+        return false;
+      }
+      return true;
+    },
     component: componentName
   });
 
-  // Monitor for potential memory leaks
+  // Monitor performance issues
   useEffect(() => {
-    const interval = setInterval(() => {
-      const heapUsed = performance.memory?.usedJSHeapSize;
-      if (heapUsed && heapUsed > 100 * 1024 * 1024) { // Alert if heap size > 100MB
-        console.warn(`[${componentName}] High memory usage detected:`, {
-          heapUsed: `${Math.round(heapUsed / (1024 * 1024))}MB`
-        });
+    let frameCount = 0;
+    let lastTime = performance.now();
+    
+    const checkPerformance = () => {
+      frameCount++;
+      const currentTime = performance.now();
+      
+      if (currentTime - lastTime >= 1000) { // Check every second
+        const fps = frameCount;
+        if (fps < 30 && isRunning) { // Alert on low FPS while timer is running
+          console.warn(`[${componentName}] Performance warning:`, {
+            fps,
+            timeLeft,
+            isRunning
+          });
+          
+          toast.warning('Performance issues detected', {
+            description: 'Timer might not be accurate'
+          });
+        }
+        
+        frameCount = 0;
+        lastTime = currentTime;
       }
-    }, 10000);
+      
+      requestAnimationFrame(checkPerformance);
+    };
 
-    return () => clearInterval(interval);
-  }, [componentName]);
+    const frameId = requestAnimationFrame(checkPerformance);
+    
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [componentName, isRunning, timeLeft]);
+
+  // Log interaction patterns
+  useEffect(() => {
+    const logInteraction = () => {
+      console.log(`[${componentName}] User interaction detected:`, {
+        timeLeft,
+        isRunning,
+        metrics,
+        timestamp: new Date().toISOString()
+      });
+    };
+
+    document.addEventListener('click', logInteraction);
+    document.addEventListener('keypress', logInteraction);
+
+    return () => {
+      document.removeEventListener('click', logInteraction);
+      document.removeEventListener('keypress', logInteraction);
+    };
+  }, [componentName, timeLeft, isRunning, metrics]);
+
+  // Handle errors from error boundary
+  useEffect(() => {
+    if (error) {
+      console.error(`[${componentName}] Error detected in timer:`, error);
+    }
+  }, [error, componentName]);
 };
