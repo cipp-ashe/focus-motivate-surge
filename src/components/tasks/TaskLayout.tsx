@@ -1,5 +1,5 @@
 
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNotesPanel } from '@/hooks/useNotesPanel';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { cn } from '@/lib/utils';
@@ -14,41 +14,36 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
-    let rafId: number | null = null;
-    let queued = false;
+    let timeout: NodeJS.Timeout | null = null;
     
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      const entry = entries[0];
+    const observer = new ResizeObserver(() => {
+      // Clear any pending timeout
+      if (timeout) {
+        clearTimeout(timeout);
+      }
       
-      if (!queued) {
-        queued = true;
-        rafId = requestAnimationFrame(() => {
-          if (entry && element) {
-            const newWidth = entry.contentRect.width;
-            const newHeight = entry.contentRect.height;
-            
-            if (newWidth !== element.offsetWidth || newHeight !== element.offsetHeight) {
-              element.style.display = 'none';
-              void element.offsetHeight;
+      // Set a new timeout to handle the resize after a delay
+      timeout = setTimeout(() => {
+        if (element) {
+          element.style.display = 'none';
+          requestAnimationFrame(() => {
+            if (element) {
               element.style.display = '';
             }
-          }
-          queued = false;
-          rafId = null;
-        });
-      }
-    };
+          });
+        }
+      }, 100);
+    });
 
-    const observer = new ResizeObserver(handleResize);
-    observer.observe(element, { box: 'border-box' });
+    observer.observe(element);
 
     return () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
+      if (timeout) {
+        clearTimeout(timeout);
       }
       observer.disconnect();
     };
