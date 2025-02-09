@@ -36,9 +36,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
           onDragOver={(e) => onDragOver(e, index)}
           onDragEnd={onDragEnd}
           className={`p-2 transition-all duration-200 ${
-            draggedIndex === index 
-              ? 'ring-2 ring-primary shadow-lg scale-[1.02] opacity-90' 
-              : ''
+            draggedIndex === index ? 'ring-2 ring-primary shadow-lg scale-[1.02] opacity-90' : ''
           }`}
         >
           <div className="flex items-center gap-2">
@@ -46,69 +44,71 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
               <GripVertical className="h-5 w-5 text-muted-foreground" />
             </div>
 
-            <Input
-              className="flex-[2]"
-              placeholder="Habit name"
-              value={habit.name}
-              onChange={(e) => onUpdateHabit(index, { name: e.target.value })}
-            />
-
-            <Select
-              value={habit.metrics.type}
-              onValueChange={(value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
-                onUpdateHabit(index, {
-                  metrics: {
-                    type: value,
-                    ...(value === 'timer' && { unit: 'minutes', min: 5, target: 1500 }),
-                    ...(value === 'count' && { target: 1 }),
-                    ...(value === 'rating' && { min: 1, max: 5 }),
-                  },
-                });
-              }}
-            >
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="boolean">Checkbox</SelectItem>
-                <SelectItem value="timer">Timer</SelectItem>
-                <SelectItem value="count">Counter</SelectItem>
-                <SelectItem value="rating">Rating</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {habit.metrics.type !== 'boolean' && (
+            <div className="flex-1 flex items-center gap-2">
               <Input
-                className="w-[80px]"
-                type="number"
-                placeholder="Target"
-                value={habit.metrics.type === 'timer' ? 
-                  Math.round((habit.metrics.target || 1500) / 60) : 
-                  habit.metrics.target || ''}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  if (!isNaN(value)) {
-                    onUpdateHabit(index, {
-                      metrics: {
-                        ...habit.metrics,
-                        target: habit.metrics.type === 'timer' ? value * 60 : value,
-                      },
-                    });
-                  }
-                }}
-                min={habit.metrics.type === 'timer' ? 5 : 1}
-                max={habit.metrics.type === 'rating' ? 5 : undefined}
+                placeholder="Habit name"
+                value={habit.name}
+                onChange={(e) => onUpdateHabit(index, { name: e.target.value })}
+                className="flex-1"
               />
-            )}
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDeleteHabit(index)}
-              className="h-8 w-8"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+              <Select
+                value={habit.metrics.type}
+                onValueChange={(value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
+                  onUpdateHabit(index, {
+                    metrics: {
+                      type: value,
+                      ...(value === 'timer' && { unit: 'minutes', min: 5, target: 1500 }),
+                      ...(value === 'count' && { target: 1 }),
+                      ...(value === 'rating' && { min: 1, max: 5 }),
+                    },
+                  });
+                }}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="boolean">Checkbox</SelectItem>
+                  <SelectItem value="timer">Timer</SelectItem>
+                  <SelectItem value="count">Counter</SelectItem>
+                  <SelectItem value="rating">Rating</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {habit.metrics.type !== 'boolean' && (
+                <Input
+                  className="w-24"
+                  type="number"
+                  placeholder="Target"
+                  value={habit.metrics.type === 'timer' ? 
+                    Math.round((habit.metrics.target || 1500) / 60) : 
+                    habit.metrics.target || ''}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value)) {
+                      onUpdateHabit(index, {
+                        metrics: {
+                          ...habit.metrics,
+                          target: habit.metrics.type === 'timer' ? value * 60 : value,
+                        },
+                      });
+                    }
+                  }}
+                  min={habit.metrics.type === 'timer' ? 5 : 1}
+                  max={habit.metrics.type === 'rating' ? 5 : undefined}
+                />
+              )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDeleteHabit(index)}
+                className="h-8 w-8 shrink-0"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       ))}

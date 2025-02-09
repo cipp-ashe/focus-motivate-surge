@@ -40,8 +40,8 @@ const DialogContent: React.FC<DialogContentProps> = ({
   onSave,
 }) => {
   return (
-    <ShadcnDialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
-      <div className="flex flex-col space-y-4 overflow-hidden">
+    <ShadcnDialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="space-y-4 flex-1 overflow-hidden">
         <div>
           <h3 className="text-lg font-medium mb-2">Active Days</h3>
           <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
@@ -61,7 +61,7 @@ const DialogContent: React.FC<DialogContentProps> = ({
             </Button>
           </div>
 
-          <div className="overflow-y-auto max-h-[calc(100vh-400px)]">
+          <div className="overflow-y-auto">
             <DraggableHabitList
               habits={habits}
               draggedIndex={draggedIndex}
