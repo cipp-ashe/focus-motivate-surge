@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "./ui/table";
 import { Task } from "./tasks/TaskList";
-import { Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer, Download, Trash2 } from "lucide-react";
+import { Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer, Download, Trash2, FileJson } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { NoteTags } from "./notes/components/NoteTags";
 import { ActionButton } from "./ui/action-button";
@@ -81,7 +81,7 @@ const getCompletionIcon = (status: string) => {
   }
 };
 
-const downloadTasks = (tasks: Task[]) => {
+const downloadMarkdown = (tasks: Task[]) => {
   const timestamp = format(new Date(), 'yyyy-MM-dd-HH-mm-ss');
   const content = tasks.map(task => {
     const metrics = task.metrics || {
@@ -108,7 +108,22 @@ const downloadTasks = (tasks: Task[]) => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  toast.success('Tasks downloaded successfully');
+  toast.success('Tasks downloaded as Markdown');
+};
+
+const downloadJson = (tasks: Task[]) => {
+  const timestamp = format(new Date(), 'yyyy-MM-dd-HH-mm-ss');
+  const jsonContent = JSON.stringify(tasks, null, 2);
+  const blob = new Blob([jsonContent], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `completed-tasks-${timestamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast.success('Tasks downloaded as JSON');
 };
 
 export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => {
@@ -134,12 +149,20 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
               <div className="flex items-center gap-2">
                 <ActionButton
                   icon={Download}
-                  onClick={() => downloadTasks(tasks)}
+                  onClick={() => downloadMarkdown(tasks)}
+                  tooltip="Download as Markdown"
+                  className="h-6 w-6 p-0"
+                />
+                <ActionButton
+                  icon={FileJson}
+                  onClick={() => downloadJson(tasks)}
+                  tooltip="Download as JSON"
                   className="h-6 w-6 p-0"
                 />
                 <ActionButton
                   icon={Trash2}
                   onClick={() => setShowClearDialog(true)}
+                  tooltip="Clear completed tasks"
                   className="h-6 w-6 p-0"
                 />
               </div>
