@@ -89,11 +89,14 @@ export const TaskSection: React.FC = () => {
               <div className="bg-muted/30 p-4 rounded-lg">
                 <TaskRow
                   task={demoTask}
-                  onSelect={() => {}}
-                  onUpdate={(updatedTask) => {
-                    setDemoTask(updatedTask);
-                    setTimeLeft(updatedTask.duration * 60);
+                  editingTaskId={null}
+                  onTaskClick={() => {}}
+                  onTaskDelete={() => {}}
+                  onDurationChange={(taskId, newDuration) => {
+                    setDemoTask(prev => ({...prev, duration: parseInt(newDuration)}));
                   }}
+                  onDurationClick={() => {}}
+                  onInputBlur={() => {}}
                   isSelected={false}
                 />
                 <p className="text-sm text-muted-foreground mt-4">

@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
+import { memo } from "react";
 import { Card } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
 import { TimerDisplay } from "../TimerDisplay";
@@ -36,15 +36,13 @@ interface TimerExpandedViewProps {
 export const TimerExpandedView = memo(({
   taskName,
   timerCircleProps,
-  timerControlsProps: originalTimerControlsProps,
+  timerControlsProps,
   metrics,
   onClose,
   onLike,
   favorites,
   setFavorites,
-}) => {
-  const timerControlsProps = originalTimerControlsProps;
-
+}: TimerExpandedViewProps) => {
   return (
     <div className="relative w-full max-w-[900px] mx-auto px-4 py-4 z-[101] flex flex-col gap-4 h-[90vh] overflow-x-hidden">
       <QuoteDisplay 

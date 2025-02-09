@@ -14,12 +14,12 @@ export const QuotesSection: React.FC = () => {
   const allQuotes: Quote[] = [{
       text: "Start where you are. Use what you have. Do what you can.",
       author: "Arthur Ashe",
-      categories: ['motivation', 'progress']
+      categories: ['motivation', 'growth']
     },
     {
       text: "The secret of getting ahead is getting started.",
       author: "Mark Twain",
-      categories: ['focus', 'productivity']
+      categories: ['focus', 'motivation']
     },
     {
       text: "Small progress is still progress.",

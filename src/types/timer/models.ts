@@ -1,4 +1,11 @@
-export type QuoteCategory = 'motivation' | 'focus' | 'creativity' | 'learning' | 'persistence' | 'growth';
+
+export type QuoteCategory = 
+  | 'motivation' 
+  | 'focus' 
+  | 'creativity' 
+  | 'learning' 
+  | 'persistence' 
+  | 'growth';
 
 export interface Quote {
   text: string;
