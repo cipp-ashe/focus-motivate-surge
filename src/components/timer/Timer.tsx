@@ -1,19 +1,18 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useAudio } from "@/hooks/useAudio";
-import { useTimer } from "@/hooks/timer/useTimer";
+
+import { useCallback, useRef } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
+import { Minimize2 } from "lucide-react";
+import { TIMER_CONSTANTS } from "@/types/timer";
 import { CompletionCelebration } from "./CompletionCelebration";
 import { FloatingQuotes } from "../quotes/FloatingQuotes";
-import { Minimize2 } from "lucide-react";
-import { TIMER_CONSTANTS, SOUND_OPTIONS, type SoundOption, type TimerProps } from "@/types/timer";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { TimerCompactView } from "./views/TimerCompactView";
-import { toast } from "sonner";
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { TimerCompletionDialog, TimerCompletionDialogContent } from "./TimerCompletionDialog";
 import { Button } from "../ui/button";
-
-const { MIN_MINUTES, MAX_MINUTES, ADD_TIME_MINUTES, CIRCLE_CIRCUMFERENCE } = TIMER_CONSTANTS;
+import { useTimerState } from "./state/TimerState";
+import { useTimerHandlers } from "./handlers/TimerHandlers";
+import type { TimerProps } from "@/types/timer";
 
 export const Timer = ({
   duration,
@@ -24,17 +23,24 @@ export const Timer = ({
   favorites = [],
   setFavorites
 }: TimerProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
-  const [showCompletion, setShowCompletion] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [completionMetrics, setCompletionMetrics] = useState<TimerStateMetrics | null>(null);
-  const [internalMinutes, setInternalMinutes] = useState(duration ? Math.floor(duration / 60) : 25);
-  const [pauseTimeLeft, setPauseTimeLeft] = useState(0);
-  const pauseTimerRef = useRef<NodeJS.Timeout>();
-  const durationInSeconds = internalMinutes * 60;
+  const expandedViewRef = useRef<TimerExpandedViewRef>(null);
 
   const {
+    isExpanded,
+    setIsExpanded,
+    selectedSound,
+    setSelectedSound,
+    showCompletion,
+    setShowCompletion,
+    showConfirmation,
+    setShowConfirmation,
+    completionMetrics,
+    setCompletionMetrics,
+    internalMinutes,
+    setInternalMinutes,
+    pauseTimeLeft,
+    setPauseTimeLeft,
+    pauseTimerRef,
     timeLeft,
     minutes,
     isRunning,
@@ -46,63 +52,47 @@ export const Timer = ({
     setMinutes,
     completeTimer,
     updateMetrics,
-  } = useTimer({
-    initialDuration: durationInSeconds,
-    onTimeUp: async () => {
-      try {
-        pause();
-        setShowConfirmation(true);
-      } catch (error) {
-        console.error('Error in timer completion flow:', error);
-        toast.error("An error occurred while completing the timer ⚠️");
-      }
-    },
+    playSound,
+    testSound,
+    isLoadingAudio,
+  } = useTimerState({
+    duration,
+    onComplete,
+    onAddTime,
     onDurationChange,
   });
 
-  const { play: playSound, testSound, isLoadingAudio } = useAudio({
-    audioUrl: SOUND_OPTIONS[selectedSound],
-    options: {
-      onError: (error) => {
-        console.error("Audio error:", error);
-        toast.error("Could not play sound. Please check your browser settings. 🔇");
-      },
-    },
+  const {
+    handleComplete,
+    handleAddTimeAndContinue,
+    handleToggle,
+    handleCloseCompletion,
+    handleAddTime,
+  } = useTimerHandlers({
+    isRunning,
+    start,
+    pause,
+    addTime,
+    completeTimer,
+    playSound,
+    onAddTime,
+    onComplete,
+    setShowConfirmation,
+    setCompletionMetrics,
+    setShowCompletion,
+    setIsExpanded,
+    metrics,
+    reset,
+    updateMetrics,
+    setPauseTimeLeft,
+    pauseTimerRef,
   });
 
-  const expandedViewRef = useRef<TimerExpandedViewRef>(null);
-
-  const handleTimerCompletion = useCallback(async () => {
-    try {
-      if (isExpanded) {
-        expandedViewRef.current?.saveNotes();
-      }
-      await completeTimer();
-      await playSound();
-      setTimeout(() => {
-        setCompletionMetrics(metrics);
-        setShowCompletion(true);
-      }, 0);
-    } catch (error) {
-      console.error('Error in timer completion flow:', error);
-      toast.error("An error occurred while completing the timer ⚠️");
+  const handleCloseTimer = useCallback(() => {
+    if (!showCompletion) {
+      setIsExpanded(false);
     }
-  }, [completeTimer, playSound, isExpanded, metrics]);
-
-  const handleComplete = useCallback(async () => {
-    setShowConfirmation(false);
-    await handleTimerCompletion();
-  }, [handleTimerCompletion]);
-
-  const handleAddTimeAndContinue = useCallback(() => {
-    setShowConfirmation(false);
-    addTime(ADD_TIME_MINUTES);
-    if (typeof onAddTime === 'function') {
-      onAddTime();
-    }
-    start();
-    toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
-  }, [addTime, onAddTime, start]);
+  }, [showCompletion, setIsExpanded]);
 
   const handleMinutesChange = useCallback((newMinutes: number) => {
     const clampedMinutes = Math.min(Math.max(newMinutes, 1), 60);
@@ -111,84 +101,13 @@ export const Timer = ({
     if (onDurationChange) {
       onDurationChange(clampedMinutes);
     }
-  }, [setMinutes, onDurationChange]);
-
-  const handleStart = useCallback(() => {
-    if (pauseTimerRef.current) {
-      clearInterval(pauseTimerRef.current);
-      setPauseTimeLeft(0);
-    }
-    start();
-  }, [start]);
-
-  const handlePause = useCallback(() => {
-    pause();
-    setPauseTimeLeft(300); // 5 minutes in seconds
-    pauseTimerRef.current = setInterval(() => {
-      setPauseTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(pauseTimerRef.current);
-          playSound();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [pause, playSound]);
-
-  useEffect(() => {
-    return () => {
-      if (pauseTimerRef.current) {
-        clearInterval(pauseTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleToggle = useCallback((fromExpanded = false) => {
-    if (isRunning) {
-      handlePause();
-    } else {
-      handleStart();
-      if (!fromExpanded) {
-        setIsExpanded(true);
-      }
-    }
-  }, [isRunning, handlePause, handleStart]);
-
-  const handleCloseCompletion = useCallback(() => {
-    if (!completionMetrics) return;
-    
-    if (typeof onComplete === 'function') {
-      onComplete(completionMetrics);
-    }
-    
-    setShowCompletion(false);
-    setIsExpanded(false);
-    setCompletionMetrics(null);
-    reset();
-    
-    toast.success("Task completed! You're crushing it! 🎯🎉");
-  }, [onComplete, completionMetrics, reset]);
-
-  const handleAddTime = useCallback(() => {
-    addTime(ADD_TIME_MINUTES);
-    if (typeof onAddTime === 'function') {
-      onAddTime();
-    }
-    toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
-  }, [addTime, onAddTime]);
-
-  const handleCloseTimer = useCallback(() => {
-    if (!showCompletion) {
-      setIsExpanded(false);
-    }
-  }, [showCompletion]);
+  }, [setMinutes, onDurationChange, setInternalMinutes]);
 
   const timerCircleProps = {
     isRunning,
     timeLeft,
     minutes,
-    circumference: CIRCLE_CIRCUMFERENCE,
+    circumference: TIMER_CONSTANTS.CIRCLE_CIRCUMFERENCE,
     onClick: () => {
       if (isRunning || metrics.isPaused) {
         setIsExpanded(true);
