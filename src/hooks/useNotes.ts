@@ -1,62 +1,27 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import { Note, Tag, TagColor } from '@/types/notes';
+import { STORAGE_KEY, parseStoredNotes, createNewNote, sanitizeContent } from '@/utils/noteUtils';
+import { useNotesStorage } from './useNotesStorage';
 
-export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink';
-
-export interface Tag {
-  name: string;
-  color: TagColor;
-}
-
-export interface Note {
-  id: string;
-  content: string;
-  createdAt: string;
-  updatedAt?: string;
-  tags: Tag[];
-}
-
-const STORAGE_KEY = 'notes';
-
-const isValidTagColor = (color: string): color is TagColor => {
-  return ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'].includes(color);
-};
+export type { Note, Tag, TagColor };
 
 export function useNotes() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [currentContent, setCurrentContent] = useState('');
+  const { saveNotes } = useNotesStorage();
 
-  // Load notes on mount and when storage changes
   useEffect(() => {
     const loadNotes = () => {
       const savedNotes = localStorage.getItem(STORAGE_KEY);
-      if (savedNotes) {
-        try {
-          const parsedNotes = JSON.parse(savedNotes);
-          const updatedNotes = parsedNotes.map((note: any) => ({
-            ...note,
-            tags: note.tags.map((tag: string | { name: string; color: string }) => {
-              if (typeof tag === 'string') {
-                return { name: tag, color: 'default' as TagColor };
-              }
-              return {
-                name: tag.name,
-                color: isValidTagColor(tag.color) ? tag.color : 'default'
-              };
-            })
-          }));
-          setNotes(updatedNotes);
-        } catch (error) {
-          console.error('Error loading notes:', error);
-          setNotes([]);
-        }
-      }
+      const parsedNotes = parseStoredNotes(savedNotes);
+      setNotes(parsedNotes);
     };
 
     loadNotes();
 
-    // Listen for storage events (when other tabs modify localStorage)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) {
         loadNotes();
@@ -72,42 +37,13 @@ export function useNotes() {
     };
   }, []);
 
-  const sanitizeContent = (content: string) => {
-    // Remove control characters that can cause JSON parsing issues
-    return content.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
-  };
-
-  const saveNotes = useCallback((updatedNotes: Note[]) => {
-    // Sanitize content of all notes before saving
-    const sanitizedNotes = updatedNotes.map(note => ({
-      ...note,
-      content: sanitizeContent(note.content)
-    }));
-    
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizedNotes));
-      setNotes(sanitizedNotes);
-      window.dispatchEvent(new Event('notesUpdated'));
-    } catch (error) {
-      console.error('Error saving notes:', error);
-      toast.error('Failed to save notes. Please try again.');
-    }
-  }, []);
-
   const updateCurrentContent = useCallback((content: string) => {
     setCurrentContent(content);
   }, []);
 
   const addNote = useCallback(() => {
     if (!currentContent.trim()) return null;
-    
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      content: sanitizeContent(currentContent.trim()),
-      createdAt: new Date().toISOString(),
-      tags: []
-    };
-    
+    const newNote = createNewNote(currentContent);
     const updatedNotes = [newNote, ...notes];
     saveNotes(updatedNotes);
     setCurrentContent('');
@@ -126,13 +62,12 @@ export function useNotes() {
 
   const updateNote = useCallback((noteId: string, content: string) => {
     if (!content.trim()) return;
-    const sanitizedContent = sanitizeContent(content.trim());
-
+    
     const updatedNotes = notes.map(note => 
       note.id === noteId 
         ? { 
             ...note, 
-            content: sanitizedContent,
+            content: sanitizeContent(content.trim()),
             updatedAt: new Date().toISOString()
           } 
         : note
@@ -157,7 +92,6 @@ export function useNotes() {
   }, [notes, saveNotes]);
 
   const updateTagColor = useCallback((noteId: string, tagName: string, color: TagColor) => {
-    console.log('Updating tag color:', { noteId, tagName, color });
     const updatedNotes = notes.map(note => 
       note.id === noteId 
         ? {
@@ -212,3 +146,4 @@ export function useNotes() {
     clearSelectedNote
   };
 }
+
