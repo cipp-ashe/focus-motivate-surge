@@ -16,6 +16,15 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   const actions = useAppStateActions();
   const { tasks: { items: tasks } } = state;
   const syncInProgress = useRef(false);
+  const lastSyncRef = useRef<string>('');
+
+  // Create a sync key to track meaningful changes
+  const getSyncKey = useCallback(() => {
+    return JSON.stringify({
+      habitIds: todaysHabits.map(h => h.id),
+      taskIds: tasks.filter(t => t.id.startsWith('habit-')).map(t => t.id),
+    });
+  }, [todaysHabits, tasks]);
 
   // Cleanup stale habit tasks when templates change
   useEffect(() => {
@@ -37,8 +46,13 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   const syncHabitTasks = useCallback(() => {
     if (syncInProgress.current) return;
 
+    const currentSyncKey = getSyncKey();
+    if (currentSyncKey === lastSyncRef.current) {
+      return;
+    }
+
     syncInProgress.current = true;
-    console.log('Syncing habit tasks');
+    console.log('Syncing habit tasks - new sync key detected');
     
     try {
       const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
@@ -62,10 +76,12 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           addTagToEntity('Habit', taskId, 'task');
         }
       });
+
+      lastSyncRef.current = currentSyncKey;
     } finally {
       syncInProgress.current = false;
     }
-  }, [todaysHabits, tasks, actions, addTagToEntity]);
+  }, [todaysHabits, tasks, actions, addTagToEntity, getSyncKey]);
 
   // Only run sync when dependencies change
   useEffect(() => {
@@ -74,3 +90,4 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
 
   return null;
 };
+
