@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   console.log('Mounting Index component');
   
-  const { isInitialized, showClearButton, clearStorage } = useDataInitialization();
+  const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -46,6 +46,7 @@ const Index = () => {
 
   console.log('Index component state:', {
     isInitialized,
+    error,
     tasks: tasks.length,
     completedTasks: initialCompletedTasks.length,
     activeTemplates: activeTemplates.length
@@ -55,7 +56,17 @@ const Index = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="text-lg mb-4">Initializing data store...</div>
+          {error ? (
+            <>
+              <div className="text-lg mb-4 text-red-600">{error}</div>
+              <div className="text-sm text-gray-600 mb-4">
+                Try clearing local storage to fix this issue
+              </div>
+            </>
+          ) : (
+            <div className="text-lg mb-4">Initializing data store...</div>
+          )}
+          
           {showClearButton && (
             <Button 
               variant="destructive"
