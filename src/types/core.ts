@@ -23,3 +23,4 @@ export interface TaggableEntity extends BaseEntity {
 }
 
 export type EntityType = 'note' | 'task' | 'habit';
+
