@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -86,7 +85,8 @@ const HabitTracker: React.FC = () => {
     if (isCreatingTemplate) {
       const updatedTemplate = { 
         ...selectedTemplate,
-        name: newTemplateName 
+        name: newTemplateName,
+        customized: true,
       };
       addTemplate(updatedTemplate);
       toast.success('Template saved successfully');
@@ -123,7 +123,7 @@ const HabitTracker: React.FC = () => {
                 <SheetTitle>Configure Templates</SheetTitle>
               </SheetHeader>
             </div>
-            <div className="flex-1 overflow-hidden p-6">
+            <div className="flex-1 overflow-hidden">
               <TemplateManager
                 availableTemplates={habitTemplates}
                 activeTemplateIds={activeTemplates.map(t => t.templateId)}
@@ -164,24 +164,14 @@ const HabitTracker: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex-1 overflow-hidden p-6 pt-4">
+              <div className="flex-1 overflow-hidden">
                 <TemplateManager
                   templateToEdit={selectedTemplate}
                   onUpdateTemplate={handleUpdateTemplate}
                   onUpdateDays={handleUpdateDays}
                   onClose={handleCloseTemplate}
+                  onSave={handleSaveTemplate}
                 />
-              </div>
-
-              <div className="p-6 pt-4 border-t">
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={handleCloseTemplate}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveTemplate}>
-                    Save Template
-                  </Button>
-                </div>
               </div>
             </div>
           </SheetContent>
