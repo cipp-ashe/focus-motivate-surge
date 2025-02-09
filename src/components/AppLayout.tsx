@@ -49,10 +49,24 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   const handleCloseHabitsAndRefresh = () => {
     handleCloseHabits();
-    // Trigger a window reload after a short delay to ensure panel is closed
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
+    
+    // Use requestAnimationFrame to ensure DOM updates are complete
+    requestAnimationFrame(() => {
+      // Add a small delay to let animations complete
+      setTimeout(() => {
+        // Cleanup any existing observers before reload
+        if (window.ResizeObserver) {
+          const observers = Array.from(document.querySelectorAll('*')).map(el => {
+            const observer = el.getResizeObserver?.();
+            if (observer) {
+              observer.disconnect();
+            }
+            return observer;
+          });
+        }
+        window.location.reload();
+      }, 300); // Increased delay to ensure animations complete
+    });
   };
 
   return (
@@ -147,4 +161,3 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     </div>
   );
 };
-
