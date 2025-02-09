@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { TemplateProgress } from '../types';
 
@@ -47,14 +48,31 @@ export const useHabitProgress = () => {
       }
 
       currentDate.setDate(currentDate.getDate() - 1);
-      if (dateStr < today) break;
+      // Break if we've gone beyond consecutive days
+      if (!habitProgress[dateStr] && dateStr < today) break;
     }
 
     return streak;
   };
 
+  const getWeeklyProgress = useCallback((habitId: string, templateId: string) => {
+    const today = new Date();
+    const lastWeek = new Array(7).fill(0).map((_, i) => {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      return date.toISOString().split('T')[0];
+    }).reverse();
+
+    return lastWeek.map(date => ({
+      date,
+      completed: !!progress[templateId]?.[habitId]?.[date]?.value,
+    }));
+  }, [progress]);
+
   return {
     getTodayProgress,
     updateProgress,
+    getWeeklyProgress,
   };
 };
+

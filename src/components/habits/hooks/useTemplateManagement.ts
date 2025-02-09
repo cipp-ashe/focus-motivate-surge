@@ -1,13 +1,27 @@
-import { useState, useCallback } from 'react';
-import { ActiveTemplate, DayOfWeek, HabitTemplate, NewTemplate } from '../types';
-import { DEFAULT_ACTIVE_DAYS } from '../types';
+
+import { useState, useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
+import { ActiveTemplate, DayOfWeek, HabitTemplate, NewTemplate, DEFAULT_ACTIVE_DAYS } from '../types';
+
+const STORAGE_KEY = 'habit-templates';
 
 export const useTemplateManagement = () => {
-  const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>([]);
+  const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
   const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTemplates));
+  }, [activeTemplates]);
+
   const addTemplate = useCallback((template: ActiveTemplate) => {
-    setActiveTemplates(prev => [...prev, template]);
+    setActiveTemplates(prev => {
+      const newTemplates = [...prev, template];
+      toast.success('Template added successfully');
+      return newTemplates;
+    });
   }, []);
 
   const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
@@ -18,12 +32,12 @@ export const useTemplateManagement = () => {
           : template
       )
     );
+    toast.success('Template updated successfully');
   }, []);
 
   const removeTemplate = useCallback((templateId: string) => {
-    setActiveTemplates(prev =>
-      prev.filter(template => template.templateId !== templateId)
-    );
+    setActiveTemplates(prev => prev.filter(template => template.templateId !== templateId));
+    toast.success('Template removed successfully');
   }, []);
 
   const saveCustomTemplate = useCallback((template: NewTemplate): HabitTemplate => {
@@ -37,6 +51,7 @@ export const useTemplateManagement = () => {
     };
 
     setCustomTemplates(prev => [...prev, newTemplate]);
+    toast.success('Custom template saved successfully');
     return newTemplate;
   }, []);
 
@@ -52,6 +67,7 @@ export const useTemplateManagement = () => {
           : template
       )
     );
+    toast.success('Template days updated successfully');
   }, []);
 
   return {

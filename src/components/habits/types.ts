@@ -63,7 +63,12 @@ export interface ActiveTemplate {
 
 export interface TemplateProgress {
   [key: string]: {
-    [habitId: string]: any;
+    [habitId: string]: {
+      [date: string]: {
+        value: boolean | number;
+        timestamp: number;
+      };
+    };
   };
 }
 
@@ -71,3 +76,15 @@ export interface DialogState {
   type: 'customize' | 'manage';
   open: boolean;
 }
+
+export const createEmptyHabit = (): HabitDetail => ({
+  id: `habit-${Date.now()}`,
+  name: 'New Habit',
+  description: '',
+  category: 'Personal',
+  timePreference: 'Anytime',
+  metrics: { type: 'boolean' },
+  insights: [],
+  tips: [],
+});
+
