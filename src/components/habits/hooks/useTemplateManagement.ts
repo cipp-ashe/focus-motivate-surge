@@ -15,23 +15,36 @@ export const useTemplateManagement = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTemplates));
   }, [activeTemplates]);
 
-  const addTemplate = useCallback((template: HabitTemplate) => {
+  const addTemplate = useCallback((template: HabitTemplate | ActiveTemplate) => {
     setActiveTemplates(prev => {
-      const exists = prev.some(t => t.templateId === template.id);
+      // Handle predefined template (HabitTemplate)
+      if ('id' in template && 'defaultHabits' in template) {
+        const exists = prev.some(t => t.templateId === template.id);
+        if (exists) {
+          toast.error('Template already exists');
+          return prev;
+        }
+        
+        const newTemplate: ActiveTemplate = {
+          templateId: template.id,
+          habits: template.defaultHabits,
+          activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
+          customized: false,
+        };
+        
+        toast.success('Template added successfully');
+        return [...prev, newTemplate];
+      }
+      
+      // Handle custom template (ActiveTemplate)
+      const exists = prev.some(t => t.templateId === template.templateId);
       if (exists) {
         toast.error('Template already exists');
         return prev;
       }
       
-      const newTemplate: ActiveTemplate = {
-        templateId: template.id,
-        habits: template.defaultHabits,
-        activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
-        customized: false,
-      };
-      
       toast.success('Template added successfully');
-      return [...prev, newTemplate];
+      return [...prev, template];
     });
   }, []);
 
