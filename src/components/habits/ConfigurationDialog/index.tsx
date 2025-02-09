@@ -1,19 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-  Paper,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import { HabitDetail, DayOfWeek } from '../../types';
-import DaySelector from './DaySelector';
-import DraggableHabitList from './DraggableHabitList';
-import HabitForm from './HabitForm';
+import DialogHeader from './DialogHeader';
+import DialogContent as CustomDialogContent from './DialogContent';
+import DialogFooter from './DialogFooter';
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -37,7 +31,6 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
   const [habits, setHabits] = useState<HabitDetail[]>(initialHabits);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  // Reset state when dialog opens/closes
   useEffect(() => {
     if (open) {
       setHabits(initialHabits);
@@ -109,52 +102,26 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
       fullWidth
       aria-labelledby="configure-template-title"
     >
-      <DialogTitle id="configure-template-title">Configure Template</DialogTitle>
+      <DialogHeader />
       <DialogContent>
-        <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
-        
-        <Box sx={{ mt: 2, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="subtitle1">Configure Habits</Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={handleAddHabit}
-          >
-            Add Habit
-          </Button>
-        </Box>
-
-        <Box>
-          <DraggableHabitList
-            habits={habits}
-            draggedIndex={draggedIndex}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-            onUpdateHabit={handleUpdateHabit}
-            onDeleteHabit={handleDeleteHabit}
-          />
-        </Box>
+        <CustomDialogContent
+          habits={habits}
+          draggedIndex={draggedIndex}
+          activeDays={activeDays}
+          onUpdateDays={onUpdateDays}
+          onAddHabit={handleAddHabit}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onUpdateHabit={handleUpdateHabit}
+          onDeleteHabit={handleDeleteHabit}
+        />
       </DialogContent>
-      <DialogActions>
-        <Button
-          variant="outlined"
-          onClick={onSaveAsTemplate}
-        >
-          Save as Custom Template
-        </Button>
-        <Box sx={{ flex: 1 }} />
-        <Button onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => onSave(habits)}
-        >
-          Apply Changes
-        </Button>
-      </DialogActions>
+      <DialogFooter
+        onSaveAsTemplate={onSaveAsTemplate}
+        onClose={onClose}
+        onSave={() => onSave(habits)}
+      />
     </Dialog>
   );
 };
