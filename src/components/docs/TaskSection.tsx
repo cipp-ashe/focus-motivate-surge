@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TaskInput } from "@/components/tasks/TaskInput";
 import TaskRow from "@/components/tasks/TaskRow";
 import { TimerCircle } from "@/components/timer/TimerCircle";
-import { type Task } from "@/components/tasks/TaskList";
+import { type Task } from "@/types/tasks";
 import {
   Accordion,
   AccordionContent,

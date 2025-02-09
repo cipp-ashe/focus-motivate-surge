@@ -1,5 +1,5 @@
 
-import { Task } from "./TaskList";
+import { Task } from "@/types/tasks";
 import { TaskHeader } from "./TaskHeader";
 import { TaskDuration } from "./TaskDuration";
 import { TaskTags } from "./TaskTags";

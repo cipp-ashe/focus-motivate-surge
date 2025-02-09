@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
@@ -6,6 +5,7 @@ import { CompletedTasks } from "../CompletedTasks";
 import { EmailSummaryModal } from "../EmailSummaryModal";
 import { useTaskContext } from "@/contexts/TaskContext";
 import type { Quote } from "@/types/timer";
+import type { Task } from "@/types/tasks";
 
 interface TaskListProps {
   initialFavorites?: Quote[];

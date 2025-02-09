@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { Task } from "@/components/tasks/TaskList";
+import { Task } from "@/types/tasks";
 import { toast } from "sonner";
 
 export const useTaskClear = (

@@ -2,7 +2,7 @@
 import React from 'react';
 import { EmailSummaryModal } from "@/components/EmailSummaryModal";
 import { type Quote } from "@/types/timer/models";
-import { type Task } from "@/components/tasks/TaskList";
+import { type Task } from "@/types/tasks";
 import { type TimerStateMetrics } from "@/types/metrics";
 
 interface EmailModalProps {

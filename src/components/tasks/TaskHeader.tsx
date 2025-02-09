@@ -1,6 +1,5 @@
-
 import { Sparkles, X } from "lucide-react";
-import { Task } from "./TaskList";
+import { Task } from "@/types/tasks";
 
 interface TaskHeaderProps {
   task: Task;

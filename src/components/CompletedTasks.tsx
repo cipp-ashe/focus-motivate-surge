@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -22,7 +23,7 @@ import { useState } from "react";
 import { TaskMetricsRow } from "./tasks/TaskMetricsRow";
 import { TaskJsonDialog } from "./tasks/TaskJsonDialog";
 import { downloadContent } from "@/utils/downloadUtils";
-import { Tag } from "@/types/notes";
+import { Tag } from "@/types/core";
 
 interface CompletedTasksProps {
   tasks: Task[];

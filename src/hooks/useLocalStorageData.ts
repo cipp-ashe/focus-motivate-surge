@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import type { Task } from "@/components/tasks/TaskList";
+import type { Task } from "@/types/tasks";
 import type { Quote } from "@/types/timer";
 import type { ActiveTemplate } from "@/components/habits/types";
 import { toast } from "sonner";

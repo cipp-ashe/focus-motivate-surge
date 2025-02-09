@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { Task } from "@/components/tasks/TaskList";
+import { Task } from "@/types/tasks";
 import { TimerStateMetrics } from "@/types/metrics";
 import { toast } from "sonner";
 
