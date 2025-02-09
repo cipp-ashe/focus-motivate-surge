@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Plus, GripVertical, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { HabitTemplate, ActiveTemplate, DayOfWeek, DAYS_OF_WEEK } from './types'
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import HabitForm from './ConfigurationDialog/HabitForm';
 import { createEmptyHabit } from './types';
+import { useWindowSize } from '@/hooks/useWindowSize';
 
 interface TemplateManagerProps {
   availableTemplates?: HabitTemplate[];
@@ -32,9 +33,12 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   onCreateTemplate,
   onSave,
 }) => {
+  const { height } = useWindowSize();
+  const maxHeight = height ? `${Math.max(400, height - 200)}px` : '600px';
+
   if (templateToEdit) {
     return (
-      <div className="flex flex-col h-full max-h-[calc(100vh-8rem)] overflow-hidden">
+      <div className="flex flex-col h-full overflow-hidden">
         <div className="space-y-4 flex-1 overflow-hidden p-4">
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-primary">Active Days</h4>
@@ -80,7 +84,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
               </Button>
             </div>
 
-            <ScrollArea className="h-[calc(100vh-26rem)]">
+            <ScrollArea className="h-[calc(100vh-26rem)]" style={{ maxHeight: `calc(${maxHeight} - 12rem)` }}>
               <div className="space-y-2 pr-4">
                 {(templateToEdit.habits || []).map((habit, index) => (
                   <div
@@ -121,7 +125,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-8rem)]">
+    <ScrollArea className="h-full" style={{ maxHeight }}>
       <div className="space-y-3 p-4">
         <Button 
           onClick={onCreateTemplate}
@@ -165,4 +169,3 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 };
 
 export default TemplateManager;
-
