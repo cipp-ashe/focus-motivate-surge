@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EmailSummaryModal } from './EmailSummaryModal';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -47,12 +47,18 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     }
   };
 
+  const handleCloseHabitsAndRefresh = () => {
+    handleCloseHabits();
+    // Trigger a window reload after a short delay to ensure panel is closed
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen relative flex flex-col overflow-hidden">
-      {/* Only show TitleBar in electron */}
       {window.electron && <TitleBar />}
       <div className="flex-1 flex relative">
-        {/* Mobile Backdrop */}
         <div
           className={cn(
             "fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity lg:hidden z-40",
@@ -60,11 +66,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           )}
           onClick={() => {
             handleCloseNotes();
-            handleCloseHabits();
+            handleCloseHabitsAndRefresh();
           }}
         />
 
-        {/* Main Content */}
         <div className={cn(
           "flex-1 transition-all duration-300 ease-in-out",
           (isNotesOpen || isHabitsOpen) && "lg:pr-[50%]"
@@ -113,7 +118,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <div className="flex-none px-4 py-7">
               <div className="flex items-center gap-4 mb-4 sm:mb-7">
                 <button 
-                  onClick={handleCloseHabits}
+                  onClick={handleCloseHabitsAndRefresh}
                   className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="h-5 w-5" />
@@ -142,3 +147,4 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     </div>
   );
 };
+
