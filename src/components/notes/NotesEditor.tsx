@@ -19,7 +19,7 @@ export interface NotesEditorRef {
   saveNotes: () => void;
 }
 
-export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({ 
+const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({ 
   selectedNote,
   onNoteSaved,
   content: externalContent,
@@ -130,3 +130,5 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
 });
 
 NotesEditor.displayName = 'NotesEditor';
+
+export default NotesEditor;
