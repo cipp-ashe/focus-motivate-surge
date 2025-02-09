@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNotesPanel } from '@/hooks/useNotesPanel';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { cn } from '@/lib/utils';
+import { useWindowSize } from '@/hooks/useWindowSize';
 
 interface TaskLayoutProps {
   timer: React.ReactNode;
@@ -12,12 +13,33 @@ interface TaskLayoutProps {
 export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { width } = useWindowSize();
+
+  // Add resize handler cleanup
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Use requestAnimationFrame to debounce resize observations
+      requestAnimationFrame(() => {
+        if (!Array.isArray(entries) || !entries.length) return;
+      });
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <div 
+      ref={containerRef}
       className={cn(
-        "grid grid-cols-1 gap-4 sm:gap-6 w-full h-full",
-        !(isNotesOpen || isHabitsOpen) && "lg:grid-cols-2"
+        "grid grid-cols-1 gap-4 sm:gap-6 w-full h-full transition-all duration-300 ease-in-out",
+        !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2"
       )}
     >
       {/* Task List */}
@@ -36,4 +58,3 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     </div>
   );
 };
-
