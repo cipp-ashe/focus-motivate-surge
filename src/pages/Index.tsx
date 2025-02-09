@@ -110,26 +110,36 @@ const Index = () => {
     // Get existing non-habit tasks
     const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
     
-    // Convert timer habits to tasks
+    // Convert timer habits to tasks with proper duration handling
     const timerHabits = todaysHabits.filter(habit => 
       habit.metrics.type === 'timer' && 
       habit.metrics.target && 
       habit.metrics.target > 0
     );
     
-    // Only proceed if we have timer habits to convert
     if (timerHabits.length > 0) {
       console.log('Converting timer habits to tasks:', timerHabits);
       
-      const habitTasks: Task[] = timerHabits.map(habit => ({
-        id: `habit-${habit.id}`,
-        name: habit.name,
-        completed: false,
-        // Convert minutes to seconds for task duration
-        duration: habit.metrics.target * 60,
-        createdAt: new Date().toISOString(),
-        tags: [{ name: 'Habit', color: 'blue' }],
-      }));
+      const habitTasks: Task[] = timerHabits.map(habit => {
+        // Ensure we have a valid number for the duration
+        const targetMinutes = typeof habit.metrics.target === 'number' 
+          ? habit.metrics.target 
+          : parseInt(String(habit.metrics.target));
+
+        // Convert minutes to seconds, default to 25 minutes if parsing fails
+        const durationInSeconds = !isNaN(targetMinutes) 
+          ? targetMinutes * 60 
+          : 25 * 60;
+
+        return {
+          id: `habit-${habit.id}`,
+          name: habit.name,
+          completed: false,
+          duration: durationInSeconds,
+          createdAt: new Date().toISOString(),
+          tags: [{ name: 'Habit', color: 'blue' }],
+        };
+      });
 
       const newTasks = [...nonHabitTasks, ...habitTasks];
       
