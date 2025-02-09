@@ -1,4 +1,3 @@
-
 import { HabitTemplate, HabitDetail, HabitInsight, DEFAULT_ACTIVE_DAYS } from '../components/habits/types';
 
 const createHabitInsight = (type: HabitInsight['type'], description: string): HabitInsight => ({
@@ -19,7 +18,7 @@ export const habitTemplates: HabitTemplate[] = [
         description: 'Daily meditation practice',
         category: 'Wellbeing',
         timePreference: 'Morning',
-        metrics: { type: 'duration', unit: 'minutes', min: 5, target: 15 },
+        metrics: { type: 'timer', unit: 'minutes', min: 5, target: 15 },
         insights: [
           createHabitInsight('streak', 'Meditation is most effective when practiced consistently'),
           createHabitInsight('timing', 'Morning meditation sets a calm tone for the day')
@@ -103,7 +102,7 @@ export const habitTemplates: HabitTemplate[] = [
         description: 'Daily exercise routine',
         category: 'Health',
         timePreference: 'Anytime',
-        metrics: { type: 'duration', unit: 'minutes', min: 5, target: 30 },
+        metrics: { type: 'timer', unit: 'minutes', min: 5, target: 30 },
         insights: [
           createHabitInsight('streak', 'Regular exercise builds momentum'),
           createHabitInsight('timing', 'Find your optimal workout time')

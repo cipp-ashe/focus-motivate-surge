@@ -21,7 +21,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
         // Ensure each habit has its duration property set from the metrics
         return template.habits.map(habit => ({
           ...habit,
-          duration: habit.metrics.type === 'duration' ? habit.metrics.target : undefined
+          duration: habit.metrics.type === 'timer' ? habit.metrics.target : undefined
         }));
       }
       return [];

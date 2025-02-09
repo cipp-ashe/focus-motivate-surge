@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -32,14 +31,14 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
             className="h-3 w-3"
           />
         );
-      case 'duration':
-        const durationValue = typeof progress.value === 'number' ? progress.value : 0;
-        const durationTarget = habit.metrics.target || 30;
+      case 'timer':
+        const timerValue = typeof progress.value === 'number' ? progress.value : 0;
+        const timerTarget = habit.metrics.target || 30;
         return (
           <div className="space-y-0.5 w-16">
-            <Progress value={(durationValue / durationTarget) * 100} className="h-1" />
+            <Progress value={(timerValue / timerTarget) * 100} className="h-1" />
             <p className="text-[0.65rem] text-muted-foreground text-right">
-              {durationValue}/{durationTarget}m
+              {timerValue}/{timerTarget}m
             </p>
           </div>
         );

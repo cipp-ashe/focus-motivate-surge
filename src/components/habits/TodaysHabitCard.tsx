@@ -1,4 +1,3 @@
-
 import { Timer, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ interface HabitRowProps {
 }
 
 const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
-  const isDurationHabit = habit.metrics.type === 'duration';
+  const isTimerHabit = habit.metrics.type === 'timer';
   
   const handleTimerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -38,10 +37,10 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
         </span>
       </div>
       <div className="flex items-center gap-2">
-        {isDurationHabit && (
+        {isTimerHabit && (
           <>
             <span className="text-sm text-muted-foreground">
-              {habit.duration}m
+              {habit.metrics.target}m
             </span>
             <Button
               variant="ghost"
@@ -107,10 +106,10 @@ export const TodaysHabitCard = ({
   if (habits.length === 0) return null;
 
   const durationHabits = habits.filter(habit => 
-    habit.metrics.type === 'duration' && habit.duration
+    habit.metrics.type === 'timer' && habit.duration
   );
   const nonDurationHabits = habits.filter(habit => 
-    habit.metrics.type !== 'duration'
+    habit.metrics.type !== 'timer'
   );
 
   const handleStartHabit = (habit: HabitDetail) => {

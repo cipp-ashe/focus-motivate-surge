@@ -49,15 +49,15 @@ const HabitForm: React.FC<HabitFormProps> = ({
 
           <Select
             value={habit.metrics.type}
-            onValueChange={(value: 'boolean' | 'duration' | 'count' | 'rating') => {
+            onValueChange={(value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
               onUpdate({
                 metrics: {
                   type: value,
-                  ...(value === 'duration' && { unit: 'minutes', min: 5, target: 30 }),
+                  ...(value === 'timer' && { unit: 'minutes', min: 5, target: 30 }),
                   ...(value === 'count' && { target: 1 }),
                   ...(value === 'rating' && { min: 1, max: 5 }),
                 },
-                duration: value === 'duration' ? 30 : undefined, // Set duration directly when type is duration
+                duration: value === 'timer' ? 30 : undefined,
               });
             }}
           >
@@ -66,13 +66,13 @@ const HabitForm: React.FC<HabitFormProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="boolean">Checkbox</SelectItem>
-              <SelectItem value="duration">Duration</SelectItem>
+              <SelectItem value="timer">Timer</SelectItem>
               <SelectItem value="count">Counter</SelectItem>
               <SelectItem value="rating">Rating</SelectItem>
             </SelectContent>
           </Select>
 
-          {habit.metrics.type === 'duration' && (
+          {habit.metrics.type === 'timer' && (
             <div className="space-y-2">
               <Input
                 type="number"
@@ -85,7 +85,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
                       ...habit.metrics,
                       target: value,
                     },
-                    duration: value, // Update both metrics target and duration
+                    duration: value,
                   });
                 }}
                 min={5}
@@ -96,7 +96,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
             </div>
           )}
 
-          {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'duration' && (
+          {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && (
             <Input
               type="number"
               placeholder="Target value"

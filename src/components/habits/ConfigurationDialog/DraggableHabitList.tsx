@@ -69,11 +69,11 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 
               <Select
                 value={habit.metrics.type}
-                onValueChange={(value: 'boolean' | 'duration' | 'count' | 'rating') => {
+                onValueChange={(value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
                   onUpdateHabit(index, {
                     metrics: {
                       type: value,
-                      ...(value === 'duration' && { unit: 'minutes', min: 5, target: 30 }),
+                      ...(value === 'timer' && { unit: 'minutes', min: 5, target: 30 }),
                       ...(value === 'count' && { target: 1 }),
                       ...(value === 'rating' && { min: 1, max: 5 }),
                     },
@@ -85,7 +85,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="boolean">Checkbox</SelectItem>
-                  <SelectItem value="duration">Duration</SelectItem>
+                  <SelectItem value="timer">Timer</SelectItem>
                   <SelectItem value="count">Counter</SelectItem>
                   <SelectItem value="rating">Rating</SelectItem>
                 </SelectContent>
@@ -103,7 +103,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                       target: parseInt(e.target.value),
                     },
                   })}
-                  min={habit.metrics.type === 'duration' ? 5 : 1}
+                  min={habit.metrics.type === 'timer' ? 5 : 1}
                   max={habit.metrics.type === 'rating' ? 5 : undefined}
                 />
               )}
