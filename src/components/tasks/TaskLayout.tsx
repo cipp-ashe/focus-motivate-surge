@@ -21,23 +21,14 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     const element = containerRef.current;
     let rafId: number;
     
-    const observer = new ResizeObserver((entries) => {
+    const observer = new ResizeObserver(() => {
       if (isProcessingRef.current) return;
       
       rafId = requestAnimationFrame(() => {
         isProcessingRef.current = true;
-        
-        entries.forEach(entry => {
-          if (entry.target === element && document.contains(element)) {
-            const { width, height } = entry.contentRect;
-            if (width > 0 && height > 0) {
-              element.style.display = 'none';
-              void element.offsetHeight;
-              element.style.display = '';
-            }
-          }
-        });
-        
+        if (containerRef.current) {
+          containerRef.current.style.minHeight = '0';
+        }
         isProcessingRef.current = false;
       });
     });
@@ -57,7 +48,7 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     <div 
       ref={containerRef}
       className={cn(
-        "grid grid-cols-1 gap-4 sm:gap-6 min-h-0 w-full overflow-y-auto",
+        "grid grid-cols-1 gap-4 sm:gap-6 min-h-0 w-full",
         !(isNotesOpen || isHabitsOpen) && "lg:grid-cols-2"
       )}
     >
