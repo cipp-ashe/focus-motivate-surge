@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import { TaskList } from "./TaskList";
 import { TaskLayout } from "./TaskLayout";
 import { TimerSection } from "../timer/TimerSection";
-import { TaskProvider } from "@/contexts/TaskContext";
 import type { Quote } from "@/types/timer";
 import { useTaskContext } from "@/contexts/TaskContext";
 
@@ -40,11 +39,9 @@ export const TaskManager = ({
   ), [initialFavorites, onFavoritesChange, selectedTaskId]);
 
   return (
-    <TaskProvider>
-      <TaskLayout
-        timer={timerComponent}
-        taskList={taskListComponent}
-      />
-    </TaskProvider>
+    <TaskLayout
+      timer={timerComponent}
+      taskList={taskListComponent}
+    />
   );
 };

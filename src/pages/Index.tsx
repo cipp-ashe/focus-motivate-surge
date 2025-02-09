@@ -1,10 +1,8 @@
 
-import { useState } from "react";
 import { TaskManager } from "@/components/tasks/TaskManager";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { Header } from "@/components/layout/Header";
-import { HabitTaskManager } from "@/components/habits/HabitTaskManager";
 import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import { useDataInitialization } from "@/hooks/useDataInitialization";
 import { useLocalStorageData } from "@/hooks/useLocalStorageData";
@@ -23,7 +21,6 @@ const Index = () => {
     lastSyncDate,
     favorites,
     activeTemplates,
-    setActiveTemplates,
     handleLastSyncUpdate,
     handleFavoritesUpdate
   } = useLocalStorageData();
@@ -74,10 +71,6 @@ const Index = () => {
         <Header 
           onNotesClick={handleNotesClick}
           onHabitsClick={handleHabitsClick}
-        />
-
-        <HabitTaskManager
-          activeTemplates={activeTemplates}
         />
 
         <DailySyncManager

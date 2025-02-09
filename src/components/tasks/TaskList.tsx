@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "../CompletedTasks";
@@ -7,7 +6,6 @@ import { useTaskContext } from "@/contexts/TaskContext";
 import { HabitTaskManager } from "../habits/HabitTaskManager";
 import { useTemplateManagement } from "@/components/habits/hooks/useTemplateManagement";
 import type { Quote } from "@/types/timer";
-import type { Task } from "@/types/tasks";
 
 interface TaskListProps {
   initialFavorites?: Quote[];
