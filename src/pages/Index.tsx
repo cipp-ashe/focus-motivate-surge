@@ -142,15 +142,17 @@ const Index = () => {
       });
 
       const newTasks = [...nonHabitTasks, ...habitTasks];
+      const currentTasksStr = JSON.stringify(tasks);
+      const newTasksStr = JSON.stringify(newTasks);
       
       // Only update if the tasks have actually changed
-      if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
-        console.log('Updated tasks:', newTasks);
-        localStorage.setItem('taskList', JSON.stringify(newTasks));
+      if (currentTasksStr !== newTasksStr) {
+        console.log('Updating tasks with converted habits:', newTasks);
         setTasks(newTasks);
+        localStorage.setItem('taskList', newTasksStr);
       }
     }
-  }, [todaysHabits]); // Only depend on todaysHabits, not tasks
+  }, [todaysHabits]); // Only depend on todaysHabits
 
   const handleNotesClick = () => {
     closeHabits();
@@ -163,8 +165,12 @@ const Index = () => {
   };
 
   const handleTasksUpdate = (newTasks: Task[]) => {
-    if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
-      localStorage.setItem('taskList', JSON.stringify(newTasks));
+    const currentTasksStr = JSON.stringify(tasks);
+    const newTasksStr = JSON.stringify(newTasks);
+    
+    // Only update if the tasks have actually changed
+    if (currentTasksStr !== newTasksStr) {
+      localStorage.setItem('taskList', newTasksStr);
       setTasks(newTasks);
     }
   };
