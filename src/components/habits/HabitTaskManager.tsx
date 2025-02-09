@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback, useMemo, useRef } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { ActiveTemplate } from "@/components/habits/types";
@@ -26,7 +26,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
       
-      // Extract duration from metrics correctly - only if it's a timer type
+      // Handle task duration based on habit type
       let duration;
       if (habit.metrics?.type === 'timer' && typeof habit.metrics.target === 'number') {
         duration = habit.metrics.target;
@@ -46,6 +46,14 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
     });
   }, [todaysHabits, tasks]);
 
+  // Initialize tasks on first render if there are habits but no tasks
+  useEffect(() => {
+    if (todaysHabits.length > 0 && tasks.length === 0) {
+      console.log('Initializing tasks from habits:', todaysHabits);
+      onTasksUpdate([...habitTasks]);
+    }
+  }, [todaysHabits, tasks.length, habitTasks, onTasksUpdate]);
+
   // Synchronize tasks whenever habits or non-habit tasks change
   useEffect(() => {
     const newTasks = [...nonHabitTasks, ...habitTasks];
@@ -55,4 +63,3 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
-
