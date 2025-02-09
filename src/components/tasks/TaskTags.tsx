@@ -3,6 +3,7 @@ import { NoteTags } from "../notes/components/NoteTags";
 import { Tag } from "@/types/notes";
 import { toast } from "sonner";
 import { Task } from "./TaskList";
+import { useState, useEffect } from "react";
 
 interface TaskTagsProps {
   task: Task;
@@ -10,6 +11,12 @@ interface TaskTagsProps {
 }
 
 export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
+  const [tags, setTags] = useState<Tag[]>(task.tags || []);
+
+  useEffect(() => {
+    setTags(task.tags || []);
+  }, [task.tags]);
+
   const handleAddTag = (tagName: string) => {
     if (!task.tags) {
       task.tags = [];
@@ -25,6 +32,7 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
       color: 'default'
     });
     
+    setTags([...task.tags]);
     window.dispatchEvent(new Event('tagsUpdated'));
     toast.success("Tag added");
   };
@@ -38,6 +46,7 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     }
 
     task.tags = task.tags.filter(t => t.name !== tagName);
+    setTags([...task.tags]);
     window.dispatchEvent(new Event('tagsUpdated'));
     toast.success("Tag removed");
   };
@@ -54,20 +63,21 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     const tagIndex = task.tags.findIndex(t => t.name === tag.name);
     if (tagIndex !== -1) {
       task.tags[tagIndex].color = nextColor;
+      setTags([...task.tags]);
       window.dispatchEvent(new Event('tagsUpdated'));
     }
   };
 
-  if (!task.tags || task.tags.length === 0) return null;
+  if (!tags || tags.length === 0) return null;
 
   return (
     <div 
-      className="flex items-center"
+      className="flex items-center flex-wrap gap-1"
       onClick={preventPropagation}
       onTouchStart={preventPropagation}
     >
       <NoteTags
-        tags={task.tags}
+        tags={tags}
         onAddTag={handleAddTag}
         onRemoveTag={handleRemoveTag}
         onTagClick={handleTagClick}
