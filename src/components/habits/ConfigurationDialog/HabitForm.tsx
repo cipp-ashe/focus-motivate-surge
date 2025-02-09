@@ -20,6 +20,11 @@ const HabitForm: React.FC<HabitFormProps> = ({
   onDelete,
   onDragStart,
 }) => {
+  // Convert seconds to minutes only for display in the input
+  const displayMinutes = habit.metrics.type === 'timer' ? 
+    Math.round(Number(habit.metrics.target || 0) / 60) : 
+    habit.metrics.target || '';
+
   return (
     <Card className="p-4 space-y-4">
       <div className="flex items-center gap-4">
@@ -53,7 +58,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
               onUpdate({
                 metrics: {
                   type: value,
-                  ...(value === 'timer' && { unit: 'minutes', min: 5, target: 30 }),
+                  ...(value === 'timer' && { unit: 'seconds', target: 1500 }), // Default 25 minutes in seconds
                   ...(value === 'count' && { target: 1 }),
                   ...(value === 'rating' && { min: 1, max: 5 }),
                 },
@@ -75,21 +80,24 @@ const HabitForm: React.FC<HabitFormProps> = ({
             <div className="space-y-2">
               <Input
                 type="number"
-                placeholder="Target minutes"
-                value={habit.metrics.target || ''}
+                placeholder="Duration in minutes"
+                value={displayMinutes}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  onUpdate({
-                    metrics: {
-                      ...habit.metrics,
-                      target: value,
-                    },
-                  });
+                  const minutes = parseInt(e.target.value);
+                  if (!isNaN(minutes)) {
+                    onUpdate({
+                      metrics: {
+                        ...habit.metrics,
+                        target: minutes * 60, // Store as seconds
+                      },
+                    });
+                  }
                 }}
-                min={5}
+                min={1}
+                max={60}
               />
               <p className="text-xs text-muted-foreground">
-                This duration will be used when sending to timer
+                Enter duration in minutes (stored as seconds internally)
               </p>
             </div>
           )}

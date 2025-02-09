@@ -26,15 +26,15 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       console.log('Converting timer habits to tasks:', timerHabits);
       
       const habitTasks: Task[] = timerHabits.map(habit => {
-        const minutes = habit.metrics.target || 0;
+        const seconds = habit.metrics.target || 0;
         
         console.log(`Converting habit duration for ${habit.name}:`, {
-          target: minutes,
-          duration: minutes * 60, // Convert to seconds for the task
+          target: seconds,
+          duration: seconds, // Duration is already in seconds
         });
 
-        if (!minutes || minutes <= 0) {
-          console.warn(`Invalid duration for habit ${habit.name}:`, { target: minutes });
+        if (!seconds || seconds <= 0) {
+          console.warn(`Invalid duration for habit ${habit.name}:`, { target: seconds });
           return null;
         }
 
@@ -42,7 +42,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
           id: `habit-${habit.id}`,
           name: habit.name,
           completed: false,
-          duration: minutes * 60, // Store duration in seconds
+          duration: seconds, // Already in seconds, no conversion needed
           createdAt: new Date().toISOString(),
           tags: [{ name: 'Habit', color: 'blue' }],
         };
@@ -73,3 +73,4 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
+
