@@ -6,12 +6,14 @@ import { Moon, Sun, Code2, StickyNote, ActivitySquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
+import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 
 const Index = () => {
   const { isDark, toggleTheme } = useTheme(true);
   const { toggle: toggleNotes } = useNotesPanel();
+  const { toggle: toggleHabits } = useHabitsPanel();
 
   // Load initial tasks from localStorage
   const [initialTasks] = useState<Task[]>(() => {
@@ -68,13 +70,13 @@ const Index = () => {
             Focus Timer
           </h1>
           <div className="flex items-center gap-2">
-            <Link 
-              to="/habits"
+            <button 
+              onClick={toggleHabits}
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"
               title="Habits"
             >
               <ActivitySquare className="h-5 w-5" />
-            </Link>
+            </button>
             <button 
               onClick={toggleNotes}
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"

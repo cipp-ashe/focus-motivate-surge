@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import ComponentExamples from "./pages/ComponentExamples";
 import { AppLayout } from "./components/AppLayout";
 import { NotesPanelProvider } from "./hooks/useNotesPanel";
+import { HabitsPanelProvider } from "./hooks/useHabitsPanel";
 
 // Suppress specific React Router v7 warnings
 window.__reactRouterFutureWarnings = {
@@ -24,13 +25,15 @@ const App = () => (
     <TooltipProvider>
       <Router>
         <NotesPanelProvider>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/components" element={<ComponentExamples />} />
-            </Routes>
-          </AppLayout>
-          <Toaster position="bottom-right" closeButton />
+          <HabitsPanelProvider>
+            <AppLayout>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/components" element={<ComponentExamples />} />
+              </Routes>
+            </AppLayout>
+            <Toaster position="bottom-right" closeButton />
+          </HabitsPanelProvider>
         </NotesPanelProvider>
       </Router>
     </TooltipProvider>

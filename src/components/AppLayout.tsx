@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { EmailSummaryModal } from './EmailSummaryModal';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
@@ -7,7 +8,9 @@ import { cn } from '@/lib/utils';
 import { Notes } from './notes/Notes';
 import { ArrowLeft } from 'lucide-react';
 import { useNotesPanel } from '@/hooks/useNotesPanel';
+import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { TitleBar } from './TitleBar';
+import { HabitTracker } from './habits/HabitTracker';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -16,6 +19,7 @@ interface AppLayoutProps {
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const { isOpen: isNotesOpen, close: handleCloseNotes } = useNotesPanel();
+  const { isOpen: isHabitsOpen, close: handleCloseHabits } = useHabitsPanel();
 
   const handleSendSummary = async (email: string, clearNotes?: boolean) => {
     try {
@@ -52,16 +56,19 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         <div
           className={cn(
             "fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity lg:hidden z-40",
-            isNotesOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            (isNotesOpen || isHabitsOpen) ? "opacity-100" : "opacity-0 pointer-events-none"
           )}
-          onClick={handleCloseNotes}
+          onClick={() => {
+            handleCloseNotes();
+            handleCloseHabits();
+          }}
         />
 
         {/* Main Content */}
         <div
           className={cn(
             "w-full transition-all duration-300 ease-in-out",
-            isNotesOpen && "lg:w-1/2"
+            (isNotesOpen || isHabitsOpen) && "lg:w-1/2"
           )}
         >
           {children}
@@ -92,6 +99,36 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <div className="flex-1 px-4 pb-7 overflow-hidden">
               <div className="relative bg-card/90 backdrop-blur-md shadow-lg rounded-lg p-6 h-full before:absolute before:inset-0 before:rounded-lg before:p-[1px] before:bg-gradient-to-r before:from-primary/20 before:via-purple-500/20 before:to-primary/20 before:-z-10 after:absolute after:inset-[1px] after:rounded-[7px] after:bg-card/90 after:-z-10">
                 <Notes onOpenEmailModal={() => setIsEmailModalOpen(true)} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Habits Panel */}
+        <div
+          className={cn(
+            "fixed top-0 right-0 h-screen w-full lg:w-1/2 bg-background border-l border-border transition-transform duration-300 ease-in-out z-50 flex flex-col",
+            isHabitsOpen ? "translate-x-0" : "translate-x-full"
+          )}
+        >
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex-none px-4 py-7">
+              <div className="flex items-center gap-4 mb-4 sm:mb-7">
+                <button 
+                  onClick={handleCloseHabits}
+                  className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                  Habits
+                </h1>
+              </div>
+            </div>
+
+            <div className="flex-1 px-4 pb-7 overflow-hidden">
+              <div className="relative bg-card/90 backdrop-blur-md shadow-lg rounded-lg p-6 h-full before:absolute before:inset-0 before:rounded-lg before:p-[1px] before:bg-gradient-to-r before:from-primary/20 before:via-purple-500/20 before:to-primary/20 before:-z-10 after:absolute after:inset-[1px] after:rounded-[7px] after:bg-card/90 after:-z-10">
+                <HabitTracker />
               </div>
             </div>
           </div>
