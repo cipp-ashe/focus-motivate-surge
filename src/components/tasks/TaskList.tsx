@@ -5,7 +5,6 @@ import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "../CompletedTasks";
 import { EmailSummaryModal } from "../EmailSummaryModal";
 import { useTaskContext } from "@/contexts/TaskContext";
-import type { Task } from "@/types/tasks";
 import type { Quote } from "@/types/timer";
 
 interface TaskListProps {
@@ -17,7 +16,7 @@ export const TaskList = ({
   initialFavorites = [],
   onFavoritesChange,
 }: TaskListProps) => {
-  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const {
     tasks,
     completedTasks,
@@ -31,7 +30,7 @@ export const TaskList = ({
   } = useTaskContext();
 
   const handleEmailSent = () => {
-    setShowEmailModal(false);
+    setIsEmailModalOpen(false);
     clearCompletedTasks();
   };
 
@@ -54,8 +53,8 @@ export const TaskList = ({
       />
 
       <EmailSummaryModal
-        isOpen={showEmailModal}
-        onClose={() => setShowEmailModal(false)}
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
         onSubmit={handleEmailSent}
         tasks={tasks}
         completedTasks={completedTasks}
