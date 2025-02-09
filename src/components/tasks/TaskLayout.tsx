@@ -13,37 +13,46 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const frameRef = useRef<number>();
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
+    let resizeTimeout: NodeJS.Timeout;
     
     const observer = new ResizeObserver(() => {
-      // Clear any existing timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      // Clear any existing animation frame
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
       }
       
-      // Set a new timeout with requestAnimationFrame for smoother handling
-      timeoutRef.current = setTimeout(() => {
-        requestAnimationFrame(() => {
+      // Clear any existing timeout
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      
+      // Set a new timeout
+      resizeTimeout = setTimeout(() => {
+        frameRef.current = requestAnimationFrame(() => {
           if (element && document.contains(element)) {
-            // Only trigger the reflow if the element is still in the document
             element.style.display = 'none';
-            element.offsetHeight; // Force reflow
+            // Force reflow
+            void element.offsetHeight;
             element.style.display = '';
           }
         });
-      }, 100);
+      }, 150); // Increased debounce time
     });
 
     observer.observe(element);
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+      }
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
       }
       observer.disconnect();
     };
