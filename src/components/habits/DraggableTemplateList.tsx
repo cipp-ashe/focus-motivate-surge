@@ -53,9 +53,8 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
             <TemplateCard
               template={template}
               templateInfo={templateInfo}
-              onCustomize={() => onCustomize(template)}
+              onConfigure={() => onCustomize(template)}
               onRemove={() => onRemove(template.templateId)}
-              onToggleInsights={() => onToggleInsights(template)}
               getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
               onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
             />
