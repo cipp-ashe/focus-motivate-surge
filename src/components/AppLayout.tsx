@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { EmailSummaryModal } from './EmailSummaryModal';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
@@ -117,6 +118,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
+                <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                  Habit Configuration
+                </h1>
               </div>
             </div>
 
