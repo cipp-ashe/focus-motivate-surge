@@ -25,14 +25,20 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
     return todaysHabits.map(habit => {
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
+      
+      // Extract duration from metrics correctly
+      let duration;
+      if (habit.metrics?.type === 'timer' && typeof habit.metrics.target === 'number') {
+        duration = habit.metrics.target;
+      } else if (habit.metrics?.type === 'duration' && typeof habit.metrics.target === 'number') {
+        duration = habit.metrics.target;
+      }
 
       return {
         id: taskId,
         name: habit.name,
         completed: existingTask?.completed || false,
-        duration: habit.metrics.type === 'timer' && habit.metrics.target 
-          ? habit.metrics.target 
-          : undefined,
+        duration,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         tags: [
           { name: 'Habit', color: 'blue' as const },
