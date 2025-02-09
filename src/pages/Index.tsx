@@ -8,7 +8,7 @@ import { HabitTaskManager } from "@/components/habits/HabitTaskManager";
 import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import { useDataInitialization } from "@/hooks/useDataInitialization";
 import { useLocalStorageData } from "@/hooks/useLocalStorageData";
-import { useRelationships } from "@/hooks/useRelationships";
+import { useTaskContext } from "@/contexts/TaskContext";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -17,6 +17,7 @@ const Index = () => {
   const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
+  const { tasks, updateTask } = useTaskContext();
 
   const {
     lastSyncDate,
@@ -26,8 +27,6 @@ const Index = () => {
     handleLastSyncUpdate,
     handleFavoritesUpdate
   } = useLocalStorageData();
-
-  useRelationships(setActiveTemplates);
 
   const handleNotesClick = () => {
     closeHabits();
@@ -84,6 +83,8 @@ const Index = () => {
         <DailySyncManager
           lastSyncDate={lastSyncDate}
           onLastSyncUpdate={handleLastSyncUpdate}
+          tasks={tasks}
+          onTasksUpdate={updateTask}
         />
 
         <div className="flex-1 overflow-hidden">

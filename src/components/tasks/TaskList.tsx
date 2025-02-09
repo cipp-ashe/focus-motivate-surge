@@ -37,15 +37,6 @@ export const TaskList = ({
       <TaskInput onTaskAdd={addTask} />
       
       <HabitTaskManager 
-        tasks={tasks}
-        onTasksUpdate={(updatedTasks) => {
-          // Update tasks through the TaskContext
-          updatedTasks.forEach(task => {
-            if (!tasks.find(t => t.id === task.id)) {
-              addTask(task);
-            }
-          });
-        }}
         activeTemplates={activeTemplates}
       />
 

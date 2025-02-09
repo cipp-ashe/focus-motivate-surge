@@ -16,7 +16,8 @@ export const TaskSection: React.FC = () => {
     id: 'demo1',
     name: 'Example Task',
     completed: false,
-    duration: 25
+    duration: 25,
+    createdAt: new Date().toISOString()
   });
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(demoTask.duration * 60);
@@ -37,9 +38,9 @@ export const TaskSection: React.FC = () => {
       name: 'Write Documentation',
       completed: true,
       duration: 25,
+      createdAt: new Date().toISOString(),
       metrics: { expectedTime: 1500, actualDuration: 1450, pauseCount: 2, favoriteQuotes: 1, pausedTime: 300, extensionTime: 0, netEffectiveTime: 1150, efficiencyRatio: 95, completionStatus: 'Completed On Time' }
-    },
-    // Add more completed tasks as needed
+    }
   ];
 
   const demoLikedQuotes = [

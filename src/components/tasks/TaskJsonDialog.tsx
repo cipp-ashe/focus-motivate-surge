@@ -1,5 +1,5 @@
 
-import { Task } from "./TaskList";
+import type { Task } from "@/types/tasks";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
