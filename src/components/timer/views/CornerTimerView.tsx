@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Maximize2 } from "lucide-react";
@@ -11,8 +12,8 @@ export interface CornerTimerViewProps {
     timeLeft: number;
     minutes: number;
     circumference: number;
-    isStateLoaded: boolean; // Add isStateLoaded to timerCircleProps
-    onClick?: () => void; // Add onClick prop here
+    isStateLoaded: boolean;
+    onClick?: () => void;
   };
   onExpand: () => void;
 }
@@ -39,7 +40,7 @@ export const CornerTimerView = ({
           <div className="relative scale-150" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
             <TimerDisplay
               circleProps={timerCircleProps}
-              size="small"
+              size="normal"
               isRunning={timerCircleProps.isRunning}
             />
             <Button
