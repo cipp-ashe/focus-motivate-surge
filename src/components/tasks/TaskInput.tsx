@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -48,6 +49,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
             name: taskName,
             completed: false,
             duration: duration,
+            createdAt: new Date().toISOString(),
           });
         }
       });
@@ -57,6 +59,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         name: newTaskName.trim(),
         completed: false,
         duration: 25,
+        createdAt: new Date().toISOString(),
       });
     }
     setNewTaskName("");

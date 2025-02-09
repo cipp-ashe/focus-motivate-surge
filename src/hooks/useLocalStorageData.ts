@@ -64,4 +64,3 @@ export const useLocalStorageData = () => {
       updateStorage('favorites', newFavorites, 'favoriteQuotes')
   };
 };
-
