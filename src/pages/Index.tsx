@@ -9,10 +9,21 @@ import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 import type { ActiveTemplate } from "@/components/habits/types";
+import { initializeDataStore, SCHEMA_VERSION } from "@/types/core";
 import { toast } from "sonner";
 
 const Index = () => {
-  console.log('Rendering Index component');
+  console.log('Mounting Index component');
+
+  // Initialize data store on component mount
+  useEffect(() => {
+    const initialized = initializeDataStore();
+    if (!initialized) {
+      toast.error('Failed to initialize data store');
+    } else {
+      console.log('Data store initialized with schema version:', SCHEMA_VERSION);
+    }
+  }, []);
 
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
@@ -24,6 +35,7 @@ const Index = () => {
       return saved ? new Date(saved) : new Date();
     } catch (error) {
       console.error('Error loading lastSyncDate:', error);
+      toast.error('Error loading lastSyncDate');
       return new Date();
     }
   });
@@ -66,7 +78,6 @@ const Index = () => {
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
-  // Load active templates with their tags
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
       const saved = localStorage.getItem('habit-templates');
@@ -78,6 +89,27 @@ const Index = () => {
       return [];
     }
   });
+
+  // Load and monitor relationships
+  useEffect(() => {
+    try {
+      const relations = localStorage.getItem('entity-relations');
+      console.log('Loading entity relations:', relations);
+      
+      const handleRelationsUpdate = () => {
+        console.log('Entity relations updated');
+        // Handle updates to relationships here
+      };
+
+      window.addEventListener('relationsUpdated', handleRelationsUpdate);
+      return () => {
+        window.removeEventListener('relationsUpdated', handleRelationsUpdate);
+      };
+    } catch (error) {
+      console.error('Error loading entity relations:', error);
+      toast.error('Error loading entity relations');
+    }
+  }, []);
 
   useEffect(() => {
     const handleTemplateUpdate = () => {
@@ -113,7 +145,6 @@ const Index = () => {
     const currentTasksStr = JSON.stringify(tasks);
     const newTasksStr = JSON.stringify(newTasks);
     
-    // Only update if the tasks have actually changed
     if (currentTasksStr !== newTasksStr) {
       localStorage.setItem('taskList', newTasksStr);
       setTasks(newTasks);
@@ -179,3 +210,4 @@ const Index = () => {
 };
 
 export default Index;
+
