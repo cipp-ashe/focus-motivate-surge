@@ -67,9 +67,9 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
       <div className="space-y-2">
         <Label htmlFor="days">Active Days</Label>
         <ToggleGroup 
-          type="multiple"
+          type="multiple" 
           value={activeDays}
-          onValueChange={setActiveDays}
+          onValueChange={(value) => setActiveDays(value as DayOfWeek[])}
           className="justify-start"
         >
           {DAYS_OF_WEEK.map((day) => (
