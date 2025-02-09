@@ -1,3 +1,4 @@
+
 import { TaskSummary, DailySummary, NotesSummary } from "../types/summary";
 import { Quote } from "../types/timer";
 import { TimerMetrics } from "../types/metrics";
@@ -19,15 +20,14 @@ const calculateEfficiency = (metrics: TimerMetrics[]): number => {
   
   const totalEfficiency = metrics.reduce((acc, metric) => {
     if (metric.expectedTime === 0 || metric.netEffectiveTime === 0) return acc;
-    // Calculate efficiency as defined in TimerMetrics type
-    return acc + Math.min((metric.netEffectiveTime / metric.expectedTime) * 100, 200); // Cap at 200% efficiency
+    return acc + Math.min((metric.netEffectiveTime / metric.expectedTime) * 100, 200);
   }, 0);
   
   return Math.round(totalEfficiency / metrics.length);
 };
 
 export const formatNotesSummary = (notes: Note[]): NotesSummary => {
-  const allTags = Array.from(new Set(notes.flatMap(note => note.tags)));
+  const allTags = Array.from(new Set(notes.flatMap(note => note.tags.map(tag => tag.name))));
   
   return {
     notes,
@@ -54,7 +54,7 @@ export const formatDailySummary = (
       netEffectiveTime: formatDuration(task.metrics.netEffectiveTime),
       efficiency: task.metrics.efficiencyRatio,
       pauseCount: task.metrics.pauseCount,
-      favoriteQuotes: task.metrics.favoriteQuotes || [],
+      favoriteQuotes: task.metrics.favoriteQuotes ? Array.isArray(task.metrics.favoriteQuotes) ? task.metrics.favoriteQuotes : [] : [],
     } : null
   }));
 

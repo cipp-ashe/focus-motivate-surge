@@ -36,9 +36,7 @@ export const ProjectOverview: React.FC = () => {
         <div className="h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
       </div>
 
-      {/* Component Configuration Section */}
       <div className="mt-12 max-w-3xl mx-auto space-y-8">
-        {/* Package Details */}
         <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden">
           <div className="p-6 border-b border-border/50">
             <div className="flex items-center gap-3">
@@ -143,7 +141,6 @@ export const ProjectOverview: React.FC = () => {
           </div>
         </div>
 
-        {/* Custom Hooks & Utilities */}
         <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden">
           <Accordion type="single" collapsible>
             <AccordionItem value="hooks-helper">
@@ -198,7 +195,6 @@ export const ProjectOverview: React.FC = () => {
           </Accordion>
         </div>
 
-        {/* Tailwind CSS Helper */}
         <div className="bg-gradient-to-br from-card to-card/95 rounded-xl shadow-xl border border-border/50 overflow-hidden">
           <Accordion type="single" collapsible>
             <AccordionItem value="css-helper">
@@ -287,7 +283,6 @@ export const ProjectOverview: React.FC = () => {
           </Accordion>
         </div>
 
-        {/* Navigation */}
         <nav className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {navigation.map(({ icon: Icon, label, href }) => (
             <a
