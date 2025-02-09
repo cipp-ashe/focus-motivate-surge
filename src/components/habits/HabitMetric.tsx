@@ -29,16 +29,17 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
           <Checkbox
             checked={!!progress.value}
             onCheckedChange={(checked) => onUpdate(!!checked)}
+            className="h-3 w-3"
           />
         );
       case 'duration':
         const durationValue = typeof progress.value === 'number' ? progress.value : 0;
         const durationTarget = habit.metrics.target || 30;
         return (
-          <div className="space-y-2">
-            <Progress value={(durationValue / durationTarget) * 100} />
-            <p className="text-sm text-muted-foreground">
-              {durationValue} / {durationTarget} min
+          <div className="space-y-0.5 w-24">
+            <Progress value={(durationValue / durationTarget) * 100} className="h-1.5" />
+            <p className="text-xs text-muted-foreground text-right">
+              {durationValue}/{durationTarget}m
             </p>
           </div>
         );
@@ -46,25 +47,26 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         const countValue = typeof progress.value === 'number' ? progress.value : 0;
         const countTarget = habit.metrics.target || 1;
         return (
-          <div className="space-y-2">
-            <Progress value={(countValue / countTarget) * 100} />
-            <p className="text-sm text-muted-foreground">
-              {countValue} / {countTarget}
+          <div className="space-y-0.5 w-24">
+            <Progress value={(countValue / countTarget) * 100} className="h-1.5" />
+            <p className="text-xs text-muted-foreground text-right">
+              {countValue}/{countTarget}
             </p>
           </div>
         );
       case 'rating':
         const ratingValue = typeof progress.value === 'number' ? progress.value : 0;
         return (
-          <div className="flex space-x-1">
+          <div className="flex space-x-0.5">
             {[1, 2, 3, 4, 5].map((rating) => (
               <Button
                 key={rating}
                 variant={rating <= ratingValue ? "default" : "ghost"}
                 size="icon"
                 onClick={() => onUpdate(rating)}
+                className="h-4 w-4 p-0"
               >
-                <Star className="h-4 w-4" />
+                <Star className="h-2 w-2" />
               </Button>
             ))}
           </div>
@@ -74,19 +76,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
     }
   };
 
-  return (
-    <div className="p-4 rounded-lg bg-card">
-      <div className="flex justify-between items-center mb-2">
-        <h4 className="font-medium">{habit.name}</h4>
-        {progress.streak > 0 && (
-          <span className="text-sm text-muted-foreground">
-            {progress.streak} day streak
-          </span>
-        )}
-      </div>
-      {renderMetric()}
-    </div>
-  );
+  return renderMetric();
 };
 
 export default HabitMetric;
