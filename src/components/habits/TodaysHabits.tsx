@@ -45,7 +45,7 @@ export const TodaysHabits = ({
       <ScrollArea className="h-[300px] pr-4">
         <div className="space-y-2">
           {habits.map((habit) => (
-            <div key={habit.id} className="relative">
+            <div key={habit.id} className="relative group">
               <TaskRow
                 task={getHabitAsTask(habit)}
                 isSelected={false}
@@ -61,7 +61,7 @@ export const TodaysHabits = ({
                   variant="outline"
                   size="sm"
                   onClick={() => onAddHabitToTasks(habit)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 whitespace-nowrap transition-colors duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
                 >
                   Add as Task
                 </Button>
