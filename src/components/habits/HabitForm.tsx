@@ -1,93 +1,119 @@
-
 import React from 'react';
-import { DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Habit } from '@/types/habits';
+import {
+  TextField,
+  MenuItem,
+  Grid,
+  IconButton,
+  Box,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { HabitDetail } from '../../types';
 
 interface HabitFormProps {
-  newHabit: Partial<Habit>;
-  onHabitChange: (updates: Partial<Habit>) => void;
-  onSubmit: () => void;
-  onCancel: () => void;
+  habit: HabitDetail;
+  onUpdate: (updates: Partial<HabitDetail>) => void;
+  onDelete: () => void;
+  onDragStart?: () => void;
 }
 
-export const HabitForm: React.FC<HabitFormProps> = ({
-  newHabit,
-  onHabitChange,
-  onSubmit,
-  onCancel,
-}) => {
-  return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Add New Habit</DialogTitle>
-        <DialogDescription>
-          Create a new habit to track. Fill in the details below.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="space-y-4 py-4">
-        <div className="space-y-2">
-          <Input
-            placeholder="Habit Name"
-            value={newHabit.name}
-            onChange={(e) => onHabitChange({ name: e.target.value })}
-          />
-        </div>
-        <div className="space-y-2">
-          <Textarea
-            placeholder="Description"
-            value={newHabit.description}
-            onChange={(e) => onHabitChange({ description: e.target.value })}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Select
-              value={newHabit.category}
-              onValueChange={(value) => onHabitChange({ category: value as Habit['category'] })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {['Wellness', 'Work', 'Personal', 'Learning'].map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Select
-              value={newHabit.timePreference}
-              onValueChange={(value) => onHabitChange({ timePreference: value as Habit['timePreference'] })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Preferred Time" />
-              </SelectTrigger>
-              <SelectContent>
-                {['Morning', 'Afternoon', 'Evening', 'Anytime'].map((time) => (
-                  <SelectItem key={time} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={onSubmit} disabled={!newHabit.name || !newHabit.description}>
-          Add Habit
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  );
-};
+const HabitForm: React.FC<HabitFormProps> = ({
+  habit,
+  onUpdate,
+  onDelete,
+  onDragStart,
+}) => (
+  <Grid container spacing={2} alignItems="center">
+    <Grid item>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          cursor: 'grab',
+          '&:active': {
+            cursor: 'grabbing',
+          },
+          touchAction: 'none',
+          userSelect: 'none',
+        }}
+        onMouseDown={onDragStart}
+        onTouchStart={onDragStart}
+      >
+        <DragIndicatorIcon />
+      </Box>
+    </Grid>
+    <Grid item>
+      <IconButton
+        size="small"
+        onClick={onDelete}
+        aria-label="Delete habit"
+      >
+        <DeleteIcon />
+      </IconButton>
+    </Grid>
+    <Grid item xs>
+      <TextField
+        fullWidth
+        size="small"
+        label="Habit Name"
+        value={habit.name}
+        onChange={(e) => onUpdate({ name: e.target.value })}
+        inputProps={{
+          'aria-label': 'Habit name',
+        }}
+      />
+    </Grid>
+    <Grid item xs={3}>
+      <TextField
+        fullWidth
+        size="small"
+        select
+        label="Tracking Type"
+        value={habit.metrics.type}
+        onChange={(e) => {
+          const type = e.target.value as 'boolean' | 'duration' | 'count' | 'rating';
+          onUpdate({
+            metrics: {
+              type,
+              ...(type === 'duration' && { unit: 'minutes', min: 5, target: 30 }),
+              ...(type === 'count' && { target: 1 }),
+              ...(type === 'rating' && { min: 1, max: 5 }),
+            },
+          });
+        }}
+        inputProps={{
+          'aria-label': 'Tracking type',
+        }}
+      >
+        <MenuItem value="boolean">Checkbox</MenuItem>
+        <MenuItem value="duration">Duration</MenuItem>
+        <MenuItem value="count">Counter</MenuItem>
+        <MenuItem value="rating">Rating</MenuItem>
+      </TextField>
+    </Grid>
+    {habit.metrics.type !== 'boolean' && (
+      <Grid item xs={2}>
+        <TextField
+          fullWidth
+          size="small"
+          label="Target"
+          type="number"
+          value={habit.metrics.target || ''}
+          onChange={(e) => onUpdate({
+            metrics: {
+              ...habit.metrics,
+              target: parseInt(e.target.value),
+            },
+          })}
+          inputProps={{
+            'aria-label': 'Target value',
+            min: habit.metrics.type === 'duration' ? 5 : 1,
+            max: habit.metrics.type === 'rating' ? 5 : undefined,
+          }}
+        />
+      </Grid>
+    )}
+  </Grid>
+);
+
+export default HabitForm;
