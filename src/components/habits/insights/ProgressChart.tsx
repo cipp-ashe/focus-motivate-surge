@@ -3,10 +3,9 @@ import React from 'react';
 import {
   Card,
   CardContent,
-  Typography,
-  Box,
-  useTheme,
-} from '@mui/material';
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   LineChart,
   Line,
@@ -17,6 +16,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { HabitDetail, HabitProgress } from '../types';
+import { cn } from "@/lib/utils";
 
 interface ChartDataPoint {
   date: string;
@@ -29,8 +29,6 @@ interface ProgressChartProps {
 }
 
 const ProgressChart: React.FC<ProgressChartProps> = ({ habit, progress }) => {
-  const theme = useTheme();
-
   const getChartData = (): ChartDataPoint[] => {
     const last30Days = [...Array(30)].map((_, i) => {
       const date = new Date();
@@ -55,15 +53,15 @@ const ProgressChart: React.FC<ProgressChartProps> = ({ habit, progress }) => {
   ];
 
   return (
-    <Card elevation={0}>
+    <Card>
+      <CardHeader>
+        <CardTitle>30-Day Progress</CardTitle>
+      </CardHeader>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          30-Day Progress
-        </Typography>
-        <Box sx={{ height: 300 }}>
+        <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={getChartData()}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
                 tickFormatter={(date: string) => 
@@ -72,22 +70,29 @@ const ProgressChart: React.FC<ProgressChartProps> = ({ habit, progress }) => {
                     month: 'short' 
                   })
                 }
+                className="text-muted-foreground"
               />
-              <YAxis />
+              <YAxis className="text-muted-foreground" />
               <Tooltip
                 formatter={formatTooltipValue}
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '0.5rem',
+                  color: 'hsl(var(--foreground))'
+                }}
               />
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={theme.palette.primary.main}
+                stroke="hsl(var(--primary))"
                 strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+                dot={{ r: 4, fill: "hsl(var(--primary))" }}
+                activeDot={{ r: 6, fill: "hsl(var(--primary))" }}
               />
             </LineChart>
           </ResponsiveContainer>
-        </Box>
+        </div>
       </CardContent>
     </Card>
   );
