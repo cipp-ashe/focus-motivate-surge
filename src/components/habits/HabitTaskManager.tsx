@@ -30,12 +30,17 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
 
+      // Calculate duration in minutes for timer-type habits
+      const duration = habit.metrics.type === 'timer' && habit.metrics.target 
+        ? habit.metrics.target 
+        : undefined;
+
       // Base task structure that matches regular tasks
       const newTask: Task = {
         id: taskId,
         name: habit.name,
         completed: existingTask?.completed || false,
-        duration: habit.metrics.type === 'timer' ? habit.metrics.target : undefined,
+        duration,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         tags: [
           { name: 'Habit', color: 'blue' as const }
