@@ -1,23 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
-import { ActiveTemplate, DayOfWeek, HabitTemplate } from './types';
+import { useTemplateCreation } from './hooks/useTemplateCreation';
+import { HabitTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
-import TemplateManager from './TemplateManager';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+import TemplateSelectionSheet from './TemplateSelectionSheet';
+import TemplateConfigurationSheet from './TemplateConfigurationSheet';
 
 const HabitTracker: React.FC = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
-  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
-  const [newTemplateName, setNewTemplateName] = useState('');
   const [allTemplates, setAllTemplates] = useState<HabitTemplate[]>(habitTemplates);
 
   const {
@@ -32,6 +26,17 @@ const HabitTracker: React.FC = () => {
     getTodayProgress,
     updateProgress,
   } = useHabitProgress();
+
+  const {
+    selectedTemplate,
+    isCreatingTemplate,
+    newTemplateName,
+    setNewTemplateName,
+    handleCreateTemplate,
+    handleConfigureTemplate,
+    handleCloseTemplate,
+    handleSaveTemplate,
+  } = useTemplateCreation(addTemplate, updateTemplate);
 
   // Load custom templates from localStorage
   useEffect(() => {
@@ -63,89 +68,9 @@ const HabitTracker: React.FC = () => {
     }
   };
 
-  const handleCreateTemplate = () => {
-    const newTemplate: ActiveTemplate = {
-      templateId: `custom-${Date.now()}`,
-      habits: [],
-      customized: true,
-      activeDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    };
-    setSelectedTemplate(newTemplate);
-    setIsCreatingTemplate(true);
-    setNewTemplateName('');
-  };
-
-  const handleConfigureTemplate = (template: ActiveTemplate) => {
-    setSelectedTemplate(template);
-    setIsCreatingTemplate(false);
-  };
-
-  const handleCloseTemplate = () => {
-    setSelectedTemplate(null);
-    setIsCreatingTemplate(false);
-    setNewTemplateName('');
-  };
-
-  const handleUpdateTemplate = (updates: Partial<ActiveTemplate>) => {
+  const handleUpdateTemplate = (updates: Partial<typeof selectedTemplate>) => {
     if (!selectedTemplate) return;
-    const updatedTemplate = { ...selectedTemplate, ...updates };
-    setSelectedTemplate(updatedTemplate);
-  };
-
-  const handleSaveTemplate = () => {
-    if (!selectedTemplate) return;
-    
-    if (!newTemplateName.trim() && isCreatingTemplate) {
-      toast.error('Please enter a template name');
-      return;
-    }
-
-    if (!selectedTemplate.habits?.length) {
-      toast.error('Please add at least one habit');
-      return;
-    }
-
-    if (isCreatingTemplate) {
-      // Save as a new custom template
-      const customTemplate: HabitTemplate = {
-        id: selectedTemplate.templateId,
-        name: newTemplateName,
-        description: 'Custom template',
-        category: 'Custom',
-        defaultHabits: selectedTemplate.habits,
-        defaultDays: selectedTemplate.activeDays,
-        duration: null,
-      };
-
-      // Save to localStorage
-      const existingTemplatesStr = localStorage.getItem('custom-templates');
-      const existingTemplates = existingTemplatesStr ? JSON.parse(existingTemplatesStr) : [];
-      const updatedTemplates = [...existingTemplates, customTemplate];
-      localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
-
-      // Add to active templates
-      const updatedTemplate = { 
-        ...selectedTemplate,
-        name: newTemplateName,
-        customized: true,
-      };
-      addTemplate(updatedTemplate);
-      toast.success('Template saved successfully');
-      handleCloseTemplate();
-      window.dispatchEvent(new Event('templatesUpdated'));
-    } else {
-      updateTemplate(selectedTemplate.templateId, selectedTemplate);
-      toast.success('Template updated successfully');
-      handleCloseTemplate();
-      window.dispatchEvent(new Event('templatesUpdated'));
-    }
-    
-    setIsConfigOpen(false);
-  };
-
-  const handleUpdateDays = (days: DayOfWeek[]) => {
-    if (!selectedTemplate) return;
-    handleUpdateTemplate({ activeDays: days });
+    handleConfigureTemplate({ ...selectedTemplate, ...updates });
   };
 
   return (
@@ -160,68 +85,25 @@ const HabitTracker: React.FC = () => {
         onHabitUpdate={updateProgress}
       />
 
-      <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
-        <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
-          <div className="flex flex-col h-full">
-            <div className="p-6 pb-0">
-              <SheetHeader>
-                <SheetTitle>Configure Templates</SheetTitle>
-              </SheetHeader>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <TemplateManager
-                availableTemplates={allTemplates}
-                activeTemplateIds={activeTemplates.map(t => t.templateId)}
-                onSelectTemplate={handleTemplateSelect}
-                onCreateTemplate={handleCreateTemplate}
-              />
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <TemplateSelectionSheet
+        isOpen={isConfigOpen}
+        onOpenChange={setIsConfigOpen}
+        allTemplates={allTemplates}
+        activeTemplateIds={activeTemplates.map(t => t.templateId)}
+        onSelectTemplate={handleTemplateSelect}
+        onCreateTemplate={handleCreateTemplate}
+      />
 
-      {selectedTemplate && (
-        <Sheet 
-          open={!!selectedTemplate} 
-          onOpenChange={(open) => {
-            if (!open) handleCloseTemplate();
-          }}
-        >
-          <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
-            <div className="flex flex-col h-full">
-              <div className="p-6 pb-0">
-                <SheetHeader>
-                  <SheetTitle>
-                    {isCreatingTemplate ? 'Create New Template' : 'Edit Template'}
-                  </SheetTitle>
-                </SheetHeader>
-                
-                {isCreatingTemplate && (
-                  <div className="space-y-2 mt-4">
-                    <Label htmlFor="templateName">Template Name</Label>
-                    <Input
-                      id="templateName"
-                      value={newTemplateName}
-                      onChange={(e) => setNewTemplateName(e.target.value)}
-                      placeholder="Enter template name"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 overflow-hidden">
-                <TemplateManager
-                  templateToEdit={selectedTemplate}
-                  onUpdateTemplate={handleUpdateTemplate}
-                  onUpdateDays={handleUpdateDays}
-                  onClose={handleCloseTemplate}
-                  onSave={handleSaveTemplate}
-                />
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
+      <TemplateConfigurationSheet
+        selectedTemplate={selectedTemplate}
+        isCreatingTemplate={isCreatingTemplate}
+        newTemplateName={newTemplateName}
+        onNewTemplateNameChange={setNewTemplateName}
+        onClose={handleCloseTemplate}
+        onUpdateTemplate={handleUpdateTemplate}
+        onUpdateDays={updateTemplateDays}
+        onSave={handleSaveTemplate}
+      />
     </div>
   );
 };
