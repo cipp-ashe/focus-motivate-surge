@@ -4,30 +4,22 @@ import { HabitDetail, DayOfWeek, ActiveTemplate } from '@/components/habits/type
 
 export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
-  
+
   useEffect(() => {
+    // Get today's day name (e.g., "Monday")
     const today = new Date();
     const dayOfWeek = today.toLocaleString('en-US', { weekday: 'long' }) as DayOfWeek;
     
-    // Create a new array with only the habits from currently active templates
-    const activeHabits = activeTemplates.reduce<HabitDetail[]>((acc, template) => {
-      // Only include habits if the template is active for today
+    // Filter habits from templates that are active today
+    const habitsForToday = activeTemplates.flatMap(template => {
       if (template.activeDays.includes(dayOfWeek)) {
-        // Map through habits to ensure we pass through all properties
-        const templatesHabits = template.habits.map(habit => ({
-          ...habit,
-          // Ensure duration is properly passed through
-          duration: habit.duration || null
-        }));
-        return [...acc, ...templatesHabits];
+        return template.habits;
       }
-      return acc;
-    }, []);
-    
-    setTodaysHabits(activeHabits);
-  }, [activeTemplates]); // This ensures we update whenever templates change
+      return [];
+    });
 
-  return {
-    todaysHabits,
-  };
+    setTodaysHabits(habitsForToday);
+  }, [activeTemplates]);
+
+  return { todaysHabits };
 };

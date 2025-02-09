@@ -5,7 +5,7 @@ import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { Header } from "@/components/layout/Header";
-import { TodaysHabits } from "@/components/habits/TodaysHabits";
+import { TodaysHabitCard } from "@/components/habits/TodaysHabitCard";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 import type { HabitDetail, ActiveTemplate } from "@/components/habits/types";
@@ -90,19 +90,19 @@ const Index = () => {
       id: `habit-task-${habit.id}`,
       name: habit.name,
       completed: false,
-      duration: habit.duration || 25, // Fallback to 25 if no duration set
+      duration: habit.duration || 25,
       metrics: undefined
     };
     handleTasksUpdate([newTask, ...tasks]);
-    toast.success(`Added "${habit.name}" to tasks`);
   };
 
-  const handleHabitClick = (habit: HabitDetail) => {
-    if (completedHabits.includes(habit.id)) {
-      setCompletedHabits(prev => prev.filter(id => id !== habit.id));
-    } else {
-      setCompletedHabits(prev => [...prev, habit.id]);
-    }
+  const handleHabitComplete = (habit: HabitDetail) => {
+    setCompletedHabits(prev => {
+      if (prev.includes(habit.id)) {
+        return prev.filter(id => id !== habit.id);
+      }
+      return [...prev, habit.id];
+    });
   };
 
   return (
@@ -122,10 +122,10 @@ const Index = () => {
           onFavoritesChange={handleFavoritesUpdate}
         />
 
-        <TodaysHabits
+        <TodaysHabitCard
           habits={todaysHabits}
           completedHabits={completedHabits}
-          onHabitClick={handleHabitClick}
+          onHabitComplete={handleHabitComplete}
           onAddHabitToTasks={handleAddHabitToTasks}
         />
       </div>
