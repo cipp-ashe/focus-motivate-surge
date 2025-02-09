@@ -1,15 +1,15 @@
+
 import React, { useState } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
-  Box,
-  Button,
-  Tabs,
-  Tab,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { HabitTemplate, NewTemplate } from '../../types';
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Plus } from "lucide-react";
+import { HabitTemplate, NewTemplate } from '../types';
 import AvailableTemplates from './AvailableTemplates';
 import CustomTemplates from './CustomTemplates';
 import CreateTemplateForm from './CreateTemplateForm';
@@ -33,12 +33,8 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
   onSelectTemplate,
   onCreateTemplate,
 }) => {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState("available");
   const [showCreateForm, setShowCreateForm] = useState(false);
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTab(newValue);
-  };
 
   const handleCreateTemplate = (template: NewTemplate) => {
     onCreateTemplate(template);
@@ -47,13 +43,10 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
 
   if (showCreateForm) {
     return (
-      <Dialog
-        open={open}
-        onClose={onClose}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Create New Template</DialogTitle>
+      <Dialog open={open} onOpenChange={() => onClose()}>
+        <DialogHeader>
+          <DialogTitle>Create New Template</DialogTitle>
+        </DialogHeader>
         <DialogContent>
           <CreateTemplateForm
             onSubmit={handleCreateTemplate}
@@ -65,45 +58,41 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-    >
-      <DialogTitle>Manage Templates</DialogTitle>
+    <Dialog open={open} onOpenChange={() => onClose()}>
+      <DialogHeader>
+        <DialogTitle>Manage Templates</DialogTitle>
+      </DialogHeader>
       <DialogContent>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="flex justify-end mb-6">
           <Button
-            variant="contained"
-            startIcon={<AddIcon />}
             onClick={() => setShowCreateForm(true)}
+            className="gap-2"
           >
+            <Plus className="h-4 w-4" />
             Create Template
           </Button>
-        </Box>
+        </div>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tab} onChange={handleTabChange}>
-            <Tab label="Available Templates" />
-            <Tab label="Custom Templates" />
-          </Tabs>
-        </Box>
-
-        {tab === 0 && (
-          <AvailableTemplates
-            templates={availableTemplates}
-            activeTemplateIds={activeTemplateIds}
-            onSelect={onSelectTemplate}
-          />
-        )}
-        {tab === 1 && (
-          <CustomTemplates
-            templates={customTemplates}
-            activeTemplateIds={activeTemplateIds}
-            onSelect={onSelectTemplate}
-          />
-        )}
+        <Tabs defaultValue="available" className="w-full" value={tab} onValueChange={setTab}>
+          <TabsList className="w-full">
+            <TabsTrigger value="available" className="flex-1">Available Templates</TabsTrigger>
+            <TabsTrigger value="custom" className="flex-1">Custom Templates</TabsTrigger>
+          </TabsList>
+          <TabsContent value="available">
+            <AvailableTemplates
+              templates={availableTemplates}
+              activeTemplateIds={activeTemplateIds}
+              onSelect={onSelectTemplate}
+            />
+          </TabsContent>
+          <TabsContent value="custom">
+            <CustomTemplates
+              templates={customTemplates}
+              activeTemplateIds={activeTemplateIds}
+              onSelect={onSelectTemplate}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
