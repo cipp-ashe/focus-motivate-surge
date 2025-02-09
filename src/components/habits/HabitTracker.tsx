@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,8 @@ const HabitTracker: React.FC = () => {
     if (template) {
       addTemplate(template);
       setIsConfigOpen(false);
+      // Dispatch update event
+      window.dispatchEvent(new Event('templatesUpdated'));
     }
   };
 
@@ -91,11 +94,18 @@ const HabitTracker: React.FC = () => {
       addTemplate(updatedTemplate);
       toast.success('Template saved successfully');
       handleCloseTemplate();
+      // Dispatch update event
+      window.dispatchEvent(new Event('templatesUpdated'));
     } else {
       updateTemplate(selectedTemplate.templateId, selectedTemplate);
       toast.success('Template updated successfully');
       handleCloseTemplate();
+      // Dispatch update event
+      window.dispatchEvent(new Event('templatesUpdated'));
     }
+    
+    // Close the configuration panel
+    setIsConfigOpen(false);
   };
 
   const handleUpdateDays = (days: DayOfWeek[]) => {
@@ -182,3 +192,4 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
+
