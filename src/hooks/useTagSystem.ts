@@ -29,7 +29,6 @@ export const useTagSystem = () => {
   const createTag = useCallback((name: string, color: Tag['color'] = 'default') => {
     const existingTag = tags.find(t => t.name.toLowerCase() === name.toLowerCase());
     if (existingTag) {
-      toast.error("Tag already exists");
       return existingTag;
     }
 
@@ -41,7 +40,6 @@ export const useTagSystem = () => {
     };
 
     setTags(prev => [...prev, newTag]);
-    toast.success("Tag created");
     return newTag;
   }, [tags]);
 
@@ -86,7 +84,6 @@ export const useTagSystem = () => {
     );
 
     if (existingRelation) {
-      toast.error("Tag already added");
       return;
     }
 
@@ -99,7 +96,6 @@ export const useTagSystem = () => {
     };
 
     setRelations(prev => [...prev, newRelation]);
-    toast.success("Tag added");
 
     // Dispatch event for components to update
     window.dispatchEvent(new Event('tagsUpdated'));
@@ -117,7 +113,6 @@ export const useTagSystem = () => {
       !(r.tagId === tag.id && r.entityId === entityId && r.entityType === entityType)
     ));
     
-    toast.success("Tag removed");
     window.dispatchEvent(new Event('tagsUpdated'));
   }, [tags]);
 
