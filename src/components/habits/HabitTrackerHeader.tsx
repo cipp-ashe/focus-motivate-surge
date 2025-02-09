@@ -10,7 +10,7 @@ interface HabitTrackerHeaderProps {
 const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ onConfigureTemplates }) => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Habit Configuration</h2>
+      <h2 className="text-4xl font-bold text-primary tracking-tight">Habit Configuration</h2>
       <Button
         onClick={onConfigureTemplates}
         variant="outline"
@@ -25,3 +25,4 @@ const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ onConfigureTemp
 };
 
 export default HabitTrackerHeader;
+
