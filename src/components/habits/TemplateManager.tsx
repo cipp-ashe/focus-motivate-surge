@@ -1,14 +1,15 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, GripVertical, Save } from 'lucide-react';
+import { Plus, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { HabitTemplate, ActiveTemplate, DayOfWeek, DAYS_OF_WEEK } from './types';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import HabitForm from './ConfigurationDialog/HabitForm';
+import { HabitTemplate, ActiveTemplate, DayOfWeek } from './types';
 import { createEmptyHabit } from './types';
 import { useWindowSize } from '@/hooks/useWindowSize';
+import DaySelector from './ConfigurationDialog/DaySelector';
+import HabitFormField from './HabitFormField';
+import { toast } from 'sonner';
 
 interface TemplateManagerProps {
   availableTemplates?: HabitTemplate[];
@@ -51,10 +52,13 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
     return () => clearTimeout(debounceResize);
   }, [updateContainerHeight]);
 
-  // Filter out active templates from available ones
-  const inactiveTemplates = availableTemplates.filter(
-    template => !activeTemplateIds.includes(template.id)
-  );
+  const handleSave = () => {
+    if (!templateToEdit?.habits?.length) {
+      toast.error('Please add at least one habit to the template');
+      return;
+    }
+    onSave?.();
+  };
 
   if (templateToEdit) {
     return (
@@ -62,27 +66,10 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
         <div className="space-y-4 flex-1 overflow-hidden p-4">
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-primary">Active Days</h4>
-            <ToggleGroup 
-              type="multiple" 
-              value={templateToEdit.activeDays}
-              onValueChange={(values) => {
-                if (values.length > 0) {
-                  onUpdateDays?.(values as DayOfWeek[]);
-                }
-              }}
-              className="flex flex-wrap gap-1"
-            >
-              {DAYS_OF_WEEK.map((day) => (
-                <ToggleGroupItem
-                  key={day}
-                  value={day}
-                  aria-label={`Toggle ${day}`}
-                  className="flex-1 min-w-[36px] h-8 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                >
-                  {day.charAt(0)}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+            <DaySelector 
+              activeDays={templateToEdit.activeDays}
+              onUpdateDays={onUpdateDays || (() => {})}
+            />
           </div>
 
           <div className="space-y-3">
@@ -110,7 +97,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                     key={habit.id}
                     className="transition-all hover:scale-[1.01]"
                   >
-                    <HabitForm
+                    <HabitFormField
                       habit={habit}
                       onUpdate={(updates) => {
                         const updatedHabits = [...(templateToEdit.habits || [])];
@@ -121,7 +108,6 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                         const updatedHabits = (templateToEdit.habits || []).filter((_, i) => i !== index);
                         onUpdateTemplate?.({ habits: updatedHabits });
                       }}
-                      onDragStart={() => {}}
                     />
                   </div>
                 ))}
@@ -131,7 +117,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
         </div>
 
         <div className="p-4 border-t">
-          <Button onClick={onSave} className="w-full" size="lg">
+          <Button onClick={handleSave} className="w-full" size="lg">
             <Save className="h-4 w-4 mr-2" />
             Save Template
           </Button>
@@ -139,6 +125,11 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
       </div>
     );
   }
+
+  // Filter out active templates from available ones
+  const inactiveTemplates = availableTemplates.filter(
+    template => !activeTemplateIds.includes(template.id)
+  );
 
   return (
     <div className="h-full flex flex-col">
