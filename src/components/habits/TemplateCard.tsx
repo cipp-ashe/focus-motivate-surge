@@ -1,15 +1,11 @@
 
 import React from 'react';
-import { Edit, Trash2, BarChart } from 'lucide-react';
+import { Settings, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { HabitDetail, HabitTemplate } from './types';
 import HabitMetric from './HabitMetric';
-
-interface ProgressResult {
-  value: boolean | number;
-  streak: number;
-}
 
 interface TemplateCardProps {
   template: {
@@ -18,53 +14,59 @@ interface TemplateCardProps {
     activeDays: string[];
   };
   templateInfo: HabitTemplate;
-  onCustomize: () => void;
+  onConfigure: () => void;
   onRemove: () => void;
-  onToggleInsights: () => void;
-  getProgress: (habitId: string) => ProgressResult;
+  getProgress: (habitId: string) => { value: boolean | number; streak: number; };
   onHabitUpdate: (habitId: string, value: boolean | number) => void;
 }
 
 const TemplateCard: React.FC<TemplateCardProps> = ({
   template,
   templateInfo,
-  onCustomize,
+  onConfigure,
   onRemove,
-  onToggleInsights,
   getProgress,
   onHabitUpdate,
 }) => {
   return (
-    <Card className="bg-background">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-        <CardTitle className="text-sm font-medium">{templateInfo.name}</CardTitle>
-        <div className="flex space-x-0.5">
-          <Button variant="ghost" size="sm" onClick={onToggleInsights} className="h-6 w-6 p-0">
-            <BarChart className="h-3 w-3" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onCustomize} className="h-6 w-6 p-0">
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onRemove} className="h-6 w-6 p-0 text-destructive hover:text-destructive">
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="py-1">
-        <div className="grid grid-cols-2 gap-1">
-          {template.habits.map((habit) => (
-            <div key={habit.id} className="flex items-center justify-between px-2 py-1 rounded-sm bg-muted/30 text-[0.7rem]">
-              <span className="font-medium truncate max-w-[80px]">{habit.name}</span>
-              <HabitMetric
-                habit={habit}
-                progress={getProgress(habit.id)}
-                onUpdate={(value) => onHabitUpdate(habit.id, value)}
-              />
+    <Collapsible>
+      <Card className="bg-card">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CollapsibleTrigger className="flex-1 text-left">
+            <CardTitle className="text-lg font-medium hover:text-primary transition-colors">
+              {templateInfo.name}
+            </CardTitle>
+          </CollapsibleTrigger>
+          <div className="flex space-x-2">
+            <Button variant="ghost" size="sm" onClick={onConfigure}>
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onRemove} className="text-destructive hover:text-destructive">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CollapsibleContent>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              {template.habits.map((habit) => (
+                <div 
+                  key={habit.id} 
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted"
+                >
+                  <span className="font-medium text-sm">{habit.name}</span>
+                  <HabitMetric
+                    habit={habit}
+                    progress={getProgress(habit.id)}
+                    onUpdate={(value) => onHabitUpdate(habit.id, value)}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 };
 

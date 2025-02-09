@@ -1,114 +1,79 @@
 
 import React, { useState } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
-import { useDragAndDrop } from './hooks/useDragAndDrop';
-import ConfigurationDialog from './ConfigurationDialog';
-import ManageTemplatesDialog from './ManageTemplatesDialog';
-import { DialogState, ActiveTemplate } from './types';
+import { ActiveTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
-import DraggableTemplateList from './DraggableTemplateList';
+import TemplateList from './TemplateList';
+import TemplateConfiguration from './TemplateConfiguration';
 
 const HabitTracker: React.FC = () => {
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
+
   const {
     activeTemplates,
     addTemplate,
     updateTemplate,
     removeTemplate,
-    updateTemplateOrder,
     updateTemplateDays,
   } = useTemplateManagement();
 
   const {
     getTodayProgress,
     updateProgress,
-    getWeeklyProgress,
   } = useHabitProgress();
 
-  const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
-  const [dialog, setDialog] = useState<DialogState>({ type: 'customize', open: false });
-  const [showInsights, setShowInsights] = useState(false);
-  const [insightTemplateId, setInsightTemplateId] = useState<string | null>(null);
-
-  const {
-    draggedIndex,
-    handleDragStart,
-    handleDragOver,
-    handleDragEnd,
-  } = useDragAndDrop(activeTemplates, updateTemplateOrder);
-
-  const handleCustomizeTemplate = (template: ActiveTemplate) => {
-    setSelectedTemplate({
-      ...template,
-      activeDays: template.activeDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    });
-    setDialog({ type: 'customize', open: true });
-  };
-
-  const handleSaveTemplate = (habits: any) => {
-    if (selectedTemplate) {
-      updateTemplate(selectedTemplate.templateId, { habits });
-      setDialog({ type: 'customize', open: false });
-      setSelectedTemplate(null);
+  const handleTemplateSelect = (templateId: string) => {
+    const template = habitTemplates.find(t => t.id === templateId);
+    if (template) {
+      addTemplate(template);
+      setIsConfigOpen(false);
     }
   };
 
-  const handleToggleInsights = (template: ActiveTemplate) => {
-    if (insightTemplateId === template.templateId) {
-      setShowInsights(false);
-      setInsightTemplateId(null);
-    } else {
-      setShowInsights(true);
-      setInsightTemplateId(template.templateId);
-    }
+  const handleConfigureTemplate = (template: ActiveTemplate) => {
+    setSelectedTemplate(template);
   };
 
   return (
-    <div className="space-y-4">
-      <HabitTrackerHeader 
-        onAddTemplate={() => setDialog({ type: 'manage', open: true })} 
-      />
-
-      <DraggableTemplateList
+    <div className="space-y-4 max-w-4xl mx-auto">
+      <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
+      
+      <TemplateList
         activeTemplates={activeTemplates}
-        showInsights={showInsights}
-        insightTemplateId={insightTemplateId}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onCustomize={handleCustomizeTemplate}
+        onConfigure={handleConfigureTemplate}
         onRemove={removeTemplate}
-        onToggleInsights={handleToggleInsights}
         getTodayProgress={getTodayProgress}
         onHabitUpdate={updateProgress}
-        getWeeklyProgress={getWeeklyProgress}
       />
 
-      {dialog.type === 'manage' && (
-        <ManageTemplatesDialog
-          open={dialog.open}
-          onClose={() => setDialog({ type: 'manage', open: false })}
-          availableTemplates={habitTemplates}
-          activeTemplateIds={activeTemplates.map(t => t.templateId)}
-          onSelectTemplate={(template) => {
-            addTemplate(template);
-            setDialog({ type: 'manage', open: false });
-          }}
-        />
-      )}
+      <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+          <SheetHeader>
+            <SheetTitle>Configure Templates</SheetTitle>
+          </SheetHeader>
+          <TemplateConfiguration
+            availableTemplates={habitTemplates}
+            activeTemplateIds={activeTemplates.map(t => t.templateId)}
+            onSelectTemplate={handleTemplateSelect}
+          />
+        </SheetContent>
+      </Sheet>
 
-      {selectedTemplate && dialog.type === 'customize' && (
-        <ConfigurationDialog
-          open={dialog.open}
-          onClose={() => {
-            setDialog({ type: 'customize', open: false });
+      {selectedTemplate && (
+        <TemplateConfiguration
+          template={selectedTemplate}
+          onClose={() => setSelectedTemplate(null)}
+          onUpdate={(updates) => {
+            updateTemplate(selectedTemplate.templateId, updates);
             setSelectedTemplate(null);
           }}
-          onSave={handleSaveTemplate}
-          habits={selectedTemplate.habits}
-          activeDays={selectedTemplate.activeDays}
-          onUpdateDays={(days) => updateTemplateDays(selectedTemplate.templateId, days)}
+          onUpdateDays={(days) => {
+            updateTemplateDays(selectedTemplate.templateId, days);
+          }}
         />
       )}
     </div>
