@@ -1,6 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+import { Check, AlertOctagon, X } from 'lucide-react';
 import { ActiveTemplate, DayOfWeek, HabitTemplate, NewTemplate, DEFAULT_ACTIVE_DAYS } from '../types';
 
 const STORAGE_KEY = 'habit-templates';
@@ -29,7 +30,10 @@ export const useTemplateManagement = () => {
     setActiveTemplates(prev => {
       const exists = prev.some(t => t.templateId === template.templateId);
       if (exists) {
-        toast.error('Template already exists');
+        toast.error('Template already exists', {
+          icon: <AlertOctagon className="h-5 w-5" />,
+          duration: 2000,
+        });
         return prev;
       }
       
@@ -40,7 +44,10 @@ export const useTemplateManagement = () => {
       };
       
       console.log('Adding template:', newTemplate);
-      toast.success('Template added successfully');
+      toast.success('Template added successfully', {
+        icon: <Check className="h-5 w-5" />,
+        duration: 2000,
+      });
       return [...prev, newTemplate];
     });
   }, []);
@@ -60,6 +67,10 @@ export const useTemplateManagement = () => {
     setActiveTemplates(prev => 
       prev.filter(template => template.templateId !== templateId)
     );
+    toast.success('Template removed', {
+      icon: <Check className="h-5 w-5" />,
+      duration: 2000,
+    });
   }, []);
 
   const deleteCustomTemplate = useCallback((templateId: string) => {
@@ -75,6 +86,10 @@ export const useTemplateManagement = () => {
 
   const saveCustomTemplate = useCallback((template: NewTemplate): HabitTemplate => {
     if (!template.defaultHabits || template.defaultHabits.length === 0) {
+      toast.error('Template must have at least one habit', {
+        icon: <X className="h-5 w-5" />,
+        duration: 2000,
+      });
       throw new Error('Template must have at least one habit');
     }
 
@@ -104,6 +119,12 @@ export const useTemplateManagement = () => {
     addTemplate(activeTemplate);
     console.log('Created custom template:', newTemplate);
     console.log('Added as active template:', activeTemplate);
+    
+    toast.success('Custom template created successfully', {
+      icon: <Check className="h-5 w-5" />,
+      duration: 2000,
+    });
+    
     return newTemplate;
   }, [addTemplate]);
 
