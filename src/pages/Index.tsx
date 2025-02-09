@@ -12,8 +12,6 @@ import { useRelationships } from "@/hooks/useRelationships";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  console.log('Mounting Index component');
-  
   const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
@@ -44,34 +42,26 @@ const Index = () => {
     toggleHabits();
   };
 
-  console.log('Index component state:', {
-    isInitialized,
-    error,
-    tasks: tasks.length,
-    completedTasks: initialCompletedTasks.length,
-    activeTemplates: activeTemplates.length
-  });
-
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4 p-4 rounded-lg">
           {error ? (
             <>
-              <div className="text-lg mb-4 text-red-600">{error}</div>
-              <div className="text-sm text-gray-600 mb-4">
+              <div className="text-lg font-medium text-red-600">{error}</div>
+              <div className="text-sm text-muted-foreground">
                 Try clearing local storage to fix this issue
               </div>
             </>
           ) : (
-            <div className="text-lg mb-4">Initializing data store...</div>
+            <div className="text-lg font-medium">Initializing data store...</div>
           )}
           
           {showClearButton && (
             <Button 
               variant="destructive"
               onClick={clearStorage}
-              className="animate-pulse"
+              className="mt-4"
             >
               Clear Storage & Refresh
             </Button>

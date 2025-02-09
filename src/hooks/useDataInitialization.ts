@@ -9,31 +9,21 @@ export const useDataInitialization = () => {
   const [error, setError] = useState<string | null>(null);
 
   const clearStorage = () => {
-    console.log('Clearing localStorage');
     localStorage.clear();
     toast.success('Local storage cleared');
     window.location.reload();
   };
 
   useEffect(() => {
-    console.log('Starting data store initialization');
-    
     try {
-      // Log current localStorage state
-      console.log('Current localStorage state:', {
-        schemaVersion: localStorage.getItem('schema-version'),
-        relations: localStorage.getItem('entity-relations'),
-        tagRelations: localStorage.getItem('tag-relations'),
-        taskList: localStorage.getItem('taskList'),
-        completedTasks: localStorage.getItem('completedTasks'),
-        habitTemplates: localStorage.getItem('habit-templates')
-      });
+      // Check if already initialized to prevent multiple attempts
+      if (isInitialized) {
+        return;
+      }
 
       const initialized = initializeDataStore();
       if (!initialized) {
-        const errorMsg = 'Failed to initialize data store';
-        console.error(errorMsg);
-        setError(errorMsg);
+        setError('Failed to initialize data store');
         setShowClearButton(true);
         return;
       }
@@ -43,21 +33,12 @@ export const useDataInitialization = () => {
       const relations = localStorage.getItem('entity-relations');
       const tagRelations = localStorage.getItem('tag-relations');
       
-      console.log('Core data structures:', {
-        schemaVersion,
-        hasRelations: !!relations,
-        hasTagRelations: !!tagRelations
-      });
-      
       if (!schemaVersion || !relations || !tagRelations) {
-        const errorMsg = 'Missing core data structures';
-        console.error(errorMsg);
-        setError(errorMsg);
+        setError('Missing core data structures');
         setShowClearButton(true);
         return;
       }
 
-      console.log('Data store initialized successfully with schema version:', schemaVersion);
       setIsInitialized(true);
       setError(null);
     } catch (err) {
@@ -66,7 +47,7 @@ export const useDataInitialization = () => {
       setError(errorMsg);
       setShowClearButton(true);
     }
-  }, []);
+  }, []); // Only run once on mount
 
   return { isInitialized, showClearButton, clearStorage, error };
 };
