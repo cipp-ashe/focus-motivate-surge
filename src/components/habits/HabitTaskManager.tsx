@@ -26,11 +26,9 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
       
-      // Extract duration from metrics correctly
+      // Extract duration from metrics correctly - only if it's a timer type
       let duration;
       if (habit.metrics?.type === 'timer' && typeof habit.metrics.target === 'number') {
-        duration = habit.metrics.target;
-      } else if (habit.metrics?.type === 'duration' && typeof habit.metrics.target === 'number') {
         duration = habit.metrics.target;
       }
 
@@ -57,3 +55,4 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
+
