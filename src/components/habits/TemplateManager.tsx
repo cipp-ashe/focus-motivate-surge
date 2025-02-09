@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, GripVertical, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,12 +36,20 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   const { height } = useWindowSize();
   const [containerHeight, setContainerHeight] = useState('600px');
 
-  useEffect(() => {
+  const updateContainerHeight = useCallback(() => {
     if (height) {
-      const newHeight = Math.max(400, height - 200);
-      setContainerHeight(`${newHeight}px`);
+      const newHeight = Math.max(400, Math.min(height - 200, 800));
+      requestAnimationFrame(() => {
+        setContainerHeight(`${newHeight}px`);
+      });
     }
   }, [height]);
+
+  useEffect(() => {
+    updateContainerHeight();
+    const debounceResize = setTimeout(updateContainerHeight, 100);
+    return () => clearTimeout(debounceResize);
+  }, [updateContainerHeight]);
 
   // Filter out active templates from available ones
   const inactiveTemplates = availableTemplates.filter(
@@ -137,45 +145,47 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   }
 
   return (
-    <ScrollArea className="relative" style={{ height: containerHeight }}>
-      <div className="space-y-3 p-4">
-        <Button 
-          onClick={onCreateTemplate}
-          variant="outline"
-          className="w-full flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors group"
-        >
-          <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
-          Create New Template
-        </Button>
-        {inactiveTemplates.map((template) => (
-          <Card 
-            key={template.id} 
-            className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card to-card/50 border-primary/10"
+    <div className="h-full flex flex-col">
+      <ScrollArea className="flex-1">
+        <div className="space-y-3 p-4">
+          <Button 
+            onClick={onCreateTemplate}
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2 hover:bg-primary/10 transition-colors group"
           >
-            <div className="p-4">
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{template.name}</h3>
-                <p className="text-sm text-muted-foreground">{template.description}</p>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-sm text-muted-foreground">
-                    {template.defaultHabits.length} habits
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onSelectTemplate?.(template.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Template
-                  </Button>
+            <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
+            Create New Template
+          </Button>
+          {inactiveTemplates.map((template) => (
+            <Card 
+              key={template.id} 
+              className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card to-card/50 border-primary/10"
+            >
+              <div className="p-4">
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{template.name}</h3>
+                  <p className="text-sm text-muted-foreground">{template.description}</p>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-sm text-muted-foreground">
+                      {template.defaultHabits.length} habits
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onSelectTemplate?.(template.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Template
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </ScrollArea>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
   );
 };
 
