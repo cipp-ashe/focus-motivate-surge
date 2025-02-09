@@ -13,69 +13,48 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
-  const frameRef = useRef<number>();
-  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   const isProcessingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
+    let rafId: number;
     
-    const observer = new ResizeObserver(() => {
-      if (isProcessingRef.current) {
-        return;
-      }
+    const observer = new ResizeObserver((entries) => {
+      if (isProcessingRef.current) return;
       
-      console.log('Resize detected');
-      
-      // Clear any existing animation frame
-      if (frameRef.current) {
-        console.log('Canceling previous animation frame');
-        cancelAnimationFrame(frameRef.current);
-      }
-      
-      // Clear any existing timeout
-      if (resizeTimeoutRef.current) {
-        console.log('Clearing previous timeout');
-        clearTimeout(resizeTimeoutRef.current);
-      }
-      
-      // Set a new timeout
-      resizeTimeoutRef.current = setTimeout(() => {
-        console.log('Timeout triggered, requesting animation frame');
+      // Use requestAnimationFrame to batch updates
+      rafId = requestAnimationFrame(() => {
         isProcessingRef.current = true;
         
-        frameRef.current = requestAnimationFrame(() => {
-          if (element && document.contains(element)) {
-            console.log('Applying reflow fix');
-            element.style.display = 'none';
-            // Force reflow
-            void element.offsetHeight;
-            element.style.display = '';
+        entries.forEach(entry => {
+          if (entry.target === element && document.contains(element)) {
+            // Force a reflow only when dimensions actually change
+            const { width, height } = entry.contentRect;
+            if (width > 0 && height > 0) {
+              element.style.display = 'none';
+              void element.offsetHeight;
+              element.style.display = '';
+            }
           }
-          
-          // Reset processing flag after a short delay
-          setTimeout(() => {
-            isProcessingRef.current = false;
-          }, 100);
         });
-      }, 500); // Increased debounce time significantly
+        
+        // Reset the processing flag after a short delay
+        setTimeout(() => {
+          isProcessingRef.current = false;
+        }, 100);
+      });
     });
 
-    console.log('Setting up ResizeObserver');
     observer.observe(element);
 
     return () => {
-      console.log('Cleaning up ResizeObserver');
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
+      observer.disconnect();
+      if (rafId) {
+        cancelAnimationFrame(rafId);
       }
       isProcessingRef.current = false;
-      observer.disconnect();
     };
   }, []);
 
@@ -99,4 +78,3 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     </div>
   );
 };
-
