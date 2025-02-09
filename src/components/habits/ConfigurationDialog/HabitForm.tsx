@@ -20,7 +20,6 @@ const HabitForm: React.FC<HabitFormProps> = ({
   onDelete,
   onDragStart,
 }) => {
-  // Convert seconds to minutes only for display in the input
   const displayMinutes = habit.metrics.type === 'timer' ? 
     Math.round(Number(habit.metrics.target || 0) / 60) : 
     habit.metrics.target || '';
@@ -61,8 +60,8 @@ const HabitForm: React.FC<HabitFormProps> = ({
                   type: value,
                   ...(value === 'timer' && { 
                     unit: 'seconds', 
-                    target: 1500, // Default 25 minutes in seconds
-                    min: 60, // Minimum 1 minute in seconds
+                    target: 1500,
+                    min: 60,
                   }),
                   ...(value === 'count' && { target: 1 }),
                   ...(value === 'rating' && { min: 1, max: 5 }),
@@ -84,24 +83,27 @@ const HabitForm: React.FC<HabitFormProps> = ({
           {habit.metrics.type === 'timer' && (
             <div className="space-y-2">
               <Input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="\d*"
                 placeholder="Duration in minutes"
                 value={displayMinutes}
                 onChange={(e) => {
-                  const minutes = parseInt(e.target.value);
-                  if (!isNaN(minutes)) {
-                    const seconds = minutes * 60;
-                    console.log(`Setting timer duration: ${minutes} minutes (${seconds} seconds)`);
-                    onUpdate({
-                      metrics: {
-                        ...habit.metrics,
-                        target: seconds, // Store as seconds
-                      },
-                    });
+                  const value = e.target.value;
+                  if (value === '' || /^\d+$/.test(value)) {
+                    const minutes = parseInt(value || '0');
+                    if (!isNaN(minutes)) {
+                      const seconds = minutes * 60;
+                      console.log(`Setting timer duration: ${minutes} minutes (${seconds} seconds)`);
+                      onUpdate({
+                        metrics: {
+                          ...habit.metrics,
+                          target: seconds,
+                        },
+                      });
+                    }
                   }
                 }}
-                min={1}
-                max={60}
               />
               <p className="text-xs text-muted-foreground">
                 Enter duration in minutes (stored as seconds internally)

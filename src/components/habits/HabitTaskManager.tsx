@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { ActiveTemplate } from "@/components/habits/types";
+import { toast } from "sonner";
 
 interface HabitTaskManagerProps {
   tasks: Task[];
@@ -20,48 +21,40 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       activeTemplates
     });
 
-    // Get existing non-habit tasks
-    const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
+    // Get existing tasks that weren't created from habits
+    const nonHabitTasks = tasks.filter(task => !task.tags?.some(tag => tag.name === 'Habit'));
     
-    // Convert timer habits to tasks
-    const timerHabits = todaysHabits.filter(habit => 
-      habit.metrics.type === 'timer' && habit.metrics.target
-    );
+    // Convert habits to tasks format
+    const habitTasks = todaysHabits.map(habit => {
+      const taskId = `habit-${habit.id}`;
+      const existingTask = tasks.find(t => t.id === taskId);
+
+      // Base task structure that matches regular tasks
+      const newTask: Task = {
+        id: taskId,
+        name: habit.name,
+        completed: existingTask?.completed || false,
+        duration: habit.metrics.type === 'timer' ? habit.metrics.target : undefined,
+        createdAt: existingTask?.createdAt || new Date().toISOString(),
+        tags: [
+          { name: 'Habit', color: 'blue' },
+          { name: habit.category, color: 'green' }
+        ],
+      };
+
+      console.log(`Created/Updated task for habit ${habit.name}:`, newTask);
+      return newTask;
+    });
+
+    // Combine non-habit tasks with habit tasks
+    const newTasks = [...nonHabitTasks, ...habitTasks];
+    console.log('Updating tasks:', newTasks);
     
-    if (timerHabits.length > 0) {
-      console.log('Processing timer habits:', timerHabits);
-      
-      const habitTasks: Task[] = timerHabits.map(habit => {
-        if (!habit.metrics.target || habit.metrics.target <= 0) {
-          console.warn(`Invalid duration for habit ${habit.name}:`, habit.metrics);
-          return null;
-        }
-
-        const taskId = `habit-${habit.id}`;
-        const existingTask = tasks.find(t => t.id === taskId);
-
-        // Create new task or use existing task's completion status
-        const newTask: Task = {
-          id: taskId,
-          name: habit.name,
-          completed: existingTask?.completed || false,
-          duration: habit.metrics.target, // Already in seconds
-          createdAt: existingTask?.createdAt || new Date().toISOString(),
-          tags: [{ name: 'Habit', color: 'blue' }],
-        };
-
-        console.log(`Created/Updated task for habit ${habit.name}:`, newTask);
-        return newTask;
-      }).filter(Boolean) as Task[];
-
-      const newTasks = [...nonHabitTasks, ...habitTasks];
-      console.log('Updating tasks:', newTasks);
+    // Only update if there are actual changes
+    const tasksChanged = JSON.stringify(tasks) !== JSON.stringify(newTasks);
+    if (tasksChanged) {
       onTasksUpdate(newTasks);
-    } else if (tasks.some(task => task.id.startsWith('habit-'))) {
-      // If there are no timer habits but we have habit tasks, remove them
-      console.log('Removing habit tasks as no timer habits exist');
-      const newTasks = tasks.filter(task => !task.id.startsWith('habit-'));
-      onTasksUpdate(newTasks);
+      toast.success("Habit tasks synchronized");
     }
   }, [todaysHabits, tasks, onTasksUpdate]);
 
