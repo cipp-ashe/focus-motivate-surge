@@ -7,7 +7,6 @@ import {
 import { HabitDetail, DayOfWeek } from '../types';
 import DialogHeader from './DialogHeader';
 import DialogContent from './DialogContent';
-import DialogFooter from './DialogFooter';
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -94,6 +93,10 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
     setDraggedIndex(null);
   };
 
+  const handleSave = () => {
+    onSave(habits);
+  };
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogHeader />
@@ -108,11 +111,9 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
         onDragEnd={handleDragEnd}
         onUpdateHabit={handleUpdateHabit}
         onDeleteHabit={handleDeleteHabit}
-      />
-      <DialogFooter
         onSaveAsTemplate={onSaveAsTemplate}
         onClose={onClose}
-        onSave={() => onSave(habits)}
+        onSave={handleSave}
       />
     </Dialog>
   );

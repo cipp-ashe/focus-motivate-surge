@@ -15,7 +15,7 @@ const DialogFooter: React.FC<DialogFooterProps> = ({
   onSave,
 }) => {
   return (
-    <ShadcnDialogFooter className="flex justify-between items-center">
+    <ShadcnDialogFooter className="flex justify-between items-center mt-6 border-t pt-4">
       <Button
         variant="outline"
         onClick={onSaveAsTemplate}
