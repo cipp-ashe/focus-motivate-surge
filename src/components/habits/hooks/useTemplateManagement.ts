@@ -31,7 +31,7 @@ export const useTemplateManagement = () => {
       const exists = prev.some(t => t.templateId === template.templateId);
       if (exists) {
         toast.error('Template already exists', {
-          icon: <AlertOctagon className="h-5 w-5" />,
+          icon: () => <AlertOctagon className="h-5 w-5" />,
           duration: 2000,
         });
         return prev;
@@ -45,7 +45,7 @@ export const useTemplateManagement = () => {
       
       console.log('Adding template:', newTemplate);
       toast.success('Template added successfully', {
-        icon: <Check className="h-5 w-5" />,
+        icon: () => <Check className="h-5 w-5" />,
         duration: 2000,
       });
       return [...prev, newTemplate];
@@ -68,7 +68,7 @@ export const useTemplateManagement = () => {
       prev.filter(template => template.templateId !== templateId)
     );
     toast.success('Template removed', {
-      icon: <Check className="h-5 w-5" />,
+      icon: () => <Check className="h-5 w-5" />,
       duration: 2000,
     });
   }, []);
@@ -87,7 +87,7 @@ export const useTemplateManagement = () => {
   const saveCustomTemplate = useCallback((template: NewTemplate): HabitTemplate => {
     if (!template.defaultHabits || template.defaultHabits.length === 0) {
       toast.error('Template must have at least one habit', {
-        icon: <X className="h-5 w-5" />,
+        icon: () => <X className="h-5 w-5" />,
         duration: 2000,
       });
       throw new Error('Template must have at least one habit');
@@ -121,7 +121,7 @@ export const useTemplateManagement = () => {
     console.log('Added as active template:', activeTemplate);
     
     toast.success('Custom template created successfully', {
-      icon: <Check className="h-5 w-5" />,
+      icon: () => <Check className="h-5 w-5" />,
       duration: 2000,
     });
     
