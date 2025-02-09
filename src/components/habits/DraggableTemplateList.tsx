@@ -40,16 +40,7 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
   onCreateTemplate,
 }) => {
   return (
-    <div className="space-y-4">
-      <Button 
-        onClick={onCreateTemplate}
-        variant="outline"
-        className="w-full flex items-center justify-center gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Create New Template
-      </Button>
-      
+    <div className="space-y-4">      
       <div className="space-y-2">
         {activeTemplates.map((template, index) => {
           const templateInfo = habitTemplates.find(t => t.id === template.templateId);
@@ -92,4 +83,3 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
 };
 
 export default DraggableTemplateList;
-
