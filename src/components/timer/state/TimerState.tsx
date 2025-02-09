@@ -25,6 +25,19 @@ export const useTimerState = ({
   // Memoize duration in seconds
   const durationInSeconds = useMemo(() => internalMinutes * 60, [internalMinutes]);
 
+  // Create a ref to hold the setShowConfirmation function
+  const showConfirmationRef = useRef(setShowConfirmation);
+  showConfirmationRef.current = setShowConfirmation;
+
+  const handleTimeUp = useCallback(() => {
+    try {
+      showConfirmationRef.current(true);
+    } catch (error) {
+      console.error('Error in timer completion flow:', error);
+      toast.error("An error occurred while completing the timer ⚠️");
+    }
+  }, []);
+
   const {
     timeLeft,
     minutes,
@@ -39,15 +52,7 @@ export const useTimerState = ({
     updateMetrics,
   } = useTimer({
     initialDuration: durationInSeconds,
-    onTimeUp: useCallback(async () => {
-      try {
-        pause();
-        setShowConfirmation(true);
-      } catch (error) {
-        console.error('Error in timer completion flow:', error);
-        toast.error("An error occurred while completing the timer ⚠️");
-      }
-    }, [pause]),
+    onTimeUp: handleTimeUp,
     onDurationChange,
   });
 
@@ -93,3 +98,4 @@ export const useTimerState = ({
     isLoadingAudio,
   };
 };
+
