@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, GripVertical, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -190,4 +189,3 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 };
 
 export default TemplateManager;
-
