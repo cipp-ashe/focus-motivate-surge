@@ -77,6 +77,13 @@ export interface DialogState {
   open: boolean;
 }
 
+export interface HabitProgress {
+  value: boolean | number;
+  streak: number;
+  date?: string;
+  completed?: boolean;
+}
+
 export const createEmptyHabit = (): HabitDetail => ({
   id: `habit-${Date.now()}`,
   name: 'New Habit',
@@ -87,4 +94,3 @@ export const createEmptyHabit = (): HabitDetail => ({
   insights: [],
   tips: [],
 });
-
