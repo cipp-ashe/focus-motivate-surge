@@ -26,3 +26,4 @@ const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({
 };
 
 export default HabitTrackerHeader;
+
