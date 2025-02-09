@@ -64,17 +64,24 @@ const HabitTracker: React.FC = () => {
       </Sheet>
 
       {selectedTemplate && (
-        <TemplateConfiguration
-          template={selectedTemplate}
-          onClose={() => setSelectedTemplate(null)}
-          onUpdate={(updates) => {
-            updateTemplate(selectedTemplate.templateId, updates);
-            setSelectedTemplate(null);
-          }}
-          onUpdateDays={(days) => {
-            updateTemplateDays(selectedTemplate.templateId, days);
-          }}
-        />
+        <Sheet open={!!selectedTemplate} onOpenChange={(open) => !open && setSelectedTemplate(null)}>
+          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+            <SheetHeader>
+              <SheetTitle>Edit Template</SheetTitle>
+            </SheetHeader>
+            <TemplateConfiguration
+              templateToEdit={selectedTemplate}
+              onUpdateTemplate={(updates) => {
+                updateTemplate(selectedTemplate.templateId, updates);
+                setSelectedTemplate(null);
+              }}
+              onUpdateDays={(days) => {
+                updateTemplateDays(selectedTemplate.templateId, days);
+              }}
+              onClose={() => setSelectedTemplate(null)}
+            />
+          </SheetContent>
+        </Sheet>
       )}
     </div>
   );
