@@ -27,7 +27,7 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
   return (
     <div className="space-y-4 mt-4">
       {templates.map((template) => (
-        <Card key={template.id}>
+        <Card key={template.id} className="hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{template.name}</CardTitle>
             <CardDescription>{template.description}</CardDescription>
@@ -43,7 +43,7 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
               disabled={activeTemplateIds.includes(template.id)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Template
+              {activeTemplateIds.includes(template.id) ? 'Already Added' : 'Add Template'}
             </Button>
           </CardContent>
         </Card>
@@ -53,3 +53,4 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
 };
 
 export default CustomTemplates;
+
