@@ -137,7 +137,7 @@ export const TaskRow = ({
       className={`
         relative flex flex-col gap-2
         p-4 rounded-lg border border-primary/20 bg-card/50 backdrop-blur-sm
-        cursor-pointer transition-all duration-200
+        cursor-pointer transition-all duration-200 group
         ${isSelected 
           ? 'bg-accent/10 border-primary/40' 
           : 'hover:border-primary/30 hover:bg-accent/5'
