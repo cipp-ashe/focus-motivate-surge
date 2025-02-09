@@ -25,11 +25,11 @@ export const TaskDuration = ({
 }: TaskDurationProps) => {
   return (
     <div 
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 min-w-[100px] justify-end"
       onClick={preventPropagation}
       onTouchStart={preventPropagation}
     >
-      <Clock className="h-4 w-4 text-muted-foreground" />
+      <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
       {isEditing ? (
         <Input
           type="text"
@@ -53,7 +53,7 @@ export const TaskDuration = ({
           {durationInMinutes}
         </span>
       )}
-      <span className="text-muted-foreground">m</span>
+      <span className="text-muted-foreground shrink-0">m</span>
     </div>
   );
 };
