@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { HabitTemplate } from '../types';
 import { toast } from 'sonner';
 
@@ -53,7 +53,7 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
                   onClick={() => handleDelete(template.id)}
                   className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <X className="h-4 w-4" />
                 </Button>
               )}
               <Button
@@ -75,3 +75,4 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
 };
 
 export default CustomTemplates;
+
