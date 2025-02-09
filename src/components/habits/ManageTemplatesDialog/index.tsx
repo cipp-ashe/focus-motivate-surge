@@ -45,10 +45,10 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
   if (showCreateForm) {
     return (
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogHeader>
-          <DialogTitle>Create New Template</DialogTitle>
-        </DialogHeader>
         <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Template</DialogTitle>
+          </DialogHeader>
           <CreateTemplateForm
             onSubmit={handleCreateTemplate}
             onCancel={() => setShowCreateForm(false)}
@@ -60,10 +60,11 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogHeader>
-        <DialogTitle>Manage Templates</DialogTitle>
-      </DialogHeader>
       <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Manage Templates</DialogTitle>
+        </DialogHeader>
+
         <div className="flex justify-end mb-4">
           <Button onClick={() => setShowCreateForm(true)} className="gap-2">
             <Plus className="h-4 w-4" />

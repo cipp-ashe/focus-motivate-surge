@@ -27,8 +27,13 @@ export const useTemplateManagement = () => {
 
   const addTemplate = useCallback((template: ActiveTemplate) => {
     setActiveTemplates(prev => {
+      // Check if template already exists
+      if (prev.some(t => t.templateId === template.templateId)) {
+        return prev;
+      }
       const newTemplates = [...prev, template];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newTemplates));
+      toast.success('Template added successfully');
       return newTemplates;
     });
   }, []);
@@ -82,18 +87,8 @@ export const useTemplateManagement = () => {
       return updated;
     });
 
-    const activeTemplate: ActiveTemplate = {
-      templateId: newTemplate.id,
-      habits: newTemplate.defaultHabits,
-      customized: false,
-      activeDays: newTemplate.defaultDays,
-    };
-
-    addTemplate(activeTemplate);
-    toast.success('Custom template created and added');
-
     return newTemplate;
-  }, [addTemplate]);
+  }, []);
 
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     setActiveTemplates(templates);
