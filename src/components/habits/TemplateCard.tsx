@@ -4,15 +4,11 @@ import { Settings, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { HabitDetail, HabitTemplate } from './types';
+import { HabitDetail, HabitTemplate, ActiveTemplate } from './types';
 import HabitMetric from './HabitMetric';
 
 interface TemplateCardProps {
-  template: {
-    templateId: string;
-    habits: HabitDetail[];
-    activeDays: string[];
-  };
+  template: ActiveTemplate;
   templateInfo: HabitTemplate;
   onConfigure: () => void;
   onRemove: () => void;
