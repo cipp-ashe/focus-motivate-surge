@@ -25,25 +25,28 @@ export const useTemplateManagement = () => {
     localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(customTemplates));
   }, [customTemplates]);
 
-  const addTemplate = useCallback((template: ActiveTemplate) => {
+  const createActiveTemplate = useCallback((template: HabitTemplate): ActiveTemplate => ({
+    templateId: template.id,
+    habits: template.defaultHabits,
+    activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
+    customized: false,
+  }), []);
+
+  const addTemplate = useCallback((template: HabitTemplate) => {
+    const activeTemplate = createActiveTemplate(template);
+    
     setActiveTemplates(prev => {
-      const exists = prev.some(t => t.templateId === template.templateId);
+      const exists = prev.some(t => t.templateId === activeTemplate.templateId);
       if (exists) {
         toast.error('Template already exists');
         return prev;
       }
       
-      const newTemplate = {
-        ...template,
-        habits: template.habits,
-        activeDays: template.activeDays || DEFAULT_ACTIVE_DAYS,
-      };
-      
-      console.log('Adding template:', newTemplate);
+      console.log('Adding template:', activeTemplate);
       toast.success('Template added successfully');
-      return [...prev, newTemplate];
+      return [...prev, activeTemplate];
     });
-  }, []);
+  }, [createActiveTemplate]);
 
   const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
     setActiveTemplates(prev => {
@@ -91,18 +94,11 @@ export const useTemplateManagement = () => {
     };
 
     setCustomTemplates(prev => [...prev, newTemplate]);
-
-    // Automatically add the custom template to active templates
-    const activeTemplate: ActiveTemplate = {
-      templateId: newTemplate.id,
-      habits: newTemplate.defaultHabits,
-      activeDays: newTemplate.defaultDays || DEFAULT_ACTIVE_DAYS,
-      customized: false,
-    };
     
-    addTemplate(activeTemplate);
+    // Use the same addTemplate function here
+    addTemplate(newTemplate);
+    
     console.log('Created custom template:', newTemplate);
-    console.log('Added as active template:', activeTemplate);
     toast.success('Custom template created successfully');
     
     return newTemplate;

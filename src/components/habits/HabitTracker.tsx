@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { habitTemplates } from '../../utils/habitTemplates';
@@ -130,14 +129,11 @@ const HabitTracker: React.FC = () => {
           customTemplates={customTemplates}
           activeTemplateIds={activeTemplates.map(t => t.templateId)}
           onSelectTemplate={(template) => {
-            addTemplate(createActiveTemplate(template));
-            toast.success('Template added successfully');
+            addTemplate(template);
             setDialog({ type: 'manage', open: false });
           }}
           onCreateTemplate={(template) => {
-            const newTemplate = saveCustomTemplate(template);
-            addTemplate(createActiveTemplate(newTemplate));
-            toast.success('Custom template created successfully');
+            saveCustomTemplate(template);
             setDialog({ type: 'manage', open: false });
           }}
           onDeleteTemplate={handleDeleteCustomTemplate}
@@ -163,4 +159,3 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
-
