@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ActiveTemplate } from './types';
 import TemplateCard from './TemplateCard';
@@ -60,4 +59,3 @@ const TemplateList: React.FC<TemplateListProps> = ({
 };
 
 export default TemplateList;
-

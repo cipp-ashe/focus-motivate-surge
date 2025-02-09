@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,8 @@ import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
 import { ActiveTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
-import TemplateList from './TemplateList';
-import TemplateConfiguration from './TemplateConfiguration';
+import ActiveTemplateList from './ActiveTemplateList';
+import TemplateManager from './TemplateManager';
 
 const HabitTracker: React.FC = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -53,7 +52,7 @@ const HabitTracker: React.FC = () => {
     <div className="space-y-4 max-w-4xl mx-auto">
       <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
 
-      <TemplateList
+      <ActiveTemplateList
         activeTemplates={activeTemplates}
         onConfigure={handleConfigureTemplate}
         onRemove={removeTemplate}
@@ -66,7 +65,7 @@ const HabitTracker: React.FC = () => {
           <SheetHeader>
             <SheetTitle>Configure Templates</SheetTitle>
           </SheetHeader>
-          <TemplateConfiguration
+          <TemplateManager
             availableTemplates={habitTemplates}
             activeTemplateIds={activeTemplates.map(t => t.templateId)}
             onSelectTemplate={handleTemplateSelect}
@@ -83,7 +82,7 @@ const HabitTracker: React.FC = () => {
                 {selectedTemplate.habits.length === 0 ? 'Create New Template' : 'Edit Template'}
               </SheetTitle>
             </SheetHeader>
-            <TemplateConfiguration
+            <TemplateManager
               templateToEdit={selectedTemplate}
               onUpdateTemplate={(updates) => {
                 if (selectedTemplate.habits.length === 0) {

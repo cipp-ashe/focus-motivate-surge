@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import HabitForm from './ConfigurationDialog/HabitForm';
 import { createEmptyHabit } from './types';
 
-interface TemplateConfigurationProps {
+interface TemplateManagerProps {
   availableTemplates?: HabitTemplate[];
   activeTemplateIds?: string[];
   onSelectTemplate?: (templateId: string) => void;
@@ -20,7 +19,7 @@ interface TemplateConfigurationProps {
   onCreateTemplate?: () => void;
 }
 
-const TemplateConfiguration: React.FC<TemplateConfigurationProps> = ({
+const TemplateManager: React.FC<TemplateManagerProps> = ({
   availableTemplates = [],
   activeTemplateIds = [],
   onSelectTemplate,
@@ -142,4 +141,4 @@ const TemplateConfiguration: React.FC<TemplateConfigurationProps> = ({
   );
 };
 
-export default TemplateConfiguration;
+export default TemplateManager;
