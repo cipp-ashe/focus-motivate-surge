@@ -45,7 +45,7 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
   if (showCreateForm) {
     return (
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md z-[100] relative bg-background">
           <DialogHeader>
             <DialogTitle>Create New Template</DialogTitle>
           </DialogHeader>
@@ -60,7 +60,7 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl z-[100] relative bg-background">
         <DialogHeader>
           <DialogTitle>Manage Templates</DialogTitle>
         </DialogHeader>
