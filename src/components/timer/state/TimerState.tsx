@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { SoundOption, TimerProps } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { useTimer } from "@/hooks/timer/useTimer";
@@ -21,7 +21,9 @@ export const useTimerState = ({
   const [internalMinutes, setInternalMinutes] = useState(duration ? Math.floor(duration / 60) : 25);
   const [pauseTimeLeft, setPauseTimeLeft] = useState(0);
   const pauseTimerRef = useRef<NodeJS.Timeout>();
-  const durationInSeconds = internalMinutes * 60;
+  
+  // Memoize duration in seconds
+  const durationInSeconds = useMemo(() => internalMinutes * 60, [internalMinutes]);
 
   const {
     timeLeft,
@@ -37,7 +39,7 @@ export const useTimerState = ({
     updateMetrics,
   } = useTimer({
     initialDuration: durationInSeconds,
-    onTimeUp: async () => {
+    onTimeUp: useCallback(async () => {
       try {
         pause();
         setShowConfirmation(true);
@@ -45,17 +47,17 @@ export const useTimerState = ({
         console.error('Error in timer completion flow:', error);
         toast.error("An error occurred while completing the timer ⚠️");
       }
-    },
+    }, [pause]),
     onDurationChange,
   });
 
   const { play: playSound, testSound, isLoadingAudio } = useAudio({
     audioUrl: SOUND_OPTIONS[selectedSound],
     options: {
-      onError: (error) => {
+      onError: useCallback((error) => {
         console.error("Audio error:", error);
         toast.error("Could not play sound. Please check your browser settings. 🔇");
-      },
+      }, []),
     },
   });
 

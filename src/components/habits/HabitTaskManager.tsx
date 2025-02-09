@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { ActiveTemplate } from "@/components/habits/types";
@@ -15,60 +15,53 @@ interface HabitTaskManagerProps {
 export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
 
-  useEffect(() => {
-    console.log('HabitTaskManager running with:', {
-      currentTasks: tasks,
-      todaysHabits,
-      activeTemplates
-    });
+  // Memoize non-habit tasks to prevent unnecessary recalculations
+  const nonHabitTasks = useMemo(() => {
+    return tasks.filter(task => !task.tags?.some(tag => tag.name === 'Habit'));
+  }, [tasks]);
 
-    // Get existing tasks that weren't created from habits
-    const nonHabitTasks = tasks.filter(task => !task.tags?.some(tag => tag.name === 'Habit'));
-    
-    // Convert habits to tasks format
-    const habitTasks = todaysHabits.map(habit => {
+  // Memoize habit task creation
+  const habitTasks = useMemo(() => {
+    return todaysHabits.map(habit => {
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
 
-      // Calculate duration in minutes for timer-type habits
       const duration = habit.metrics.type === 'timer' && habit.metrics.target 
         ? habit.metrics.target 
         : undefined;
 
-      // Base task structure that matches regular tasks
-      const newTask: Task = {
+      return {
         id: taskId,
         name: habit.name,
         completed: existingTask?.completed || false,
         duration,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         tags: [
-          { name: 'Habit', color: 'blue' as const }
+          { name: 'Habit', color: 'blue' as const },
+          ...(existingTask?.tags?.filter(tag => tag.name !== 'Habit') || [])
         ],
       };
-
-      // If task exists, preserve any custom tags that aren't the Habit tag
-      if (existingTask?.tags) {
-        const customTags = existingTask.tags.filter(tag => tag.name !== 'Habit');
-        newTask.tags = [...newTask.tags, ...customTags];
-      }
-
-      console.log(`Created/Updated task for habit ${habit.name}:`, newTask);
-      return newTask;
     });
+  }, [todaysHabits, tasks]);
 
-    // Combine non-habit tasks with habit tasks
+  // Memoize tasks comparison
+  const shouldUpdate = useMemo(() => {
     const newTasks = [...nonHabitTasks, ...habitTasks];
-    console.log('Updating tasks:', newTasks);
-    
-    // Only update if there are actual changes
-    const tasksChanged = JSON.stringify(tasks) !== JSON.stringify(newTasks);
-    if (tasksChanged) {
-      onTasksUpdate(newTasks);
-      toast.success("Habit tasks synchronized");
+    return JSON.stringify(tasks) !== JSON.stringify(newTasks);
+  }, [tasks, nonHabitTasks, habitTasks]);
+
+  // Use useCallback for the update function
+  const updateTasks = useCallback(() => {
+    const newTasks = [...nonHabitTasks, ...habitTasks];
+    onTasksUpdate(newTasks);
+    toast.success("Habit tasks synchronized");
+  }, [nonHabitTasks, habitTasks, onTasksUpdate]);
+
+  useEffect(() => {
+    if (shouldUpdate) {
+      updateTasks();
     }
-  }, [todaysHabits, tasks, onTasksUpdate]);
+  }, [shouldUpdate, updateTasks]);
 
   return null;
 };
-
