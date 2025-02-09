@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Task } from "@/components/tasks/TaskList";
+import { Task } from "@/types/tasks";
 import { useTaskAdd } from "./tasks/useTaskAdd";
 import { useTaskSelect } from "./tasks/useTaskSelect";
 import { useTaskComplete } from "./tasks/useTaskComplete";

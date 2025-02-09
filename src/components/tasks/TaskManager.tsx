@@ -6,6 +6,7 @@ import { TimerSection } from "../timer/TimerSection";
 import { TaskProvider } from "@/contexts/TaskContext";
 import type { Task } from "@/types/tasks";
 import type { Quote } from "@/types/timer";
+import { useTaskContext } from "@/contexts/TaskContext";
 
 interface TaskManagerProps {
   initialTasks?: Task[];
@@ -14,6 +15,8 @@ interface TaskManagerProps {
   onTasksUpdate?: (tasks: Task[]) => void;
   onCompletedTasksUpdate?: (tasks: Task[]) => void;
   onFavoritesChange?: (favorites: Quote[]) => void;
+  selectedTaskId?: string | null;
+  onTaskSelect?: (taskId: string | null) => void;
 }
 
 export const TaskManager = ({
@@ -23,6 +26,8 @@ export const TaskManager = ({
   onTasksUpdate,
   onCompletedTasksUpdate,
   onFavoritesChange,
+  selectedTaskId,
+  onTaskSelect,
 }: TaskManagerProps) => {
   const taskListComponent = useMemo(() => (
     <TaskList
@@ -31,12 +36,22 @@ export const TaskManager = ({
     />
   ), [onFavoritesChange, initialFavorites]);
 
+  const { tasks } = useTaskContext();
+  const selectedTask = selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : null;
+
   const timerComponent = useMemo(() => (
     <TimerSection
+      selectedTask={selectedTask}
+      onTaskComplete={(metrics) => {
+        // Handle task completion
+      }}
+      onDurationChange={(minutes) => {
+        // Handle duration change
+      }}
       favorites={initialFavorites}
       setFavorites={onFavoritesChange}
     />
-  ), [initialFavorites, onFavoritesChange]);
+  ), [selectedTask, initialFavorites, onFavoritesChange]);
 
   return (
     <TaskProvider

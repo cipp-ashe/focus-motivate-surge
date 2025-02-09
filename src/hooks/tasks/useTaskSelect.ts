@@ -1,5 +1,6 @@
+
 import { useCallback } from "react";
-import { Task } from "@/components/tasks/TaskList";
+import { Task } from "@/types/tasks";
 import { toast } from "sonner";
 
 export const useTaskSelect = (
@@ -12,7 +13,6 @@ export const useTaskSelect = (
     const existingTask = tasks.find(t => t.id === task.id);
     if (!existingTask) return;
 
-    // Keep the duration as-is from the task, don't modify it
     const updatedTask = { ...existingTask, ...task };
     setSelectedTask(updatedTask);
     

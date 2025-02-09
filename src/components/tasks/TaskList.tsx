@@ -5,6 +5,7 @@ import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "../CompletedTasks";
 import { EmailSummaryModal } from "../EmailSummaryModal";
 import { useTaskContext } from "@/contexts/TaskContext";
+import type { Task } from "@/types/tasks";
 import type { Quote } from "@/types/timer";
 
 interface TaskListProps {
@@ -40,8 +41,8 @@ export const TaskList = ({
       
       <TaskTable
         tasks={tasks}
-        selectedTaskId={selectedTaskId}
-        onTaskClick={selectTask}
+        selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+        onTaskClick={(task) => selectTask(task.id)}
         onTaskDelete={deleteTask}
         onTaskUpdate={updateTask}
         onTasksClear={clearTasks}
@@ -53,9 +54,9 @@ export const TaskList = ({
       />
 
       <EmailSummaryModal
-        open={showEmailModal}
-        onOpenChange={setShowEmailModal}
-        onEmailSent={handleEmailSent}
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSubmit={handleEmailSent}
         tasks={tasks}
         completedTasks={completedTasks}
         favorites={initialFavorites}
