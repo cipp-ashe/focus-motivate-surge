@@ -1,16 +1,11 @@
+
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  FormLabel,
-  FormGroup,
-  Checkbox,
-  FormControlLabel,
-  Stack,
-} from '@mui/material';
-import { DAYS_OF_WEEK, DEFAULT_ACTIVE_DAYS, DayOfWeek, NewTemplate } from '../../types';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Label } from "@/components/ui/label";
+import { DAYS_OF_WEEK, DayOfWeek, NewTemplate } from '../types';
 
 interface CreateTemplateFormProps {
   onSubmit: (template: NewTemplate) => void;
@@ -24,7 +19,7 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [activeDays, setActiveDays] = useState<DayOfWeek[]>(DEFAULT_ACTIVE_DAYS);
+  const [activeDays, setActiveDays] = useState<DayOfWeek[]>(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,71 +32,71 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
     });
   };
 
-  const handleDayToggle = (day: DayOfWeek) => {
-    setActiveDays(prev =>
-      prev.includes(day)
-        ? prev.filter(d => d !== day)
-        : [...prev, day]
-    );
-  };
-
   return (
-    <Box component="form" onSubmit={handleSubmit}>
-      <Stack spacing={3}>
-        <TextField
-          fullWidth
-          label="Template Name"
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="name">Template Name</Label>
+        <Input
+          id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
-        <TextField
-          fullWidth
-          label="Description"
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          multiline
-          rows={3}
           required
         />
-        <TextField
-          fullWidth
-          label="Category"
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <Input
+          id="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           required
         />
-        <FormControl component="fieldset">
-          <FormLabel component="legend">Active Days</FormLabel>
-          <FormGroup row>
-            {DAYS_OF_WEEK.map((day) => (
-              <FormControlLabel
-                key={day}
-                control={
-                  <Checkbox
-                    checked={activeDays.includes(day)}
-                    onChange={() => handleDayToggle(day)}
-                  />
-                }
-                label={day}
-              />
-            ))}
-          </FormGroup>
-        </FormControl>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={!name || !description || !category || activeDays.length === 0}
-          >
-            Create Template
-          </Button>
-        </Box>
-      </Stack>
-    </Box>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="days">Active Days</Label>
+        <ToggleGroup 
+          type="multiple"
+          value={activeDays}
+          onValueChange={setActiveDays}
+          className="justify-start"
+        >
+          {DAYS_OF_WEEK.map((day) => (
+            <ToggleGroupItem
+              key={day}
+              value={day}
+              aria-label={`Toggle ${day}`}
+              className="w-9 h-9"
+            >
+              {day.charAt(0)}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={!name || !description || !category || activeDays.length === 0}
+        >
+          Create Template
+        </Button>
+      </div>
+    </form>
   );
 };
 

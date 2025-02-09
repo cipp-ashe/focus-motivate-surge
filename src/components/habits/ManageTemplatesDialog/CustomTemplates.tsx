@@ -1,17 +1,11 @@
-import React from 'react';
-import {
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Typography,
-  Box,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { HabitTemplate } from '../../types';
 
-export interface CustomTemplatesProps {
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { HabitTemplate } from '../types';
+
+interface CustomTemplatesProps {
   templates: HabitTemplate[];
   activeTemplateIds: string[];
   onSelect: (template: HabitTemplate) => void;
@@ -24,52 +18,37 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
 }) => {
   if (templates.length === 0) {
     return (
-      <Box sx={{ mt: 2, p: 2, textAlign: 'center' }}>
-        <Typography color="text.secondary">
-          No custom templates yet. Create your first template to see it here.
-        </Typography>
-      </Box>
+      <div className="text-center p-8 text-muted-foreground">
+        No custom templates yet. Create your first template to see it here.
+      </div>
     );
   }
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <List>
-        {templates.map((template) => (
-          <ListItem
-            key={template.id}
-            sx={{
-              bgcolor: 'background.paper',
-              mb: 1,
-              borderRadius: 1,
-            }}
-          >
-            <ListItemText
-              primary={template.name}
-              secondary={
-                <>
-                  <Typography variant="body2" color="text.secondary">
-                    {template.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {template.category} • {template.defaultHabits.length} habits
-                  </Typography>
-                </>
-              }
-            />
-            <ListItemSecondaryAction>
-              <IconButton
-                edge="end"
-                onClick={() => onSelect(template)}
-                disabled={activeTemplateIds.includes(template.id)}
-              >
-                <AddIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+    <div className="space-y-4 mt-4">
+      {templates.map((template) => (
+        <Card key={template.id}>
+          <CardHeader>
+            <CardTitle>{template.name}</CardTitle>
+            <CardDescription>{template.description}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">
+              {template.category} • {template.defaultHabits.length} habits
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSelect(template)}
+              disabled={activeTemplateIds.includes(template.id)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Template
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 };
 
