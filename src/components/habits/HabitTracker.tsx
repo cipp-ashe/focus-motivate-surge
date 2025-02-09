@@ -1,29 +1,15 @@
+
 import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  LinearProgress,
-  IconButton,
-  Chip,
-  Stack,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  useTheme,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
-import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Check, Plus, TrendingUp, FlameIcon } from 'lucide-react';
 
 interface Habit {
   id: string;
@@ -36,8 +22,7 @@ interface Habit {
   lastCompleted: Date | null;
 }
 
-const HabitTracker: React.FC = () => {
-  const theme = useTheme();
+export const HabitTracker: React.FC = () => {
   const [habits, setHabits] = useState<Habit[]>([
     {
       id: '1',
@@ -87,6 +72,7 @@ const HabitTracker: React.FC = () => {
           : habit
       )
     );
+    toast.success("Habit status updated!");
   };
 
   const handleAddHabit = () => {
@@ -109,172 +95,136 @@ const HabitTracker: React.FC = () => {
         category: 'Personal',
         timePreference: 'Anytime',
       });
+      toast.success("New habit created!");
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h5" sx={{ mb: 4 }}>
-        Habit Tracker
-      </Typography>
-
-      {/* Progress Overview */}
-      <Card elevation={0} sx={{ mb: 3 }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6">Daily Progress</Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setOpenDialog(true)}
-              sx={{ borderRadius: 8 }}
-            >
-              Add Habit
-            </Button>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={calculateProgress()}
-            sx={{
-              height: 10,
-              borderRadius: 5,
-              bgcolor: theme.palette.grey[200],
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 5,
-              },
-            }}
-          />
-          <Box display="flex" justifyContent="space-between" mt={1}>
-            <Typography variant="body2" color="text.secondary">
-              {Math.round(calculateProgress())}% Complete
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {habits.filter((h) => h.completed).length}/{habits.length} Habits
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Habit List */}
-      <Grid container spacing={3}>
-        {habits.map((habit) => (
-          <Grid item xs={12} sm={6} md={4} key={habit.id}>
-            <Card
-              elevation={0}
-              sx={{
-                height: '100%',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                },
-              }}
-            >
-              <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="h6" gutterBottom>
-                    {habit.name}
-                  </Typography>
-                  <IconButton
-                    color={habit.completed ? 'primary' : 'default'}
-                    onClick={() => handleHabitToggle(habit.id)}
-                  >
-                    {habit.completed ? <CheckCircleIcon /> : <RadioButtonUncheckedIcon />}
-                  </IconButton>
-                </Box>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  {habit.description}
-                </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  <Chip
-                    size="small"
-                    label={habit.category}
-                    color="primary"
-                    variant="outlined"
-                  />
-                  <Chip
-                    size="small"
-                    icon={<LocalFireDepartmentIcon />}
-                    label={`${habit.streak} day streak`}
-                    color="secondary"
-                    variant="outlined"
-                  />
-                  <Chip
-                    size="small"
-                    icon={<TrendingUpIcon />}
-                    label={habit.timePreference}
-                    variant="outlined"
-                  />
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Add Habit Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Habit</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Habit Name"
-              fullWidth
-              value={newHabit.name}
-              onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
-            />
-            <TextField
-              label="Description"
-              fullWidth
-              multiline
-              rows={2}
-              value={newHabit.description}
-              onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
-            />
-            <TextField
-              select
-              label="Category"
-              fullWidth
-              value={newHabit.category}
-              onChange={(e) =>
-                setNewHabit({ ...newHabit, category: e.target.value as any })
-              }
-            >
-              {['Wellness', 'Work', 'Personal', 'Learning'].map((category) => (
-                <MenuItem key={category} value={category}>
-                  {category}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              select
-              label="Preferred Time"
-              fullWidth
-              value={newHabit.timePreference}
-              onChange={(e) =>
-                setNewHabit({ ...newHabit, timePreference: e.target.value as any })
-              }
-            >
-              {['Morning', 'Afternoon', 'Evening', 'Anytime'].map((time) => (
-                <MenuItem key={time} value={time}>
-                  {time}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleAddHabit}
-            disabled={!newHabit.name || !newHabit.description}
-          >
+    <div className="space-y-6">
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Daily Progress</h2>
+          <Button onClick={() => setOpenDialog(true)}>
+            <Plus className="mr-2 h-4 w-4" />
             Add Habit
           </Button>
-        </DialogActions>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <Progress value={calculateProgress()} className="h-2" />
+            <div className="flex justify-between mt-2 text-sm text-muted-foreground">
+              <span>{Math.round(calculateProgress())}% Complete</span>
+              <span>{habits.filter((h) => h.completed).length}/{habits.length} Habits</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {habits.map((habit) => (
+          <Card key={habit.id} className="overflow-hidden transition-all hover:shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="font-semibold mb-1">{habit.name}</h3>
+                  <p className="text-sm text-muted-foreground">{habit.description}</p>
+                </div>
+                <Button
+                  variant={habit.completed ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => handleHabitToggle(habit.id)}
+                >
+                  <Check className={`h-4 w-4 ${habit.completed ? "" : "text-muted-foreground"}`} />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="text-xs">
+                  {habit.category}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  <FlameIcon className="mr-1 h-3 w-3" />
+                  {habit.streak} day streak
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  <TrendingUp className="mr-1 h-3 w-3" />
+                  {habit.timePreference}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Habit</DialogTitle>
+            <DialogDescription>
+              Create a new habit to track. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Input
+                placeholder="Habit Name"
+                value={newHabit.name}
+                onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Textarea
+                placeholder="Description"
+                value={newHabit.description}
+                onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Select
+                  value={newHabit.category}
+                  onValueChange={(value) => setNewHabit({ ...newHabit, category: value as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['Wellness', 'Work', 'Personal', 'Learning'].map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Select
+                  value={newHabit.timePreference}
+                  onValueChange={(value) => setNewHabit({ ...newHabit, timePreference: value as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Preferred Time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['Morning', 'Afternoon', 'Evening', 'Anytime'].map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddHabit} disabled={!newHabit.name || !newHabit.description}>
+              Add Habit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
-    </Box>
+    </div>
   );
 };
-
-export default HabitTracker;
