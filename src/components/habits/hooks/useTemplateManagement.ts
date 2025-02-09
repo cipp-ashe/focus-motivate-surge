@@ -29,7 +29,6 @@ export const useTemplateManagement = () => {
     setActiveTemplates(prev => {
       const newTemplates = [...prev, template];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newTemplates));
-      toast.success('Template added successfully');
       return newTemplates;
     });
   }, []);
@@ -42,7 +41,6 @@ export const useTemplateManagement = () => {
           : template
       );
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      toast.success('Template updated successfully');
       return updated;
     });
   }, []);
@@ -51,7 +49,6 @@ export const useTemplateManagement = () => {
     setActiveTemplates(prev => {
       const filtered = prev.filter(template => template.templateId !== templateId);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-      toast.success('Template removed successfully');
       return filtered;
     });
   }, []);
@@ -111,7 +108,6 @@ export const useTemplateManagement = () => {
           : template
       );
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      toast.success('Template days updated successfully');
       return updated;
     });
   }, []);

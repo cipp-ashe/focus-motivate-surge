@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { EmailSummaryModal } from './EmailSummaryModal';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
@@ -64,12 +65,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         />
 
         {/* Main Content */}
-        <div
-          className={cn(
-            "w-full transition-all duration-300 ease-in-out",
-            (isNotesOpen || isHabitsOpen) && "lg:w-1/2"
-          )}
-        >
+        <div className={cn(
+          "flex-1 transition-all duration-300 ease-in-out",
+          (isNotesOpen || isHabitsOpen) && "lg:pr-[50%]"
+        )}>
           {children}
         </div>
 
