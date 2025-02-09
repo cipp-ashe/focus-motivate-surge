@@ -1,3 +1,4 @@
+
 import { Task } from "./TaskList";
 import { Sparkles, Clock, X } from "lucide-react";
 import { Input } from "../ui/input";
@@ -24,14 +25,14 @@ export const TaskRow = ({
   onDurationClick,
   onInputBlur,
 }: TaskRowProps) => {
-  // Convert seconds to minutes for display
-  const durationInMinutes = Math.round((task.duration || 1500) / 60);
+  // Convert seconds to minutes for display, ensuring numeric conversion
+  const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   const [inputValue, setInputValue] = useState(durationInMinutes.toString());
 
   // Update input value when task duration changes
   useEffect(() => {
     if (task.duration) {
-      setInputValue(Math.round(task.duration / 60).toString());
+      setInputValue(Math.round(Number(task.duration) / 60).toString());
     }
   }, [task.duration]);
 
@@ -140,3 +141,4 @@ export const TaskRow = ({
 };
 
 export default TaskRow;
+
