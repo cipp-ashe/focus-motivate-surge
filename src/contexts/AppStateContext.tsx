@@ -1,12 +1,11 @@
-
 import { createContext, useContext, useReducer, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { StateContext, StateContextActions } from '@/types/state';
 import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
-import type { ActiveTemplate } from '@/components/habits/types';
-import { stateReducer } from './stateReducer';
+import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
+import { stateReducer, StateAction } from './stateReducer';
 
 const AppStateContext = createContext<StateContext | undefined>(undefined);
 const AppStateActionsContext = createContext<StateContextActions | undefined>(undefined);
