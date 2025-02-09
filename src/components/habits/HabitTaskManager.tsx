@@ -42,9 +42,15 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         createdAt: existingTask?.createdAt || new Date().toISOString(),
       };
 
-      // Ensure the Habit tag is added
+      // Add appropriate tags for the task
       if (!existingTask) {
         addTagToEntity('Habit', taskId, 'task');
+        // Add corresponding type tag based on the habit type
+        if (habit.metrics.type === 'timer') {
+          addTagToEntity('TimerHabit', taskId, 'task');
+        } else if (habit.metrics.type === 'note') {
+          addTagToEntity('NoteHabit', taskId, 'task');
+        }
       }
 
       return task;

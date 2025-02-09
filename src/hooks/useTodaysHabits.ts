@@ -5,7 +5,7 @@ import { HabitDetail, DayOfWeek, ActiveTemplate } from '@/components/habits/type
 
 export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
-  const { getEntityTags } = useTagSystem();
+  const { getEntityTags, addTagToEntity } = useTagSystem();
 
   const getTodaysHabits = useCallback(() => {
     // Get today's day name (e.g., "Monday")
@@ -15,21 +15,26 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     // Filter habits from templates that are active today
     const habitsForToday = activeTemplates.flatMap(template => {
       if (template.activeDays.includes(dayOfWeek)) {
-        // Only include habits that have the appropriate tags
-        return template.habits.filter(habit => {
+        return template.habits.map(habit => {
+          // Add appropriate tag based on habit type if not already present
           const tags = getEntityTags(habit.id, 'habit');
-          return tags.some(tag => {
-            if (habit.metrics.type === 'timer') return tag.name === 'TimerHabit';
-            if (habit.metrics.type === 'note') return tag.name === 'NoteHabit';
-            return tag.name === 'StandardHabit';
-          });
+          if (!tags.length) {
+            if (habit.metrics.type === 'timer') {
+              addTagToEntity('TimerHabit', habit.id, 'habit');
+            } else if (habit.metrics.type === 'note') {
+              addTagToEntity('NoteHabit', habit.id, 'habit');
+            } else {
+              addTagToEntity('StandardHabit', habit.id, 'habit');
+            }
+          }
+          return habit;
         });
       }
       return [];
     });
 
     return habitsForToday;
-  }, [activeTemplates, getEntityTags]);
+  }, [activeTemplates, getEntityTags, addTagToEntity]);
 
   useEffect(() => {
     const habits = getTodaysHabits();
