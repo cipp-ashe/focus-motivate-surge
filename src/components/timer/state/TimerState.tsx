@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { SoundOption, TimerProps } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { useTimer } from "@/hooks/timer/useTimer";

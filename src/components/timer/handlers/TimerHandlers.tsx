@@ -1,5 +1,5 @@
 
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TIMER_CONSTANTS } from "@/types/timer";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ interface UseTimerHandlersProps {
   metrics: TimerStateMetrics;
   reset: () => void;
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
-  setPauseTimeLeft: (time: number) => void;
+  setPauseTimeLeft: (time: number | ((prev: number) => number)) => void;
   pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | undefined>;
 }
 
