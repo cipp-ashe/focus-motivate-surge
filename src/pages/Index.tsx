@@ -133,8 +133,17 @@ const Index = () => {
           </div>
         </div>
 
+        <TaskManager
+          initialTasks={initialTasks}
+          initialCompletedTasks={initialCompletedTasks}
+          initialFavorites={favorites}
+          onTasksUpdate={handleTasksUpdate}
+          onCompletedTasksUpdate={handleCompletedTasksUpdate}
+          onFavoritesChange={handleFavoritesUpdate}
+        />
+
         {todaysHabits.length > 0 && (
-          <Card className="mb-6 p-4 border-primary/20 bg-gradient-to-br from-card to-card/50">
+          <Card className="mt-6 p-4 border-primary/20 bg-gradient-to-br from-card to-card/50">
             <h2 className="text-lg font-semibold mb-3 text-primary">Today's Habits</h2>
             <ScrollArea className="h-[200px] pr-4">
               <div className="space-y-2">
@@ -167,15 +176,6 @@ const Index = () => {
             </ScrollArea>
           </Card>
         )}
-
-        <TaskManager
-          initialTasks={initialTasks}
-          initialCompletedTasks={initialCompletedTasks}
-          initialFavorites={favorites}
-          onTasksUpdate={handleTasksUpdate}
-          onCompletedTasksUpdate={handleCompletedTasksUpdate}
-          onFavoritesChange={handleFavoritesUpdate}
-        />
       </div>
     </div>
   );
