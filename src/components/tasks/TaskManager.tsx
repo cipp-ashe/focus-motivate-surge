@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useMemo } from "react";
 import { TaskList, Task } from "./TaskList";
 import { TaskLayout } from "./TaskLayout";
@@ -13,6 +14,8 @@ interface TaskManagerProps {
   onTasksUpdate?: (tasks: Task[]) => void;
   onCompletedTasksUpdate?: (tasks: Task[]) => void;
   onFavoritesChange?: (favorites: Quote[]) => void;
+  selectedTaskId?: string | null;
+  onTaskSelect?: (task: Task) => void;
 }
 
 export const TaskManager = ({
@@ -22,6 +25,8 @@ export const TaskManager = ({
   onTasksUpdate,
   onCompletedTasksUpdate,
   onFavoritesChange,
+  selectedTaskId,
+  onTaskSelect,
 }: TaskManagerProps) => {
   const [favorites, setFavorites] = useState<Quote[]>(initialFavorites);
   
@@ -30,7 +35,6 @@ export const TaskManager = ({
     setTasks,
     completedTasks,
     setCompletedTasks,
-    selectedTask,
     handleTaskAdd,
     handleTaskSelect,
     handleTaskComplete,
@@ -42,6 +46,19 @@ export const TaskManager = ({
     onTasksUpdate,
     onCompletedTasksUpdate,
   });
+
+  // Find the selected task based on selectedTaskId
+  const selectedTask = useMemo(() => {
+    if (!selectedTaskId) return null;
+    return tasks.find(task => task.id === selectedTaskId) || null;
+  }, [tasks, selectedTaskId]);
+
+  const handleTaskSelection = useCallback((task: Task) => {
+    handleTaskSelect(task);
+    if (onTaskSelect) {
+      onTaskSelect(task);
+    }
+  }, [handleTaskSelect, onTaskSelect]);
 
   const handleFavoritesChange = (newFavorites: Quote[]) => {
     console.log('Updating favorites:', newFavorites.length);
@@ -72,14 +89,16 @@ export const TaskManager = ({
       tasks={tasks}
       completedTasks={completedTasks}
       onTaskAdd={handleTaskAdd}
-      onTaskSelect={handleTaskSelect}
+      onTaskSelect={handleTaskSelection}
       onTasksClear={handleTasksClear}
       onSelectedTasksClear={handleSelectedTasksClear}
       onSummaryEmailSent={handleSummaryEmailSent}
       favorites={favorites}
       onTasksUpdate={onTasksUpdate}
+      selectedTaskId={selectedTaskId}
     />
-  ), [tasks, completedTasks, handleTaskAdd, handleTaskSelect, handleTasksClear, handleSelectedTasksClear, handleSummaryEmailSent, favorites, onTasksUpdate]);
+  ), [tasks, completedTasks, handleTaskAdd, handleTaskSelection, handleTasksClear, 
+      handleSelectedTasksClear, handleSummaryEmailSent, favorites, onTasksUpdate, selectedTaskId]);
 
   const timerComponent = useMemo(() => (
     <TimerSection

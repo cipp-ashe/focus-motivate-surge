@@ -57,6 +57,8 @@ const Index = () => {
     }
   });
 
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
   // Listen for template updates
   useEffect(() => {
     const handleTemplateUpdate = () => {
@@ -92,6 +94,7 @@ const Index = () => {
   };
 
   const handleTasksUpdate = (newTasks: Task[]) => {
+    console.log('Updating tasks:', newTasks);
     localStorage.setItem('taskList', JSON.stringify(newTasks));
     setTasks(newTasks);
   };
@@ -106,6 +109,12 @@ const Index = () => {
   };
 
   const handleAddHabitToTasks = (habit: HabitDetail) => {
+    if (!habit.duration) {
+      console.warn('Habit has no duration:', habit);
+      toast.error("This habit doesn't have a duration set");
+      return;
+    }
+
     const newTask: Task = {
       id: `habit-task-${habit.id}`,
       name: habit.name,
@@ -113,7 +122,15 @@ const Index = () => {
       duration: habit.duration || 25,
       metrics: undefined
     };
-    handleTasksUpdate([newTask, ...tasks]);
+
+    // Update tasks list
+    const updatedTasks = [newTask, ...tasks];
+    handleTasksUpdate(updatedTasks);
+    
+    // Select the new task immediately
+    setSelectedTaskId(newTask.id);
+    
+    toast.success(`Started "${habit.name}"`);
   };
 
   const handleHabitComplete = (habit: HabitDetail) => {
@@ -140,6 +157,8 @@ const Index = () => {
           onTasksUpdate={handleTasksUpdate}
           onCompletedTasksUpdate={handleCompletedTasksUpdate}
           onFavoritesChange={handleFavoritesUpdate}
+          selectedTaskId={selectedTaskId}
+          onTaskSelect={(task) => setSelectedTaskId(task.id)}
         />
 
         <TodaysHabitCard
