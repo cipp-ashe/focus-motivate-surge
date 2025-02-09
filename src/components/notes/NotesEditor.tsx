@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
+
+import React, { useCallback, forwardRef, ForwardedRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { ActionButton } from '@/components/ui/action-button';
 
@@ -14,14 +15,18 @@ interface NotesEditorProps {
   onSave?: () => void;
 }
 
-export const NotesEditor = ({ 
+export interface NotesEditorRef {
+  saveNotes: () => void;
+}
+
+export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({ 
   selectedNote,
   onNoteSaved,
   content: externalContent,
   onChange: externalOnChange,
   isEditing,
   onSave: externalOnSave
-}: NotesEditorProps) => {
+}, ref) => {
   const handleChange = (newContent: string | undefined) => {
     if (!newContent) return;
     if (externalOnChange) {
@@ -97,6 +102,11 @@ export const NotesEditor = ({
     }
   }, [externalContent, handleSave, selectedNote]);
 
+  // Expose saveNotes method through ref
+  React.useImperativeHandle(ref, () => ({
+    saveNotes: handleSave
+  }));
+
   return (
     <div className="flex flex-col gap-2 h-full notes-editor" onKeyDown={handleKeyDown}>
       <div className="flex justify-end mb-2">
@@ -117,4 +127,6 @@ export const NotesEditor = ({
       </div>
     </div>
   );
-};
+});
+
+NotesEditor.displayName = 'NotesEditor';
