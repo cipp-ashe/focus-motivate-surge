@@ -15,6 +15,7 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>();
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+  const isProcessingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -22,6 +23,10 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     const element = containerRef.current;
     
     const observer = new ResizeObserver(() => {
+      if (isProcessingRef.current) {
+        return;
+      }
+      
       console.log('Resize detected');
       
       // Clear any existing animation frame
@@ -39,6 +44,8 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
       // Set a new timeout
       resizeTimeoutRef.current = setTimeout(() => {
         console.log('Timeout triggered, requesting animation frame');
+        isProcessingRef.current = true;
+        
         frameRef.current = requestAnimationFrame(() => {
           if (element && document.contains(element)) {
             console.log('Applying reflow fix');
@@ -47,8 +54,13 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
             void element.offsetHeight;
             element.style.display = '';
           }
+          
+          // Reset processing flag after a short delay
+          setTimeout(() => {
+            isProcessingRef.current = false;
+          }, 100);
         });
-      }, 200); // Increased debounce time further
+      }, 500); // Increased debounce time significantly
     });
 
     console.log('Setting up ResizeObserver');
@@ -62,6 +74,7 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
       if (resizeTimeoutRef.current) {
         clearTimeout(resizeTimeoutRef.current);
       }
+      isProcessingRef.current = false;
       observer.disconnect();
     };
   }, []);
