@@ -1,16 +1,15 @@
+
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
-import TemplateCard from './TemplateCard';
+import { useDragAndDrop } from './hooks/useDragAndDrop';
 import ConfigurationDialog from './ConfigurationDialog';
 import ManageTemplatesDialog from './ManageTemplatesDialog';
-import { DialogState, DayOfWeek, ActiveTemplate } from './types';
-import HabitInsights from './HabitInsights';
-import { Card } from '@/components/ui/card';
+import { DialogState, ActiveTemplate } from './types';
+import HabitTrackerHeader from './HabitTrackerHeader';
+import DraggableTemplateList from './DraggableTemplateList';
 
 const HabitTracker: React.FC = () => {
   const {
@@ -32,29 +31,15 @@ const HabitTracker: React.FC = () => {
 
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
   const [dialog, setDialog] = useState<DialogState>({ type: 'customize', open: false });
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [showInsights, setShowInsights] = useState(false);
   const [insightTemplateId, setInsightTemplateId] = useState<string | null>(null);
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    e.dataTransfer.effectAllowed = 'move';
-    setDraggedIndex(index);
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
-
-    const newTemplates = [...activeTemplates];
-    const [draggedTemplate] = newTemplates.splice(draggedIndex, 1);
-    newTemplates.splice(index, 0, draggedTemplate);
-    updateTemplateOrder(newTemplates);
-    setDraggedIndex(index);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-  };
+  const {
+    draggedIndex,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+  } = useDragAndDrop(activeTemplates, updateTemplateOrder);
 
   const handleCustomizeTemplate = (template: ActiveTemplate) => {
     setSelectedTemplate({
@@ -112,63 +97,24 @@ const HabitTracker: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold tracking-tight">Habit Configuration</h2>
-        <Button
-          onClick={() => setDialog({ type: 'manage', open: true })}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Template
-        </Button>
-      </div>
+      <HabitTrackerHeader 
+        onAddTemplate={() => setDialog({ type: 'manage', open: true })} 
+      />
 
-      <div className="space-y-2">
-        {activeTemplates.map((template, index) => {
-          const templateInfo = habitTemplates.find(t => t.id === template.templateId);
-          if (!templateInfo) return null;
-
-          return (
-            <div
-              key={template.templateId}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDragEnd={handleDragEnd}
-              className="cursor-grab active:cursor-grabbing"
-            >
-              <TemplateCard
-                template={template}
-                templateInfo={templateInfo}
-                onCustomize={() => handleCustomizeTemplate(template)}
-                onRemove={() => removeTemplate(template.templateId)}
-                onToggleInsights={() => {
-                  if (insightTemplateId === template.templateId) {
-                    setShowInsights(false);
-                    setInsightTemplateId(null);
-                  } else {
-                    setShowInsights(true);
-                    setInsightTemplateId(template.templateId);
-                  }
-                }}
-                getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
-                onHabitUpdate={(habitId, value) => updateProgress(habitId, template.templateId, value)}
-              />
-
-              {showInsights && insightTemplateId === template.templateId && (
-                <div className="mt-2">
-                  <HabitInsights
-                    habit={template.habits[0]}
-                    progress={template.habits.map(habit => getWeeklyProgress(habit.id, template.templateId)).flat()}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <DraggableTemplateList
+        activeTemplates={activeTemplates}
+        showInsights={showInsights}
+        insightTemplateId={insightTemplateId}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onCustomize={handleCustomizeTemplate}
+        onRemove={removeTemplate}
+        onToggleInsights={handleToggleInsights}
+        getTodayProgress={getTodayProgress}
+        onHabitUpdate={updateProgress}
+        getWeeklyProgress={getWeeklyProgress}
+      />
 
       <ManageTemplatesDialog
         open={dialog.type === 'manage' && dialog.open}
@@ -208,3 +154,4 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
+
