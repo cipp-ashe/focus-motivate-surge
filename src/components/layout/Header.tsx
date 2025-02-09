@@ -1,10 +1,7 @@
 
-import { Moon, Sun, Code2, StickyNote, ActivitySquare } from "lucide-react";
+import { Moon, Sun, StickyNote, ActivitySquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
-import { useNotesPanel } from "@/hooks/useNotesPanel";
-import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 
 interface HeaderProps {
   onNotesClick: () => void;
@@ -34,13 +31,6 @@ export const Header = ({ onNotesClick, onHabitsClick }: HeaderProps) => {
         >
           <StickyNote className="h-5 w-5" />
         </button>
-        <Link 
-          to="/components" 
-          className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-          title="Developer Documentation"
-        >
-          <Code2 className="h-5 w-5" />
-        </Link>
         <Button
           variant="ghost"
           size="icon"
