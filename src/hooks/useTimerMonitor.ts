@@ -38,7 +38,7 @@ export const useTimerMonitor = ({
     value: { isRunning, metrics },
     name: 'timerState',
     validate: (state) => {
-      if (state.isRunning && state.metrics.totalPauses > 10) {
+      if (state.isRunning && state.metrics.pauseCount > 10) {
         toast.warning('High number of pauses detected', {
           description: 'Consider taking a longer break'
         });
@@ -53,6 +53,7 @@ export const useTimerMonitor = ({
   useEffect(() => {
     let frameCount = 0;
     let lastTime = performance.now();
+    let frameId: number;
     
     const checkPerformance = () => {
       frameCount++;
@@ -64,7 +65,8 @@ export const useTimerMonitor = ({
           console.warn(`[${componentName}] Performance warning:`, {
             fps,
             timeLeft,
-            isRunning
+            isRunning,
+            metrics
           });
           
           toast.warning('Performance issues detected', {
@@ -76,15 +78,15 @@ export const useTimerMonitor = ({
         lastTime = currentTime;
       }
       
-      requestAnimationFrame(checkPerformance);
+      frameId = requestAnimationFrame(checkPerformance);
     };
 
-    const frameId = requestAnimationFrame(checkPerformance);
+    frameId = requestAnimationFrame(checkPerformance);
     
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [componentName, isRunning, timeLeft]);
+  }, [componentName, isRunning, timeLeft, metrics]);
 
   // Log interaction patterns
   useEffect(() => {
@@ -113,3 +115,4 @@ export const useTimerMonitor = ({
     }
   }, [error, componentName]);
 };
+

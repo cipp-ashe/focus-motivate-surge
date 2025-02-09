@@ -35,9 +35,19 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
           ? habit.metrics.target 
           : parseInt(String(habit.metrics.target));
 
+        // Log duration conversion details
+        console.log(`Converting habit duration for ${habit.name}:`, {
+          originalTarget: habit.metrics.target,
+          parsedMinutes: targetMinutes,
+          finalDuration: targetMinutes
+        });
+
         // Ensure target is valid and greater than 0
         if (isNaN(targetMinutes) || targetMinutes <= 0) {
-          console.warn(`Invalid duration for habit ${habit.name}`);
+          console.warn(`Invalid duration for habit ${habit.name}:`, {
+            target: habit.metrics.target,
+            parsed: targetMinutes
+          });
           return null;
         }
 
