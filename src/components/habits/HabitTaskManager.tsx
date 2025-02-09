@@ -4,6 +4,7 @@ import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { useTaskContext } from "@/contexts/TaskContext";
 import type { ActiveTemplate } from "@/components/habits/types";
+import { TASKS_UPDATED_EVENT } from "@/hooks/useTaskStorage";
 
 interface HabitTaskManagerProps {
   activeTemplates: ActiveTemplate[];
@@ -20,15 +21,15 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   }, [tasks, getEntityTags]);
 
   // Filter and create tasks only for timer-based habits
-  const habitTasks = useMemo(() => {
+  const syncHabitTasks = useCallback(() => {
+    console.log('Syncing habit tasks');
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
     
-    return timerHabits.map(habit => {
+    timerHabits.forEach(habit => {
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
       
       if (!existingTask) {
-        // Only create task if it doesn't exist
         const task = {
           id: taskId,
           name: habit.name,
@@ -39,25 +40,27 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           }
         };
 
-        // Add the Habit tag
         addTagToEntity('Habit', taskId, 'task');
-        
-        // Add the task through the context
         addTask(task);
       }
-      
-      return existingTask;
-    }).filter(Boolean);
+    });
   }, [todaysHabits, tasks, addTask, addTagToEntity]);
 
   useEffect(() => {
-    // Log initial sync for debugging
-    console.log('Initial habit-task sync:', {
-      todaysHabits,
-      habitTasks,
-      allTasks: [...nonHabitTasks, ...habitTasks]
-    });
-  }, []);
+    syncHabitTasks();
+    
+    // Subscribe to task updates
+    const handleTasksUpdate = () => {
+      console.log('Tasks updated, syncing habits');
+      syncHabitTasks();
+    };
+
+    window.addEventListener(TASKS_UPDATED_EVENT, handleTasksUpdate);
+    
+    return () => {
+      window.removeEventListener(TASKS_UPDATED_EVENT, handleTasksUpdate);
+    };
+  }, [syncHabitTasks]);
 
   return null;
 };

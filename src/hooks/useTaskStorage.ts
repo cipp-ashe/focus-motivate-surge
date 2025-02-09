@@ -9,6 +9,14 @@ const COMPLETED_TASKS_STORAGE_KEY = 'completedTasks';
 // Custom event names
 export const TASKS_UPDATED_EVENT = 'tasksUpdated';
 export const COMPLETED_TASKS_UPDATED_EVENT = 'completedTasksUpdated';
+export const TASK_OPERATION_EVENT = 'taskOperation';
+
+interface TaskOperationEvent {
+  type: 'add' | 'update' | 'delete' | 'complete' | 'clear';
+  taskId?: string;
+  task?: Task;
+  metrics?: TaskMetrics;
+}
 
 const parseStoredTasks = (stored: string | null): Task[] => {
   try {
@@ -24,9 +32,10 @@ export const useTaskStorage = () => {
   const [completedTasks, setCompletedTasks] = useState<Task[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
-  // Load initial data
+  // Load initial data and subscribe to events
   useEffect(() => {
     const loadTasks = () => {
+      console.log('Loading tasks from storage');
       const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
       const savedCompletedTasks = localStorage.getItem(COMPLETED_TASKS_STORAGE_KEY);
       
@@ -34,18 +43,30 @@ export const useTaskStorage = () => {
       setCompletedTasks(parseStoredTasks(savedCompletedTasks));
     };
 
+    const handleTaskOperation = (event: CustomEvent<TaskOperationEvent>) => {
+      console.log('Task operation:', event.detail);
+      loadTasks(); // Reload tasks after any operation
+    };
+
     loadTasks();
 
-    // Subscribe to storage events
+    // Subscribe to storage and custom events
     window.addEventListener('storage', loadTasks);
     window.addEventListener(TASKS_UPDATED_EVENT, loadTasks);
     window.addEventListener(COMPLETED_TASKS_UPDATED_EVENT, loadTasks);
+    window.addEventListener(TASK_OPERATION_EVENT, handleTaskOperation as EventListener);
 
     return () => {
       window.removeEventListener('storage', loadTasks);
       window.removeEventListener(TASKS_UPDATED_EVENT, loadTasks);
       window.removeEventListener(COMPLETED_TASKS_UPDATED_EVENT, loadTasks);
+      window.removeEventListener(TASK_OPERATION_EVENT, handleTaskOperation as EventListener);
     };
+  }, []);
+
+  const dispatchTaskOperation = useCallback((operation: TaskOperationEvent) => {
+    const event = new CustomEvent(TASK_OPERATION_EVENT, { detail: operation });
+    window.dispatchEvent(event);
   }, []);
 
   const updateTasks = useCallback((newTasks: Task[]) => {
@@ -68,23 +89,26 @@ export const useTaskStorage = () => {
     };
 
     updateTasks([...tasks, newTask]);
+    dispatchTaskOperation({ type: 'add', task: newTask });
     toast.success('Task added 📝');
-  }, [tasks, updateTasks]);
+  }, [tasks, updateTasks, dispatchTaskOperation]);
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     const newTasks = tasks.map(task =>
       task.id === taskId ? { ...task, ...updates } : task
     );
     updateTasks(newTasks);
-  }, [tasks, updateTasks]);
+    dispatchTaskOperation({ type: 'update', taskId, task: newTasks.find(t => t.id === taskId) });
+  }, [tasks, updateTasks, dispatchTaskOperation]);
 
   const deleteTask = useCallback((taskId: string) => {
     updateTasks(tasks.filter(task => task.id !== taskId));
     if (selectedTaskId === taskId) {
       setSelectedTaskId(null);
     }
+    dispatchTaskOperation({ type: 'delete', taskId });
     toast.success('Task removed 🗑️');
-  }, [tasks, selectedTaskId, updateTasks]);
+  }, [tasks, selectedTaskId, updateTasks, dispatchTaskOperation]);
 
   const completeTask = useCallback((taskId: string, metrics?: TaskMetrics) => {
     const task = tasks.find(t => t.id === taskId);
@@ -102,14 +126,17 @@ export const useTaskStorage = () => {
     if (selectedTaskId === taskId) {
       setSelectedTaskId(null);
     }
+    
+    dispatchTaskOperation({ type: 'complete', taskId, task: completedTask, metrics });
     toast.success('Task completed 🎯');
-  }, [tasks, completedTasks, selectedTaskId, updateTasks, updateCompletedTasks]);
+  }, [tasks, completedTasks, selectedTaskId, updateTasks, updateCompletedTasks, dispatchTaskOperation]);
 
   const clearTasks = useCallback(() => {
     updateTasks([]);
     setSelectedTaskId(null);
+    dispatchTaskOperation({ type: 'clear' });
     toast.success('Tasks cleared 🗑️');
-  }, [updateTasks]);
+  }, [updateTasks, dispatchTaskOperation]);
 
   const clearCompletedTasks = useCallback(() => {
     updateCompletedTasks([]);

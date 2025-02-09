@@ -1,9 +1,11 @@
+
 import { useMemo } from "react";
 import { TaskList } from "./TaskList";
 import { TaskLayout } from "./TaskLayout";
 import { TimerSection } from "../timer/TimerSection";
 import { TaskProvider } from "@/contexts/TaskContext";
 import type { Quote } from "@/types/timer";
+import { useTaskContext } from "@/contexts/TaskContext";
 
 interface TaskManagerProps {
   initialFavorites?: Quote[];
@@ -14,6 +16,8 @@ export const TaskManager = ({
   initialFavorites = [],
   onFavoritesChange,
 }: TaskManagerProps) => {
+  const { selectedTaskId } = useTaskContext();
+
   const taskListComponent = useMemo(() => (
     <TaskList
       initialFavorites={initialFavorites}
@@ -23,7 +27,7 @@ export const TaskManager = ({
 
   const timerComponent = useMemo(() => (
     <TimerSection
-      selectedTask={null}
+      selectedTask={selectedTaskId}
       onTaskComplete={(metrics) => {
         // Handle task completion
       }}
@@ -33,7 +37,7 @@ export const TaskManager = ({
       favorites={initialFavorites}
       setFavorites={onFavoritesChange}
     />
-  ), [initialFavorites, onFavoritesChange]);
+  ), [initialFavorites, onFavoritesChange, selectedTaskId]);
 
   return (
     <TaskProvider>
