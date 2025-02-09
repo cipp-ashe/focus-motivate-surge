@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -13,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { Task } from "./tasks/TaskList";
+import type { Task } from "@/types/tasks";
 import { Download, FileJson, Trash2 } from "lucide-react";
 import { ActionButton } from "./ui/action-button";
 import { toast } from "sonner";
@@ -156,4 +155,3 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     </div>
   );
 };
-

@@ -1,7 +1,7 @@
 
 import { NoteTags } from "../notes/components/NoteTags";
 import { Tag } from "@/types/core";
-import { Task } from "./TaskList";
+import { Task } from "@/types/tasks";
 import { useState, useEffect } from "react";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { toast } from "sonner";

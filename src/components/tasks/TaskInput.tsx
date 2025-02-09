@@ -1,11 +1,10 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Plus, List, X, Send } from "lucide-react";
-import { Task } from "../tasks/TaskList";
+import type { Task } from "@/types/tasks";
 import {
   DropdownMenu,
   DropdownMenuContent,

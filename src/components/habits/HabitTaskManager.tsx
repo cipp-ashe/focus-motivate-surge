@@ -14,14 +14,14 @@ interface HabitTaskManagerProps {
 
 export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
-  const { getEntityTags } = useTagSystem();
+  const { addTagToEntity, getEntityTags } = useTagSystem();
 
   // Memoize non-habit tasks
   const nonHabitTasks = useMemo(() => {
     return tasks.filter(task => !getEntityTags(task.id, 'task').some(tag => tag.name === 'Habit'));
   }, [tasks, getEntityTags]);
 
-  // Memoize habit tasks creation
+  // Memoize habit tasks creation and tag management
   const habitTasks = useMemo(() => {
     console.log('Creating habit tasks from:', todaysHabits);
     return todaysHabits.map(habit => {
@@ -34,15 +34,25 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         duration = habit.metrics.target;
       }
 
-      return {
+      const task = {
         id: taskId,
         name: habit.name,
         completed: existingTask?.completed || false,
         duration,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
       };
+
+      // Add appropriate tags for habit tasks
+      addTagToEntity('Habit', taskId, 'task');
+      if (habit.metrics?.type === 'timer') {
+        addTagToEntity('TimerHabit', taskId, 'task');
+      } else if (habit.metrics?.type === 'note') {
+        addTagToEntity('NoteHabit', taskId, 'task');
+      }
+
+      return task;
     });
-  }, [todaysHabits, tasks]);
+  }, [todaysHabits, tasks, addTagToEntity]);
 
   // Initialize tasks on first render if there are habits but no tasks
   useEffect(() => {

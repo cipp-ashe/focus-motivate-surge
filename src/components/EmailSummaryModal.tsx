@@ -15,7 +15,7 @@ import { z } from "zod";
 import { Mail } from "lucide-react";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
-import { Task } from "./tasks/TaskList";
+import { Task } from "@/types/tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
