@@ -116,16 +116,22 @@ const HabitTracker: React.FC = () => {
       />
 
       <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
-        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-          <SheetHeader>
-            <SheetTitle>Configure Templates</SheetTitle>
-          </SheetHeader>
-          <TemplateManager
-            availableTemplates={habitTemplates}
-            activeTemplateIds={activeTemplates.map(t => t.templateId)}
-            onSelectTemplate={handleTemplateSelect}
-            onCreateTemplate={handleCreateTemplate}
-          />
+        <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
+          <div className="flex flex-col h-full">
+            <div className="p-6 pb-0">
+              <SheetHeader>
+                <SheetTitle>Configure Templates</SheetTitle>
+              </SheetHeader>
+            </div>
+            <div className="flex-1 overflow-hidden p-6">
+              <TemplateManager
+                availableTemplates={habitTemplates}
+                activeTemplateIds={activeTemplates.map(t => t.templateId)}
+                onSelectTemplate={handleTemplateSelect}
+                onCreateTemplate={handleCreateTemplate}
+              />
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
 
@@ -136,27 +142,29 @@ const HabitTracker: React.FC = () => {
             if (!open) handleCloseTemplate();
           }}
         >
-          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+          <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
             <div className="flex flex-col h-full">
-              <SheetHeader>
-                <SheetTitle>
-                  {isCreatingTemplate ? 'Create New Template' : 'Edit Template'}
-                </SheetTitle>
-              </SheetHeader>
-              
-              {isCreatingTemplate && (
-                <div className="space-y-2 mt-4">
-                  <Label htmlFor="templateName">Template Name</Label>
-                  <Input
-                    id="templateName"
-                    value={newTemplateName}
-                    onChange={(e) => setNewTemplateName(e.target.value)}
-                    placeholder="Enter template name"
-                  />
-                </div>
-              )}
+              <div className="p-6 pb-0">
+                <SheetHeader>
+                  <SheetTitle>
+                    {isCreatingTemplate ? 'Create New Template' : 'Edit Template'}
+                  </SheetTitle>
+                </SheetHeader>
+                
+                {isCreatingTemplate && (
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="templateName">Template Name</Label>
+                    <Input
+                      id="templateName"
+                      value={newTemplateName}
+                      onChange={(e) => setNewTemplateName(e.target.value)}
+                      placeholder="Enter template name"
+                    />
+                  </div>
+                )}
+              </div>
 
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-hidden p-6 pt-4">
                 <TemplateManager
                   templateToEdit={selectedTemplate}
                   onUpdateTemplate={handleUpdateTemplate}
@@ -165,13 +173,15 @@ const HabitTracker: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
-                <Button variant="outline" onClick={handleCloseTemplate}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveTemplate}>
-                  Save Template
-                </Button>
+              <div className="p-6 pt-4 border-t">
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={handleCloseTemplate}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveTemplate}>
+                    Save Template
+                  </Button>
+                </div>
               </div>
             </div>
           </SheetContent>

@@ -32,7 +32,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 }) => {
   if (templateToEdit) {
     return (
-      <div className="space-y-6 pt-4">
+      <div className="space-y-4 h-full flex flex-col">
         <div className="space-y-2">
           <h4 className="text-sm font-medium">Active Days</h4>
           <ToggleGroup 
@@ -58,7 +58,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
           </ToggleGroup>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex-1 flex flex-col min-h-0">
           <div className="flex justify-between items-center">
             <h4 className="text-sm font-medium">Habits</h4>
             <Button
@@ -77,7 +77,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
             </Button>
           </div>
 
-          <ScrollArea className="h-[calc(100vh-20rem)]">
+          <ScrollArea className="flex-1">
             <div className="space-y-4 pr-4">
               {(templateToEdit.habits || []).map((habit, index) => (
                 <HabitForm
@@ -103,12 +103,12 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-8rem)] pr-4">
+    <ScrollArea className="h-full">
       <div className="space-y-4">
         <Button 
           onClick={onCreateTemplate}
           variant="outline"
-          className="w-full flex items-center justify-center gap-2 mb-4"
+          className="w-full flex items-center justify-center gap-2"
         >
           <Plus className="h-4 w-4" />
           Create New Template
