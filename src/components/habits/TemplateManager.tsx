@@ -79,7 +79,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 
           <ScrollArea className="h-[calc(100vh-20rem)]">
             <div className="space-y-4 pr-4">
-              {templateToEdit.habits?.map((habit, index) => (
+              {(templateToEdit.habits || []).map((habit, index) => (
                 <HabitForm
                   key={habit.id}
                   habit={habit}
@@ -89,7 +89,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                     onUpdateTemplate?.({ habits: updatedHabits });
                   }}
                   onDelete={() => {
-                    const updatedHabits = templateToEdit.habits.filter((_, i) => i !== index);
+                    const updatedHabits = (templateToEdit.habits || []).filter((_, i) => i !== index);
                     onUpdateTemplate?.({ habits: updatedHabits });
                   }}
                   onDragStart={() => {}}
@@ -143,4 +143,3 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 };
 
 export default TemplateManager;
-

@@ -63,6 +63,13 @@ const HabitTracker: React.FC = () => {
     setNewTemplateName('');
   };
 
+  const handleUpdateTemplate = (updates: Partial<ActiveTemplate>) => {
+    if (!selectedTemplate) return;
+    const updatedTemplate = { ...selectedTemplate, ...updates };
+    setSelectedTemplate(updatedTemplate);
+    console.log('Template updated:', updatedTemplate);
+  };
+
   const handleSaveTemplate = () => {
     if (!selectedTemplate) return;
     
@@ -71,7 +78,7 @@ const HabitTracker: React.FC = () => {
       return;
     }
 
-    if (!selectedTemplate.habits.length) {
+    if (!selectedTemplate.habits?.length) {
       toast.error('Please add at least one habit');
       return;
     }
@@ -89,6 +96,11 @@ const HabitTracker: React.FC = () => {
       toast.success('Template updated successfully');
       handleCloseTemplate();
     }
+  };
+
+  const handleUpdateDays = (days: string[]) => {
+    if (!selectedTemplate) return;
+    handleUpdateTemplate({ activeDays: days });
   };
 
   return (
@@ -121,9 +133,7 @@ const HabitTracker: React.FC = () => {
         <Sheet 
           open={!!selectedTemplate} 
           onOpenChange={(open) => {
-            if (!open && !isCreatingTemplate) {
-              handleCloseTemplate();
-            }
+            if (!open) handleCloseTemplate();
           }}
         >
           <SheetContent side="right" className="w-[400px] sm:w-[540px]">
@@ -147,12 +157,8 @@ const HabitTracker: React.FC = () => {
 
             <TemplateManager
               templateToEdit={selectedTemplate}
-              onUpdateTemplate={(updates) => {
-                updateTemplate(selectedTemplate.templateId, updates);
-              }}
-              onUpdateDays={(days) => {
-                updateTemplateDays(selectedTemplate.templateId, days);
-              }}
+              onUpdateTemplate={handleUpdateTemplate}
+              onUpdateDays={handleUpdateDays}
               onClose={handleCloseTemplate}
             />
 
@@ -172,4 +178,3 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
-
