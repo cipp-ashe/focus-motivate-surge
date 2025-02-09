@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { TaskManager } from "@/components/tasks/TaskManager";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
@@ -16,18 +17,13 @@ const Index = () => {
   const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const {
     lastSyncDate,
-    tasks,
-    completedTasks,
     favorites,
     activeTemplates,
     setActiveTemplates,
-    handleTasksUpdate,
     handleLastSyncUpdate,
-    handleCompletedTasksUpdate,
     handleFavoritesUpdate
   } = useLocalStorageData();
 
@@ -42,12 +38,6 @@ const Index = () => {
     closeNotes();
     toggleHabits();
   };
-
-  console.log('Index render state:', { 
-    isInitialized, 
-    hasError: !!error,
-    showClearButton 
-  });
 
   if (!isInitialized) {
     return (
@@ -88,25 +78,17 @@ const Index = () => {
         />
 
         <HabitTaskManager
-          tasks={tasks}
-          onTasksUpdate={handleTasksUpdate}
           activeTemplates={activeTemplates}
         />
 
         <DailySyncManager
           lastSyncDate={lastSyncDate}
-          tasks={tasks}
-          onTasksUpdate={handleTasksUpdate}
           onLastSyncUpdate={handleLastSyncUpdate}
         />
 
         <div className="flex-1 overflow-hidden">
           <TaskManager
-            initialTasks={tasks}
-            initialCompletedTasks={completedTasks}
             initialFavorites={favorites}
-            onTasksUpdate={handleTasksUpdate}
-            onCompletedTasksUpdate={handleCompletedTasksUpdate}
             onFavoritesChange={handleFavoritesUpdate}
           />
         </div>

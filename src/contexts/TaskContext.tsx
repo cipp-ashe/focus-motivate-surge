@@ -1,7 +1,7 @@
 
 import { createContext, useContext, ReactNode } from 'react';
 import { Task, TaskContextType } from '@/types/tasks';
-import { useTaskManager } from '@/hooks/useTaskManager';
+import { useTaskStorage } from '@/hooks/useTaskStorage';
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
@@ -15,25 +15,10 @@ export const useTaskContext = () => {
 
 interface TaskProviderProps {
   children: ReactNode;
-  initialTasks?: Task[];
-  initialCompletedTasks?: Task[];
-  onTasksUpdate?: (tasks: Task[]) => void;
-  onCompletedTasksUpdate?: (tasks: Task[]) => void;
 }
 
-export const TaskProvider = ({
-  children,
-  initialTasks = [],
-  initialCompletedTasks = [],
-  onTasksUpdate,
-  onCompletedTasksUpdate,
-}: TaskProviderProps) => {
-  const taskManager = useTaskManager({
-    initialTasks,
-    initialCompletedTasks,
-    onTasksUpdate,
-    onCompletedTasksUpdate,
-  });
+export const TaskProvider = ({ children }: TaskProviderProps) => {
+  const taskManager = useTaskStorage();
 
   return (
     <TaskContext.Provider value={taskManager}>
