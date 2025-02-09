@@ -15,16 +15,14 @@ const HabitForm: React.FC<HabitFormProps> = ({
   onUpdate,
   onDelete,
   onDragStart,
-}) => {
-  return (
-    <HabitFormField
-      habit={habit}
-      onUpdate={onUpdate}
-      onDelete={onDelete}
-      isDraggable
-      onDragStart={onDragStart}
-    />
-  );
-};
+}) => (
+  <HabitFormField
+    habit={habit}
+    onUpdate={onUpdate}
+    onDelete={onDelete}
+    isDraggable
+    onDragStart={onDragStart}
+  />
+);
 
 export default HabitForm;

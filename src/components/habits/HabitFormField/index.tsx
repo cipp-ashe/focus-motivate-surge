@@ -23,6 +23,31 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
   isDraggable = false,
   onDragStart,
 }) => {
+  const handleMetricTypeChange = (value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
+    const updates: Partial<HabitDetail> = {
+      metrics: {
+        type: value,
+        ...(value === 'timer' && { 
+          unit: 'seconds',
+          target: 1500,
+          min: 60,
+        }),
+        ...(value === 'count' && { target: 1 }),
+        ...(value === 'rating' && { min: 1, max: 5 }),
+      },
+    };
+    onUpdate(updates);
+  };
+
+  const handleMinutesChange = (minutes: number) => {
+    onUpdate({
+      metrics: {
+        ...habit.metrics,
+        target: minutes * 60,
+      },
+    });
+  };
+
   return (
     <Card className="p-3">
       <div className="flex flex-col gap-2 sm:gap-3">
@@ -57,20 +82,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
         <div className="flex flex-wrap gap-2">
           <Select
             value={habit.metrics.type}
-            onValueChange={(value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
-              onUpdate({
-                metrics: {
-                  type: value,
-                  ...(value === 'timer' && { 
-                    unit: 'seconds',
-                    target: 1500,
-                    min: 60,
-                  }),
-                  ...(value === 'count' && { target: 1 }),
-                  ...(value === 'rating' && { min: 1, max: 5 }),
-                },
-              });
-            }}
+            onValueChange={handleMetricTypeChange}
           >
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Type" />
@@ -87,14 +99,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
             <div className="flex-1">
               <MinutesInput
                 minutes={Math.round((habit.metrics.target || 1500) / 60)}
-                onMinutesChange={(minutes) => {
-                  onUpdate({
-                    metrics: {
-                      ...habit.metrics,
-                      target: minutes * 60,
-                    },
-                  });
-                }}
+                onMinutesChange={handleMinutesChange}
                 minMinutes={1}
                 maxMinutes={60}
               />

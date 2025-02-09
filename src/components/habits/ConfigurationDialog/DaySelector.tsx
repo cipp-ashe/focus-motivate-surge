@@ -12,16 +12,17 @@ const DaySelector: React.FC<DaySelectorProps> = ({
   activeDays,
   onUpdateDays,
 }) => {
+  const handleDayToggle = (values: string[]) => {
+    if (values.length > 0) {
+      onUpdateDays(values as DayOfWeek[]);
+    }
+  };
+
   return (
     <ToggleGroup 
       type="multiple"
       value={activeDays}
-      onValueChange={(values) => {
-        // Ensure we have at least one day selected
-        if (values.length > 0) {
-          onUpdateDays(values as DayOfWeek[]);
-        }
-      }}
+      onValueChange={handleDayToggle}
       className="flex flex-wrap justify-center sm:justify-start gap-1.5"
     >
       {DAYS_OF_WEEK.map((day) => (
