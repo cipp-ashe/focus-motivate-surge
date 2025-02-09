@@ -44,7 +44,19 @@ const downloadMarkdown = (tasks: Task[]) => {
       completionStatus: 'Completed On Time',
     };
 
-    return `# ${task.name}\n\nCompleted: ${format(new Date(metrics.endTime || ''), 'MMM d, yyyy HH:mm')}\nExpected Time: ${metrics.expectedTime}s\nActual Time: ${metrics.actualDuration}s\nEfficiency: ${metrics.efficiencyRatio.toFixed(1)}%\nStatus: ${metrics.completionStatus}\n\n---\n\n`;
+    let completionTime = 'Not recorded';
+    if (metrics.endTime) {
+      try {
+        const date = new Date(metrics.endTime);
+        if (!isNaN(date.getTime())) {
+          completionTime = format(date, 'MMM d, yyyy HH:mm');
+        }
+      } catch (error) {
+        console.warn(`Invalid date format for task ${task.name}:`, metrics.endTime);
+      }
+    }
+
+    return `# ${task.name}\n\nCompleted: ${completionTime}\nExpected Time: ${metrics.expectedTime}s\nActual Time: ${metrics.actualDuration}s\nEfficiency: ${metrics.efficiencyRatio.toFixed(1)}%\nStatus: ${metrics.completionStatus}\n\n---\n\n`;
   }).join('\n');
 
   downloadContent(content, `completed-tasks-${timestamp}.md`, 'text/markdown');
@@ -135,3 +147,4 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     </div>
   );
 };
+
