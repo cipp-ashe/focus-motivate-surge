@@ -12,8 +12,8 @@ import type { Quote } from "@/types/timer";
 
 const Index = () => {
   const { isDark, toggleTheme } = useTheme(true);
-  const { toggle: toggleNotes } = useNotesPanel();
-  const { toggle: toggleHabits } = useHabitsPanel();
+  const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
+  const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
 
   // Load initial tasks from localStorage
   const [initialTasks] = useState<Task[]>(() => {
@@ -46,6 +46,16 @@ const Index = () => {
     }
   });
 
+  const handleNotesClick = () => {
+    closeHabits();
+    toggleNotes();
+  };
+
+  const handleHabitsClick = () => {
+    closeNotes();
+    toggleHabits();
+  };
+
   // Handle task updates
   const handleTasksUpdate = (tasks: Task[]) => {
     localStorage.setItem('taskList', JSON.stringify(tasks));
@@ -71,14 +81,14 @@ const Index = () => {
           </h1>
           <div className="flex items-center gap-2">
             <button 
-              onClick={toggleHabits}
+              onClick={handleHabitsClick}
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"
               title="Habits"
             >
               <ActivitySquare className="h-5 w-5" />
             </button>
             <button 
-              onClick={toggleNotes}
+              onClick={handleNotesClick}
               className="p-2 text-muted-foreground hover:text-foreground transition-colors"
               title="Toggle Notes"
             >
@@ -120,3 +130,4 @@ const Index = () => {
 };
 
 export default Index;
+

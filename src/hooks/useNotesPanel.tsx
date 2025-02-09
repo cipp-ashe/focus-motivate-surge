@@ -1,4 +1,6 @@
+
 import React, { createContext, useContext, useState } from 'react';
+import { useHabitsPanel } from './useHabitsPanel';
 
 interface NotesPanelContextType {
   isOpen: boolean;
@@ -12,7 +14,11 @@ const NotesPanelContext = createContext<NotesPanelContextType | undefined>(undef
 export function NotesPanelProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggle = () => setIsOpen(prev => !prev);
+  const toggle = () => {
+    setIsOpen(prev => !prev);
+    // No need to close habits here as it will be handled by the button click
+  };
+  
   const open = () => setIsOpen(true);
   const close = () => setIsOpen(false);
 
@@ -30,3 +36,4 @@ export function useNotesPanel() {
   }
   return context;
 }
+
