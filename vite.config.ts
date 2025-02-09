@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -31,6 +32,7 @@ export default defineConfig(({ mode }) => ({
           vendor: ['react', 'react-dom'],
         },
       },
+      external: [/@rollup\/rollup-linux-*/], // Exclude platform-specific Rollup modules
     },
   },
   server: {
@@ -40,6 +42,7 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime'],
+    exclude: ['@rollup/rollup-linux-x64-gnu'], // Exclude from optimization
     esbuildOptions: {
       target: 'es2020',
     },
