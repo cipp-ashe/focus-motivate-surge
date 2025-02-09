@@ -27,6 +27,7 @@ export const useTimer = ({
   onTimeUp,
   onDurationChange,
 }: UseTimerOptions): UseTimerReturn => {
+  // initialDuration is already in seconds, no need to multiply
   const validInitialDuration = Math.max(60, initialDuration);
   const [timeLeft, setTimeLeft] = useState<number>(validInitialDuration);
   const [minutes, setMinutesState] = useState(Math.floor(validInitialDuration / 60));
@@ -52,6 +53,7 @@ export const useTimer = ({
   useEffect(() => {
     if (!isMountedRef.current) return;
 
+    // initialDuration is already in seconds
     const validDuration = Math.max(60, initialDuration);
     setTimeLeft(validDuration);
     setMinutesState(Math.floor(validDuration / 60));
