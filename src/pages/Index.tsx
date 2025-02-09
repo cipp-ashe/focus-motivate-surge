@@ -9,11 +9,12 @@ import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import { useDataInitialization } from "@/hooks/useDataInitialization";
 import { useLocalStorageData } from "@/hooks/useLocalStorageData";
 import { useRelationships } from "@/hooks/useRelationships";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   console.log('Mounting Index component');
   
-  const { isInitialized } = useDataInitialization();
+  const { isInitialized, showClearButton, clearStorage } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -51,10 +52,22 @@ const Index = () => {
   });
 
   if (!isInitialized) {
-    console.log('Waiting for data store initialization...');
-    return <div className="min-h-screen flex items-center justify-center">
-      <div className="text-lg">Loading...</div>
-    </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-lg mb-4">Initializing data store...</div>
+          {showClearButton && (
+            <Button 
+              variant="destructive"
+              onClick={clearStorage}
+              className="animate-pulse"
+            >
+              Clear Storage & Refresh
+            </Button>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
