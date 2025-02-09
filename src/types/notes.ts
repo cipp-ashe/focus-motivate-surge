@@ -22,4 +22,3 @@ export interface NotesProps {
 export const isValidTagColor = (color: string): color is TagColor => {
   return ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'].includes(color);
 };
-
