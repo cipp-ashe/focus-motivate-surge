@@ -14,6 +14,7 @@ import HabitInsights from './HabitInsights';
 import { Card } from '@/components/ui/card';
 
 const HabitTracker: React.FC = () => {
+  // Move all hooks to the top level
   const {
     activeTemplates,
     customTemplates,
@@ -31,10 +32,12 @@ const HabitTracker: React.FC = () => {
     getWeeklyProgress,
   } = useHabitProgress();
 
+  // Group all useState hooks together at the top level
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
   const [dialog, setDialog] = useState<DialogState>({ type: 'customize', open: false });
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [showInsights, setShowInsights] = useState(false);
+  const [insightTemplateId, setInsightTemplateId] = useState<string | null>(null);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -74,8 +77,13 @@ const HabitTracker: React.FC = () => {
   };
 
   const handleToggleInsights = (template: ActiveTemplate) => {
-    setSelectedTemplate(template);
-    setShowInsights(!showInsights);
+    if (insightTemplateId === template.templateId) {
+      setShowInsights(false);
+      setInsightTemplateId(null);
+    } else {
+      setShowInsights(true);
+      setInsightTemplateId(template.templateId);
+    }
   };
 
   const createActiveTemplate = (template: any): ActiveTemplate => ({
@@ -127,7 +135,7 @@ const HabitTracker: React.FC = () => {
                   onHabitUpdate={(habitId, value) => updateProgress(habitId, template.templateId, value)}
                 />
 
-                {showInsights && selectedTemplate?.templateId === template.templateId && (
+                {showInsights && insightTemplateId === template.templateId && (
                   <div className="mt-6">
                     <HabitInsights
                       habit={template.habits[0]}
@@ -197,3 +205,4 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
+
