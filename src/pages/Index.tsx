@@ -9,22 +9,33 @@ import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 import type { ActiveTemplate } from "@/components/habits/types";
+import { toast } from "sonner";
 
 const Index = () => {
+  console.log('Rendering Index component');
+
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
 
   const [lastSyncDate, setLastSyncDate] = useState(() => {
-    const saved = localStorage.getItem('lastSyncDate');
-    return saved ? new Date(saved) : new Date();
+    try {
+      const saved = localStorage.getItem('lastSyncDate');
+      console.log('Loading lastSyncDate:', saved);
+      return saved ? new Date(saved) : new Date();
+    } catch (error) {
+      console.error('Error loading lastSyncDate:', error);
+      return new Date();
+    }
   });
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     try {
       const saved = localStorage.getItem('taskList');
+      console.log('Loading tasks:', saved);
       return saved ? JSON.parse(saved) : [];
     } catch (error) {
       console.error('Error loading tasks:', error);
+      toast.error('Error loading tasks');
       return [];
     }
   });
@@ -32,9 +43,11 @@ const Index = () => {
   const [initialCompletedTasks] = useState<Task[]>(() => {
     try {
       const saved = localStorage.getItem('completedTasks');
+      console.log('Loading completed tasks:', saved);
       return saved ? JSON.parse(saved) : [];
     } catch (error) {
       console.error('Error loading completed tasks:', error);
+      toast.error('Error loading completed tasks');
       return [];
     }
   });
@@ -42,9 +55,11 @@ const Index = () => {
   const [favorites, setFavorites] = useState<Quote[]>(() => {
     try {
       const saved = localStorage.getItem('favoriteQuotes');
+      console.log('Loading favorite quotes:', saved);
       return saved && saved !== "undefined" ? JSON.parse(saved) : [];
     } catch (error) {
       console.error('Error loading favorite quotes:', error);
+      toast.error('Error loading favorite quotes');
       return [];
     }
   });
@@ -55,9 +70,11 @@ const Index = () => {
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
       const saved = localStorage.getItem('habit-templates');
+      console.log('Loading habit templates:', saved);
       return saved ? JSON.parse(saved) : [];
     } catch (error) {
-      console.error('Error loading active templates:', error);
+      console.error('Error loading habit templates:', error);
+      toast.error('Error loading habit templates');
       return [];
     }
   });
@@ -72,6 +89,7 @@ const Index = () => {
         }
       } catch (error) {
         console.error('Error updating templates:', error);
+        toast.error('Error updating templates');
       }
     };
 
@@ -115,6 +133,12 @@ const Index = () => {
     localStorage.setItem('favoriteQuotes', JSON.stringify(newFavorites));
     setFavorites(newFavorites);
   };
+
+  console.log('Index rendering with:', {
+    tasks: tasks.length,
+    completedTasks: initialCompletedTasks.length,
+    activeTemplates: activeTemplates.length
+  });
 
   return (
     <div className="min-h-screen h-full flex flex-col bg-background transition-colors duration-300">
