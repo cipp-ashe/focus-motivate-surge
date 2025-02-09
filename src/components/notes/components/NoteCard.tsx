@@ -1,23 +1,13 @@
+
 import React, { useState, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { ActionButton } from '@/components/ui/action-button';
-import { 
-  Download, 
-  Trash2, 
-  Edit2, 
-  X, 
-  Tag as TagIcon,
-  Clock,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-} from 'lucide-react';
 import type { Note, Tag, TagColor } from '@/hooks/useNotes';
-import { NoteMeta } from './NoteMeta';
-import { downloadNoteAsMarkdown } from '@/utils/downloadUtils';
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { NoteTags } from './NoteTags';
+import { NoteActions } from './NoteActions';
+import { getNextColor } from '../utils/tagUtils';
 
 interface NoteCardProps {
   note: Note;
@@ -31,36 +21,6 @@ interface NoteCardProps {
 
 const PREVIEW_LENGTH = 80;
 
-const TAG_COLORS: TagColor[] = [
-  'default',
-  'red',
-  'orange',
-  'yellow',
-  'green',
-  'blue',
-  'purple',
-  'pink'
-];
-
-const getNextColor = (currentColor: TagColor): TagColor => {
-  const currentIndex = TAG_COLORS.indexOf(currentColor);
-  return TAG_COLORS[(currentIndex + 1) % TAG_COLORS.length];
-};
-
-const getTagStyles = (color: TagColor) => {
-  const styles: Record<TagColor, string> = {
-    default: 'bg-primary/5 hover:bg-primary/10 text-primary/80 hover:text-primary',
-    red: 'bg-red-500/10 hover:bg-red-500/20 text-red-500/80 hover:text-red-500',
-    orange: 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-500/80 hover:text-orange-500',
-    yellow: 'bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500/80 hover:text-yellow-500',
-    green: 'bg-green-500/10 hover:bg-green-500/20 text-green-500/80 hover:text-green-500',
-    blue: 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-500/80 hover:text-blue-500',
-    purple: 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-500/80 hover:text-purple-500',
-    pink: 'bg-pink-500/10 hover:bg-pink-500/20 text-pink-500/80 hover:text-pink-500'
-  };
-  return styles[color];
-};
-
 export const NoteCard = ({ 
   note,
   onEdit,
@@ -70,21 +30,8 @@ export const NoteCard = ({
   onUpdateTagColor,
   compact = false
 }: NoteCardProps) => {
-  const [tagInput, setTagInput] = useState('');
-  const [isEditingTags, setIsEditingTags] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [localTags, setLocalTags] = useState<Tag[]>(note.tags);
-
-  const handleAddTag = (tagName: string) => {
-    if (!tagName.trim()) return;
-    onAddTag(note.id, tagName);
-    setTagInput('');
-    setIsEditingTags(false);
-  };
-
-  const handleDownload = async () => {
-    await downloadNoteAsMarkdown(note);
-  };
 
   const handleTagClick = useCallback((tag: Tag) => {
     if (!onUpdateTagColor) return;
@@ -132,65 +79,12 @@ export const NoteCard = ({
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <div className="flex items-center gap-1">
-              {localTags.map(tag => (
-                <Badge 
-                  key={tag.name} 
-                  variant="secondary" 
-                  className={cn(
-                    "text-xs px-1.5 h-5 transition-colors cursor-pointer",
-                    getTagStyles(tag.color)
-                  )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTagClick(tag);
-                  }}
-                >
-                  {tag.name}
-                  <X 
-                    className="h-3 w-3 ml-1 cursor-pointer opacity-50 hover:opacity-100" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemoveTag(note.id, tag.name);
-                    }}
-                  />
-                </Badge>
-              ))}
-              {isEditingTags ? (
-                <div className="relative" onClick={e => e.stopPropagation()}>
-                  <Input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleAddTag(tagInput);
-                      } else if (e.key === 'Escape') {
-                        setIsEditingTags(false);
-                        setTagInput('');
-                      }
-                    }}
-                    onBlur={() => {
-                      if (tagInput.trim()) {
-                        handleAddTag(tagInput);
-                      }
-                      setIsEditingTags(false);
-                    }}
-                    placeholder="Add tag"
-                    className="h-5 w-16 text-xs px-1.5"
-                    autoFocus
-                  />
-                </div>
-              ) : (
-                <ActionButton
-                  icon={Plus}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditingTags(true);
-                  }}
-                  className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100"
-                />
-              )}
-            </div>
+            <NoteTags
+              tags={localTags}
+              onAddTag={(tagName) => onAddTag(note.id, tagName)}
+              onRemoveTag={(tagName) => onRemoveTag(note.id, tagName)}
+              onTagClick={handleTagClick}
+            />
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
               <span>{formattedDate}</span>
@@ -202,25 +96,11 @@ export const NoteCard = ({
             />
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <ActionButton
-            icon={Download}
-            onClick={handleDownload}
-            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
-          />
-          {onEdit && (
-            <ActionButton
-              icon={Edit2}
-              onClick={() => onEdit(note)}
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
-            />
-          )}
-          <ActionButton
-            icon={Trash2}
-            onClick={() => onDelete(note.id)}
-            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
-          />
-        </div>
+        <NoteActions
+          note={note}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       </div>
     </div>
   );
