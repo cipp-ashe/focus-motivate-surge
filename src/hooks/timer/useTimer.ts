@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { TimerMetrics } from '@/types/metrics';
@@ -26,7 +27,6 @@ export const useTimer = ({
   onTimeUp,
   onDurationChange,
 }: UseTimerOptions): UseTimerReturn => {
-  // Ensure initial duration is positive
   const validInitialDuration = Math.max(60, initialDuration);
   const [timeLeft, setTimeLeft] = useState<number>(validInitialDuration);
   const [minutes, setMinutesState] = useState(Math.floor(validInitialDuration / 60));
@@ -49,11 +49,10 @@ export const useTimer = ({
   const isMountedRef = useRef(true);
   const intervalRef = useRef<NodeJS.Timeout>();
 
-  // Handle duration updates
   useEffect(() => {
     if (!isMountedRef.current) return;
 
-    const validDuration = Math.max(60, initialDuration); // Minimum 1 minute
+    const validDuration = Math.max(60, initialDuration);
     setTimeLeft(validDuration);
     setMinutesState(Math.floor(validDuration / 60));
     setMetrics(prev => ({
@@ -69,7 +68,6 @@ export const useTimer = ({
   const setMinutes = useCallback((newMinutes: number) => {
     if (!isMountedRef.current) return;
 
-    // Clamp minutes between 1 and 60
     const clampedMinutes = Math.max(1, Math.min(60, newMinutes));
     const newSeconds = clampedMinutes * 60;
     

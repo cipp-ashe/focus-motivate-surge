@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
 import { calculateEfficiencyRatio, determineCompletionStatus, formatTime } from '@/utils/timeUtils';
@@ -60,7 +61,6 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
     if (!isMountedRef.current) return;
 
     setMetrics(prev => {
-      // Calculate accumulated pause time if we're updating from a paused state
       let updatedPausedTime = prev.pausedTime;
       if (prev.lastPauseTimestamp && updates.lastPauseTimestamp === null) {
         const now = new Date();
