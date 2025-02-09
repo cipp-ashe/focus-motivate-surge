@@ -53,7 +53,7 @@ export const TodaysHabits = ({
                 task={getHabitAsTask(habit)}
                 isSelected={false}
                 editingTaskId={null}
-                onTaskClick={() => onAddHabitToTasks(habit)}
+                onTaskClick={() => onHabitClick(habit)}
                 onTaskDelete={() => {}}
                 onDurationChange={() => {}}
                 onDurationClick={(e) => {
