@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { TaskManager } from "@/components/tasks/TaskManager";
@@ -166,27 +167,52 @@ const Index = () => {
                 {todaysHabits.length} habit{todaysHabits.length !== 1 ? 's' : ''}
               </span>
             </div>
-            <ScrollArea className="h-[200px] pr-4">
-              <div className="space-y-2">
+            <ScrollArea className="h-[300px] pr-4">
+              <div className="space-y-3">
                 {todaysHabits.map((habit) => (
                   <div 
                     key={habit.id} 
-                    className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-primary/5 transition-all duration-300 hover:translate-x-1 group border border-primary/10"
+                    className="flex flex-col p-4 rounded-lg bg-background/50 hover:bg-primary/5 transition-all duration-300 hover:translate-x-1 group border border-primary/10"
                   >
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-foreground truncate">{habit.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{habit.description}</p>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-foreground mb-1">{habit.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">{habit.description}</p>
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
+                            {habit.category}
+                          </span>
+                          <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
+                            {habit.timePreference}
+                          </span>
+                          {habit.duration && (
+                            <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
+                              {habit.duration} minutes
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {habit.duration && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAddHabitToTasks(habit)}
+                          className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Task
+                        </Button>
+                      )}
                     </div>
-                    {habit.duration && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAddHabitToTasks(habit)}
-                        className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Add Task
-                      </Button>
+                    {habit.tips && habit.tips.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-primary/10">
+                        <p className="text-xs text-muted-foreground mb-1">Tips:</p>
+                        <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                          {habit.tips.slice(0, 2).map((tip, index) => (
+                            <li key={index} className="line-clamp-1">{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 ))}
