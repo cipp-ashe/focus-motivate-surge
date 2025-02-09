@@ -55,10 +55,15 @@ const HabitForm: React.FC<HabitFormProps> = ({
           <Select
             value={habit.metrics.type}
             onValueChange={(value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
+              console.log('Changing habit type to:', value);
               onUpdate({
                 metrics: {
                   type: value,
-                  ...(value === 'timer' && { unit: 'seconds', target: 1500 }), // Default 25 minutes in seconds
+                  ...(value === 'timer' && { 
+                    unit: 'seconds', 
+                    target: 1500, // Default 25 minutes in seconds
+                    min: 60, // Minimum 1 minute in seconds
+                  }),
                   ...(value === 'count' && { target: 1 }),
                   ...(value === 'rating' && { min: 1, max: 5 }),
                 },
@@ -85,10 +90,12 @@ const HabitForm: React.FC<HabitFormProps> = ({
                 onChange={(e) => {
                   const minutes = parseInt(e.target.value);
                   if (!isNaN(minutes)) {
+                    const seconds = minutes * 60;
+                    console.log(`Setting timer duration: ${minutes} minutes (${seconds} seconds)`);
                     onUpdate({
                       metrics: {
                         ...habit.metrics,
-                        target: minutes * 60, // Store as seconds
+                        target: seconds, // Store as seconds
                       },
                     });
                   }
@@ -124,4 +131,3 @@ const HabitForm: React.FC<HabitFormProps> = ({
 };
 
 export default HabitForm;
-
