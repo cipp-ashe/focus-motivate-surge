@@ -86,27 +86,33 @@ const HabitTracker: React.FC = () => {
         <Sheet 
           open={!!selectedTemplate} 
           onOpenChange={(open) => {
-            if (!open && !isCreatingTemplate) {
-              handleCloseTemplate();
+            if (!open) {
+              // Only close if we're not in template creation mode or if the template has habits
+              if (!isCreatingTemplate || selectedTemplate.habits.length > 0) {
+                handleCloseTemplate();
+              }
             }
           }}
         >
           <SheetContent side="right" className="w-[400px] sm:w-[540px]">
             <SheetHeader>
               <SheetTitle>
-                {selectedTemplate.habits.length === 0 ? 'Create New Template' : 'Edit Template'}
+                {isCreatingTemplate ? 'Create New Template' : 'Edit Template'}
               </SheetTitle>
             </SheetHeader>
             <TemplateManager
               templateToEdit={selectedTemplate}
               onUpdateTemplate={(updates) => {
-                if (selectedTemplate.habits.length === 0) {
-                  const updatedTemplate = { ...selectedTemplate, ...updates };
-                  addTemplate(updatedTemplate);
-                } else {
-                  updateTemplate(selectedTemplate.templateId, updates);
+                // Only save and close if we have at least one habit configured
+                if (updates.habits && updates.habits.length > 0) {
+                  if (isCreatingTemplate) {
+                    const updatedTemplate = { ...selectedTemplate, ...updates };
+                    addTemplate(updatedTemplate);
+                  } else {
+                    updateTemplate(selectedTemplate.templateId, updates);
+                  }
+                  handleCloseTemplate();
                 }
-                handleCloseTemplate();
               }}
               onUpdateDays={(days) => {
                 updateTemplateDays(selectedTemplate.templateId, days);
