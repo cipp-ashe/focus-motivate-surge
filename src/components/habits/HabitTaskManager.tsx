@@ -33,32 +33,34 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         id: taskId,
         name: habit.name,
         completed: existingTask?.completed || false,
-        duration: habit.metrics?.target ? habit.metrics.target * 60 : undefined, // Convert minutes to seconds
+        duration: habit.metrics?.target ? Math.round(habit.metrics.target / 60) * 60 : undefined, // Convert to seconds
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         relationships: {
           habitId: habit.id
         }
       };
 
-      // Only add the Habit tag
+      // Add the Habit tag
       addTagToEntity('Habit', taskId, 'task');
 
       return task;
     });
   }, [todaysHabits, tasks, addTagToEntity]);
 
-  // Initialize tasks on first render if there are timer habits but no tasks
-  useEffect(() => {
-    if (habitTasks.length > 0 && tasks.length === 0) {
-      onTasksUpdate([...habitTasks]);
-    }
-  }, [habitTasks, tasks.length, onTasksUpdate]);
-
-  // Synchronize tasks whenever habits or non-habit tasks change
+  // Sync tasks whenever habits change
   useEffect(() => {
     const newTasks = [...nonHabitTasks, ...habitTasks];
     onTasksUpdate(newTasks);
   }, [nonHabitTasks, habitTasks, onTasksUpdate]);
+
+  useEffect(() => {
+    // Log initial sync for debugging
+    console.log('Initial habit-task sync:', {
+      todaysHabits,
+      habitTasks,
+      allTasks: [...nonHabitTasks, ...habitTasks]
+    });
+  }, []);
 
   return null;
 };

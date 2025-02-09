@@ -4,6 +4,8 @@ import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "../CompletedTasks";
 import { useTaskContext } from "@/contexts/TaskContext";
+import { HabitTaskManager } from "../habits/HabitTaskManager";
+import { useTemplateManagement } from "@/components/habits/hooks/useTemplateManagement";
 import type { Quote } from "@/types/timer";
 import type { Task } from "@/types/tasks";
 
@@ -28,10 +30,25 @@ export const TaskList = ({
     clearCompletedTasks,
   } = useTaskContext();
 
+  const { activeTemplates } = useTemplateManagement();
+
   return (
     <div className="space-y-4">
       <TaskInput onTaskAdd={addTask} />
       
+      <HabitTaskManager 
+        tasks={tasks}
+        onTasksUpdate={(updatedTasks) => {
+          // Update tasks through the TaskContext
+          updatedTasks.forEach(task => {
+            if (!tasks.find(t => t.id === task.id)) {
+              addTask(task);
+            }
+          });
+        }}
+        activeTemplates={activeTemplates}
+      />
+
       <TaskTable
         tasks={tasks}
         selectedTasks={selectedTaskId ? [selectedTaskId] : []}

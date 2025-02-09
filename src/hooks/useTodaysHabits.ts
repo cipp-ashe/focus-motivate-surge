@@ -23,9 +23,14 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
 
   useEffect(() => {
     const habits = getTodaysHabits();
-    console.log('Updating today\'s habits:', habits);
+    console.log('Updating today\'s habits:', {
+      habits,
+      timerHabits: habits.filter(h => h.metrics?.type === 'timer'),
+      date: new Date().toLocaleString(),
+      activeTemplates
+    });
     setTodaysHabits(habits);
-  }, [getTodaysHabits]);
+  }, [getTodaysHabits, activeTemplates]);
 
   return { todaysHabits };
 };
