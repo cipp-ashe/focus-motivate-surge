@@ -15,7 +15,6 @@ const Index = () => {
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
 
-  // Load initial tasks from localStorage
   const [tasks, setTasks] = useState<Task[]>(() => {
     try {
       const saved = localStorage.getItem('taskList');
@@ -58,7 +57,6 @@ const Index = () => {
     }
   });
 
-  // Listen for template updates
   useEffect(() => {
     const handleTemplateUpdate = () => {
       try {
@@ -73,7 +71,6 @@ const Index = () => {
     };
 
     window.addEventListener('templatesUpdated', handleTemplateUpdate);
-
     return () => {
       window.removeEventListener('templatesUpdated', handleTemplateUpdate);
     };
@@ -117,12 +114,11 @@ const Index = () => {
       id: `habit-task-${habit.id}`,
       name: habit.name,
       completed: false,
-      duration: habit.duration || 25,
+      duration: habit.duration,
       metrics: undefined
     };
 
-    const updatedTasks = [newTask, ...tasks];
-    handleTasksUpdate(updatedTasks);
+    handleTasksUpdate([newTask, ...tasks]);
     setSelectedTaskId(newTask.id);
     toast.success(`Started "${habit.name}"`);
   };
