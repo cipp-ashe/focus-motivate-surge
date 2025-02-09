@@ -13,50 +13,51 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizingRef = useRef(false);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+  const isResizingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
-    let timeoutId: NodeJS.Timeout;
     
-    const handleResize = () => {
-      if (resizingRef.current || !containerRef.current) return;
+    const handleResize = (entries: ResizeObserverEntry[]) => {
+      if (isResizingRef.current || !containerRef.current) return;
       
-      resizingRef.current = true;
+      isResizingRef.current = true;
       
-      // Get the computed style once
-      const computedStyle = window.getComputedStyle(containerRef.current);
-      const currentHeight = parseFloat(computedStyle.height);
-      
-      // Only update if height needs adjusting and element exists
-      if (currentHeight > 0 && containerRef.current) {
-        containerRef.current.style.minHeight = '0';
+      // Clear any pending timeouts
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
       }
       
-      // Reset resizing flag after a short delay
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        resizingRef.current = false;
+      // Debounce the resize handling
+      resizeTimeoutRef.current = setTimeout(() => {
+        entries.forEach(entry => {
+          if (containerRef.current && entry.target === containerRef.current) {
+            const height = entry.contentRect.height;
+            if (height > 0) {
+              containerRef.current.style.minHeight = '0';
+            }
+          }
+        });
+        isResizingRef.current = false;
       }, 100);
     };
     
     const observer = new ResizeObserver((entries) => {
-      // Use requestIdleCallback if available, otherwise use setTimeout
-      if (window.requestIdleCallback) {
-        window.requestIdleCallback(() => handleResize(), { timeout: 100 });
-      } else {
-        setTimeout(handleResize, 16); // Roughly one frame at 60fps
-      }
+      // Use requestAnimationFrame to avoid layout thrashing
+      requestAnimationFrame(() => handleResize(entries));
     });
     
     observer.observe(element);
 
     return () => {
       observer.disconnect();
-      clearTimeout(timeoutId);
-      resizingRef.current = false;
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+      isResizingRef.current = false;
     };
   }, []);
 
