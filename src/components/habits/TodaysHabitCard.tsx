@@ -3,6 +3,7 @@ import { Timer, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import type { HabitDetail } from "@/components/habits/types";
 
@@ -10,11 +11,11 @@ interface HabitRowProps {
   habit: HabitDetail;
   isCompleted: boolean;
   onComplete: () => void;
-  onAddToTasks: () => void;
+  onStart?: () => void;
 }
 
-const HabitRow = ({ habit, isCompleted, onComplete, onAddToTasks }: HabitRowProps) => {
-  console.log('Rendering habit row:', { habitId: habit.id, habitName: habit.name, duration: habit.duration });
+const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
+  const isDurationHabit = habit.metrics.type === 'duration';
   
   return (
     <div className="flex items-center justify-between p-3 bg-card hover:bg-accent/50 rounded-md transition-colors">
@@ -30,20 +31,55 @@ const HabitRow = ({ habit, isCompleted, onComplete, onAddToTasks }: HabitRowProp
         </span>
       </div>
       <div className="flex items-center gap-2">
-        {habit.duration && (
-          <span className="text-sm text-muted-foreground">
-            {habit.duration}m
-          </span>
+        {isDurationHabit && (
+          <>
+            <span className="text-sm text-muted-foreground">
+              {habit.duration}m
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onStart}
+              className="h-8 w-8"
+            >
+              <Timer className="h-4 w-4" />
+            </Button>
+          </>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onAddToTasks}
-          className="h-8 w-8"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
       </div>
+    </div>
+  );
+};
+
+interface HabitSectionProps {
+  title: string;
+  habits: HabitDetail[];
+  completedHabits: string[];
+  onHabitComplete: (habit: HabitDetail) => void;
+  onAddHabitToTasks?: (habit: HabitDetail) => void;
+}
+
+const HabitSection = ({
+  title,
+  habits,
+  completedHabits,
+  onHabitComplete,
+  onAddHabitToTasks,
+}: HabitSectionProps) => {
+  if (habits.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+      {habits.map((habit) => (
+        <HabitRow
+          key={habit.id}
+          habit={habit}
+          isCompleted={completedHabits.includes(habit.id)}
+          onComplete={() => onHabitComplete(habit)}
+          onStart={onAddHabitToTasks ? () => onAddHabitToTasks(habit) : undefined}
+        />
+      ))}
     </div>
   );
 };
@@ -63,20 +99,21 @@ export const TodaysHabitCard = ({
 }: TodaysHabitCardProps) => {
   if (habits.length === 0) return null;
 
-  const handleAddToTasks = (habit: HabitDetail) => {
-    console.log('Attempting to add habit to tasks:', { 
-      habitId: habit.id, 
-      habitName: habit.name, 
-      duration: habit.duration 
-    });
-    
+  const durationHabits = habits.filter(habit => 
+    habit.metrics.type === 'duration' && habit.duration
+  );
+  const nonDurationHabits = habits.filter(habit => 
+    habit.metrics.type !== 'duration'
+  );
+
+  const handleStartHabit = (habit: HabitDetail) => {
     if (!habit.duration) {
       console.warn('Habit has no duration:', habit);
       toast.error("This habit doesn't have a duration set");
       return;
     }
     onAddHabitToTasks(habit);
-    toast.success(`Added "${habit.name}" to tasks`);
+    toast.success(`Started "${habit.name}"`);
   };
 
   return (
@@ -93,19 +130,31 @@ export const TodaysHabitCard = ({
         </div>
       </div>
       <ScrollArea className="h-[300px]">
-        <div className="p-4 space-y-2">
-          {habits.map((habit) => (
-            <HabitRow
-              key={habit.id}
-              habit={habit}
-              isCompleted={completedHabits.includes(habit.id)}
-              onComplete={() => onHabitComplete(habit)}
-              onAddToTasks={() => handleAddToTasks(habit)}
+        <div className="p-4 space-y-4">
+          {durationHabits.length > 0 && (
+            <HabitSection
+              title="Timed Habits"
+              habits={durationHabits}
+              completedHabits={completedHabits}
+              onHabitComplete={onHabitComplete}
+              onAddHabitToTasks={handleStartHabit}
             />
-          ))}
+          )}
+          
+          {durationHabits.length > 0 && nonDurationHabits.length > 0 && (
+            <Separator className="my-4" />
+          )}
+          
+          {nonDurationHabits.length > 0 && (
+            <HabitSection
+              title="Daily Habits"
+              habits={nonDurationHabits}
+              completedHabits={completedHabits}
+              onHabitComplete={onHabitComplete}
+            />
+          )}
         </div>
       </ScrollArea>
     </Card>
   );
 };
-
