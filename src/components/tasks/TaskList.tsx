@@ -1,8 +1,8 @@
+
 import { useState } from "react";
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "../CompletedTasks";
-import { EmailSummaryModal } from "../EmailSummaryModal";
 import { useTaskContext } from "@/contexts/TaskContext";
 import type { Quote } from "@/types/timer";
 import type { Task } from "@/types/tasks";
@@ -16,7 +16,6 @@ export const TaskList = ({
   initialFavorites = [],
   onFavoritesChange,
 }: TaskListProps) => {
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const {
     tasks,
     completedTasks,
@@ -28,13 +27,6 @@ export const TaskList = ({
     clearTasks,
     clearCompletedTasks,
   } = useTaskContext();
-
-  const handleEmailSent = async (email: string, clearData?: boolean) => {
-    setIsEmailModalOpen(false);
-    if (clearData) {
-      clearCompletedTasks();
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -52,15 +44,6 @@ export const TaskList = ({
       <CompletedTasks 
         tasks={completedTasks}
         onTasksClear={clearCompletedTasks}
-      />
-
-      <EmailSummaryModal
-        isOpen={isEmailModalOpen}
-        onClose={() => setIsEmailModalOpen(false)}
-        onSubmit={handleEmailSent}
-        tasks={tasks}
-        completedTasks={completedTasks}
-        favorites={initialFavorites}
       />
     </div>
   );
