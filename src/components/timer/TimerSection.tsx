@@ -1,4 +1,3 @@
-
 import { Timer } from "./Timer";
 import { Task } from "../tasks/TaskList";
 import { Quote } from "@/types/timer";
@@ -27,13 +26,13 @@ export const TimerSection = ({
     );
   }
 
-  // Convert duration from minutes to seconds for the timer
-  const durationInSeconds = selectedTask.duration * 60;
+  // Keep duration in minutes when passing to Timer
+  const durationInMinutes = selectedTask.duration;
 
   return (
     <Timer
       key={selectedTask.id}
-      duration={durationInSeconds}
+      duration={durationInMinutes}
       taskName={selectedTask.name}
       onComplete={onTaskComplete}
       onAddTime={() => {
@@ -45,4 +44,3 @@ export const TimerSection = ({
     />
   );
 };
-
