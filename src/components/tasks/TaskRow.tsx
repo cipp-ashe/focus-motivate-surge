@@ -1,4 +1,3 @@
-
 import { Task } from "./TaskList";
 import { Sparkles, Clock, X } from "lucide-react";
 import { Input } from "../ui/input";
@@ -66,7 +65,7 @@ export const TaskRow = ({
     }
     
     setInputValue(finalValue);
-    // Convert minutes back to seconds when saving
+    // Convert minutes to seconds when saving
     onDurationChange(task.id, (parseInt(finalValue) * 60).toString());
     onInputBlur();
   };

@@ -26,10 +26,11 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       console.log('Converting timer habits to tasks:', timerHabits);
       
       const habitTasks: Task[] = timerHabits.map(habit => {
-        const minutes = habit.metrics.target;
+        const minutes = habit.metrics.target || 0;
         
         console.log(`Converting habit duration for ${habit.name}:`, {
           target: minutes,
+          duration: minutes * 60, // Convert to seconds for the task
         });
 
         if (!minutes || minutes <= 0) {
@@ -41,28 +42,34 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
           id: `habit-${habit.id}`,
           name: habit.name,
           completed: false,
-          duration: minutes,
+          duration: minutes * 60, // Store duration in seconds
           createdAt: new Date().toISOString(),
           tags: [{ name: 'Habit', color: 'blue' }],
         };
       }).filter(Boolean) as Task[];
 
-      const newTasks = [...nonHabitTasks, ...habitTasks];
-      const currentTasksStr = JSON.stringify(tasks);
-      const newTasksStr = JSON.stringify(newTasks);
+      // Only update if the habit tasks have changed
+      const existingHabitTaskIds = tasks
+        .filter(task => task.id.startsWith('habit-'))
+        .map(task => task.id);
       
-      if (currentTasksStr !== newTasksStr) {
-        console.log('Updating tasks with converted habits:', newTasks);
-        onTasksUpdate(newTasks);
+      const newHabitTaskIds = habitTasks.map(task => task.id);
+      
+      // Check if habit tasks have changed
+      const habitTasksChanged = 
+        existingHabitTaskIds.length !== newHabitTaskIds.length ||
+        !existingHabitTaskIds.every(id => newHabitTaskIds.includes(id));
+
+      if (habitTasksChanged) {
+        console.log('Updating tasks with converted habits:', [...nonHabitTasks, ...habitTasks]);
+        onTasksUpdate([...nonHabitTasks, ...habitTasks]);
       }
-    } else {
-      if (tasks.some(task => task.id.startsWith('habit-'))) {
-        const newTasks = tasks.filter(task => !task.id.startsWith('habit-'));
-        onTasksUpdate(newTasks);
-      }
+    } else if (tasks.some(task => task.id.startsWith('habit-'))) {
+      // If there are no timer habits but we have habit tasks, remove them
+      const newTasks = tasks.filter(task => !task.id.startsWith('habit-'));
+      onTasksUpdate(newTasks);
     }
   }, [todaysHabits, tasks, onTasksUpdate]);
 
   return null;
 };
-
