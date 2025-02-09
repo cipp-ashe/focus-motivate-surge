@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
@@ -12,7 +13,6 @@ interface HabitTaskManagerProps {
 export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
 
-  // Convert timer-type habits into tasks
   useEffect(() => {
     // Get existing non-habit tasks
     const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
@@ -26,19 +26,14 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       console.log('Converting timer habits to tasks:', timerHabits);
       
       const habitTasks: Task[] = timerHabits.map(habit => {
-        const targetMinutes = habit.metrics.target;
+        const minutes = habit.metrics.target;
         
-        // Log duration conversion details
         console.log(`Converting habit duration for ${habit.name}:`, {
-          originalTarget: habit.metrics.target,
-          parsedMinutes: targetMinutes,
+          target: minutes,
         });
 
-        // Ensure target is valid and greater than 0
-        if (!targetMinutes || targetMinutes <= 0) {
-          console.warn(`Invalid duration for habit ${habit.name}:`, {
-            target: habit.metrics.target,
-          });
+        if (!minutes || minutes <= 0) {
+          console.warn(`Invalid duration for habit ${habit.name}:`, { target: minutes });
           return null;
         }
 
@@ -46,7 +41,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
           id: `habit-${habit.id}`,
           name: habit.name,
           completed: false,
-          duration: targetMinutes,
+          duration: minutes,
           createdAt: new Date().toISOString(),
           tags: [{ name: 'Habit', color: 'blue' }],
         };
@@ -56,13 +51,11 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       const currentTasksStr = JSON.stringify(tasks);
       const newTasksStr = JSON.stringify(newTasks);
       
-      // Only update if the tasks have actually changed
       if (currentTasksStr !== newTasksStr) {
         console.log('Updating tasks with converted habits:', newTasks);
         onTasksUpdate(newTasks);
       }
     } else {
-      // If no timer habits, ensure we're not keeping any stale habit tasks
       if (tasks.some(task => task.id.startsWith('habit-'))) {
         const newTasks = tasks.filter(task => !task.id.startsWith('habit-'));
         onTasksUpdate(newTasks);
@@ -72,3 +65,4 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
+

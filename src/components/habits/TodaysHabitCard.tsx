@@ -1,3 +1,4 @@
+
 import { Timer, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
         </span>
       </div>
       <div className="flex items-center gap-2">
-        {isTimerHabit && (
+        {isTimerHabit && habit.metrics.target && (
           <>
             <span className="text-sm text-muted-foreground">
               {habit.metrics.target}m
@@ -106,15 +107,15 @@ export const TodaysHabitCard = ({
   if (habits.length === 0) return null;
 
   const durationHabits = habits.filter(habit => 
-    habit.metrics.type === 'timer' && habit.duration
+    habit.metrics.type === 'timer' && habit.metrics.target
   );
   const nonDurationHabits = habits.filter(habit => 
     habit.metrics.type !== 'timer'
   );
 
   const handleStartHabit = (habit: HabitDetail) => {
-    if (!habit.duration) {
-      console.warn('Habit has no duration:', habit);
+    if (!habit.metrics.target) {
+      console.warn('Habit has no target duration:', habit);
       toast.error("This habit doesn't have a duration set");
       return;
     }
@@ -164,3 +165,4 @@ export const TodaysHabitCard = ({
     </Card>
   );
 };
+

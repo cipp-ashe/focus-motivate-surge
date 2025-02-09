@@ -57,7 +57,6 @@ const HabitForm: React.FC<HabitFormProps> = ({
                   ...(value === 'count' && { target: 1 }),
                   ...(value === 'rating' && { min: 1, max: 5 }),
                 },
-                duration: value === 'timer' ? 30 : undefined,
               });
             }}
           >
@@ -85,7 +84,6 @@ const HabitForm: React.FC<HabitFormProps> = ({
                       ...habit.metrics,
                       target: value,
                     },
-                    duration: value,
                   });
                 }}
                 min={5}
@@ -118,3 +116,4 @@ const HabitForm: React.FC<HabitFormProps> = ({
 };
 
 export default HabitForm;
+
