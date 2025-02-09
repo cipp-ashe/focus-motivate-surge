@@ -5,6 +5,7 @@ import { NoteCard } from './NoteCard';
 import { NotesDialog } from './NotesDialog';
 import { NotesListHeader } from './NotesListHeader';
 import { useNoteStorage } from '@/hooks/useNoteStorage';
+import { usePagination } from '@/hooks/usePagination';
 
 interface CompactNotesListProps {
   notes: Note[];
@@ -19,7 +20,6 @@ export const CompactNotesList = ({
   onEditNote,
   inExpandedView = false
 }: CompactNotesListProps) => {
-  const [currentPage, setCurrentPage] = useState(0);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const { 
     handleClearNotes, 
@@ -28,11 +28,15 @@ export const CompactNotesList = ({
     handleRemoveTag 
   } = useNoteStorage();
 
-  const totalPages = Math.ceil(notes.length / MAX_NOTES);
-  const paginatedNotes = notes.slice(
-    currentPage * MAX_NOTES,
-    (currentPage + 1) * MAX_NOTES
-  );
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    paginatedItems: paginatedNotes
+  } = usePagination({
+    items: notes,
+    itemsPerPage: MAX_NOTES
+  });
 
   if (notes.length === 0) {
     return null;
@@ -76,4 +80,3 @@ export const CompactNotesList = ({
     </div>
   );
 };
-
