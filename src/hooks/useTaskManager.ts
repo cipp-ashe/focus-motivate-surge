@@ -1,124 +1,113 @@
 
-import { useState, useCallback } from "react";
-import { Task } from "@/components/tasks/TaskList";
-import { Quote } from "@/types/timer";
-import { TaskSummary } from "@/types/summary";
-import { formatDailySummary } from "@/utils/summaryFormatter";
-import { sendTaskSummaryEmail } from "@/lib/supabase";
+import { useState, useCallback } from 'react';
+import { Task, TaskMetrics } from '@/types/tasks';
+import { toast } from 'sonner';
 
 interface UseTaskManagerProps {
-  tasks: Task[];
-  completedTasks: Task[];
-  onTaskAdd: (task: Task) => void;
-  onTaskSelect: (task: Task) => void;
-  onTasksClear: () => void;
-  onSelectedTasksClear: (taskIds: string[]) => void;
-  onSummaryEmailSent?: () => void;
-  favorites?: Quote[];
+  initialTasks?: Task[];
+  initialCompletedTasks?: Task[];
+  onTasksUpdate?: (tasks: Task[]) => void;
+  onCompletedTasksUpdate?: (tasks: Task[]) => void;
 }
 
 export const useTaskManager = ({
-  tasks,
-  completedTasks,
-  onTaskAdd,
-  onTaskSelect,
-  onTasksClear,
-  onSelectedTasksClear,
-  onSummaryEmailSent,
-  favorites = [],
+  initialTasks = [],
+  initialCompletedTasks = [],
+  onTasksUpdate,
+  onCompletedTasksUpdate,
 }: UseTaskManagerProps) => {
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
-  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [completedTasks, setCompletedTasks] = useState<Task[]>(initialCompletedTasks);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
-  const handleTaskClick = (task: Task, event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.ctrlKey || event.metaKey) {
-      event.preventDefault();
-      setSelectedTasks(prev =>
-        prev.includes(task.id)
-          ? prev.filter(id => id !== task.id)
-          : [...prev, task.id]
+  const addTask = useCallback((taskData: Omit<Task, 'id' | 'createdAt'>) => {
+    const newTask: Task = {
+      ...taskData,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    };
+
+    setTasks(prev => {
+      const updated = [...prev, newTask];
+      onTasksUpdate?.(updated);
+      return updated;
+    });
+    toast.success('Task added 📝');
+  }, [onTasksUpdate]);
+
+  const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
+    setTasks(prev => {
+      const updated = prev.map(task =>
+        task.id === taskId ? { ...task, ...updates } : task
       );
-    } else {
-      setSelectedTasks([]);
-      onTaskSelect(task);
+      onTasksUpdate?.(updated);
+      return updated;
+    });
+  }, [onTasksUpdate]);
+
+  const deleteTask = useCallback((taskId: string) => {
+    setTasks(prev => {
+      const updated = prev.filter(task => task.id !== taskId);
+      onTasksUpdate?.(updated);
+      return updated;
+    });
+    if (selectedTaskId === taskId) {
+      setSelectedTaskId(null);
     }
-  };
+    toast.success('Task removed 🗑️');
+  }, [selectedTaskId, onTasksUpdate]);
 
-  const handleTaskDelete = (taskId: string) => {
-    onSelectedTasksClear([taskId]);
-    setSelectedTasks(prev => prev.filter(id => id !== taskId));
-  };
+  const completeTask = useCallback((taskId: string, metrics?: TaskMetrics) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
 
-  const clearSelectedTasks = () => {
-    if (selectedTasks.length > 0) {
-      onSelectedTasksClear(selectedTasks);
-      setSelectedTasks([]);
+    const completedTask: Task = {
+      ...task,
+      completed: true,
+      metrics,
+    };
+
+    setCompletedTasks(prev => {
+      const updated = [...prev, completedTask];
+      onCompletedTasksUpdate?.(updated);
+      return updated;
+    });
+
+    setTasks(prev => {
+      const updated = prev.filter(t => t.id !== taskId);
+      onTasksUpdate?.(updated);
+      return updated;
+    });
+
+    if (selectedTaskId === taskId) {
+      setSelectedTaskId(null);
     }
-  };
+    toast.success('Task completed 🎯');
+  }, [tasks, selectedTaskId, onTasksUpdate, onCompletedTasksUpdate]);
 
-  const handleSendSummary = async (email: string) => {
-    try {
-      const completedTaskSummaries: TaskSummary[] = completedTasks.map(task => ({
-        taskName: task.name,
-        completed: true,
-        metrics: task.metrics ? {
-          ...task.metrics,
-          startTime: null,
-          endTime: null,
-          lastPauseTimestamp: null,
-          isPaused: false,
-          pausedTimeLeft: null
-        } : undefined,
-        relatedQuotes: favorites.filter(quote => quote.task === task.name),
-      }));
+  const clearTasks = useCallback(() => {
+    setTasks([]);
+    setSelectedTaskId(null);
+    onTasksUpdate?.([]);
+    toast.success('Tasks cleared 🗑️');
+  }, [onTasksUpdate]);
 
-      const unfinishedTaskSummaries: TaskSummary[] = tasks.map(task => ({
-        taskName: task.name,
-        completed: false,
-        metrics: task.metrics ? {
-          ...task.metrics,
-          startTime: null,
-          endTime: null,
-          lastPauseTimestamp: null,
-          isPaused: false,
-          pausedTimeLeft: null
-        } : undefined,
-        relatedQuotes: favorites.filter(quote => quote.task === task.name),
-      }));
-
-      const summaryData = formatDailySummary(
-        completedTaskSummaries,
-        unfinishedTaskSummaries,
-        favorites
-      );
-
-      await sendTaskSummaryEmail(email, summaryData);
-      
-      // Close the modal and clear completed tasks
-      setShowEmailModal(false);
-      if (onSummaryEmailSent) {
-        onSummaryEmailSent();
-      }
-    } catch (error) {
-      // Log the error but don't throw since email was likely sent
-      console.warn('Warning while sending email:', error);
-      
-      // Close the modal and clear completed tasks anyway
-      setShowEmailModal(false);
-      if (onSummaryEmailSent) {
-        onSummaryEmailSent();
-      }
-    }
-  };
+  const clearCompletedTasks = useCallback(() => {
+    setCompletedTasks([]);
+    onCompletedTasksUpdate?.([]);
+    toast.success('Completed tasks cleared 🗑️');
+  }, [onCompletedTasksUpdate]);
 
   return {
-    selectedTasks,
-    showEmailModal,
-    setShowEmailModal,
-    handleTaskClick,
-    clearSelectedTasks,
-    handleSendSummary,
-    handleTaskDelete,
+    tasks,
+    completedTasks,
+    selectedTaskId,
+    addTask,
+    updateTask,
+    deleteTask,
+    completeTask,
+    selectTask: setSelectedTaskId,
+    clearTasks,
+    clearCompletedTasks,
   };
 };
-

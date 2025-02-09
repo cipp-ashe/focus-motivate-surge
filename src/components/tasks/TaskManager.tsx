@@ -1,11 +1,11 @@
 
-import { useState, useCallback, useMemo } from "react";
-import { TaskList, Task } from "./TaskList";
+import { useMemo } from "react";
+import { TaskList } from "./TaskList";
 import { TaskLayout } from "./TaskLayout";
 import { TimerSection } from "../timer/TimerSection";
-import { Quote } from "@/types/timer";
-import { useTaskOperations } from "@/hooks/useTaskOperations";
-import { toast } from "sonner";
+import { TaskProvider } from "@/contexts/TaskContext";
+import type { Task } from "@/types/tasks";
+import type { Quote } from "@/types/timer";
 
 interface TaskManagerProps {
   initialTasks?: Task[];
@@ -14,8 +14,6 @@ interface TaskManagerProps {
   onTasksUpdate?: (tasks: Task[]) => void;
   onCompletedTasksUpdate?: (tasks: Task[]) => void;
   onFavoritesChange?: (favorites: Quote[]) => void;
-  selectedTaskId?: string | null;
-  onTaskSelect?: (taskId: string | null) => void;
 }
 
 export const TaskManager = ({
@@ -25,92 +23,34 @@ export const TaskManager = ({
   onTasksUpdate,
   onCompletedTasksUpdate,
   onFavoritesChange,
-  selectedTaskId,
-  onTaskSelect,
 }: TaskManagerProps) => {
-  const [favorites, setFavorites] = useState<Quote[]>(initialFavorites);
-  
-  const {
-    tasks,
-    setTasks,
-    completedTasks,
-    setCompletedTasks,
-    handleTaskAdd,
-    handleTaskSelect,
-    handleTaskComplete,
-    handleTasksClear,
-    handleSelectedTasksClear,
-  } = useTaskOperations({
-    initialTasks,
-    initialCompletedTasks,
-    onTasksUpdate,
-    onCompletedTasksUpdate,
-  });
-
-  // Find the selected task based on selectedTaskId
-  const selectedTask = useMemo(() => {
-    if (!selectedTaskId) return null;
-    return tasks.find(task => task.id === selectedTaskId) || null;
-  }, [tasks, selectedTaskId]);
-
-  const handleTaskSelection = useCallback((task: Task) => {
-    handleTaskSelect(task);
-    onTaskSelect?.(task.id);
-  }, [handleTaskSelect, onTaskSelect]);
-
-  const handleFavoritesChange = (newFavorites: Quote[]) => {
-    setFavorites(newFavorites);
-    onFavoritesChange?.(newFavorites);
-  };
-
-  const handleSummaryEmailSent = useCallback(() => {
-    setCompletedTasks([]);
-    onCompletedTasksUpdate?.([]);
-    toast.success("Summary sent ✨");
-  }, [onCompletedTasksUpdate, setCompletedTasks]);
-
-  const handleTaskDurationChange = useCallback((minutes: number) => {
-    if (selectedTask) {
-      setTasks(prev => prev.map(task =>
-        task.id === selectedTask.id
-          ? { ...task, duration: minutes }
-          : task
-      ));
-    }
-  }, [selectedTask, setTasks]);
-
   const taskListComponent = useMemo(() => (
     <TaskList
-      tasks={tasks}
-      completedTasks={completedTasks}
-      onTaskAdd={handleTaskAdd}
-      onTaskSelect={handleTaskSelection}
-      onTasksClear={handleTasksClear}
-      onSelectedTasksClear={handleSelectedTasksClear}
-      onSummaryEmailSent={handleSummaryEmailSent}
-      favorites={favorites}
-      onTasksUpdate={onTasksUpdate}
+      onFavoritesChange={onFavoritesChange}
+      initialFavorites={initialFavorites}
     />
-  ), [tasks, completedTasks, handleTaskAdd, handleTaskSelection, handleTasksClear, 
-      handleSelectedTasksClear, handleSummaryEmailSent, favorites, onTasksUpdate]);
+  ), [onFavoritesChange, initialFavorites]);
 
   const timerComponent = useMemo(() => (
     <TimerSection
-      selectedTask={selectedTask}
-      onTaskComplete={handleTaskComplete}
-      onDurationChange={handleTaskDurationChange}
-      favorites={favorites}
-      setFavorites={handleFavoritesChange}
+      favorites={initialFavorites}
+      setFavorites={onFavoritesChange}
     />
-  ), [selectedTask, handleTaskComplete, handleTaskDurationChange, favorites, handleFavoritesChange]);
+  ), [initialFavorites, onFavoritesChange]);
 
   return (
-    <TaskLayout
-      timer={timerComponent}
-      taskList={taskListComponent}
-    />
+    <TaskProvider
+      initialTasks={initialTasks}
+      initialCompletedTasks={initialCompletedTasks}
+      onTasksUpdate={onTasksUpdate}
+      onCompletedTasksUpdate={onCompletedTasksUpdate}
+    >
+      <TaskLayout
+        timer={timerComponent}
+        taskList={taskListComponent}
+      />
+    </TaskProvider>
   );
 };
 
 TaskManager.displayName = 'TaskManager';
-
