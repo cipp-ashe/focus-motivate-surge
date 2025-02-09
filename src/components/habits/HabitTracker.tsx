@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import TemplateManager from './TemplateManager';
 const HabitTracker: React.FC = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
 
   const {
     activeTemplates,
@@ -42,10 +44,16 @@ const HabitTracker: React.FC = () => {
       activeDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     };
     setSelectedTemplate(newTemplate);
+    setIsCreatingTemplate(true);
   };
 
   const handleConfigureTemplate = (template: ActiveTemplate) => {
     setSelectedTemplate(template);
+  };
+
+  const handleCloseTemplate = () => {
+    setSelectedTemplate(null);
+    setIsCreatingTemplate(false);
   };
 
   return (
@@ -75,7 +83,14 @@ const HabitTracker: React.FC = () => {
       </Sheet>
 
       {selectedTemplate && (
-        <Sheet open={!!selectedTemplate} onOpenChange={(open) => !open && setSelectedTemplate(null)}>
+        <Sheet 
+          open={!!selectedTemplate} 
+          onOpenChange={(open) => {
+            if (!open && !isCreatingTemplate) {
+              handleCloseTemplate();
+            }
+          }}
+        >
           <SheetContent side="right" className="w-[400px] sm:w-[540px]">
             <SheetHeader>
               <SheetTitle>
@@ -91,12 +106,12 @@ const HabitTracker: React.FC = () => {
                 } else {
                   updateTemplate(selectedTemplate.templateId, updates);
                 }
-                setSelectedTemplate(null);
+                handleCloseTemplate();
               }}
               onUpdateDays={(days) => {
                 updateTemplateDays(selectedTemplate.templateId, days);
               }}
-              onClose={() => setSelectedTemplate(null)}
+              onClose={handleCloseTemplate}
             />
           </SheetContent>
         </Sheet>
