@@ -60,7 +60,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         onTasksUpdate(newTasks);
       }
     }
-  }, [todaysHabits, tasks, onTasksUpdate]);
+  }, [todaysHabits]); // Remove tasks from dependency array to prevent infinite loop
 
   return null;
 };
