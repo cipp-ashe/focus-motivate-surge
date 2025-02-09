@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Plus } from 'lucide-react';
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
@@ -8,7 +10,6 @@ import { ActiveTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import TemplateList from './TemplateList';
 import TemplateConfiguration from './TemplateConfiguration';
-import { toast } from 'sonner';
 
 const HabitTracker: React.FC = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -43,7 +44,6 @@ const HabitTracker: React.FC = () => {
       activeDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     };
     setSelectedTemplate(newTemplate);
-    toast.success('New template created. Configure your habits now.');
   };
 
   const handleConfigureTemplate = (template: ActiveTemplate) => {
@@ -54,13 +54,21 @@ const HabitTracker: React.FC = () => {
     <div className="space-y-4 max-w-4xl mx-auto">
       <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
       
+      <Button 
+        onClick={handleCreateTemplate}
+        variant="outline"
+        className="w-full flex items-center justify-center gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Create New Template
+      </Button>
+
       <TemplateList
         activeTemplates={activeTemplates}
         onConfigure={handleConfigureTemplate}
         onRemove={removeTemplate}
         getTodayProgress={getTodayProgress}
         onHabitUpdate={updateProgress}
-        onCreateTemplate={handleCreateTemplate}
       />
 
       <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
