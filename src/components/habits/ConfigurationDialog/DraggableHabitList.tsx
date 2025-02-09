@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card } from "@/components/ui/card";
 import { GripVertical, Trash2 } from "lucide-react";
 import { HabitDetail } from '../types';
+import { MinutesInput } from "@/components/minutes/MinutesInput";
 
 interface DraggableHabitListProps {
   habits: HabitDetail[];
@@ -58,7 +59,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                   onUpdateHabit(index, {
                     metrics: {
                       type: value,
-                      ...(value === 'timer' && { unit: 'minutes', min: 5, target: 1500 }),
+                      ...(value === 'timer' && { unit: 'minutes', min: 5, target: 600 }), // Default 10 minutes
                       ...(value === 'count' && { target: 1 }),
                       ...(value === 'rating' && { min: 1, max: 5 }),
                     },
@@ -76,26 +77,40 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                 </SelectContent>
               </Select>
 
-              {habit.metrics.type !== 'boolean' && (
+              {habit.metrics.type === 'timer' && (
+                <MinutesInput
+                  minutes={Math.round((habit.metrics.target || 600) / 60)}
+                  onMinutesChange={(newMinutes) => {
+                    onUpdateHabit(index, {
+                      metrics: {
+                        ...habit.metrics,
+                        target: newMinutes * 60,
+                      },
+                    });
+                  }}
+                  minMinutes={5}
+                  maxMinutes={60}
+                />
+              )}
+
+              {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && (
                 <Input
                   className="w-24"
                   type="number"
                   placeholder="Target"
-                  value={habit.metrics.type === 'timer' ? 
-                    Math.round((habit.metrics.target || 1500) / 60) : 
-                    habit.metrics.target || ''}
+                  value={habit.metrics.target || ''}
                   onChange={(e) => {
                     const value = parseInt(e.target.value);
                     if (!isNaN(value)) {
                       onUpdateHabit(index, {
                         metrics: {
                           ...habit.metrics,
-                          target: habit.metrics.type === 'timer' ? value * 60 : value,
+                          target: value,
                         },
                       });
                     }
                   }}
-                  min={habit.metrics.type === 'timer' ? 5 : 1}
+                  min={habit.metrics.type === 'rating' ? 1 : undefined}
                   max={habit.metrics.type === 'rating' ? 5 : undefined}
                 />
               )}

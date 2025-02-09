@@ -40,15 +40,16 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     );
     const activeHabitIds = timerHabits.map(habit => `habit-${habit.id}`);
     
-    // Only remove habit-related tasks that are no longer active
+    // Only remove habit-related tasks
     const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
-    habitTasks.forEach(task => {
-      if (!activeHabitIds.includes(task.id)) {
-        actions.deleteTask(task.id);
-        const habitId = task.relationships?.habitId;
-        if (habitId) {
-          actions.removeRelationship(task.id, habitId);
-        }
+    const tasksToRemove = habitTasks.filter(task => !activeHabitIds.includes(task.id));
+    
+    // Remove only inactive habit tasks
+    tasksToRemove.forEach(task => {
+      actions.deleteTask(task.id);
+      const habitId = task.relationships?.habitId;
+      if (habitId) {
+        actions.removeRelationship(task.id, habitId);
       }
     });
 
@@ -76,68 +77,6 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
       }
     });
   }, [todaysHabits, tasks]);
-
-  const handleDismiss = (taskId: string, habitId: string) => {
-    saveDismissedHabit(habitId);
-    actions.deleteTask(taskId);
-    actions.removeRelationship(taskId, habitId);
-    toast.success("Habit dismissed for today");
-  };
-
-  const handleComplete = (taskId: string, duration: number) => {
-    actions.completeTask(taskId, {
-      expectedTime: duration,
-      actualDuration: duration,
-      pauseCount: 0,
-      favoriteQuotes: 0,
-      pausedTime: 0,
-      extensionTime: 0,
-      netEffectiveTime: duration,
-      efficiencyRatio: 100,
-      completionStatus: 'Completed On Time',
-      endTime: new Date().toISOString(),
-    });
-    toast.success("Habit marked as completed");
-  };
-
-  // Add task action buttons to the UI
-  useEffect(() => {
-    tasks
-      .filter(task => task.relationships?.habitId)
-      .forEach(task => {
-        const existingElement = document.querySelector(`[data-task-actions="${task.id}"]`);
-        if (!existingElement) {
-          const taskElement = document.querySelector(`[data-task-id="${task.id}"]`);
-          if (taskElement) {
-            const actionsDiv = document.createElement('div');
-            actionsDiv.setAttribute('data-task-actions', task.id);
-            actionsDiv.className = 'flex items-center gap-2 ml-auto';
-            
-            // Complete button
-            const completeButton = document.createElement('button');
-            completeButton.className = 'inline-flex items-center justify-center h-8 w-8 rounded-md text-green-500 hover:bg-green-100 transition-colors';
-            completeButton.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-            completeButton.onclick = (e) => {
-              e.stopPropagation();
-              handleComplete(task.id, task.duration || 1500);
-            };
-            
-            // Dismiss button
-            const dismissButton = document.createElement('button');
-            dismissButton.className = 'inline-flex items-center justify-center h-8 w-8 rounded-md text-gray-500 hover:bg-gray-100 transition-colors';
-            dismissButton.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
-            dismissButton.onclick = (e) => {
-              e.stopPropagation();
-              handleDismiss(task.id, task.relationships!.habitId!);
-            };
-            
-            actionsDiv.appendChild(completeButton);
-            actionsDiv.appendChild(dismissButton);
-            taskElement.appendChild(actionsDiv);
-          }
-        }
-      });
-  }, [tasks]);
 
   return null;
 };
