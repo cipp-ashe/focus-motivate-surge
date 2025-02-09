@@ -19,6 +19,7 @@ const HabitTracker: React.FC = () => {
     updateTemplate,
     removeTemplate,
     saveCustomTemplate,
+    deleteCustomTemplate,
     updateTemplateOrder,
     updateTemplateDays,
   } = useTemplateManagement();
@@ -88,6 +89,11 @@ const HabitTracker: React.FC = () => {
     }
   };
 
+  const handleDeleteCustomTemplate = (templateId: string) => {
+    deleteCustomTemplate(templateId);
+    toast.success('Template deleted successfully');
+  };
+
   const createActiveTemplate = (template: any): ActiveTemplate => ({
     templateId: template.id,
     habits: template.defaultHabits,
@@ -116,28 +122,31 @@ const HabitTracker: React.FC = () => {
         getWeeklyProgress={getWeeklyProgress}
       />
 
-      <ManageTemplatesDialog
-        open={dialog.type === 'manage' && dialog.open}
-        onClose={() => setDialog({ type: 'manage', open: false })}
-        availableTemplates={habitTemplates}
-        customTemplates={customTemplates}
-        activeTemplateIds={activeTemplates.map(t => t.templateId)}
-        onSelectTemplate={(template) => {
-          addTemplate(createActiveTemplate(template));
-          toast.success('Template added successfully');
-          setDialog({ type: 'manage', open: false });
-        }}
-        onCreateTemplate={(template) => {
-          const newTemplate = saveCustomTemplate(template);
-          addTemplate(createActiveTemplate(newTemplate));
-          toast.success('Custom template created successfully');
-          setDialog({ type: 'manage', open: false });
-        }}
-      />
+      {dialog.type === 'manage' && (
+        <ManageTemplatesDialog
+          open={dialog.open}
+          onClose={() => setDialog({ type: 'manage', open: false })}
+          availableTemplates={habitTemplates}
+          customTemplates={customTemplates}
+          activeTemplateIds={activeTemplates.map(t => t.templateId)}
+          onSelectTemplate={(template) => {
+            addTemplate(createActiveTemplate(template));
+            toast.success('Template added successfully');
+            setDialog({ type: 'manage', open: false });
+          }}
+          onCreateTemplate={(template) => {
+            const newTemplate = saveCustomTemplate(template);
+            addTemplate(createActiveTemplate(newTemplate));
+            toast.success('Custom template created successfully');
+            setDialog({ type: 'manage', open: false });
+          }}
+          onDeleteTemplate={handleDeleteCustomTemplate}
+        />
+      )}
 
-      {selectedTemplate && (
+      {selectedTemplate && dialog.type === 'customize' && (
         <ConfigurationDialog
-          open={dialog.type === 'customize' && dialog.open}
+          open={dialog.open}
           onClose={() => {
             setDialog({ type: 'customize', open: false });
             setSelectedTemplate(null);
