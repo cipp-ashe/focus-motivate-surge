@@ -94,6 +94,7 @@ export const useTimer = ({
     minutes,
     isRunning,
     metrics,
+    updateMetrics,
     start,
     pause,
     reset,

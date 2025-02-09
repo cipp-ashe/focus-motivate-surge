@@ -9,7 +9,7 @@ interface UseTimerActionsProps {
   updateTimeLeft: (time: number) => void;
   updateMinutes: (minutes: number) => void;
   updateIsRunning: (running: boolean) => void;
-  updateMetrics: (updates: Partial<TimerMetrics>) => void;
+  updateMetrics: ((updates: Partial<TimerMetrics>) => void) & ((updater: (prev: TimerMetrics) => Partial<TimerMetrics>) => void);
   onDurationChange?: (minutes: number) => void;
 }
 
@@ -49,7 +49,7 @@ export const useTimerActions = ({
 
   const pause = useCallback(() => {
     updateIsRunning(false);
-    updateMetrics((prev: TimerMetrics) => ({
+    updateMetrics((prev) => ({
       pauseCount: prev.pauseCount + 1,
       lastPauseTimestamp: new Date(),
       isPaused: true,
@@ -83,7 +83,7 @@ export const useTimerActions = ({
     const additionalSeconds = additionalMinutes * 60;
     updateTimeLeft(timeLeft + additionalSeconds);
     updateMinutes(minutes + additionalMinutes);
-    updateMetrics((prev: TimerMetrics) => ({
+    updateMetrics((prev) => ({
       extensionTime: prev.extensionTime + additionalSeconds,
       expectedTime: prev.expectedTime + additionalSeconds
     }));
@@ -92,7 +92,7 @@ export const useTimerActions = ({
 
   const completeTimer = useCallback(() => {
     updateIsRunning(false);
-    updateMetrics((prev: TimerMetrics) => ({
+    updateMetrics((prev) => ({
       endTime: new Date(),
       actualDuration: prev.startTime 
         ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
@@ -111,4 +111,3 @@ export const useTimerActions = ({
     completeTimer,
   };
 };
-

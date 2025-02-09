@@ -12,6 +12,7 @@ export interface UseTimerReturn {
   minutes: number;
   isRunning: boolean;
   metrics: TimerMetrics;
+  updateMetrics: ((updates: Partial<TimerMetrics>) => void) & ((updater: (prev: TimerMetrics) => Partial<TimerMetrics>) => void);
   start: () => void;
   pause: () => void;
   reset: () => void;
