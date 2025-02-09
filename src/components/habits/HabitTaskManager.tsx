@@ -1,9 +1,9 @@
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
-import type { ActiveTemplate } from "@/components/habits/types";
+import type { ActiveTemplate } from '@/components/habits/types';
 
 interface HabitTaskManagerProps {
   activeTemplates: ActiveTemplate[];
@@ -15,47 +15,51 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   const state = useAppState();
   const actions = useAppStateActions();
   const { tasks: { items: tasks } } = state;
+  
+  // Use a ref to track initialization
+  const isInitialized = useRef(false);
 
   useEffect(() => {
-    // 1. Get only timer habits for today
-    const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
-    console.log('Timer habits for today:', timerHabits);
+    // Prevent multiple initializations
+    if (isInitialized.current) {
+      return;
+    }
 
-    // 2. Get set of existing habit task IDs for efficient lookup
+    const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
+    console.log('Processing timer habits:', timerHabits.length);
+
+    // Get existing task IDs for lookup
     const existingTaskIds = new Set(
       tasks
         .filter(task => task.id.startsWith('habit-'))
         .map(task => task.id)
     );
-    console.log('Existing habit task IDs:', Array.from(existingTaskIds));
 
-    // 3. Get set of active habit IDs
+    // Create Set of active habit IDs
     const activeHabitIds = new Set(timerHabits.map(habit => `habit-${habit.id}`));
-    console.log('Active habit IDs:', Array.from(activeHabitIds));
 
-    // 4. Remove tasks for inactive habits
-    tasks
-      .filter(task => 
-        task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
-      )
-      .forEach(task => {
-        console.log('Removing inactive habit task:', task.id);
-        actions.deleteTask(task.id);
-        
-        if (task.relationships?.habitId) {
-          actions.removeRelationship(task.id, task.relationships.habitId);
-        }
-      });
+    // Remove inactive tasks
+    const tasksToRemove = tasks.filter(task => 
+      task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
+    );
 
-    // 5. Add tasks for new habits
+    tasksToRemove.forEach(task => {
+      console.log('Removing task:', task.id);
+      actions.deleteTask(task.id);
+      
+      if (task.relationships?.habitId) {
+        actions.removeRelationship(task.id, task.relationships.habitId);
+      }
+    });
+
+    // Add new tasks (only once)
     timerHabits.forEach(habit => {
       const taskId = `habit-${habit.id}`;
       
       if (!existingTaskIds.has(taskId)) {
-        console.log('Adding new habit task:', taskId);
-        const target = habit.metrics?.target || 600; // Default 10 minutes
+        console.log('Creating new task for habit:', habit.id);
+        const target = habit.metrics?.target || 600; // 10 minutes default
 
-        // Add task
         actions.addTask({
           name: habit.name,
           completed: false,
@@ -63,7 +67,6 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           relationships: { habitId: habit.id }
         });
 
-        // Add relationship
         actions.addRelationship({
           sourceId: taskId,
           sourceType: 'task',
@@ -72,11 +75,13 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           relationType: 'habit-task'
         });
 
-        // Add tag
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits, tasks]);
+
+    isInitialized.current = true;
+  }, [todaysHabits]); // Only depend on todaysHabits
 
   return null;
 };
+
