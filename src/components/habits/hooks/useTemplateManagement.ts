@@ -4,17 +4,26 @@ import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate, NewTemplate, DEFAULT_ACTIVE_DAYS } from '../types';
 
 const STORAGE_KEY = 'habit-templates';
+const CUSTOM_TEMPLATES_KEY = 'custom-templates';
 
 export const useTemplateManagement = () => {
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
   });
-  const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
+
+  const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>(() => {
+    const saved = localStorage.getItem(CUSTOM_TEMPLATES_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTemplates));
   }, [activeTemplates]);
+
+  useEffect(() => {
+    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(customTemplates));
+  }, [customTemplates]);
 
   const addTemplate = useCallback((template: ActiveTemplate) => {
     setActiveTemplates(prev => {
@@ -60,16 +69,20 @@ export const useTemplateManagement = () => {
 
     setCustomTemplates(prev => {
       const updated = [...prev, newTemplate];
-      toast.success('Custom template saved successfully');
+      localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(updated));
       return updated;
     });
 
-    addTemplate({
+    // Automatically add the new template to active templates
+    const activeTemplate: ActiveTemplate = {
       templateId: newTemplate.id,
       habits: newTemplate.defaultHabits,
       customized: false,
       activeDays: newTemplate.defaultDays,
-    });
+    };
+
+    addTemplate(activeTemplate);
+    toast.success('Custom template created and added to active templates');
 
     return newTemplate;
   }, [addTemplate]);
