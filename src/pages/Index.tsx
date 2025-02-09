@@ -20,7 +20,6 @@ const Index = () => {
   const {
     lastSyncDate,
     favorites,
-    activeTemplates,
     handleLastSyncUpdate,
     handleFavoritesUpdate
   } = useLocalStorageData();

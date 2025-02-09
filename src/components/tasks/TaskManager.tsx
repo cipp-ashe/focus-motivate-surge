@@ -15,7 +15,8 @@ export const TaskManager = ({
   initialFavorites = [],
   onFavoritesChange,
 }: TaskManagerProps) => {
-  const { selectedTaskId } = useTaskContext();
+  const { selectedTaskId, tasks } = useTaskContext();
+  const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
 
   const taskListComponent = useMemo(() => (
     <TaskList
@@ -26,17 +27,19 @@ export const TaskManager = ({
 
   const timerComponent = useMemo(() => (
     <TimerSection
-      selectedTask={selectedTaskId}
+      selectedTask={selectedTask}
       onTaskComplete={(metrics) => {
         // Handle task completion
+        console.log("Task completed with metrics:", metrics);
       }}
       onDurationChange={(minutes) => {
         // Handle duration change
+        console.log("Duration changed to:", minutes);
       }}
       favorites={initialFavorites}
       setFavorites={onFavoritesChange}
     />
-  ), [initialFavorites, onFavoritesChange, selectedTaskId]);
+  ), [initialFavorites, onFavoritesChange, selectedTask]);
 
   return (
     <TaskLayout

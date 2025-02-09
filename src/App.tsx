@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import ComponentExamples from "./pages/ComponentExamples";
 import { AppLayout } from "./components/AppLayout";
 import { NotesPanelProvider } from "./hooks/useNotesPanel";
 import { HabitsPanelProvider } from "./hooks/useHabitsPanel";
@@ -29,7 +28,6 @@ const App = () => (
             <AppLayout>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/components" element={<ComponentExamples />} />
               </Routes>
             </AppLayout>
             <Toaster position="bottom-right" closeButton />
