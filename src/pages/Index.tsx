@@ -107,35 +107,40 @@ const Index = () => {
 
   // Convert timer-type habits into tasks
   useEffect(() => {
+    // Get existing non-habit tasks
+    const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
+    
+    // Convert timer habits to tasks
     const timerHabits = todaysHabits.filter(habit => 
       habit.metrics.type === 'timer' && 
       habit.metrics.target && 
       habit.metrics.target > 0
     );
     
-    console.log('Converting timer habits to tasks:', timerHabits);
-    
-    // Get non-habit tasks
-    const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
-    
-    // Convert timer habits to tasks
-    const habitTasks: Task[] = timerHabits.map(habit => ({
-      id: `habit-${habit.id}`,
-      name: habit.name,
-      completed: false,
-      duration: 1800, // Fixed duration of 30 minutes in seconds
-      createdAt: new Date().toISOString(),
-      tags: [{ name: 'Habit', color: 'blue' }],
-    }));
+    // Only proceed if we have timer habits to convert
+    if (timerHabits.length > 0) {
+      console.log('Converting timer habits to tasks:', timerHabits);
+      
+      const habitTasks: Task[] = timerHabits.map(habit => ({
+        id: `habit-${habit.id}`,
+        name: habit.name,
+        completed: false,
+        // Convert minutes to seconds for task duration
+        duration: habit.metrics.target * 60,
+        createdAt: new Date().toISOString(),
+        tags: [{ name: 'Habit', color: 'blue' }],
+      }));
 
-    const newTasks = [...nonHabitTasks, ...habitTasks];
-    console.log('Updated tasks:', newTasks);
-    
-    if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
-      localStorage.setItem('taskList', JSON.stringify(newTasks));
-      setTasks(newTasks);
+      const newTasks = [...nonHabitTasks, ...habitTasks];
+      
+      // Only update if the tasks have actually changed
+      if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
+        console.log('Updated tasks:', newTasks);
+        localStorage.setItem('taskList', JSON.stringify(newTasks));
+        setTasks(newTasks);
+      }
     }
-  }, [todaysHabits, tasks]);
+  }, [todaysHabits]); // Only depend on todaysHabits, not tasks
 
   const handleNotesClick = () => {
     closeHabits();
@@ -189,4 +194,3 @@ const Index = () => {
 };
 
 export default Index;
-
