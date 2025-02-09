@@ -1,16 +1,15 @@
-
 import React, { useState } from 'react';
 import { EmailSummaryModal } from './EmailSummaryModal';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Note } from './notes/SavedNotes';
+import { type Note } from '@/types/notes';
 import { cn } from '@/lib/utils';
 import { Notes } from './notes/Notes';
 import { ArrowLeft } from 'lucide-react';
 import { useNotesPanel } from '@/hooks/useNotesPanel';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { TitleBar } from './TitleBar';
-import { HabitTracker } from './habits/HabitTracker';
+import HabitTracker from './habits/HabitTracker';
 
 interface AppLayoutProps {
   children: React.ReactNode;

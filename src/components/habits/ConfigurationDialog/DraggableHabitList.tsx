@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,9 +78,8 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                     },
                   });
                 }}
-                className="sm:col-span-2"
               >
-                <SelectTrigger>
+                <SelectTrigger className="sm:col-span-2">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -117,4 +115,3 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 };
 
 export default DraggableHabitList;
-

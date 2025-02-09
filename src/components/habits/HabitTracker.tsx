@@ -2,14 +2,13 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { habitTemplates } from '../../utils/habitTemplates';
-import { DialogState, DayOfWeek, ActiveTemplate, HabitTemplate, NewTemplate, HabitDetail } from './types';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
 import TemplateCard from './TemplateCard';
 import ConfigurationDialog from './ConfigurationDialog';
 import ManageTemplatesDialog from './ManageTemplatesDialog';
+import { DialogState, DayOfWeek, ActiveTemplate } from './types';
 
 const HabitTracker: React.FC = () => {
   const {
@@ -64,7 +63,7 @@ const HabitTracker: React.FC = () => {
     setDialog({ type: 'customize', open: true });
   };
 
-  const createActiveTemplate = (template: HabitTemplate): ActiveTemplate => ({
+  const createActiveTemplate = (template: any): ActiveTemplate => ({
     templateId: template.id,
     habits: template.defaultHabits,
     customized: false,
@@ -140,7 +139,7 @@ const HabitTracker: React.FC = () => {
             setDialog({ type: 'customize', open: false });
             setSelectedTemplate(null);
           }}
-          onSave={(habits: HabitDetail[]) => {
+          onSave={(habits) => {
             updateTemplate(selectedTemplate.templateId, { habits });
             setDialog({ type: 'customize', open: false });
             setSelectedTemplate(null);
@@ -165,7 +164,7 @@ const HabitTracker: React.FC = () => {
           }}
           habits={selectedTemplate.habits}
           activeDays={selectedTemplate.activeDays}
-          onUpdateDays={(days: DayOfWeek[]) => updateTemplateDays(selectedTemplate.templateId, days)}
+          onUpdateDays={(days) => updateTemplateDays(selectedTemplate.templateId, days)}
         />
       )}
     </div>
