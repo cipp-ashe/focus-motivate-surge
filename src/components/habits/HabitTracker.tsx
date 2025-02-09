@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,43 +8,12 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, Plus, TrendingUp, FlameIcon } from 'lucide-react';
-
-interface Habit {
-  id: string;
-  name: string;
-  description: string;
-  category: 'Wellness' | 'Work' | 'Personal' | 'Learning';
-  timePreference: 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
-  completed: boolean;
-  streak: number;
-  lastCompleted: Date | null;
-}
+import { Check, Plus, TrendingUp } from 'lucide-react';
+import { useHabits } from '@/hooks/useHabits';
+import type { Habit } from '@/types/habits';
 
 export const HabitTracker: React.FC = () => {
-  const [habits, setHabits] = useState<Habit[]>([
-    {
-      id: '1',
-      name: 'Morning Meditation',
-      description: 'Start the day with 10 minutes of mindfulness',
-      category: 'Wellness',
-      timePreference: 'Morning',
-      completed: false,
-      streak: 5,
-      lastCompleted: new Date(),
-    },
-    {
-      id: '2',
-      name: 'Deep Work Block',
-      description: '90 minutes of focused work',
-      category: 'Work',
-      timePreference: 'Morning',
-      completed: false,
-      streak: 3,
-      lastCompleted: null,
-    },
-  ]);
-
+  const { habits, addHabit, toggleHabit } = useHabits();
   const [openDialog, setOpenDialog] = useState(false);
   const [newHabit, setNewHabit] = useState<Partial<Habit>>({
     name: '',
@@ -59,35 +27,9 @@ export const HabitTracker: React.FC = () => {
     return (habits.filter((h) => h.completed).length / habits.length) * 100;
   };
 
-  const handleHabitToggle = (habitId: string) => {
-    setHabits((prevHabits) =>
-      prevHabits.map((habit) =>
-        habit.id === habitId
-          ? {
-              ...habit,
-              completed: !habit.completed,
-              streak: habit.completed ? habit.streak - 1 : habit.streak + 1,
-              lastCompleted: habit.completed ? null : new Date(),
-            }
-          : habit
-      )
-    );
-    toast.success("Habit status updated!");
-  };
-
   const handleAddHabit = () => {
-    if (newHabit.name && newHabit.description) {
-      const habit: Habit = {
-        id: Date.now().toString(),
-        name: newHabit.name,
-        description: newHabit.description,
-        category: newHabit.category as 'Personal',
-        timePreference: newHabit.timePreference as 'Anytime',
-        completed: false,
-        streak: 0,
-        lastCompleted: null,
-      };
-      setHabits((prev) => [...prev, habit]);
+    if (newHabit.name && newHabit.description && newHabit.category && newHabit.timePreference) {
+      addHabit(newHabit as Required<Omit<Habit, 'id' | 'completed' | 'streak' | 'lastCompleted'>>);
       setOpenDialog(false);
       setNewHabit({
         name: '',
@@ -95,7 +37,6 @@ export const HabitTracker: React.FC = () => {
         category: 'Personal',
         timePreference: 'Anytime',
       });
-      toast.success("New habit created!");
     }
   };
 
@@ -132,7 +73,7 @@ export const HabitTracker: React.FC = () => {
                 <Button
                   variant={habit.completed ? "default" : "outline"}
                   size="icon"
-                  onClick={() => handleHabitToggle(habit.id)}
+                  onClick={() => toggleHabit(habit.id)}
                 >
                   <Check className={`h-4 w-4 ${habit.completed ? "" : "text-muted-foreground"}`} />
                 </Button>
@@ -142,7 +83,6 @@ export const HabitTracker: React.FC = () => {
                   {habit.category}
                 </Badge>
                 <Badge variant="outline" className="text-xs">
-                  <FlameIcon className="mr-1 h-3 w-3" />
                   {habit.streak} day streak
                 </Badge>
                 <Badge variant="outline" className="text-xs">
@@ -182,7 +122,7 @@ export const HabitTracker: React.FC = () => {
               <div className="space-y-2">
                 <Select
                   value={newHabit.category}
-                  onValueChange={(value) => setNewHabit({ ...newHabit, category: value as any })}
+                  onValueChange={(value) => setNewHabit({ ...newHabit, category: value as Habit['category'] })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Category" />
@@ -199,7 +139,7 @@ export const HabitTracker: React.FC = () => {
               <div className="space-y-2">
                 <Select
                   value={newHabit.timePreference}
-                  onValueChange={(value) => setNewHabit({ ...newHabit, timePreference: value as any })}
+                  onValueChange={(value) => setNewHabit({ ...newHabit, timePreference: value as Habit['timePreference'] })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Preferred Time" />
