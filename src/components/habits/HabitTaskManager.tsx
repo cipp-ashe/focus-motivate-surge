@@ -13,7 +13,6 @@ interface HabitTaskManagerProps {
 
 export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
-  const previousTasksRef = useRef<string>('');
 
   // Memoize non-habit tasks
   const nonHabitTasks = useMemo(() => {
@@ -22,6 +21,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   // Memoize habit tasks creation
   const habitTasks = useMemo(() => {
+    console.log('Creating habit tasks from:', todaysHabits);
     return todaysHabits.map(habit => {
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
@@ -42,27 +42,12 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
     });
   }, [todaysHabits, tasks]);
 
-  // Memoize update function
-  const updateTasks = useCallback(() => {
-    const newTasks = [...nonHabitTasks, ...habitTasks];
-    const newTasksStr = JSON.stringify(newTasks);
-    
-    // Only update if tasks have actually changed
-    if (previousTasksRef.current !== newTasksStr) {
-      previousTasksRef.current = newTasksStr;
-      onTasksUpdate(newTasks);
-      toast.success("Habit tasks synchronized");
-    }
-  }, [nonHabitTasks, habitTasks, onTasksUpdate]);
-
+  // Synchronize tasks whenever habits or non-habit tasks change
   useEffect(() => {
     const newTasks = [...nonHabitTasks, ...habitTasks];
-    const newTasksStr = JSON.stringify(newTasks);
-    
-    if (previousTasksRef.current !== newTasksStr) {
-      updateTasks();
-    }
-  }, [nonHabitTasks, habitTasks, updateTasks]);
+    console.log('Synchronizing tasks:', { nonHabitTasks, habitTasks, newTasks });
+    onTasksUpdate(newTasks);
+  }, [nonHabitTasks, habitTasks, onTasksUpdate]);
 
   return null;
 };
