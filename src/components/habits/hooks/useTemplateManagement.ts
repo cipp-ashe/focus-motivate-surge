@@ -28,11 +28,22 @@ export const useTemplateManagement = () => {
   const addTemplate = useCallback((template: ActiveTemplate) => {
     setActiveTemplates(prev => {
       // Check if template already exists
-      if (prev.some(t => t.templateId === template.templateId)) {
+      const exists = prev.some(t => t.templateId === template.templateId);
+      if (exists) {
+        toast.error('Template already exists');
         return prev;
       }
-      const newTemplates = [...prev, template];
+      
+      const newTemplate = {
+        ...template,
+        habits: template.habits || [],
+        activeDays: template.activeDays || DEFAULT_ACTIVE_DAYS,
+      };
+      
+      const newTemplates = [...prev, newTemplate];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newTemplates));
+      console.log('Added template:', newTemplate);
+      console.log('Current active templates:', newTemplates);
       toast.success('Template added successfully');
       return newTemplates;
     });
@@ -87,8 +98,18 @@ export const useTemplateManagement = () => {
       return updated;
     });
 
+    // Automatically add the custom template to active templates
+    const activeTemplate: ActiveTemplate = {
+      templateId: newTemplate.id,
+      habits: newTemplate.defaultHabits || [],
+      activeDays: newTemplate.defaultDays || DEFAULT_ACTIVE_DAYS,
+      customized: false,
+    };
+    
+    addTemplate(activeTemplate);
+    console.log('Created and added custom template:', activeTemplate);
     return newTemplate;
-  }, []);
+  }, [addTemplate]);
 
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     setActiveTemplates(templates);
