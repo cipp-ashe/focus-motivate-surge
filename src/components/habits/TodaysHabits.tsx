@@ -22,14 +22,11 @@ export const TodaysHabits = ({
   onAddHabitToTasks,
 }: TodaysHabitsProps) => {
   const getHabitAsTask = (habit: HabitDetail): Task => {
-    // Set duration to either the habit duration or undefined (not 0)
-    const duration = habit.duration || undefined;
-    
     return {
       id: habit.id,
       name: habit.name,
       completed: completedHabits.includes(habit.id),
-      duration: duration,
+      duration: habit.duration || undefined,
       metrics: undefined
     };
   };
@@ -78,4 +75,3 @@ export const TodaysHabits = ({
     </Card>
   );
 };
-

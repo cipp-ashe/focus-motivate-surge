@@ -9,17 +9,18 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     const today = new Date();
     const dayOfWeek = today.toLocaleString('en-US', { weekday: 'long' }) as DayOfWeek;
     
-    // Filter habits from active templates for today
+    // Create a new array with only the habits from currently active templates
     const activeHabits = activeTemplates.reduce<HabitDetail[]>((acc, template) => {
+      // Only include habits if the template is active for today
       if (template.activeDays.includes(dayOfWeek)) {
-        // Only include habits from active templates
+        // Ensure we're working with the latest habits from the template
         return [...acc, ...template.habits];
       }
       return acc;
     }, []);
     
     setTodaysHabits(activeHabits);
-  }, [activeTemplates]); // Re-run when templates change
+  }, [activeTemplates]); // This ensures we update whenever templates change
 
   return {
     todaysHabits,
