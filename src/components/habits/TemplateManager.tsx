@@ -43,6 +43,11 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
     }
   }, [height]);
 
+  // Filter out active templates from available ones
+  const inactiveTemplates = availableTemplates.filter(
+    template => !activeTemplateIds.includes(template.id)
+  );
+
   if (templateToEdit) {
     return (
       <div className="flex flex-col h-full overflow-hidden">
@@ -142,7 +147,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
           <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
           Create New Template
         </Button>
-        {availableTemplates.map((template) => (
+        {inactiveTemplates.map((template) => (
           <Card 
             key={template.id} 
             className="group hover:shadow-lg transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card to-card/50 border-primary/10"
@@ -159,8 +164,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => onSelectTemplate?.(template.id)}
-                    disabled={activeTemplateIds.includes(template.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Template
@@ -176,3 +180,4 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 };
 
 export default TemplateManager;
+
