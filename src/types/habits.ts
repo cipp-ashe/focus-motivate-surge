@@ -13,3 +13,4 @@ export interface Habit {
 }
 
 export const STORAGE_KEY = 'habits';
+
