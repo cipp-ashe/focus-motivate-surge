@@ -5,11 +5,9 @@ import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { Header } from "@/components/layout/Header";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
-import { TodaysHabits } from "@/components/habits/TodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
-import type { ActiveTemplate, HabitDetail } from "@/components/habits/types";
-import { toast } from "sonner";
+import type { ActiveTemplate } from "@/components/habits/types";
 
 const Index = () => {
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
@@ -46,7 +44,6 @@ const Index = () => {
   });
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
 
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
@@ -79,6 +76,26 @@ const Index = () => {
     };
   }, []);
 
+  // Convert today's habits into tasks
+  useEffect(() => {
+    const habitsWithDuration = todaysHabits.filter(habit => habit.duration && habit.duration > 0);
+    
+    setTasks(currentTasks => {
+      // Filter out any existing habit-tasks to avoid duplicates
+      const nonHabitTasks = currentTasks.filter(task => !task.id.startsWith('habit-'));
+      
+      // Convert habits to tasks
+      const habitTasks: Task[] = habitsWithDuration.map(habit => ({
+        id: `habit-${habit.id}`,
+        name: habit.name,
+        completed: false,
+        duration: habit.duration,
+      }));
+
+      return [...nonHabitTasks, ...habitTasks];
+    });
+  }, [todaysHabits]);
+
   const handleNotesClick = () => {
     closeHabits();
     toggleNotes();
@@ -103,49 +120,12 @@ const Index = () => {
     setFavorites(newFavorites);
   };
 
-  const handleHabitClick = (habit: HabitDetail) => {
-    setCompletedHabits(prev => {
-      const newCompleted = prev.includes(habit.id) 
-        ? prev.filter(id => id !== habit.id)
-        : [...prev, habit.id];
-      return newCompleted;
-    });
-  };
-
-  const handleAddHabitToTasks = (habit: HabitDetail) => {
-    const newTask: Task = {
-      id: `habit-task-${habit.id}-${Date.now()}`,
-      name: habit.name,
-      duration: habit.duration,
-      completed: false,
-    };
-    
-    const taskExists = tasks.some(task => 
-      task.name === habit.name && !task.completed
-    );
-
-    if (taskExists) {
-      toast.error("This habit is already in your task list");
-      return;
-    }
-
-    handleTasksUpdate([...tasks, newTask]);
-    toast.success("Habit added to tasks");
-  };
-
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 py-7">
         <Header 
           onNotesClick={handleNotesClick}
           onHabitsClick={handleHabitsClick}
-        />
-
-        <TodaysHabits
-          habits={todaysHabits}
-          completedHabits={completedHabits}
-          onHabitClick={handleHabitClick}
-          onAddHabitToTasks={handleAddHabitToTasks}
         />
 
         <TaskManager
@@ -164,4 +144,3 @@ const Index = () => {
 };
 
 export default Index;
-
