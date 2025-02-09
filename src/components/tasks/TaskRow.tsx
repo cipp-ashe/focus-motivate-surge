@@ -25,11 +25,9 @@ export const TaskRow = ({
   onDurationClick,
   onInputBlur,
 }: TaskRowProps) => {
-  // Convert seconds to minutes for display, ensuring numeric conversion
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   const [inputValue, setInputValue] = useState(durationInMinutes.toString());
 
-  // Update input value when task duration changes
   useEffect(() => {
     if (task.duration) {
       setInputValue(Math.round(Number(task.duration) / 60).toString());
@@ -49,7 +47,6 @@ export const TaskRow = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow any numeric input, we'll clamp it on blur
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
     }
@@ -66,9 +63,14 @@ export const TaskRow = ({
     }
     
     setInputValue(finalValue);
-    // Convert minutes to seconds when saving
     onDurationChange(task.id, (parseInt(finalValue) * 60).toString());
     onInputBlur();
+  };
+
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onTaskDelete(task.id);
   };
 
   return (
@@ -123,14 +125,8 @@ export const TaskRow = ({
         </div>
         
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onTaskDelete(task.id);
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            onTaskDelete(task.id);
-          }}
+          onClick={handleDelete}
+          onTouchStart={handleDelete}
           className="text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation"
         >
           <X className="h-4 w-4" />
