@@ -22,3 +22,4 @@ export const useNotesStorage = () => {
 
   return { saveNotes };
 };
+

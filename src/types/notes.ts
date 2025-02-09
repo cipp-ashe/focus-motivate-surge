@@ -14,6 +14,12 @@ export interface Note {
   tags: Tag[];
 }
 
+export interface NotesProps {
+  hideNotes?: boolean;
+  onOpenEmailModal?: () => void;
+}
+
 export const isValidTagColor = (color: string): color is TagColor => {
   return ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'].includes(color);
 };
+
