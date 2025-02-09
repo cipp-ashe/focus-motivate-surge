@@ -76,31 +76,35 @@ const Index = () => {
     };
   }, []);
 
-  // Convert today's habits into tasks and update when habits change
+  // Convert only timer-type habits into tasks
   useEffect(() => {
-    const habitsWithDuration = todaysHabits.filter(habit => habit.duration && habit.duration > 0);
-    console.log('Converting habits to tasks:', habitsWithDuration);
+    const timerHabits = todaysHabits.filter(habit => 
+      habit.metrics.type === 'timer' && 
+      habit.metrics.target && 
+      habit.metrics.target > 0
+    );
+    
+    console.log('Converting timer habits to tasks:', timerHabits);
     
     // Get non-habit tasks
     const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
     
-    // Convert habits to tasks
-    const habitTasks: Task[] = habitsWithDuration.map(habit => ({
+    // Convert timer habits to tasks
+    const habitTasks: Task[] = timerHabits.map(habit => ({
       id: `habit-${habit.id}`,
       name: habit.name,
       completed: false,
-      duration: habit.duration,
+      duration: habit.metrics.target || 30, // Default to 30 minutes if no target specified
     }));
 
     const newTasks = [...nonHabitTasks, ...habitTasks];
     console.log('Updated tasks:', newTasks);
     
-    // Only update if there are actual changes to avoid infinite loop
     if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
       localStorage.setItem('taskList', JSON.stringify(newTasks));
       setTasks(newTasks);
     }
-  }, [todaysHabits, tasks]); // Include tasks in dependencies to ensure proper comparison
+  }, [todaysHabits, tasks]);
 
   const handleNotesClick = () => {
     closeHabits();
@@ -113,7 +117,6 @@ const Index = () => {
   };
 
   const handleTasksUpdate = (newTasks: Task[]) => {
-    // Only update if the tasks have actually changed
     if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
       localStorage.setItem('taskList', JSON.stringify(newTasks));
       setTasks(newTasks);
@@ -153,4 +156,3 @@ const Index = () => {
 };
 
 export default Index;
-

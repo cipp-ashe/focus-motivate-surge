@@ -45,7 +45,7 @@ export interface HabitDetail {
 }
 
 export interface HabitMetrics {
-  type: 'boolean' | 'duration' | 'count' | 'rating';
+  type: 'boolean' | 'timer' | 'note' | 'count' | 'rating';
   unit?: string;
   min?: number;
   max?: number;
