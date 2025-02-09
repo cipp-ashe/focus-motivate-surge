@@ -76,11 +76,10 @@ const Index = () => {
           lastSyncDate={lastSyncDate}
           onLastSyncUpdate={handleLastSyncUpdate}
           tasks={tasks}
-          onTasksUpdate={(tasks) => tasks.forEach(task => {
-            if (task.id) {
-              task.updates && task.updates;
-            }
-          })}
+          onTasksUpdate={() => {
+            // Handle task updates if needed
+            console.log('Tasks updated in DailySyncManager');
+          }}
         />
 
         <div className="flex-1 overflow-hidden">
