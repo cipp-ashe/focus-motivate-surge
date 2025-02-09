@@ -4,7 +4,7 @@ import { Sparkles, Clock, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { useState, useEffect } from "react";
 import { NoteTags } from "../notes/components/NoteTags";
-import { Tag } from "@/hooks/useNotes";
+import { Tag } from "@/types/notes";
 import { toast } from "sonner";
 
 interface TaskRowProps {
@@ -77,6 +77,10 @@ export const TaskRow = ({
   };
 
   const handleAddTag = (tagName: string) => {
+    const newTag: Tag = {
+      name: tagName,
+      color: 'default'
+    };
     // For now, we'll just show a toast since we don't have the handler yet
     toast.info("Tag functionality coming soon!");
   };

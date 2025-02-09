@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -22,6 +23,7 @@ import { useState } from "react";
 import { TaskMetricsRow } from "./tasks/TaskMetricsRow";
 import { TaskJsonDialog } from "./tasks/TaskJsonDialog";
 import { downloadContent } from "@/utils/downloadUtils";
+import { Tag } from "@/types/notes";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -78,7 +80,7 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     ...task,
     tags: [
       ...(task.tags || []),
-      { name: 'Completed', color: 'green' }
+      { name: 'Completed', color: 'green' as const }
     ]
   }));
 
@@ -154,3 +156,4 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     </div>
   );
 };
+

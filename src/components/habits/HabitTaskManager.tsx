@@ -4,6 +4,7 @@ import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { ActiveTemplate } from "@/components/habits/types";
 import { toast } from "sonner";
+import { Tag } from "@/types/notes";
 
 interface HabitTaskManagerProps {
   tasks: Task[];
@@ -37,7 +38,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         duration: habit.metrics.type === 'timer' ? habit.metrics.target : undefined,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         tags: [
-          { name: 'Habit', color: 'blue' }
+          { name: 'Habit', color: 'blue' as const }
         ],
       };
 
@@ -65,3 +66,4 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
+
