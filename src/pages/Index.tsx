@@ -118,13 +118,14 @@ const Index = () => {
     // Get non-habit tasks
     const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
     
-    // Convert timer habits to tasks with date tracking
+    // Convert timer habits to tasks with date tracking and habit tag
     const habitTasks: Task[] = timerHabits.map(habit => ({
       id: `habit-${habit.id}`,
       name: habit.name,
       completed: false,
       duration: habit.metrics.target || 30,
       createdAt: new Date().toISOString(),
+      tags: [{ name: 'Habit', color: 'blue' }],
     }));
 
     const newTasks = [...nonHabitTasks, ...habitTasks];
@@ -188,4 +189,3 @@ const Index = () => {
 };
 
 export default Index;
-

@@ -1,9 +1,11 @@
+
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "../CompletedTasks";
 import { EmailSummaryModal } from "../EmailSummaryModal";
 import { Quote } from "@/types/timer";
 import { useTaskManager } from "@/hooks/useTaskManager";
+import { Tag } from "@/types/notes";
 
 export interface Task {
   id: string;
@@ -11,6 +13,7 @@ export interface Task {
   completed: boolean;
   duration?: number;
   createdAt?: string;
+  tags?: Tag[];
   metrics?: {
     expectedTime: number;
     actualDuration: number;
@@ -21,6 +24,7 @@ export interface Task {
     netEffectiveTime: number;
     efficiencyRatio: number;
     completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
+    endTime?: string;
   };
 }
 

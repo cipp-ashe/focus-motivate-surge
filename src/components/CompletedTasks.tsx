@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -16,6 +17,8 @@ import { Task } from "./tasks/TaskList";
 import { Button } from "./ui/button";
 import { Send, Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer } from "lucide-react";
 import { Badge } from "./ui/badge";
+import { NoteTags } from "./notes/components/NoteTags";
+import { Tag } from "@/types/notes";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -120,6 +123,7 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                         netEffectiveTime: 0,
                         efficiencyRatio: 100,
                         completionStatus: 'Completed On Time',
+                        endTime: undefined,
                       };
                       
                       const StatusIcon = getCompletionIcon(metrics.completionStatus);
@@ -131,12 +135,22 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
                             <div className="line-through text-muted-foreground">
                               {task.name}
                             </div>
+                            {task.tags && task.tags.length > 0 && (
+                              <div className="mt-1">
+                                <NoteTags
+                                  tags={task.tags}
+                                  onAddTag={() => {}}
+                                  onRemoveTag={() => {}}
+                                  onTagClick={() => {}}
+                                />
+                              </div>
+                            )}
                             <div className="text-xs text-muted-foreground mt-1">
                               {formatDate(task.createdAt)}
                             </div>
                           </TableCell>
                           <TableCell className="py-2 text-sm text-muted-foreground">
-                            {task.metrics?.endTime ? formatDate(task.metrics.endTime) : '-'}
+                            {metrics.endTime ? formatDate(metrics.endTime) : '-'}
                           </TableCell>
                           <TableCell className="py-2">
                             <div className="flex flex-col space-y-1">
