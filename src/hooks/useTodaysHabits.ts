@@ -18,7 +18,11 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       console.log(`Template ${template.templateId} habits:`, template.habits);
       
       if (template.activeDays.includes(dayOfWeek)) {
-        return template.habits;
+        // Ensure each habit has its duration property set from the metrics
+        return template.habits.map(habit => ({
+          ...habit,
+          duration: habit.metrics.type === 'duration' ? habit.metrics.target : undefined
+        }));
       }
       return [];
     });
@@ -29,4 +33,3 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
 
   return { todaysHabits };
 };
-

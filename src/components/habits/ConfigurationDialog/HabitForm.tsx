@@ -57,7 +57,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
                   ...(value === 'count' && { target: 1 }),
                   ...(value === 'rating' && { min: 1, max: 5 }),
                 },
-                ...(value === 'duration' && { duration: 30 }), // Set default duration when type is duration
+                duration: value === 'duration' ? 30 : undefined, // Set duration directly when type is duration
               });
             }}
           >
@@ -85,7 +85,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
                       ...habit.metrics,
                       target: value,
                     },
-                    duration: value,
+                    duration: value, // Update both metrics target and duration
                   });
                 }}
                 min={5}
