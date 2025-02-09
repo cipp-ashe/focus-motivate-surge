@@ -21,13 +21,18 @@ export const TodaysHabits = ({
   onHabitClick,
   onAddHabitToTasks,
 }: TodaysHabitsProps) => {
-  const getHabitAsTask = (habit: HabitDetail): Task => ({
-    id: habit.id,
-    name: habit.name,
-    completed: completedHabits.includes(habit.id),
-    duration: habit.duration || 0,
-    metrics: undefined
-  });
+  const getHabitAsTask = (habit: HabitDetail): Task => {
+    // Set duration to either the habit duration or undefined (not 0)
+    const duration = habit.duration || undefined;
+    
+    return {
+      id: habit.id,
+      name: habit.name,
+      completed: completedHabits.includes(habit.id),
+      duration: duration,
+      metrics: undefined
+    };
+  };
 
   if (habits.length === 0) return null;
 
