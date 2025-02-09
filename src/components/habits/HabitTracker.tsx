@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Box,
@@ -11,8 +12,8 @@ import { DialogState, DayOfWeek, ActiveTemplate, HabitTemplate, NewTemplate, Hab
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
 import TemplateCard from './TemplateCard';
-import ConfigurationDialog from './dialogs/ConfigurationDialog/index';
-import ManageTemplatesDialog from './dialogs/ManageTemplatesDialog';
+import ConfigurationDialog from './ConfigurationDialog';
+import ManageTemplatesDialog from './ManageTemplatesDialog';
 
 const HabitTracker: React.FC = () => {
   const {
@@ -185,3 +186,4 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
+
