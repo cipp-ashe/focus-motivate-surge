@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Label } from "@/components/ui/label";
 import { DAYS_OF_WEEK, DayOfWeek } from '../types';
 
 interface DaySelectorProps {
@@ -14,26 +13,28 @@ const DaySelector: React.FC<DaySelectorProps> = ({
   onUpdateDays,
 }) => {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="days">Active Days</Label>
-      <ToggleGroup 
-        type="multiple"
-        value={activeDays}
-        onValueChange={onUpdateDays}
-        className="justify-start"
-      >
-        {DAYS_OF_WEEK.map((day) => (
-          <ToggleGroupItem
-            key={day}
-            value={day}
-            aria-label={`Toggle ${day}`}
-            className="w-9 h-9"
-          >
-            {day.charAt(0)}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-    </div>
+    <ToggleGroup 
+      type="multiple"
+      value={activeDays}
+      onValueChange={(values) => {
+        // Ensure we have at least one day selected
+        if (values.length > 0) {
+          onUpdateDays(values as DayOfWeek[]);
+        }
+      }}
+      className="flex flex-wrap gap-2"
+    >
+      {DAYS_OF_WEEK.map((day) => (
+        <ToggleGroupItem
+          key={day}
+          value={day}
+          aria-label={`Toggle ${day}`}
+          className="flex-1 min-w-[40px] data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+        >
+          {day.charAt(0)}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   );
 };
 
