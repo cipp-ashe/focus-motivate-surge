@@ -56,6 +56,18 @@ export const useTemplateManagement = () => {
     });
   }, []);
 
+  const deleteCustomTemplate = useCallback((templateId: string) => {
+    setCustomTemplates(prev => {
+      const filtered = prev.filter(template => template.id !== templateId);
+      localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(filtered));
+      // Also remove from active templates if it exists there
+      setActiveTemplates(prevActive => 
+        prevActive.filter(template => template.templateId !== templateId)
+      );
+      return filtered;
+    });
+  }, []);
+
   const saveCustomTemplate = useCallback((template: NewTemplate): HabitTemplate => {
     const newTemplate: HabitTemplate = {
       id: `template-${Date.now()}`,
@@ -73,7 +85,6 @@ export const useTemplateManagement = () => {
       return updated;
     });
 
-    // Automatically add the new template to active templates
     const activeTemplate: ActiveTemplate = {
       templateId: newTemplate.id,
       habits: newTemplate.defaultHabits,
@@ -82,7 +93,7 @@ export const useTemplateManagement = () => {
     };
 
     addTemplate(activeTemplate);
-    toast.success('Custom template created and added to active templates');
+    toast.success('Custom template created and added');
 
     return newTemplate;
   }, [addTemplate]);
@@ -112,6 +123,7 @@ export const useTemplateManagement = () => {
     updateTemplate,
     removeTemplate,
     saveCustomTemplate,
+    deleteCustomTemplate,
     updateTemplateOrder,
     updateTemplateDays,
   };

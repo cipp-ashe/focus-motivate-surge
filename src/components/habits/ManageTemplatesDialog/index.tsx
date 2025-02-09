@@ -22,6 +22,7 @@ interface ManageTemplatesDialogProps {
   activeTemplateIds: string[];
   onSelectTemplate: (template: HabitTemplate) => void;
   onCreateTemplate: (template: NewTemplate) => void;
+  onDeleteTemplate?: (templateId: string) => void;
 }
 
 const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
@@ -32,6 +33,7 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
   activeTemplateIds,
   onSelectTemplate,
   onCreateTemplate,
+  onDeleteTemplate,
 }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -46,7 +48,7 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Create New Template</DialogTitle>
         </DialogHeader>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <CreateTemplateForm
             onSubmit={handleCreateTemplate}
             onCancel={() => setShowCreateForm(false)}
@@ -61,8 +63,8 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
       <DialogHeader>
         <DialogTitle>Manage Templates</DialogTitle>
       </DialogHeader>
-      <DialogContent>
-        <div className="flex justify-end mb-6">
+      <DialogContent className="max-w-2xl">
+        <div className="flex justify-end mb-4">
           <Button onClick={() => setShowCreateForm(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Create Template
@@ -90,6 +92,7 @@ const ManageTemplatesDialog: React.FC<ManageTemplatesDialogProps> = ({
               templates={customTemplates}
               activeTemplateIds={activeTemplateIds}
               onSelect={onSelectTemplate}
+              onDelete={onDeleteTemplate}
             />
           </TabsContent>
         </Tabs>

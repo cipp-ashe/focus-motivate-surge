@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Package, Code, Timer, Palette, BookOpen, Hearts } from 'lucide-react';
+import { Package, Code, Timer, Palette, BookOpen, Heart } from 'lucide-react';
 
 const navigation = [
   {
@@ -17,7 +16,7 @@ const navigation = [
     href: '/',
   },
   {
-    icon: Hearts,
+    icon: Heart,
     label: 'Habits',
     href: '/habits',
   },
