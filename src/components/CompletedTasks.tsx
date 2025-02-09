@@ -14,74 +14,20 @@ import {
   TableRow,
 } from "./ui/table";
 import { Task } from "./tasks/TaskList";
-import { Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer, Download, Trash2, FileJson } from "lucide-react";
-import { Badge } from "./ui/badge";
-import { NoteTags } from "./notes/components/NoteTags";
+import { Download, FileJson, Trash2 } from "lucide-react";
 import { ActionButton } from "./ui/action-button";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { NotesDialog } from "./notes/components/NotesDialog";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
+import { TaskMetricsRow } from "./tasks/TaskMetricsRow";
+import { TaskJsonDialog } from "./tasks/TaskJsonDialog";
+import { downloadContent } from "@/utils/downloadUtils";
 
 interface CompletedTasksProps {
   tasks: Task[];
   onTasksClear?: () => void;
 }
-
-const formatDuration = (seconds: number): string => {
-  if (seconds === 0) return '0s';
-  
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${remainingSeconds}s`;
-  }
-  if (minutes > 0) {
-    return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
-  }
-  return `${remainingSeconds}s`;
-};
-
-const formatDate = (dateString?: string): string => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
-const getCompletionStatusColor = (status: string) => {
-  switch (status) {
-    case 'Completed Early':
-      return 'text-green-500';
-    case 'Completed On Time':
-      return 'text-blue-500';
-    case 'Completed Late':
-      return 'text-yellow-500';
-    default:
-      return 'text-muted-foreground';
-  }
-};
-
-const getCompletionIcon = (status: string) => {
-  switch (status) {
-    case 'Completed Early':
-      return CheckCircle2;
-    case 'Completed On Time':
-      return Timer;
-    case 'Completed Late':
-      return AlertTriangle;
-    default:
-      return Timer;
-  }
-};
 
 const downloadMarkdown = (tasks: Task[]) => {
   const timestamp = format(new Date(), 'yyyy-MM-dd-HH-mm-ss');
@@ -98,18 +44,10 @@ const downloadMarkdown = (tasks: Task[]) => {
       completionStatus: 'Completed On Time',
     };
 
-    return `# ${task.name}\n\nCompleted: ${formatDate(metrics.endTime)}\nExpected Time: ${formatDuration(metrics.expectedTime)}\nActual Time: ${formatDuration(metrics.actualDuration)}\nEfficiency: ${metrics.efficiencyRatio.toFixed(1)}%\nStatus: ${metrics.completionStatus}\n\n---\n\n`;
+    return `# ${task.name}\n\nCompleted: ${format(new Date(metrics.endTime || ''), 'MMM d, yyyy HH:mm')}\nExpected Time: ${metrics.expectedTime}s\nActual Time: ${metrics.actualDuration}s\nEfficiency: ${metrics.efficiencyRatio.toFixed(1)}%\nStatus: ${metrics.completionStatus}\n\n---\n\n`;
   }).join('\n');
 
-  const blob = new Blob([content], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `completed-tasks-${timestamp}.md`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  downloadContent(content, `completed-tasks-${timestamp}.md`, 'text/markdown');
   toast.success('Tasks downloaded as Markdown');
 };
 
@@ -125,12 +63,6 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     toast.success("Completed tasks cleared 🗑️");
   };
 
-  const handleCopyJson = () => {
-    const jsonContent = JSON.stringify(tasks, null, 2);
-    navigator.clipboard.writeText(jsonContent);
-    toast.success('JSON copied to clipboard');
-  };
-
   return (
     <div className="mt-4">
       <div className="flex flex-col space-y-2">
@@ -144,19 +76,19 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                 <ActionButton
                   icon={Download}
                   onClick={() => downloadMarkdown(tasks)}
-                  tooltip="Download as Markdown"
+                  title="Download as Markdown"
                   className="h-6 w-6 p-0"
                 />
                 <ActionButton
                   icon={FileJson}
                   onClick={() => setShowJsonDialog(true)}
-                  tooltip="View JSON Data"
+                  title="View JSON Data"
                   className="h-6 w-6 p-0"
                 />
                 <ActionButton
                   icon={Trash2}
                   onClick={() => setShowClearDialog(true)}
-                  tooltip="Clear completed tasks"
+                  title="Clear completed tasks"
                   className="h-6 w-6 p-0"
                 />
               </div>
@@ -174,90 +106,9 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tasks.map((task) => {
-                      const metrics = task.metrics || {
-                        expectedTime: 0,
-                        actualDuration: 0,
-                        pauseCount: 0,
-                        favoriteQuotes: 0,
-                        pausedTime: 0,
-                        extensionTime: 0,
-                        netEffectiveTime: 0,
-                        efficiencyRatio: 100,
-                        completionStatus: 'Completed On Time',
-                        endTime: undefined,
-                      };
-                      
-                      const StatusIcon = getCompletionIcon(metrics.completionStatus);
-                      const statusColor = getCompletionStatusColor(metrics.completionStatus);
-                      
-                      return (
-                        <TableRow key={task.id} className="bg-muted/50">
-                          <TableCell className="py-2">
-                            <div className="line-through text-muted-foreground">
-                              {task.name}
-                            </div>
-                            {task.tags && task.tags.length > 0 && (
-                              <div className="mt-1">
-                                <NoteTags
-                                  tags={task.tags}
-                                  onAddTag={() => {}}
-                                  onRemoveTag={() => {}}
-                                  onTagClick={() => {}}
-                                />
-                              </div>
-                            )}
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {formatDate(task.createdAt)}
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-2 text-sm text-muted-foreground">
-                            {metrics.endTime ? formatDate(metrics.endTime) : '-'}
-                          </TableCell>
-                          <TableCell className="py-2">
-                            <div className="flex flex-col space-y-1">
-                              <div className="flex items-center space-x-2 text-muted-foreground">
-                                <Clock className="w-4 h-4" />
-                                <span>Expected: {formatDuration(metrics.expectedTime)}</span>
-                              </div>
-                              <div className="flex items-center space-x-2 text-muted-foreground">
-                                <Clock className="w-4 h-4" />
-                                <span>Actual: {formatDuration(metrics.actualDuration)}</span>
-                              </div>
-                              <div className="flex items-center space-x-2 text-muted-foreground">
-                                <Timer className="w-4 h-4" />
-                                <span>Net: {formatDuration(metrics.netEffectiveTime)}</span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-2">
-                            <div className="flex items-center space-x-2">
-                              <StatusIcon className={`w-4 h-4 ${statusColor}`} />
-                              <span className={statusColor}>{metrics.completionStatus}</span>
-                            </div>
-                            <Badge variant="outline" className="mt-1">
-                              {metrics.efficiencyRatio.toFixed(1)}% efficiency
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="py-2">
-                            <div className="flex flex-col space-y-1 text-muted-foreground">
-                              <div className="flex items-center space-x-1">
-                                <Pause className="w-4 h-4" />
-                                <span>Paused: {formatDuration(metrics.pausedTime)}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <Timer className="w-4 h-4" />
-                                <span>Added: {formatDuration(metrics.extensionTime)}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <Quote className="w-4 h-4" />
-                                <span>Quotes: {metrics.favoriteQuotes}</span>
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                    {tasks.map((task) => (
+                      <TaskMetricsRow key={task.id} task={task} />
+                    ))}
                   </TableBody>
                 </Table>
               </div>
@@ -276,27 +127,11 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
         variant="destructive"
       />
 
-      <Dialog open={showJsonDialog} onOpenChange={setShowJsonDialog}>
-        <DialogContent className="max-w-3xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Task Metrics JSON Data</DialogTitle>
-          </DialogHeader>
-          <div className="relative">
-            <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-[60vh]">
-              <code>{JSON.stringify(tasks, null, 2)}</code>
-            </pre>
-            <Button
-              onClick={handleCopyJson}
-              className="absolute top-2 right-2"
-              variant="secondary"
-              size="sm"
-            >
-              Copy JSON
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TaskJsonDialog 
+        tasks={tasks}
+        open={showJsonDialog}
+        onOpenChange={setShowJsonDialog}
+      />
     </div>
   );
 };
-
