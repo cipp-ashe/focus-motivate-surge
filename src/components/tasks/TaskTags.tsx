@@ -4,6 +4,7 @@ import { Tag } from "@/types/core";
 import { Task } from "./TaskList";
 import { useState, useEffect } from "react";
 import { useTagSystem } from "@/hooks/useTagSystem";
+import { toast } from "sonner";
 
 interface TaskTagsProps {
   task: Task;
