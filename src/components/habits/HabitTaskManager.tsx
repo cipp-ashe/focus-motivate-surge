@@ -34,8 +34,8 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     timerHabits.forEach(habit => {
       const taskId = `habit-${habit.id}`;
       if (!tasks.some(t => t.id === taskId)) {
+        // Remove id from the task object as it's handled by addTask
         actions.addTask({
-          id: taskId,
           name: habit.name,
           completed: false,
           duration: habit.metrics?.target ? Math.round(habit.metrics.target / 60) * 60 : undefined,
