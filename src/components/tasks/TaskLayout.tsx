@@ -13,51 +13,50 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizeTimeoutRef = useRef<number>();
-  const rafIdRef = useRef<number>();
+  const resizingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
+    let timeoutId: NodeJS.Timeout;
     
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      // Clear any existing timeout and RAF
-      if (resizeTimeoutRef.current) {
-        window.clearTimeout(resizeTimeoutRef.current);
-      }
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
+    const handleResize = () => {
+      if (resizingRef.current || !containerRef.current) return;
+      
+      resizingRef.current = true;
+      
+      // Get the computed style once
+      const computedStyle = window.getComputedStyle(containerRef.current);
+      const currentHeight = parseFloat(computedStyle.height);
+      
+      // Only update if height needs adjusting and element exists
+      if (currentHeight > 0 && containerRef.current) {
+        containerRef.current.style.minHeight = '0';
       }
       
-      // Debounce and batch resize operations
-      resizeTimeoutRef.current = window.setTimeout(() => {
-        rafIdRef.current = requestAnimationFrame(() => {
-          if (!containerRef.current) return;
-          
-          // Get the computed style
-          const computedStyle = window.getComputedStyle(containerRef.current);
-          const currentHeight = parseFloat(computedStyle.height);
-          
-          // Only update if height needs adjusting
-          if (currentHeight > 0) {
-            containerRef.current.style.minHeight = '0';
-          }
-        });
-      }, 150); // Increased debounce time for better performance
+      // Reset resizing flag after a short delay
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        resizingRef.current = false;
+      }, 100);
     };
     
-    const observer = new ResizeObserver(handleResize);
+    const observer = new ResizeObserver((entries) => {
+      // Use requestIdleCallback if available, otherwise use setTimeout
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(() => handleResize(), { timeout: 100 });
+      } else {
+        setTimeout(handleResize, 16); // Roughly one frame at 60fps
+      }
+    });
+    
     observer.observe(element);
 
     return () => {
       observer.disconnect();
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-      if (resizeTimeoutRef.current) {
-        window.clearTimeout(resizeTimeoutRef.current);
-      }
+      clearTimeout(timeoutId);
+      resizingRef.current = false;
     };
   }, []);
 
