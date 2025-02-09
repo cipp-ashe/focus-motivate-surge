@@ -23,6 +23,7 @@ export const TaskDuration = ({
   onKeyDown,
   preventPropagation,
 }: TaskDurationProps) => {
+  // Ensure durationInMinutes is displayed as is, without any conversion
   return (
     <div 
       className="flex items-center gap-2 min-w-[100px] justify-end"
@@ -57,3 +58,4 @@ export const TaskDuration = ({
     </div>
   );
 };
+

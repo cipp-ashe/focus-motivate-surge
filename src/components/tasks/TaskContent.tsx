@@ -27,7 +27,8 @@ export const TaskContent = ({
   onKeyDown,
   preventPropagation,
 }: TaskContentProps) => {
-  const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
+  // Ensure we're actually getting minutes, not seconds
+  const durationInMinutes = task.duration ? Math.round(task.duration / 60) : 25;
 
   return (
     <>
@@ -56,3 +57,4 @@ export const TaskContent = ({
     </>
   );
 };
+

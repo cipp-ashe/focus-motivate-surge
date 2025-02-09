@@ -18,7 +18,15 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
   useEffect(() => {
     const updateTags = () => {
       const currentTags = getEntityTags(task.id, 'task');
-      setTags(currentTags);
+      // Deduplicate tags by name
+      const uniqueTags = currentTags.reduce((acc: Tag[], current) => {
+        const exists = acc.find(tag => tag.name === current.name);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+      setTags(uniqueTags);
     };
 
     updateTags();
@@ -27,7 +35,11 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
   }, [task.id, getEntityTags]);
 
   const handleAddTag = (tagName: string) => {
-    addTagToEntity(tagName, task.id, 'task');
+    // Check if tag already exists before adding
+    const existingTag = tags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
+    if (!existingTag) {
+      addTagToEntity(tagName, task.id, 'task');
+    }
   };
 
   const handleRemoveTag = (tagName: string) => {
@@ -65,3 +77,4 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     </div>
   );
 };
+
