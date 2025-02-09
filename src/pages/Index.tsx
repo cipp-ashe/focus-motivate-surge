@@ -60,17 +60,20 @@ const Index = () => {
   // Listen for template updates
   useEffect(() => {
     const handleTemplateUpdate = () => {
-      const saved = localStorage.getItem('habit-templates');
-      if (saved) {
-        setActiveTemplates(JSON.parse(saved));
+      try {
+        const saved = localStorage.getItem('habit-templates');
+        if (saved) {
+          const templates = JSON.parse(saved);
+          setActiveTemplates(templates);
+        }
+      } catch (error) {
+        console.error('Error updating templates:', error);
       }
     };
 
-    window.addEventListener('storage', handleTemplateUpdate);
     window.addEventListener('templatesUpdated', handleTemplateUpdate);
 
     return () => {
-      window.removeEventListener('storage', handleTemplateUpdate);
       window.removeEventListener('templatesUpdated', handleTemplateUpdate);
     };
   }, []);
@@ -89,9 +92,8 @@ const Index = () => {
   };
 
   const handleTasksUpdate = (newTasks: Task[]) => {
-    setTasks(newTasks);
     localStorage.setItem('taskList', JSON.stringify(newTasks));
-    window.dispatchEvent(new CustomEvent('tasksUpdated', { detail: { tasks: newTasks } }));
+    setTasks(newTasks);
   };
 
   const handleCompletedTasksUpdate = (tasks: Task[]) => {
