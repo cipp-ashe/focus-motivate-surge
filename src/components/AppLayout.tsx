@@ -16,13 +16,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const { isOpen: isNotesOpen, close: handleCloseNotes } = useNotesPanel();
   const { isOpen: isHabitsOpen, close: handleCloseHabits } = useHabitsPanel();
 
-  const handleCloseHabitsAndRefresh = () => {
-    handleCloseHabits();
-    setTimeout(() => {
-      window.location.reload();
-    }, 300);
-  };
-
   return (
     <div className="min-h-screen relative flex flex-col overflow-hidden">
       {window.electron && <TitleBar />}
@@ -34,7 +27,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           )}
           onClick={() => {
             handleCloseNotes();
-            handleCloseHabitsAndRefresh();
+            handleCloseHabits();
           }}
         />
 
@@ -86,7 +79,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             <div className="flex-none px-4 py-7">
               <div className="flex items-center gap-4 mb-4 sm:mb-7">
                 <button 
-                  onClick={handleCloseHabitsAndRefresh}
+                  onClick={handleCloseHabits}
                   className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="h-5 w-5" />
@@ -108,3 +101,4 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     </div>
   );
 };
+
