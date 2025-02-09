@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EmailSummaryModal } from './EmailSummaryModal';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -49,24 +49,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   const handleCloseHabitsAndRefresh = () => {
     handleCloseHabits();
-    
-    // Use requestAnimationFrame to ensure DOM updates are complete
-    requestAnimationFrame(() => {
-      // Add a small delay to let animations complete
-      setTimeout(() => {
-        // Cleanup any existing observers before reload
-        if (window.ResizeObserver) {
-          const observers = Array.from(document.querySelectorAll('*')).map(el => {
-            const observer = el.getResizeObserver?.();
-            if (observer) {
-              observer.disconnect();
-            }
-            return observer;
-          });
-        }
-        window.location.reload();
-      }, 300); // Increased delay to ensure animations complete
-    });
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   };
 
   return (
@@ -161,3 +146,4 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     </div>
   );
 };
+

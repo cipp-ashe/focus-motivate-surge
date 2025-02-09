@@ -1,14 +1,9 @@
+
 import { useState, useEffect } from 'react';
 
 export const useTheme = (initialDark = true) => {
   const [isDark, setIsDark] = useState(initialDark);
 
-  // Initial theme setup
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
-  // Theme toggle effect
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -22,3 +17,4 @@ export const useTheme = (initialDark = true) => {
     toggleTheme: () => setIsDark(prev => !prev)
   };
 };
+
