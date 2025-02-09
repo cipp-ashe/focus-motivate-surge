@@ -3,13 +3,10 @@ import { useState, useEffect } from "react";
 import { TaskManager } from "@/components/tasks/TaskManager";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
-import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { Header } from "@/components/layout/Header";
-import { TodaysHabitCard } from "@/components/habits/TodaysHabitCard";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
-import type { HabitDetail, ActiveTemplate } from "@/components/habits/types";
-import { toast } from "sonner";
+import type { ActiveTemplate } from "@/components/habits/types";
 
 const Index = () => {
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
@@ -76,9 +73,6 @@ const Index = () => {
     };
   }, []);
 
-  const { todaysHabits } = useTodaysHabits(activeTemplates);
-  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
-
   const handleNotesClick = () => {
     closeHabits();
     toggleNotes();
@@ -103,35 +97,6 @@ const Index = () => {
     setFavorites(newFavorites);
   };
 
-  const handleAddHabitToTasks = (habit: HabitDetail) => {
-    if (!habit.duration) {
-      console.warn('Habit has no duration:', habit);
-      toast.error("This habit doesn't have a duration set");
-      return;
-    }
-
-    const newTask: Task = {
-      id: `habit-task-${habit.id}`,
-      name: habit.name,
-      completed: false,
-      duration: habit.duration,
-      metrics: undefined
-    };
-
-    handleTasksUpdate([newTask, ...tasks]);
-    setSelectedTaskId(newTask.id);
-    toast.success(`Started "${habit.name}"`);
-  };
-
-  const handleHabitComplete = (habit: HabitDetail) => {
-    setCompletedHabits(prev => {
-      if (prev.includes(habit.id)) {
-        return prev.filter(id => id !== habit.id);
-      }
-      return [...prev, habit.id];
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 py-7">
@@ -149,13 +114,6 @@ const Index = () => {
           onFavoritesChange={handleFavoritesUpdate}
           selectedTaskId={selectedTaskId}
           onTaskSelect={setSelectedTaskId}
-        />
-
-        <TodaysHabitCard
-          habits={todaysHabits}
-          completedHabits={completedHabits}
-          onHabitComplete={handleHabitComplete}
-          onAddHabitToTasks={handleAddHabitToTasks}
         />
       </div>
     </div>
