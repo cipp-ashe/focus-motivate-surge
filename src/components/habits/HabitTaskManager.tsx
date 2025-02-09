@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
@@ -21,8 +20,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
     
     // Convert timer habits to tasks with proper duration handling
     const timerHabits = todaysHabits.filter(habit => 
-      habit.metrics.type === 'timer' || 
-      (habit.metrics.type === 'duration' && habit.metrics.target)
+      habit.metrics.type === 'timer' && habit.metrics.target
     );
     
     if (timerHabits.length > 0) {
@@ -80,4 +78,3 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
-
