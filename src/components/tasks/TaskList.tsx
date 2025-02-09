@@ -1,4 +1,3 @@
-
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
 import { CompletedTasks } from "../CompletedTasks";
@@ -47,17 +46,13 @@ export const TaskList = ({
   onTaskSelect,
   onTasksClear,
   onSelectedTasksClear,
-  onSummaryEmailSent,
-  favorites = [],
   onTasksUpdate,
+  favorites = [],
 }: TaskListProps) => {
   const {
     selectedTasks,
-    showEmailModal,
-    setShowEmailModal,
     handleTaskClick,
     clearSelectedTasks,
-    handleSendSummary,
     handleTaskDelete,
   } = useTaskManager({
     tasks,
@@ -66,7 +61,6 @@ export const TaskList = ({
     onTaskSelect,
     onTasksClear,
     onSelectedTasksClear: onSelectedTasksClear!,
-    onSummaryEmailSent,
     favorites,
   });
 
@@ -85,15 +79,7 @@ export const TaskList = ({
 
       <CompletedTasks 
         tasks={completedTasks} 
-        onSendSummary={() => setShowEmailModal(true)} 
-      />
-
-      <EmailSummaryModal
-        isOpen={showEmailModal}
-        onClose={() => setShowEmailModal(false)}
-        onSubmit={handleSendSummary}
-        favorites={favorites}
-        type="tasks"
+        onTasksClear={onTasksClear}
       />
     </div>
   );

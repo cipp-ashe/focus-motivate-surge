@@ -14,15 +14,18 @@ import {
   TableRow,
 } from "./ui/table";
 import { Task } from "./tasks/TaskList";
-import { Button } from "./ui/button";
-import { Send, Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer } from "lucide-react";
+import { Clock, Pause, Quote, CheckCircle2, AlertTriangle, Timer, Download, Trash2 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { NoteTags } from "./notes/components/NoteTags";
-import { Tag } from "@/types/notes";
+import { ActionButton } from "./ui/action-button";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { NotesDialog } from "./notes/components/NotesDialog";
+import { useState } from "react";
 
 interface CompletedTasksProps {
   tasks: Task[];
-  onSendSummary: () => void;
+  onTasksClear?: () => void;
 }
 
 const formatDuration = (seconds: number): string => {
@@ -78,8 +81,46 @@ const getCompletionIcon = (status: string) => {
   }
 };
 
-export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) => {
+const downloadTasks = (tasks: Task[]) => {
+  const timestamp = format(new Date(), 'yyyy-MM-dd-HH-mm-ss');
+  const content = tasks.map(task => {
+    const metrics = task.metrics || {
+      expectedTime: 0,
+      actualDuration: 0,
+      pauseCount: 0,
+      favoriteQuotes: 0,
+      pausedTime: 0,
+      extensionTime: 0,
+      netEffectiveTime: 0,
+      efficiencyRatio: 100,
+      completionStatus: 'Completed On Time',
+    };
+
+    return `# ${task.name}\n\nCompleted: ${formatDate(metrics.endTime)}\nExpected Time: ${formatDuration(metrics.expectedTime)}\nActual Time: ${formatDuration(metrics.actualDuration)}\nEfficiency: ${metrics.efficiencyRatio.toFixed(1)}%\nStatus: ${metrics.completionStatus}\n\n---\n\n`;
+  }).join('\n');
+
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `completed-tasks-${timestamp}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast.success('Tasks downloaded successfully');
+};
+
+export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => {
+  const [showClearDialog, setShowClearDialog] = useState(false);
+
   if (tasks.length === 0) return null;
+
+  const handleClearTasks = () => {
+    onTasksClear?.();
+    setShowClearDialog(false);
+    toast.success("Completed tasks cleared 🗑️");
+  };
 
   return (
     <div className="mt-4">
@@ -90,14 +131,18 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
               <AccordionTrigger className="text-sm font-medium hover:no-underline py-2">
                 Completed Tasks ({tasks.length})
               </AccordionTrigger>
-              <Button
-                variant="outline"
-                onClick={onSendSummary}
-                className="text-primary hover:text-primary"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                Send Summary
-              </Button>
+              <div className="flex items-center gap-2">
+                <ActionButton
+                  icon={Download}
+                  onClick={() => downloadTasks(tasks)}
+                  className="h-6 w-6 p-0"
+                />
+                <ActionButton
+                  icon={Trash2}
+                  onClick={() => setShowClearDialog(true)}
+                  className="h-6 w-6 p-0"
+                />
+              </div>
             </div>
             <AccordionContent>
               <div className="max-h-[60vh] overflow-y-auto">
@@ -203,6 +248,16 @@ export const CompletedTasks = ({ tasks, onSendSummary }: CompletedTasksProps) =>
           </AccordionItem>
         </Accordion>
       </div>
+
+      <NotesDialog
+        open={showClearDialog}
+        onOpenChange={setShowClearDialog}
+        title="Clear completed tasks?"
+        description="This action cannot be undone. All completed tasks will be permanently deleted."
+        actionText="Clear All"
+        onAction={handleClearTasks}
+        variant="destructive"
+      />
     </div>
   );
 };
