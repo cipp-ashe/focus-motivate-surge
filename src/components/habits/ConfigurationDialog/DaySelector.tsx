@@ -38,4 +38,3 @@ const DaySelector: React.FC<DaySelectorProps> = ({
 };
 
 export default DaySelector;
-

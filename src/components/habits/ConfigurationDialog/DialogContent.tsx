@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { DialogContent as ShadcnDialogContent } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { HabitDetail, DayOfWeek } from '../../types';
+import { HabitDetail, DayOfWeek } from '../types';
 import DaySelector from './DaySelector';
 import DraggableHabitList from './DraggableHabitList';
 
@@ -65,4 +65,3 @@ const DialogContent: React.FC<DialogContentProps> = ({
 };
 
 export default DialogContent;
-

@@ -119,4 +119,3 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
 };
 
 export default ConfigurationDialog;
-

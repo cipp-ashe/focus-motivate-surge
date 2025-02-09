@@ -35,4 +35,3 @@ const DialogFooter: React.FC<DialogFooterProps> = ({
 };
 
 export default DialogFooter;
-
