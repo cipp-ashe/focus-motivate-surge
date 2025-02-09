@@ -13,33 +13,39 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>();
+  const resizeTimeoutRef = useRef<number>();
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
+    let frameId: number;
     
-    const observer = new ResizeObserver(() => {
-      // Cancel any pending rAF
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
+    const observer = new ResizeObserver((entries) => {
+      // Clear any existing timeout
+      if (resizeTimeoutRef.current) {
+        window.clearTimeout(resizeTimeoutRef.current);
       }
       
-      // Schedule new update
-      rafRef.current = requestAnimationFrame(() => {
-        if (containerRef.current) {
-          containerRef.current.style.minHeight = '0';
-        }
-      });
+      // Debounce the resize handler
+      resizeTimeoutRef.current = window.setTimeout(() => {
+        frameId = requestAnimationFrame(() => {
+          if (containerRef.current) {
+            containerRef.current.style.minHeight = '0';
+          }
+        });
+      }, 100); // 100ms debounce
     });
 
     observer.observe(element);
 
     return () => {
       observer.disconnect();
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+      if (resizeTimeoutRef.current) {
+        window.clearTimeout(resizeTimeoutRef.current);
       }
     };
   }, []);
@@ -64,4 +70,3 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     </div>
   );
 };
-
