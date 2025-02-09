@@ -76,12 +76,13 @@ const Index = () => {
     };
   }, []);
 
-  // Convert today's habits into tasks
+  // Convert today's habits into tasks and update when habits change
   useEffect(() => {
     const habitsWithDuration = todaysHabits.filter(habit => habit.duration && habit.duration > 0);
+    console.log('Converting habits to tasks:', habitsWithDuration);
     
     setTasks(currentTasks => {
-      // Filter out any existing habit-tasks to avoid duplicates
+      // Get non-habit tasks
       const nonHabitTasks = currentTasks.filter(task => !task.id.startsWith('habit-'));
       
       // Convert habits to tasks
@@ -92,9 +93,12 @@ const Index = () => {
         duration: habit.duration,
       }));
 
-      return [...nonHabitTasks, ...habitTasks];
+      const newTasks = [...nonHabitTasks, ...habitTasks];
+      console.log('Updated tasks:', newTasks);
+      localStorage.setItem('taskList', JSON.stringify(newTasks));
+      return newTasks;
     });
-  }, [todaysHabits]);
+  }, [todaysHabits]); // React to changes in todaysHabits
 
   const handleNotesClick = () => {
     closeHabits();
@@ -144,3 +148,4 @@ const Index = () => {
 };
 
 export default Index;
+
