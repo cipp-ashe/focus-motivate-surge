@@ -37,10 +37,15 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         duration: habit.metrics.type === 'timer' ? habit.metrics.target : undefined,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         tags: [
-          { name: 'Habit', color: 'blue' },
-          { name: habit.category, color: 'green' }
+          { name: 'Habit', color: 'blue' }
         ],
       };
+
+      // If task exists, preserve any custom tags that aren't the Habit tag
+      if (existingTask?.tags) {
+        const customTags = existingTask.tags.filter(tag => tag.name !== 'Habit');
+        newTask.tags = [...newTask.tags, ...customTags];
+      }
 
       console.log(`Created/Updated task for habit ${habit.name}:`, newTask);
       return newTask;

@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -75,6 +74,14 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     toast.success("Completed tasks cleared 🗑️");
   };
 
+  const processedTasks = tasks.map(task => ({
+    ...task,
+    tags: [
+      ...(task.tags || []),
+      { name: 'Completed', color: 'green' }
+    ]
+  }));
+
   return (
     <div className="mt-4">
       <div className="flex flex-col space-y-2">
@@ -87,7 +94,7 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
               <div className="flex items-center gap-2">
                 <ActionButton
                   icon={Download}
-                  onClick={() => downloadMarkdown(tasks)}
+                  onClick={() => downloadMarkdown(processedTasks)}
                   title="Download as Markdown"
                   className="h-6 w-6 p-0"
                 />
@@ -118,7 +125,7 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tasks.map((task) => (
+                    {processedTasks.map((task) => (
                       <TaskMetricsRow key={task.id} task={task} />
                     ))}
                   </TableBody>
@@ -140,11 +147,10 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
       />
 
       <TaskJsonDialog 
-        tasks={tasks}
+        tasks={processedTasks}
         open={showJsonDialog}
         onOpenChange={setShowJsonDialog}
       />
     </div>
   );
 };
-
