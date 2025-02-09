@@ -1,9 +1,18 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { TemplateProgress } from '../types';
 
+const STORAGE_KEY = 'habit-progress';
+
 export const useHabitProgress = () => {
-  const [progress, setProgress] = useState<TemplateProgress>({});
+  const [progress, setProgress] = useState<TemplateProgress>(() => {
+    const savedProgress = localStorage.getItem(STORAGE_KEY);
+    return savedProgress ? JSON.parse(savedProgress) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  }, [progress]);
 
   const getTodayProgress = useCallback((habitId: string, templateId: string) => {
     const today = new Date().toISOString().split('T')[0];
@@ -75,4 +84,3 @@ export const useHabitProgress = () => {
     getWeeklyProgress,
   };
 };
-
