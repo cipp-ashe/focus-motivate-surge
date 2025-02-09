@@ -1,3 +1,4 @@
+
 import { Task } from "./TaskList";
 import { Sparkles, Clock, X } from "lucide-react";
 import { Input } from "../ui/input";
@@ -24,12 +25,14 @@ export const TaskRow = ({
   onDurationClick,
   onInputBlur,
 }: TaskRowProps) => {
-  const [inputValue, setInputValue] = useState(task.duration?.toString() || "25");
+  // Convert seconds to minutes for display
+  const durationInMinutes = Math.round((task.duration || 1500) / 60);
+  const [inputValue, setInputValue] = useState(durationInMinutes.toString());
 
   // Update input value when task duration changes
   useEffect(() => {
     if (task.duration) {
-      setInputValue(task.duration.toString());
+      setInputValue(Math.round(task.duration / 60).toString());
     }
   }, [task.duration]);
 
@@ -63,7 +66,8 @@ export const TaskRow = ({
     }
     
     setInputValue(finalValue);
-    onDurationChange(task.id, finalValue);
+    // Convert minutes back to seconds when saving
+    onDurationChange(task.id, (parseInt(finalValue) * 60).toString());
     onInputBlur();
   };
 
@@ -112,7 +116,7 @@ export const TaskRow = ({
               onClick={(e) => onDurationClick(e, task.id)}
               onTouchStart={(e) => onDurationClick(e, task.id)}
             >
-              {task.duration || 25}
+              {durationInMinutes}
             </span>
           )}
           <span className="text-muted-foreground">m</span>
