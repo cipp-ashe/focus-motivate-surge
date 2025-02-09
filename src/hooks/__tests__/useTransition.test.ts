@@ -1,16 +1,13 @@
+
 import { describe, test, expect, jest, beforeEach } from '@jest/globals';
 import { createHookTester } from '../../testUtils/hookTester';
 import { useTransition } from '../useTransition';
+import { setupMediaQueryMocks } from '../../testUtils/mockMediaQueries';
 
 describe('useTransition', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    // Mock matchMedia for reduced motion
-    window.matchMedia = jest.fn().mockImplementation(query => ({
-      matches: query === '(prefers-reduced-motion: reduce)',
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    }));
+    setupMediaQueryMocks();
   });
 
   afterEach(() => {
@@ -93,8 +90,13 @@ describe('useTransition', () => {
   test('respects reduced motion preferences', () => {
     window.matchMedia = jest.fn().mockImplementation(() => ({
       matches: true,
+      media: '',
+      onchange: null,
       addListener: jest.fn(),
       removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
     }));
 
     const { result } = createHookTester(useTransition)({
