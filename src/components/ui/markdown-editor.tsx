@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MDEditor from '@uiw/react-md-editor';
 import { cn } from '@/lib/utils';
@@ -45,14 +46,15 @@ export const MarkdownEditor = ({
     >
       <MDEditor
         value={value}
-        onChange={onChange}
+        onChange={(val) => onChange(val || '')}
         preview={preview}
         height={height}
         hideToolbar={false}
         visibleDragbar={false}
         textareaProps={{
           placeholder: 'Write your note here...',
-          onBlur: onBlur
+          onBlur: onBlur,
+          autoFocus: true
         }}
       />
     </div>
