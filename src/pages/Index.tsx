@@ -12,6 +12,7 @@ import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 const Index = () => {
   const { isDark, toggleTheme } = useTheme(true);
@@ -52,7 +53,7 @@ const Index = () => {
   // Load active templates from localStorage
   const [activeTemplates] = useState(() => {
     try {
-      const saved = localStorage.getItem('activeTemplates');
+      const saved = localStorage.getItem('habit-templates');
       return saved ? JSON.parse(saved) : [];
     } catch (error) {
       console.error('Error loading active templates:', error);
@@ -133,15 +134,18 @@ const Index = () => {
         </div>
 
         {todaysHabits.length > 0 && (
-          <Card className="mb-6 p-4">
-            <h2 className="text-lg font-semibold mb-3">Today's Habits</h2>
-            <ScrollArea className="h-[200px]">
+          <Card className="mb-6 p-4 border-primary/20 bg-gradient-to-br from-card to-card/50">
+            <h2 className="text-lg font-semibold mb-3 text-primary">Today's Habits</h2>
+            <ScrollArea className="h-[200px] pr-4">
               <div className="space-y-2">
                 {todaysHabits.map((habit) => (
-                  <div key={habit.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
-                    <div>
-                      <h3 className="font-medium">{habit.name}</h3>
-                      <p className="text-sm text-muted-foreground">{habit.description}</p>
+                  <div 
+                    key={habit.id} 
+                    className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-primary/5 transition-colors border border-primary/10"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground truncate">{habit.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{habit.description}</p>
                     </div>
                     {habit.duration && (
                       <Button
@@ -150,8 +154,9 @@ const Index = () => {
                         onClick={() => {
                           const task = convertHabitToTask(habit);
                           handleTasksUpdate([task, ...initialTasks]);
+                          toast.success(`Added "${habit.name}" to tasks`);
                         }}
-                        className="hover:bg-primary hover:text-primary-foreground"
+                        className="ml-4 whitespace-nowrap hover:bg-primary hover:text-primary-foreground"
                       >
                         Add as Task
                       </Button>
