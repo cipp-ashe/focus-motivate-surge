@@ -1,9 +1,9 @@
 
 import { NoteTags } from "../notes/components/NoteTags";
-import { Tag } from "@/types/notes";
-import { toast } from "sonner";
+import { Tag } from "@/types/core";
 import { Task } from "./TaskList";
 import { useState, useEffect } from "react";
+import { useTagSystem } from "@/hooks/useTagSystem";
 
 interface TaskTagsProps {
   task: Task;
@@ -11,44 +11,30 @@ interface TaskTagsProps {
 }
 
 export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
-  const [tags, setTags] = useState<Tag[]>(task.tags || []);
+  const { getEntityTags, addTagToEntity, removeTagFromEntity, updateTagColor } = useTagSystem();
+  const [tags, setTags] = useState<Tag[]>([]);
 
   useEffect(() => {
-    setTags(task.tags || []);
-  }, [task.tags]);
+    const updateTags = () => {
+      const currentTags = getEntityTags(task.id, 'task');
+      setTags(currentTags);
+    };
+
+    updateTags();
+    window.addEventListener('tagsUpdated', updateTags);
+    return () => window.removeEventListener('tagsUpdated', updateTags);
+  }, [task.id, getEntityTags]);
 
   const handleAddTag = (tagName: string) => {
-    if (!task.tags) {
-      task.tags = [];
-    }
-    
-    if (task.tags.some(t => t.name === tagName)) {
-      toast.error("Tag already exists");
-      return;
-    }
-
-    task.tags.push({
-      name: tagName,
-      color: 'default'
-    });
-    
-    setTags([...task.tags]);
-    window.dispatchEvent(new Event('tagsUpdated'));
-    toast.success("Tag added");
+    addTagToEntity(tagName, task.id, 'task');
   };
 
   const handleRemoveTag = (tagName: string) => {
-    if (!task.tags) return;
-    
     if (tagName === 'Habit') {
       toast.error("Cannot remove Habit tag");
       return;
     }
-
-    task.tags = task.tags.filter(t => t.name !== tagName);
-    setTags([...task.tags]);
-    window.dispatchEvent(new Event('tagsUpdated'));
-    toast.success("Tag removed");
+    removeTagFromEntity(tagName, task.id, 'task');
   };
 
   const handleTagClick = (tag: Tag) => {
@@ -58,14 +44,7 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     const currentIndex = colors.indexOf(tag.color);
     const nextColor = colors[(currentIndex + 1) % colors.length];
     
-    if (!task.tags) return;
-    
-    const tagIndex = task.tags.findIndex(t => t.name === tag.name);
-    if (tagIndex !== -1) {
-      task.tags[tagIndex].color = nextColor;
-      setTags([...task.tags]);
-      window.dispatchEvent(new Event('tagsUpdated'));
-    }
+    updateTagColor(tag.name, nextColor);
   };
 
   if (!tags || tags.length === 0) return null;
