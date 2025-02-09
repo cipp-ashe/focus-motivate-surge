@@ -1,12 +1,10 @@
+
 import React, { useState } from 'react';
-import { Download, Trash2 } from 'lucide-react';
-import type { Note, Tag } from '@/hooks/useNotes';
-import { NoteCard } from './components/NoteCard';
-import { NotesDialog } from './components/NotesDialog';
-import { NotesPagination } from './components/NotesPagination';
-import { ActionButton } from '@/components/ui/action-button';
-import { downloadAllNotes } from '@/utils/downloadUtils';
 import { toast } from 'sonner';
+import type { Note } from '@/hooks/useNotes';
+import { NoteCard } from './NoteCard';
+import { NotesDialog } from './NotesDialog';
+import { NotesListHeader } from './NotesListHeader';
 
 interface CompactNotesListProps {
   notes: Note[];
@@ -21,7 +19,7 @@ export const CompactNotesList = ({
   onEditNote,
   inExpandedView = false
 }: CompactNotesListProps) => {
-  const [currentPage, setCurrentPage] = React.useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const [showClearDialog, setShowClearDialog] = useState(false);
 
   const totalPages = Math.ceil(notes.length / MAX_NOTES);
@@ -53,7 +51,7 @@ export const CompactNotesList = ({
       const currentNotes: Note[] = JSON.parse(savedNotes);
       const updatedNotes = currentNotes.map(note => {
         if (note.id === noteId) {
-          const newTag: Tag = { name: tagName.trim(), color: 'default' };
+          const newTag = { name: tagName.trim(), color: 'default' as const };
           return { 
             ...note, 
             tags: [...note.tags.filter(t => t.name !== newTag.name), newTag]
@@ -87,29 +85,14 @@ export const CompactNotesList = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-medium text-muted-foreground">Recent Notes</h3>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <ActionButton
-              icon={Download}
-              onClick={() => downloadAllNotes(notes)}
-              className="h-6 w-6 p-0"
-            />
-            <ActionButton
-              icon={Trash2}
-              onClick={() => setShowClearDialog(true)}
-              className="h-6 w-6 p-0"
-            />
-          </div>
-          <NotesPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            compact
-          />
-        </div>
-      </div>
+      <NotesListHeader
+        notes={notes}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        onClearClick={() => setShowClearDialog(true)}
+        compact
+      />
 
       <div className="grid gap-1.5">
         {paginatedNotes.map(note => (
@@ -125,7 +108,6 @@ export const CompactNotesList = ({
         ))}
       </div>
 
-      {/* Clear Notes Dialog */}
       <NotesDialog
         open={showClearDialog}
         onOpenChange={setShowClearDialog}
