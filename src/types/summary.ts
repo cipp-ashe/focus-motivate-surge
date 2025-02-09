@@ -1,3 +1,4 @@
+
 import { TimerMetrics } from "./metrics";
 import { Quote } from "./timer";
 import { Note } from "@/components/notes/Notes";
@@ -15,6 +16,7 @@ export interface TaskSummary {
   taskName: string;
   metrics?: TimerMetrics;
   formattedMetrics?: FormattedMetrics | null;
+  relatedQuotes?: Quote[];
 }
 
 export interface NotesSummary {
