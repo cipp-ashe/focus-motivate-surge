@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { startOfDay, isToday } from "date-fns";
-import type { Task } from "@/components/tasks/TaskList";
+import type { Task } from "@/types/tasks";
 import { toast } from "sonner";
 
 interface DailySyncManagerProps {
@@ -38,3 +38,4 @@ export const DailySyncManager = ({
 
   return null;
 };
+
