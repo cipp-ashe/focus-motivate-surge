@@ -4,12 +4,11 @@ import { TaskManager } from "@/components/tasks/TaskManager";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { Header } from "@/components/layout/Header";
-import { useTodaysHabits } from "@/hooks/useTodaysHabits";
-import { startOfDay, isToday } from "date-fns";
+import { HabitTaskManager } from "@/components/habits/HabitTaskManager";
+import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 import type { ActiveTemplate } from "@/components/habits/types";
-import { toast } from "sonner";
 
 const Index = () => {
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
@@ -62,30 +61,6 @@ const Index = () => {
     }
   });
 
-  const { todaysHabits } = useTodaysHabits(activeTemplates);
-
-  // Check if we need to reset tasks for a new day
-  useEffect(() => {
-    const today = startOfDay(new Date());
-    const lastSync = startOfDay(new Date(lastSyncDate));
-
-    if (!isToday(lastSync)) {
-      // Clear non-habit tasks and reset habit tasks for the new day
-      const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
-      const resetHabitTasks = habitTasks.map(task => ({
-        ...task,
-        completed: false
-      }));
-
-      setTasks(resetHabitTasks);
-      localStorage.setItem('taskList', JSON.stringify(resetHabitTasks));
-      localStorage.setItem('lastSyncDate', today.toISOString());
-      setLastSyncDate(today);
-      
-      toast.info("Tasks have been reset for the new day");
-    }
-  }, [lastSyncDate, tasks]);
-
   useEffect(() => {
     const handleTemplateUpdate = () => {
       try {
@@ -104,55 +79,6 @@ const Index = () => {
       window.removeEventListener('templatesUpdated', handleTemplateUpdate);
     };
   }, []);
-
-  // Convert timer-type habits into tasks
-  useEffect(() => {
-    // Get existing non-habit tasks
-    const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
-    
-    // Convert timer habits to tasks with proper duration handling
-    const timerHabits = todaysHabits.filter(habit => 
-      habit.metrics.type === 'timer' && 
-      habit.metrics.target && 
-      habit.metrics.target > 0
-    );
-    
-    if (timerHabits.length > 0) {
-      console.log('Converting timer habits to tasks:', timerHabits);
-      
-      const habitTasks: Task[] = timerHabits.map(habit => {
-        // Ensure we have a valid number for the duration
-        const targetMinutes = typeof habit.metrics.target === 'number' 
-          ? habit.metrics.target 
-          : parseInt(String(habit.metrics.target));
-
-        // Convert minutes to seconds, default to 25 minutes if parsing fails
-        const durationInSeconds = !isNaN(targetMinutes) 
-          ? targetMinutes * 60 
-          : 25 * 60;
-
-        return {
-          id: `habit-${habit.id}`,
-          name: habit.name,
-          completed: false,
-          duration: durationInSeconds,
-          createdAt: new Date().toISOString(),
-          tags: [{ name: 'Habit', color: 'blue' }],
-        };
-      });
-
-      const newTasks = [...nonHabitTasks, ...habitTasks];
-      const currentTasksStr = JSON.stringify(tasks);
-      const newTasksStr = JSON.stringify(newTasks);
-      
-      // Only update if the tasks have actually changed
-      if (currentTasksStr !== newTasksStr) {
-        console.log('Updating tasks with converted habits:', newTasks);
-        setTasks(newTasks);
-        localStorage.setItem('taskList', newTasksStr);
-      }
-    }
-  }, [todaysHabits]); // Only depend on todaysHabits
 
   const handleNotesClick = () => {
     closeHabits();
@@ -175,6 +101,11 @@ const Index = () => {
     }
   };
 
+  const handleLastSyncUpdate = (date: Date) => {
+    localStorage.setItem('lastSyncDate', date.toISOString());
+    setLastSyncDate(date);
+  };
+
   const handleCompletedTasksUpdate = (tasks: Task[]) => {
     localStorage.setItem('completedTasks', JSON.stringify(tasks));
   };
@@ -190,6 +121,19 @@ const Index = () => {
         <Header 
           onNotesClick={handleNotesClick}
           onHabitsClick={handleHabitsClick}
+        />
+
+        <HabitTaskManager
+          tasks={tasks}
+          onTasksUpdate={handleTasksUpdate}
+          activeTemplates={activeTemplates}
+        />
+
+        <DailySyncManager
+          lastSyncDate={lastSyncDate}
+          tasks={tasks}
+          onTasksUpdate={handleTasksUpdate}
+          onLastSyncUpdate={handleLastSyncUpdate}
         />
 
         <div className="flex-1 overflow-hidden">
