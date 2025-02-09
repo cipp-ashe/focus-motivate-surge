@@ -1,11 +1,12 @@
 
 import { createContext, useContext, useReducer, ReactNode } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { StateContext, StateContextActions } from '@/types/state';
 import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
-import type { ActiveTemplate, HabitDetail } from '@/components/habits/types';
+import type { ActiveTemplate } from '@/components/habits/types';
+import { stateReducer } from './stateReducer';
 
 const AppStateContext = createContext<StateContext | undefined>(undefined);
 const AppStateActionsContext = createContext<StateContextActions | undefined>(undefined);
@@ -33,11 +34,10 @@ interface AppStateProviderProps {
 }
 
 export const AppStateProvider = ({ children }: AppStateProviderProps) => {
-  const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   // Load initial data from localStorage
-  const { data: storedData } = useQuery({
+  useQuery({
     queryKey: ['appState'],
     queryFn: () => {
       const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
@@ -45,12 +45,8 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
       const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
       const notes = JSON.parse(localStorage.getItem('notes') || '[]');
       
-      return {
-        tasks,
-        completed,
-        templates,
-        notes,
-      };
+      dispatch({ type: 'LOAD_INITIAL_STATE', payload: { tasks, completed, templates, notes } });
+      return { tasks, completed, templates, notes };
     },
   });
 
@@ -67,7 +63,6 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
     window.dispatchEvent(new Event('notesUpdated'));
   };
 
-  // Actions
   const actions: StateContextActions = {
     addTask: (task) => {
       const newTask: Task = {
@@ -75,7 +70,6 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       };
-      
       dispatch({ type: 'ADD_TASK', payload: newTask });
       toast.success('Task added 📝');
     },
@@ -126,7 +120,6 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       };
-      
       dispatch({ type: 'ADD_NOTE', payload: newNote });
       toast.success('Note added ✨');
     },

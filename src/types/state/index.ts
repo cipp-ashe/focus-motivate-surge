@@ -3,14 +3,16 @@ import type { Task, TaskMetrics } from '../tasks';
 import type { Note } from '../notes';
 import type { HabitDetail, ActiveTemplate, DayOfWeek } from '@/components/habits/types';
 
+export type EntityType = 'task' | 'habit' | 'note' | 'template';
+export type RelationType = 'habit-task' | 'task-note' | 'habit-note';
+
 export interface EntityRelationship {
   sourceId: string;
   sourceType: EntityType;
   targetId: string;
   targetType: EntityType;
+  relationType: RelationType;
 }
-
-export type EntityType = 'task' | 'habit' | 'note' | 'template';
 
 export interface StateContext {
   tasks: {
