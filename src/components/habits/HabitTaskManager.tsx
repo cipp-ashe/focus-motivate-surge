@@ -1,10 +1,9 @@
 
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { ActiveTemplate } from "@/components/habits/types";
 import { toast } from "sonner";
-import { Tag } from "@/types/notes";
 
 interface HabitTaskManagerProps {
   tasks: Task[];
@@ -14,27 +13,26 @@ interface HabitTaskManagerProps {
 
 export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
+  const previousTasksRef = useRef<string>('');
 
-  // Memoize non-habit tasks to prevent unnecessary recalculations
+  // Memoize non-habit tasks
   const nonHabitTasks = useMemo(() => {
     return tasks.filter(task => !task.tags?.some(tag => tag.name === 'Habit'));
   }, [tasks]);
 
-  // Memoize habit task creation
+  // Memoize habit tasks creation
   const habitTasks = useMemo(() => {
     return todaysHabits.map(habit => {
       const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
 
-      const duration = habit.metrics.type === 'timer' && habit.metrics.target 
-        ? habit.metrics.target 
-        : undefined;
-
       return {
         id: taskId,
         name: habit.name,
         completed: existingTask?.completed || false,
-        duration,
+        duration: habit.metrics.type === 'timer' && habit.metrics.target 
+          ? habit.metrics.target 
+          : undefined,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         tags: [
           { name: 'Habit', color: 'blue' as const },
@@ -44,24 +42,27 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
     });
   }, [todaysHabits, tasks]);
 
-  // Memoize tasks comparison
-  const shouldUpdate = useMemo(() => {
-    const newTasks = [...nonHabitTasks, ...habitTasks];
-    return JSON.stringify(tasks) !== JSON.stringify(newTasks);
-  }, [tasks, nonHabitTasks, habitTasks]);
-
-  // Use useCallback for the update function
+  // Memoize update function
   const updateTasks = useCallback(() => {
     const newTasks = [...nonHabitTasks, ...habitTasks];
-    onTasksUpdate(newTasks);
-    toast.success("Habit tasks synchronized");
+    const newTasksStr = JSON.stringify(newTasks);
+    
+    // Only update if tasks have actually changed
+    if (previousTasksRef.current !== newTasksStr) {
+      previousTasksRef.current = newTasksStr;
+      onTasksUpdate(newTasks);
+      toast.success("Habit tasks synchronized");
+    }
   }, [nonHabitTasks, habitTasks, onTasksUpdate]);
 
   useEffect(() => {
-    if (shouldUpdate) {
+    const newTasks = [...nonHabitTasks, ...habitTasks];
+    const newTasksStr = JSON.stringify(newTasks);
+    
+    if (previousTasksRef.current !== newTasksStr) {
       updateTasks();
     }
-  }, [shouldUpdate, updateTasks]);
+  }, [nonHabitTasks, habitTasks, updateTasks]);
 
   return null;
 };

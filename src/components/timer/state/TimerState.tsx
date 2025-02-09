@@ -13,6 +13,7 @@ export const useTimerState = ({
   onAddTime,
   onDurationChange,
 }: Pick<TimerProps, "duration" | "onComplete" | "onAddTime" | "onDurationChange">) => {
+  // Use primitive state to reduce re-renders
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
   const [showCompletion, setShowCompletion] = useState(false);
@@ -20,14 +21,16 @@ export const useTimerState = ({
   const [completionMetrics, setCompletionMetrics] = useState<TimerStateMetrics | null>(null);
   const [internalMinutes, setInternalMinutes] = useState(duration ? Math.floor(duration / 60) : 25);
   const [pauseTimeLeft, setPauseTimeLeft] = useState(0);
-  const pauseTimerRef = useRef<NodeJS.Timeout>();
-  
-  // Memoize duration in seconds
-  const durationInSeconds = useMemo(() => internalMinutes * 60, [internalMinutes]);
 
-  // Create a ref to hold the setShowConfirmation function
+  const pauseTimerRef = useRef<NodeJS.Timeout>();
+  const metricsRef = useRef<TimerStateMetrics | null>(null);
   const showConfirmationRef = useRef(setShowConfirmation);
+  
+  // Update refs
   showConfirmationRef.current = setShowConfirmation;
+  
+  // Memoized calculations
+  const durationInSeconds = useMemo(() => internalMinutes * 60, [internalMinutes]);
 
   const handleTimeUp = useCallback(() => {
     try {
@@ -56,8 +59,9 @@ export const useTimerState = ({
     onDurationChange,
   });
 
+  // Memoize audio options
   const { play: playSound, testSound, isLoadingAudio } = useAudio({
-    audioUrl: SOUND_OPTIONS[selectedSound],
+    audioUrl: useMemo(() => SOUND_OPTIONS[selectedSound], [selectedSound]),
     options: {
       onError: useCallback((error) => {
         console.error("Audio error:", error);
@@ -98,4 +102,3 @@ export const useTimerState = ({
     isLoadingAudio,
   };
 };
-
