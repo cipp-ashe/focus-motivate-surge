@@ -25,7 +25,8 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
   const habitTasks = useMemo(() => {
     console.log('Creating habit tasks from:', todaysHabits);
     return todaysHabits.map(habit => {
-      const taskId = `habit-${habit.id}`;
+      // Create a unique ID using both template and habit IDs to ensure uniqueness
+      const taskId = `habit-${habit.templateId}-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
       
       // Handle task duration based on habit type
@@ -40,6 +41,10 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         completed: existingTask?.completed || false,
         duration,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
+        relationships: {
+          habitId: habit.id,
+          templateId: habit.templateId
+        }
       };
 
       // Add appropriate tags for habit tasks
