@@ -42,24 +42,23 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     );
     const activeHabitIds = timerHabits.map(habit => `habit-${habit.id}`);
     
-    // Clean up stale tasks and relationships
-    tasks
-      .filter(task => task.id.startsWith('habit-'))
-      .forEach(task => {
-        if (!activeHabitIds.includes(task.id)) {
-          actions.deleteTask(task.id);
-          const habitId = task.relationships?.habitId;
-          if (habitId) {
-            actions.removeRelationship(task.id, habitId);
-          }
+    // Only clean up habit-related tasks, preserve manual tasks
+    const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
+    habitTasks.forEach(task => {
+      if (!activeHabitIds.includes(task.id)) {
+        actions.deleteTask(task.id);
+        const habitId = task.relationships?.habitId;
+        if (habitId) {
+          actions.removeRelationship(task.id, habitId);
         }
-      });
+      }
+    });
 
     // Add new timer habit tasks
     timerHabits.forEach(habit => {
       const taskId = `habit-${habit.id}`;
       if (!tasks.some(t => t.id === taskId)) {
-        const target = habit.metrics?.target || 1500; // Default to 25 minutes if no target
+        const target = habit.metrics?.target || 1500;
         
         actions.addTask({
           name: habit.name,
@@ -144,3 +143,4 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
 
   return null;
 };
+
