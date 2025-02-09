@@ -1,23 +1,17 @@
 
-import { useState, useEffect } from "react";
-import { useTheme } from "@/hooks/useTheme";
+import { useState } from "react";
 import { TaskManager } from "@/components/tasks/TaskManager";
-import { Moon, Sun, Code2, StickyNote, ActivitySquare, Timer } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
+import { Header } from "@/components/layout/Header";
+import { TodaysHabits } from "@/components/habits/TodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
 import type { HabitDetail, ActiveTemplate } from "@/components/habits/types";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import TaskRow from "@/components/tasks/TaskRow";
 
 const Index = () => {
-  const { isDark, toggleTheme } = useTheme(true);
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
 
@@ -76,7 +70,6 @@ const Index = () => {
     toggleHabits();
   };
 
-  // Handle task updates
   const handleTasksUpdate = (newTasks: Task[]) => {
     setTasks(newTasks);
     localStorage.setItem('taskList', JSON.stringify(newTasks));
@@ -87,7 +80,6 @@ const Index = () => {
     localStorage.setItem('completedTasks', JSON.stringify(tasks));
   };
 
-  // Handle favorites updates
   const handleFavoritesUpdate = (newFavorites: Quote[]) => {
     setFavorites(newFavorites);
     localStorage.setItem('favoriteQuotes', JSON.stringify(newFavorites));
@@ -113,57 +105,13 @@ const Index = () => {
     }
   };
 
-  const getHabitAsTask = (habit: HabitDetail): Task => ({
-    id: habit.id,
-    name: habit.name,
-    completed: completedHabits.includes(habit.id),
-    duration: habit.duration,
-    metrics: undefined
-  });
-
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 py-7">
-        <div className="flex justify-between items-center mb-4 sm:mb-7">
-          <h1 className="text-2xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-            Focus Timer
-          </h1>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={handleHabitsClick}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              title="Habits"
-            >
-              <ActivitySquare className="h-5 w-5" />
-            </button>
-            <button 
-              onClick={handleNotesClick}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              title="Toggle Notes"
-            >
-              <StickyNote className="h-5 w-5" />
-            </button>
-            <Link 
-              to="/components" 
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              title="Developer Documentation"
-            >
-              <Code2 className="h-5 w-5" />
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="rounded-full hover:bg-primary/20"
-            >
-              {isDark ? (
-                <Sun className="h-5 w-5 sm:h-6 sm:w-6" />
-              ) : (
-                <Moon className="h-5 w-5 sm:h-6 sm:w-6" />
-              )}
-            </Button>
-          </div>
-        </div>
+        <Header 
+          onNotesClick={handleNotesClick}
+          onHabitsClick={handleHabitsClick}
+        />
 
         <TaskManager
           initialTasks={tasks}
@@ -174,51 +122,15 @@ const Index = () => {
           onFavoritesChange={handleFavoritesUpdate}
         />
 
-        {todaysHabits.length > 0 && (
-          <Card className="mt-6 p-4 border-primary/20 bg-gradient-to-br from-card to-card/50">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
-                <Timer className="h-5 w-5 text-primary animate-pulse-slow" />
-                Today's Habits
-              </h2>
-              <span className="text-sm text-muted-foreground">
-                {todaysHabits.length} habit{todaysHabits.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-2">
-                {todaysHabits.map((habit) => (
-                  <div key={habit.id} className="relative">
-                    <TaskRow
-                      task={getHabitAsTask(habit)}
-                      isSelected={false}
-                      editingTaskId={null}
-                      onTaskClick={() => handleHabitClick(habit)}
-                      onTaskDelete={() => {}}
-                      onDurationChange={() => {}}
-                      onDurationClick={() => {}}
-                      onInputBlur={() => {}}
-                    />
-                    {habit.duration && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAddHabitToTasks(habit)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
-                      >
-                        Add as Task
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </Card>
-        )}
+        <TodaysHabits
+          habits={todaysHabits}
+          completedHabits={completedHabits}
+          onHabitClick={handleHabitClick}
+          onAddHabitToTasks={handleAddHabitToTasks}
+        />
       </div>
     </div>
   );
 };
 
 export default Index;
-
