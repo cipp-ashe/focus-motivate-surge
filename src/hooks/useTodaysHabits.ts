@@ -25,7 +25,6 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     name: habit.name,
     completed: false,
     duration: habit.duration || 25,
-    description: habit.description,
   }), []);
 
   return {
