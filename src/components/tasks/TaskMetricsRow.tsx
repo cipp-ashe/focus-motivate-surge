@@ -1,12 +1,10 @@
 
-import { Clock, Pause, Quote, Timer } from "lucide-react";
+import { Clock, Pause, Quote, Timer, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Task } from "./TaskList";
 import { TableCell, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
 import { NoteTags } from "../notes/components/NoteTags";
 import { formatDate, formatDuration, getCompletionStatusColor, getCompletionIcon } from "@/utils/taskFormatUtils";
-import { Icon } from "lucide-react";
-import * as Icons from "lucide-react";
 
 export const TaskMetricsRow = ({ task }: { task: Task }) => {
   const metrics = task.metrics || {
@@ -23,7 +21,21 @@ export const TaskMetricsRow = ({ task }: { task: Task }) => {
   };
 
   const statusColor = getCompletionStatusColor(metrics.completionStatus);
-  const StatusIcon = Icons[getCompletionIcon(metrics.completionStatus) as keyof typeof Icons];
+  const iconName = getCompletionIcon(metrics.completionStatus);
+  
+  // Map the icon name to the actual component
+  const getStatusIcon = () => {
+    switch (iconName) {
+      case 'CheckCircle2':
+        return <CheckCircle2 className={`w-4 h-4 ${statusColor}`} />;
+      case 'Timer':
+        return <Timer className={`w-4 h-4 ${statusColor}`} />;
+      case 'AlertTriangle':
+        return <AlertTriangle className={`w-4 h-4 ${statusColor}`} />;
+      default:
+        return <Timer className={`w-4 h-4 ${statusColor}`} />;
+    }
+  };
 
   return (
     <TableRow className="bg-muted/50">
@@ -66,7 +78,7 @@ export const TaskMetricsRow = ({ task }: { task: Task }) => {
       </TableCell>
       <TableCell className="py-2">
         <div className="flex items-center space-x-2">
-          <StatusIcon className={`w-4 h-4 ${statusColor}`} />
+          {getStatusIcon()}
           <span className={statusColor}>{metrics.completionStatus}</span>
         </div>
         <Badge variant="outline" className="mt-1">
