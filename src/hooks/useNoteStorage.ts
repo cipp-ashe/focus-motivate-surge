@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 
 interface NoteStorageState {
   isLoading: boolean;
