@@ -77,22 +77,59 @@ export const TaskRow = ({
   };
 
   const handleAddTag = (tagName: string) => {
-    const newTag: Tag = {
+    if (!task.tags) {
+      task.tags = [];
+    }
+    
+    // Don't add duplicate tags
+    if (task.tags.some(t => t.name === tagName)) {
+      toast.error("Tag already exists");
+      return;
+    }
+
+    // Add new tag with default color
+    task.tags.push({
       name: tagName,
       color: 'default'
-    };
-    // For now, we'll just show a toast since we don't have the handler yet
-    toast.info("Tag functionality coming soon!");
+    });
+    
+    // Force a re-render
+    window.dispatchEvent(new Event('tagsUpdated'));
+    toast.success("Tag added");
   };
 
   const handleRemoveTag = (tagName: string) => {
-    // For now, we'll just show a toast since we don't have the handler yet
-    toast.info("Tag functionality coming soon!");
+    if (!task.tags) return;
+    
+    // Don't allow removing the Habit tag from habit tasks
+    if (tagName === 'Habit') {
+      toast.error("Cannot remove Habit tag");
+      return;
+    }
+
+    task.tags = task.tags.filter(t => t.name !== tagName);
+    
+    // Force a re-render
+    window.dispatchEvent(new Event('tagsUpdated'));
+    toast.success("Tag removed");
   };
 
   const handleTagClick = (tag: Tag) => {
-    // For now, we'll just show a toast since we don't have the handler yet
-    toast.info("Tag functionality coming soon!");
+    // Preserve habit tag color
+    if (tag.name === 'Habit') return;
+    
+    const colors: Tag['color'][] = ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'];
+    const currentIndex = colors.indexOf(tag.color);
+    const nextColor = colors[(currentIndex + 1) % colors.length];
+    
+    if (!task.tags) return;
+    
+    const tagIndex = task.tags.findIndex(t => t.name === tag.name);
+    if (tagIndex !== -1) {
+      task.tags[tagIndex].color = nextColor;
+      // Force a re-render
+      window.dispatchEvent(new Event('tagsUpdated'));
+    }
   };
 
   return (
