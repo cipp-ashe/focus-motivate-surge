@@ -17,30 +17,37 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     
-    // Create ResizeObserver with a debounced callback
-    let timeoutId: NodeJS.Timeout;
-    const observer = new ResizeObserver(() => {
-      // Clear any pending timeout
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+    const element = containerRef.current;
+    let rafId: number;
+    
+    const observer = new ResizeObserver((entries) => {
+      // Cancel any pending rAF
+      if (rafId) {
+        cancelAnimationFrame(rafId);
       }
       
-      // Set a new timeout to handle the resize after a delay
-      timeoutId = setTimeout(() => {
-        if (containerRef.current) {
-          // Force a reflow if needed
-          containerRef.current.style.display = 'none';
-          containerRef.current.offsetHeight; // Force reflow
-          containerRef.current.style.display = '';
-        }
-      }, 100);
+      // Schedule a new update
+      rafId = requestAnimationFrame(() => {
+        entries.forEach(entry => {
+          if (entry.target === element && element) {
+            // Only force reflow if element dimensions actually changed
+            if (entry.contentRect.width !== element.offsetWidth || 
+                entry.contentRect.height !== element.offsetHeight) {
+              element.style.display = 'none';
+              // Force reflow
+              void element.offsetHeight;
+              element.style.display = '';
+            }
+          }
+        });
+      });
     });
 
-    observer.observe(containerRef.current);
+    observer.observe(element);
 
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
       }
       observer.disconnect();
     };
@@ -66,3 +73,4 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     </div>
   );
 };
+
