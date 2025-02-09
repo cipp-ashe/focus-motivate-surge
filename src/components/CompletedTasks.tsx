@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { NotesDialog } from "./notes/components/NotesDialog";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -111,23 +113,9 @@ const downloadMarkdown = (tasks: Task[]) => {
   toast.success('Tasks downloaded as Markdown');
 };
 
-const downloadJson = (tasks: Task[]) => {
-  const timestamp = format(new Date(), 'yyyy-MM-dd-HH-mm-ss');
-  const jsonContent = JSON.stringify(tasks, null, 2);
-  const blob = new Blob([jsonContent], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `completed-tasks-${timestamp}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast.success('Tasks downloaded as JSON');
-};
-
 export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => {
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [showJsonDialog, setShowJsonDialog] = useState(false);
 
   if (tasks.length === 0) return null;
 
@@ -135,6 +123,12 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     onTasksClear?.();
     setShowClearDialog(false);
     toast.success("Completed tasks cleared 🗑️");
+  };
+
+  const handleCopyJson = () => {
+    const jsonContent = JSON.stringify(tasks, null, 2);
+    navigator.clipboard.writeText(jsonContent);
+    toast.success('JSON copied to clipboard');
   };
 
   return (
@@ -155,8 +149,8 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                 />
                 <ActionButton
                   icon={FileJson}
-                  onClick={() => downloadJson(tasks)}
-                  tooltip="Download as JSON"
+                  onClick={() => setShowJsonDialog(true)}
+                  tooltip="View JSON Data"
                   className="h-6 w-6 p-0"
                 />
                 <ActionButton
@@ -281,6 +275,28 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
         onAction={handleClearTasks}
         variant="destructive"
       />
+
+      <Dialog open={showJsonDialog} onOpenChange={setShowJsonDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Task Metrics JSON Data</DialogTitle>
+          </DialogHeader>
+          <div className="relative">
+            <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-[60vh]">
+              <code>{JSON.stringify(tasks, null, 2)}</code>
+            </pre>
+            <Button
+              onClick={handleCopyJson}
+              className="absolute top-2 right-2"
+              variant="secondary"
+              size="sm"
+            >
+              Copy JSON
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
