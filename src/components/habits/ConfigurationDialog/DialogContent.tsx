@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Button } from "@/components/ui/button";
+import { DialogContent as ShadcnDialogContent } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import { HabitDetail, DayOfWeek } from '../../types';
 import DaySelector from './DaySelector';
 import DraggableHabitList from './DraggableHabitList';
@@ -32,22 +33,23 @@ const DialogContent: React.FC<DialogContentProps> = ({
   onDeleteHabit,
 }) => {
   return (
-    <>
+    <ShadcnDialogContent className="sm:max-w-[600px]">
       <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
       
-      <Box sx={{ mt: 2, mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="subtitle1">Configure Habits</Typography>
+      <div className="mt-6 mb-4 flex justify-between items-center">
+        <h3 className="text-lg font-medium">Configure Habits</h3>
         <Button
-          variant="outlined"
-          size="small"
-          startIcon={<AddIcon />}
+          variant="outline"
+          size="sm"
           onClick={onAddHabit}
+          className="gap-1"
         >
+          <Plus className="h-4 w-4" />
           Add Habit
         </Button>
-      </Box>
+      </div>
 
-      <Box>
+      <div className="space-y-4">
         <DraggableHabitList
           habits={habits}
           draggedIndex={draggedIndex}
@@ -57,9 +59,10 @@ const DialogContent: React.FC<DialogContentProps> = ({
           onUpdateHabit={onUpdateHabit}
           onDeleteHabit={onDeleteHabit}
         />
-      </Box>
-    </>
+      </div>
+    </ShadcnDialogContent>
   );
 };
 
 export default DialogContent;
+

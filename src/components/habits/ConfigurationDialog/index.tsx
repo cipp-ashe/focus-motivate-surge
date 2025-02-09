@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
-  DialogContent,
-} from '@mui/material';
-import { HabitDetail, DayOfWeek } from '../../types';
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { HabitDetail, DayOfWeek } from '../types';
 import DialogHeader from './DialogHeader';
-import DialogContent as CustomDialogContent from './DialogContent';
+import DialogContent from './DialogContent';
 import DialogFooter from './DialogFooter';
 
 interface ConfigurationDialogProps {
@@ -95,28 +95,20 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      aria-labelledby="configure-template-title"
-    >
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogHeader />
-      <DialogContent>
-        <CustomDialogContent
-          habits={habits}
-          draggedIndex={draggedIndex}
-          activeDays={activeDays}
-          onUpdateDays={onUpdateDays}
-          onAddHabit={handleAddHabit}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-          onUpdateHabit={handleUpdateHabit}
-          onDeleteHabit={handleDeleteHabit}
-        />
-      </DialogContent>
+      <DialogContent
+        habits={habits}
+        draggedIndex={draggedIndex}
+        activeDays={activeDays}
+        onUpdateDays={onUpdateDays}
+        onAddHabit={handleAddHabit}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onUpdateHabit={handleUpdateHabit}
+        onDeleteHabit={handleDeleteHabit}
+      />
       <DialogFooter
         onSaveAsTemplate={onSaveAsTemplate}
         onClose={onClose}
@@ -127,3 +119,4 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
 };
 
 export default ConfigurationDialog;
+

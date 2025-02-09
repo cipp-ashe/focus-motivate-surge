@@ -1,11 +1,17 @@
 
 import React from 'react';
-import { DialogTitle } from '@mui/material';
+import {
+  DialogHeader as ShadcnDialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const DialogHeader = () => {
   return (
-    <DialogTitle id="configure-template-title">Configure Template</DialogTitle>
+    <ShadcnDialogHeader>
+      <DialogTitle>Configure Template</DialogTitle>
+    </ShadcnDialogHeader>
   );
 };
 
 export default DialogHeader;
+

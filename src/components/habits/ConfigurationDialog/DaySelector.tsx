@@ -1,13 +1,8 @@
+
 import React from 'react';
-import {
-  FormControl,
-  FormLabel,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  Box,
-} from '@mui/material';
-import { DAYS_OF_WEEK, DayOfWeek } from '../../types';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Label } from "@/components/ui/label";
+import { DAYS_OF_WEEK, DayOfWeek } from '../types';
 
 interface DaySelectorProps {
   activeDays: DayOfWeek[];
@@ -18,58 +13,29 @@ const DaySelector: React.FC<DaySelectorProps> = ({
   activeDays,
   onUpdateDays,
 }) => {
-  const handleDayToggle = (day: DayOfWeek) => {
-    const newDays = activeDays.includes(day)
-      ? activeDays.filter(d => d !== day)
-      : [...activeDays, day];
-    onUpdateDays(newDays);
-  };
-
-  const handleKeyPress = (event: React.KeyboardEvent, day: DayOfWeek) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleDayToggle(day);
-    }
-  };
-
   return (
-    <FormControl component="fieldset">
-      <FormLabel component="legend" id="active-days-label">
-        Active Days
-      </FormLabel>
-      <FormGroup row>
+    <div className="space-y-2">
+      <Label htmlFor="days">Active Days</Label>
+      <ToggleGroup 
+        type="multiple"
+        value={activeDays}
+        onValueChange={onUpdateDays}
+        className="justify-start"
+      >
         {DAYS_OF_WEEK.map((day) => (
-          <Box
+          <ToggleGroupItem
             key={day}
-            sx={{
-              '& .MuiFormControlLabel-root': {
-                mr: 2,
-                '&:hover': {
-                  bgcolor: 'action.hover',
-                  borderRadius: 1,
-                },
-              },
-            }}
+            value={day}
+            aria-label={`Toggle ${day}`}
+            className="w-9 h-9"
           >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={activeDays.includes(day)}
-                  onChange={() => handleDayToggle(day)}
-                  onKeyPress={(e) => handleKeyPress(e, day)}
-                  inputProps={{
-                    'aria-label': `Toggle ${day}`,
-                    'aria-describedby': 'active-days-label',
-                  }}
-                />
-              }
-              label={day}
-            />
-          </Box>
+            {day.charAt(0)}
+          </ToggleGroupItem>
         ))}
-      </FormGroup>
-    </FormControl>
+      </ToggleGroup>
+    </div>
   );
 };
 
 export default DaySelector;
+

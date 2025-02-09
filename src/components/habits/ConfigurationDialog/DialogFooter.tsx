@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { DialogActions, Button, Box } from '@mui/material';
+import { Button } from "@/components/ui/button";
+import { DialogFooter as ShadcnDialogFooter } from "@/components/ui/dialog";
 
 interface DialogFooterProps {
   onSaveAsTemplate: () => void;
@@ -14,25 +15,24 @@ const DialogFooter: React.FC<DialogFooterProps> = ({
   onSave,
 }) => {
   return (
-    <DialogActions>
+    <ShadcnDialogFooter className="flex justify-between items-center">
       <Button
-        variant="outlined"
+        variant="outline"
         onClick={onSaveAsTemplate}
       >
         Save as Custom Template
       </Button>
-      <Box sx={{ flex: 1 }} />
-      <Button onClick={onClose}>
-        Cancel
-      </Button>
-      <Button
-        variant="contained"
-        onClick={onSave}
-      >
-        Apply Changes
-      </Button>
-    </DialogActions>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={onSave}>
+          Apply Changes
+        </Button>
+      </div>
+    </ShadcnDialogFooter>
   );
 };
 
 export default DialogFooter;
+
