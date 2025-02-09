@@ -87,7 +87,16 @@ export const useTemplateManagement = () => {
       name: template.name,
       description: template.description,
       category: template.category,
-      defaultHabits: template.defaultHabits || [],
+      defaultHabits: template.defaultHabits || [{
+        id: `habit-${Date.now()}`,
+        name: 'New Habit',
+        description: 'Description of your new habit',
+        category: template.category,
+        timePreference: 'Anytime',
+        metrics: { type: 'boolean' },
+        insights: [],
+        tips: []
+      }],
       defaultDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
       duration: template.duration || null,
     };
@@ -140,3 +149,4 @@ export const useTemplateManagement = () => {
     updateTemplateDays,
   };
 };
+
