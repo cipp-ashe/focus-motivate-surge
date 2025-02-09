@@ -81,24 +81,26 @@ const Index = () => {
     const habitsWithDuration = todaysHabits.filter(habit => habit.duration && habit.duration > 0);
     console.log('Converting habits to tasks:', habitsWithDuration);
     
-    setTasks(currentTasks => {
-      // Get non-habit tasks
-      const nonHabitTasks = currentTasks.filter(task => !task.id.startsWith('habit-'));
-      
-      // Convert habits to tasks
-      const habitTasks: Task[] = habitsWithDuration.map(habit => ({
-        id: `habit-${habit.id}`,
-        name: habit.name,
-        completed: false,
-        duration: habit.duration,
-      }));
+    // Get non-habit tasks
+    const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
+    
+    // Convert habits to tasks
+    const habitTasks: Task[] = habitsWithDuration.map(habit => ({
+      id: `habit-${habit.id}`,
+      name: habit.name,
+      completed: false,
+      duration: habit.duration,
+    }));
 
-      const newTasks = [...nonHabitTasks, ...habitTasks];
-      console.log('Updated tasks:', newTasks);
+    const newTasks = [...nonHabitTasks, ...habitTasks];
+    console.log('Updated tasks:', newTasks);
+    
+    // Only update if there are actual changes to avoid infinite loop
+    if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
       localStorage.setItem('taskList', JSON.stringify(newTasks));
-      return newTasks;
-    });
-  }, [todaysHabits]); // React to changes in todaysHabits
+      setTasks(newTasks);
+    }
+  }, [todaysHabits, tasks]); // Include tasks in dependencies to ensure proper comparison
 
   const handleNotesClick = () => {
     closeHabits();
@@ -111,8 +113,11 @@ const Index = () => {
   };
 
   const handleTasksUpdate = (newTasks: Task[]) => {
-    localStorage.setItem('taskList', JSON.stringify(newTasks));
-    setTasks(newTasks);
+    // Only update if the tasks have actually changed
+    if (JSON.stringify(newTasks) !== JSON.stringify(tasks)) {
+      localStorage.setItem('taskList', JSON.stringify(newTasks));
+      setTasks(newTasks);
+    }
   };
 
   const handleCompletedTasksUpdate = (tasks: Task[]) => {
