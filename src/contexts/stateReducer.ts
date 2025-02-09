@@ -3,6 +3,7 @@ import type { StateContext } from '@/types/state';
 import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
 import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
+import type { EntityRelationship } from '@/types/state';
 import { taskReducer } from './reducers/taskReducer';
 import { habitReducer } from './reducers/habitReducer';
 import { noteReducer } from './reducers/noteReducer';
@@ -24,7 +25,7 @@ export type StateAction =
   | { type: 'UPDATE_NOTE'; payload: { noteId: string; updates: Partial<Note> } }
   | { type: 'DELETE_NOTE'; payload: string }
   | { type: 'SELECT_NOTE'; payload: string | null }
-  | { type: 'ADD_RELATIONSHIP'; payload: Omit<EntityRelationship, 'id'> }
+  | { type: 'ADD_RELATIONSHIP'; payload: EntityRelationship }
   | { type: 'REMOVE_RELATIONSHIP'; payload: { sourceId: string; targetId: string } };
 
 export const stateReducer = (state: StateContext, action: StateAction): StateContext => {
