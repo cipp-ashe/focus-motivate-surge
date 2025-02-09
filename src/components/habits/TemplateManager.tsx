@@ -65,9 +65,11 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
               variant="outline"
               size="sm"
               onClick={() => {
+                const newHabit = createEmptyHabit();
                 onUpdateTemplate?.({
-                  habits: [...(templateToEdit.habits || []), createEmptyHabit()]
+                  habits: [...(templateToEdit.habits || []), newHabit]
                 });
+                console.log('Adding new habit:', newHabit);
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -77,12 +79,12 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 
           <ScrollArea className="h-[calc(100vh-20rem)]">
             <div className="space-y-4 pr-4">
-              {templateToEdit.habits.map((habit, index) => (
+              {templateToEdit.habits?.map((habit, index) => (
                 <HabitForm
                   key={habit.id}
                   habit={habit}
                   onUpdate={(updates) => {
-                    const updatedHabits = [...templateToEdit.habits];
+                    const updatedHabits = [...(templateToEdit.habits || [])];
                     updatedHabits[index] = { ...habit, ...updates };
                     onUpdateTemplate?.({ habits: updatedHabits });
                   }}
