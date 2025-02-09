@@ -60,6 +60,7 @@ export const useTemplateManagement = () => {
     setActiveTemplates(prev => 
       prev.filter(template => template.templateId !== templateId)
     );
+    toast.success('Template removed');
   }, []);
 
   const deleteCustomTemplate = useCallback((templateId: string) => {
@@ -75,6 +76,7 @@ export const useTemplateManagement = () => {
 
   const saveCustomTemplate = useCallback((template: NewTemplate): HabitTemplate => {
     if (!template.defaultHabits || template.defaultHabits.length === 0) {
+      toast.error('Template must have at least one habit');
       throw new Error('Template must have at least one habit');
     }
 
@@ -88,10 +90,7 @@ export const useTemplateManagement = () => {
       duration: template.duration || null,
     };
 
-    setCustomTemplates(prev => {
-      const updated = [...prev, newTemplate];
-      return updated;
-    });
+    setCustomTemplates(prev => [...prev, newTemplate]);
 
     // Automatically add the custom template to active templates
     const activeTemplate: ActiveTemplate = {
@@ -104,6 +103,8 @@ export const useTemplateManagement = () => {
     addTemplate(activeTemplate);
     console.log('Created custom template:', newTemplate);
     console.log('Added as active template:', activeTemplate);
+    toast.success('Custom template created successfully');
+    
     return newTemplate;
   }, [addTemplate]);
 
