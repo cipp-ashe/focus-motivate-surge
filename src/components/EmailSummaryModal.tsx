@@ -13,12 +13,14 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
+import { Task } from "./tasks/TaskList";
 
 interface EmailSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (email: string, clearData?: boolean) => Promise<void>;
+  onSubmit?: (email: string, clearData?: boolean) => Promise<void>;
   type?: 'tasks' | 'notes';
+  tasks?: Task[];
   favorites?: Quote[];
   metrics?: TimerStateMetrics;
 }

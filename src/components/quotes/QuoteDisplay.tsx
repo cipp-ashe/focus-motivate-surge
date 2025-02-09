@@ -16,12 +16,11 @@ export const QuoteDisplay = ({
   favorites,
   setFavorites,
   onLike,
-  currentTask}: QuoteDisplayProps) => {
+  currentTask
+}: QuoteDisplayProps) => {
   const {
     currentQuote,
-    nextQuote,
     isLiked,
-    isFading,
     handleLike,
     getRandomQuote,
   } = useQuoteManager({
