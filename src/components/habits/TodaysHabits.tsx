@@ -25,7 +25,7 @@ export const TodaysHabits = ({
     id: habit.id,
     name: habit.name,
     completed: completedHabits.includes(habit.id),
-    duration: habit.duration,
+    duration: habit.duration || 0,
     metrics: undefined
   });
 
@@ -56,7 +56,7 @@ export const TodaysHabits = ({
                 onDurationClick={() => {}}
                 onInputBlur={() => {}}
               />
-              {habit.duration && (
+              {habit.duration && habit.duration > 0 && (
                 <Button
                   variant="outline"
                   size="sm"
