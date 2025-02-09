@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
-import { Plus, X } from "lucide-react";
-import { DAYS_OF_WEEK, DayOfWeek, NewTemplate, HabitDetail } from '../types';
-import { Card } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { DAYS_OF_WEEK, DayOfWeek, NewTemplate } from '../types';
 import { toast } from 'sonner';
+import HabitForm from '../ConfigurationDialog/HabitForm';
+import { createEmptyHabit } from '../types';
 
 interface CreateTemplateFormProps {
   onSubmit: (template: NewTemplate) => void;
@@ -23,13 +24,13 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [activeDays, setActiveDays] = useState<DayOfWeek[]>(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
-  const [habits, setHabits] = useState<HabitDetail[]>([]);
+  const [habits, setHabits] = useState([createEmptyHabit()]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (habits.length === 0) {
-      toast.error('Please add at least one habit to the template');
+    if (!habits.some(habit => habit.name.trim())) {
+      toast.error('Please configure at least one habit with a name');
       return;
     }
 
@@ -37,26 +38,16 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
       name,
       description,
       category,
-      defaultHabits: habits,
+      defaultHabits: habits.filter(habit => habit.name.trim()),
       defaultDays: activeDays,
     });
   };
 
   const addHabit = () => {
-    const newHabit: HabitDetail = {
-      id: `habit-${Date.now()}`,
-      name: '',
-      description: '',
-      category: category,
-      timePreference: 'Anytime',
-      metrics: { type: 'boolean' },
-      insights: [],
-      tips: []
-    };
-    setHabits(prev => [...prev, newHabit]);
+    setHabits(prev => [...prev, createEmptyHabit()]);
   };
 
-  const updateHabit = (index: number, updates: Partial<HabitDetail>) => {
+  const updateHabit = (index: number, updates: Partial<typeof habits[0]>) => {
     setHabits(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], ...updates };
@@ -101,7 +92,7 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="days">Active Days</Label>
+        <Label>Active Days</Label>
         <ToggleGroup 
           type="multiple" 
           value={activeDays}
@@ -132,36 +123,13 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
 
         <div className="space-y-3">
           {habits.map((habit, index) => (
-            <Card key={habit.id} className="p-4">
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <Label>Habit {index + 1}</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeHabit(index)}
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Habit name"
-                    value={habit.name}
-                    onChange={(e) => updateHabit(index, { name: e.target.value })}
-                    required
-                  />
-                  <Textarea
-                    placeholder="Habit description"
-                    value={habit.description}
-                    onChange={(e) => updateHabit(index, { description: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-            </Card>
+            <HabitForm
+              key={habit.id}
+              habit={habit}
+              onUpdate={(updates) => updateHabit(index, updates)}
+              onDelete={() => removeHabit(index)}
+              onDragStart={() => {}}
+            />
           ))}
         </div>
       </div>
@@ -182,4 +150,3 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
 };
 
 export default CreateTemplateForm;
-

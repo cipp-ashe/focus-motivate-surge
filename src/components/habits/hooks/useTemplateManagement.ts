@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate, NewTemplate, DEFAULT_ACTIVE_DAYS } from '../types';
@@ -26,7 +27,6 @@ export const useTemplateManagement = () => {
 
   const addTemplate = useCallback((template: ActiveTemplate) => {
     setActiveTemplates(prev => {
-      // Check if template already exists
       const exists = prev.some(t => t.templateId === template.templateId);
       if (exists) {
         toast.error('Template already exists');
@@ -35,16 +35,13 @@ export const useTemplateManagement = () => {
       
       const newTemplate = {
         ...template,
-        habits: template.habits || [],
+        habits: template.habits,
         activeDays: template.activeDays || DEFAULT_ACTIVE_DAYS,
       };
       
-      const newTemplates = [...prev, newTemplate];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newTemplates));
-      console.log('Added template:', newTemplate);
-      console.log('Current active templates:', newTemplates);
+      console.log('Adding template:', newTemplate);
       toast.success('Template added successfully');
-      return newTemplates;
+      return [...prev, newTemplate];
     });
   }, []);
 
@@ -55,23 +52,19 @@ export const useTemplateManagement = () => {
           ? { ...template, ...updates, customized: true }
           : template
       );
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
   }, []);
 
   const removeTemplate = useCallback((templateId: string) => {
-    setActiveTemplates(prev => {
-      const filtered = prev.filter(template => template.templateId !== templateId);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-      return filtered;
-    });
+    setActiveTemplates(prev => 
+      prev.filter(template => template.templateId !== templateId)
+    );
   }, []);
 
   const deleteCustomTemplate = useCallback((templateId: string) => {
     setCustomTemplates(prev => {
       const filtered = prev.filter(template => template.id !== templateId);
-      localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(filtered));
       // Also remove from active templates if it exists there
       setActiveTemplates(prevActive => 
         prevActive.filter(template => template.templateId !== templateId)
@@ -81,38 +74,41 @@ export const useTemplateManagement = () => {
   }, []);
 
   const saveCustomTemplate = useCallback((template: NewTemplate): HabitTemplate => {
+    if (!template.defaultHabits || template.defaultHabits.length === 0) {
+      throw new Error('Template must have at least one habit');
+    }
+
     const newTemplate: HabitTemplate = {
       id: `template-${Date.now()}`,
       name: template.name,
       description: template.description,
       category: template.category,
-      defaultHabits: template.defaultHabits || [],
+      defaultHabits: template.defaultHabits,
       defaultDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
       duration: template.duration || null,
     };
 
     setCustomTemplates(prev => {
       const updated = [...prev, newTemplate];
-      localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(updated));
       return updated;
     });
 
     // Automatically add the custom template to active templates
     const activeTemplate: ActiveTemplate = {
       templateId: newTemplate.id,
-      habits: newTemplate.defaultHabits || [],
+      habits: newTemplate.defaultHabits,
       activeDays: newTemplate.defaultDays || DEFAULT_ACTIVE_DAYS,
       customized: false,
     };
     
     addTemplate(activeTemplate);
-    console.log('Created and added custom template:', activeTemplate);
+    console.log('Created custom template:', newTemplate);
+    console.log('Added as active template:', activeTemplate);
     return newTemplate;
   }, [addTemplate]);
 
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     setActiveTemplates(templates);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
   }, []);
 
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
@@ -122,7 +118,6 @@ export const useTemplateManagement = () => {
           ? { ...template, activeDays: days, customized: true }
           : template
       );
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
   }, []);
