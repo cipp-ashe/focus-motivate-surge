@@ -105,6 +105,14 @@ const TemplateConfiguration: React.FC<TemplateConfigurationProps> = ({
   return (
     <ScrollArea className="h-[calc(100vh-8rem)] pr-4">
       <div className="space-y-4">
+        <Button 
+          onClick={onCreateTemplate}
+          variant="outline"
+          className="w-full flex items-center justify-center gap-2 mb-4"
+        >
+          <Plus className="h-4 w-4" />
+          Create New Template
+        </Button>
         {availableTemplates.map((template) => (
           <Card key={template.id}>
             <CardHeader>
