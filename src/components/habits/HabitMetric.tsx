@@ -36,9 +36,9 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         const durationValue = typeof progress.value === 'number' ? progress.value : 0;
         const durationTarget = habit.metrics.target || 30;
         return (
-          <div className="space-y-0.5 w-24">
-            <Progress value={(durationValue / durationTarget) * 100} className="h-1.5" />
-            <p className="text-xs text-muted-foreground text-right">
+          <div className="space-y-0.5 w-16">
+            <Progress value={(durationValue / durationTarget) * 100} className="h-1" />
+            <p className="text-[0.65rem] text-muted-foreground text-right">
               {durationValue}/{durationTarget}m
             </p>
           </div>
@@ -47,9 +47,9 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         const countValue = typeof progress.value === 'number' ? progress.value : 0;
         const countTarget = habit.metrics.target || 1;
         return (
-          <div className="space-y-0.5 w-24">
-            <Progress value={(countValue / countTarget) * 100} className="h-1.5" />
-            <p className="text-xs text-muted-foreground text-right">
+          <div className="space-y-0.5 w-16">
+            <Progress value={(countValue / countTarget) * 100} className="h-1" />
+            <p className="text-[0.65rem] text-muted-foreground text-right">
               {countValue}/{countTarget}
             </p>
           </div>
@@ -64,9 +64,9 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
                 variant={rating <= ratingValue ? "default" : "ghost"}
                 size="icon"
                 onClick={() => onUpdate(rating)}
-                className="h-4 w-4 p-0"
+                className="h-3 w-3 p-0"
               >
-                <Star className="h-2 w-2" />
+                <Star className="h-1.5 w-1.5" />
               </Button>
             ))}
           </div>

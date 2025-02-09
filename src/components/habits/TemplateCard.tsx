@@ -51,10 +51,10 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         </div>
       </CardHeader>
       <CardContent className="py-1">
-        <div className="grid grid-cols-1 gap-0.5">
+        <div className="grid grid-cols-2 gap-1">
           {template.habits.map((habit) => (
-            <div key={habit.id} className="flex items-center justify-between px-1.5 py-0.5 rounded-sm bg-muted/30 text-xs">
-              <span className="font-medium truncate max-w-[120px]">{habit.name}</span>
+            <div key={habit.id} className="flex items-center justify-between px-2 py-1 rounded-sm bg-muted/30 text-[0.7rem]">
+              <span className="font-medium truncate max-w-[80px]">{habit.name}</span>
               <HabitMetric
                 habit={habit}
                 progress={getProgress(habit.id)}
