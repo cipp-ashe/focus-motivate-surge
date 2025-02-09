@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
-import { ActiveTemplate } from './types';
+import { ActiveTemplate, DayOfWeek } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateManager from './TemplateManager';
@@ -98,7 +98,7 @@ const HabitTracker: React.FC = () => {
     }
   };
 
-  const handleUpdateDays = (days: string[]) => {
+  const handleUpdateDays = (days: DayOfWeek[]) => {
     if (!selectedTemplate) return;
     handleUpdateTemplate({ activeDays: days });
   };
@@ -137,38 +137,42 @@ const HabitTracker: React.FC = () => {
           }}
         >
           <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-            <SheetHeader>
-              <SheetTitle>
-                {isCreatingTemplate ? 'Create New Template' : 'Edit Template'}
-              </SheetTitle>
-            </SheetHeader>
-            
-            {isCreatingTemplate && (
-              <div className="space-y-2 mt-4 mb-6">
-                <Label htmlFor="templateName">Template Name</Label>
-                <Input
-                  id="templateName"
-                  value={newTemplateName}
-                  onChange={(e) => setNewTemplateName(e.target.value)}
-                  placeholder="Enter template name"
+            <div className="flex flex-col h-full">
+              <SheetHeader>
+                <SheetTitle>
+                  {isCreatingTemplate ? 'Create New Template' : 'Edit Template'}
+                </SheetTitle>
+              </SheetHeader>
+              
+              {isCreatingTemplate && (
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="templateName">Template Name</Label>
+                  <Input
+                    id="templateName"
+                    value={newTemplateName}
+                    onChange={(e) => setNewTemplateName(e.target.value)}
+                    placeholder="Enter template name"
+                  />
+                </div>
+              )}
+
+              <div className="flex-1 overflow-y-auto">
+                <TemplateManager
+                  templateToEdit={selectedTemplate}
+                  onUpdateTemplate={handleUpdateTemplate}
+                  onUpdateDays={handleUpdateDays}
+                  onClose={handleCloseTemplate}
                 />
               </div>
-            )}
 
-            <TemplateManager
-              templateToEdit={selectedTemplate}
-              onUpdateTemplate={handleUpdateTemplate}
-              onUpdateDays={handleUpdateDays}
-              onClose={handleCloseTemplate}
-            />
-
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={handleCloseTemplate}>
-                Cancel
-              </Button>
-              <Button onClick={handleSaveTemplate}>
-                Save Template
-              </Button>
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                <Button variant="outline" onClick={handleCloseTemplate}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveTemplate}>
+                  Save Template
+                </Button>
+              </div>
             </div>
           </SheetContent>
         </Sheet>
