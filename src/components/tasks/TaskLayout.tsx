@@ -14,35 +14,46 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
   const resizeTimeoutRef = useRef<number>();
+  const rafIdRef = useRef<number>();
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     const element = containerRef.current;
-    let frameId: number;
     
-    const observer = new ResizeObserver((entries) => {
-      // Clear any existing timeout
+    const handleResize = (entries: ResizeObserverEntry[]) => {
+      // Clear any existing timeout and RAF
       if (resizeTimeoutRef.current) {
         window.clearTimeout(resizeTimeoutRef.current);
       }
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
       
-      // Debounce the resize handler
+      // Debounce and batch resize operations
       resizeTimeoutRef.current = window.setTimeout(() => {
-        frameId = requestAnimationFrame(() => {
-          if (containerRef.current) {
+        rafIdRef.current = requestAnimationFrame(() => {
+          if (!containerRef.current) return;
+          
+          // Get the computed style
+          const computedStyle = window.getComputedStyle(containerRef.current);
+          const currentHeight = parseFloat(computedStyle.height);
+          
+          // Only update if height needs adjusting
+          if (currentHeight > 0) {
             containerRef.current.style.minHeight = '0';
           }
         });
-      }, 100); // 100ms debounce
-    });
-
+      }, 150); // Increased debounce time for better performance
+    };
+    
+    const observer = new ResizeObserver(handleResize);
     observer.observe(element);
 
     return () => {
       observer.disconnect();
-      if (frameId) {
-        cancelAnimationFrame(frameId);
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
       }
       if (resizeTimeoutRef.current) {
         window.clearTimeout(resizeTimeoutRef.current);
@@ -70,3 +81,4 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     </div>
   );
 };
+
