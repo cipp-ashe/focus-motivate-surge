@@ -1,6 +1,5 @@
 
 import { Tag } from "./core";
-import { Quote } from "./timer";
 
 export interface TaskMetrics {
   expectedTime: number;
@@ -41,3 +40,4 @@ export interface TaskContextType {
   clearTasks: () => void;
   clearCompletedTasks: () => void;
 }
+

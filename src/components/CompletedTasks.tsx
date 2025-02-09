@@ -79,7 +79,12 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     ...task,
     tags: [
       ...(task.tags || []),
-      { name: 'Completed', color: 'green' as const }
+      {
+        id: 'completed-tag',
+        name: 'Completed',
+        color: 'green',
+        createdAt: new Date().toISOString()
+      } as Tag
     ]
   }));
 
