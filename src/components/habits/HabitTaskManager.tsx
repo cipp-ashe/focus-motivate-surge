@@ -35,28 +35,36 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
 
   useEffect(() => {
     const dismissedHabits = getDismissedHabits();
+    
+    // Filter timer habits that aren't dismissed
     const timerHabits = todaysHabits.filter(habit => 
       habit.metrics?.type === 'timer' && !dismissedHabits.includes(habit.id)
     );
-    const activeHabitIds = timerHabits.map(habit => `habit-${habit.id}`);
     
-    // Only remove habit-related tasks
-    const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
-    const tasksToRemove = habitTasks.filter(task => !activeHabitIds.includes(task.id));
-    
-    // Remove only inactive habit tasks
+    // Create a map of existing habit task IDs
+    const existingHabitTaskIds = new Set(
+      tasks
+        .filter(task => task.id.startsWith('habit-'))
+        .map(task => task.id)
+    );
+
+    // Remove inactive habit tasks
+    const activeHabitIds = new Set(timerHabits.map(habit => `habit-${habit.id}`));
+    const tasksToRemove = tasks.filter(task => 
+      task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
+    );
+
     tasksToRemove.forEach(task => {
       actions.deleteTask(task.id);
-      const habitId = task.relationships?.habitId;
-      if (habitId) {
-        actions.removeRelationship(task.id, habitId);
+      if (task.relationships?.habitId) {
+        actions.removeRelationship(task.id, task.relationships.habitId);
       }
     });
 
-    // Add new timer habit tasks
+    // Add new timer habit tasks (only if they don't exist)
     timerHabits.forEach(habit => {
       const taskId = `habit-${habit.id}`;
-      if (!tasks.some(t => t.id === taskId)) {
+      if (!existingHabitTaskIds.has(taskId)) {
         const target = habit.metrics?.target || 1500;
         
         actions.addTask({
@@ -73,10 +81,11 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           targetType: 'habit',
           relationType: 'habit-task'
         });
+        
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits, tasks]);
+  }, [todaysHabits]);
 
   return null;
 };
