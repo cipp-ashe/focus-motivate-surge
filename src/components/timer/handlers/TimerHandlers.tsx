@@ -84,7 +84,7 @@ export const useTimerHandlers = ({
     pause();
     setPauseTimeLeft(300); // 5 minutes in seconds
     pauseTimerRef.current = setInterval(() => {
-      setPauseTimeLeft(prev => {
+      setPauseTimeLeft((prev: number) => {
         if (prev <= 1) {
           clearInterval(pauseTimerRef.current);
           playSound();
