@@ -1,7 +1,7 @@
 import { TaskSummary, DailySummary, NotesSummary } from "../types/summary";
 import { Quote } from "../types/timer";
 import { TimerMetrics } from "../types/metrics";
-import { Note } from "@/components/notes/Notes";
+import { Note } from "@/types/notes";
 
 const formatDuration = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
@@ -42,40 +42,9 @@ export const formatDailySummary = (
   favoriteQuotes: Quote[],
   notes?: Note[]
 ): DailySummary => {
-  console.log('Summary Formatter - Input tasks:', completedTasks.map(task => ({
-    taskName: task.taskName,
-    metrics: task.metrics ? {
-      expectedTime: task.metrics.expectedTime,
-      actualDuration: task.metrics.actualDuration,
-      netEffectiveTime: task.metrics.netEffectiveTime,
-      efficiencyRatio: task.metrics.efficiencyRatio
-    } : null
-  })));
-
   const metrics = completedTasks
     .map(task => task.metrics)
     .filter((metrics): metrics is TimerMetrics => metrics !== undefined);
-
-  console.log('Summary Formatter - Filtered metrics:', metrics.map(m => ({
-    expectedTime: m.expectedTime,
-    actualDuration: m.actualDuration,
-    netEffectiveTime: m.netEffectiveTime,
-    efficiencyRatio: m.efficiencyRatio
-  })));
-
-  const totalTimeSpent = metrics.reduce((total, metric) => {
-    return total + (metric.actualDuration || 0);
-  }, 0);
-
-  const totalPlannedTime = metrics.reduce((total, metric) => {
-    return total + (metric.expectedTime || 0);
-  }, 0);
-
-  const totalPauses = metrics.reduce((total, metric) => {
-    return total + (metric.pauseCount || 0);
-  }, 0);
-
-  const averageEfficiency = calculateEfficiency(metrics);
 
   const formattedCompletedTasks = completedTasks.map(task => ({
     ...task,
@@ -85,7 +54,7 @@ export const formatDailySummary = (
       netEffectiveTime: formatDuration(task.metrics.netEffectiveTime),
       efficiency: task.metrics.efficiencyRatio,
       pauseCount: task.metrics.pauseCount,
-      favoriteQuotes: task.metrics.favoriteQuotes,
+      favoriteQuotes: task.metrics.favoriteQuotes || [],
     } : null
   }));
 
@@ -93,10 +62,10 @@ export const formatDailySummary = (
     date: new Date().toISOString(),
     completedTasks: formattedCompletedTasks,
     unfinishedTasks,
-    totalTimeSpent,
-    totalPlannedTime,
-    totalPauses,
-    averageEfficiency,
+    totalTimeSpent: metrics.reduce((total, metric) => total + (metric.actualDuration || 0), 0),
+    totalPlannedTime: metrics.reduce((total, metric) => total + (metric.expectedTime || 0), 0),
+    totalPauses: metrics.reduce((total, metric) => total + (metric.pauseCount || 0), 0),
+    averageEfficiency: calculateEfficiency(metrics),
     favoriteQuotes,
     notes: notes ? formatNotesSummary(notes) : undefined,
   };

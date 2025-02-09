@@ -9,13 +9,14 @@ import { downloadAllNotes } from '@/utils/downloadUtils';
 import { useNotes, type Note, type TagColor } from '@/hooks/useNotes';
 
 interface SavedNotesProps {
+  onOpenEmailModal?: () => void;
   onEditNote?: (note: Note) => void;
   onUpdateTagColor?: (noteId: string, tagName: string, color: TagColor) => void;
 }
 
 const MAX_NOTES = 4;
 
-export const SavedNotes = ({ onEditNote, onUpdateTagColor }: SavedNotesProps) => {
+export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: SavedNotesProps) => {
   const { 
     notes,
     deleteNote,

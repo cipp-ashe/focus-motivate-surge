@@ -8,7 +8,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Link } from 'react-router-dom';
 import { sendNotesSummaryEmail } from '@/lib/supabase';
 import { toast } from 'sonner';
-import type { Note } from '@/components/notes/Notes';
+import type { Note } from '@/types/notes';
 
 export default function NotesPage() {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);

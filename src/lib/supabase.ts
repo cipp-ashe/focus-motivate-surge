@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
 
+import { createClient } from '@supabase/supabase-js';
 import { DailySummary } from '../types/summary';
-import { Note } from '@/components/notes/Notes';
+import { Note } from '@/types/notes';
 import { formatNotesSummary } from '@/utils/summaryFormatter';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

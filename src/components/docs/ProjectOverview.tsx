@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { List, Quote as QuoteIcon, Package, Layers, Code, Settings2 } from "lucide-react";
 import {
@@ -305,4 +304,3 @@ export const ProjectOverview: React.FC = () => {
     </section>
   );
 };
-

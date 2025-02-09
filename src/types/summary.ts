@@ -1,7 +1,6 @@
-
 import { TimerMetrics } from "./metrics";
 import { Quote } from "./timer";
-import { Note } from "@/components/notes/Notes";
+import { Note } from "@/types/notes";
 
 export interface FormattedMetrics {
   plannedDuration: string;

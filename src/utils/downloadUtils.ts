@@ -2,16 +2,31 @@ import { format } from 'date-fns';
 import type { Note, Tag } from '@/hooks/useNotes';
 import { toast } from 'sonner';
 
+interface SaveFileParams {
+  content: string;
+  filename: string;
+  mimeType: string;
+}
+
+interface ElectronWindow extends Window {
+  electron?: {
+    minimize: () => Promise<void>;
+    maximize: () => Promise<void>;
+    close: () => Promise<void>;
+    saveFile?: (params: SaveFileParams) => Promise<void>;
+  };
+}
+
+declare const window: ElectronWindow;
+
 /**
  * Downloads content using appropriate method for web or electron
  */
 export const downloadContent = async (content: string, filename: string, mimeType: string = 'text/plain') => {
   try {
-    // Check if running in Electron
     if (window.electron?.saveFile) {
       try {
         console.log('Attempting Electron download...');
-        // Use Electron's save method
         await window.electron.saveFile({
           content,
           filename,
@@ -21,18 +36,15 @@ export const downloadContent = async (content: string, filename: string, mimeTyp
         toast.success('File downloaded successfully');
       } catch (error) {
         console.error('Electron save failed, falling back to web download:', error);
-        // Fall back to web download if Electron save fails
         webDownload(content, filename, mimeType);
       }
     } else {
       console.log('Using web download...');
-      // Web download
       webDownload(content, filename, mimeType);
     }
   } catch (error) {
     console.error('Error downloading file:', error);
     toast.error('Failed to download file');
-    // Try one last time with web download
     try {
       webDownload(content, filename, mimeType);
     } catch (fallbackError) {
