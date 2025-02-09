@@ -3,7 +3,7 @@ import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ActiveTemplate } from './types';
+import { ActiveTemplate, DayOfWeek } from './types';
 import TemplateManager from './TemplateManager';
 
 interface TemplateConfigurationSheetProps {
@@ -13,7 +13,7 @@ interface TemplateConfigurationSheetProps {
   onNewTemplateNameChange: (value: string) => void;
   onClose: () => void;
   onUpdateTemplate: (updates: Partial<ActiveTemplate>) => void;
-  onUpdateDays: (days: any[]) => void;
+  onUpdateDays: (templateId: string, days: DayOfWeek[]) => void;
   onSave: () => void;
 }
 
@@ -62,7 +62,7 @@ const TemplateConfigurationSheet: React.FC<TemplateConfigurationSheetProps> = ({
             <TemplateManager
               templateToEdit={selectedTemplate}
               onUpdateTemplate={onUpdateTemplate}
-              onUpdateDays={onUpdateDays}
+              onUpdateDays={(days) => onUpdateDays(selectedTemplate.templateId, days)}
               onClose={onClose}
               onSave={onSave}
             />
