@@ -4,7 +4,7 @@ import { NotesEditor } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
 import type { NotesProps } from '@/types/notes';
 
-export const Notes: React.FC<NotesProps> = ({ hideNotes, onOpenEmailModal }) => {
+export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 min-h-0 mb-4">
@@ -12,9 +12,8 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes, onOpenEmailModal }) => 
       </div>
 
       {!hideNotes && (
-        <SavedNotes onOpenEmailModal={onOpenEmailModal} />
+        <SavedNotes />
       )}
     </div>
   );
 };
-

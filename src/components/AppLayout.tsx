@@ -1,9 +1,5 @@
 
-import React, { useState } from 'react';
-import { EmailSummaryModal } from './EmailSummaryModal';
-import { sendNotesSummaryEmail } from '@/lib/supabase';
-import { toast } from 'sonner';
-import { type Note } from '@/types/notes';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { Notes } from './notes/Notes';
 import { ArrowLeft } from 'lucide-react';
@@ -17,35 +13,8 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const { isOpen: isNotesOpen, close: handleCloseNotes } = useNotesPanel();
   const { isOpen: isHabitsOpen, close: handleCloseHabits } = useHabitsPanel();
-
-  const handleSendSummary = async (email: string, clearNotes?: boolean) => {
-    try {
-      const savedNotes = localStorage.getItem('notes');
-      const allNotes: Note[] = savedNotes ? JSON.parse(savedNotes) : [];
-      
-      // Sort notes by creation date, newest first
-      const sortedNotes = [...allNotes].sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      
-      await sendNotesSummaryEmail(email, sortedNotes, clearNotes);
-
-      if (clearNotes) {
-        localStorage.removeItem('notes');
-        localStorage.removeItem('noteTags');
-        window.location.reload();
-      }
-
-      toast.success('Notes summary sent 📧✨');
-    } catch (error) {
-      console.error('Error sending summary:', error);
-      toast.error('Failed to send summary email 📧❌');
-      throw error;
-    }
-  };
 
   const handleCloseHabitsAndRefresh = () => {
     handleCloseHabits();
@@ -100,7 +69,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
             <div className="flex-1 px-4 pb-7 overflow-hidden">
               <div className="relative bg-card/90 backdrop-blur-md shadow-lg rounded-lg p-6 h-full before:absolute before:inset-0 before:rounded-lg before:p-[1px] before:bg-gradient-to-r before:from-primary/20 before:via-purple-500/20 before:to-primary/20 before:-z-10 after:absolute after:inset-[1px] after:rounded-[7px] after:bg-card/90 after:-z-10">
-                <Notes onOpenEmailModal={() => setIsEmailModalOpen(true)} />
+                <Notes />
               </div>
             </div>
           </div>
@@ -135,15 +104,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             </div>
           </div>
         </div>
-
-        <EmailSummaryModal
-          isOpen={isEmailModalOpen}
-          onClose={() => setIsEmailModalOpen(false)}
-          onSubmit={handleSendSummary}
-          type="notes"
-        />
       </div>
     </div>
   );
 };
-
