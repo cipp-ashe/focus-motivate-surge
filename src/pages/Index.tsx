@@ -133,23 +133,25 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
-      <div className="max-w-7xl mx-auto px-4 py-7">
+    <div className="min-h-screen h-full flex flex-col bg-background transition-colors duration-300">
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-7 w-full overflow-hidden flex flex-col">
         <Header 
           onNotesClick={handleNotesClick}
           onHabitsClick={handleHabitsClick}
         />
 
-        <TaskManager
-          initialTasks={tasks}
-          initialCompletedTasks={initialCompletedTasks}
-          initialFavorites={favorites}
-          onTasksUpdate={handleTasksUpdate}
-          onCompletedTasksUpdate={handleCompletedTasksUpdate}
-          onFavoritesChange={handleFavoritesUpdate}
-          selectedTaskId={selectedTaskId}
-          onTaskSelect={setSelectedTaskId}
-        />
+        <div className="flex-1 overflow-hidden">
+          <TaskManager
+            initialTasks={tasks}
+            initialCompletedTasks={initialCompletedTasks}
+            initialFavorites={favorites}
+            onTasksUpdate={handleTasksUpdate}
+            onCompletedTasksUpdate={handleCompletedTasksUpdate}
+            onFavoritesChange={handleFavoritesUpdate}
+            selectedTaskId={selectedTaskId}
+            onTaskSelect={setSelectedTaskId}
+          />
+        </div>
       </div>
     </div>
   );

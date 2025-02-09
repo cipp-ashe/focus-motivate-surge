@@ -24,13 +24,11 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     const observer = new ResizeObserver((entries) => {
       if (isProcessingRef.current) return;
       
-      // Use requestAnimationFrame to batch updates
       rafId = requestAnimationFrame(() => {
         isProcessingRef.current = true;
         
         entries.forEach(entry => {
           if (entry.target === element && document.contains(element)) {
-            // Force a reflow only when dimensions actually change
             const { width, height } = entry.contentRect;
             if (width > 0 && height > 0) {
               element.style.display = 'none';
@@ -40,10 +38,7 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
           }
         });
         
-        // Reset the processing flag after a short delay
-        setTimeout(() => {
-          isProcessingRef.current = false;
-        }, 100);
+        isProcessingRef.current = false;
       });
     });
 
@@ -62,19 +57,20 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     <div 
       ref={containerRef}
       className={cn(
-        "grid grid-cols-1 gap-4 sm:gap-6",
+        "grid grid-cols-1 gap-4 sm:gap-6 min-h-0 w-full overflow-y-auto",
         !(isNotesOpen || isHabitsOpen) && "lg:grid-cols-2"
       )}
     >
       {/* Task List */}
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-4 sm:space-y-6 min-h-0 overflow-y-auto">
         {taskList}
       </div>
 
       {/* Timer Container */}
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-4 sm:space-y-6 min-h-0 overflow-y-auto">
         {timer}
       </div>
     </div>
   );
 };
+
