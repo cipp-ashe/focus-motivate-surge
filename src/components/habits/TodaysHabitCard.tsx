@@ -17,6 +17,13 @@ interface HabitRowProps {
 const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
   const isDurationHabit = habit.metrics.type === 'duration';
   
+  const handleTimerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onStart) {
+      onStart();
+    }
+  };
+  
   return (
     <div className="flex items-center justify-between p-3 bg-card hover:bg-accent/50 rounded-md transition-colors">
       <div className="flex items-center gap-3">
@@ -39,7 +46,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
             <Button
               variant="ghost"
               size="icon"
-              onClick={onStart}
+              onClick={handleTimerClick}
               className="h-8 w-8"
             >
               <Timer className="h-4 w-4" />
