@@ -16,16 +16,14 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     const habitsForToday = activeTemplates.flatMap(template => {
       if (template.activeDays.includes(dayOfWeek)) {
         return template.habits.map(habit => {
-          // Add appropriate tag based on habit type if not already present
-          const tags = getEntityTags(habit.id, 'habit');
-          if (!tags.length) {
-            if (habit.metrics.type === 'timer') {
-              addTagToEntity('TimerHabit', habit.id, 'habit');
-            } else if (habit.metrics.type === 'note') {
-              addTagToEntity('NoteHabit', habit.id, 'habit');
-            } else {
-              addTagToEntity('StandardHabit', habit.id, 'habit');
-            }
+          const taskId = `habit-${habit.id}`;
+          // Add tags only if they don't exist
+          const existingTags = getEntityTags(taskId, 'task');
+          if (!existingTags.some(tag => tag.name === 'Habit')) {
+            addTagToEntity('Habit', taskId, 'task');
+          }
+          if (habit.metrics.type === 'timer' && !existingTags.some(tag => tag.name === 'TimerHabit')) {
+            addTagToEntity('TimerHabit', taskId, 'task');
           }
           return habit;
         });

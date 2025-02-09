@@ -2,7 +2,7 @@
 import { useEffect, useCallback, useMemo } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
-import type { Task } from "@/components/tasks/TaskList";
+import type { Task } from "@/types/tasks";
 import type { ActiveTemplate } from "@/components/habits/types";
 import { toast } from "sonner";
 
@@ -14,7 +14,7 @@ interface HabitTaskManagerProps {
 
 export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
-  const { addTagToEntity, getEntityTags } = useTagSystem();
+  const { getEntityTags } = useTagSystem();
 
   // Memoize non-habit tasks
   const nonHabitTasks = useMemo(() => {
@@ -34,28 +34,15 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         duration = habit.metrics.target;
       }
 
-      const task = {
+      return {
         id: taskId,
         name: habit.name,
         completed: existingTask?.completed || false,
         duration,
         createdAt: existingTask?.createdAt || new Date().toISOString(),
       };
-
-      // Add appropriate tags for the task
-      if (!existingTask) {
-        addTagToEntity('Habit', taskId, 'task');
-        // Add corresponding type tag based on the habit type
-        if (habit.metrics.type === 'timer') {
-          addTagToEntity('TimerHabit', taskId, 'task');
-        } else if (habit.metrics.type === 'note') {
-          addTagToEntity('NoteHabit', taskId, 'task');
-        }
-      }
-
-      return task;
     });
-  }, [todaysHabits, tasks, addTagToEntity]);
+  }, [todaysHabits, tasks]);
 
   // Initialize tasks on first render if there are habits but no tasks
   useEffect(() => {
