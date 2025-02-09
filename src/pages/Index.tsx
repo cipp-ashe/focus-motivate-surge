@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TaskManager } from "@/components/tasks/TaskManager";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
@@ -46,8 +46,8 @@ const Index = () => {
     }
   });
 
-  // Load active templates from localStorage
-  const [activeTemplates] = useState<ActiveTemplate[]>(() => {
+  // Load active templates from localStorage and update when they change
+  const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
       const saved = localStorage.getItem('habit-templates');
       return saved ? JSON.parse(saved) : [];
@@ -56,6 +56,24 @@ const Index = () => {
       return [];
     }
   });
+
+  // Listen for template updates
+  useEffect(() => {
+    const handleTemplateUpdate = () => {
+      const saved = localStorage.getItem('habit-templates');
+      if (saved) {
+        setActiveTemplates(JSON.parse(saved));
+      }
+    };
+
+    window.addEventListener('storage', handleTemplateUpdate);
+    window.addEventListener('templatesUpdated', handleTemplateUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleTemplateUpdate);
+      window.removeEventListener('templatesUpdated', handleTemplateUpdate);
+    };
+  }, []);
 
   const { todaysHabits } = useTodaysHabits(activeTemplates);
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);

@@ -13,6 +13,8 @@ export const useTemplateManagement = () => {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTemplates));
+    // Dispatch event when templates are updated
+    window.dispatchEvent(new Event('templatesUpdated'));
   }, [activeTemplates]);
 
   const addTemplate = useCallback((template: HabitTemplate | ActiveTemplate) => {
