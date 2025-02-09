@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { TaskManager } from "@/components/tasks/TaskManager";
@@ -62,7 +61,7 @@ const Index = () => {
     }
   });
 
-  const { todaysHabits, convertHabitToTask } = useTodaysHabits(activeTemplates);
+  const { todaysHabits } = useTodaysHabits(activeTemplates);
 
   const handleNotesClick = () => {
     closeHabits();
@@ -92,8 +91,14 @@ const Index = () => {
   };
 
   const handleAddHabitToTasks = (habit: HabitDetail) => {
-    const task = convertHabitToTask(habit);
-    handleTasksUpdate([task, ...tasks]);
+    const newTask: Task = {
+      id: `habit-task-${habit.id}`,
+      name: habit.name,
+      completed: false,
+      duration: habit.duration || 25,
+      metrics: undefined
+    };
+    handleTasksUpdate([newTask, ...tasks]);
     toast.success(`Added "${habit.name}" to tasks`);
   };
 
