@@ -35,15 +35,15 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
           onDragStart={(e) => onDragStart(e, index)}
           onDragOver={(e) => onDragOver(e, index)}
           onDragEnd={onDragEnd}
-          className={`p-4 transition-all duration-200 ${
+          className={`p-3 transition-all duration-200 ${
             draggedIndex === index 
               ? 'ring-2 ring-primary shadow-lg scale-[1.02] opacity-90' 
               : ''
           }`}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-2">
             <div 
-              className="cursor-grab active:cursor-grabbing touch-none"
+              className="cursor-grab active:cursor-grabbing touch-none mt-2"
               onMouseDown={() => {}}
               onTouchStart={() => {}}
             >
@@ -54,12 +54,12 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
               variant="ghost"
               size="icon"
               onClick={() => onDeleteHabit(index)}
-              className="h-9 w-9"
+              className="h-8 w-8 mt-1"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
 
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-7 gap-4">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-6 gap-2">
               <Input
                 className="sm:col-span-3"
                 placeholder="Habit name"
@@ -93,7 +93,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 
               {habit.metrics.type !== 'boolean' && (
                 <Input
-                  className="sm:col-span-2"
+                  className="sm:col-span-1"
                   type="number"
                   placeholder="Target"
                   value={habit.metrics.target || ''}
@@ -116,3 +116,4 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 };
 
 export default DraggableHabitList;
+

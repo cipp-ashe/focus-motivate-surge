@@ -40,50 +40,49 @@ const DialogContent: React.FC<DialogContentProps> = ({
   onSave,
 }) => {
   return (
-    <ShadcnDialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
-      <div className="flex-1 overflow-y-auto px-1">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">Active Days</h3>
-            <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
+    <ShadcnDialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col overflow-hidden">
+      <div className="flex flex-col h-full space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium">Active Days</h3>
+          <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
+        </div>
+        
+        <div className="flex-1 min-h-0">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">Configure Habits</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onAddHabit}
+              className="gap-1"
+            >
+              <Plus className="h-4 w-4" />
+              Add Habit
+            </Button>
           </div>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Configure Habits</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onAddHabit}
-                className="gap-1"
-              >
-                <Plus className="h-4 w-4" />
-                Add Habit
-              </Button>
-            </div>
 
-            <div className="space-y-4">
-              <DraggableHabitList
-                habits={habits}
-                draggedIndex={draggedIndex}
-                onDragStart={onDragStart}
-                onDragOver={onDragOver}
-                onDragEnd={onDragEnd}
-                onUpdateHabit={onUpdateHabit}
-                onDeleteHabit={onDeleteHabit}
-              />
-            </div>
+          <div className="overflow-y-auto pr-2 h-full pb-4">
+            <DraggableHabitList
+              habits={habits}
+              draggedIndex={draggedIndex}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDragEnd={onDragEnd}
+              onUpdateHabit={onUpdateHabit}
+              onDeleteHabit={onDeleteHabit}
+            />
           </div>
         </div>
-      </div>
 
-      <DialogFooter
-        onSaveAsTemplate={onSaveAsTemplate}
-        onClose={onClose}
-        onSave={onSave}
-      />
+        <DialogFooter
+          onSaveAsTemplate={onSaveAsTemplate}
+          onClose={onClose}
+          onSave={onSave}
+        />
+      </div>
     </ShadcnDialogContent>
   );
 };
 
 export default DialogContent;
+
