@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, GripVertical, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,7 +34,14 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   onSave,
 }) => {
   const { height } = useWindowSize();
-  const maxHeight = height ? `${Math.max(400, height - 200)}px` : '600px';
+  const [containerHeight, setContainerHeight] = useState('600px');
+
+  useEffect(() => {
+    if (height) {
+      const newHeight = Math.max(400, height - 200);
+      setContainerHeight(`${newHeight}px`);
+    }
+  }, [height]);
 
   if (templateToEdit) {
     return (
@@ -84,7 +91,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
               </Button>
             </div>
 
-            <ScrollArea className="h-[calc(100vh-26rem)]" style={{ maxHeight: `calc(${maxHeight} - 12rem)` }}>
+            <ScrollArea className="relative" style={{ height: `calc(${containerHeight} - 12rem)` }}>
               <div className="space-y-2 pr-4">
                 {(templateToEdit.habits || []).map((habit, index) => (
                   <div
@@ -125,7 +132,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   }
 
   return (
-    <ScrollArea className="h-full" style={{ maxHeight }}>
+    <ScrollArea className="relative" style={{ height: containerHeight }}>
       <div className="space-y-3 p-4">
         <Button 
           onClick={onCreateTemplate}
