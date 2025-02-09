@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useAudio } from "@/hooks/useAudio";
-import { useTimerState } from "@/hooks/timer/useTimerState";
+import { useTimer } from "@/hooks/timer/useTimer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { CompletionCelebration } from "./CompletionCelebration";
 import { FloatingQuotes } from "../quotes/FloatingQuotes";
@@ -41,12 +41,11 @@ export const Timer = ({
     metrics,
     start,
     pause,
-    incrementFavorites,
-    addTime: addMinutes,
+    reset,
+    addTime,
     setMinutes,
     completeTimer,
-    reset: resetTimer,
-  } = useTimerState({
+  } = useTimer({
     initialDuration: durationInSeconds,
     onTimeUp: async () => {
       try {
@@ -77,22 +76,17 @@ export const Timer = ({
       if (isExpanded) {
         expandedViewRef.current?.saveNotes();
       }
-
-      const finalMetrics = await completeTimer();
-      if (!finalMetrics) {
-        toast.error("An error occurred while completing the timer ⚠️");
-        return;
-      }
+      await completeTimer();
       await playSound();
       setTimeout(() => {
-        setCompletionMetrics(finalMetrics);
+        setCompletionMetrics(metrics);
         setShowCompletion(true);
       }, 0);
     } catch (error) {
       console.error('Error in timer completion flow:', error);
       toast.error("An error occurred while completing the timer ⚠️");
     }
-  }, [completeTimer, playSound, isExpanded]);
+  }, [completeTimer, playSound, isExpanded, metrics]);
 
   const handleComplete = useCallback(async () => {
     setShowConfirmation(false);
@@ -101,21 +95,13 @@ export const Timer = ({
 
   const handleAddTimeAndContinue = useCallback(() => {
     setShowConfirmation(false);
-    addMinutes(ADD_TIME_MINUTES);
+    addTime(ADD_TIME_MINUTES);
     if (typeof onAddTime === 'function') {
       onAddTime();
     }
     start();
     toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
-  }, [addMinutes, onAddTime, start]);
-
-  useEffect(() => {
-    if (duration) {
-      const newMinutes = Math.floor(duration / 60);
-      setInternalMinutes(newMinutes);
-      setMinutes(newMinutes);
-    }
-  }, [duration, setMinutes]);
+  }, [addTime, onAddTime, start]);
 
   const handleMinutesChange = useCallback((newMinutes: number) => {
     const clampedMinutes = Math.min(Math.max(newMinutes, 1), 60);
@@ -178,18 +164,18 @@ export const Timer = ({
     setShowCompletion(false);
     setIsExpanded(false);
     setCompletionMetrics(null);
-    resetTimer();
+    reset();
     
     toast.success("Task completed! You're crushing it! 🎯🎉");
-  }, [onComplete, completionMetrics, resetTimer]);
+  }, [onComplete, completionMetrics, reset]);
 
   const handleAddTime = useCallback(() => {
-    addMinutes(ADD_TIME_MINUTES);
+    addTime(ADD_TIME_MINUTES);
     if (typeof onAddTime === 'function') {
       onAddTime();
     }
     toast.success(`Added ${ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
-  }, [addMinutes, onAddTime]);
+  }, [addTime, onAddTime]);
 
   const handleCloseTimer = useCallback(() => {
     if (!showCompletion) {
@@ -253,7 +239,7 @@ export const Timer = ({
             }}
             metrics={metrics}
             onClose={handleCloseTimer}
-            onLike={incrementFavorites}
+            onLike={() => updateMetrics(prev => ({ favoriteQuotes: prev.favoriteQuotes + 1 }))}
             favorites={favorites}
             setFavorites={setFavorites}
           />
@@ -275,7 +261,7 @@ export const Timer = ({
               setIsExpanded(true);
             }
           }}
-          onLike={incrementFavorites}
+          onLike={() => updateMetrics(prev => ({ favoriteQuotes: prev.favoriteQuotes + 1 }))}
           favorites={favorites}
           setFavorites={setFavorites}
         />

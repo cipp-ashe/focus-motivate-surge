@@ -41,17 +41,21 @@ export const useTimerActions = ({
     updateIsRunning(true);
     updateMetrics({
       startTime: new Date(),
+      isPaused: false,
+      pausedTimeLeft: null
     });
     toast.success("Timer started ⏱️🚀");
   }, [updateIsRunning, updateMetrics]);
 
   const pause = useCallback(() => {
     updateIsRunning(false);
-    updateMetrics(prev => ({
-      pauseCount: prev.pauseCount + 1,
-      lastPauseTimestamp: new Date()
-    }));
-  }, [updateIsRunning, updateMetrics]);
+    updateMetrics({
+      pauseCount: prev => prev.pauseCount + 1,
+      lastPauseTimestamp: new Date(),
+      isPaused: true,
+      pausedTimeLeft: timeLeft
+    });
+  }, [updateIsRunning, updateMetrics, timeLeft]);
 
   const reset = useCallback(() => {
     const newSeconds = minutes * 60;
@@ -69,7 +73,9 @@ export const useTimerActions = ({
       extensionTime: 0,
       netEffectiveTime: 0,
       efficiencyRatio: 0,
-      completionStatus: 'Completed On Time'
+      completionStatus: 'Completed On Time',
+      isPaused: false,
+      pausedTimeLeft: null
     });
   }, [minutes, updateIsRunning, updateTimeLeft, updateMetrics]);
 
@@ -77,21 +83,23 @@ export const useTimerActions = ({
     const additionalSeconds = additionalMinutes * 60;
     updateTimeLeft(timeLeft + additionalSeconds);
     updateMinutes(minutes + additionalMinutes);
-    updateMetrics(prev => ({
-      extensionTime: prev.extensionTime + additionalSeconds,
-      expectedTime: prev.expectedTime + additionalSeconds
-    }));
+    updateMetrics({
+      extensionTime: prev => prev.extensionTime + additionalSeconds,
+      expectedTime: prev => prev.expectedTime + additionalSeconds
+    });
     toast.success(`+${additionalMinutes}m added ⌛💪`);
   }, [timeLeft, minutes, updateTimeLeft, updateMinutes, updateMetrics]);
 
   const completeTimer = useCallback(() => {
     updateIsRunning(false);
-    updateMetrics(prev => ({
+    updateMetrics({
       endTime: new Date(),
-      actualDuration: prev.startTime 
+      actualDuration: prev => prev.startTime 
         ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
         : prev.actualDuration,
-    }));
+      isPaused: false,
+      pausedTimeLeft: null
+    });
   }, [updateIsRunning, updateMetrics]);
 
   return {

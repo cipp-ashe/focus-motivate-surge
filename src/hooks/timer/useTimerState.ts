@@ -20,14 +20,20 @@ export const useTimerState = (initialDuration: number) => {
     extensionTime: 0,
     netEffectiveTime: 0,
     efficiencyRatio: 0,
-    completionStatus: 'Completed On Time'
+    completionStatus: 'Completed On Time',
+    isPaused: false,
+    pausedTimeLeft: null
   });
 
   const isMountedRef = useRef(true);
 
-  const updateTimeLeft = useCallback((newTimeLeft: number) => {
+  const updateTimeLeft = useCallback((newTimeLeft: number | ((prev: number) => number)) => {
     if (!isMountedRef.current) return;
-    setTimeLeft(newTimeLeft);
+    if (typeof newTimeLeft === 'function') {
+      setTimeLeft(prev => newTimeLeft(prev));
+    } else {
+      setTimeLeft(newTimeLeft);
+    }
   }, []);
 
   const updateMinutes = useCallback((newMinutes: number) => {
@@ -40,9 +46,12 @@ export const useTimerState = (initialDuration: number) => {
     setIsRunning(running);
   }, []);
 
-  const updateMetrics = useCallback((updates: Partial<TimerMetrics>) => {
+  const updateMetrics = useCallback((updates: Partial<TimerMetrics> | ((prev: TimerMetrics) => Partial<TimerMetrics>)) => {
     if (!isMountedRef.current) return;
-    setMetrics(prev => ({ ...prev, ...updates }));
+    setMetrics(prev => {
+      const newUpdates = typeof updates === 'function' ? updates(prev) : updates;
+      return { ...prev, ...newUpdates };
+    });
   }, []);
 
   return {

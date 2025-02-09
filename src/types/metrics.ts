@@ -1,3 +1,4 @@
+
 export interface TimerMetrics {
   startTime: Date | null;
   endTime: Date | null;
@@ -11,6 +12,8 @@ export interface TimerMetrics {
   netEffectiveTime: number;  // Computed as: actualDuration - pausedTime + extensionTime
   efficiencyRatio: number;   // Computed as: (expectedTime / netEffectiveTime) * 100
   completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
+  isPaused: boolean;
+  pausedTimeLeft: number | null;
 }
 
 export interface MetricsDisplayProps {
@@ -18,7 +21,4 @@ export interface MetricsDisplayProps {
   taskName: string;
 }
 
-export interface TimerStateMetrics extends TimerMetrics {
-  isPaused: boolean;
-  pausedTimeLeft: number | null;
-}
+export type TimerStateMetrics = TimerMetrics;
