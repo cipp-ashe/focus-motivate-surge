@@ -1,12 +1,16 @@
 
 import { Clock, Pause, Quote, Timer, CheckCircle2, AlertTriangle } from "lucide-react";
-import { Task } from "./TaskList";
+import { Task } from "@/types/tasks";
 import { TableCell, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
-import { NoteTags } from "../notes/components/NoteTags";
+import { TaskTags } from "./TaskTags";
 import { formatDate, formatDuration, getCompletionStatusColor, getCompletionIcon } from "@/utils/taskFormatUtils";
 
-export const TaskMetricsRow = ({ task }: { task: Task }) => {
+interface TaskMetricsRowProps {
+  task: Task;
+}
+
+export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
   const metrics = task.metrics || {
     expectedTime: 0,
     actualDuration: 0,
@@ -37,22 +41,17 @@ export const TaskMetricsRow = ({ task }: { task: Task }) => {
     }
   };
 
+  const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
+    e.stopPropagation();
+  };
+
   return (
     <TableRow className="bg-muted/50">
       <TableCell className="py-2">
         <div className="line-through text-muted-foreground">
           {task.name}
         </div>
-        {task.tags && task.tags.length > 0 && (
-          <div className="mt-1">
-            <NoteTags
-              tags={task.tags}
-              onAddTag={() => {}}
-              onRemoveTag={() => {}}
-              onTagClick={() => {}}
-            />
-          </div>
-        )}
+        <TaskTags task={task} preventPropagation={preventPropagation} />
         <div className="text-xs text-muted-foreground mt-1">
           {formatDate(task.createdAt)}
         </div>
@@ -104,3 +103,4 @@ export const TaskMetricsRow = ({ task }: { task: Task }) => {
     </TableRow>
   );
 };
+
