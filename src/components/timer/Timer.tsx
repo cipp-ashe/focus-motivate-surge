@@ -45,6 +45,7 @@ export const Timer = ({
     addTime,
     setMinutes,
     completeTimer,
+    updateMetrics,
   } = useTimer({
     initialDuration: durationInSeconds,
     onTimeUp: async () => {

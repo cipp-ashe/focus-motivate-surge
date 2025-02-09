@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useCallback } from "react";
 import { Task } from "@/components/tasks/TaskList";
 import { Quote } from "@/types/timer";
 import { TaskSummary } from "@/types/summary";
@@ -60,12 +61,14 @@ export const useTaskManager = ({
       const completedTaskSummaries: TaskSummary[] = completedTasks.map(task => ({
         taskName: task.name,
         completed: true,
-        metrics: {
+        metrics: task.metrics ? {
           ...task.metrics,
           startTime: null,
           endTime: null,
-          lastPauseTimestamp: null
-        },
+          lastPauseTimestamp: null,
+          isPaused: false,
+          pausedTimeLeft: null
+        } : undefined,
         relatedQuotes: favorites.filter(quote => quote.task === task.name),
       }));
 
@@ -76,7 +79,9 @@ export const useTaskManager = ({
           ...task.metrics,
           startTime: null,
           endTime: null,
-          lastPauseTimestamp: null
+          lastPauseTimestamp: null,
+          isPaused: false,
+          pausedTimeLeft: null
         } : undefined,
         relatedQuotes: favorites.filter(quote => quote.task === task.name),
       }));
@@ -116,3 +121,4 @@ export const useTaskManager = ({
     handleTaskDelete,
   };
 };
+

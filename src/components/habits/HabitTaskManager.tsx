@@ -35,20 +35,21 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
           ? habit.metrics.target 
           : parseInt(String(habit.metrics.target));
 
-        // Convert minutes to seconds, default to 25 minutes if parsing fails
-        const durationInSeconds = !isNaN(targetMinutes) 
-          ? targetMinutes * 60 
-          : 25 * 60;
+        // Ensure target is valid and greater than 0
+        if (isNaN(targetMinutes) || targetMinutes <= 0) {
+          console.warn(`Invalid duration for habit ${habit.name}`);
+          return null;
+        }
 
         return {
           id: `habit-${habit.id}`,
           name: habit.name,
           completed: false,
-          duration: durationInSeconds,
+          duration: targetMinutes, // Keep duration in minutes, not seconds
           createdAt: new Date().toISOString(),
           tags: [{ name: 'Habit', color: 'blue' }],
         };
-      });
+      }).filter(Boolean) as Task[];
 
       const newTasks = [...nonHabitTasks, ...habitTasks];
       const currentTasksStr = JSON.stringify(tasks);
@@ -64,3 +65,4 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
+
