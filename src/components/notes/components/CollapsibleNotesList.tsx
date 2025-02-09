@@ -1,33 +1,39 @@
-import React from 'react';
-import { 
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ActionButton } from '@/components/ui/action-button';
-import { ChevronDown, ChevronUp, Download, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Download, Trash2 } from 'lucide-react';
 import type { Note, Tag } from '@/hooks/useNotes';
-import { NoteCard } from './NoteCard';
-import { NotesDialog } from './NotesDialog';
+import { NoteCard } from './components/NoteCard';
+import { NotesDialog } from './components/NotesDialog';
+import { NotesPagination } from './components/NotesPagination';
+import { ActionButton } from '@/components/ui/action-button';
 import { downloadAllNotes } from '@/utils/downloadUtils';
+import { toast } from 'sonner';
 
-interface CollapsibleNotesListProps {
+interface CompactNotesListProps {
   notes: Note[];
   onEditNote?: (note: Note) => void;
   inExpandedView?: boolean;
 }
 
-export const CollapsibleNotesList = ({
+const MAX_NOTES = 4;
+
+export const CompactNotesList = ({ 
   notes,
   onEditNote,
   inExpandedView = false
-}: CollapsibleNotesListProps) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [showClearDialog, setShowClearDialog] = React.useState(false);
+}: CompactNotesListProps) => {
+  const [currentPage, setCurrentPage] = React.useState(0);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+
+  const totalPages = Math.ceil(notes.length / MAX_NOTES);
+  const paginatedNotes = notes.slice(
+    currentPage * MAX_NOTES,
+    (currentPage + 1) * MAX_NOTES
+  );
 
   const handleClearNotes = () => {
     localStorage.removeItem('notes');
     window.dispatchEvent(new Event('notesUpdated'));
+    toast.success("All notes cleared 🗑️");
   };
 
   const handleDeleteNote = (noteId: string) => {
@@ -37,6 +43,7 @@ export const CollapsibleNotesList = ({
       const newNotes = currentNotes.filter(note => note.id !== noteId);
       localStorage.setItem('notes', JSON.stringify(newNotes));
       window.dispatchEvent(new Event('notesUpdated'));
+      toast.success("Note deleted 🗑️");
     }
   };
 
@@ -79,32 +86,33 @@ export const CollapsibleNotesList = ({
   }
 
   return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      className="space-y-2"
-    >
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <CollapsibleTrigger className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-primary">
-          {isOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-          Recent Notes ({notes.length})
-        </CollapsibleTrigger>
-        <div className="flex items-center gap-1">
-          <ActionButton
-            icon={Download}
-            onClick={() => downloadAllNotes(notes)}
-            className="h-6 w-6 p-0"
-          />
-          <ActionButton
-            icon={Trash2}
-            onClick={() => setShowClearDialog(true)}
-            className="h-6 w-6 p-0"
+        <h3 className="text-xs font-medium text-muted-foreground">Recent Notes</h3>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <ActionButton
+              icon={Download}
+              onClick={() => downloadAllNotes(notes)}
+              className="h-6 w-6 p-0"
+            />
+            <ActionButton
+              icon={Trash2}
+              onClick={() => setShowClearDialog(true)}
+              className="h-6 w-6 p-0"
+            />
+          </div>
+          <NotesPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            compact
           />
         </div>
       </div>
 
-      <CollapsibleContent className="space-y-2">
-        {notes.map(note => (
+      <div className="grid gap-1.5">
+        {paginatedNotes.map(note => (
           <NoteCard
             key={note.id}
             note={note}
@@ -115,8 +123,9 @@ export const CollapsibleNotesList = ({
             compact
           />
         ))}
-      </CollapsibleContent>
+      </div>
 
+      {/* Clear Notes Dialog */}
       <NotesDialog
         open={showClearDialog}
         onOpenChange={setShowClearDialog}
@@ -127,6 +136,6 @@ export const CollapsibleNotesList = ({
         variant="destructive"
         inExpandedView={inExpandedView}
       />
-    </Collapsible>
+    </div>
   );
 };
