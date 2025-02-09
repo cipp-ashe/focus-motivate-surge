@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NotesEditor } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
