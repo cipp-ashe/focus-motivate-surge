@@ -27,7 +27,7 @@ export const TaskContent = ({
   onKeyDown,
   preventPropagation,
 }: TaskContentProps) => {
-  // Ensure we're actually getting minutes, not seconds
+  // Convert task duration from seconds to minutes, default to 25 if not set
   const durationInMinutes = task.duration ? Math.round(task.duration / 60) : 25;
 
   return (
@@ -57,4 +57,3 @@ export const TaskContent = ({
     </>
   );
 };
-
