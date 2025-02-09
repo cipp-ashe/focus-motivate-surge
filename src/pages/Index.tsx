@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { TaskManager } from "@/components/tasks/TaskManager";
-import { Moon, Sun, Code2, StickyNote, ActivitySquare, Plus, Timer, Circle, CheckCircle2 } from "lucide-react";
+import { Moon, Sun, Code2, StickyNote, ActivitySquare, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
@@ -14,6 +14,7 @@ import type { HabitDetail, ActiveTemplate } from "@/components/habits/types";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import TaskRow from "@/components/tasks/TaskRow";
 
 const Index = () => {
   const { isDark, toggleTheme } = useTheme(true);
@@ -63,6 +64,7 @@ const Index = () => {
   });
 
   const { todaysHabits } = useTodaysHabits(activeTemplates);
+  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
 
   const handleNotesClick = () => {
     closeHabits();
@@ -102,6 +104,22 @@ const Index = () => {
     handleTasksUpdate([newTask, ...tasks]);
     toast.success(`Added "${habit.name}" to tasks`);
   };
+
+  const handleHabitClick = (habit: HabitDetail) => {
+    if (completedHabits.includes(habit.id)) {
+      setCompletedHabits(prev => prev.filter(id => id !== habit.id));
+    } else {
+      setCompletedHabits(prev => [...prev, habit.id]);
+    }
+  };
+
+  const getHabitAsTask = (habit: HabitDetail): Task => ({
+    id: habit.id,
+    name: habit.name,
+    completed: completedHabits.includes(habit.id),
+    duration: habit.duration,
+    metrics: undefined
+  });
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
@@ -157,7 +175,7 @@ const Index = () => {
         />
 
         {todaysHabits.length > 0 && (
-          <Card className="mt-6 p-4 border-primary/20 bg-gradient-to-br from-card to-card/50 transform transition-all duration-300 hover:shadow-lg hover:scale-[1.01]">
+          <Card className="mt-6 p-4 border-primary/20 bg-gradient-to-br from-card to-card/50">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <Timer className="h-5 w-5 text-primary animate-pulse-slow" />
@@ -168,60 +186,29 @@ const Index = () => {
               </span>
             </div>
             <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {todaysHabits.map((habit) => (
-                  <div 
-                    key={habit.id} 
-                    className="flex flex-col p-4 rounded-lg bg-background/50 hover:bg-primary/5 transition-all duration-300 hover:translate-x-1 group border border-primary/10"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-medium text-foreground">{habit.name}</h3>
-                          <div className="flex items-center">
-                            {habit.metrics.type === 'duration' && (
-                              <span className="text-sm text-muted-foreground">
-                                0/{habit.metrics.target}m
-                              </span>
-                            )}
-                            {habit.metrics.type === 'boolean' && (
-                              <Circle className="h-5 w-5 text-primary/50" />
-                            )}
-                            {habit.metrics.type === 'count' && habit.metrics.target && (
-                              <span className="text-sm text-muted-foreground">
-                                0/{habit.metrics.target}
-                              </span>
-                            )}
-                            {habit.metrics.type === 'rating' && (
-                              <div className="flex gap-0.5">
-                                {[...Array(5)].map((_, i) => (
-                                  <span key={i} className="text-primary/30">★</span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
-                            {habit.category}
-                          </span>
-                          <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
-                            {habit.timePreference}
-                          </span>
-                        </div>
-                      </div>
-                      {habit.duration && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleAddHabitToTasks(habit)}
-                          className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Task
-                        </Button>
-                      )}
-                    </div>
+                  <div key={habit.id} className="relative">
+                    <TaskRow
+                      task={getHabitAsTask(habit)}
+                      isSelected={false}
+                      editingTaskId={null}
+                      onTaskClick={() => handleHabitClick(habit)}
+                      onTaskDelete={() => {}}
+                      onDurationChange={() => {}}
+                      onDurationClick={() => {}}
+                      onInputBlur={() => {}}
+                    />
+                    {habit.duration && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddHabitToTasks(habit)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
+                      >
+                        Add as Task
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
