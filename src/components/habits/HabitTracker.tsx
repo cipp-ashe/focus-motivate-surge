@@ -49,6 +49,7 @@ const HabitTracker: React.FC = () => {
 
   const handleConfigureTemplate = (template: ActiveTemplate) => {
     setSelectedTemplate(template);
+    setIsCreatingTemplate(false);
   };
 
   const handleCloseTemplate = () => {
@@ -87,8 +88,9 @@ const HabitTracker: React.FC = () => {
           open={!!selectedTemplate} 
           onOpenChange={(open) => {
             if (!open) {
-              // Only close if we're not in template creation mode or if the template has habits
-              if (!isCreatingTemplate || selectedTemplate.habits.length > 0) {
+              // Only allow closing if we're editing an existing template
+              // or if the new template has at least one habit configured
+              if (!isCreatingTemplate || (selectedTemplate.habits && selectedTemplate.habits.length > 0)) {
                 handleCloseTemplate();
               }
             }
@@ -103,8 +105,10 @@ const HabitTracker: React.FC = () => {
             <TemplateManager
               templateToEdit={selectedTemplate}
               onUpdateTemplate={(updates) => {
-                // Only save and close if we have at least one habit configured
-                if (updates.habits && updates.habits.length > 0) {
+                const hasValidHabits = updates.habits && updates.habits.some(h => h.name.trim());
+                
+                // Only save and close if we have at least one valid habit
+                if (hasValidHabits) {
                   if (isCreatingTemplate) {
                     const updatedTemplate = { ...selectedTemplate, ...updates };
                     addTemplate(updatedTemplate);
