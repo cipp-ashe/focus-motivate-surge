@@ -47,13 +47,8 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         }
       };
 
-      // Add appropriate tags for habit tasks
+      // Add single Habit tag for all habit tasks
       addTagToEntity('Habit', taskId, 'task');
-      if (habit.metrics?.type === 'timer') {
-        addTagToEntity('TimerHabit', taskId, 'task');
-      } else if (habit.metrics?.type === 'note') {
-        addTagToEntity('NoteHabit', taskId, 'task');
-      }
 
       return task;
     });
@@ -76,3 +71,4 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
 
   return null;
 };
+
