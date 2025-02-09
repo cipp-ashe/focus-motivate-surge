@@ -60,4 +60,3 @@ const TemplateList: React.FC<TemplateListProps> = ({
 };
 
 export default TemplateList;
-

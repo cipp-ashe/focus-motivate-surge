@@ -10,7 +10,7 @@ import HabitMetric from './HabitMetric';
 interface TemplateCardProps {
   template: ActiveTemplate;
   templateInfo: HabitTemplate;
-  onConfigure: () => void;
+  onConfigure: () => void;  // This is the correct prop name
   onRemove: () => void;
   getProgress: (habitId: string) => { value: boolean | number; streak: number; };
   onHabitUpdate: (habitId: string, value: boolean | number) => void;
