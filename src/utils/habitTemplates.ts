@@ -1,3 +1,4 @@
+
 import { HabitTemplate, HabitDetail, HabitInsight, DEFAULT_ACTIVE_DAYS } from '../components/habits/types';
 
 const createHabitInsight = (type: HabitInsight['type'], description: string): HabitInsight => ({
@@ -46,6 +47,7 @@ export const habitTemplates: HabitTemplate[] = [
       },
     ],
     defaultDays: DEFAULT_ACTIVE_DAYS,
+    duration: null,
   },
   {
     id: 'daily-review',
@@ -87,6 +89,7 @@ export const habitTemplates: HabitTemplate[] = [
       },
     ],
     defaultDays: DEFAULT_ACTIVE_DAYS,
+    duration: null,
   },
   {
     id: 'fitness',
@@ -128,6 +131,7 @@ export const habitTemplates: HabitTemplate[] = [
       },
     ],
     defaultDays: DEFAULT_ACTIVE_DAYS,
+    duration: null,
   },
 ];
 
@@ -135,4 +139,5 @@ export const createTemplate = (template: Omit<HabitTemplate, 'id' | 'defaultHabi
   ...template,
   id: `template-${Date.now()}`,
   defaultHabits: [],
+  duration: null,
 });
