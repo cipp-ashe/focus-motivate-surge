@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { toast } from 'sonner';
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
@@ -8,6 +10,8 @@ import TemplateCard from './TemplateCard';
 import ConfigurationDialog from './ConfigurationDialog';
 import ManageTemplatesDialog from './ManageTemplatesDialog';
 import { DialogState, DayOfWeek, ActiveTemplate } from './types';
+import HabitInsights from './HabitInsights';
+import { Card } from '@/components/ui/card';
 
 const HabitTracker: React.FC = () => {
   const {
@@ -24,11 +28,13 @@ const HabitTracker: React.FC = () => {
   const {
     getTodayProgress,
     updateProgress,
+    getWeeklyProgress,
   } = useHabitProgress();
 
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
   const [dialog, setDialog] = useState<DialogState>({ type: 'customize', open: false });
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [showInsights, setShowInsights] = useState(false);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -50,16 +56,26 @@ const HabitTracker: React.FC = () => {
     setDraggedIndex(null);
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
   const handleCustomizeTemplate = (template: ActiveTemplate) => {
     setSelectedTemplate({
       ...template,
       activeDays: template.activeDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     });
     setDialog({ type: 'customize', open: true });
+  };
+
+  const handleSaveTemplate = (habits: any) => {
+    if (selectedTemplate) {
+      updateTemplate(selectedTemplate.templateId, { habits });
+      toast.success('Template updated successfully');
+      setDialog({ type: 'customize', open: false });
+      setSelectedTemplate(null);
+    }
+  };
+
+  const handleToggleInsights = (template: ActiveTemplate) => {
+    setSelectedTemplate(template);
+    setShowInsights(!showInsights);
   };
 
   const createActiveTemplate = (template: any): ActiveTemplate => ({
@@ -94,21 +110,32 @@ const HabitTracker: React.FC = () => {
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
-              onDragLeave={handleDragLeave}
               className={`
                 cursor-grab active:cursor-grabbing transition-all relative
                 ${draggedIndex === index ? 'scale-[1.02] opacity-80 shadow-lg z-10' : 'z-auto opacity-100'}
                 hover:shadow-sm
               `}
             >
-              <TemplateCard
-                template={template}
-                templateInfo={templateInfo}
-                onCustomize={() => handleCustomizeTemplate(template)}
-                onRemove={() => removeTemplate(template.templateId)}
-                getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
-                onHabitUpdate={(habitId, value) => updateProgress(habitId, template.templateId, value)}
-              />
+              <Card className="p-6">
+                <TemplateCard
+                  template={template}
+                  templateInfo={templateInfo}
+                  onCustomize={() => handleCustomizeTemplate(template)}
+                  onRemove={() => removeTemplate(template.templateId)}
+                  onToggleInsights={() => handleToggleInsights(template)}
+                  getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
+                  onHabitUpdate={(habitId, value) => updateProgress(habitId, template.templateId, value)}
+                />
+
+                {showInsights && selectedTemplate?.templateId === template.templateId && (
+                  <div className="mt-6">
+                    <HabitInsights
+                      habit={template.habits[0]}
+                      progress={template.habits.map(habit => getWeeklyProgress(habit.id, template.templateId)).flat()}
+                    />
+                  </div>
+                )}
+              </Card>
             </div>
           );
         })}
@@ -122,11 +149,13 @@ const HabitTracker: React.FC = () => {
         activeTemplateIds={activeTemplates.map(t => t.templateId)}
         onSelectTemplate={(template) => {
           addTemplate(createActiveTemplate(template));
+          toast.success('Template added successfully');
           setDialog({ type: 'manage', open: false });
         }}
         onCreateTemplate={(template) => {
           const newTemplate = saveCustomTemplate(template);
           addTemplate(createActiveTemplate(newTemplate));
+          toast.success('Custom template created successfully');
           setDialog({ type: 'manage', open: false });
         }}
       />
@@ -138,11 +167,7 @@ const HabitTracker: React.FC = () => {
             setDialog({ type: 'customize', open: false });
             setSelectedTemplate(null);
           }}
-          onSave={(habits) => {
-            updateTemplate(selectedTemplate.templateId, { habits });
-            setDialog({ type: 'customize', open: false });
-            setSelectedTemplate(null);
-          }}
+          onSave={handleSaveTemplate}
           onSaveAsTemplate={() => {
             if (selectedTemplate) {
               const baseTemplate = habitTemplates.find(t => t.id === selectedTemplate.templateId);
@@ -156,6 +181,7 @@ const HabitTracker: React.FC = () => {
                 });
                 removeTemplate(selectedTemplate.templateId);
                 addTemplate(createActiveTemplate(newTemplate));
+                toast.success('Template saved as custom template');
                 setDialog({ type: 'customize', open: false });
                 setSelectedTemplate(null);
               }
