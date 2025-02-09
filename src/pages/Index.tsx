@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { TaskManager } from "@/components/tasks/TaskManager";
-import { Moon, Sun, Code2, StickyNote, ActivitySquare, Plus, Timer } from "lucide-react";
+import { Moon, Sun, Code2, StickyNote, ActivitySquare, Plus, Timer, Circle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
@@ -176,8 +176,31 @@ const Index = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground mb-1">{habit.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{habit.description}</p>
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="font-medium text-foreground">{habit.name}</h3>
+                          <div className="flex items-center">
+                            {habit.metrics.type === 'duration' && (
+                              <span className="text-sm text-muted-foreground">
+                                0/{habit.metrics.target}m
+                              </span>
+                            )}
+                            {habit.metrics.type === 'boolean' && (
+                              <Circle className="h-5 w-5 text-primary/50" />
+                            )}
+                            {habit.metrics.type === 'count' && habit.metrics.target && (
+                              <span className="text-sm text-muted-foreground">
+                                0/{habit.metrics.target}
+                              </span>
+                            )}
+                            {habit.metrics.type === 'rating' && (
+                              <div className="flex gap-0.5">
+                                {[...Array(5)].map((_, i) => (
+                                  <span key={i} className="text-primary/30">★</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                         <div className="flex flex-wrap gap-2 text-xs">
                           <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
                             {habit.category}
@@ -185,11 +208,6 @@ const Index = () => {
                           <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
                             {habit.timePreference}
                           </span>
-                          {habit.duration && (
-                            <span className="px-2 py-1 rounded-full bg-primary/10 text-primary">
-                              {habit.duration} minutes
-                            </span>
-                          )}
                         </div>
                       </div>
                       {habit.duration && (
@@ -204,16 +222,6 @@ const Index = () => {
                         </Button>
                       )}
                     </div>
-                    {habit.tips && habit.tips.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-primary/10">
-                        <p className="text-xs text-muted-foreground mb-1">Tips:</p>
-                        <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
-                          {habit.tips.slice(0, 2).map((tip, index) => (
-                            <li key={index} className="line-clamp-1">{tip}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -226,3 +234,4 @@ const Index = () => {
 };
 
 export default Index;
+
