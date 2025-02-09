@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChartBar, Edit, Trash2 } from 'lucide-react';
+import { BarChart, Edit, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HabitDetail, HabitTemplate } from './types';
@@ -40,7 +40,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         <CardTitle className="text-xl font-bold">{templateInfo.name}</CardTitle>
         <div className="flex space-x-2">
           <Button variant="ghost" size="icon" onClick={onToggleInsights}>
-            <ChartBar className="h-4 w-4" />
+            <BarChart className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" onClick={onCustomize}>
             <Edit className="h-4 w-4" />
