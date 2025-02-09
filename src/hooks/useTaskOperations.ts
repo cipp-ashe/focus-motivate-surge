@@ -46,10 +46,15 @@ export const useTaskOperations = ({
     if (!selectedTask) return;
     
     setCompletedTasks(prev => {
+      const formattedMetrics = {
+        ...metrics,
+        endTime: metrics.endTime ? metrics.endTime.toISOString() : undefined,
+      };
+      
       const newCompleted = [...prev, {
         ...selectedTask,
         completed: true,
-        metrics: metrics
+        metrics: formattedMetrics,
       }];
       onCompletedTasksUpdate?.(newCompleted);
       return newCompleted;
