@@ -14,14 +14,42 @@ import { toast } from "sonner";
 
 const Index = () => {
   console.log('Mounting Index component');
+  
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize data store on component mount
   useEffect(() => {
-    const initialized = initializeDataStore();
-    if (!initialized) {
-      toast.error('Failed to initialize data store');
-    } else {
-      console.log('Data store initialized with schema version:', SCHEMA_VERSION);
+    try {
+      console.log('Starting data store initialization');
+      const initialized = initializeDataStore();
+      if (!initialized) {
+        console.error('Failed to initialize data store');
+        toast.error('Failed to initialize data store');
+        return;
+      }
+      
+      // Verify core data structures exist
+      const schemaVersion = localStorage.getItem('schema-version');
+      const relations = localStorage.getItem('entity-relations');
+      const tagRelations = localStorage.getItem('tag-relations');
+      
+      console.log('Core data structures:', {
+        schemaVersion,
+        hasRelations: !!relations,
+        hasTagRelations: !!tagRelations
+      });
+      
+      if (!schemaVersion || !relations || !tagRelations) {
+        console.error('Missing core data structures');
+        toast.error('Missing core data structures');
+        return;
+      }
+
+      console.log('Data store initialized with schema version:', schemaVersion);
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Error during initialization:', error);
+      toast.error('Error during initialization');
     }
   }, []);
 
@@ -165,11 +193,19 @@ const Index = () => {
     setFavorites(newFavorites);
   };
 
-  console.log('Index rendering with:', {
+  console.log('Index component state:', {
+    isInitialized,
     tasks: tasks.length,
     completedTasks: initialCompletedTasks.length,
     activeTemplates: activeTemplates.length
   });
+
+  if (!isInitialized) {
+    console.log('Waiting for data store initialization...');
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="text-lg">Loading...</div>
+    </div>;
+  }
 
   return (
     <div className="min-h-screen h-full flex flex-col bg-background transition-colors duration-300">
@@ -210,4 +246,3 @@ const Index = () => {
 };
 
 export default Index;
-
