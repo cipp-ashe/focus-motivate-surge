@@ -35,26 +35,25 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   onHabitUpdate,
 }) => {
   return (
-    <Card>
+    <Card className="bg-background">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-bold">{templateInfo.name}</CardTitle>
-        <div className="flex space-x-2">
-          <Button variant="ghost" size="icon" onClick={onToggleInsights}>
+        <CardTitle className="text-base font-medium">{templateInfo.name}</CardTitle>
+        <div className="flex space-x-1">
+          <Button variant="ghost" size="sm" onClick={onToggleInsights} className="h-8 w-8 p-0">
             <BarChart className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onCustomize}>
+          <Button variant="ghost" size="sm" onClick={onCustomize} className="h-8 w-8 p-0">
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onRemove}>
+          <Button variant="ghost" size="sm" onClick={onRemove} className="h-8 w-8 p-0 text-destructive hover:text-destructive">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">{templateInfo.description}</p>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {template.habits.map((habit) => (
-            <div key={habit.id}>
+            <div key={habit.id} className="flex items-center space-x-2">
               <HabitMetric
                 habit={habit}
                 progress={getProgress(habit.id)}
@@ -69,3 +68,4 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 };
 
 export default TemplateCard;
+
