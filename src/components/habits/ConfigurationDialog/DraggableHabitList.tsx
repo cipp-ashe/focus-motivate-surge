@@ -27,7 +27,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
   onDeleteHabit,
 }) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {habits.map((habit, index) => (
         <Card
           key={habit.id}
@@ -35,33 +35,24 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
           onDragStart={(e) => onDragStart(e, index)}
           onDragOver={(e) => onDragOver(e, index)}
           onDragEnd={onDragEnd}
-          className={`p-3 transition-all duration-200 ${
+          className={`p-2 transition-all duration-200 ${
             draggedIndex === index 
               ? 'ring-2 ring-primary shadow-lg scale-[1.02] opacity-90' 
               : ''
           }`}
         >
-          <div className="flex items-start gap-2">
+          <div className="flex items-center gap-2">
             <div 
-              className="cursor-grab active:cursor-grabbing touch-none mt-2"
+              className="cursor-grab active:cursor-grabbing touch-none"
               onMouseDown={() => {}}
               onTouchStart={() => {}}
             >
               <GripVertical className="h-5 w-5 text-muted-foreground" />
             </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDeleteHabit(index)}
-              className="h-8 w-8 mt-1"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-6 gap-2">
+            <div className="flex-1 flex items-center gap-2">
               <Input
-                className="sm:col-span-3"
+                className="flex-1"
                 placeholder="Habit name"
                 value={habit.name}
                 onChange={(e) => onUpdateHabit(index, { name: e.target.value })}
@@ -80,7 +71,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                   });
                 }}
               >
-                <SelectTrigger className="sm:col-span-2">
+                <SelectTrigger className="w-[120px]">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -93,20 +84,36 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 
               {habit.metrics.type !== 'boolean' && (
                 <Input
-                  className="sm:col-span-1"
+                  className="w-[100px]"
                   type="number"
                   placeholder="Target"
-                  value={habit.metrics.target || ''}
-                  onChange={(e) => onUpdateHabit(index, {
-                    metrics: {
-                      ...habit.metrics,
-                      target: parseInt(e.target.value),
-                    },
-                  })}
+                  value={habit.metrics.type === 'timer' ? 
+                    Math.round((habit.metrics.target || 1500) / 60) : 
+                    habit.metrics.target || ''}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value)) {
+                      onUpdateHabit(index, {
+                        metrics: {
+                          ...habit.metrics,
+                          target: habit.metrics.type === 'timer' ? value * 60 : value,
+                        },
+                      });
+                    }
+                  }}
                   min={habit.metrics.type === 'timer' ? 5 : 1}
                   max={habit.metrics.type === 'rating' ? 5 : undefined}
                 />
               )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDeleteHabit(index)}
+                className="h-8 w-8 ml-2"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </Card>
@@ -116,4 +123,3 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 };
 
 export default DraggableHabitList;
-

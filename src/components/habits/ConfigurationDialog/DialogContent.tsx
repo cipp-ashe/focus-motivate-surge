@@ -40,16 +40,16 @@ const DialogContent: React.FC<DialogContentProps> = ({
   onSave,
 }) => {
   return (
-    <ShadcnDialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col overflow-hidden">
+    <ShadcnDialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col">
       <div className="flex flex-col h-full space-y-4">
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium">Active Days</h3>
+        <div>
+          <h3 className="text-lg font-medium mb-2">Active Days</h3>
           <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
         </div>
         
-        <div className="flex-1 min-h-0">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium">Configure Habits</h3>
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-medium">Habits</h3>
             <Button
               variant="outline"
               size="sm"
@@ -61,7 +61,7 @@ const DialogContent: React.FC<DialogContentProps> = ({
             </Button>
           </div>
 
-          <div className="overflow-y-auto pr-2 h-full pb-4">
+          <div className="overflow-y-auto pr-2 h-full">
             <DraggableHabitList
               habits={habits}
               draggedIndex={draggedIndex}
@@ -85,4 +85,3 @@ const DialogContent: React.FC<DialogContentProps> = ({
 };
 
 export default DialogContent;
-
