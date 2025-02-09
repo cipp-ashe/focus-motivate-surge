@@ -22,7 +22,7 @@ const Index = () => {
   const {
     lastSyncDate,
     tasks,
-    initialCompletedTasks,
+    completedTasks,
     favorites,
     activeTemplates,
     setActiveTemplates,
@@ -104,7 +104,7 @@ const Index = () => {
         <div className="flex-1 overflow-hidden">
           <TaskManager
             initialTasks={tasks}
-            initialCompletedTasks={initialCompletedTasks}
+            initialCompletedTasks={completedTasks}
             initialFavorites={favorites}
             onTasksUpdate={handleTasksUpdate}
             onCompletedTasksUpdate={handleCompletedTasksUpdate}
@@ -119,3 +119,4 @@ const Index = () => {
 };
 
 export default Index;
+

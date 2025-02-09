@@ -1,6 +1,5 @@
 
 import { useEffect } from 'react';
-import { useStateMonitor } from './useStateMonitor';
 import { useErrorBoundary } from './useErrorBoundary';
 import { toast } from 'sonner';
 import type { TimerStateMetrics } from '@/types/metrics';
@@ -21,33 +20,22 @@ export const useTimerMonitor = ({
   const { error } = useErrorBoundary(componentName);
 
   // Monitor time left
-  useStateMonitor({
-    value: timeLeft,
-    name: 'timeLeft',
-    validate: (value) => value >= 0,
-    onInvalid: () => {
+  useEffect(() => {
+    if (timeLeft < 0) {
       toast.error('Timer reached invalid state', {
         description: 'Time value cannot be negative'
       });
-    },
-    component: componentName
-  });
+    }
+  }, [timeLeft]);
 
   // Monitor running state and metrics
-  useStateMonitor({
-    value: { isRunning, metrics },
-    name: 'timerState',
-    validate: (state) => {
-      if (state.isRunning && state.metrics.pauseCount > 10) {
-        toast.warning('High number of pauses detected', {
-          description: 'Consider taking a longer break'
-        });
-        return false;
-      }
-      return true;
-    },
-    component: componentName
-  });
+  useEffect(() => {
+    if (isRunning && metrics.pauseCount > 10) {
+      toast.warning('High number of pauses detected', {
+        description: 'Consider taking a longer break'
+      });
+    }
+  }, [isRunning, metrics]);
 
   // Monitor performance issues
   useEffect(() => {
@@ -59,9 +47,9 @@ export const useTimerMonitor = ({
       frameCount++;
       const currentTime = performance.now();
       
-      if (currentTime - lastTime >= 1000) { // Check every second
+      if (currentTime - lastTime >= 1000) {
         const fps = frameCount;
-        if (fps < 30 && isRunning) { // Alert on low FPS while timer is running
+        if (fps < 30 && isRunning) {
           console.warn(`[${componentName}] Performance warning:`, {
             fps,
             timeLeft,

@@ -42,9 +42,10 @@ export const useLocalStorageData = () => {
     storageKey?: string
   ) => {
     setData(prev => ({ ...prev, [key]: value }));
-    localStorage.setItem(storageKey || key, 
+    localStorage.setItem(
+      storageKey || key, 
       key === 'lastSyncDate' 
-        ? value.toISOString() 
+        ? (value as Date).toISOString()
         : JSON.stringify(value)
     );
   };
@@ -63,3 +64,4 @@ export const useLocalStorageData = () => {
       updateStorage('favorites', newFavorites, 'favoriteQuotes')
   };
 };
+
