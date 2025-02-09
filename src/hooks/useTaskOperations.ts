@@ -47,7 +47,15 @@ export const useTaskOperations = ({
     
     setCompletedTasks(prev => {
       const formattedMetrics = {
-        ...metrics,
+        expectedTime: metrics.expectedTime ?? 0,
+        actualDuration: metrics.actualDuration ?? 0,
+        pauseCount: metrics.pauseCount ?? 0,
+        favoriteQuotes: metrics.favoriteQuotes ?? 0,
+        pausedTime: metrics.pausedTime ?? 0,
+        extensionTime: metrics.extensionTime ?? 0,
+        netEffectiveTime: metrics.netEffectiveTime ?? 0,
+        efficiencyRatio: metrics.efficiencyRatio ?? 100,
+        completionStatus: metrics.completionStatus ?? 'Completed On Time',
         endTime: metrics.endTime ? metrics.endTime.toISOString() : undefined,
       };
       
@@ -103,3 +111,4 @@ export const useTaskOperations = ({
     handleSelectedTasksClear,
   };
 };
+
