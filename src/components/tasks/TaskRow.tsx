@@ -1,5 +1,5 @@
 
-import { Task } from "./TaskList";
+import { Task } from "@/types/tasks";
 import { useState, useEffect } from "react";
 import { TaskContent } from "./TaskContent";
 
@@ -101,3 +101,4 @@ export const TaskRow = ({
 };
 
 export default TaskRow;
+
