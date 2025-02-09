@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { Plus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { ActiveTemplate } from './types';
 import TemplateCard from './TemplateCard';
 import { habitTemplates } from '../../utils/habitTemplates';
@@ -11,6 +13,7 @@ interface TemplateListProps {
   onRemove: (templateId: string) => void;
   getTodayProgress: (habitId: string, templateId: string) => { value: boolean | number; streak: number; };
   onHabitUpdate: (habitId: string, templateId: string, value: boolean | number) => void;
+  onCreateTemplate: () => void;
 }
 
 const TemplateList: React.FC<TemplateListProps> = ({
@@ -19,6 +22,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
   onRemove,
   getTodayProgress,
   onHabitUpdate,
+  onCreateTemplate,
 }) => {
   const {
     draggedIndex,
@@ -29,34 +33,46 @@ const TemplateList: React.FC<TemplateListProps> = ({
 
   return (
     <div className="space-y-4 px-2 sm:px-0">
-      {activeTemplates.map((template, index) => {
-        const templateInfo = habitTemplates.find(t => t.id === template.templateId);
-        if (!templateInfo) return null;
+      <Button 
+        onClick={onCreateTemplate}
+        variant="outline"
+        className="w-full flex items-center justify-center gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Create New Template
+      </Button>
 
-        return (
-          <div
-            key={template.templateId}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDragEnd={handleDragEnd}
-            className={`transition-transform ${
-              draggedIndex === index ? 'scale-[1.02] opacity-75' : ''
-            }`}
-          >
-            <TemplateCard
-              template={template}
-              templateInfo={templateInfo}
-              onConfigure={() => onConfigure(template)}
-              onRemove={() => onRemove(template.templateId)}
-              getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
-              onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
-            />
-          </div>
-        );
-      })}
+      <div className="space-y-4">
+        {activeTemplates.map((template, index) => {
+          const templateInfo = habitTemplates.find(t => t.id === template.templateId);
+          if (!templateInfo) return null;
+
+          return (
+            <div
+              key={template.templateId}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`transition-transform ${
+                draggedIndex === index ? 'scale-[1.02] opacity-75' : ''
+              }`}
+            >
+              <TemplateCard
+                template={template}
+                templateInfo={templateInfo}
+                onConfigure={() => onConfigure(template)}
+                onRemove={() => onRemove(template.templateId)}
+                getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
+                onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
 export default TemplateList;
+

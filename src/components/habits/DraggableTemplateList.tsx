@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { Plus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { ActiveTemplate } from './types';
 import { HabitTemplate } from './types';
 import { habitTemplates } from '../../utils/habitTemplates';
@@ -19,6 +21,7 @@ interface DraggableTemplateListProps {
   getTodayProgress: (habitId: string, templateId: string) => { value: boolean | number; streak: number; };
   onHabitUpdate: (habitId: string, templateId: string, value: boolean | number) => void;
   getWeeklyProgress: (habitId: string, templateId: string) => any[];
+  onCreateTemplate: () => void;
 }
 
 const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
@@ -34,44 +37,56 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
   getTodayProgress,
   onHabitUpdate,
   getWeeklyProgress,
+  onCreateTemplate,
 }) => {
   return (
-    <div className="space-y-2">
-      {activeTemplates.map((template, index) => {
-        const templateInfo = habitTemplates.find(t => t.id === template.templateId);
-        if (!templateInfo) return null;
+    <div className="space-y-4">
+      <Button 
+        onClick={onCreateTemplate}
+        variant="outline"
+        className="w-full flex items-center justify-center gap-2"
+      >
+        <Plus className="h-4 w-4" />
+        Create New Template
+      </Button>
+      
+      <div className="space-y-2">
+        {activeTemplates.map((template, index) => {
+          const templateInfo = habitTemplates.find(t => t.id === template.templateId);
+          if (!templateInfo) return null;
 
-        return (
-          <div
-            key={template.templateId}
-            draggable
-            onDragStart={(e) => onDragStart(e, index)}
-            onDragOver={(e) => onDragOver(e, index)}
-            onDragEnd={onDragEnd}
-            className="cursor-grab active:cursor-grabbing"
-          >
-            <TemplateCard
-              template={template}
-              templateInfo={templateInfo}
-              onConfigure={() => onCustomize(template)}
-              onRemove={() => onRemove(template.templateId)}
-              getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
-              onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
-            />
+          return (
+            <div
+              key={template.templateId}
+              draggable
+              onDragStart={(e) => onDragStart(e, index)}
+              onDragOver={(e) => onDragOver(e, index)}
+              onDragEnd={onDragEnd}
+              className="cursor-grab active:cursor-grabbing"
+            >
+              <TemplateCard
+                template={template}
+                templateInfo={templateInfo}
+                onConfigure={() => onCustomize(template)}
+                onRemove={() => onRemove(template.templateId)}
+                getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
+                onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
+              />
 
-            {showInsights && insightTemplateId === template.templateId && (
-              <div className="mt-2">
-                <HabitInsights
-                  habit={template.habits[0]}
-                  progress={template.habits.map(habit => 
-                    getWeeklyProgress(habit.id, template.templateId)
-                  ).flat()}
-                />
-              </div>
-            )}
-          </div>
-        );
-      })}
+              {showInsights && insightTemplateId === template.templateId && (
+                <div className="mt-2">
+                  <HabitInsights
+                    habit={template.habits[0]}
+                    progress={template.habits.map(habit => 
+                      getWeeklyProgress(habit.id, template.templateId)
+                    ).flat()}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

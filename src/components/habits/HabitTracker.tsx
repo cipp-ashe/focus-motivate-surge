@@ -8,6 +8,7 @@ import { ActiveTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import TemplateList from './TemplateList';
 import TemplateConfiguration from './TemplateConfiguration';
+import { toast } from 'sonner';
 
 const HabitTracker: React.FC = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -34,6 +35,17 @@ const HabitTracker: React.FC = () => {
     }
   };
 
+  const handleCreateTemplate = () => {
+    const newTemplate: ActiveTemplate = {
+      templateId: `custom-${Date.now()}`,
+      habits: [],
+      customized: true,
+      activeDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    };
+    setSelectedTemplate(newTemplate);
+    toast.success('New template created. Configure your habits now.');
+  };
+
   const handleConfigureTemplate = (template: ActiveTemplate) => {
     setSelectedTemplate(template);
   };
@@ -48,6 +60,7 @@ const HabitTracker: React.FC = () => {
         onRemove={removeTemplate}
         getTodayProgress={getTodayProgress}
         onHabitUpdate={updateProgress}
+        onCreateTemplate={handleCreateTemplate}
       />
 
       <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
@@ -67,12 +80,19 @@ const HabitTracker: React.FC = () => {
         <Sheet open={!!selectedTemplate} onOpenChange={(open) => !open && setSelectedTemplate(null)}>
           <SheetContent side="right" className="w-[400px] sm:w-[540px]">
             <SheetHeader>
-              <SheetTitle>Edit Template</SheetTitle>
+              <SheetTitle>
+                {selectedTemplate.habits.length === 0 ? 'Create New Template' : 'Edit Template'}
+              </SheetTitle>
             </SheetHeader>
             <TemplateConfiguration
               templateToEdit={selectedTemplate}
               onUpdateTemplate={(updates) => {
-                updateTemplate(selectedTemplate.templateId, updates);
+                if (selectedTemplate.habits.length === 0) {
+                  const updatedTemplate = { ...selectedTemplate, ...updates };
+                  addTemplate(updatedTemplate);
+                } else {
+                  updateTemplate(selectedTemplate.templateId, updates);
+                }
                 setSelectedTemplate(null);
               }}
               onUpdateDays={(days) => {
@@ -88,3 +108,4 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
+
