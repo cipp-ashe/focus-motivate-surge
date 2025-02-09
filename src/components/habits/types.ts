@@ -41,7 +41,6 @@ export interface HabitDetail {
   metrics: HabitMetrics;
   insights: HabitInsight[];
   tips: string[];
-  duration?: number;
 }
 
 export interface HabitMetrics {
@@ -97,3 +96,4 @@ export const createEmptyHabit = (): HabitDetail => ({
   insights: [],
   tips: [],
 });
+

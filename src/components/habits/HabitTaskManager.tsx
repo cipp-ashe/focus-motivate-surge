@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { ActiveTemplate } from "@/components/habits/types";
-import { toast } from "sonner";
 
 interface HabitTaskManagerProps {
   tasks: Task[];
@@ -18,7 +17,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
     // Get existing non-habit tasks
     const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
     
-    // Convert timer habits to tasks with proper duration handling
+    // Convert timer habits to tasks
     const timerHabits = todaysHabits.filter(habit => 
       habit.metrics.type === 'timer' && habit.metrics.target
     );
@@ -27,23 +26,18 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
       console.log('Converting timer habits to tasks:', timerHabits);
       
       const habitTasks: Task[] = timerHabits.map(habit => {
-        // Get target duration from either timer or duration type habits
-        const targetMinutes = habit.metrics.target ? 
-          parseInt(String(habit.metrics.target)) : 
-          (habit.duration || 0);
-
+        const targetMinutes = habit.metrics.target;
+        
         // Log duration conversion details
         console.log(`Converting habit duration for ${habit.name}:`, {
           originalTarget: habit.metrics.target,
           parsedMinutes: targetMinutes,
-          finalDuration: targetMinutes
         });
 
         // Ensure target is valid and greater than 0
-        if (isNaN(targetMinutes) || targetMinutes <= 0) {
+        if (!targetMinutes || targetMinutes <= 0) {
           console.warn(`Invalid duration for habit ${habit.name}:`, {
             target: habit.metrics.target,
-            parsed: targetMinutes
           });
           return null;
         }
@@ -74,7 +68,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         onTasksUpdate(newTasks);
       }
     }
-  }, [todaysHabits, tasks, onTasksUpdate]); // Include tasks and onTasksUpdate in dependencies
+  }, [todaysHabits, tasks, onTasksUpdate]);
 
   return null;
 };
