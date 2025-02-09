@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { NotesEditor } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
-import { NotesProps } from '@/types/notes';
+import type { NotesProps } from '@/types/notes';
 
 export const Notes: React.FC<NotesProps> = ({ hideNotes, onOpenEmailModal }) => {
   return (
@@ -16,3 +17,4 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes, onOpenEmailModal }) => 
     </div>
   );
 };
+

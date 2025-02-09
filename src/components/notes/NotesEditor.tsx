@@ -1,4 +1,3 @@
-
 import React, { useCallback, forwardRef, ForwardedRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -19,7 +18,7 @@ export interface NotesEditorRef {
   saveNotes: () => void;
 }
 
-const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({ 
+export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({ 
   selectedNote,
   onNoteSaved,
   content: externalContent,
@@ -130,5 +129,3 @@ const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
 });
 
 NotesEditor.displayName = 'NotesEditor';
-
-export default NotesEditor;
