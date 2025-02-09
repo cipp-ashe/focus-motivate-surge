@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { TaskManager } from "@/components/tasks/TaskManager";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
@@ -109,8 +108,6 @@ const Index = () => {
             onTasksUpdate={handleTasksUpdate}
             onCompletedTasksUpdate={handleCompletedTasksUpdate}
             onFavoritesChange={handleFavoritesUpdate}
-            selectedTaskId={selectedTaskId}
-            onTaskSelect={setSelectedTaskId}
           />
         </div>
       </div>
@@ -119,4 +116,3 @@ const Index = () => {
 };
 
 export default Index;
-

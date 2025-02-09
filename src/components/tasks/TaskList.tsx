@@ -29,9 +29,11 @@ export const TaskList = ({
     clearCompletedTasks,
   } = useTaskContext();
 
-  const handleEmailSent = () => {
+  const handleEmailSent = async (email: string, clearData?: boolean) => {
     setIsEmailModalOpen(false);
-    clearCompletedTasks();
+    if (clearData) {
+      clearCompletedTasks();
+    }
   };
 
   return (
@@ -43,7 +45,7 @@ export const TaskList = ({
         selectedTasks={selectedTaskId ? [selectedTaskId] : []}
         onTaskClick={(task) => selectTask(task.id)}
         onTaskDelete={deleteTask}
-        onTaskUpdate={updateTask}
+        onTasksUpdate={updateTask}
         onTasksClear={clearTasks}
       />
 

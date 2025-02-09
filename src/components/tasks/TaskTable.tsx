@@ -1,14 +1,15 @@
+
 import { useState, useCallback } from "react";
-import { Task } from "./TaskList";
+import { Task } from "@/types/tasks";
 import { TaskRow } from "./TaskRow";
 
 interface TaskTableProps {
   tasks: Task[];
   selectedTasks: string[];
-  onTaskClick: (task: Task, event: React.MouseEvent<HTMLDivElement>) => void;
+  onTaskClick: (task: Task) => void;
   onTaskDelete: (taskId: string) => void;
+  onTasksUpdate: (taskId: string, updates: Partial<Task>) => void;
   onTasksClear: () => void;
-  onTasksUpdate?: (tasks: Task[]) => void;
 }
 
 export const TaskTable = ({
@@ -16,31 +17,20 @@ export const TaskTable = ({
   selectedTasks,
   onTaskClick,
   onTaskDelete,
-  onTasksClear,
   onTasksUpdate,
+  onTasksClear,
 }: TaskTableProps) => {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    
     const duration = parseInt(newDuration);
     if (isNaN(duration)) return;
-
-    const updatedTask = { ...task, duration };
     
-    // Update the task through task selection to ensure proper state updates
-    onTaskClick(updatedTask, { 
-      ctrlKey: false,
-      stopPropagation: () => {},
-      preventDefault: () => {} 
-    } as React.MouseEvent<HTMLDivElement>);
-    
+    onTasksUpdate(taskId, { duration });
     setEditingTaskId(null);
-  }, [tasks, onTaskClick]);
+  }, [onTasksUpdate]);
 
-    const handleDurationClick = useCallback((e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => {
+  const handleDurationClick = useCallback((e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => {
     e.stopPropagation();
     setEditingTaskId(taskId);
   }, []);
