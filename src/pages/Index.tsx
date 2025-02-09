@@ -90,7 +90,7 @@ const Index = () => {
       id: `habit-task-${habit.id}`,
       name: habit.name,
       completed: false,
-      duration: habit.duration, // Use the habit's actual duration
+      duration: habit.duration || 25, // Fallback to 25 if no duration set
       metrics: undefined
     };
     handleTasksUpdate([newTask, ...tasks]);

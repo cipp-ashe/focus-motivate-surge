@@ -36,7 +36,6 @@ export const TodaysHabits = ({
       toast.error("This habit doesn't have a duration set");
       return;
     }
-    // Create a task and add it to the task list, which will trigger the timer
     onAddHabitToTasks(habit);
   };
 
@@ -62,9 +61,12 @@ export const TodaysHabits = ({
                 isSelected={false}
                 editingTaskId={null}
                 onTaskClick={() => onHabitClick(habit)}
-                onTaskDelete={() => {}}
-                onDurationChange={() => {}}
-                onDurationClick={() => handleDurationClick(habit)}
+                onTaskDelete={() => {}} // Habits can't be deleted from here
+                onDurationChange={() => {}} // Duration is set in template
+                onDurationClick={(e) => {
+                  e.stopPropagation();
+                  handleDurationClick(habit);
+                }}
                 onInputBlur={() => {}}
               />
               {habit.duration && habit.duration > 0 && (

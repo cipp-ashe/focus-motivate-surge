@@ -13,8 +13,13 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     const activeHabits = activeTemplates.reduce<HabitDetail[]>((acc, template) => {
       // Only include habits if the template is active for today
       if (template.activeDays.includes(dayOfWeek)) {
-        // Ensure we're working with the latest habits from the template
-        return [...acc, ...template.habits];
+        // Map through habits to ensure we pass through all properties
+        const templatesHabits = template.habits.map(habit => ({
+          ...habit,
+          // Ensure duration is properly passed through
+          duration: habit.duration || null
+        }));
+        return [...acc, ...templatesHabits];
       }
       return acc;
     }, []);
