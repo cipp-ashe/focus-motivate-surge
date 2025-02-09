@@ -3,6 +3,7 @@ import React from 'react';
 import { ActiveTemplate } from './types';
 import TemplateCard from './TemplateCard';
 import { habitTemplates } from '../../utils/habitTemplates';
+import { useDragAndDrop } from './hooks/useDragAndDrop';
 
 interface TemplateListProps {
   activeTemplates: ActiveTemplate[];
@@ -19,22 +20,39 @@ const TemplateList: React.FC<TemplateListProps> = ({
   getTodayProgress,
   onHabitUpdate,
 }) => {
+  const {
+    draggedIndex,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+  } = useDragAndDrop(activeTemplates, () => {});
+
   return (
     <div className="space-y-4">
-      {activeTemplates.map((template) => {
+      {activeTemplates.map((template, index) => {
         const templateInfo = habitTemplates.find(t => t.id === template.templateId);
         if (!templateInfo) return null;
 
         return (
-          <TemplateCard
+          <div
             key={template.templateId}
-            template={template}
-            templateInfo={templateInfo}
-            onConfigure={() => onConfigure(template)}
-            onRemove={() => onRemove(template.templateId)}
-            getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
-            onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
-          />
+            draggable
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragEnd={handleDragEnd}
+            className={`cursor-grab active:cursor-grabbing transition-transform ${
+              draggedIndex === index ? 'scale-[1.02] opacity-75' : ''
+            }`}
+          >
+            <TemplateCard
+              template={template}
+              templateInfo={templateInfo}
+              onConfigure={() => onConfigure(template)}
+              onRemove={() => onRemove(template.templateId)}
+              getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
+              onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
+            />
+          </div>
         );
       })}
     </div>
@@ -42,3 +60,4 @@ const TemplateList: React.FC<TemplateListProps> = ({
 };
 
 export default TemplateList;
+
