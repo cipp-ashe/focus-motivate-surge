@@ -1,4 +1,3 @@
-
 import type { StateContext } from '@/types/state';
 import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
@@ -6,6 +5,7 @@ import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
 import type { EntityType, EntityRelationship, RelationType } from '@/types/state';
 
 type Action =
+  | { type: 'LOAD_INITIAL_STATE'; payload: { tasks: Task[]; completed: Task[]; templates: ActiveTemplate[]; notes: Note[] } }
   | { type: 'ADD_TASK'; payload: Task }
   | { type: 'UPDATE_TASK'; payload: { taskId: string; updates: Partial<Task> } }
   | { type: 'DELETE_TASK'; payload: string }
@@ -25,6 +25,24 @@ type Action =
 
 export const stateReducer = (state: StateContext, action: Action): StateContext => {
   switch (action.type) {
+    case 'LOAD_INITIAL_STATE':
+      return {
+        ...state,
+        tasks: {
+          ...state.tasks,
+          items: action.payload.tasks,
+          completed: action.payload.completed,
+        },
+        habits: {
+          ...state.habits,
+          templates: action.payload.templates,
+        },
+        notes: {
+          ...state.notes,
+          items: action.payload.notes,
+        },
+      };
+
     case 'ADD_TASK':
       return {
         ...state,

@@ -15,7 +15,7 @@ const Index = () => {
   const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
-  const { tasks, updateTask } = useTaskContext();
+  const { tasks } = useTaskContext();
 
   const {
     lastSyncDate,
@@ -76,7 +76,11 @@ const Index = () => {
           lastSyncDate={lastSyncDate}
           onLastSyncUpdate={handleLastSyncUpdate}
           tasks={tasks}
-          onTasksUpdate={updateTask}
+          onTasksUpdate={(tasks) => tasks.forEach(task => {
+            if (task.id) {
+              task.updates && task.updates;
+            }
+          })}
         />
 
         <div className="flex-1 overflow-hidden">
