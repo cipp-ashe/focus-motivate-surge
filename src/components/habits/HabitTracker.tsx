@@ -1,12 +1,8 @@
 
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Stack,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Plus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { habitTemplates } from '../../utils/habitTemplates';
 import { DialogState, DayOfWeek, ActiveTemplate, HabitTemplate, NewTemplate, HabitDetail } from './types';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
@@ -76,45 +72,36 @@ const HabitTracker: React.FC = () => {
   });
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5">Habit Tracker</Typography>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold tracking-tight">Habit Tracker</h2>
         <Button
-          variant="contained"
-          startIcon={<AddIcon />}
           onClick={() => setDialog({ type: 'manage', open: true })}
-          sx={{ borderRadius: 8 }}
+          className="rounded-full"
         >
+          <Plus className="mr-2 h-4 w-4" />
           Manage Templates
         </Button>
-      </Box>
+      </div>
 
-      <Stack spacing={2}>
+      <div className="space-y-4">
         {activeTemplates.map((template, index) => {
           const templateInfo = habitTemplates.find(t => t.id === template.templateId);
           if (!templateInfo) return null;
 
           return (
-            <Box
+            <div
               key={template.templateId}
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
               onDragLeave={handleDragLeave}
-              sx={{
-                cursor: 'grab',
-                transform: draggedIndex === index ? 'scale(1.02)' : 'none',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                position: 'relative',
-                zIndex: draggedIndex === index ? 1 : 'auto',
-                opacity: draggedIndex === index ? 0.8 : 1,
-                boxShadow: draggedIndex === index ? 3 : 0,
-                '&:hover': {
-                  boxShadow: 1,
-                },
-                '&:active': { cursor: 'grabbing' },
-              }}
+              className={`
+                cursor-grab active:cursor-grabbing transition-all relative
+                ${draggedIndex === index ? 'scale-[1.02] opacity-80 shadow-lg z-10' : 'z-auto opacity-100'}
+                hover:shadow-sm
+              `}
             >
               <TemplateCard
                 template={template}
@@ -124,10 +111,10 @@ const HabitTracker: React.FC = () => {
                 getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
                 onHabitUpdate={(habitId, value) => updateProgress(habitId, template.templateId, value)}
               />
-            </Box>
+            </div>
           );
         })}
-      </Stack>
+      </div>
 
       <ManageTemplatesDialog
         open={dialog.type === 'manage' && dialog.open}
@@ -181,9 +168,8 @@ const HabitTracker: React.FC = () => {
           onUpdateDays={(days: DayOfWeek[]) => updateTemplateDays(selectedTemplate.templateId, days)}
         />
       )}
-    </Box>
+    </div>
   );
 };
 
 export default HabitTracker;
-

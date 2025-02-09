@@ -1,11 +1,9 @@
+
 import React from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  LinearProgress,
-  Checkbox,
-} from '@mui/material';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Star } from 'lucide-react';
 import { HabitDetail } from './types';
 
 interface ProgressResult {
@@ -30,55 +28,46 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         return (
           <Checkbox
             checked={!!progress.value}
-            onChange={(e) => onUpdate(e.target.checked)}
-            size="small"
+            onCheckedChange={(checked) => onUpdate(!!checked)}
           />
         );
       case 'duration':
         const durationValue = typeof progress.value === 'number' ? progress.value : 0;
         const durationTarget = habit.metrics.target || 30;
         return (
-          <Box sx={{ width: '100%' }}>
-            <LinearProgress
-              variant="determinate"
-              value={(durationValue / durationTarget) * 100}
-              sx={{ height: 8, borderRadius: 4 }}
-            />
-            <Typography variant="caption" color="text.secondary">
+          <div className="space-y-2">
+            <Progress value={(durationValue / durationTarget) * 100} />
+            <p className="text-sm text-muted-foreground">
               {durationValue} / {durationTarget} min
-            </Typography>
-          </Box>
+            </p>
+          </div>
         );
       case 'count':
         const countValue = typeof progress.value === 'number' ? progress.value : 0;
         const countTarget = habit.metrics.target || 1;
         return (
-          <Box sx={{ width: '100%' }}>
-            <LinearProgress
-              variant="determinate"
-              value={(countValue / countTarget) * 100}
-              sx={{ height: 8, borderRadius: 4 }}
-            />
-            <Typography variant="caption" color="text.secondary">
+          <div className="space-y-2">
+            <Progress value={(countValue / countTarget) * 100} />
+            <p className="text-sm text-muted-foreground">
               {countValue} / {countTarget}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         );
       case 'rating':
         const ratingValue = typeof progress.value === 'number' ? progress.value : 0;
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex space-x-1">
             {[1, 2, 3, 4, 5].map((rating) => (
-              <IconButton
+              <Button
                 key={rating}
-                size="small"
+                variant={rating <= ratingValue ? "default" : "ghost"}
+                size="icon"
                 onClick={() => onUpdate(rating)}
-                color={rating <= ratingValue ? 'primary' : 'default'}
               >
-                ★
-              </IconButton>
+                <Star className="h-4 w-4" />
+              </Button>
             ))}
-          </Box>
+          </div>
         );
       default:
         return null;
@@ -86,17 +75,17 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   };
 
   return (
-    <Box sx={{ p: 1, borderRadius: 1, bgcolor: 'background.paper' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography variant="subtitle2">{habit.name}</Typography>
+    <div className="p-4 rounded-lg bg-card">
+      <div className="flex justify-between items-center mb-2">
+        <h4 className="font-medium">{habit.name}</h4>
         {progress.streak > 0 && (
-          <Typography variant="caption" color="text.secondary">
+          <span className="text-sm text-muted-foreground">
             {progress.streak} day streak
-          </Typography>
+          </span>
         )}
-      </Box>
+      </div>
       {renderMetric()}
-    </Box>
+    </div>
   );
 };
 

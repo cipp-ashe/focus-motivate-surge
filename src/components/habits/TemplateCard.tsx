@@ -1,14 +1,8 @@
+
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  IconButton,
-  Box,
-  Grid,
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Edit, Trash2 } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { HabitDetail, HabitTemplate } from './types';
 import HabitMetric from './HabitMetric';
 
@@ -26,7 +20,7 @@ interface TemplateCardProps {
   templateInfo: HabitTemplate;
   onCustomize: () => void;
   onRemove: () => void;
-  getProgress: (habitId: string, templateId: string) => ProgressResult;
+  getProgress: (habitId: string) => ProgressResult;
   onHabitUpdate: (habitId: string, value: boolean | number) => void;
 }
 
@@ -39,33 +33,31 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   onHabitUpdate,
 }) => {
   return (
-    <Card sx={{ mb: 2 }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" component="div">
-            {templateInfo.name}
-          </Typography>
-          <Box>
-            <IconButton size="small" onClick={onCustomize}>
-              <EditIcon />
-            </IconButton>
-            <IconButton size="small" onClick={onRemove}>
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        </Box>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">{templateInfo.name}</h3>
+          <div className="flex space-x-2">
+            <Button variant="ghost" size="icon" onClick={onCustomize}>
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onRemove}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
         
-        <Grid container spacing={2}>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {template.habits.map((habit) => (
-            <Grid item xs={12} sm={6} md={4} key={habit.id}>
+            <div key={habit.id}>
               <HabitMetric
                 habit={habit}
-                progress={getProgress(habit.id, template.templateId)}
+                progress={getProgress(habit.id)}
                 onUpdate={(value) => onHabitUpdate(habit.id, value)}
               />
-            </Grid>
+            </div>
           ))}
-        </Grid>
+        </div>
       </CardContent>
     </Card>
   );
