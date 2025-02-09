@@ -20,7 +20,7 @@ const Index = () => {
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
 
   // Load initial tasks from localStorage
-  const [initialTasks] = useState<Task[]>(() => {
+  const [tasks, setTasks] = useState<Task[]>(() => {
     try {
       const saved = localStorage.getItem('taskList');
       return saved ? JSON.parse(saved) : [];
@@ -74,9 +74,10 @@ const Index = () => {
   };
 
   // Handle task updates
-  const handleTasksUpdate = (tasks: Task[]) => {
-    localStorage.setItem('taskList', JSON.stringify(tasks));
-    window.dispatchEvent(new CustomEvent('tasksUpdated', { detail: { tasks } }));
+  const handleTasksUpdate = (newTasks: Task[]) => {
+    setTasks(newTasks);
+    localStorage.setItem('taskList', JSON.stringify(newTasks));
+    window.dispatchEvent(new CustomEvent('tasksUpdated', { detail: { tasks: newTasks } }));
   };
 
   const handleCompletedTasksUpdate = (tasks: Task[]) => {
@@ -87,6 +88,12 @@ const Index = () => {
   const handleFavoritesUpdate = (newFavorites: Quote[]) => {
     setFavorites(newFavorites);
     localStorage.setItem('favoriteQuotes', JSON.stringify(newFavorites));
+  };
+
+  const handleAddHabitToTasks = (habit: HabitDetail) => {
+    const task = convertHabitToTask(habit);
+    handleTasksUpdate([task, ...tasks]);
+    toast.success(`Added "${habit.name}" to tasks`);
   };
 
   return (
@@ -134,7 +141,7 @@ const Index = () => {
         </div>
 
         <TaskManager
-          initialTasks={initialTasks}
+          initialTasks={tasks}
           initialCompletedTasks={initialCompletedTasks}
           initialFavorites={favorites}
           onTasksUpdate={handleTasksUpdate}
@@ -168,11 +175,7 @@ const Index = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          const task = convertHabitToTask(habit);
-                          handleTasksUpdate([task, ...initialTasks]);
-                          toast.success(`Added "${habit.name}" to tasks`);
-                        }}
+                        onClick={() => handleAddHabitToTasks(habit)}
                         className="ml-4 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary hover:text-primary-foreground flex items-center gap-1"
                       >
                         <Plus className="h-4 w-4" />
@@ -191,4 +194,3 @@ const Index = () => {
 };
 
 export default Index;
-

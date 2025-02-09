@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { HabitDetail, DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { Task } from '@/components/tasks/TaskList';
 
@@ -20,12 +20,13 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     setTodaysHabits(activeHabits);
   }, [activeTemplates]);
 
-  const convertHabitToTask = (habit: HabitDetail): Task => ({
+  const convertHabitToTask = useCallback((habit: HabitDetail): Task => ({
     id: `habit-task-${habit.id}`,
     name: habit.name,
     completed: false,
     duration: habit.duration || 25,
-  });
+    description: habit.description,
+  }), []);
 
   return {
     todaysHabits,
