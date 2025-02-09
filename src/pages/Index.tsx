@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import { useDataInitialization } from "@/hooks/useDataInitialization";
 import { useLocalStorageData } from "@/hooks/useLocalStorageData";
-import { useTaskContext } from "@/contexts/TaskContext";
+import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -15,7 +15,8 @@ const Index = () => {
   const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
-  const { tasks } = useTaskContext();
+  const state = useAppState();
+  const { tasks } = state;
 
   const {
     lastSyncDate,
@@ -75,9 +76,8 @@ const Index = () => {
         <DailySyncManager
           lastSyncDate={lastSyncDate}
           onLastSyncUpdate={handleLastSyncUpdate}
-          tasks={tasks}
+          tasks={tasks.items}
           onTasksUpdate={() => {
-            // Handle task updates if needed
             console.log('Tasks updated in DailySyncManager');
           }}
         />

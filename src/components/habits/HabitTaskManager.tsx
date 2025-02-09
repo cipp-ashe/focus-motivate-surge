@@ -1,10 +1,9 @@
 
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
-import { useTaskContext } from "@/contexts/TaskContext";
+import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
 import type { ActiveTemplate } from "@/components/habits/types";
-import { TASKS_UPDATED_EVENT } from "@/hooks/useTaskStorage";
 
 interface HabitTaskManagerProps {
   activeTemplates: ActiveTemplate[];
@@ -12,15 +11,26 @@ interface HabitTaskManagerProps {
 
 export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
-  const { addTagToEntity, getEntityTags } = useTagSystem();
-  const { tasks, addTask } = useTaskContext();
+  const { addTagToEntity } = useTagSystem();
+  const state = useAppState();
+  const actions = useAppStateActions();
+  const { tasks: { items: tasks } } = state;
 
-  // Memoize non-habit tasks
-  const nonHabitTasks = useMemo(() => {
-    return tasks.filter(task => !getEntityTags(task.id, 'task').some(tag => tag.name === 'Habit'));
-  }, [tasks, getEntityTags]);
+  // Cleanup stale habit tasks when templates change
+  useEffect(() => {
+    const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
+    const activeHabitIds = todaysHabits.map(habit => `habit-${habit.id}`);
+    
+    // Remove tasks for habits that are no longer active
+    habitTasks.forEach(task => {
+      if (!activeHabitIds.includes(task.id)) {
+        console.log('Removing stale habit task:', task.id);
+        actions.deleteTask(task.id);
+      }
+    });
+  }, [todaysHabits, tasks, actions]);
 
-  // Filter and create tasks only for timer-based habits
+  // Sync habit tasks
   const syncHabitTasks = useCallback(() => {
     console.log('Syncing habit tasks');
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
@@ -40,26 +50,14 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           }
         };
 
+        actions.addTask(task);
         addTagToEntity('Habit', taskId, 'task');
-        addTask(task);
       }
     });
-  }, [todaysHabits, tasks, addTask, addTagToEntity]);
+  }, [todaysHabits, tasks, actions, addTagToEntity]);
 
   useEffect(() => {
     syncHabitTasks();
-    
-    // Subscribe to task updates
-    const handleTasksUpdate = () => {
-      console.log('Tasks updated, syncing habits');
-      syncHabitTasks();
-    };
-
-    window.addEventListener(TASKS_UPDATED_EVENT, handleTasksUpdate);
-    
-    return () => {
-      window.removeEventListener(TASKS_UPDATED_EVENT, handleTasksUpdate);
-    };
   }, [syncHabitTasks]);
 
   return null;

@@ -4,7 +4,7 @@ import { TaskList } from "./TaskList";
 import { TaskLayout } from "./TaskLayout";
 import { TimerSection } from "../timer/TimerSection";
 import type { Quote } from "@/types/timer";
-import { useTaskContext } from "@/contexts/TaskContext";
+import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
 
 interface TaskManagerProps {
   initialFavorites?: Quote[];
@@ -15,7 +15,8 @@ export const TaskManager = ({
   initialFavorites = [],
   onFavoritesChange,
 }: TaskManagerProps) => {
-  const { selectedTaskId, tasks } = useTaskContext();
+  const state = useAppState();
+  const { tasks: { items: tasks, selected: selectedTaskId } } = state;
   const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
 
   const taskListComponent = useMemo(() => (
