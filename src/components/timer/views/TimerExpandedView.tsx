@@ -1,4 +1,5 @@
-import { memo } from "react";
+
+import { forwardRef, memo } from "react";
 import { Card } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
 import { TimerDisplay } from "../TimerDisplay";
@@ -8,6 +9,10 @@ import { QuoteDisplay } from "../../quotes/QuoteDisplay";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { NotesEditor } from "../../notes/NotesEditor";
+
+export interface TimerExpandedViewRef {
+  saveNotes: () => void;
+}
 
 interface TimerExpandedViewProps {
   taskName: string;
@@ -33,7 +38,7 @@ interface TimerExpandedViewProps {
   setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
-export const TimerExpandedView = memo(({
+export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpandedViewProps>(({
   taskName,
   timerCircleProps,
   timerControlsProps,
@@ -42,7 +47,7 @@ export const TimerExpandedView = memo(({
   onLike,
   favorites,
   setFavorites,
-}: TimerExpandedViewProps) => {
+}, ref) => {
   return (
     <div className="relative w-full max-w-[900px] mx-auto px-4 py-4 z-[101] flex flex-col gap-4 h-[90vh] overflow-x-hidden">
       <QuoteDisplay 
@@ -92,12 +97,12 @@ export const TimerExpandedView = memo(({
             Quick Notes
           </h2>
           <div className="flex-1">
-            <NotesEditor />
+            <NotesEditor ref={ref} />
           </div>
         </div>
       </Card>
     </div>
   );
-});
+}));
 
 TimerExpandedView.displayName = 'TimerExpandedView';
