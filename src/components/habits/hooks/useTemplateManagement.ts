@@ -19,25 +19,32 @@ export const useTemplateManagement = () => {
   const addTemplate = useCallback((template: ActiveTemplate) => {
     setActiveTemplates(prev => {
       const newTemplates = [...prev, template];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newTemplates));
       toast.success('Template added successfully');
       return newTemplates;
     });
   }, []);
 
   const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
-    setActiveTemplates(prev =>
-      prev.map(template =>
+    setActiveTemplates(prev => {
+      const updated = prev.map(template =>
         template.templateId === templateId
           ? { ...template, ...updates, customized: true }
           : template
-      )
-    );
-    toast.success('Template updated successfully');
+      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      toast.success('Template updated successfully');
+      return updated;
+    });
   }, []);
 
   const removeTemplate = useCallback((templateId: string) => {
-    setActiveTemplates(prev => prev.filter(template => template.templateId !== templateId));
-    toast.success('Template removed successfully');
+    setActiveTemplates(prev => {
+      const filtered = prev.filter(template => template.templateId !== templateId);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+      toast.success('Template removed successfully');
+      return filtered;
+    });
   }, []);
 
   const saveCustomTemplate = useCallback((template: NewTemplate): HabitTemplate => {
@@ -48,26 +55,41 @@ export const useTemplateManagement = () => {
       category: template.category,
       defaultHabits: template.defaultHabits || [],
       defaultDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
+      duration: template.duration || null,
     };
 
-    setCustomTemplates(prev => [...prev, newTemplate]);
-    toast.success('Custom template saved successfully');
+    setCustomTemplates(prev => {
+      const updated = [...prev, newTemplate];
+      toast.success('Custom template saved successfully');
+      return updated;
+    });
+
+    addTemplate({
+      templateId: newTemplate.id,
+      habits: newTemplate.defaultHabits,
+      customized: false,
+      activeDays: newTemplate.defaultDays,
+    });
+
     return newTemplate;
-  }, []);
+  }, [addTemplate]);
 
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     setActiveTemplates(templates);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
   }, []);
 
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
-    setActiveTemplates(prev =>
-      prev.map(template =>
+    setActiveTemplates(prev => {
+      const updated = prev.map(template =>
         template.templateId === templateId
           ? { ...template, activeDays: days, customized: true }
           : template
-      )
-    );
-    toast.success('Template days updated successfully');
+      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      toast.success('Template days updated successfully');
+      return updated;
+    });
   }, []);
 
   return {

@@ -57,6 +57,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
                   ...(value === 'count' && { target: 1 }),
                   ...(value === 'rating' && { min: 1, max: 5 }),
                 },
+                ...(value === 'duration' && { duration: 30 }), // Set default duration when type is duration
               });
             }}
           >
@@ -71,7 +72,31 @@ const HabitForm: React.FC<HabitFormProps> = ({
             </SelectContent>
           </Select>
 
-          {habit.metrics.type !== 'boolean' && (
+          {habit.metrics.type === 'duration' && (
+            <div className="space-y-2">
+              <Input
+                type="number"
+                placeholder="Target minutes"
+                value={habit.metrics.target || ''}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  onUpdate({
+                    metrics: {
+                      ...habit.metrics,
+                      target: value,
+                    },
+                    duration: value,
+                  });
+                }}
+                min={5}
+              />
+              <p className="text-xs text-muted-foreground">
+                This duration will be used when sending to timer
+              </p>
+            </div>
+          )}
+
+          {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'duration' && (
             <Input
               type="number"
               placeholder="Target value"
@@ -82,7 +107,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
                   target: parseInt(e.target.value),
                 },
               })}
-              min={habit.metrics.type === 'duration' ? 5 : 1}
+              min={habit.metrics.type === 'rating' ? 1 : undefined}
               max={habit.metrics.type === 'rating' ? 5 : undefined}
             />
           )}

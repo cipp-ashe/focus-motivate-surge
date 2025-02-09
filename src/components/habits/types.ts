@@ -20,6 +20,7 @@ export interface HabitTemplate {
   category: string;
   defaultHabits: HabitDetail[];
   defaultDays: DayOfWeek[];
+  duration: number | null;
 }
 
 export interface NewTemplate {
@@ -28,6 +29,7 @@ export interface NewTemplate {
   category: string;
   defaultHabits: HabitDetail[];
   defaultDays: DayOfWeek[];
+  duration?: number | null;
 }
 
 export interface HabitDetail {
@@ -39,6 +41,7 @@ export interface HabitDetail {
   metrics: HabitMetrics;
   insights: HabitInsight[];
   tips: string[];
+  duration?: number;
 }
 
 export interface HabitMetrics {
