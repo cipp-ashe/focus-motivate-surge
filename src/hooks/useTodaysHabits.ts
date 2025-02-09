@@ -18,7 +18,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       console.log(`Template ${template.templateId} habits:`, template.habits);
       
       if (template.activeDays.includes(dayOfWeek)) {
-        // Map habits and set duration from metrics.target for timer habits
+        // Map habits and set duration from metrics.target for timer habits (in minutes)
         return template.habits.map(habit => ({
           ...habit,
           duration: habit.metrics.type === 'timer' ? habit.metrics.target : undefined
@@ -33,4 +33,3 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
 
   return { todaysHabits };
 };
-

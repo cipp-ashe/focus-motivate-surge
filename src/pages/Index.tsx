@@ -118,12 +118,12 @@ const Index = () => {
     // Get non-habit tasks
     const nonHabitTasks = tasks.filter(task => !task.id.startsWith('habit-'));
     
-    // Convert timer habits to tasks and ensure duration is set correctly
+    // Convert timer habits to tasks and ensure duration is set correctly (minutes to seconds)
     const habitTasks: Task[] = timerHabits.map(habit => ({
       id: `habit-${habit.id}`,
       name: habit.name,
       completed: false,
-      duration: habit.metrics.target, // Use target directly as duration
+      duration: habit.metrics.target * 60, // Convert minutes to seconds for timer
       createdAt: new Date().toISOString(),
       tags: [{ name: 'Habit', color: 'blue' }],
     }));
