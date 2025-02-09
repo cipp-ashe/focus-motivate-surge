@@ -9,11 +9,15 @@ import { ActiveTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateManager from './TemplateManager';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 const HabitTracker: React.FC = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState('');
 
   const {
     activeTemplates,
@@ -45,6 +49,7 @@ const HabitTracker: React.FC = () => {
     };
     setSelectedTemplate(newTemplate);
     setIsCreatingTemplate(true);
+    setNewTemplateName('');
   };
 
   const handleConfigureTemplate = (template: ActiveTemplate) => {
@@ -55,6 +60,35 @@ const HabitTracker: React.FC = () => {
   const handleCloseTemplate = () => {
     setSelectedTemplate(null);
     setIsCreatingTemplate(false);
+    setNewTemplateName('');
+  };
+
+  const handleSaveTemplate = () => {
+    if (!selectedTemplate) return;
+    
+    if (!newTemplateName.trim() && isCreatingTemplate) {
+      toast.error('Please enter a template name');
+      return;
+    }
+
+    if (!selectedTemplate.habits.length) {
+      toast.error('Please add at least one habit');
+      return;
+    }
+
+    if (isCreatingTemplate) {
+      const updatedTemplate = { 
+        ...selectedTemplate,
+        name: newTemplateName 
+      };
+      addTemplate(updatedTemplate);
+      toast.success('Template saved successfully');
+      handleCloseTemplate();
+    } else {
+      updateTemplate(selectedTemplate.templateId, selectedTemplate);
+      toast.success('Template updated successfully');
+      handleCloseTemplate();
+    }
   };
 
   return (
@@ -87,12 +121,8 @@ const HabitTracker: React.FC = () => {
         <Sheet 
           open={!!selectedTemplate} 
           onOpenChange={(open) => {
-            if (!open) {
-              // Only allow closing if we're editing an existing template
-              // or if the new template has at least one habit configured
-              if (!isCreatingTemplate || (selectedTemplate.habits && selectedTemplate.habits.length > 0)) {
-                handleCloseTemplate();
-              }
+            if (!open && !isCreatingTemplate) {
+              handleCloseTemplate();
             }
           }}
         >
@@ -102,27 +132,38 @@ const HabitTracker: React.FC = () => {
                 {isCreatingTemplate ? 'Create New Template' : 'Edit Template'}
               </SheetTitle>
             </SheetHeader>
+            
+            {isCreatingTemplate && (
+              <div className="space-y-2 mt-4 mb-6">
+                <Label htmlFor="templateName">Template Name</Label>
+                <Input
+                  id="templateName"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  placeholder="Enter template name"
+                />
+              </div>
+            )}
+
             <TemplateManager
               templateToEdit={selectedTemplate}
               onUpdateTemplate={(updates) => {
-                const hasValidHabits = updates.habits && updates.habits.some(h => h.name.trim());
-                
-                // Only save and close if we have at least one valid habit
-                if (hasValidHabits) {
-                  if (isCreatingTemplate) {
-                    const updatedTemplate = { ...selectedTemplate, ...updates };
-                    addTemplate(updatedTemplate);
-                  } else {
-                    updateTemplate(selectedTemplate.templateId, updates);
-                  }
-                  handleCloseTemplate();
-                }
+                updateTemplate(selectedTemplate.templateId, updates);
               }}
               onUpdateDays={(days) => {
                 updateTemplateDays(selectedTemplate.templateId, days);
               }}
               onClose={handleCloseTemplate}
             />
+
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={handleCloseTemplate}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveTemplate}>
+                Save Template
+              </Button>
+            </div>
           </SheetContent>
         </Sheet>
       )}
@@ -131,3 +172,4 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
+

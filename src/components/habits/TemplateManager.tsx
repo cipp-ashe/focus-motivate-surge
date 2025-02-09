@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -63,11 +64,9 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+              onClick={() => {
                 onUpdateTemplate?.({
-                  habits: [...templateToEdit.habits, createEmptyHabit()]
+                  habits: [...(templateToEdit.habits || []), createEmptyHabit()]
                 });
               }}
             >
@@ -142,3 +141,4 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 };
 
 export default TemplateManager;
+
