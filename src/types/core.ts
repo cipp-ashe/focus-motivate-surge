@@ -15,7 +15,7 @@ export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue
 export interface TagRelation extends BaseEntity {
   tagId: string;
   entityId: string;
-  entityType: 'note' | 'task' | 'habit';
+  entityType: EntityType;
 }
 
 export interface TaggableEntity extends BaseEntity {
@@ -23,4 +23,3 @@ export interface TaggableEntity extends BaseEntity {
 }
 
 export type EntityType = 'note' | 'task' | 'habit';
-
