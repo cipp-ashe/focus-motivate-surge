@@ -17,6 +17,7 @@ import { Mail } from "lucide-react";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { Task } from "./tasks/TaskList";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EmailSummaryModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export const EmailSummaryModal = ({
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [clearAfterSend, setClearAfterSend] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +74,12 @@ export const EmailSummaryModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-card border-primary/20">
+      <DialogContent 
+        className={cn(
+          "sm:max-w-[425px] bg-card border-primary/20",
+          isMobile && "w-[95vw] mx-auto mt-16"
+        )}
+      >
         <DialogHeader className="space-y-3">
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Mail className="w-5 h-5 text-primary" />
