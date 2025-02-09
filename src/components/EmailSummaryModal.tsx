@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Dialog,
@@ -18,6 +17,7 @@ import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { Task } from "./tasks/TaskList";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface EmailSummaryModalProps {
   isOpen: boolean;
