@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
-import { toast } from "sonner";
 import type { ActiveTemplate } from "@/components/habits/types";
 
 interface HabitTaskManagerProps {
@@ -17,56 +16,46 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   const actions = useAppStateActions();
   const { tasks: { items: tasks } } = state;
 
-  // Get today's date in YYYY-MM-DD format for dismissed storage
-  const today = new Date().toISOString().split('T')[0];
-  const DISMISSED_HABITS_KEY = `dismissed-habits-${today}`;
-
-  // Load dismissed habits for today
-  const getDismissedHabits = (): string[] => {
-    const dismissed = localStorage.getItem(DISMISSED_HABITS_KEY);
-    return dismissed ? JSON.parse(dismissed) : [];
-  };
-
-  // Save dismissed habit
-  const saveDismissedHabit = (habitId: string) => {
-    const dismissed = getDismissedHabits();
-    localStorage.setItem(DISMISSED_HABITS_KEY, JSON.stringify([...dismissed, habitId]));
-  };
-
   useEffect(() => {
-    const dismissedHabits = getDismissedHabits();
-    
-    // Filter timer habits that aren't dismissed
-    const timerHabits = todaysHabits.filter(habit => 
-      habit.metrics?.type === 'timer' && !dismissedHabits.includes(habit.id)
-    );
-    
-    // Create a map of existing habit task IDs
-    const existingHabitTaskIds = new Set(
+    // 1. Get only timer habits for today
+    const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
+    console.log('Timer habits for today:', timerHabits);
+
+    // 2. Get set of existing habit task IDs for efficient lookup
+    const existingTaskIds = new Set(
       tasks
         .filter(task => task.id.startsWith('habit-'))
         .map(task => task.id)
     );
+    console.log('Existing habit task IDs:', Array.from(existingTaskIds));
 
-    // Remove inactive habit tasks
+    // 3. Get set of active habit IDs
     const activeHabitIds = new Set(timerHabits.map(habit => `habit-${habit.id}`));
-    const tasksToRemove = tasks.filter(task => 
-      task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
-    );
+    console.log('Active habit IDs:', Array.from(activeHabitIds));
 
-    tasksToRemove.forEach(task => {
-      actions.deleteTask(task.id);
-      if (task.relationships?.habitId) {
-        actions.removeRelationship(task.id, task.relationships.habitId);
-      }
-    });
+    // 4. Remove tasks for inactive habits
+    tasks
+      .filter(task => 
+        task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
+      )
+      .forEach(task => {
+        console.log('Removing inactive habit task:', task.id);
+        actions.deleteTask(task.id);
+        
+        if (task.relationships?.habitId) {
+          actions.removeRelationship(task.id, task.relationships.habitId);
+        }
+      });
 
-    // Add new timer habit tasks (only if they don't exist)
+    // 5. Add tasks for new habits
     timerHabits.forEach(habit => {
       const taskId = `habit-${habit.id}`;
-      if (!existingHabitTaskIds.has(taskId)) {
-        const target = habit.metrics?.target || 1500;
-        
+      
+      if (!existingTaskIds.has(taskId)) {
+        console.log('Adding new habit task:', taskId);
+        const target = habit.metrics?.target || 600; // Default 10 minutes
+
+        // Add task
         actions.addTask({
           name: habit.name,
           completed: false,
@@ -74,6 +63,7 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           relationships: { habitId: habit.id }
         });
 
+        // Add relationship
         actions.addRelationship({
           sourceId: taskId,
           sourceType: 'task',
@@ -81,11 +71,12 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           targetType: 'habit',
           relationType: 'habit-task'
         });
-        
+
+        // Add tag
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits]);
+  }, [todaysHabits, tasks]);
 
   return null;
 };
