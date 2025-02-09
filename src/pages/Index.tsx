@@ -4,9 +4,12 @@ import { TaskManager } from "@/components/tasks/TaskManager";
 import { useNotesPanel } from "@/hooks/useNotesPanel";
 import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 import { Header } from "@/components/layout/Header";
+import { useTodaysHabits } from "@/hooks/useTodaysHabits";
+import { TodaysHabits } from "@/components/habits/TodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
 import type { Quote } from "@/types/timer";
-import type { ActiveTemplate } from "@/components/habits/types";
+import type { ActiveTemplate, HabitDetail } from "@/components/habits/types";
+import { toast } from "sonner";
 
 const Index = () => {
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
@@ -43,6 +46,7 @@ const Index = () => {
   });
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
 
   const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
     try {
@@ -53,6 +57,8 @@ const Index = () => {
       return [];
     }
   });
+
+  const { todaysHabits } = useTodaysHabits(activeTemplates);
 
   useEffect(() => {
     const handleTemplateUpdate = () => {
@@ -97,12 +103,49 @@ const Index = () => {
     setFavorites(newFavorites);
   };
 
+  const handleHabitClick = (habit: HabitDetail) => {
+    setCompletedHabits(prev => {
+      const newCompleted = prev.includes(habit.id) 
+        ? prev.filter(id => id !== habit.id)
+        : [...prev, habit.id];
+      return newCompleted;
+    });
+  };
+
+  const handleAddHabitToTasks = (habit: HabitDetail) => {
+    const newTask: Task = {
+      id: `habit-task-${habit.id}-${Date.now()}`,
+      name: habit.name,
+      duration: habit.duration,
+      completed: false,
+    };
+    
+    const taskExists = tasks.some(task => 
+      task.name === habit.name && !task.completed
+    );
+
+    if (taskExists) {
+      toast.error("This habit is already in your task list");
+      return;
+    }
+
+    handleTasksUpdate([...tasks, newTask]);
+    toast.success("Habit added to tasks");
+  };
+
   return (
     <div className="min-h-screen bg-background transition-colors duration-300 overflow-y-auto">
       <div className="max-w-7xl mx-auto px-4 py-7">
         <Header 
           onNotesClick={handleNotesClick}
           onHabitsClick={handleHabitsClick}
+        />
+
+        <TodaysHabits
+          habits={todaysHabits}
+          completedHabits={completedHabits}
+          onHabitClick={handleHabitClick}
+          onAddHabitToTasks={handleAddHabitToTasks}
         />
 
         <TaskManager
@@ -121,3 +164,4 @@ const Index = () => {
 };
 
 export default Index;
+
