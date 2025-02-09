@@ -17,29 +17,14 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
 
   useEffect(() => {
     const updateTags = () => {
-      // Ensure we're getting tags for the correct task
       const currentTags = getEntityTags(task.id, 'task');
-      
-      // Combine system tags with task.tags if they exist
-      const combinedTags = [...currentTags];
-      if (task.tags) {
-        task.tags.forEach(tag => {
-          if (!combinedTags.some(t => t.name === tag.name)) {
-            // Add tag to the system if it doesn't exist
-            addTagToEntity(tag.name, task.id, 'task');
-          }
-        });
-      }
-      
-      setTags(combinedTags);
+      setTags(currentTags);
     };
 
     updateTags();
-    
-    // Listen for tag updates
     window.addEventListener('tagsUpdated', updateTags);
     return () => window.removeEventListener('tagsUpdated', updateTags);
-  }, [task.id, task.tags, getEntityTags, addTagToEntity]);
+  }, [task.id, getEntityTags]);
 
   const handleAddTag = (tagName: string) => {
     addTagToEntity(tagName, task.id, 'task');
@@ -63,7 +48,6 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     updateTagColor(tag.name, nextColor);
   };
 
-  // Only render if we have tags
   if (!tags || tags.length === 0) return null;
 
   return (
@@ -81,4 +65,3 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     </div>
   );
 };
-

@@ -24,10 +24,9 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
   // Filter and create tasks only for timer-based habits
   const habitTasks = useMemo(() => {
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
-    console.log('Creating habit tasks from timer habits:', timerHabits);
     
     return timerHabits.map(habit => {
-      const taskId = `habit-${habit.templateId}-${habit.id}`;
+      const taskId = `habit-${habit.id}`;
       const existingTask = tasks.find(t => t.id === taskId);
       
       const task: Task = {
@@ -37,12 +36,11 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         duration: habit.metrics?.target ? habit.metrics.target * 60 : undefined, // Convert minutes to seconds
         createdAt: existingTask?.createdAt || new Date().toISOString(),
         relationships: {
-          habitId: habit.id,
-          templateId: habit.templateId
+          habitId: habit.id
         }
       };
 
-      // Add Habit tag
+      // Only add the Habit tag
       addTagToEntity('Habit', taskId, 'task');
 
       return task;
@@ -52,7 +50,6 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
   // Initialize tasks on first render if there are timer habits but no tasks
   useEffect(() => {
     if (habitTasks.length > 0 && tasks.length === 0) {
-      console.log('Initializing tasks from timer habits:', habitTasks);
       onTasksUpdate([...habitTasks]);
     }
   }, [habitTasks, tasks.length, onTasksUpdate]);
@@ -60,10 +57,8 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
   // Synchronize tasks whenever habits or non-habit tasks change
   useEffect(() => {
     const newTasks = [...nonHabitTasks, ...habitTasks];
-    console.log('Synchronizing tasks:', { nonHabitTasks, habitTasks, newTasks });
     onTasksUpdate(newTasks);
   }, [nonHabitTasks, habitTasks, onTasksUpdate]);
 
   return null;
 };
-
