@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import type { Task } from "@/components/tasks/TaskList";
@@ -21,19 +20,18 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
     
     // Convert timer habits to tasks with proper duration handling
     const timerHabits = todaysHabits.filter(habit => 
-      habit.metrics.type === 'timer' && 
-      habit.metrics.target && 
-      habit.metrics.target > 0
+      habit.metrics.type === 'timer' || 
+      habit.metrics.type === 'duration'
     );
     
     if (timerHabits.length > 0) {
       console.log('Converting timer habits to tasks:', timerHabits);
       
       const habitTasks: Task[] = timerHabits.map(habit => {
-        // Ensure we have a valid number for the duration
-        const targetMinutes = typeof habit.metrics.target === 'number' 
-          ? habit.metrics.target 
-          : parseInt(String(habit.metrics.target));
+        // Get target duration from either timer or duration type habits
+        const targetMinutes = habit.metrics.target ? 
+          parseInt(String(habit.metrics.target)) : 
+          (habit.duration || 0);
 
         // Log duration conversion details
         console.log(`Converting habit duration for ${habit.name}:`, {
@@ -55,7 +53,7 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
           id: `habit-${habit.id}`,
           name: habit.name,
           completed: false,
-          duration: targetMinutes, // Keep duration in minutes, not seconds
+          duration: targetMinutes,
           createdAt: new Date().toISOString(),
           tags: [{ name: 'Habit', color: 'blue' }],
         };
@@ -70,9 +68,14 @@ export const HabitTaskManager = ({ tasks, onTasksUpdate, activeTemplates }: Habi
         console.log('Updating tasks with converted habits:', newTasks);
         onTasksUpdate(newTasks);
       }
+    } else {
+      // If no timer habits, ensure we're not keeping any stale habit tasks
+      if (tasks.some(task => task.id.startsWith('habit-'))) {
+        const newTasks = tasks.filter(task => !task.id.startsWith('habit-'));
+        onTasksUpdate(newTasks);
+      }
     }
-  }, [todaysHabits]); // Remove tasks from dependency array to prevent infinite loop
+  }, [todaysHabits, tasks, onTasksUpdate]); // Include tasks and onTasksUpdate in dependencies
 
   return null;
 };
-
