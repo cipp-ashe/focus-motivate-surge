@@ -12,6 +12,8 @@ import { useRelationships } from "@/hooks/useRelationships";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  console.log('Rendering Index component');
+  
   const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
@@ -42,29 +44,36 @@ const Index = () => {
     toggleHabits();
   };
 
+  console.log('Index render state:', { 
+    isInitialized, 
+    hasError: !!error,
+    showClearButton 
+  });
+
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4 p-4 rounded-lg">
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        <div className="text-center space-y-4 p-8 rounded-lg border border-border shadow-sm">
           {error ? (
             <>
-              <div className="text-lg font-medium text-red-600">{error}</div>
+              <div className="text-lg font-medium text-destructive">{error}</div>
               <div className="text-sm text-muted-foreground">
                 Try clearing local storage to fix this issue
               </div>
+              {showClearButton && (
+                <Button 
+                  variant="destructive"
+                  onClick={clearStorage}
+                  className="mt-4"
+                >
+                  Clear Storage & Refresh
+                </Button>
+              )}
             </>
           ) : (
-            <div className="text-lg font-medium">Initializing data store...</div>
-          )}
-          
-          {showClearButton && (
-            <Button 
-              variant="destructive"
-              onClick={clearStorage}
-              className="mt-4"
-            >
-              Clear Storage & Refresh
-            </Button>
+            <div className="text-lg font-medium animate-pulse">
+              Initializing data store...
+            </div>
           )}
         </div>
       </div>
