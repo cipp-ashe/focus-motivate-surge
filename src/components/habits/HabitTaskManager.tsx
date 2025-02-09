@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
-import { Button } from "@/components/ui/button";
-import { Check, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import type { ActiveTemplate } from "@/components/habits/types";
 
@@ -42,7 +40,7 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     );
     const activeHabitIds = timerHabits.map(habit => `habit-${habit.id}`);
     
-    // Only clean up habit-related tasks, preserve manual tasks
+    // Only remove habit-related tasks that are no longer active
     const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
     habitTasks.forEach(task => {
       if (!activeHabitIds.includes(task.id)) {
@@ -77,7 +75,7 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits, activeTemplates]);
+  }, [todaysHabits, tasks]);
 
   const handleDismiss = (taskId: string, habitId: string) => {
     saveDismissedHabit(habitId);
@@ -143,4 +141,3 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
 
   return null;
 };
-

@@ -6,12 +6,10 @@ import { Header } from "@/components/layout/Header";
 import { DailySyncManager } from "@/components/tasks/DailySyncManager";
 import { useDataInitialization } from "@/hooks/useDataInitialization";
 import { useLocalStorageData } from "@/hooks/useLocalStorageData";
-import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
+import { useAppState } from "@/contexts/AppStateContext";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  console.log('Rendering Index component');
-  
   const { isInitialized, showClearButton, clearStorage, error } = useDataInitialization();
   const { toggle: toggleNotes, close: closeNotes } = useNotesPanel();
   const { toggle: toggleHabits, close: closeHabits } = useHabitsPanel();
