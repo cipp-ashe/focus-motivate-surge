@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -16,7 +17,6 @@ interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
 }
 
-// Generate a more reliable UUID for task IDs
 const generateId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
@@ -41,7 +41,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
           // Split the line by comma to check for duration
           const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
           // Parse duration, default to 25 if not provided or invalid
-          const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || 25, 1), 60) : 25;
+          const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || 25, 1), 60) * 60 : 25 * 60;
           
           onTaskAdd({
             id: generateId(),
@@ -57,7 +57,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         id: generateId(),
         name: newTaskName.trim(),
         completed: false,
-        duration: 25,
+        duration: 25 * 60, // Default to 25 minutes (in seconds)
         createdAt: new Date().toISOString(),
       });
     }
@@ -68,7 +68,6 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
     setNewTaskName("");
   };
 
-  // Handle Ctrl/Cmd + Enter shortcut for bulk mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isBulkAdd && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
