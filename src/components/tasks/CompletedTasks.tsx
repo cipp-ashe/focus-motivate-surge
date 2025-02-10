@@ -53,7 +53,14 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                       {task.completedAt ? formatDate(task.completedAt) : "-"}
                     </TableCell>
                     <TableCell>
-                      <NotesDialog id={task.id} />
+                      <NotesDialog 
+                        open={false}
+                        onOpenChange={() => {}}
+                        title="Notes"
+                        description="Add notes for this task"
+                        actionText="Save"
+                        onAction={() => {}}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -72,3 +79,4 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     </Accordion>
   );
 };
+

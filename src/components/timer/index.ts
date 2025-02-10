@@ -1,6 +1,19 @@
 
-export { TimerControls } from './controls/TimerControls';
+// Re-export component types
+export type {
+  TimerA11yProps,
+  ButtonA11yProps,
+  TimerProps,
+  TimerCircleProps,
+  TimerControlsProps,
+  MinutesInputProps,
+  SoundOption,
+  SoundSelectorProps,
+} from './types/components';
+
+// Re-export components
 export { Timer } from './Timer';
+export { TimerControls } from './controls/TimerControls';
 export { TimerSection } from './TimerSection';
 export { TimerErrorBoundary } from './TimerErrorBoundary';
 export { TimerCompletionDialog } from './TimerCompletionDialog';
