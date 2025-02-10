@@ -162,4 +162,3 @@ export const Timer = ({
 
 Timer.displayName = 'Timer';
 
-export { Timer };
