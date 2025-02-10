@@ -33,11 +33,9 @@ export const TimerSection = ({
     durationInMinutes: selectedTask.duration ? Math.floor(selectedTask.duration / 60) : 25
   });
 
-  const initialMinutes = selectedTask.duration ? Math.floor(selectedTask.duration / 60) : 25;
-
   return (
     <Timer
-      key={selectedTask.id}
+      key={`timer-${selectedTask.id}-${selectedTask.duration}`}
       duration={selectedTask.duration || 1500}
       taskName={selectedTask.name}
       onComplete={onTaskComplete}

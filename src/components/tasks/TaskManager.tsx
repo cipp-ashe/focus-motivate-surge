@@ -49,6 +49,7 @@ export const TaskManager = ({
 
   const timerComponent = useMemo(() => (
     <TimerSection
+      key={`${selectedTask?.id}-${selectedTask?.duration}`}
       selectedTask={selectedTask}
       onTaskComplete={(metrics) => {
         if (selectedTask) {
