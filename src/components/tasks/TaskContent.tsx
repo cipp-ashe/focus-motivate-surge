@@ -45,6 +45,14 @@ export const TaskContent = ({
     }
   };
 
+  const handleLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      console.log('Enter pressed, handling blur');
+      e.currentTarget.blur();
+    }
+    onKeyDown(e);
+  };
+
   const handleLocalBlur = () => {
     let finalValue = localInputValue;
     if (finalValue === '' || isNaN(parseInt(finalValue, 10))) {
@@ -84,7 +92,7 @@ export const TaskContent = ({
               className="w-16 text-right bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               onChange={handleLocalChange}
               onBlur={handleLocalBlur}
-              onKeyDown={onKeyDown}
+              onKeyDown={handleLocalKeyDown}
               autoFocus
               onClick={preventPropagation}
               onTouchStart={preventPropagation}

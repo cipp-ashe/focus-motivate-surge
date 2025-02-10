@@ -41,7 +41,8 @@ export const TaskRow = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      e.currentTarget.blur();
+      console.log('Enter pressed in TaskRow');
+      handleBlur();
     }
     e.stopPropagation();
   };
@@ -52,14 +53,17 @@ export const TaskRow = ({
     
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
-      // Store duration in seconds
-      const newDurationInSeconds = (parseInt(value || "25") * 60).toString();
-      onDurationChange(task.id, newDurationInSeconds);
       
-      if (isSelected) {
-        console.log('Updating selected task duration:', newDurationInSeconds);
-        const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
-        onTaskClick(updatedTask, new MouseEvent('click') as any);
+      if (value !== '') {
+        // Store duration in seconds
+        const newDurationInSeconds = (parseInt(value) * 60).toString();
+        onDurationChange(task.id, newDurationInSeconds);
+        
+        if (isSelected) {
+          console.log('Updating selected task duration:', newDurationInSeconds);
+          const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
+          onTaskClick(updatedTask, new MouseEvent('click') as any);
+        }
       }
     }
   };
