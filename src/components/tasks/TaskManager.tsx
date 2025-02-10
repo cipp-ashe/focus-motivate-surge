@@ -16,6 +16,7 @@ export const TaskManager = ({
   onFavoritesChange,
 }: TaskManagerProps) => {
   const state = useAppState();
+  const actions = useAppStateActions();
   const { tasks: { items: tasks, selected: selectedTaskId } } = state;
   const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
 
@@ -30,15 +31,19 @@ export const TaskManager = ({
     <TimerSection
       selectedTask={selectedTask}
       onTaskComplete={(metrics) => {
-        console.log("Task completed with metrics:", metrics);
+        if (selectedTask) {
+          actions.completeTask(selectedTask.id, metrics);
+        }
       }}
       onDurationChange={(minutes) => {
-        console.log("Duration changed to:", minutes);
+        if (selectedTask) {
+          actions.updateTask(selectedTask.id, { duration: minutes });
+        }
       }}
       favorites={initialFavorites}
       setFavorites={onFavoritesChange}
     />
-  ), [initialFavorites, onFavoritesChange, selectedTask]);
+  ), [initialFavorites, onFavoritesChange, selectedTask, actions]);
 
   return (
     <TaskLayout
