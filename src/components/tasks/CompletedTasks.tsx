@@ -18,6 +18,7 @@ import {
 import { NotesDialog } from "@/components/notes/components/NotesDialog";
 import { toast } from "sonner";
 import { Award } from "lucide-react";
+import { TaskMetricsRow } from "./TaskMetricsRow";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -51,27 +52,40 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="font-semibold">Task</TableHead>
                     <TableHead className="font-semibold">Completed At</TableHead>
-                    <TableHead className="font-semibold">Notes</TableHead>
+                    <TableHead className="font-semibold">Duration</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold">Stats</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {tasks.map((task) => (
-                    <TableRow key={task.id} className="group hover:bg-muted/50">
-                      <TableCell className="font-medium">{task.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {task.completedAt ? formatDate(task.completedAt) : "-"}
-                      </TableCell>
-                      <TableCell>
-                        <NotesDialog 
-                          open={false}
-                          onOpenChange={() => {}}
-                          title="Notes"
-                          description="Add notes for this task"
-                          actionText="Save"
-                          onAction={() => {}}
-                        />
-                      </TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow key={task.id} className="group hover:bg-muted/50">
+                        <TableCell className="font-medium">{task.name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {task.completedAt ? formatDate(task.completedAt) : "-"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {task.duration ? `${task.duration} min` : "-"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {task.metrics?.completionStatus || "-"}
+                        </TableCell>
+                        <TableCell>
+                          <NotesDialog 
+                            open={false}
+                            onOpenChange={() => {}}
+                            title="Notes"
+                            description="Add notes for this task"
+                            actionText="Save"
+                            onAction={() => {}}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      {task.metrics && (
+                        <TaskMetricsRow task={task} />
+                      )}
+                    </>
                   ))}
                 </TableBody>
               </Table>
@@ -89,3 +103,4 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     </Accordion>
   );
 };
+
