@@ -40,28 +40,37 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
       const tasks = newTaskName.split('\n').filter(task => task.trim());
       tasks.forEach(taskLine => {
         if (taskLine.trim()) {
-          // Split the line by comma to check for duration
           const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
-          // Parse duration, default to DEFAULT_DURATION if not provided or invalid
-          const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || DEFAULT_DURATION / 60, 1), 60) * 60 : DEFAULT_DURATION;
+          let duration = DEFAULT_DURATION;
           
-          onTaskAdd({
+          if (durationStr) {
+            const parsedDuration = parseInt(durationStr);
+            if (!isNaN(parsedDuration)) {
+              duration = Math.min(Math.max(parsedDuration, 1), 60) * 60;
+            }
+          }
+          
+          const task: Task = {
             id: generateId(),
             name: taskName,
             completed: false,
             duration: duration,
             createdAt: new Date().toISOString(),
-          });
+          };
+          console.log('Adding task with duration:', duration);
+          onTaskAdd(task);
         }
       });
     } else {
-      onTaskAdd({
+      const task: Task = {
         id: generateId(),
         name: newTaskName.trim(),
         completed: false,
-        duration: DEFAULT_DURATION,
+        duration: DEFAULT_DURATION, // Explicitly set 25 minutes for single tasks
         createdAt: new Date().toISOString(),
-      });
+      };
+      console.log('Adding single task with duration:', DEFAULT_DURATION);
+      onTaskAdd(task);
     }
     setNewTaskName("");
   };
