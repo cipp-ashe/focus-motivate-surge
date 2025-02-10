@@ -7,7 +7,7 @@ import { TimerStateMetrics } from "@/types/metrics";
 interface TimerSectionProps {
   selectedTask: Task | null;
   onTaskComplete: (metrics: TimerStateMetrics) => void;
-  onDurationChange: (minutes: number) => void;
+  onDurationChange: (seconds: number) => void;
   favorites: Quote[];
   setFavorites: (favorites: Quote[]) => void;
 }
@@ -30,15 +30,24 @@ export const TimerSection = ({
   return (
     <Timer
       key={selectedTask.id}
-      duration={selectedTask.duration || 1500} // Keep seconds internally
+      duration={selectedTask.duration || 1500}
       taskName={selectedTask.name}
       onComplete={onTaskComplete}
       onAddTime={() => {
         console.log("Time added to task:", selectedTask.name);
       }}
-      onDurationChange={(minutes) => onDurationChange(minutes * 60)} // Convert to seconds for storage
+      onDurationChange={(minutes) => {
+        const seconds = minutes * 60;
+        console.log('TimerSection - Converting and passing duration:', {
+          minutes,
+          seconds,
+          taskId: selectedTask.id
+        });
+        onDurationChange(seconds);
+      }}
       favorites={favorites}
       setFavorites={setFavorites}
     />
   );
 };
+

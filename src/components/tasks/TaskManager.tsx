@@ -20,7 +20,6 @@ export const TaskManager = ({
   const actions = useAppStateActions();
   const { tasks: { items: tasks, selected: selectedTaskId } } = state;
   
-  // Get selected task with proper type checking
   const selectedTask = useMemo(() => 
     tasks.find(task => task.id === selectedTaskId) || null
   , [tasks, selectedTaskId]);
@@ -59,7 +58,7 @@ export const TaskManager = ({
       }}
       onDurationChange={(minutes) => {
         if (selectedTask) {
-          const newDuration = minutes * 60; // Convert to seconds
+          const newDuration = minutes; // Remove the * 60 since TimerSection now handles conversion
           console.log('TaskManager - Updating duration:', { 
             taskId: selectedTask.id, 
             newDuration,
@@ -67,10 +66,8 @@ export const TaskManager = ({
             selectedTaskId
           });
           
-          // Update task duration in global state
           actions.updateTask(selectedTask.id, { duration: newDuration });
           
-          // Log the state after update
           console.log('TaskManager - After duration update:', {
             taskId: selectedTask.id,
             duration: newDuration,
@@ -81,7 +78,7 @@ export const TaskManager = ({
       favorites={initialFavorites}
       setFavorites={onFavoritesChange}
     />
-  ), [initialFavorites, onFavoritesChange, selectedTask, actions]);
+  ), [selectedTask, actions, initialFavorites, onFavoritesChange]);
 
   return (
     <TaskLayout
@@ -90,3 +87,4 @@ export const TaskManager = ({
     />
   );
 };
+
