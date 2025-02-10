@@ -27,12 +27,13 @@ export const TimerSection = ({
     );
   }
 
-  const durationInMinutes = selectedTask.duration;
+  // Convert duration from seconds to minutes for the Timer component
+  const durationInMinutes = Math.round(Number(selectedTask.duration || 1500) / 60);
 
   return (
     <Timer
       key={selectedTask.id}
-      duration={durationInMinutes}
+      duration={durationInMinutes * 60} // Convert minutes back to seconds for internal timer logic
       taskName={selectedTask.name}
       onComplete={onTaskComplete}
       onAddTime={() => {
@@ -44,4 +45,3 @@ export const TimerSection = ({
     />
   );
 };
-
