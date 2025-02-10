@@ -25,7 +25,7 @@ const generateId = () => {
   });
 };
 
-const DEFAULT_DURATION = 25 * 60; // 25 minutes in seconds
+const DEFAULT_DURATION = 1500; // 25 minutes in seconds
 
 export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
   const [newTaskName, setNewTaskName] = useState("");
@@ -41,14 +41,9 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
       tasks.forEach(taskLine => {
         if (taskLine.trim()) {
           const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
-          let duration = DEFAULT_DURATION;
-          
-          if (durationStr) {
-            const parsedDuration = parseInt(durationStr);
-            if (!isNaN(parsedDuration)) {
-              duration = Math.min(Math.max(parsedDuration, 1), 60) * 60;
-            }
-          }
+          const duration = durationStr 
+            ? Math.min(Math.max(parseInt(durationStr), 1), 60) * 60 
+            : DEFAULT_DURATION;
           
           const task: Task = {
             id: generateId(),
@@ -66,7 +61,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         id: generateId(),
         name: newTaskName.trim(),
         completed: false,
-        duration: DEFAULT_DURATION, // Explicitly set 25 minutes for single tasks
+        duration: DEFAULT_DURATION,
         createdAt: new Date().toISOString(),
       };
       console.log('Adding single task with duration:', DEFAULT_DURATION);

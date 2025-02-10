@@ -68,7 +68,8 @@ export const TaskRow = ({
     
     // Trigger a re-selection of the task to update the timer if this task is selected
     if (isSelected) {
-      onTaskClick(task, new MouseEvent('click') as any);
+      const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
+      onTaskClick(updatedTask, new MouseEvent('click') as any);
     }
     
     onInputBlur();
