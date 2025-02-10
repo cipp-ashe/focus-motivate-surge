@@ -9,7 +9,7 @@ export type {
   MinutesInputProps,
   SoundOption,
   SoundSelectorProps,
-} from './types/components';
+} from '@/types/timer';
 
 // Re-export components
 export { Timer } from './Timer';
