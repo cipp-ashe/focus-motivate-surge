@@ -27,7 +27,8 @@ export const TaskContent = ({
   onKeyDown,
   preventPropagation,
 }: TaskContentProps) => {
-  const durationInMinutes = task.duration ? Math.round(task.duration / 60) : 25;
+  // Convert seconds to minutes, default to 25 if duration is undefined
+  const durationInMinutes = Math.round((task.duration || 1500) / 60);
 
   return (
     <div className="flex flex-col gap-2">
