@@ -8,8 +8,8 @@ interface UseTimerActionsProps {
   minutes: number;
   updateTimeLeft: (time: number) => void;
   updateMinutes: (minutes: number) => void;
-  updateIsRunning: (running: boolean) => void;
-  updateMetrics: ((updates: Partial<TimerMetrics>) => void) & ((updater: (prev: TimerMetrics) => Partial<TimerMetrics>) => void);
+  setIsRunning: (running: boolean) => void;
+  updateMetrics: (updates: Partial<TimerMetrics>) => void;
   onDurationChange?: (minutes: number) => void;
 }
 
@@ -18,7 +18,7 @@ export const useTimerActions = ({
   minutes,
   updateTimeLeft,
   updateMinutes,
-  updateIsRunning,
+  setIsRunning,
   updateMetrics,
   onDurationChange,
 }: UseTimerActionsProps) => {
@@ -38,28 +38,28 @@ export const useTimerActions = ({
   }, [updateMinutes, updateTimeLeft, updateMetrics, onDurationChange]);
 
   const start = useCallback(() => {
-    updateIsRunning(true);
+    setIsRunning(true);
     updateMetrics({
       startTime: new Date(),
       isPaused: false,
       pausedTimeLeft: null
     });
     toast.success("Timer started ⏱️🚀");
-  }, [updateIsRunning, updateMetrics]);
+  }, [setIsRunning, updateMetrics]);
 
   const pause = useCallback(() => {
-    updateIsRunning(false);
-    updateMetrics((prev) => ({
+    setIsRunning(false);
+    updateMetrics(prev => ({
       pauseCount: prev.pauseCount + 1,
       lastPauseTimestamp: new Date(),
       isPaused: true,
       pausedTimeLeft: timeLeft
     }));
-  }, [updateIsRunning, updateMetrics, timeLeft]);
+  }, [setIsRunning, updateMetrics, timeLeft]);
 
   const reset = useCallback(() => {
     const newSeconds = minutes * 60;
-    updateIsRunning(false);
+    setIsRunning(false);
     updateTimeLeft(newSeconds);
     updateMetrics({
       startTime: null,
@@ -77,13 +77,13 @@ export const useTimerActions = ({
       isPaused: false,
       pausedTimeLeft: null
     });
-  }, [minutes, updateIsRunning, updateTimeLeft, updateMetrics]);
+  }, [minutes, setIsRunning, updateTimeLeft, updateMetrics]);
 
   const addTime = useCallback((additionalMinutes: number) => {
     const additionalSeconds = additionalMinutes * 60;
     updateTimeLeft(timeLeft + additionalSeconds);
     updateMinutes(minutes + additionalMinutes);
-    updateMetrics((prev) => ({
+    updateMetrics(prev => ({
       extensionTime: prev.extensionTime + additionalSeconds,
       expectedTime: prev.expectedTime + additionalSeconds
     }));
@@ -91,8 +91,8 @@ export const useTimerActions = ({
   }, [timeLeft, minutes, updateTimeLeft, updateMinutes, updateMetrics]);
 
   const completeTimer = useCallback(() => {
-    updateIsRunning(false);
-    updateMetrics((prev) => ({
+    setIsRunning(false);
+    updateMetrics(prev => ({
       endTime: new Date(),
       actualDuration: prev.startTime 
         ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
@@ -100,7 +100,7 @@ export const useTimerActions = ({
       isPaused: false,
       pausedTimeLeft: null
     }));
-  }, [updateIsRunning, updateMetrics]);
+  }, [setIsRunning, updateMetrics]);
 
   return {
     setMinutes,

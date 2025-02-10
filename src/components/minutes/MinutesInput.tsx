@@ -1,9 +1,9 @@
 
-import React, { memo, useEffect } from "react";
-import { MinutesInputProps } from "../../types/timer";
+import React, { memo } from "react";
+import { MinutesInputProps } from "@/types/timer";
 import { MinutesButton } from "./MinutesButton";
 import { MinutesDisplay } from "./MinutesDisplay";
-import { useMinutesHandlers } from "../../hooks/useMinutesHandlers";
+import { useMinutesHandlers } from "@/hooks/useMinutesHandlers";
 
 export const MinutesInput = memo(({
   minutes,
@@ -24,11 +24,6 @@ export const MinutesInput = memo(({
     maxMinutes,
     onBlur
   });
-
-  // Add effect to log minutes changes for debugging
-  useEffect(() => {
-    console.log('MinutesInput received new minutes value:', minutes);
-  }, [minutes]);
 
   return (
     <div className="flex items-center justify-center gap-2">

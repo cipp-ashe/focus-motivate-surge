@@ -1,18 +1,28 @@
 
-import { useState, useCallback, useRef } from 'react';
-import { TimerMetrics } from '@/types/metrics';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { TimerStateMetrics } from '@/types/metrics';
+import { SoundOption } from '@/types/timer';
 import { toast } from "sonner";
+import { calculateEfficiencyRatio, determineCompletionStatus } from '@/utils/timeUtils';
 
 export const useTimerState = (initialDuration: number) => {
-  const validInitialDuration = Math.max(60, initialDuration);
-  const [timeLeft, setTimeLeft] = useState<number>(validInitialDuration);
-  const [minutes, setMinutesState] = useState(Math.floor(validInitialDuration / 60));
+  // Core timer state
+  const [timeLeft, setTimeLeft] = useState<number>(initialDuration);
+  const [minutes, setMinutesState] = useState(Math.floor(initialDuration / 60));
   const [isRunning, setIsRunning] = useState(false);
-  const [metrics, setMetrics] = useState<TimerMetrics>({
+  
+  // UI state
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedSound, setSelectedSound] = useState<SoundOption>("bell");
+  const [showCompletion, setShowCompletion] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  
+  // Metrics state
+  const [metrics, setMetrics] = useState<TimerStateMetrics>({
     startTime: null,
     endTime: null,
     pauseCount: 0,
-    expectedTime: validInitialDuration,
+    expectedTime: initialDuration,
     actualDuration: 0,
     favoriteQuotes: 0,
     pausedTime: 0,
@@ -26,43 +36,101 @@ export const useTimerState = (initialDuration: number) => {
   });
 
   const isMountedRef = useRef(true);
+  const metricsRef = useRef(metrics);
+  const pauseTimerRef = useRef<NodeJS.Timeout>();
+
+  // Update refs
+  useEffect(() => {
+    metricsRef.current = metrics;
+  }, [metrics]);
 
   const updateTimeLeft = useCallback((newTimeLeft: number | ((prev: number) => number)) => {
     if (!isMountedRef.current) return;
-    if (typeof newTimeLeft === 'function') {
-      setTimeLeft(prev => newTimeLeft(prev));
-    } else {
-      setTimeLeft(newTimeLeft);
-    }
-  }, []);
+    setTimeLeft(prev => {
+      const next = typeof newTimeLeft === 'function' ? newTimeLeft(prev) : newTimeLeft;
+      return Math.max(0, Math.min(next, minutes * 60));
+    });
+  }, [minutes]);
 
   const updateMinutes = useCallback((newMinutes: number) => {
     if (!isMountedRef.current) return;
-    setMinutesState(newMinutes);
-  }, []);
+    const clampedMinutes = Math.max(1, Math.min(60, newMinutes));
+    setMinutesState(clampedMinutes);
+    updateTimeLeft(clampedMinutes * 60);
+  }, [updateTimeLeft]);
 
-  const updateIsRunning = useCallback((running: boolean) => {
+  const updateMetrics = useCallback((updates: Partial<TimerStateMetrics> | ((prev: TimerStateMetrics) => Partial<TimerStateMetrics>)) => {
     if (!isMountedRef.current) return;
-    setIsRunning(running);
-  }, []);
-
-  const updateMetrics = useCallback((updates: Partial<TimerMetrics> | ((prev: TimerMetrics) => Partial<TimerMetrics>)) => {
-    if (!isMountedRef.current) return;
+    
     setMetrics(prev => {
       const newUpdates = typeof updates === 'function' ? updates(prev) : updates;
-      return { ...prev, ...newUpdates };
+      
+      let updatedPausedTime = prev.pausedTime;
+      if (prev.lastPauseTimestamp && newUpdates.lastPauseTimestamp === null) {
+        const pauseDuration = Math.floor(
+          (new Date().getTime() - prev.lastPauseTimestamp.getTime()) / 1000
+        );
+        updatedPausedTime += pauseDuration;
+      }
+
+      const nextMetrics = {
+        ...prev,
+        ...newUpdates,
+        pausedTime: newUpdates.pausedTime !== undefined ? newUpdates.pausedTime : updatedPausedTime,
+      };
+
+      // Calculate derived metrics
+      if (nextMetrics.startTime && nextMetrics.endTime) {
+        const totalElapsedMs = nextMetrics.endTime.getTime() - nextMetrics.startTime.getTime();
+        const totalElapsedSeconds = Math.floor(totalElapsedMs / 1000);
+        const actualWorkingTime = Math.max(0, totalElapsedSeconds - nextMetrics.pausedTime);
+        const netEffectiveTime = actualWorkingTime + nextMetrics.extensionTime;
+        
+        nextMetrics.actualDuration = totalElapsedSeconds;
+        nextMetrics.netEffectiveTime = netEffectiveTime;
+        nextMetrics.efficiencyRatio = calculateEfficiencyRatio(nextMetrics.expectedTime, actualWorkingTime);
+        nextMetrics.completionStatus = determineCompletionStatus(nextMetrics.expectedTime, actualWorkingTime);
+      }
+
+      return nextMetrics;
     });
   }, []);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (pauseTimerRef.current) {
+        clearTimeout(pauseTimerRef.current);
+      }
+    };
+  }, []);
+
   return {
+    // Core timer state
     timeLeft,
     minutes,
     isRunning,
-    metrics,
     updateTimeLeft,
     updateMinutes,
-    updateIsRunning,
+    setIsRunning,
+    
+    // UI state
+    isExpanded,
+    setIsExpanded,
+    selectedSound,
+    setSelectedSound,
+    showCompletion,
+    setShowCompletion,
+    showConfirmation,
+    setShowConfirmation,
+    
+    // Metrics state
+    metrics,
     updateMetrics,
+    
+    // Refs
     isMountedRef,
+    pauseTimerRef,
   };
 };
