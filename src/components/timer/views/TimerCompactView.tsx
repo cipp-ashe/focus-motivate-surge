@@ -1,3 +1,4 @@
+
 import { memo } from "react";
 import { Card } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
@@ -66,7 +67,7 @@ export const TimerCompactView = memo(({
         }`}>
           <div className="flex flex-col items-center space-y-3 pt-1">
             <MinutesInput
-              minutes={internalMinutes}
+              minutes={Math.floor(timerCircleProps.minutes)}
               onMinutesChange={onMinutesChange}
               minMinutes={1}
               maxMinutes={60}
@@ -107,3 +108,4 @@ export const TimerCompactView = memo(({
 });
 
 TimerCompactView.displayName = 'TimerCompactView';
+
