@@ -50,6 +50,11 @@ export const TaskManager = ({
       onDurationChange={(minutes) => {
         if (selectedTask) {
           const newDuration = minutes * 60; // Convert to seconds
+          console.log('TaskManager - Updating duration:', { 
+            taskId: selectedTask.id, 
+            newDuration,
+            currentTask: selectedTask 
+          });
           actions.updateTask(selectedTask.id, { duration: newDuration });
         }
       }}
@@ -65,3 +70,4 @@ export const TaskManager = ({
     />
   );
 };
+
