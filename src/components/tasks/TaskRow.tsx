@@ -69,12 +69,13 @@ export const TaskRow = ({
     console.log('Handling blur in TaskRow with final value:', finalValue);
     setInputValue(finalValue);
     
-    // Only update duration when input is finalized
+    // Convert minutes to seconds
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     onDurationChange(task.id, newDurationInSeconds);
     
+    // Immediately update the selected task if this is the active one
     if (isSelected) {
-      console.log('Updating selected task on blur:', newDurationInSeconds);
+      console.log('Updating selected task immediately:', newDurationInSeconds);
       const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
       onTaskClick(updatedTask, new MouseEvent('click') as any);
     }
