@@ -46,13 +46,14 @@ export const TaskContent = ({
   };
 
   const handleLocalBlur = () => {
-    let finalValue = '25';
-    if (localInputValue !== '') {
-      const numValue = parseInt(localInputValue, 10);
-      if (!isNaN(numValue)) {
-        finalValue = Math.min(Math.max(numValue, 1), 60).toString();
-      }
+    let finalValue = localInputValue;
+    if (finalValue === '' || isNaN(parseInt(finalValue, 10))) {
+      finalValue = '25';
+    } else {
+      const numValue = parseInt(finalValue, 10);
+      finalValue = Math.min(Math.max(numValue, 1), 60).toString();
     }
+    
     console.log('Handling blur with final value:', finalValue);
     setLocalInputValue(finalValue);
     const syntheticEvent = {
@@ -115,4 +116,3 @@ export const TaskContent = ({
     </div>
   );
 };
-

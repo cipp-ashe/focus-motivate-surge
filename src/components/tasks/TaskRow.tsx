@@ -65,13 +65,13 @@ export const TaskRow = ({
   };
 
   const handleBlur = () => {
-    let finalValue = '25';
+    const numValue = parseInt(inputValue, 10);
+    let finalValue = inputValue;
     
-    if (inputValue !== '') {
-      const numValue = parseInt(inputValue, 10);
-      if (!isNaN(numValue)) {
-        finalValue = Math.min(Math.max(numValue, 1), 60).toString();
-      }
+    if (isNaN(numValue) || numValue < 1) {
+      finalValue = '25';
+    } else if (numValue > 60) {
+      finalValue = '60';
     }
     
     console.log('Handling blur in TaskRow with final value:', finalValue);
@@ -124,4 +124,3 @@ export const TaskRow = ({
 };
 
 export default TaskRow;
-
