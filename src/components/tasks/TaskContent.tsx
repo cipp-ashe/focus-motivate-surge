@@ -30,8 +30,8 @@ export const TaskContent = ({
   const durationInMinutes = task.duration ? Math.round(task.duration / 60) : 25;
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-3">
+    <div className="space-y-2">
+      <div className="inline-flex items-center w-full gap-3">
         <Sparkles className="h-4 w-4 text-primary" />
         <span className="text-foreground line-clamp-1 flex-1">{task.name}</span>
         <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
