@@ -27,7 +27,6 @@ export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
   const statusColor = getCompletionStatusColor(metrics.completionStatus);
   const iconName = getCompletionIcon(metrics.completionStatus);
   
-  // Map the icon name to the actual component
   const getStatusIcon = () => {
     switch (iconName) {
       case 'CheckCircle2':
@@ -46,61 +45,60 @@ export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
   };
 
   return (
-    <TableRow className="bg-muted/50">
+    <TableRow className="bg-muted/30 border-l-2 border-l-primary/20">
       <TableCell className="py-2">
-        <div className="line-through text-muted-foreground">
+        <div className="text-muted-foreground">
           {task.name}
         </div>
         <TaskTags task={task} preventPropagation={preventPropagation} />
         <div className="text-xs text-muted-foreground mt-1">
-          {formatDate(task.createdAt)}
+          Created: {formatDate(task.createdAt)}
         </div>
       </TableCell>
       <TableCell className="py-2 text-sm text-muted-foreground">
         {metrics.endTime ? formatDate(metrics.endTime) : '-'}
       </TableCell>
       <TableCell className="py-2">
-        <div className="flex flex-col space-y-1">
+        <div className="flex flex-col space-y-1.5">
           <div className="flex items-center space-x-2 text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span>Expected: {formatDuration(metrics.expectedTime)}</span>
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-sm">Expected: {formatDuration(metrics.expectedTime)}</span>
           </div>
           <div className="flex items-center space-x-2 text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span>Actual: {formatDuration(metrics.actualDuration)}</span>
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-sm">Actual: {formatDuration(metrics.actualDuration)}</span>
           </div>
           <div className="flex items-center space-x-2 text-muted-foreground">
-            <Timer className="w-4 h-4" />
-            <span>Net: {formatDuration(metrics.netEffectiveTime)}</span>
+            <Timer className="w-3.5 h-3.5" />
+            <span className="text-sm">Net: {formatDuration(metrics.netEffectiveTime)}</span>
           </div>
         </div>
       </TableCell>
       <TableCell className="py-2">
         <div className="flex items-center space-x-2">
           {getStatusIcon()}
-          <span className={statusColor}>{metrics.completionStatus}</span>
+          <span className={`${statusColor} text-sm`}>{metrics.completionStatus}</span>
         </div>
-        <Badge variant="outline" className="mt-1">
+        <Badge variant="outline" className="mt-1.5 text-xs">
           {metrics.efficiencyRatio.toFixed(1)}% efficiency
         </Badge>
       </TableCell>
       <TableCell className="py-2">
-        <div className="flex flex-col space-y-1 text-muted-foreground">
-          <div className="flex items-center space-x-1">
-            <Pause className="w-4 h-4" />
-            <span>Paused: {formatDuration(metrics.pausedTime)}</span>
+        <div className="flex flex-col space-y-1.5 text-muted-foreground">
+          <div className="flex items-center space-x-1.5">
+            <Pause className="w-3.5 h-3.5" />
+            <span className="text-sm">Paused: {formatDuration(metrics.pausedTime)}</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <Timer className="w-4 h-4" />
-            <span>Added: {formatDuration(metrics.extensionTime)}</span>
+          <div className="flex items-center space-x-1.5">
+            <Timer className="w-3.5 h-3.5" />
+            <span className="text-sm">Added: {formatDuration(metrics.extensionTime)}</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <Quote className="w-4 h-4" />
-            <span>Quotes: {metrics.favoriteQuotes}</span>
+          <div className="flex items-center space-x-1.5">
+            <Quote className="w-3.5 h-3.5" />
+            <span className="text-sm">Quotes: {metrics.favoriteQuotes}</span>
           </div>
         </div>
       </TableCell>
     </TableRow>
   );
 };
-
