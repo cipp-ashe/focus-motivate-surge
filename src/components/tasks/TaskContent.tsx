@@ -27,27 +27,27 @@ export const TaskContent = ({
   onKeyDown,
   preventPropagation,
 }: TaskContentProps) => {
-  // Convert task duration from seconds to minutes, default to 25 if not set
   const durationInMinutes = task.duration ? Math.round(task.duration / 60) : 25;
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-4">
-        <TaskHeader 
-          task={task}
-          onDelete={onDelete}
-        />
-        
-        <TaskDuration
-          durationInMinutes={durationInMinutes}
-          isEditing={editingTaskId === task.id}
-          inputValue={inputValue}
-          onDurationClick={onDurationClick}
-          onChange={onChange}
-          onBlur={onBlur}
-          onKeyDown={onKeyDown}
-          preventPropagation={preventPropagation}
-        />
+        <div className="flex-1 flex items-center justify-between gap-4">
+          <TaskHeader 
+            task={task}
+            onDelete={onDelete}
+          />
+          <TaskDuration
+            durationInMinutes={durationInMinutes}
+            isEditing={editingTaskId === task.id}
+            inputValue={inputValue}
+            onDurationClick={onDurationClick}
+            onChange={onChange}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+            preventPropagation={preventPropagation}
+          />
+        </div>
       </div>
 
       <TaskTags 
@@ -57,4 +57,3 @@ export const TaskContent = ({
     </div>
   );
 };
-
