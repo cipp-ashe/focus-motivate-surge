@@ -1,4 +1,3 @@
-
 import { Task } from "@/types/tasks";
 import {
   Accordion,
@@ -17,6 +16,7 @@ import {
 import { Award } from "lucide-react";
 import { TaskMetricsRow } from "./TaskMetricsRow";
 import { toast } from "sonner";
+import React from 'react';
 
 interface CompletedTasksProps {
   tasks: Task[];
