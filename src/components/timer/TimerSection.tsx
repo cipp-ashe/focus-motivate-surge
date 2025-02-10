@@ -27,7 +27,6 @@ export const TimerSection = ({
     );
   }
 
-  // Keep duration in minutes when passing to Timer
   const durationInMinutes = selectedTask.duration;
 
   return (
@@ -45,3 +44,4 @@ export const TimerSection = ({
     />
   );
 };
+

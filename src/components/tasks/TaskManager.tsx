@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 import { TaskList } from "./TaskList";
 import { TaskLayout } from "./TaskLayout";
-import { TimerSection } from "../timer/TimerSection";
+import { TimerSection } from "@/components/timer";
 import type { Quote } from "@/types/timer";
 import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
 
@@ -30,11 +30,9 @@ export const TaskManager = ({
     <TimerSection
       selectedTask={selectedTask}
       onTaskComplete={(metrics) => {
-        // Handle task completion
         console.log("Task completed with metrics:", metrics);
       }}
       onDurationChange={(minutes) => {
-        // Handle duration change
         console.log("Duration changed to:", minutes);
       }}
       favorites={initialFavorites}
@@ -49,3 +47,4 @@ export const TaskManager = ({
     />
   );
 };
+
