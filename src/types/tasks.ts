@@ -18,6 +18,7 @@ export interface Task {
   id: string;
   name: string;
   completed: boolean;
+  completedAt?: string;
   duration?: number;
   createdAt: string;
   tags?: Tag[];
@@ -40,4 +41,3 @@ export interface TaskContextType {
   clearTasks: () => void;
   clearCompletedTasks: () => void;
 }
-

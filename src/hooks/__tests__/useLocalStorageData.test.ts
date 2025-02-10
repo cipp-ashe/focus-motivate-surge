@@ -5,6 +5,7 @@ import { useLocalStorageData } from '../useLocalStorageData';
 import { toast } from 'sonner';
 import { Task } from '@/types/tasks';
 import type { Quote } from '@/types/timer';
+import { DayOfWeek } from '@/components/habits/types';
 
 vi.mock('sonner', () => ({
   toast: {
@@ -80,7 +81,7 @@ describe('useLocalStorageData', () => {
       templateId: '1',
       habits: [],
       customized: false,
-      activeDays: ['Monday', 'Wednesday', 'Friday']
+      activeDays: ['Monday', 'Wednesday', 'Friday'] as DayOfWeek[]
     }];
 
     act(() => {

@@ -53,7 +53,7 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                       {task.completedAt ? formatDate(task.completedAt) : "-"}
                     </TableCell>
                     <TableCell>
-                      <NotesDialog taskId={task.id} />
+                      <NotesDialog id={task.id} />
                     </TableCell>
                   </TableRow>
                 ))}
