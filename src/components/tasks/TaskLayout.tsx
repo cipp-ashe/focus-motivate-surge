@@ -14,23 +14,48 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
   const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const { width } = useWindowSize();
 
-  // Add resize handler cleanup
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      // Use requestAnimationFrame to debounce resize observations
-      requestAnimationFrame(() => {
+    // Cleanup previous observer if it exists
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
+    }
+
+    // Create new ResizeObserver with debounced callback
+    let timeout: NodeJS.Timeout;
+    resizeObserverRef.current = new ResizeObserver((entries) => {
+      // Clear existing timeout
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      // Debounce the resize handling
+      timeout = setTimeout(() => {
         if (!Array.isArray(entries) || !entries.length) return;
-      });
+        
+        const entry = entries[0];
+        if (!entry.contentRect) return;
+
+        // Handle resize if needed
+        console.log('Container resized:', entry.contentRect);
+      }, 100); // 100ms debounce
     });
 
-    resizeObserver.observe(containerRef.current);
+    // Start observing
+    resizeObserverRef.current.observe(containerRef.current);
 
+    // Cleanup function
     return () => {
-      resizeObserver.disconnect();
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
     };
   }, []);
 
