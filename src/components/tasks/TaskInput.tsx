@@ -25,6 +25,8 @@ const generateId = () => {
   });
 };
 
+const DEFAULT_DURATION = 25 * 60; // 25 minutes in seconds
+
 export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
   const [newTaskName, setNewTaskName] = useState("");
   const [isBulkAdd, setIsBulkAdd] = useState(false);
@@ -40,8 +42,8 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         if (taskLine.trim()) {
           // Split the line by comma to check for duration
           const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
-          // Parse duration, default to 25 if not provided or invalid
-          const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || 25, 1), 60) * 60 : 25 * 60;
+          // Parse duration, default to DEFAULT_DURATION if not provided or invalid
+          const duration = durationStr ? Math.min(Math.max(parseInt(durationStr) || DEFAULT_DURATION / 60, 1), 60) * 60 : DEFAULT_DURATION;
           
           onTaskAdd({
             id: generateId(),
@@ -57,7 +59,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         id: generateId(),
         name: newTaskName.trim(),
         completed: false,
-        duration: 25 * 60, // Always set 25 minutes (in seconds) for single task mode
+        duration: DEFAULT_DURATION,
         createdAt: new Date().toISOString(),
       });
     }
