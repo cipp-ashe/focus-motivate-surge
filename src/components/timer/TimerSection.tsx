@@ -36,10 +36,9 @@ export const TimerSection = ({
       onAddTime={() => {
         console.log("Time added to task:", selectedTask.name);
       }}
-      onDurationChange={onDurationChange}
+      onDurationChange={(minutes) => onDurationChange(minutes * 60)} // Convert to seconds for storage
       favorites={favorites}
       setFavorites={setFavorites}
     />
   );
 };
-

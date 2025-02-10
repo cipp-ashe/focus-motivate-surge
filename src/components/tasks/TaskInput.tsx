@@ -41,6 +41,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
       tasks.forEach(taskLine => {
         if (taskLine.trim()) {
           const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
+          // Store duration in seconds
           const duration = durationStr 
             ? Math.min(Math.max(parseInt(durationStr), 1), 60) * 60 
             : DEFAULT_DURATION;

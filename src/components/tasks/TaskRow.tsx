@@ -29,7 +29,7 @@ export const TaskRow = ({
 
   useEffect(() => {
     if (task.duration) {
-      setInputValue(Math.round(Number(task.duration) / 60).toString());
+      setInputValue(Math.round(task.duration / 60).toString());
     }
   }, [task.duration]);
 
@@ -48,7 +48,7 @@ export const TaskRow = ({
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
-      // Immediately update the task duration
+      // Store duration in seconds
       const newDurationInSeconds = (parseInt(value || "25") * 60).toString();
       onDurationChange(task.id, newDurationInSeconds);
       if (isSelected) {
@@ -69,6 +69,7 @@ export const TaskRow = ({
     }
     
     setInputValue(finalValue);
+    // Store duration in seconds
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     onDurationChange(task.id, newDurationInSeconds);
     
