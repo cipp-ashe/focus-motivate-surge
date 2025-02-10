@@ -36,9 +36,14 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    host: "::",
+    host: "localhost", // Changed from "::" to "localhost"
     port: 8080,
     strictPort: true,
+    hmr: {
+      protocol: 'ws',
+      timeout: 30000,
+      clientPort: 8080
+    },
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime'],
