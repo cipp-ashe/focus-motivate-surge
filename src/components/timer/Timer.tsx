@@ -8,6 +8,7 @@ import { useTimerState } from "./state/TimerState";
 import { useTimerHandlers } from "./handlers/TimerHandlers";
 import { TimerBody } from "./components/TimerBody";
 import { TimerCompletion } from "./components/TimerCompletion";
+import { useTimerMonitor } from "@/hooks/useTimerMonitor";
 import type { TimerProps } from "@/types/timer";
 
 export const Timer = ({
@@ -58,6 +59,14 @@ export const Timer = ({
     onDurationChange,
   });
 
+  // Add timer monitoring for better performance and debugging
+  useTimerMonitor({
+    timeLeft,
+    isRunning,
+    metrics,
+    componentName: 'Timer'
+  });
+
   const {
     handleComplete,
     handleAddTimeAndContinue,
@@ -101,10 +110,12 @@ export const Timer = ({
 
   if (showCompletion && completionMetrics) {
     return (
-      <CompletionCelebration
-        metrics={completionMetrics}
-        onComplete={handleCloseCompletion}
-      />
+      <div className="animate-fade-in">
+        <CompletionCelebration
+          metrics={completionMetrics}
+          onComplete={handleCloseCompletion}
+        />
+      </div>
     );
   }
 
@@ -128,7 +139,7 @@ export const Timer = ({
   };
 
   return (
-    <>
+    <div className={`transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
       <TimerBody
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
@@ -156,9 +167,8 @@ export const Timer = ({
         handleAddTimeAndContinue={handleAddTimeAndContinue}
         handleComplete={handleComplete}
       />
-    </>
+    </div>
   );
 };
 
 Timer.displayName = 'Timer';
-

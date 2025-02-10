@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { NotesDialog } from "@/components/notes/components/NotesDialog";
 import { toast } from "sonner";
+import { Award } from "lucide-react";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -28,50 +29,59 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
 
   const handleClearClick = () => {
     onTasksClear();
-    toast.success("Completed tasks cleared!");
+    toast.success("Completed tasks cleared!", {
+      description: "Keep up the great work! 🎯"
+    });
   };
 
   return (
     <Accordion type="single" collapsible>
-      <AccordionItem value="completed-tasks">
-        <AccordionTrigger>Completed Tasks ({tasks.length})</AccordionTrigger>
+      <AccordionItem value="completed-tasks" className="border-none">
+        <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-lg transition-colors">
+          <div className="flex items-center gap-2">
+            <Award className="h-4 w-4 text-primary animate-pulse-slow" />
+            <span>Completed Tasks ({tasks.length})</span>
+          </div>
+        </AccordionTrigger>
         <AccordionContent>
-          <div className="space-y-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Task</TableHead>
-                  <TableHead>Completed At</TableHead>
-                  <TableHead>Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tasks.map((task) => (
-                  <TableRow key={task.id}>
-                    <TableCell>{task.name}</TableCell>
-                    <TableCell>
-                      {task.completedAt ? formatDate(task.completedAt) : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <NotesDialog 
-                        open={false}
-                        onOpenChange={() => {}}
-                        title="Notes"
-                        description="Add notes for this task"
-                        actionText="Save"
-                        onAction={() => {}}
-                      />
-                    </TableCell>
+          <div className="space-y-4 p-2">
+            <div className="rounded-lg border border-border/50 overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-semibold">Task</TableHead>
+                    <TableHead className="font-semibold">Completed At</TableHead>
+                    <TableHead className="font-semibold">Notes</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {tasks.map((task) => (
+                    <TableRow key={task.id} className="group hover:bg-muted/50">
+                      <TableCell className="font-medium">{task.name}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {task.completedAt ? formatDate(task.completedAt) : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <NotesDialog 
+                          open={false}
+                          onOpenChange={() => {}}
+                          title="Notes"
+                          description="Add notes for this task"
+                          actionText="Save"
+                          onAction={() => {}}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
             <button
               onClick={handleClearClick}
-              className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
+              className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200 group flex items-center gap-2"
             >
-              Clear All
+              <span className="group-hover:underline">Clear All</span>
             </button>
           </div>
         </AccordionContent>
@@ -79,4 +89,3 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     </Accordion>
   );
 };
-
