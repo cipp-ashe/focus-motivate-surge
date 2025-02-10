@@ -31,27 +31,34 @@ export const TaskContent = ({
   const [localInputValue, setLocalInputValue] = useState(inputValue);
   
   useEffect(() => {
-    setLocalInputValue(inputValue);
-  }, [inputValue]);
+    if (editingTaskId === task.id) {
+      setLocalInputValue(inputValue);
+    }
+  }, [inputValue, editingTaskId, task.id]);
 
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Only allow numbers
     if (value === '' || /^\d+$/.test(value)) {
+      console.log('Handling duration change:', value);
       setLocalInputValue(value);
       onChange(e);
     }
   };
 
   const handleLocalBlur = () => {
-    // Convert empty string to "25"
-    if (localInputValue === '') {
-      setLocalInputValue('25');
-      const syntheticEvent = {
-        target: { value: '25' }
-      } as React.ChangeEvent<HTMLInputElement>;
-      onChange(syntheticEvent);
+    let finalValue = '25';
+    if (localInputValue !== '') {
+      const numValue = parseInt(localInputValue, 10);
+      if (!isNaN(numValue)) {
+        finalValue = Math.min(Math.max(numValue, 1), 60).toString();
+      }
     }
+    console.log('Handling blur with final value:', finalValue);
+    setLocalInputValue(finalValue);
+    const syntheticEvent = {
+      target: { value: finalValue }
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(syntheticEvent);
     onBlur();
   };
 
@@ -108,3 +115,4 @@ export const TaskContent = ({
     </div>
   );
 };
+

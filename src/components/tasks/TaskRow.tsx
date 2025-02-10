@@ -29,7 +29,9 @@ export const TaskRow = ({
 
   useEffect(() => {
     if (task.duration) {
-      setInputValue(Math.round(task.duration / 60).toString());
+      const minutes = Math.round(task.duration / 60);
+      console.log('Updating input value from task duration:', minutes);
+      setInputValue(minutes.toString());
     }
   }, [task.duration]);
 
@@ -46,12 +48,16 @@ export const TaskRow = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log('Handling duration change in TaskRow:', value);
+    
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
       // Store duration in seconds
       const newDurationInSeconds = (parseInt(value || "25") * 60).toString();
       onDurationChange(task.id, newDurationInSeconds);
+      
       if (isSelected) {
+        console.log('Updating selected task duration:', newDurationInSeconds);
         const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
         onTaskClick(updatedTask, new MouseEvent('click') as any);
       }
@@ -68,12 +74,14 @@ export const TaskRow = ({
       }
     }
     
+    console.log('Handling blur in TaskRow with final value:', finalValue);
     setInputValue(finalValue);
     // Store duration in seconds
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     onDurationChange(task.id, newDurationInSeconds);
     
     if (isSelected) {
+      console.log('Updating selected task on blur:', newDurationInSeconds);
       const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
       onTaskClick(updatedTask, new MouseEvent('click') as any);
     }
@@ -116,3 +124,4 @@ export const TaskRow = ({
 };
 
 export default TaskRow;
+
