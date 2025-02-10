@@ -19,7 +19,17 @@ export const TaskManager = ({
   const state = useAppState();
   const actions = useAppStateActions();
   const { tasks: { items: tasks, selected: selectedTaskId } } = state;
-  const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
+  
+  // Get selected task with proper type checking
+  const selectedTask = useMemo(() => 
+    tasks.find(task => task.id === selectedTaskId) || null
+  , [tasks, selectedTaskId]);
+
+  console.log('TaskManager - Current state:', {
+    selectedTaskId,
+    selectedTask,
+    allTasks: tasks.map(t => ({ id: t.id, name: t.name, duration: t.duration }))
+  });
 
   const taskListComponent = useMemo(() => (
     <TaskList
@@ -53,9 +63,19 @@ export const TaskManager = ({
           console.log('TaskManager - Updating duration:', { 
             taskId: selectedTask.id, 
             newDuration,
-            currentTask: selectedTask 
+            currentTask: selectedTask,
+            selectedTaskId
           });
+          
+          // Update task duration in global state
           actions.updateTask(selectedTask.id, { duration: newDuration });
+          
+          // Log the state after update
+          console.log('TaskManager - After duration update:', {
+            taskId: selectedTask.id,
+            duration: newDuration,
+            selectedTaskId
+          });
         }
       }}
       favorites={initialFavorites}
@@ -70,4 +90,3 @@ export const TaskManager = ({
     />
   );
 };
-

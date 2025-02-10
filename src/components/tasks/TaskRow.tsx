@@ -30,10 +30,15 @@ export const TaskRow = ({
   useEffect(() => {
     if (task.duration) {
       const minutes = Math.round(task.duration / 60);
-      console.log('Updating input value from task duration:', minutes);
+      console.log('TaskRow - Updating input value from task duration:', {
+        taskId: task.id,
+        minutes,
+        duration: task.duration,
+        isSelected
+      });
       setInputValue(minutes.toString());
     }
-  }, [task.duration]);
+  }, [task.duration, task.id, isSelected]);
 
   const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -41,7 +46,10 @@ export const TaskRow = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      console.log('Enter pressed in TaskRow');
+      console.log('TaskRow - Enter pressed:', {
+        taskId: task.id,
+        value: inputValue
+      });
       handleBlur();
     }
     e.stopPropagation();
@@ -49,7 +57,11 @@ export const TaskRow = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log('Handling duration change in TaskRow:', value);
+    console.log('TaskRow - Handling duration change:', {
+      taskId: task.id,
+      value,
+      isSelected
+    });
     
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
@@ -66,16 +78,23 @@ export const TaskRow = ({
       finalValue = '60';
     }
     
-    console.log('Handling blur in TaskRow with final value:', finalValue);
+    console.log('TaskRow - Handling blur:', {
+      taskId: task.id,
+      finalValue,
+      isSelected
+    });
+    
     setInputValue(finalValue);
     
-    // Convert minutes to seconds
+    // Convert minutes to seconds and update
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
-    console.log('Updating task duration:', { taskId: task.id, newDuration: newDurationInSeconds });
+    console.log('TaskRow - Updating task duration:', {
+      taskId: task.id,
+      newDuration: newDurationInSeconds,
+      isSelected
+    });
     
-    // Update the task's duration in the state
     onDurationChange(task.id, newDurationInSeconds);
-    
     onInputBlur();
   };
 
@@ -114,4 +133,3 @@ export const TaskRow = ({
 };
 
 export default TaskRow;
-
