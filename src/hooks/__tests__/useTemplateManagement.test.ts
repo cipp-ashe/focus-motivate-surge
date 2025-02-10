@@ -1,7 +1,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useTemplateManagement } from '../useTemplateManagement';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { useTemplateManagement } from '@/components/habits/hooks/useTemplateManagement';
 import { ActiveTemplate } from '@/components/habits/types';
 
 describe('useTemplateManagement', () => {

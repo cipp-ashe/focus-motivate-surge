@@ -1,10 +1,10 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useHabitProgress } from '../useHabitProgress';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
 
 describe('useHabitProgress', () => {
   beforeEach(() => {
-    // Clear any mocked dates
     vi.useFakeTimers();
     const today = new Date('2024-02-20');
     vi.setSystemTime(today);

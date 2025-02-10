@@ -1,11 +1,31 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useTimerControls } from '../timer/useTimerControls';
+import { TimerStateMetrics } from '@/types/metrics';
 
 describe('useTimerControls', () => {
-  const mockSetTimeLeft = vi.fn();
-  const mockSetIsRunning = vi.fn();
+  const mockMetrics: TimerStateMetrics = {
+    startTime: null,
+    endTime: null,
+    pauseCount: 0,
+    expectedTime: 300,
+    actualDuration: 0,
+    favoriteQuotes: 0,
+    pausedTime: 0,
+    lastPauseTimestamp: null,
+    extensionTime: 0,
+    netEffectiveTime: 0,
+    efficiencyRatio: 0,
+    completionStatus: 'Completed On Time',
+    isPaused: false,
+    pausedTimeLeft: null
+  };
+
+  const mockOnStart = vi.fn();
+  const mockOnPause = vi.fn();
   const mockOnComplete = vi.fn();
+  const mockOnAddTime = vi.fn();
   const initialTimeLeft = 300; // 5 minutes
 
   beforeEach(() => {
@@ -15,52 +35,64 @@ describe('useTimerControls', () => {
   it('should initialize with correct state', () => {
     const { result } = renderHook(() => useTimerControls({
       timeLeft: initialTimeLeft,
-      setTimeLeft: mockSetTimeLeft,
-      setIsRunning: mockSetIsRunning,
-      onComplete: mockOnComplete
+      isRunning: false,
+      metrics: mockMetrics,
+      onStart: mockOnStart,
+      onPause: mockOnPause,
+      onComplete: mockOnComplete,
+      onAddTime: mockOnAddTime
     }));
 
-    expect(result.current.handleStart).toBeDefined();
-    expect(result.current.handlePause).toBeDefined();
+    expect(result.current.handleToggle).toBeDefined();
     expect(result.current.handleComplete).toBeDefined();
+    expect(result.current.handleAddTime).toBeDefined();
   });
 
-  it('should handle start correctly', () => {
+  it('should handle toggle correctly when starting', () => {
     const { result } = renderHook(() => useTimerControls({
       timeLeft: initialTimeLeft,
-      setTimeLeft: mockSetTimeLeft,
-      setIsRunning: mockSetIsRunning,
-      onComplete: mockOnComplete
+      isRunning: false,
+      metrics: mockMetrics,
+      onStart: mockOnStart,
+      onPause: mockOnPause,
+      onComplete: mockOnComplete,
+      onAddTime: mockOnAddTime
     }));
 
     act(() => {
-      result.current.handleStart();
+      result.current.handleToggle();
     });
 
-    expect(mockSetIsRunning).toHaveBeenCalledWith(true);
+    expect(mockOnStart).toHaveBeenCalled();
   });
 
-  it('should handle pause correctly', () => {
+  it('should handle toggle correctly when pausing', () => {
     const { result } = renderHook(() => useTimerControls({
       timeLeft: initialTimeLeft,
-      setTimeLeft: mockSetTimeLeft,
-      setIsRunning: mockSetIsRunning,
-      onComplete: mockOnComplete
+      isRunning: true,
+      metrics: mockMetrics,
+      onStart: mockOnStart,
+      onPause: mockOnPause,
+      onComplete: mockOnComplete,
+      onAddTime: mockOnAddTime
     }));
 
     act(() => {
-      result.current.handlePause();
+      result.current.handleToggle();
     });
 
-    expect(mockSetIsRunning).toHaveBeenCalledWith(false);
+    expect(mockOnPause).toHaveBeenCalled();
   });
 
   it('should handle complete correctly', () => {
     const { result } = renderHook(() => useTimerControls({
       timeLeft: initialTimeLeft,
-      setTimeLeft: mockSetTimeLeft,
-      setIsRunning: mockSetIsRunning,
-      onComplete: mockOnComplete
+      isRunning: true,
+      metrics: mockMetrics,
+      onStart: mockOnStart,
+      onPause: mockOnPause,
+      onComplete: mockOnComplete,
+      onAddTime: mockOnAddTime
     }));
 
     act(() => {
@@ -68,6 +100,5 @@ describe('useTimerControls', () => {
     });
 
     expect(mockOnComplete).toHaveBeenCalled();
-    expect(mockSetIsRunning).toHaveBeenCalledWith(false);
   });
 });
