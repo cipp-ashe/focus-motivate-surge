@@ -3,12 +3,37 @@ import { Clock, Pause, Quote, Timer, CheckCircle2, AlertTriangle } from "lucide-
 import { Task } from "@/types/tasks";
 import { TableCell, TableRow } from "../ui/table";
 import { Badge } from "../ui/badge";
-import { TaskTags } from "./TaskTags";
-import { formatDate, formatDuration, getCompletionStatusColor, getCompletionIcon } from "@/utils/taskFormatUtils";
+import { formatDuration } from "@/utils/taskFormatUtils";
 
 interface TaskMetricsRowProps {
   task: Task;
 }
+
+const getCompletionStatusColor = (status: string) => {
+  switch (status) {
+    case 'Completed Early':
+      return 'text-green-500';
+    case 'Completed On Time':
+      return 'text-blue-500';
+    case 'Completed Late':
+      return 'text-yellow-500';
+    default:
+      return 'text-muted-foreground';
+  }
+};
+
+const getCompletionIcon = (status: string) => {
+  switch (status) {
+    case 'Completed Early':
+      return CheckCircle2;
+    case 'Completed On Time':
+      return Timer;
+    case 'Completed Late':
+      return AlertTriangle;
+    default:
+      return Timer;
+  }
+};
 
 export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
   if (!task.metrics) return null;
@@ -23,15 +48,14 @@ export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
     netEffectiveTime,
     efficiencyRatio,
     completionStatus,
-    endTime,
   } = task.metrics;
 
   const statusColor = getCompletionStatusColor(completionStatus);
-  const StatusIcon = getCompletionIcon(completionStatus);
+  const StatusIconComponent = getCompletionIcon(completionStatus);
   
   return (
     <TableRow className="bg-muted/30 border-l-2 border-l-primary/20">
-      <TableCell colSpan={5} className="py-2">
+      <TableCell colSpan={4} className="py-2">
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
             <div className="text-sm font-medium text-muted-foreground">Time Metrics</div>
@@ -55,17 +79,12 @@ export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
             <div className="text-sm font-medium text-muted-foreground">Status</div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <StatusIcon className={`h-4 w-4 ${statusColor}`} />
+                <StatusIconComponent className={`h-4 w-4 ${statusColor}`} />
                 <span className={`text-sm ${statusColor}`}>{completionStatus}</span>
               </div>
               <Badge variant="outline" className="text-xs">
                 {efficiencyRatio.toFixed(1)}% efficiency
               </Badge>
-              {endTime && (
-                <div className="text-xs text-muted-foreground">
-                  Completed: {formatDate(endTime)}
-                </div>
-              )}
             </div>
           </div>
 
