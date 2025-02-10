@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { toast } from "sonner";
 import { TimerMetrics } from '@/types/metrics';
@@ -26,6 +25,14 @@ export const useTimerActions = ({
     const clampedMinutes = Math.max(1, Math.min(60, newMinutes));
     const newSeconds = clampedMinutes * 60;
     
+    console.log('Timer Action - Setting minutes:', {
+      newMinutes,
+      clampedMinutes,
+      newSeconds,
+      currentTimeLeft: timeLeft,
+      currentMinutes: minutes
+    });
+    
     updateMinutes(clampedMinutes);
     updateTimeLeft(newSeconds);
     updateMetrics({
@@ -35,7 +42,7 @@ export const useTimerActions = ({
     if (onDurationChange) {
       onDurationChange(clampedMinutes);
     }
-  }, [updateMinutes, updateTimeLeft, updateMetrics, onDurationChange]);
+  }, [updateMinutes, updateTimeLeft, updateMetrics, onDurationChange, timeLeft, minutes]);
 
   const start = useCallback(() => {
     setIsRunning(true);

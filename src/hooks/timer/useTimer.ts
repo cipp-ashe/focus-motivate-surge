@@ -44,6 +44,13 @@ export const useTimer = ({
     if (!isMountedRef.current) return;
 
     const validDuration = Math.max(60, initialDuration);
+    console.log('Timer - Initial duration changed:', {
+      initialDuration,
+      validDuration,
+      currentTimeLeft: timeLeft,
+      currentMinutes: minutes
+    });
+    
     updateTimeLeft(validDuration);
     updateMinutes(Math.floor(validDuration / 60));
     updateMetrics({
@@ -53,10 +60,16 @@ export const useTimer = ({
     return () => {
       setIsRunning(false);
     };
-  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, setIsRunning, isMountedRef]);
+  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, setIsRunning, isMountedRef, timeLeft, minutes]);
 
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
+      console.log('Timer - Starting countdown:', {
+        timeLeft,
+        minutes,
+        isRunning
+      });
+      
       intervalRef.current = setInterval(() => {
         if (!isMountedRef.current) return;
 
@@ -77,7 +90,7 @@ export const useTimer = ({
         intervalRef.current = undefined;
       }
     };
-  }, [isRunning, timeLeft, onTimeUp, completeTimer, updateTimeLeft, isMountedRef]);
+  }, [isRunning, timeLeft, onTimeUp, completeTimer, updateTimeLeft, isMountedRef, minutes]);
 
   useEffect(() => {
     return () => {

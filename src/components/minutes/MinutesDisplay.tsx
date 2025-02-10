@@ -23,9 +23,13 @@ export const MinutesDisplay = ({
   const [isFocused, setIsFocused] = useState(false);
   const previousMinutesRef = useRef(minutes);
 
-  // Update local input value when minutes prop changes and not focused
   useEffect(() => {
     if (!isFocused && previousMinutesRef.current !== minutes) {
+      console.log('MinutesDisplay - Minutes prop changed:', {
+        previous: previousMinutesRef.current,
+        new: minutes,
+        isFocused
+      });
       setInputValue(minutes.toString());
       previousMinutesRef.current = minutes;
     }
@@ -34,14 +38,22 @@ export const MinutesDisplay = ({
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
-      console.log('MinutesDisplay immediate update:', value);
+      console.log('MinutesDisplay - Input value changing:', {
+        value,
+        currentMinutes: minutes
+      });
       setInputValue(value);
       
-      // Immediately validate and propagate valid changes
       if (value !== '') {
         const numValue = parseInt(value, 10);
         if (!isNaN(numValue)) {
           const clampedValue = Math.min(Math.max(numValue, minMinutes), maxMinutes);
+          console.log('MinutesDisplay - Propagating valid change:', {
+            rawValue: value,
+            clampedValue,
+            minMinutes,
+            maxMinutes
+          });
           const syntheticEvent = {
             ...e,
             target: { ...e.target, value: clampedValue.toString() }
@@ -50,7 +62,7 @@ export const MinutesDisplay = ({
         }
       }
     }
-  }, [onChange, minMinutes, maxMinutes]);
+  }, [onChange, minMinutes, maxMinutes, minutes]);
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
@@ -64,7 +76,13 @@ export const MinutesDisplay = ({
       finalValue = Math.min(Math.max(numValue, minMinutes), maxMinutes).toString();
     }
     
-    console.log('MinutesDisplay blur update:', finalValue);
+    console.log('MinutesDisplay - Handling blur:', {
+      inputValue: value,
+      finalValue,
+      minMinutes,
+      maxMinutes
+    });
+    
     setInputValue(finalValue);
     previousMinutesRef.current = parseInt(finalValue, 10);
     
@@ -76,13 +94,13 @@ export const MinutesDisplay = ({
   }, [minMinutes, maxMinutes, onBlur]);
 
   const handleFocus = useCallback(() => {
-    console.log('MinutesDisplay focus');
+    console.log('MinutesDisplay - Input focused');
     setIsFocused(true);
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      console.log('MinutesDisplay Enter pressed');
+      console.log('MinutesDisplay - Enter key pressed');
       e.currentTarget.blur();
     }
   }, []);
