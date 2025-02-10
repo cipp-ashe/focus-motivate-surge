@@ -57,7 +57,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         id: generateId(),
         name: newTaskName.trim(),
         completed: false,
-        duration: 25 * 60, // Default to 25 minutes (in seconds)
+        duration: 25 * 60, // Always set 25 minutes (in seconds) for single task mode
         createdAt: new Date().toISOString(),
       });
     }
