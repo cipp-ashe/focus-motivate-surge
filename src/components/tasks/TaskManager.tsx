@@ -49,7 +49,7 @@ export const TaskManager = ({
 
   const timerComponent = useMemo(() => (
     <TimerSection
-      key={`${selectedTask?.id}-${selectedTask?.duration}`}
+      key={`timer-section-${selectedTask?.id}-${selectedTask?.duration}`}
       selectedTask={selectedTask}
       onTaskComplete={(metrics) => {
         if (selectedTask) {
@@ -77,12 +77,6 @@ export const TaskManager = ({
           });
           
           actions.updateTask(selectedTask.id, { duration: seconds });
-          
-          console.log('TaskManager - After duration update:', {
-            taskId: selectedTask.id,
-            duration: seconds,
-            selectedTaskId
-          });
         }
       }}
       favorites={initialFavorites}
@@ -97,3 +91,4 @@ export const TaskManager = ({
     />
   );
 };
+

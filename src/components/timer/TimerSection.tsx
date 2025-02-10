@@ -27,16 +27,18 @@ export const TimerSection = ({
     );
   }
 
+  const durationInSeconds = selectedTask.duration || 1500;
+
   console.log('TimerSection - Rendering with task:', {
     taskId: selectedTask.id,
-    duration: selectedTask.duration,
-    durationInMinutes: selectedTask.duration ? Math.floor(selectedTask.duration / 60) : 25
+    duration: durationInSeconds,
+    durationInMinutes: Math.floor(durationInSeconds / 60)
   });
 
   return (
     <Timer
-      key={`timer-${selectedTask.id}-${selectedTask.duration}`}
-      duration={selectedTask.duration || 1500}
+      key={`timer-${selectedTask.id}-${durationInSeconds}`}
+      duration={durationInSeconds}
       taskName={selectedTask.name}
       onComplete={onTaskComplete}
       onAddTime={() => {
@@ -48,7 +50,7 @@ export const TimerSection = ({
           minutes,
           seconds,
           taskId: selectedTask.id,
-          currentDuration: selectedTask.duration
+          currentDuration: durationInSeconds
         });
         onDurationChange(seconds);
       }}
@@ -57,3 +59,4 @@ export const TimerSection = ({
     />
   );
 };
+
