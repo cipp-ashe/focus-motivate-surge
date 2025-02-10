@@ -3,6 +3,7 @@ import { Task } from "@/types/tasks";
 import { Sparkles, X, Clock } from "lucide-react";
 import { TaskTags } from "./TaskTags";
 import { Input } from "../ui/input";
+import { useState, useEffect } from "react";
 
 interface TaskContentProps {
   task: Task;
@@ -27,10 +28,35 @@ export const TaskContent = ({
   onKeyDown,
   preventPropagation,
 }: TaskContentProps) => {
-  console.log('TaskContent rendering with task:', task);
-  // Convert seconds to minutes, default to 25 if duration is undefined
+  const [localInputValue, setLocalInputValue] = useState(inputValue);
+  
+  useEffect(() => {
+    setLocalInputValue(inputValue);
+  }, [inputValue]);
+
+  const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow numbers
+    if (value === '' || /^\d+$/.test(value)) {
+      setLocalInputValue(value);
+      onChange(e);
+    }
+  };
+
+  const handleLocalBlur = () => {
+    // Convert empty string to "25"
+    if (localInputValue === '') {
+      setLocalInputValue('25');
+      const syntheticEvent = {
+        target: { value: '25' }
+      } as React.ChangeEvent<HTMLInputElement>;
+      onChange(syntheticEvent);
+    }
+    onBlur();
+  };
+
+  // Convert seconds to minutes for display
   const durationInMinutes = Math.round((task.duration || 1500) / 60);
-  console.log('Calculated duration in minutes:', durationInMinutes, 'from seconds:', task.duration);
 
   return (
     <div className="flex flex-col gap-2">
@@ -46,10 +72,10 @@ export const TaskContent = ({
               type="text"
               inputMode="numeric"
               pattern="\d*"
-              value={inputValue}
+              value={localInputValue}
               className="w-16 text-right bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              onChange={onChange}
-              onBlur={onBlur}
+              onChange={handleLocalChange}
+              onBlur={handleLocalBlur}
               onKeyDown={onKeyDown}
               autoFocus
               onClick={preventPropagation}
