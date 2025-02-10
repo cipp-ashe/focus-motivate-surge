@@ -31,23 +31,21 @@ export const TaskContent = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1 flex items-center justify-between gap-4">
-          <TaskHeader 
-            task={task}
-            onDelete={onDelete}
-          />
-          <TaskDuration
-            durationInMinutes={durationInMinutes}
-            isEditing={editingTaskId === task.id}
-            inputValue={inputValue}
-            onDurationClick={onDurationClick}
-            onChange={onChange}
-            onBlur={onBlur}
-            onKeyDown={onKeyDown}
-            preventPropagation={preventPropagation}
-          />
-        </div>
+      <div className="flex items-center gap-4">
+        <TaskHeader 
+          task={task}
+          onDelete={onDelete}
+        />
+        <TaskDuration
+          durationInMinutes={durationInMinutes}
+          isEditing={editingTaskId === task.id}
+          inputValue={inputValue}
+          onDurationClick={onDurationClick}
+          onChange={onChange}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
+          preventPropagation={preventPropagation}
+        />
       </div>
 
       <TaskTags 
