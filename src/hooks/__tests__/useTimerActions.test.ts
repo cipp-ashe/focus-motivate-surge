@@ -6,7 +6,7 @@ import { useTimerActions } from '../timer/useTimerActions';
 describe('useTimerActions', () => {
   const mockUpdateTimeLeft = vi.fn();
   const mockUpdateMinutes = vi.fn();
-  const mockUpdateIsRunning = vi.fn();
+  const mockSetIsRunning = vi.fn();
   const mockUpdateMetrics = vi.fn();
   const mockOnDurationChange = vi.fn();
 
@@ -15,7 +15,7 @@ describe('useTimerActions', () => {
     minutes: 5,
     updateTimeLeft: mockUpdateTimeLeft,
     updateMinutes: mockUpdateMinutes,
-    updateIsRunning: mockUpdateIsRunning,
+    setIsRunning: mockSetIsRunning,
     updateMetrics: mockUpdateMetrics,
     onDurationChange: mockOnDurationChange,
   };
@@ -31,9 +31,9 @@ describe('useTimerActions', () => {
     
     expect(mockUpdateMinutes).toHaveBeenCalledWith(10);
     expect(mockUpdateTimeLeft).toHaveBeenCalledWith(600);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockUpdateMetrics).toHaveBeenCalledWith({
       expectedTime: 600
-    }));
+    });
     expect(mockOnDurationChange).toHaveBeenCalledWith(10);
   });
 
@@ -42,11 +42,12 @@ describe('useTimerActions', () => {
     
     result.current.start();
     
-    expect(mockUpdateIsRunning).toHaveBeenCalledWith(true);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockSetIsRunning).toHaveBeenCalledWith(true);
+    expect(mockUpdateMetrics).toHaveBeenCalledWith({
       startTime: expect.any(Date),
       isPaused: false,
-    }));
+      pausedTimeLeft: null
+    });
   });
 
   it('should handle pause action', () => {
@@ -54,11 +55,13 @@ describe('useTimerActions', () => {
     
     result.current.pause();
     
-    expect(mockUpdateIsRunning).toHaveBeenCalledWith(false);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockSetIsRunning).toHaveBeenCalledWith(false);
+    expect(mockUpdateMetrics).toHaveBeenCalledWith({
       isPaused: true,
       lastPauseTimestamp: expect.any(Date),
-    }));
+      pauseCount: expect.any(Number),
+      pausedTimeLeft: 300
+    });
   });
 
   it('should handle reset action', () => {
@@ -66,7 +69,7 @@ describe('useTimerActions', () => {
     
     result.current.reset();
     
-    expect(mockUpdateIsRunning).toHaveBeenCalledWith(false);
+    expect(mockSetIsRunning).toHaveBeenCalledWith(false);
     expect(mockUpdateTimeLeft).toHaveBeenCalledWith(300);
     expect(mockUpdateMetrics).toHaveBeenCalledWith(expect.any(Object));
   });
@@ -78,9 +81,9 @@ describe('useTimerActions', () => {
     
     expect(mockUpdateTimeLeft).toHaveBeenCalledWith(600);
     expect(mockUpdateMinutes).toHaveBeenCalledWith(10);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockUpdateMetrics).toHaveBeenCalledWith({
       extensionTime: 300,
       expectedTime: 600,
-    }));
+    });
   });
 });

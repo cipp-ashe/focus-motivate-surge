@@ -49,12 +49,12 @@ export const useTimerActions = ({
 
   const pause = useCallback(() => {
     setIsRunning(false);
-    updateMetrics(prev => ({
-      pauseCount: prev.pauseCount + 1,
+    updateMetrics({
+      pauseCount: (prev: TimerMetrics) => prev.pauseCount + 1,
       lastPauseTimestamp: new Date(),
       isPaused: true,
       pausedTimeLeft: timeLeft
-    }));
+    });
   }, [setIsRunning, updateMetrics, timeLeft]);
 
   const reset = useCallback(() => {
@@ -83,23 +83,23 @@ export const useTimerActions = ({
     const additionalSeconds = additionalMinutes * 60;
     updateTimeLeft(timeLeft + additionalSeconds);
     updateMinutes(minutes + additionalMinutes);
-    updateMetrics(prev => ({
-      extensionTime: prev.extensionTime + additionalSeconds,
-      expectedTime: prev.expectedTime + additionalSeconds
-    }));
+    updateMetrics({
+      extensionTime: (prev: TimerMetrics) => prev.extensionTime + additionalSeconds,
+      expectedTime: (prev: TimerMetrics) => prev.expectedTime + additionalSeconds
+    });
     toast.success(`+${additionalMinutes}m added ⌛💪`);
   }, [timeLeft, minutes, updateTimeLeft, updateMinutes, updateMetrics]);
 
   const completeTimer = useCallback(() => {
     setIsRunning(false);
-    updateMetrics(prev => ({
+    updateMetrics({
       endTime: new Date(),
-      actualDuration: prev.startTime 
+      actualDuration: (prev: TimerMetrics) => prev.startTime 
         ? Math.floor((Date.now() - prev.startTime.getTime()) / 1000)
         : prev.actualDuration,
       isPaused: false,
       pausedTimeLeft: null
-    }));
+    });
   }, [setIsRunning, updateMetrics]);
 
   return {

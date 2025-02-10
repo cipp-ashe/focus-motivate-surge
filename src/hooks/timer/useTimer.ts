@@ -16,7 +16,7 @@ export const useTimer = ({
     metrics,
     updateTimeLeft,
     updateMinutes,
-    updateIsRunning,
+    setIsRunning,
     updateMetrics,
     isMountedRef,
   } = useTimerState(initialDuration);
@@ -35,7 +35,7 @@ export const useTimer = ({
     minutes,
     updateTimeLeft,
     updateMinutes,
-    updateIsRunning,
+    setIsRunning,
     updateMetrics,
     onDurationChange,
   });
@@ -51,9 +51,9 @@ export const useTimer = ({
     });
 
     return () => {
-      updateIsRunning(false);
+      setIsRunning(false);
     };
-  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, updateIsRunning, isMountedRef]);
+  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, setIsRunning, isMountedRef]);
 
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
