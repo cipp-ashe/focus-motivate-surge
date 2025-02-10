@@ -124,6 +124,7 @@ export const Timer = ({
     metrics,
     showAddTime: isExpanded,
     pauseTimeLeft,
+    size: 'normal' as const,
   };
 
   return (
@@ -160,3 +161,5 @@ export const Timer = ({
 };
 
 Timer.displayName = 'Timer';
+
+export { Timer };

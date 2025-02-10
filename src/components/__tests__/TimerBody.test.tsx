@@ -19,6 +19,7 @@ describe('TimerBody Component', () => {
       isRunning: false,
       onToggle: vi.fn(),
       onComplete: vi.fn(),
+      onAddTime: vi.fn(),
       metrics: {
         startTime: null,
         endTime: null,
@@ -31,7 +32,7 @@ describe('TimerBody Component', () => {
         extensionTime: 0,
         netEffectiveTime: 0,
         efficiencyRatio: 0,
-        completionStatus: 'Completed On Time',
+        completionStatus: 'Completed On Time' as const,
         isPaused: false,
         pausedTimeLeft: null,
       },
@@ -50,7 +51,7 @@ describe('TimerBody Component', () => {
       extensionTime: 0,
       netEffectiveTime: 0,
       efficiencyRatio: 0,
-      completionStatus: 'Completed On Time',
+      completionStatus: 'Completed On Time' as const,
       isPaused: false,
       pausedTimeLeft: null,
     },
@@ -118,4 +119,3 @@ describe('TimerBody Component', () => {
     expect(mockProps.setSelectedSound).toHaveBeenCalled();
   });
 });
-

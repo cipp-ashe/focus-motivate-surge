@@ -26,7 +26,7 @@ interface TimerExpandedViewProps {
     isRunning: boolean;
     onToggle: () => void;
     onComplete: () => void;
-    onAddTime: () => void;
+    onAddTime?: () => void;
     metrics: TimerStateMetrics;
     showAddTime: boolean;
     size: "large";
