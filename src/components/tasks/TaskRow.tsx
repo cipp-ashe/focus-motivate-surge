@@ -73,12 +73,14 @@ export const TaskRow = ({
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     console.log('Updating task duration:', { taskId: task.id, newDuration: newDurationInSeconds });
     
-    // Update the task's duration first
+    // Create updated task with new duration
+    const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
+    
+    // Update the task's duration in the state
     onDurationChange(task.id, newDurationInSeconds);
     
-    // Then update the timer if this is the selected task
+    // If this is the selected task, update the timer immediately
     if (isSelected) {
-      const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
       onTaskClick(updatedTask, new MouseEvent('click') as any);
     }
     
@@ -120,3 +122,4 @@ export const TaskRow = ({
 };
 
 export default TaskRow;
+
