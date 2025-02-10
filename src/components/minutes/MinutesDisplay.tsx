@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes, useCallback, useState } from "react";
+
+import React, { InputHTMLAttributes, useCallback, useState, useEffect } from "react";
 import { Input } from "../ui/input";
 
 interface MinutesDisplayProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -21,58 +22,64 @@ export const MinutesDisplay = ({
   const [inputValue, setInputValue] = useState(minutes.toString());
   const [isFocused, setIsFocused] = useState(false);
 
+  // Update local input value when minutes prop changes
+  useEffect(() => {
+    if (!isFocused) {
+      console.log('MinutesDisplay updating input value:', minutes);
+      setInputValue(minutes.toString());
+    }
+  }, [minutes, isFocused]);
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
+      console.log('MinutesDisplay handling change:', value);
       setInputValue(value);
+      onChange(e);
     }
-  }, []);
+  }, [onChange]);
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
     const value = e.target.value;
     
-    if (value === '') {
-      setInputValue(minMinutes.toString());
-      const syntheticEvent = {
-        ...e,
-        target: { ...e.target, value: minMinutes.toString() }
-      } as React.ChangeEvent<HTMLInputElement>;
-      onChange(syntheticEvent);
+    let finalValue: string;
+    if (value === '' || isNaN(parseInt(value, 10))) {
+      finalValue = minMinutes.toString();
     } else {
       const numValue = parseInt(value, 10);
-      const clampedValue = Math.min(Math.max(numValue, minMinutes), maxMinutes);
-      setInputValue(clampedValue.toString());
-      const syntheticEvent = {
-        ...e,
-        target: { ...e.target, value: clampedValue.toString() }
-      } as React.ChangeEvent<HTMLInputElement>;
-      onChange(syntheticEvent);
+      finalValue = Math.min(Math.max(numValue, minMinutes), maxMinutes).toString();
     }
-    onBlur(e);
-  }, [minMinutes, maxMinutes, onChange, onBlur]);
+    
+    console.log('MinutesDisplay handling blur, final value:', finalValue);
+    setInputValue(finalValue);
+    
+    const syntheticEvent = {
+      ...e,
+      target: { ...e.target, value: finalValue }
+    } as React.FocusEvent<HTMLInputElement>;
+    onBlur(syntheticEvent);
+  }, [minMinutes, maxMinutes, onBlur]);
+
+  const handleFocus = useCallback(() => {
+    console.log('MinutesDisplay focus');
+    setIsFocused(true);
+  }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      console.log('MinutesDisplay Enter pressed');
       e.currentTarget.blur();
     }
   }, []);
 
-  const handleFocus = useCallback(() => {
-    setIsFocused(true);
-  }, []);
-
-  const displayValue = isFocused ? inputValue : minutes.toString();
-
   return (
-    <div 
-      className="relative w-20"
-    >
+    <div className="relative w-20">
       <Input
         type="text"
         inputMode="numeric"
         pattern="\d*"
-        value={displayValue}
+        value={inputValue}
         onChange={handleChange}
         onBlur={handleBlur}
         onFocus={handleFocus}
@@ -86,4 +93,6 @@ export const MinutesDisplay = ({
       </span>
     </div>
   );
-};
+});
+
+MinutesDisplay.displayName = 'MinutesDisplay';
