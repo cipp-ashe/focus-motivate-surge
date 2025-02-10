@@ -26,8 +26,18 @@ export const TaskManager = ({
 
   console.log('TaskManager - Current state:', {
     selectedTaskId,
-    selectedTask,
-    allTasks: tasks.map(t => ({ id: t.id, name: t.name, duration: t.duration }))
+    selectedTask: selectedTask ? {
+      id: selectedTask.id,
+      name: selectedTask.name,
+      duration: selectedTask.duration,
+      durationInMinutes: selectedTask.duration ? Math.floor(selectedTask.duration / 60) : 25
+    } : null,
+    allTasks: tasks.map(t => ({ 
+      id: t.id, 
+      name: t.name, 
+      duration: t.duration,
+      durationInMinutes: t.duration ? Math.floor(t.duration / 60) : 25
+    }))
   });
 
   const taskListComponent = useMemo(() => (

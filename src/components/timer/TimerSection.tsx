@@ -29,8 +29,11 @@ export const TimerSection = ({
 
   console.log('TimerSection - Rendering with task:', {
     taskId: selectedTask.id,
-    duration: selectedTask.duration
+    duration: selectedTask.duration,
+    durationInMinutes: selectedTask.duration ? Math.floor(selectedTask.duration / 60) : 25
   });
+
+  const initialMinutes = selectedTask.duration ? Math.floor(selectedTask.duration / 60) : 25;
 
   return (
     <Timer
@@ -46,7 +49,8 @@ export const TimerSection = ({
         console.log('TimerSection - Converting minutes to seconds:', {
           minutes,
           seconds,
-          taskId: selectedTask.id
+          taskId: selectedTask.id,
+          currentDuration: selectedTask.duration
         });
         onDurationChange(seconds);
       }}
