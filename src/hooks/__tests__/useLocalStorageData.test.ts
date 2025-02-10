@@ -5,7 +5,7 @@ import { useLocalStorageData } from '../useLocalStorageData';
 import { toast } from 'sonner';
 import { Task } from '@/types/tasks';
 import type { Quote } from '@/types/timer';
-import type { HabitTemplate } from '@/components/habits/types';
+import type { ActiveTemplate } from '@/types/habits';
 
 vi.mock('sonner', () => ({
   toast: {
@@ -77,14 +77,11 @@ describe('useLocalStorageData', () => {
 
   it('should handle active templates updates', () => {
     const { result } = renderHook(() => useLocalStorageData());
-    const mockTemplates: HabitTemplate[] = [{
-      id: '1',
-      name: 'Test Template',
-      description: 'Test Description',
-      category: 'Test',
-      defaultHabits: [],
-      defaultDays: ['Monday', 'Wednesday', 'Friday'],
-      duration: null,
+    const mockTemplates: ActiveTemplate[] = [{
+      templateId: '1',
+      habits: [],
+      customized: false,
+      activeDays: ['Monday', 'Wednesday', 'Friday']
     }];
 
     act(() => {
