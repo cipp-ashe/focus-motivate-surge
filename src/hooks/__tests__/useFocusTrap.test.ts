@@ -1,13 +1,19 @@
+
 import { renderHook } from '@testing-library/react-hooks';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useFocusTrap } from '../useFocusTrap';
 
 describe('useFocusTrap', () => {
   const mockFocusableElement = {
-    focus: jest.fn(),
+    focus: vi.fn(),
     hasAttribute: () => false,
     getAttribute: () => null,
     tabIndex: 0
   } as unknown as HTMLElement;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('should initialize with correct state', () => {
     const { result } = renderHook(() => useFocusTrap({ enabled: true }));
@@ -17,6 +23,13 @@ describe('useFocusTrap', () => {
 
   it('should handle disabled state', () => {
     const { result } = renderHook(() => useFocusTrap({ enabled: false }));
+    
+    Object.defineProperty(result.current.containerRef, 'current', {
+      value: {
+        querySelectorAll: () => []
+      }
+    });
+
     const elements = result.current.getFocusableElements();
     expect(elements).toHaveLength(0);
   });
@@ -24,7 +37,6 @@ describe('useFocusTrap', () => {
   it('should get focusable elements', () => {
     const { result } = renderHook(() => useFocusTrap({ enabled: true }));
     
-    // Mock the container ref
     Object.defineProperty(result.current.containerRef, 'current', {
       value: {
         querySelectorAll: () => [mockFocusableElement]
@@ -33,5 +45,16 @@ describe('useFocusTrap', () => {
 
     const elements = result.current.getFocusableElements();
     expect(elements).toHaveLength(1);
+  });
+
+  it('should handle null container ref', () => {
+    const { result } = renderHook(() => useFocusTrap({ enabled: true }));
+    
+    Object.defineProperty(result.current.containerRef, 'current', {
+      value: null
+    });
+
+    const elements = result.current.getFocusableElements();
+    expect(elements).toHaveLength(0);
   });
 });
