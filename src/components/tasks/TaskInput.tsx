@@ -52,7 +52,6 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
             duration: duration,
             createdAt: new Date().toISOString(),
           };
-          console.log('Adding task with duration:', duration);
           onTaskAdd(task);
         }
       });
@@ -64,7 +63,6 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         duration: DEFAULT_DURATION,
         createdAt: new Date().toISOString(),
       };
-      console.log('Adding single task with duration:', DEFAULT_DURATION);
       onTaskAdd(task);
     }
     setNewTaskName("");

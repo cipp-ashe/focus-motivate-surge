@@ -27,7 +27,6 @@ export const TaskRow = ({
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   const [inputValue, setInputValue] = useState(durationInMinutes.toString());
 
-  // Update local state when task duration changes
   useEffect(() => {
     if (task.duration) {
       setInputValue(Math.round(Number(task.duration) / 60).toString());
@@ -49,6 +48,13 @@ export const TaskRow = ({
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
+      // Immediately update the task duration
+      const newDurationInSeconds = (parseInt(value || "25") * 60).toString();
+      onDurationChange(task.id, newDurationInSeconds);
+      if (isSelected) {
+        const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
+        onTaskClick(updatedTask, new MouseEvent('click') as any);
+      }
     }
   };
 
@@ -66,7 +72,6 @@ export const TaskRow = ({
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     onDurationChange(task.id, newDurationInSeconds);
     
-    // Trigger a re-selection of the task to update the timer if this task is selected
     if (isSelected) {
       const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
       onTaskClick(updatedTask, new MouseEvent('click') as any);
