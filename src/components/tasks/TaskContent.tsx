@@ -34,39 +34,31 @@ export const TaskContent = ({
       <div className="flex items-center gap-3">
         <Sparkles className="h-4 w-4 text-primary" />
         <span className="text-foreground line-clamp-1 flex-1">{task.name}</span>
-        
-        <div 
-          className="flex items-center gap-2 justify-end"
-          onClick={preventPropagation}
-          onTouchStart={preventPropagation}
-        >
-          <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-          {editingTaskId === task.id ? (
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="\d*"
-              value={inputValue}
-              className="w-16 text-right bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              onChange={onChange}
-              onBlur={onBlur}
-              onKeyDown={onKeyDown}
-              autoFocus
-              onClick={preventPropagation}
-              onTouchStart={preventPropagation}
-            />
-          ) : (
-            <span 
-              className="w-16 text-right text-muted-foreground cursor-text"
-              onClick={onDurationClick}
-              onTouchStart={onDurationClick}
-            >
-              {durationInMinutes}
-            </span>
-          )}
-          <span className="text-muted-foreground shrink-0">m</span>
-        </div>
-
+        <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+        {editingTaskId === task.id ? (
+          <Input
+            type="text"
+            inputMode="numeric"
+            pattern="\d*"
+            value={inputValue}
+            className="w-16 text-right bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            onChange={onChange}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+            autoFocus
+            onClick={preventPropagation}
+            onTouchStart={preventPropagation}
+          />
+        ) : (
+          <span 
+            className="w-16 text-right text-muted-foreground cursor-text"
+            onClick={onDurationClick}
+            onTouchStart={onDurationClick}
+          >
+            {durationInMinutes}
+          </span>
+        )}
+        <span className="text-muted-foreground shrink-0">m</span>
         <button
           onClick={onDelete}
           onTouchStart={onDelete}
