@@ -1,7 +1,7 @@
 
 import { TaskInput } from "./TaskInput";
 import { TaskTable } from "./TaskTable";
-import { CompletedTasks } from "../CompletedTasks";
+import { CompletedTasks } from "./CompletedTasks";
 import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
 import { HabitTaskManager } from "../habits/HabitTaskManager";
 import { useTemplateManagement } from "@/components/habits/hooks/useTemplateManagement";
