@@ -31,16 +31,11 @@ export const TaskContent = ({
   const durationInMinutes = task.duration ? Math.round(task.duration / 60) : 25;
 
   return (
-    <>
-      <TaskHeader 
-        task={task}
-        onDelete={onDelete}
-      />
-      
-      <div className="flex items-center justify-between">
-        <TaskTags 
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-4">
+        <TaskHeader 
           task={task}
-          preventPropagation={preventPropagation}
+          onDelete={onDelete}
         />
         
         <TaskDuration
@@ -54,6 +49,12 @@ export const TaskContent = ({
           preventPropagation={preventPropagation}
         />
       </div>
-    </>
+
+      <TaskTags 
+        task={task}
+        preventPropagation={preventPropagation}
+      />
+    </div>
   );
 };
+
