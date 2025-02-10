@@ -93,6 +93,7 @@ export const MinutesDisplay = ({
       </span>
     </div>
   );
-});
+};
 
 MinutesDisplay.displayName = 'MinutesDisplay';
+
