@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useLocalStorageData } from '../useLocalStorageData';
 import { toast } from 'sonner';
+import { Task, Quote, ActiveTemplate } from '@/types/tasks';
 
 vi.mock('sonner', () => ({
   toast: {
@@ -26,7 +27,12 @@ describe('useLocalStorageData', () => {
 
   it('should handle storage updates', () => {
     const { result } = renderHook(() => useLocalStorageData());
-    const mockTasks = [{ id: '1', name: 'Test Task', completed: false }];
+    const mockTasks: Task[] = [{
+      id: '1',
+      name: 'Test Task',
+      completed: false,
+      createdAt: new Date().toISOString()
+    }];
 
     act(() => {
       result.current.handleTasksUpdate(mockTasks);
@@ -37,7 +43,12 @@ describe('useLocalStorageData', () => {
 
   it('should handle completed tasks updates', () => {
     const { result } = renderHook(() => useLocalStorageData());
-    const mockCompletedTasks = [{ id: '1', name: 'Completed Task', completed: true }];
+    const mockCompletedTasks: Task[] = [{
+      id: '1',
+      name: 'Completed Task',
+      completed: true,
+      createdAt: new Date().toISOString()
+    }];
 
     act(() => {
       result.current.handleCompletedTasksUpdate(mockCompletedTasks);
@@ -48,7 +59,12 @@ describe('useLocalStorageData', () => {
 
   it('should handle favorites updates', () => {
     const { result } = renderHook(() => useLocalStorageData());
-    const mockFavorites = [{ text: 'Test Quote', author: 'Test Author' }];
+    const mockFavorites: Quote[] = [{
+      text: 'Test Quote',
+      author: 'Test Author',
+      categories: ['motivation'],
+      timestamp: new Date().toISOString()
+    }];
 
     act(() => {
       result.current.handleFavoritesUpdate(mockFavorites);
@@ -59,7 +75,12 @@ describe('useLocalStorageData', () => {
 
   it('should handle active templates updates', () => {
     const { result } = renderHook(() => useLocalStorageData());
-    const mockTemplates = [{ templateId: '1', habits: [] }];
+    const mockTemplates: ActiveTemplate[] = [{
+      templateId: '1',
+      habits: [],
+      customized: false,
+      activeDays: ['Monday', 'Wednesday', 'Friday']
+    }];
 
     act(() => {
       result.current.setActiveTemplates(mockTemplates);
