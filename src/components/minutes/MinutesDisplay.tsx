@@ -1,5 +1,5 @@
 
-import React, { InputHTMLAttributes, useCallback, useState, useEffect } from "react";
+import React, { InputHTMLAttributes, useCallback, useState, useEffect, useRef } from "react";
 import { Input } from "../ui/input";
 
 interface MinutesDisplayProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -21,23 +21,36 @@ export const MinutesDisplay = ({
 }: MinutesDisplayProps) => {
   const [inputValue, setInputValue] = useState(minutes.toString());
   const [isFocused, setIsFocused] = useState(false);
+  const previousMinutesRef = useRef(minutes);
 
-  // Update local input value when minutes prop changes
+  // Update local input value when minutes prop changes and not focused
   useEffect(() => {
-    if (!isFocused) {
-      console.log('MinutesDisplay updating input value:', minutes);
+    if (!isFocused && previousMinutesRef.current !== minutes) {
       setInputValue(minutes.toString());
+      previousMinutesRef.current = minutes;
     }
   }, [minutes, isFocused]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
-      console.log('MinutesDisplay handling change:', value);
+      console.log('MinutesDisplay immediate update:', value);
       setInputValue(value);
-      onChange(e);
+      
+      // Immediately validate and propagate valid changes
+      if (value !== '') {
+        const numValue = parseInt(value, 10);
+        if (!isNaN(numValue)) {
+          const clampedValue = Math.min(Math.max(numValue, minMinutes), maxMinutes);
+          const syntheticEvent = {
+            ...e,
+            target: { ...e.target, value: clampedValue.toString() }
+          } as React.ChangeEvent<HTMLInputElement>;
+          onChange(syntheticEvent);
+        }
+      }
     }
-  }, [onChange]);
+  }, [onChange, minMinutes, maxMinutes]);
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
@@ -51,8 +64,9 @@ export const MinutesDisplay = ({
       finalValue = Math.min(Math.max(numValue, minMinutes), maxMinutes).toString();
     }
     
-    console.log('MinutesDisplay handling blur, final value:', finalValue);
+    console.log('MinutesDisplay blur update:', finalValue);
     setInputValue(finalValue);
+    previousMinutesRef.current = parseInt(finalValue, 10);
     
     const syntheticEvent = {
       ...e,
@@ -96,4 +110,3 @@ export const MinutesDisplay = ({
 };
 
 MinutesDisplay.displayName = 'MinutesDisplay';
-
