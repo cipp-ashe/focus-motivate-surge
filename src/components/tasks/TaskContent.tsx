@@ -1,8 +1,8 @@
 
 import { Task } from "@/types/tasks";
-import { TaskHeader } from "./TaskHeader";
-import { TaskDuration } from "./TaskDuration";
+import { Sparkles, X, Clock } from "lucide-react";
 import { TaskTags } from "./TaskTags";
+import { Input } from "../ui/input";
 
 interface TaskContentProps {
   task: Task;
@@ -32,20 +32,48 @@ export const TaskContent = ({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
-        <TaskHeader 
-          task={task}
-          onDelete={onDelete}
-        />
-        <TaskDuration
-          durationInMinutes={durationInMinutes}
-          isEditing={editingTaskId === task.id}
-          inputValue={inputValue}
-          onDurationClick={onDurationClick}
-          onChange={onChange}
-          onBlur={onBlur}
-          onKeyDown={onKeyDown}
-          preventPropagation={preventPropagation}
-        />
+        <Sparkles className="h-4 w-4 text-primary" />
+        <span className="text-foreground line-clamp-1 flex-1">{task.name}</span>
+        
+        <div 
+          className="flex items-center gap-2 justify-end"
+          onClick={preventPropagation}
+          onTouchStart={preventPropagation}
+        >
+          <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+          {editingTaskId === task.id ? (
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="\d*"
+              value={inputValue}
+              className="w-16 text-right bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              onChange={onChange}
+              onBlur={onBlur}
+              onKeyDown={onKeyDown}
+              autoFocus
+              onClick={preventPropagation}
+              onTouchStart={preventPropagation}
+            />
+          ) : (
+            <span 
+              className="w-16 text-right text-muted-foreground cursor-text"
+              onClick={onDurationClick}
+              onTouchStart={onDurationClick}
+            >
+              {durationInMinutes}
+            </span>
+          )}
+          <span className="text-muted-foreground shrink-0">m</span>
+        </div>
+
+        <button
+          onClick={onDelete}
+          onTouchStart={onDelete}
+          className="text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       <TaskTags 
