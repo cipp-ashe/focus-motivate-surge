@@ -5,7 +5,7 @@ import { TaskLayout } from "./TaskLayout";
 import { TimerSection } from "@/components/timer";
 import type { Quote } from "@/types/timer";
 import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
-import { TimerMetrics } from "@/types/metrics";
+import type { TaskMetrics } from "@/types/tasks";
 
 interface TaskManagerProps {
   initialFavorites?: Quote[];
@@ -31,14 +31,20 @@ export const TaskManager = ({
   const timerComponent = useMemo(() => (
     <TimerSection
       selectedTask={selectedTask}
-      onTaskComplete={(metrics: TimerMetrics) => {
+      onTaskComplete={(metrics) => {
         if (selectedTask) {
-          actions.completeTask(selectedTask.id, {
-            ...metrics,
-            endTime: metrics.endTime?.toISOString(),
-            startTime: metrics.startTime?.toISOString(),
-            lastPauseTimestamp: metrics.lastPauseTimestamp?.toISOString()
-          });
+          const taskMetrics: TaskMetrics = {
+            expectedTime: metrics.expectedTime,
+            actualDuration: metrics.actualDuration,
+            pauseCount: metrics.pauseCount,
+            favoriteQuotes: metrics.favoriteQuotes,
+            pausedTime: metrics.pausedTime,
+            extensionTime: metrics.extensionTime,
+            netEffectiveTime: metrics.netEffectiveTime,
+            efficiencyRatio: metrics.efficiencyRatio,
+            completionStatus: metrics.completionStatus
+          };
+          actions.completeTask(selectedTask.id, taskMetrics);
         }
       }}
       onDurationChange={(minutes) => {
