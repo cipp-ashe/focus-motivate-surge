@@ -56,21 +56,20 @@ export const TaskManager = ({
           actions.completeTask(selectedTask.id, taskMetrics);
         }
       }}
-      onDurationChange={(minutes) => {
+      onDurationChange={(seconds) => {
         if (selectedTask) {
-          const newDuration = minutes; // Remove the * 60 since TimerSection now handles conversion
           console.log('TaskManager - Updating duration:', { 
             taskId: selectedTask.id, 
-            newDuration,
+            newDurationSeconds: seconds,
             currentTask: selectedTask,
             selectedTaskId
           });
           
-          actions.updateTask(selectedTask.id, { duration: newDuration });
+          actions.updateTask(selectedTask.id, { duration: seconds });
           
           console.log('TaskManager - After duration update:', {
             taskId: selectedTask.id,
-            duration: newDuration,
+            duration: seconds,
             selectedTaskId
           });
         }
@@ -87,4 +86,3 @@ export const TaskManager = ({
     />
   );
 };
-

@@ -27,6 +27,11 @@ export const TimerSection = ({
     );
   }
 
+  console.log('TimerSection - Rendering with task:', {
+    taskId: selectedTask.id,
+    duration: selectedTask.duration
+  });
+
   return (
     <Timer
       key={selectedTask.id}
@@ -38,7 +43,7 @@ export const TimerSection = ({
       }}
       onDurationChange={(minutes) => {
         const seconds = minutes * 60;
-        console.log('TimerSection - Converting and passing duration:', {
+        console.log('TimerSection - Converting minutes to seconds:', {
           minutes,
           seconds,
           taskId: selectedTask.id
@@ -50,4 +55,3 @@ export const TimerSection = ({
     />
   );
 };
-
