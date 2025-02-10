@@ -53,18 +53,6 @@ export const TaskRow = ({
     
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
-      
-      if (value !== '') {
-        // Store duration in seconds
-        const newDurationInSeconds = (parseInt(value) * 60).toString();
-        onDurationChange(task.id, newDurationInSeconds);
-        
-        if (isSelected) {
-          console.log('Updating selected task duration:', newDurationInSeconds);
-          const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
-          onTaskClick(updatedTask, new MouseEvent('click') as any);
-        }
-      }
     }
   };
 
@@ -80,7 +68,8 @@ export const TaskRow = ({
     
     console.log('Handling blur in TaskRow with final value:', finalValue);
     setInputValue(finalValue);
-    // Store duration in seconds
+    
+    // Only update duration when input is finalized
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     onDurationChange(task.id, newDurationInSeconds);
     
