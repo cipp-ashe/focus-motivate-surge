@@ -18,6 +18,7 @@ import {
 import { NotesDialog } from "@/components/notes/components/NotesDialog";
 import { toast } from "sonner";
 import { Award } from "lucide-react";
+import { TaskMetricsRow } from "./TaskMetricsRow";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -35,43 +36,48 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
   };
 
   return (
-    <Accordion type="single" collapsible>
+    <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="completed-tasks" className="border-none">
         <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-lg transition-colors">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-foreground">
             <Award className="h-4 w-4 text-primary animate-pulse-slow" />
             <span>Completed Tasks ({tasks.length})</span>
           </div>
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-4 p-2">
-            <div className="rounded-lg border border-border/50 overflow-hidden">
+            <div className="rounded-lg border border-border/50 overflow-hidden bg-background/50">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="font-semibold">Task</TableHead>
-                    <TableHead className="font-semibold">Completed At</TableHead>
-                    <TableHead className="font-semibold">Notes</TableHead>
+                  <TableRow className="hover:bg-transparent border-b border-border/50">
+                    <TableHead className="text-muted-foreground">Task</TableHead>
+                    <TableHead className="text-muted-foreground">Completed At</TableHead>
+                    <TableHead className="text-muted-foreground">Notes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {tasks.map((task) => (
-                    <TableRow key={task.id} className="group hover:bg-muted/50">
-                      <TableCell className="font-medium">{task.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {task.completedAt ? formatDate(task.completedAt) : "-"}
-                      </TableCell>
-                      <TableCell>
-                        <NotesDialog 
-                          open={false}
-                          onOpenChange={() => {}}
-                          title="Notes"
-                          description="Add notes for this task"
-                          actionText="Save"
-                          onAction={() => {}}
-                        />
-                      </TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow key={task.id} className="group border-b border-border/50">
+                        <TableCell className="text-foreground">{task.name}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {task.completedAt ? formatDate(task.completedAt) : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <NotesDialog 
+                            open={false}
+                            onOpenChange={() => {}}
+                            title="Notes"
+                            description="Add notes for this task"
+                            actionText="Save"
+                            onAction={() => {}}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      {task.metrics && (
+                        <TaskMetricsRow task={task} />
+                      )}
+                    </>
                   ))}
                 </TableBody>
               </Table>
@@ -79,9 +85,9 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
 
             <button
               onClick={handleClearClick}
-              className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200 group flex items-center gap-2"
+              className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
             >
-              <span className="group-hover:underline">Clear All</span>
+              Clear All
             </button>
           </div>
         </AccordionContent>
