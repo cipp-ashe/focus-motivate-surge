@@ -10,7 +10,7 @@ import { TimerBody } from "./components/TimerBody";
 import { TimerCompletion } from "./components/TimerCompletion";
 import type { TimerProps } from "@/types/timer";
 
-export const Timer = ({
+const Timer = ({
   duration,
   taskName,
   onComplete,
@@ -161,4 +161,6 @@ export const Timer = ({
 };
 
 Timer.displayName = 'Timer';
+
+export { Timer };
 
