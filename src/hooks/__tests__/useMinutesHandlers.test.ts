@@ -1,6 +1,6 @@
 
 import { renderHook } from '@testing-library/react-hooks';
-import { vi, describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { useMinutesHandlers } from '../useMinutesHandlers';
 
 describe('useMinutesHandlers', () => {

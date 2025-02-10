@@ -3,7 +3,9 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useLocalStorageData } from '../useLocalStorageData';
 import { toast } from 'sonner';
-import { Task, Quote, ActiveTemplate } from '@/types/tasks';
+import { Task } from '@/types/tasks';
+import type { Quote } from '@/types/timer';
+import type { ActiveTemplate } from '@/types/habits';
 
 vi.mock('sonner', () => ({
   toast: {
