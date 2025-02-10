@@ -71,14 +71,12 @@ export const TaskRow = ({
     
     // Convert minutes to seconds
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
-    onDurationChange(task.id, newDurationInSeconds);
+    console.log('Updating task duration:', { taskId: task.id, newDuration: newDurationInSeconds });
     
-    // Immediately update the selected task if this is the active one
-    if (isSelected) {
-      console.log('Updating selected task immediately:', newDurationInSeconds);
-      const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
-      onTaskClick(updatedTask, new MouseEvent('click') as any);
-    }
+    // Update the task's duration
+    const updatedTask = { ...task, duration: parseInt(newDurationInSeconds) };
+    onTaskClick(updatedTask, new MouseEvent('click') as any);
+    onDurationChange(task.id, newDurationInSeconds);
     
     onInputBlur();
   };
