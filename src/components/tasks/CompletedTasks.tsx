@@ -51,8 +51,10 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-b border-border/50">
                     <TableHead className="text-muted-foreground">Task</TableHead>
-                    <TableHead className="text-muted-foreground">Completed At</TableHead>
-                    <TableHead className="text-muted-foreground">Notes</TableHead>
+                    <TableHead className="text-muted-foreground">Duration</TableHead>
+                    <TableHead className="text-muted-foreground">Status</TableHead>
+                    <TableHead className="text-muted-foreground">Efficiency</TableHead>
+                    <TableHead className="text-muted-foreground">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -61,7 +63,13 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                       <TableRow key={task.id} className="group border-b border-border/50">
                         <TableCell className="text-foreground">{task.name}</TableCell>
                         <TableCell className="text-muted-foreground">
-                          {task.completedAt ? formatDate(task.completedAt) : "-"}
+                          {task.metrics ? `${task.metrics.expectedTime}m` : "-"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {task.metrics?.completionStatus || "-"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {task.metrics ? `${task.metrics.efficiencyRatio.toFixed(1)}%` : "-"}
                         </TableCell>
                         <TableCell>
                           <NotesDialog 

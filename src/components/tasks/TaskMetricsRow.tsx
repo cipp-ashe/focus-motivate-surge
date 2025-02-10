@@ -11,91 +11,80 @@ interface TaskMetricsRowProps {
 }
 
 export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
-  const metrics = task.metrics || {
-    expectedTime: 0,
-    actualDuration: 0,
-    pauseCount: 0,
-    favoriteQuotes: 0,
-    pausedTime: 0,
-    extensionTime: 0,
-    netEffectiveTime: 0,
-    efficiencyRatio: 100,
-    completionStatus: 'Completed On Time',
-    endTime: undefined,
-  };
+  if (!task.metrics) return null;
 
-  const statusColor = getCompletionStatusColor(metrics.completionStatus);
-  const iconName = getCompletionIcon(metrics.completionStatus);
+  const {
+    expectedTime,
+    actualDuration,
+    pauseCount,
+    favoriteQuotes,
+    pausedTime,
+    extensionTime,
+    netEffectiveTime,
+    efficiencyRatio,
+    completionStatus,
+    endTime,
+  } = task.metrics;
+
+  const statusColor = getCompletionStatusColor(completionStatus);
+  const StatusIcon = getCompletionIcon(completionStatus);
   
-  const getStatusIcon = () => {
-    switch (iconName) {
-      case 'CheckCircle2':
-        return <CheckCircle2 className={`w-4 h-4 ${statusColor}`} />;
-      case 'Timer':
-        return <Timer className={`w-4 h-4 ${statusColor}`} />;
-      case 'AlertTriangle':
-        return <AlertTriangle className={`w-4 h-4 ${statusColor}`} />;
-      default:
-        return <Timer className={`w-4 h-4 ${statusColor}`} />;
-    }
-  };
-
-  const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
-    e.stopPropagation();
-  };
-
   return (
     <TableRow className="bg-muted/30 border-l-2 border-l-primary/20">
-      <TableCell className="py-2">
-        <div className="text-muted-foreground">
-          {task.name}
-        </div>
-        <TaskTags task={task} preventPropagation={preventPropagation} />
-        <div className="text-xs text-muted-foreground mt-1">
-          Created: {formatDate(task.createdAt)}
-        </div>
-      </TableCell>
-      <TableCell className="py-2 text-sm text-muted-foreground">
-        {metrics.endTime ? formatDate(metrics.endTime) : '-'}
-      </TableCell>
-      <TableCell className="py-2">
-        <div className="flex flex-col space-y-1.5">
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-sm">Expected: {formatDuration(metrics.expectedTime)}</span>
+      <TableCell colSpan={5} className="py-2">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-muted-foreground">Time Metrics</div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>Expected: {formatDuration(expectedTime)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>Actual: {formatDuration(actualDuration)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Timer className="h-4 w-4" />
+                <span>Net: {formatDuration(netEffectiveTime)}</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-sm">Actual: {formatDuration(metrics.actualDuration)}</span>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-muted-foreground">Status</div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <StatusIcon className={`h-4 w-4 ${statusColor}`} />
+                <span className={`text-sm ${statusColor}`}>{completionStatus}</span>
+              </div>
+              <Badge variant="outline" className="text-xs">
+                {efficiencyRatio.toFixed(1)}% efficiency
+              </Badge>
+              {endTime && (
+                <div className="text-xs text-muted-foreground">
+                  Completed: {formatDate(endTime)}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <Timer className="w-3.5 h-3.5" />
-            <span className="text-sm">Net: {formatDuration(metrics.netEffectiveTime)}</span>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell className="py-2">
-        <div className="flex items-center space-x-2">
-          {getStatusIcon()}
-          <span className={`${statusColor} text-sm`}>{metrics.completionStatus}</span>
-        </div>
-        <Badge variant="outline" className="mt-1.5 text-xs">
-          {metrics.efficiencyRatio.toFixed(1)}% efficiency
-        </Badge>
-      </TableCell>
-      <TableCell className="py-2">
-        <div className="flex flex-col space-y-1.5 text-muted-foreground">
-          <div className="flex items-center space-x-1.5">
-            <Pause className="w-3.5 h-3.5" />
-            <span className="text-sm">Paused: {formatDuration(metrics.pausedTime)}</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <Timer className="w-3.5 h-3.5" />
-            <span className="text-sm">Added: {formatDuration(metrics.extensionTime)}</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <Quote className="w-3.5 h-3.5" />
-            <span className="text-sm">Quotes: {metrics.favoriteQuotes}</span>
+
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-muted-foreground">Details</div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Pause className="h-4 w-4" />
+                <span>Pauses: {pauseCount} ({formatDuration(pausedTime)})</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Timer className="h-4 w-4" />
+                <span>Extensions: {formatDuration(extensionTime)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Quote className="h-4 w-4" />
+                <span>Quotes: {favoriteQuotes}</span>
+              </div>
+            </div>
           </div>
         </div>
       </TableCell>
