@@ -41,18 +41,16 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
       tasks.forEach(taskLine => {
         if (taskLine.trim()) {
           const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
-          // Store duration in seconds
-          const duration = durationStr 
-            ? Math.min(Math.max(parseInt(durationStr), 1), 60) * 60 
-            : DEFAULT_DURATION;
-          
           const task: Task = {
             id: generateId(),
             name: taskName,
             completed: false,
-            duration: duration,
+            duration: durationStr 
+              ? Math.min(Math.max(parseInt(durationStr), 1), 60) * 60 
+              : DEFAULT_DURATION,
             createdAt: new Date().toISOString(),
           };
+          console.log('Creating task with duration:', task.duration);
           onTaskAdd(task);
         }
       });
@@ -64,6 +62,7 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         duration: DEFAULT_DURATION,
         createdAt: new Date().toISOString(),
       };
+      console.log('Creating single task with duration:', task.duration);
       onTaskAdd(task);
     }
     setNewTaskName("");
