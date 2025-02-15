@@ -1,0 +1,90 @@
+
+import { TimerBody } from "../components/TimerBody";
+import { TimerCompletion } from "../components/TimerCompletion";
+import { TimerStateMetrics } from "@/types/metrics";
+import { Quote } from "@/types/timer";
+import { TimerExpandedViewRef } from "./TimerExpandedView";
+
+interface MainTimerViewProps {
+  isExpanded: boolean;
+  setIsExpanded: (expanded: boolean) => void;
+  showCompletion: boolean;
+  taskName: string;
+  timerCircleProps: any;
+  timerControlsProps: any;
+  metrics: TimerStateMetrics;
+  internalMinutes: number;
+  handleMinutesChange: (minutes: number) => void;
+  selectedSound: string;
+  setSelectedSound: (sound: string) => void;
+  testSound: () => void;
+  isLoadingAudio: boolean;
+  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
+  expandedViewRef: React.RefObject<TimerExpandedViewRef>;
+  handleCloseTimer: () => void;
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  showConfirmation: boolean;
+  setShowConfirmation: (show: boolean) => void;
+  handleAddTimeAndContinue: () => void;
+  handleComplete: () => void;
+}
+
+export const MainTimerView = ({
+  isExpanded,
+  setIsExpanded,
+  showCompletion,
+  taskName,
+  timerCircleProps,
+  timerControlsProps,
+  metrics,
+  internalMinutes,
+  handleMinutesChange,
+  selectedSound,
+  setSelectedSound,
+  testSound,
+  isLoadingAudio,
+  updateMetrics,
+  expandedViewRef,
+  handleCloseTimer,
+  favorites,
+  setFavorites,
+  showConfirmation,
+  setShowConfirmation,
+  handleAddTimeAndContinue,
+  handleComplete,
+}: MainTimerViewProps) => {
+  return (
+    <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
+      <div className={`relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <TimerBody
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          showCompletion={showCompletion}
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={timerControlsProps}
+          metrics={metrics}
+          internalMinutes={internalMinutes}
+          handleMinutesChange={handleMinutesChange}
+          selectedSound={selectedSound}
+          setSelectedSound={setSelectedSound}
+          testSound={testSound}
+          isLoadingAudio={isLoadingAudio}
+          updateMetrics={updateMetrics}
+          expandedViewRef={expandedViewRef}
+          handleCloseTimer={handleCloseTimer}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      </div>
+
+      <TimerCompletion
+        showConfirmation={showConfirmation}
+        setShowConfirmation={setShowConfirmation}
+        handleAddTimeAndContinue={handleAddTimeAndContinue}
+        handleComplete={handleComplete}
+      />
+    </div>
+  );
+};

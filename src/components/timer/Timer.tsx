@@ -1,14 +1,13 @@
 
-import { useCallback, useRef, useEffect } from "react";
+import { useRef } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
-import { TIMER_CONSTANTS } from "@/types/timer";
-import { CompletionCelebration } from "./CompletionCelebration";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { useTimerState } from "./state/TimerState";
 import { useTimerHandlers } from "./handlers/TimerHandlers";
-import { TimerBody } from "./components/TimerBody";
-import { TimerCompletion } from "./components/TimerCompletion";
 import { useTimerMonitor } from "@/hooks/useTimerMonitor";
+import { useTimerView } from "./hooks/useTimerView";
+import { CompletionView } from "./views/CompletionView";
+import { MainTimerView } from "./views/MainTimerView";
 import type { TimerProps } from "@/types/timer";
 
 export const Timer = ({
@@ -65,20 +64,13 @@ export const Timer = ({
     onDurationChange,
   });
 
-  // Add timer monitoring for better performance and debugging
-  useTimerMonitor({
-    timeLeft,
-    isRunning,
-    metrics,
-    componentName: 'Timer'
-  });
-
   const {
     handleComplete,
     handleAddTimeAndContinue,
-    handleToggle,
+    handleToggle: handleTimerToggle,
     handleCloseCompletion,
     handleAddTime,
+    handleCloseTimer,
   } = useTimerHandlers({
     isRunning,
     start,
@@ -99,72 +91,31 @@ export const Timer = ({
     pauseTimerRef,
   });
 
-  // Auto-expand when timer starts or is paused
-  useEffect(() => {
-    if (isRunning || metrics.isPaused) {
-      console.log('Auto-expanding timer due to:', { isRunning, isPaused: metrics.isPaused });
-      setIsExpanded(true);
-    }
-  }, [isRunning, metrics.isPaused, setIsExpanded]);
+  useTimerMonitor({
+    timeLeft,
+    isRunning,
+    metrics,
+    componentName: 'Timer'
+  });
 
-  const handleTimerToggle = useCallback(() => {
-    console.log('Timer toggle called:', { isRunning });
-    handleToggle();
-  }, [handleToggle, isRunning]);
-
-  const handleCloseTimer = useCallback(() => {
-    if (!showCompletion && !isRunning && !metrics.isPaused) {
-      console.log('Closing timer view');
-      setIsExpanded(false);
-    }
-  }, [showCompletion, isRunning, metrics.isPaused, setIsExpanded]);
-
-  const handleMinutesChange = useCallback((newMinutes: number) => {
-    const clampedMinutes = Math.min(Math.max(newMinutes, 1), 60);
-    setInternalMinutes(clampedMinutes);
-    setMinutes(clampedMinutes);
-    if (onDurationChange) {
-      onDurationChange(clampedMinutes);
-    }
-  }, [setMinutes, onDurationChange, setInternalMinutes]);
+  const { getTimerCircleProps, getTimerControlsProps } = useTimerView({
+    isRunning,
+    timeLeft,
+    minutes,
+    metrics,
+    isExpanded,
+    handleTimerToggle,
+    handleComplete,
+    handleAddTime,
+    pauseTimeLeft,
+  });
 
   if (showCompletion && completionMetrics) {
-    console.log('Rendering completion view');
-    return (
-      <div className="animate-fade-in">
-        <CompletionCelebration
-          metrics={completionMetrics}
-          onComplete={handleCloseCompletion}
-        />
-      </div>
-    );
+    return <CompletionView metrics={completionMetrics} onComplete={handleCloseCompletion} />;
   }
 
-  const timerCircleProps = {
-    isRunning,
-    timeLeft,
-    minutes,
-    circumference: TIMER_CONSTANTS.CIRCLE_CIRCUMFERENCE,
-  };
-
-  const timerControlsProps = {
-    isRunning,
-    onToggle: handleTimerToggle,
-    isPaused: metrics.isPaused,
-    onComplete: handleComplete,
-    onAddTime: handleAddTime,
-    metrics,
-    showAddTime: isExpanded,
-    pauseTimeLeft,
-    size: 'normal' as const,
-  };
-
-  console.log('Timer rendering with props:', {
-    isRunning,
-    timeLeft,
-    minutes,
-    isExpanded
-  });
+  const timerCircleProps = getTimerCircleProps();
+  const timerControlsProps = getTimerControlsProps();
 
   return (
     <>
@@ -175,7 +126,7 @@ export const Timer = ({
           timerCircleProps={timerCircleProps}
           timerControlsProps={{
             ...timerControlsProps,
-            size: "large" as const
+            size: "large"
           }}
           metrics={metrics}
           onClose={handleCloseTimer}
@@ -185,37 +136,30 @@ export const Timer = ({
         />
       )}
 
-      <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
-        <div className={`relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          <TimerBody
-            isExpanded={isExpanded}
-            setIsExpanded={setIsExpanded}
-            showCompletion={showCompletion}
-            taskName={taskName}
-            timerCircleProps={timerCircleProps}
-            timerControlsProps={timerControlsProps}
-            metrics={metrics}
-            internalMinutes={internalMinutes}
-            handleMinutesChange={handleMinutesChange}
-            selectedSound={selectedSound}
-            setSelectedSound={setSelectedSound}
-            testSound={testSound}
-            isLoadingAudio={isLoadingAudio}
-            updateMetrics={updateMetrics}
-            expandedViewRef={expandedViewRef}
-            handleCloseTimer={handleCloseTimer}
-            favorites={favorites}
-            setFavorites={setFavorites}
-          />
-        </div>
-
-        <TimerCompletion
-          showConfirmation={showConfirmation}
-          setShowConfirmation={setShowConfirmation}
-          handleAddTimeAndContinue={handleAddTimeAndContinue}
-          handleComplete={handleComplete}
-        />
-      </div>
+      <MainTimerView
+        isExpanded={isExpanded}
+        setIsExpanded={setIsExpanded}
+        showCompletion={showCompletion}
+        taskName={taskName}
+        timerCircleProps={timerCircleProps}
+        timerControlsProps={timerControlsProps}
+        metrics={metrics}
+        internalMinutes={internalMinutes}
+        handleMinutesChange={setInternalMinutes}
+        selectedSound={selectedSound}
+        setSelectedSound={setSelectedSound}
+        testSound={testSound}
+        isLoadingAudio={isLoadingAudio}
+        updateMetrics={updateMetrics}
+        expandedViewRef={expandedViewRef}
+        handleCloseTimer={handleCloseTimer}
+        favorites={favorites}
+        setFavorites={setFavorites}
+        showConfirmation={showConfirmation}
+        setShowConfirmation={setShowConfirmation}
+        handleAddTimeAndContinue={handleAddTimeAndContinue}
+        handleComplete={handleComplete}
+      />
     </>
   );
 };
