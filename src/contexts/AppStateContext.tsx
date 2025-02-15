@@ -1,11 +1,12 @@
+
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { StateContext, StateContextActions } from '@/types/state';
 import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
-import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
-import { stateReducer, StateAction } from './stateReducer';
+import type { ActiveTemplate } from '@/components/habits/types';
+import { stateReducer } from './stateReducer';
 import { eventBus } from '@/lib/eventBus';
 import { relationshipManager } from '@/lib/relationshipManager';
 
@@ -58,7 +59,7 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
       eventBus.on('task:create', (task) => {
         dispatch({ type: 'ADD_TASK', payload: task });
       }),
-      eventBus.on('task:complete', (taskId, metrics) => {
+      eventBus.on('task:complete', ({ taskId, metrics }) => {
         dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
       }),
       
@@ -68,8 +69,8 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
       }),
       
       // Habit events
-      eventBus.on('habit:generate-task', (template) => {
-        dispatch({ type: 'ADD_TEMPLATE', payload: template });
+      eventBus.on('habit:template-update', (template) => {
+        dispatch({ type: 'UPDATE_TEMPLATE', payload: { templateId: template.templateId, updates: template } });
       })
     ];
 
@@ -106,7 +107,7 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
     },
     
     completeTask: (taskId, metrics) => {
-      eventBus.emit('task:complete', taskId, metrics);
+      eventBus.emit('task:complete', { taskId, metrics });
     },
     
     selectTask: (taskId) => {
@@ -115,7 +116,12 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
     },
     
     addTemplate: (template) => {
-      eventBus.emit('habit:generate-task', template);
+      const newTemplate: ActiveTemplate = {
+        ...template,
+        templateId: crypto.randomUUID(),
+        customized: false,
+      };
+      dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
       toast.success('Template added successfully');
     },
     

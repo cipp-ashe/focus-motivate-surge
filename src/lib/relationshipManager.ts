@@ -1,4 +1,3 @@
-
 import { eventBus } from './eventBus';
 import type { EntityType, EntityRelationship, RelationType } from '@/types/state';
 
@@ -27,22 +26,24 @@ class RelationshipManager {
     eventBus.on('relationship:batch-update', this.batchUpdateRelationships.bind(this));
     
     // Handle tag relationships
-    eventBus.on('tag:link', (tagId, entityId, entityType) => {
+    eventBus.on('tag:link', ({ tagId, entityId, entityType }) => {
       this.createRelationship(tagId, 'tag', entityId, entityType, 'tag-entity');
     });
     
-    eventBus.on('tag:unlink', (tagId, entityId) => {
+    eventBus.on('tag:unlink', ({ tagId, entityId }) => {
       this.deleteRelationship(tagId, entityId);
     });
     
     // Handle quote relationships
-    eventBus.on('quote:link-task', (quoteId, taskId) => {
+    eventBus.on('quote:link-task', ({ quoteId, taskId }) => {
       this.createRelationship(quoteId, 'quote', taskId, 'task', 'quote-task');
     });
     
     // Handle habit template relationships
-    eventBus.on('habit:template-update', (templateId, habitId) => {
-      this.createRelationship(templateId, 'template', habitId, 'habit', 'template-habit');
+    eventBus.on('habit:template-update', (template) => {
+      if (template.relationships?.habitId) {
+        this.createRelationship(template.templateId, 'template', template.relationships.habitId, 'habit', 'template-habit');
+      }
     });
   }
 
@@ -182,4 +183,3 @@ class RelationshipManager {
 }
 
 export const relationshipManager = RelationshipManager.getInstance();
-
