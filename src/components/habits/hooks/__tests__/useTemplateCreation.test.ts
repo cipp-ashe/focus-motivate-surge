@@ -4,6 +4,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { useTemplateCreation } from '../useTemplateCreation';
 import { ActiveTemplate } from '../../types';
 
+const mockTemplate: ActiveTemplate = {
+  templateId: 'test-1',
+  habits: [],
+  customized: false,
+  activeDays: ['Mon', 'Wed', 'Fri'],
+};
+
 describe('useTemplateCreation', () => {
   const mockAddTemplate = vi.fn();
   const mockUpdateTemplate = vi.fn();
@@ -38,13 +45,6 @@ describe('useTemplateCreation', () => {
   });
 
   it('handles template configuration correctly', () => {
-    const mockTemplate: ActiveTemplate = {
-      templateId: 'test-1',
-      habits: [],
-      customized: false,
-      activeDays: ['Monday', 'Wednesday', 'Friday'],
-    };
-
     const { result } = renderHook(() =>
       useTemplateCreation(mockAddTemplate, mockUpdateTemplate)
     );
@@ -91,4 +91,3 @@ describe('useTemplateCreation', () => {
     expect(savedTemplates[0].name).toBe('New Template');
   });
 });
-

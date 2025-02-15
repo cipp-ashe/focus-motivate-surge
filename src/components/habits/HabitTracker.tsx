@@ -4,7 +4,7 @@ import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
 import { useTemplateCreation } from './hooks/useTemplateCreation';
-import { HabitTemplate } from './types';
+import { HabitTemplate, DayOfWeek } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
@@ -60,7 +60,7 @@ const HabitTracker: React.FC = () => {
       addTemplate({
         templateId: template.id,
         habits: template.defaultHabits || [],
-        activeDays: template.defaultDays || ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
         customized: false,
       });
       setIsConfigOpen(false);
@@ -109,4 +109,3 @@ const HabitTracker: React.FC = () => {
 };
 
 export default HabitTracker;
-
