@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Clock, Plus, Check, Sparkles } from "lucide-react";
 import { TimerControlsProps } from "@/types/timer";
@@ -25,11 +26,14 @@ export const TimerControls = memo(({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  console.log('TimerControls rendering:', { isRunning, isPaused, showAddTime });
+
   return (
     <div className="space-y-2 flex flex-col items-center w-full">
       <div className="w-full flex justify-center">
         <Button
           onClick={() => {
+            console.log('Timer control button clicked:', { isRunning, isPaused });
             if (onToggle) onToggle();
           }}
           className={`bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${buttonSize} w-full relative z-50`}

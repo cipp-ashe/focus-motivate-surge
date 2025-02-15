@@ -73,14 +73,17 @@ export const useTimerHandlers = ({
   }, [addTime, onAddTime, start, setShowConfirmation]);
 
   const handleStart = useCallback(() => {
+    console.log('Handling timer start');
     if (pauseTimerRef.current) {
       clearInterval(pauseTimerRef.current);
       setPauseTimeLeft(0);
     }
+    setIsExpanded(true); // Ensure timer is expanded when starting
     start();
-  }, [start, pauseTimerRef, setPauseTimeLeft]);
+  }, [start, pauseTimerRef, setPauseTimeLeft, setIsExpanded]);
 
   const handlePause = useCallback(() => {
+    console.log('Handling timer pause');
     pause();
     setPauseTimeLeft(300); // 5 minutes in seconds
     pauseTimerRef.current = setInterval(() => {
@@ -96,15 +99,13 @@ export const useTimerHandlers = ({
   }, [pause, playSound, setPauseTimeLeft, pauseTimerRef]);
 
   const handleToggle = useCallback((fromExpanded = false) => {
+    console.log('Handling timer toggle:', { isRunning, fromExpanded });
     if (isRunning) {
       handlePause();
     } else {
       handleStart();
-      if (!fromExpanded) {
-        setIsExpanded(true);
-      }
     }
-  }, [isRunning, handlePause, handleStart, setIsExpanded]);
+  }, [isRunning, handlePause, handleStart]);
 
   const handleCloseCompletion = useCallback(() => {
     if (typeof onComplete === 'function' && metrics) {
