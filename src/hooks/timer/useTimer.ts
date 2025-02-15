@@ -58,6 +58,10 @@ export const useTimer = ({
     });
 
     return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
+      }
       setIsRunning(false);
     };
   }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, setIsRunning, isMountedRef, timeLeft, minutes]);
@@ -70,11 +74,19 @@ export const useTimer = ({
         isRunning
       });
       
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
       intervalRef.current = setInterval(() => {
         if (!isMountedRef.current) return;
 
         updateTimeLeft((time) => {
           if (time <= 1) {
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = undefined;
+            }
             completeTimer();
             onTimeUp?.();
             return 0;
@@ -82,6 +94,9 @@ export const useTimer = ({
           return time - 1;
         });
       }, 1000);
+    } else if (!isRunning && intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = undefined;
     }
 
     return () => {

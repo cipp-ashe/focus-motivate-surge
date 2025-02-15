@@ -70,7 +70,7 @@ export const Timer = ({
     handleToggle: handleTimerToggle,
     handleCloseCompletion,
     handleAddTime,
-    handleClose: handleCloseTimer,
+    handleCloseTimer, // Renamed from handleClose to match the prop name expected by MainTimerView
   } = useTimerHandlers({
     isRunning,
     start,
