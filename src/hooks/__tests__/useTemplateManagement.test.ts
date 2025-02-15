@@ -1,4 +1,3 @@
-
 import { renderHook, act } from '@testing-library/react-hooks';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useTemplateManagement } from '@/components/habits/hooks/useTemplateManagement';
@@ -14,7 +13,7 @@ describe('useTemplateManagement', () => {
     templateId: 'test-1',
     habits: [],
     customized: false,
-    activeDays: ['Monday', 'Wednesday', 'Friday'] as DayOfWeek[],
+    activeDays: ['Mon', 'Wed', 'Fri'] as DayOfWeek[],
   };
 
   it('should initialize with empty templates', () => {
@@ -35,7 +34,7 @@ describe('useTemplateManagement', () => {
 
   it('should update template correctly', () => {
     const { result } = renderHook(() => useTemplateManagement());
-    const updatedDays: DayOfWeek[] = ['Monday', 'Tuesday'];
+    const updatedDays: DayOfWeek[] = ['Mon', 'Tue'];
 
     act(() => {
       result.current.addTemplate(mockTemplate);

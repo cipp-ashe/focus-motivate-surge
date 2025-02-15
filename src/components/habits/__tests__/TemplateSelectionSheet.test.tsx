@@ -12,7 +12,7 @@ const mockTemplates: HabitTemplate[] = [
     description: 'Test Description 1',
     category: 'Test',
     defaultHabits: [],
-    defaultDays: ['Monday', 'Wednesday', 'Friday'],
+    defaultDays: ['Mon', 'Wed', 'Fri'],
     duration: null,
   },
 ];
