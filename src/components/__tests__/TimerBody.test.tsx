@@ -14,6 +14,7 @@ describe('TimerBody Component', () => {
       timeLeft: 300,
       minutes: 5,
       circumference: 283.27,
+      size: 'normal' as const,
     },
     timerControlsProps: {
       isRunning: false,
@@ -119,3 +120,4 @@ describe('TimerBody Component', () => {
     expect(mockProps.setSelectedSound).toHaveBeenCalled();
   });
 });
+

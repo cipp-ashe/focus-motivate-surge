@@ -28,7 +28,7 @@ const getEfficiencyColor = (ratio: number): string => {
 };
 
 export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayProps) => {
-  useEventBus('timer:metrics-update', (updatedMetrics: TimerMetrics) => {
+  useEventBus('timer:metrics-update', ({ metrics: updatedMetrics }) => {
     console.log('Timer metrics updated:', updatedMetrics);
   }, []);
 
@@ -162,3 +162,4 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
     </div>
   );
 };
+
