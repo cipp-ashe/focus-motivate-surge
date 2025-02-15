@@ -3,7 +3,7 @@ import { useCallback, useRef, useEffect } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TIMER_CONSTANTS } from "@/types/timer";
 import { CompletionCelebration } from "./CompletionCelebration";
-import { TimerExpandedViewRef } from "./views/TimerExpandedView";
+import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { useTimerState } from "./state/TimerState";
 import { useTimerHandlers } from "./handlers/TimerHandlers";
 import { TimerBody } from "./components/TimerBody";
@@ -167,30 +167,7 @@ export const Timer = ({
   });
 
   return (
-    <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
-      <div className={`relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-        <TimerBody
-          isExpanded={isExpanded}
-          setIsExpanded={setIsExpanded}
-          showCompletion={showCompletion}
-          taskName={taskName}
-          timerCircleProps={timerCircleProps}
-          timerControlsProps={timerControlsProps}
-          metrics={metrics}
-          internalMinutes={internalMinutes}
-          handleMinutesChange={handleMinutesChange}
-          selectedSound={selectedSound}
-          setSelectedSound={setSelectedSound}
-          testSound={testSound}
-          isLoadingAudio={isLoadingAudio}
-          updateMetrics={updateMetrics}
-          expandedViewRef={expandedViewRef}
-          handleCloseTimer={handleCloseTimer}
-          favorites={favorites}
-          setFavorites={setFavorites}
-        />
-      </div>
-
+    <>
       {isExpanded && (
         <TimerExpandedView
           ref={expandedViewRef}
@@ -202,19 +179,44 @@ export const Timer = ({
           }}
           metrics={metrics}
           onClose={handleCloseTimer}
-          onLike={() => updateMetrics(prev => ({ favoriteQuotes: prev.favoriteQuotes + 1 }))}
+          onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
           favorites={favorites}
           setFavorites={setFavorites}
         />
       )}
 
-      <TimerCompletion
-        showConfirmation={showConfirmation}
-        setShowConfirmation={setShowConfirmation}
-        handleAddTimeAndContinue={handleAddTimeAndContinue}
-        handleComplete={handleComplete}
-      />
-    </div>
+      <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
+        <div className={`relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <TimerBody
+            isExpanded={isExpanded}
+            setIsExpanded={setIsExpanded}
+            showCompletion={showCompletion}
+            taskName={taskName}
+            timerCircleProps={timerCircleProps}
+            timerControlsProps={timerControlsProps}
+            metrics={metrics}
+            internalMinutes={internalMinutes}
+            handleMinutesChange={handleMinutesChange}
+            selectedSound={selectedSound}
+            setSelectedSound={setSelectedSound}
+            testSound={testSound}
+            isLoadingAudio={isLoadingAudio}
+            updateMetrics={updateMetrics}
+            expandedViewRef={expandedViewRef}
+            handleCloseTimer={handleCloseTimer}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
+        </div>
+
+        <TimerCompletion
+          showConfirmation={showConfirmation}
+          setShowConfirmation={setShowConfirmation}
+          handleAddTimeAndContinue={handleAddTimeAndContinue}
+          handleComplete={handleComplete}
+        />
+      </div>
+    </>
   );
 };
 
