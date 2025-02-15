@@ -1,8 +1,9 @@
+
 import { Tag } from "./core";
 import { TimerMetrics } from "./metrics";
 
 export interface TaskMetrics extends Omit<TimerMetrics, 'startTime' | 'lastPauseTimestamp' | 'isPaused' | 'pausedTimeLeft'> {
-  endTime?: string;
+  endTime: Date | null;
 }
 
 export interface Task {

@@ -113,7 +113,8 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
         startTime: null,
         lastPauseTimestamp: null,
         isPaused: false,
-        pausedTimeLeft: null
+        pausedTimeLeft: null,
+        endTime: metrics?.endTime ? new Date(metrics.endTime) : null
       };
       eventBus.emit('task:complete', { taskId, metrics: timerMetrics });
     },
