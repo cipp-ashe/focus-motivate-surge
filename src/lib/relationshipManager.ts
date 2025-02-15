@@ -1,5 +1,7 @@
+
 import { eventBus } from './eventBus';
 import type { EntityType, EntityRelationship, RelationType } from '@/types/state';
+import type { ActiveTemplate } from '@/components/habits/types';
 
 class RelationshipManager {
   private static instance: RelationshipManager;
@@ -27,7 +29,9 @@ class RelationshipManager {
     
     // Handle tag relationships
     eventBus.on('tag:link', ({ tagId, entityId, entityType }) => {
-      this.createRelationship(tagId, 'tag', entityId, entityType, 'tag-entity');
+      if (entityType) {
+        this.createRelationship(tagId, 'tag', entityId, entityType, 'tag-entity');
+      }
     });
     
     eventBus.on('tag:unlink', ({ tagId, entityId }) => {
@@ -40,7 +44,7 @@ class RelationshipManager {
     });
     
     // Handle habit template relationships
-    eventBus.on('habit:template-update', (template) => {
+    eventBus.on('habit:template-update', (template: ActiveTemplate) => {
       if (template.relationships?.habitId) {
         this.createRelationship(template.templateId, 'template', template.relationships.habitId, 'habit', 'template-habit');
       }

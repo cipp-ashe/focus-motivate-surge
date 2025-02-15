@@ -1,10 +1,9 @@
-
 import { TimerMetrics } from './metrics';
 import { Quote } from './timer/models';
 import { Task } from './tasks';
 import { Note } from './notes';
 import { ActiveTemplate } from '@/components/habits/types';
-import { EntityRelationship } from './state';
+import { EntityRelationship, EntityType } from './state';
 
 export interface TimerEventPayloads {
   // Timer Events
@@ -59,7 +58,7 @@ export interface TimerEventPayloads {
   'relationship:batch-update': EntityRelationship[];
   
   // Tag Events
-  'tag:link': { tagId: string; entityId: string };
+  'tag:link': { tagId: string; entityId: string; entityType: EntityType };
   'tag:unlink': { tagId: string; entityId: string };
   
   // Quote Events
@@ -69,4 +68,3 @@ export interface TimerEventPayloads {
 export type TimerEventType = keyof TimerEventPayloads;
 export type TimerEventCallback<T extends TimerEventType> = 
   (payload: TimerEventPayloads[T]) => void;
-

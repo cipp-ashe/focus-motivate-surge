@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -9,6 +8,7 @@ import type { ActiveTemplate } from '@/components/habits/types';
 import { stateReducer } from './stateReducer';
 import { eventBus } from '@/lib/eventBus';
 import { relationshipManager } from '@/lib/relationshipManager';
+import type { TimerMetrics } from '@/types/metrics';
 
 const AppStateContext = createContext<StateContext | undefined>(undefined);
 const AppStateActionsContext = createContext<StateContextActions | undefined>(undefined);
@@ -107,7 +107,15 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
     },
     
     completeTask: (taskId, metrics) => {
-      eventBus.emit('task:complete', { taskId, metrics });
+      // Convert TaskMetrics to TimerMetrics for the event
+      const timerMetrics: TimerMetrics = {
+        ...metrics,
+        startTime: null,
+        lastPauseTimestamp: null,
+        isPaused: false,
+        pausedTimeLeft: null
+      };
+      eventBus.emit('task:complete', { taskId, metrics: timerMetrics });
     },
     
     selectTask: (taskId) => {

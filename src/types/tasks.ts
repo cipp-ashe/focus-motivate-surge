@@ -1,16 +1,7 @@
-
 import { Tag } from "./core";
+import { TimerMetrics } from "./metrics";
 
-export interface TaskMetrics {
-  expectedTime: number;
-  actualDuration: number;
-  pauseCount: number;
-  favoriteQuotes: number;
-  pausedTime: number;
-  extensionTime: number;
-  netEffectiveTime: number;
-  efficiencyRatio: number;
-  completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
+export interface TaskMetrics extends Omit<TimerMetrics, 'startTime' | 'lastPauseTimestamp' | 'isPaused' | 'pausedTimeLeft'> {
   endTime?: string;
 }
 
