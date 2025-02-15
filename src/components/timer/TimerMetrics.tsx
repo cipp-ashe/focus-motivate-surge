@@ -2,6 +2,8 @@
 import { TimerMetrics } from "@/types/metrics";
 import { Clock, Pause, Quote, Zap, BarChart } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useEffect } from "react";
+import { useEventBus } from "@/lib/eventBus";
 
 interface TimerMetricsDisplayProps {
   metrics: TimerMetrics;
@@ -25,6 +27,21 @@ const getEfficiencyColor = (ratio: number): string => {
 };
 
 export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayProps) => {
+  // Subscribe to timer events
+  useEventBus('timer:metrics-update', (updatedMetrics: TimerMetrics) => {
+    console.log('Timer metrics updated:', updatedMetrics);
+  }, []);
+
+  useEffect(() => {
+    console.log('TimerMetrics rendered with:', {
+      isRunning,
+      metrics,
+      efficiencyRatio: metrics?.efficiencyRatio,
+      netEffectiveTime: metrics?.netEffectiveTime,
+      expectedTime: metrics?.expectedTime
+    });
+  }, [isRunning, metrics]);
+
   if (!metrics) return null;
 
   const efficiencyClass = getEfficiencyColor(metrics.efficiencyRatio || 0);
