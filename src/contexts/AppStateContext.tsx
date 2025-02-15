@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { StateContext, StateContextActions } from '@/types/state';
@@ -6,6 +6,8 @@ import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
 import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
 import { stateReducer, StateAction } from './stateReducer';
+import { eventBus } from '@/lib/eventBus';
+import { relationshipManager } from '@/lib/relationshipManager';
 
 const AppStateContext = createContext<StateContext | undefined>(undefined);
 const AppStateActionsContext = createContext<StateContextActions | undefined>(undefined);
@@ -49,50 +51,71 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
     },
   });
 
+  // Set up event listeners
+  useEffect(() => {
+    const unsubscribers = [
+      // Task events
+      eventBus.on('task:create', (task) => {
+        dispatch({ type: 'ADD_TASK', payload: task });
+      }),
+      eventBus.on('task:complete', (taskId, metrics) => {
+        dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
+      }),
+      
+      // Note events
+      eventBus.on('note:create', (note) => {
+        dispatch({ type: 'ADD_NOTE', payload: note });
+      }),
+      
+      // Habit events
+      eventBus.on('habit:generate-task', (template) => {
+        dispatch({ type: 'ADD_TEMPLATE', payload: template });
+      })
+    ];
+
+    return () => unsubscribers.forEach(unsub => unsub());
+  }, []);
+
   // Sync state changes to localStorage
   const persistState = (newState: StateContext) => {
     localStorage.setItem('taskList', JSON.stringify(newState.tasks.items));
     localStorage.setItem('completedTasks', JSON.stringify(newState.tasks.completed));
     localStorage.setItem('habit-templates', JSON.stringify(newState.habits.templates));
     localStorage.setItem('notes', JSON.stringify(newState.notes.items));
-    
-    // Dispatch events for components listening to storage changes
-    window.dispatchEvent(new Event('tasksUpdated'));
-    window.dispatchEvent(new Event('templatesUpdated'));
-    window.dispatchEvent(new Event('notesUpdated'));
   };
 
   const actions: StateContextActions = {
+    // Task actions
     addTask: (task) => {
       const newTask: Task = {
         ...task,
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       };
-      dispatch({ type: 'ADD_TASK', payload: newTask });
-      toast.success('Task added 📝');
+      eventBus.emit('task:create', newTask);
     },
     
     updateTask: (taskId, updates) => {
+      eventBus.emit('task:update', { taskId, updates });
       dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
     },
     
     deleteTask: (taskId) => {
+      eventBus.emit('task:delete', taskId);
       dispatch({ type: 'DELETE_TASK', payload: taskId });
-      toast.success('Task removed 🗑️');
     },
     
     completeTask: (taskId, metrics) => {
-      dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
-      toast.success('Task completed 🎯');
+      eventBus.emit('task:complete', taskId, metrics);
     },
     
     selectTask: (taskId) => {
+      eventBus.emit('task:select', taskId);
       dispatch({ type: 'SELECT_TASK', payload: taskId });
     },
     
     addTemplate: (template) => {
-      dispatch({ type: 'ADD_TEMPLATE', payload: { ...template, templateId: crypto.randomUUID() } });
+      eventBus.emit('habit:generate-task', template);
       toast.success('Template added successfully');
     },
     
@@ -119,7 +142,7 @@ export const AppStateProvider = ({ children }: AppStateProviderProps) => {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       };
-      dispatch({ type: 'ADD_NOTE', payload: newNote });
+      eventBus.emit('note:create', newNote);
       toast.success('Note added ✨');
     },
     
