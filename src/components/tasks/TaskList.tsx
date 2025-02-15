@@ -23,7 +23,7 @@ export const TaskList = ({
   const { activeTemplates } = useTemplateManagement();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full overflow-y-auto px-1">
       <TaskInput onTaskAdd={(task) => actions.addTask(task)} />
       
       <HabitTaskManager 

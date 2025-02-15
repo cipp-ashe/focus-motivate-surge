@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { useNotesPanel } from '@/hooks/useNotesPanel';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
@@ -10,8 +11,8 @@ interface TaskLayoutProps {
 }
 
 export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
-  const { isOpen: isNotesOpen } = useNotesPanel();
-  const { isOpen: isHabitsOpen } = useHabitsPanel();
+  const { isOpen: isNotesOpen, close: closeNotes } = useNotesPanel();
+  const { isOpen: isHabitsOpen, close: closeHabits } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const { width } = useWindowSize();
@@ -19,35 +20,26 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Cleanup previous observer if it exists
     if (resizeObserverRef.current) {
       resizeObserverRef.current.disconnect();
     }
 
-    // Create new ResizeObserver with debounced callback
     let timeout: NodeJS.Timeout;
     resizeObserverRef.current = new ResizeObserver((entries) => {
-      // Clear existing timeout
       if (timeout) {
         clearTimeout(timeout);
       }
 
-      // Debounce the resize handling
       timeout = setTimeout(() => {
         if (!Array.isArray(entries) || !entries.length) return;
-        
         const entry = entries[0];
         if (!entry.contentRect) return;
-
-        // Handle resize if needed
         console.log('Container resized:', entry.contentRect);
-      }, 100); // 100ms debounce
+      }, 100);
     });
 
-    // Start observing
     resizeObserverRef.current.observe(containerRef.current);
 
-    // Cleanup function
     return () => {
       if (timeout) {
         clearTimeout(timeout);
@@ -61,25 +53,21 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   return (
     <div 
       ref={containerRef}
-      className="relative"
+      className="relative h-full"
     >
       {/* Main content grid */}
       <div className={cn(
-        "grid grid-cols-1 gap-4 sm:gap-6 w-full h-full transition-all duration-300 ease-in-out relative z-10",
-        !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2"
+        "grid grid-cols-1 w-full h-full transition-all duration-300 ease-in-out relative z-10",
+        !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2 lg:gap-6"
       )}>
         {/* Task List */}
-        <div className="flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-6">
-            {taskList}
-          </div>
+        <div className="h-full overflow-hidden flex flex-col">
+          {taskList}
         </div>
 
         {/* Timer Container */}
-        <div className="flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto space-y-4 sm:space-y-6">
-            {timer}
-          </div>
+        <div className="h-full overflow-hidden flex flex-col">
+          {timer}
         </div>
       </div>
 
@@ -90,8 +78,8 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
           (isNotesOpen || isHabitsOpen) ? "opacity-100 z-40" : "opacity-0 pointer-events-none z-0"
         )}
         onClick={() => {
-          handleCloseNotes();
-          handleCloseHabits();
+          closeNotes();
+          closeHabits();
         }}
       />
     </div>
