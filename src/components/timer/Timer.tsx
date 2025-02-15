@@ -99,6 +99,14 @@ export const Timer = ({
     pauseTimerRef,
   });
 
+  // Auto-expand when timer starts
+  const handleTimerToggle = useCallback((fromExpanded?: boolean) => {
+    if (!isRunning) {
+      setIsExpanded(true);
+    }
+    handleToggle(fromExpanded);
+  }, [isRunning, handleToggle, setIsExpanded]);
+
   const handleCloseTimer = useCallback(() => {
     if (!showCompletion) {
       setIsExpanded(false);
@@ -135,7 +143,7 @@ export const Timer = ({
 
   const timerControlsProps = {
     isRunning,
-    onToggle: handleToggle,
+    onToggle: handleTimerToggle,
     isPaused: metrics.isPaused,
     onComplete: handleComplete,
     onAddTime: handleAddTime,
@@ -186,4 +194,3 @@ export const Timer = ({
 };
 
 Timer.displayName = 'Timer';
-
