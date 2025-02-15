@@ -107,10 +107,10 @@ export const Timer = ({
     }
   }, [isRunning, metrics.isPaused, setIsExpanded]);
 
-  const handleTimerToggle = useCallback((fromExpanded?: boolean) => {
-    console.log('Timer toggle called:', { fromExpanded, isRunning });
-    handleToggle(fromExpanded);
-  }, [handleToggle]);
+  const handleTimerToggle = useCallback(() => {
+    console.log('Timer toggle called:', { isRunning });
+    handleToggle();
+  }, [handleToggle, isRunning]);
 
   const handleCloseTimer = useCallback(() => {
     if (!showCompletion && !isRunning && !metrics.isPaused) {

@@ -78,8 +78,16 @@ export const useTimerHandlers = ({
       clearInterval(pauseTimerRef.current);
       setPauseTimeLeft(0);
     }
-    setIsExpanded(true); // Ensure timer is expanded when starting
-    start();
+    
+    // First expand the timer view
+    setIsExpanded(true);
+    
+    // Then start the timer
+    setTimeout(() => {
+      start();
+      toast.success("Timer started! Let's focus! 🎯");
+    }, 100);
+    
   }, [start, pauseTimerRef, setPauseTimeLeft, setIsExpanded]);
 
   const handlePause = useCallback(() => {
@@ -98,8 +106,8 @@ export const useTimerHandlers = ({
     }, 1000);
   }, [pause, playSound, setPauseTimeLeft, pauseTimerRef]);
 
-  const handleToggle = useCallback((fromExpanded = false) => {
-    console.log('Handling timer toggle:', { isRunning, fromExpanded });
+  const handleToggle = useCallback(() => {
+    console.log('Handling timer toggle:', { isRunning });
     if (isRunning) {
       handlePause();
     } else {
