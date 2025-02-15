@@ -1,5 +1,5 @@
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TIMER_CONSTANTS } from "@/types/timer";
 import { CompletionCelebration } from "./CompletionCelebration";
@@ -99,19 +99,25 @@ export const Timer = ({
     pauseTimerRef,
   });
 
-  // Auto-expand when timer starts
-  const handleTimerToggle = useCallback((fromExpanded?: boolean) => {
-    if (!isRunning) {
+  // Auto-expand when timer starts or is paused
+  useEffect(() => {
+    if (isRunning || metrics.isPaused) {
+      console.log('Auto-expanding timer due to:', { isRunning, isPaused: metrics.isPaused });
       setIsExpanded(true);
     }
+  }, [isRunning, metrics.isPaused, setIsExpanded]);
+
+  const handleTimerToggle = useCallback((fromExpanded?: boolean) => {
+    console.log('Timer toggle called:', { fromExpanded, isRunning });
     handleToggle(fromExpanded);
-  }, [isRunning, handleToggle, setIsExpanded]);
+  }, [handleToggle]);
 
   const handleCloseTimer = useCallback(() => {
-    if (!showCompletion) {
+    if (!showCompletion && !isRunning && !metrics.isPaused) {
+      console.log('Closing timer view');
       setIsExpanded(false);
     }
-  }, [showCompletion, setIsExpanded]);
+  }, [showCompletion, isRunning, metrics.isPaused, setIsExpanded]);
 
   const handleMinutesChange = useCallback((newMinutes: number) => {
     const clampedMinutes = Math.min(Math.max(newMinutes, 1), 60);
