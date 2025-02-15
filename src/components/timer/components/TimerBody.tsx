@@ -73,50 +73,65 @@ export const TimerBody = ({
     updateMetrics(prev => ({ favoriteQuotes: prev.favoriteQuotes + 1 }));
   }, [updateMetrics]);
 
-  // Always render the timer, either expanded or compact
-  return isExpanded ? (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md">
-      <FloatingQuotes favorites={favorites} />
-      <button
-        onClick={handleCloseTimer}
-        className="absolute top-6 right-6 p-2 text-muted-foreground hover:text-foreground z-[102] transition-all duration-300 hover:scale-110"
-      >
-        <Minimize2 className="h-6 w-6" />
-      </button>
-      <TimerExpandedView
-        ref={expandedViewRef}
-        taskName={taskName}
-        timerCircleProps={timerCircleProps}
-        timerControlsProps={{
-          ...timerControlsProps,
-          size: "large",
-          onToggle: () => timerControlsProps.onToggle(true)
-        }}
-        metrics={metrics}
-        onClose={handleCloseTimer}
-        onLike={handleLike}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
-    </div>
-  ) : (
-    <div className="w-full bg-card rounded-lg shadow-lg overflow-hidden">
-      <TimerCompactView
-        taskName={taskName}
-        timerCircleProps={timerCircleProps}
-        timerControlsProps={timerControlsProps}
-        metrics={metrics}
-        internalMinutes={internalMinutes}
-        onMinutesChange={handleMinutesChange}
-        selectedSound={selectedSound}
-        onSoundChange={setSelectedSound}
-        onTestSound={testSound}
-        isLoadingAudio={isLoadingAudio}
-        onExpand={() => setIsExpanded(true)}
-        onLike={handleLike}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
+  if (isExpanded) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
+        <div className="relative w-full max-w-[900px] mx-auto p-6 z-[101]">
+          <FloatingQuotes favorites={favorites} />
+          <button
+            onClick={handleCloseTimer}
+            className="absolute top-6 right-6 p-2 text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110"
+          >
+            <Minimize2 className="h-6 w-6" />
+          </button>
+          <TimerExpandedView
+            ref={expandedViewRef}
+            taskName={taskName}
+            timerCircleProps={timerCircleProps}
+            timerControlsProps={{
+              ...timerControlsProps,
+              size: "large" as const,
+              onToggle: () => timerControlsProps.onToggle(true)
+            }}
+            metrics={metrics}
+            onClose={handleCloseTimer}
+            onLike={handleLike}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="bg-card rounded-lg shadow-lg border border-border/5 overflow-hidden transition-all duration-300 hover:border-border/10">
+        <TimerCompactView
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={{
+            ...timerControlsProps,
+            size: "normal" as const
+          }}
+          metrics={metrics}
+          internalMinutes={internalMinutes}
+          onMinutesChange={handleMinutesChange}
+          selectedSound={selectedSound}
+          onSoundChange={setSelectedSound}
+          onTestSound={testSound}
+          isLoadingAudio={isLoadingAudio}
+          onExpand={() => {
+            if (timerCircleProps.isRunning || metrics.isPaused) {
+              setIsExpanded(true);
+            }
+          }}
+          onLike={handleLike}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      </div>
     </div>
   );
 };
