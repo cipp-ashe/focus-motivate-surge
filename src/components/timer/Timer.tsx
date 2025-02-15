@@ -168,7 +168,7 @@ export const Timer = ({
 
   return (
     <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
-      <div className={`relative z-50 bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <TimerBody
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
@@ -190,6 +190,23 @@ export const Timer = ({
           setFavorites={setFavorites}
         />
       </div>
+
+      {isExpanded && (
+        <TimerExpandedView
+          ref={expandedViewRef}
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={{
+            ...timerControlsProps,
+            size: "large" as const
+          }}
+          metrics={metrics}
+          onClose={handleCloseTimer}
+          onLike={() => updateMetrics(prev => ({ favoriteQuotes: prev.favoriteQuotes + 1 }))}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      )}
 
       <TimerCompletion
         showConfirmation={showConfirmation}

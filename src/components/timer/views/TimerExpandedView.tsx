@@ -49,61 +49,63 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
   setFavorites,
 }, ref) => {
   return (
-    <div className="relative w-full max-w-[900px] mx-auto px-4 py-4 z-[101] flex flex-col gap-4 h-[90vh] overflow-x-hidden">
-      <QuoteDisplay 
-        showAsOverlay
-        currentTask={taskName}
-        onLike={onLike}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
+      <div className="relative w-full max-w-[900px] mx-auto px-4 py-4 z-[101] flex flex-col gap-4 h-[90vh] overflow-x-hidden">
+        <QuoteDisplay 
+          showAsOverlay
+          currentTask={taskName}
+          onLike={onLike}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
 
-      <Card className="bg-card/90 backdrop-blur-md shadow-lg p-6 border-primary/20">
-        <div className="flex flex-col justify-center">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 tracking-tight">
-              {taskName}
-            </h1>
-          </div>
-          
-          <div className="relative">
-            <div className="absolute top-2 right-2">
-              <TimerMetricsDisplay 
-                metrics={metrics}
-                isRunning={timerCircleProps.isRunning}
-              />
+        <Card className="bg-card/90 backdrop-blur-md shadow-lg p-6 border-primary/20">
+          <div className="flex flex-col justify-center">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 tracking-tight">
+                {taskName}
+              </h1>
             </div>
+            
+            <div className="relative">
+              <div className="absolute top-2 right-2">
+                <TimerMetricsDisplay 
+                  metrics={metrics}
+                  isRunning={timerCircleProps.isRunning}
+                />
+              </div>
 
-            <div className="flex flex-col items-center gap-8">
-              <TimerDisplay
-                circleProps={timerCircleProps}
-                size="large"
-                isRunning={timerCircleProps.isRunning}
-              />
+              <div className="flex flex-col items-center gap-8">
+                <TimerDisplay
+                  circleProps={timerCircleProps}
+                  size="large"
+                  isRunning={timerCircleProps.isRunning}
+                />
 
-              <div className="w-full flex justify-center">
-                <div className="w-[372px]">
-                  <TimerControls {...timerControlsProps} />
+                <div className="w-full flex justify-center">
+                  <div className="w-[372px]">
+                    <TimerControls {...timerControlsProps} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
 
-      <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1">
-        <div className="p-4 h-full flex flex-col">
-          <h2 className="text-lg font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-            Quick Notes
-          </h2>
-          <div className="flex-1">
-            <NotesEditor ref={ref} />
+        <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1">
+          <div className="p-4 h-full flex flex-col">
+            <h2 className="text-lg font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+              Quick Notes
+            </h2>
+            <div className="flex-1">
+              <NotesEditor ref={ref} />
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }));
 
 TimerExpandedView.displayName = 'TimerExpandedView';
-
