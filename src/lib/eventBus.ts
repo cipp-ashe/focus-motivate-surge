@@ -1,4 +1,3 @@
-
 type EventCallback = (...args: any[]) => void;
 
 export type EventType = 
@@ -8,6 +7,8 @@ export type EventType =
   | 'timer:complete'
   | 'timer:update'
   | 'timer:external-start'
+  | 'timer:quote-favorite'
+  | 'timer:metrics-update'
   
   // Task events
   | 'task:create'
@@ -15,23 +16,44 @@ export type EventType =
   | 'task:complete'
   | 'task:delete'
   | 'task:select'
+  | 'task:metrics-update'
+  | 'task:tags-update'
   
   // Note events
   | 'note:create'
   | 'note:update'
   | 'note:delete'
   | 'note:link'
+  | 'note:tags-update'
   
   // Habit events
   | 'habit:create'
   | 'habit:complete'
   | 'habit:generate-task'
   | 'habit:update-progress'
+  | 'habit:template-update'
+  | 'habit:recurrence-update'
+  | 'habit:tags-update'
   
   // Relationship events
   | 'relationship:create'
   | 'relationship:delete'
-  | 'relationship:update';
+  | 'relationship:update'
+  | 'relationship:batch-update'
+  
+  // Tag events
+  | 'tag:create'
+  | 'tag:update'
+  | 'tag:delete'
+  | 'tag:link'
+  | 'tag:unlink'
+  | 'tag:color-update'
+  
+  // Quote events
+  | 'quote:create'
+  | 'quote:favorite'
+  | 'quote:link-task'
+  | 'quote:category-update';
 
 class EventBus {
   private static instance: EventBus;
