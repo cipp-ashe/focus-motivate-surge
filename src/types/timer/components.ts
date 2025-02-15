@@ -1,3 +1,4 @@
+
 import { TimerMetrics } from '../metrics';
 import type { Quote } from './models';
 
@@ -26,6 +27,32 @@ export interface TimerProps {
   onComplete: (metrics: TimerMetrics) => void;
   onAddTime: () => void;
   onDurationChange?: (minutes: number) => void;
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+}
+
+export interface TimerHeaderProps {
+  taskName: string;
+  onClose: () => void;
+}
+
+export interface TimerBodyProps {
+  isExpanded: boolean;
+  setIsExpanded: (expanded: boolean) => void;
+  showCompletion: boolean;
+  taskName: string;
+  timerCircleProps: TimerCircleProps;
+  timerControlsProps: TimerControlsProps;
+  metrics: TimerMetrics;
+  internalMinutes: number;
+  handleMinutesChange: (minutes: number) => void;
+  selectedSound: string;
+  setSelectedSound: (sound: string) => void;
+  testSound: () => void;
+  isLoadingAudio: boolean;
+  updateMetrics: (updates: Partial<TimerMetrics>) => void;
+  expandedViewRef: React.RefObject<any>;
+  handleCloseTimer: () => void;
   favorites: Quote[];
   setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
 }

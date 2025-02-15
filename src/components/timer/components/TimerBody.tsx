@@ -31,8 +31,6 @@ export const TimerBody = ({
     <div className="flex flex-col h-full">
       <TimerHeader
         taskName={taskName}
-        isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
         onClose={handleCloseTimer}
       />
 

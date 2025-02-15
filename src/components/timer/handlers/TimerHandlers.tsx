@@ -79,10 +79,8 @@ export const useTimerHandlers = ({
       setPauseTimeLeft(0);
     }
     
-    // First expand the timer view
     setIsExpanded(true);
     
-    // Then start the timer
     setTimeout(() => {
       start();
       toast.success("Timer started! Let's focus! 🎯");
@@ -134,6 +132,15 @@ export const useTimerHandlers = ({
     toast.success(`Added ${TIMER_CONSTANTS.ADD_TIME_MINUTES} minutes. Keep going! ⌛💪`);
   }, [addTime, onAddTime]);
 
+  const handleCloseTimer = useCallback(() => {
+    setIsExpanded(false);
+    reset();
+    if (pauseTimerRef.current) {
+      clearInterval(pauseTimerRef.current);
+      setPauseTimeLeft(0);
+    }
+  }, [setIsExpanded, reset, pauseTimerRef, setPauseTimeLeft]);
+
   return {
     handleTimerCompletion,
     handleComplete,
@@ -143,5 +150,6 @@ export const useTimerHandlers = ({
     handleToggle,
     handleCloseCompletion,
     handleAddTime,
+    handleCloseTimer,
   };
 };
