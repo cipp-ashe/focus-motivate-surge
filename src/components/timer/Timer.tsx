@@ -168,26 +168,28 @@ export const Timer = ({
 
   return (
     <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
-      <TimerBody
-        isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
-        showCompletion={showCompletion}
-        taskName={taskName}
-        timerCircleProps={timerCircleProps}
-        timerControlsProps={timerControlsProps}
-        metrics={metrics}
-        internalMinutes={internalMinutes}
-        handleMinutesChange={handleMinutesChange}
-        selectedSound={selectedSound}
-        setSelectedSound={setSelectedSound}
-        testSound={testSound}
-        isLoadingAudio={isLoadingAudio}
-        updateMetrics={updateMetrics}
-        expandedViewRef={expandedViewRef}
-        handleCloseTimer={handleCloseTimer}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
+      <div className={`relative z-50 bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>
+        <TimerBody
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          showCompletion={showCompletion}
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={timerControlsProps}
+          metrics={metrics}
+          internalMinutes={internalMinutes}
+          handleMinutesChange={handleMinutesChange}
+          selectedSound={selectedSound}
+          setSelectedSound={setSelectedSound}
+          testSound={testSound}
+          isLoadingAudio={isLoadingAudio}
+          updateMetrics={updateMetrics}
+          expandedViewRef={expandedViewRef}
+          handleCloseTimer={handleCloseTimer}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      </div>
 
       <TimerCompletion
         showConfirmation={showConfirmation}
