@@ -107,7 +107,16 @@ export const TimerBody = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-card rounded-lg shadow-lg border border-border/5 overflow-hidden transition-all duration-300 hover:border-border/10">
+      <div 
+        className="bg-card rounded-lg shadow-lg border border-border/5 overflow-hidden transition-all duration-300 hover:border-border/10 cursor-pointer"
+        onClick={() => {
+          console.log('Timer clicked, should expand:', {
+            isRunning: timerCircleProps.isRunning,
+            isPaused: metrics.isPaused
+          });
+          setIsExpanded(true);
+        }}
+      >
         <TimerCompactView
           taskName={taskName}
           timerCircleProps={timerCircleProps}
@@ -122,11 +131,7 @@ export const TimerBody = ({
           onSoundChange={setSelectedSound}
           onTestSound={testSound}
           isLoadingAudio={isLoadingAudio}
-          onExpand={() => {
-            if (timerCircleProps.isRunning || metrics.isPaused) {
-              setIsExpanded(true);
-            }
-          }}
+          onExpand={() => setIsExpanded(true)}
           onLike={handleLike}
           favorites={favorites}
           setFavorites={setFavorites}
