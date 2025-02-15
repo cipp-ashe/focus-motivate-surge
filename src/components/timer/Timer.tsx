@@ -8,7 +8,7 @@ import { useTimerMonitor } from "@/hooks/useTimerMonitor";
 import { useTimerView } from "./hooks/useTimerView";
 import { CompletionView } from "./views/CompletionView";
 import { MainTimerView } from "./views/MainTimerView";
-import type { TimerProps } from "@/types/timer";
+import type { TimerProps, SoundOption } from "@/types/timer";
 
 export const Timer = ({
   duration,
@@ -70,7 +70,7 @@ export const Timer = ({
     handleToggle: handleTimerToggle,
     handleCloseCompletion,
     handleAddTime,
-    handleCloseTimer,
+    handleClose: handleCloseTimer,
   } = useTimerHandlers({
     isRunning,
     start,
@@ -147,7 +147,7 @@ export const Timer = ({
         internalMinutes={internalMinutes}
         handleMinutesChange={setInternalMinutes}
         selectedSound={selectedSound}
-        setSelectedSound={setSelectedSound}
+        setSelectedSound={(sound: SoundOption) => setSelectedSound(sound)}
         testSound={testSound}
         isLoadingAudio={isLoadingAudio}
         updateMetrics={updateMetrics}
