@@ -23,7 +23,7 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [activeDays, setActiveDays] = useState<DayOfWeek[]>(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
+  const [activeDays, setActiveDays] = useState<DayOfWeek[]>(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
   const [habits, setHabits] = useState([createEmptyHabit()]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -106,7 +106,7 @@ const CreateTemplateForm: React.FC<CreateTemplateFormProps> = ({
               aria-label={`Toggle ${day}`}
               className="w-9 h-9"
             >
-              {day.charAt(0)}
+              {day}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
