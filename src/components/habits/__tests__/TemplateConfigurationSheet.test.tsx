@@ -1,7 +1,8 @@
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import TemplateConfigurationSheet from '../TemplateConfigurationSheet';
-import { ActiveTemplate, DayOfWeek } from '../types';
+import { ActiveTemplate } from '../types';
 
 const mockTemplate: ActiveTemplate = {
   templateId: 'test-1',
@@ -12,12 +13,14 @@ const mockTemplate: ActiveTemplate = {
 
 describe('TemplateConfigurationSheet', () => {
   const defaultProps = {
-    isOpen: true,
-    onOpenChange: vi.fn(),
-    template: mockTemplate,
-    onSave: vi.fn(),
+    selectedTemplate: mockTemplate,
+    isCreatingTemplate: false,
+    newTemplateName: '',
+    onNewTemplateNameChange: vi.fn(),
+    onUpdateDays: vi.fn(),
     onClose: vi.fn(),
     onUpdateTemplate: vi.fn(),
+    onSave: vi.fn(),
   };
 
   it('renders correctly when open', () => {
@@ -40,10 +43,9 @@ describe('TemplateConfigurationSheet', () => {
   });
 
   it('updates active days when a day is toggled', () => {
-    const onUpdateTemplate = vi.fn();
-    render(<TemplateConfigurationSheet {...defaultProps} onUpdateTemplate={onUpdateTemplate} />);
+    render(<TemplateConfigurationSheet {...defaultProps} />);
     const dayButton = screen.getByRole('button', { name: /mon/i });
     fireEvent.click(dayButton);
-    expect(onUpdateTemplate).toHaveBeenCalled();
+    expect(defaultProps.onUpdateDays).toHaveBeenCalled();
   });
 });

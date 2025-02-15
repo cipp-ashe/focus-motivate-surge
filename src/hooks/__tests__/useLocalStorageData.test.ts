@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useLocalStorageData } from '../useLocalStorageData';
 import { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
+import type { Task } from '@/types/tasks';
 
 const mockTemplate: ActiveTemplate = {
   templateId: 'test-1',
@@ -25,62 +26,83 @@ describe('useLocalStorageData', () => {
     expect(result.current.activeTemplates).toEqual([mockTemplate]);
   });
 
-  it('should add a template and update localStorage', () => {
+  it('should load tasks from localStorage', () => {
+    const mockTasks: Task[] = [{
+      id: 'task-1',
+      name: 'Test Task',
+      completed: false,
+      createdAt: new Date().toISOString(),
+    }];
+    localStorage.setItem('taskList', JSON.stringify(mockTasks));
     const { result } = renderHook(() => useLocalStorageData());
-
-    act(() => {
-      result.current.addTemplate(mockTemplate);
-    });
-
-    const storedTemplates = JSON.parse(localStorage.getItem('active-templates') || '[]');
-    expect(storedTemplates).toEqual([mockTemplate]);
-    expect(result.current.activeTemplates).toEqual([mockTemplate]);
+    expect(result.current.tasks).toEqual(mockTasks);
   });
 
-  it('should update a template and update localStorage', () => {
-    localStorage.setItem('active-templates', JSON.stringify([mockTemplate]));
+  it('should load completed tasks from localStorage', () => {
+    const mockCompletedTasks: Task[] = [{
+      id: 'task-1',
+      name: 'Completed Task',
+      completed: true,
+      createdAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+    }];
+    localStorage.setItem('completedTasks', JSON.stringify(mockCompletedTasks));
     const { result } = renderHook(() => useLocalStorageData());
-    const updatedTemplate = { ...mockTemplate, customized: true };
-
-    act(() => {
-      result.current.updateTemplate('test-1', updatedTemplate);
-    });
-
-    const storedTemplates = JSON.parse(localStorage.getItem('active-templates') || '[]');
-    expect(storedTemplates).toEqual([updatedTemplate]);
-    expect(result.current.activeTemplates).toEqual([updatedTemplate]);
+    expect(result.current.completedTasks).toEqual(mockCompletedTasks);
   });
 
-  it('should remove a template and update localStorage', () => {
-    localStorage.setItem('active-templates', JSON.stringify([mockTemplate]));
+  it('should update last sync date', () => {
     const { result } = renderHook(() => useLocalStorageData());
-
+    const newDate = new Date();
+    
     act(() => {
-      result.current.removeTemplate('test-1');
+      result.current.handleLastSyncUpdate(newDate);
     });
 
-    const storedTemplates = JSON.parse(localStorage.getItem('active-templates') || '[]');
-    expect(storedTemplates).toEqual([]);
-    expect(result.current.activeTemplates).toEqual([]);
+    expect(localStorage.getItem('lastSync')).toBe(newDate.toISOString());
   });
 
-  it('should update template order and update localStorage', () => {
-    const mockTemplate2: ActiveTemplate = {
-      templateId: 'test-2',
-      habits: [],
-      customized: false,
-      activeDays: ['Mon', 'Wed', 'Fri'] as DayOfWeek[],
-    };
-    localStorage.setItem('active-templates', JSON.stringify([mockTemplate, mockTemplate2]));
+  it('should handle tasks update', () => {
     const { result } = renderHook(() => useLocalStorageData());
-    const newOrder = [mockTemplate2, mockTemplate];
+    const newTasks: Task[] = [{
+      id: 'task-1',
+      name: 'New Task',
+      completed: false,
+      createdAt: new Date().toISOString(),
+    }];
 
     act(() => {
-      result.current.updateTemplateOrder(newOrder);
+      result.current.handleTasksUpdate(newTasks);
     });
 
-    const storedTemplates = JSON.parse(localStorage.getItem('active-templates') || '[]');
-    expect(storedTemplates).toEqual(newOrder);
-    expect(result.current.activeTemplates).toEqual(newOrder);
+    expect(JSON.parse(localStorage.getItem('taskList') || '[]')).toEqual(newTasks);
+  });
+
+  it('should handle completed tasks update', () => {
+    const { result } = renderHook(() => useLocalStorageData());
+    const completedTasks: Task[] = [{
+      id: 'task-1',
+      name: 'Completed Task',
+      completed: true,
+      createdAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+    }];
+
+    act(() => {
+      result.current.handleCompletedTasksUpdate(completedTasks);
+    });
+
+    expect(JSON.parse(localStorage.getItem('completedTasks') || '[]')).toEqual(completedTasks);
+  });
+
+  it('should handle templates update', () => {
+    const { result } = renderHook(() => useLocalStorageData());
+    const templates: ActiveTemplate[] = [mockTemplate];
+
+    act(() => {
+      result.current.setActiveTemplates(templates);
+    });
+
+    expect(JSON.parse(localStorage.getItem('active-templates') || '[]')).toEqual(templates);
   });
 });

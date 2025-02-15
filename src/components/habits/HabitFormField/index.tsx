@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HabitDetail } from '../types';
+import { HabitDetail, MetricType } from '../types';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
   isDraggable = false,
   onDragStart,
 }) => {
-  const handleMetricTypeChange = (value: 'boolean' | 'timer' | 'note' | 'count' | 'rating') => {
+  const handleMetricTypeChange = (value: MetricType) => {
     const updates: Partial<HabitDetail> = {
       metrics: {
         type: value,
