@@ -31,7 +31,7 @@ export const TimerBody = ({
     <div className="flex flex-col h-full">
       <TimerHeader
         taskName={taskName}
-        onClose={handleCloseTimer}
+        onCloseTimer={handleCloseTimer}
       />
 
       <div className={cn(
@@ -43,7 +43,7 @@ export const TimerBody = ({
         {/* Timer Circle and Controls Section */}
         <div className="flex flex-col items-center justify-center space-y-6">
           <div className="relative w-full max-w-[300px] mx-auto">
-            <TimerCircle {...timerCircleProps} />
+            <TimerCircle {...timerCircleProps} size="normal" />
           </div>
           <TimerControls {...timerControlsProps} />
         </div>
@@ -64,3 +64,4 @@ export const TimerBody = ({
     </div>
   );
 };
+

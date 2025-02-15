@@ -2,6 +2,8 @@
 import { useCallback } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import type { TimerEventType, TimerEventPayloads } from '@/types/events';
+import type { TimerMetrics } from '@/types/metrics';
+import type { Quote } from '@/types/timer/models';
 import { toast } from 'sonner';
 
 export const useTimerEvents = () => {

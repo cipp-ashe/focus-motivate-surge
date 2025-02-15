@@ -1,4 +1,3 @@
-
 import { TimerMetrics } from '../metrics';
 import type { Quote } from './models';
 
@@ -33,7 +32,7 @@ export interface TimerProps {
 
 export interface TimerHeaderProps {
   taskName: string;
-  onClose: () => void;
+  onCloseTimer: () => void;
 }
 
 export interface TimerBodyProps {
