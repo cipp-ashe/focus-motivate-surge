@@ -20,6 +20,12 @@ export const Timer = ({
   favorites = [],
   setFavorites
 }: TimerProps) => {
+  console.log('Timer component rendering with:', {
+    duration,
+    taskName,
+    isValid: Boolean(duration && taskName)
+  });
+
   const expandedViewRef = useRef<TimerExpandedViewRef>(null);
 
   const {
@@ -109,6 +115,7 @@ export const Timer = ({
   }, [setMinutes, onDurationChange, setInternalMinutes]);
 
   if (showCompletion && completionMetrics) {
+    console.log('Rendering completion view');
     return (
       <div className="animate-fade-in">
         <CompletionCelebration
@@ -138,8 +145,15 @@ export const Timer = ({
     size: 'normal' as const,
   };
 
+  console.log('Timer rendering with props:', {
+    isRunning,
+    timeLeft,
+    minutes,
+    isExpanded
+  });
+
   return (
-    <div className={`transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
+    <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
       <TimerBody
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
@@ -172,3 +186,4 @@ export const Timer = ({
 };
 
 Timer.displayName = 'Timer';
+
