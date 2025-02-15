@@ -4,6 +4,7 @@ import { Clock, Pause, Quote, Zap, BarChart } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useEffect } from "react";
 import { useEventBus } from "@/lib/eventBus";
+import { cn } from "@/lib/utils";
 
 interface TimerMetricsDisplayProps {
   metrics: TimerMetrics;
@@ -27,7 +28,6 @@ const getEfficiencyColor = (ratio: number): string => {
 };
 
 export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayProps) => {
-  // Subscribe to timer events
   useEventBus('timer:metrics-update', (updatedMetrics: TimerMetrics) => {
     console.log('Timer metrics updated:', updatedMetrics);
   }, []);
@@ -50,48 +50,112 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
     : 0;
 
   return (
-    <div className="text-sm text-muted-foreground space-y-3 pt-2">
-      <div className="flex items-center gap-2">
-        <Clock className="h-4 w-4" />
-        <span>
-          {metrics.extensionTime > 0 && (
-            <span className="text-primary">
-              +{formatTime(metrics.extensionTime)} added •{" "}
-            </span>
-          )}
-          {formatTime(metrics.pausedTime)} paused
-        </span>
+    <div className={cn(
+      "text-sm space-y-4 pt-3 rounded-lg transition-all duration-300",
+      isRunning ? "bg-card/5 p-4" : "p-2"
+    )}>
+      {/* Time Information */}
+      <div className="flex items-center gap-3 transition-all duration-300">
+        <div className={cn(
+          "p-2 rounded-full transition-colors",
+          isRunning ? "bg-primary/10" : "bg-muted"
+        )}>
+          <Clock className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-foreground font-medium">
+            {metrics.extensionTime > 0 && (
+              <span className="text-primary">
+                +{formatTime(metrics.extensionTime)} added
+              </span>
+            )}
+          </span>
+          <span className="text-muted-foreground">
+            {formatTime(metrics.pausedTime)} paused
+          </span>
+        </div>
       </div>
       
-      <div className="flex items-center gap-2">
-        <Pause className="h-4 w-4" />
-        <span>
+      {/* Break Count */}
+      <div className="flex items-center gap-3">
+        <div className={cn(
+          "p-2 rounded-full transition-colors",
+          isRunning ? "bg-primary/10" : "bg-muted"
+        )}>
+          <Pause className="h-4 w-4 text-primary" />
+        </div>
+        <span className="text-foreground">
           {metrics.pauseCount} {metrics.pauseCount === 1 ? 'break' : 'breaks'} taken
         </span>
       </div>
       
-      <div className="flex items-center gap-2">
-        <Zap className="h-4 w-4" />
-        <span className={efficiencyClass}>
-          {Math.round(metrics.efficiencyRatio || 0)}% efficiency
-        </span>
+      {/* Efficiency Status */}
+      <div className="flex items-center gap-3">
+        <div className={cn(
+          "p-2 rounded-full transition-colors",
+          isRunning ? "bg-primary/10" : "bg-muted"
+        )}>
+          <Zap className={cn("h-4 w-4", efficiencyClass)} />
+        </div>
+        <div className="flex flex-col">
+          <span className={cn(
+            "font-semibold transition-colors",
+            efficiencyClass
+          )}>
+            {Math.round(metrics.efficiencyRatio || 0)}% efficiency
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {metrics.efficiencyRatio >= 90 ? "Excellent pace!" : 
+             metrics.efficiencyRatio >= 70 ? "Good progress" : 
+             "Room for improvement"}
+          </span>
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <BarChart className="h-4 w-4" />
-          <span>Progress</span>
+      {/* Progress Bar */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-full transition-colors",
+            isRunning ? "bg-primary/10" : "bg-muted"
+          )}>
+            <BarChart className="h-4 w-4 text-primary" />
+          </div>
+          <span className="text-foreground">Progress</span>
         </div>
-        <Progress value={progressValue} className="h-1.5" />
+        <div className="relative">
+          <Progress 
+            value={progressValue} 
+            className={cn(
+              "h-2 transition-all duration-300",
+              isRunning && "bg-primary/20"
+            )} 
+          />
+          <span className="absolute right-0 -top-5 text-xs text-muted-foreground">
+            {Math.round(progressValue)}%
+          </span>
+        </div>
       </div>
       
+      {/* Quotes Counter */}
       {metrics.favoriteQuotes > 0 && (
-        <div className="flex items-center gap-2">
-          <Quote className="h-4 w-4" />
-          <span>{metrics.favoriteQuotes} quotes saved</span>
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-full transition-colors",
+            isRunning ? "bg-primary/10" : "bg-muted"
+          )}>
+            <Quote className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-foreground">
+              {metrics.favoriteQuotes} quote{metrics.favoriteQuotes !== 1 ? 's' : ''} saved
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Keep collecting inspiration!
+            </span>
+          </div>
         </div>
       )}
     </div>
   );
 };
-
