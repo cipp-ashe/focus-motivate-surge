@@ -1,5 +1,4 @@
-
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { useTimerState } from "./state/TimerState";
@@ -9,6 +8,7 @@ import { useTimerView } from "./hooks/useTimerView";
 import { CompletionView } from "./views/CompletionView";
 import { MainTimerView } from "./views/MainTimerView";
 import type { TimerProps, SoundOption } from "@/types/timer";
+import { eventBus } from "@/lib/eventBus";
 
 export const Timer = ({
   duration,
@@ -63,6 +63,17 @@ export const Timer = ({
     onAddTime,
     onDurationChange,
   });
+
+  // Listen for timer:init events
+  useEffect(() => {
+    const unsubscribe = eventBus.on('timer:init', ({ taskName, duration }) => {
+      console.log('Timer initialized with:', { taskName, duration });
+      setInternalMinutes(Math.floor(duration / 60));
+      reset();
+    });
+
+    return () => unsubscribe();
+  }, [setInternalMinutes, reset]);
 
   const {
     handleComplete,
