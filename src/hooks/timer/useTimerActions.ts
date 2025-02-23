@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { toast } from "sonner";
 import { TimerMetrics } from '@/types/metrics';
@@ -36,7 +37,13 @@ export const useTimerActions = ({
     updateMinutes(clampedMinutes);
     updateTimeLeft(newSeconds);
     updateMetrics({
-      expectedTime: newSeconds
+      expectedTime: newSeconds,
+      startTime: null,
+      endTime: null,
+      pauseCount: 0,
+      actualDuration: 0,
+      isPaused: false,
+      pausedTimeLeft: null
     });
     
     if (onDurationChange) {

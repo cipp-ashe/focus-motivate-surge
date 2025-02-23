@@ -40,22 +40,43 @@ export const useTimer = ({
     onDurationChange,
   });
 
+  // Handle duration changes and initialization
   useEffect(() => {
     if (!isMountedRef.current) return;
 
     const validDuration = Math.max(60, initialDuration);
-    console.log('Timer - Initial duration changed:', {
-      initialDuration,
-      validDuration,
-      currentTimeLeft: timeLeft,
-      currentMinutes: minutes
-    });
     
-    updateTimeLeft(validDuration);
-    updateMinutes(Math.floor(validDuration / 60));
-    updateMetrics({
-      expectedTime: validDuration
-    });
+    if (timeLeft !== validDuration) {
+      console.log('Timer - Initial duration changed:', {
+        initialDuration,
+        validDuration,
+        currentTimeLeft: timeLeft,
+        currentMinutes: minutes
+      });
+      
+      updateTimeLeft(validDuration);
+      updateMinutes(Math.floor(validDuration / 60));
+      
+      // Only initialize metrics if they haven't been set yet
+      if (!metrics.startTime) {
+        updateMetrics({
+          expectedTime: validDuration,
+          startTime: null,
+          endTime: null,
+          pauseCount: 0,
+          actualDuration: 0,
+          favoriteQuotes: 0,
+          pausedTime: 0,
+          lastPauseTimestamp: null,
+          extensionTime: 0,
+          netEffectiveTime: 0,
+          efficiencyRatio: 0,
+          completionStatus: 'Completed On Time',
+          isPaused: false,
+          pausedTimeLeft: null
+        });
+      }
+    }
 
     return () => {
       if (intervalRef.current) {
@@ -64,8 +85,9 @@ export const useTimer = ({
       }
       setIsRunning(false);
     };
-  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, setIsRunning, isMountedRef, timeLeft, minutes]);
+  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, setIsRunning, isMountedRef, timeLeft, minutes, metrics.startTime]);
 
+  // Handle timer countdown
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
       console.log('Timer - Starting countdown:', {
@@ -107,6 +129,7 @@ export const useTimer = ({
     };
   }, [isRunning, timeLeft, onTimeUp, completeTimer, updateTimeLeft, isMountedRef, minutes]);
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
