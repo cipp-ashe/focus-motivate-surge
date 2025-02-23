@@ -42,7 +42,8 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
     });
   }, [isRunning, metrics]);
 
-  if (!metrics) return null;
+  // Only show metrics if timer has been started (startTime exists) or is paused
+  if (!metrics?.startTime && !metrics?.isPaused) return null;
 
   const efficiencyClass = getEfficiencyColor(metrics.efficiencyRatio || 0);
   const progressValue = metrics.netEffectiveTime 
@@ -162,4 +163,3 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
     </div>
   );
 };
-
