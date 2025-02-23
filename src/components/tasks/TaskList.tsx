@@ -28,7 +28,7 @@ export const TaskList = ({
   const { activeTemplates } = useTemplateManagement();
 
   return (
-    <div className="flex flex-col min-h-0 h-full">
+    <div className="section-container">
       <div className="flex-none p-1">
         <TaskInput onTaskAdd={(task) => actions.addTask(task)} />
       </div>
@@ -37,7 +37,7 @@ export const TaskList = ({
         activeTemplates={activeTemplates}
       />
 
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="scrollable-content">
         <TaskTable
           tasks={tasks}
           selectedTasks={selectedTasks}

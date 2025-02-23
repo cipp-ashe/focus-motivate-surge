@@ -51,27 +51,20 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   }, []);
 
   return (
-    <div 
-      ref={containerRef}
-      className="relative h-[calc(100vh-4rem)]"
-    >
-      {/* Main content grid */}
+    <div ref={containerRef} className="main-layout">
       <div className={cn(
-        "grid grid-cols-1 w-full h-full transition-all duration-300 ease-in-out relative z-10",
+        "content-grid",
         !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2 lg:gap-6"
       )}>
-        {/* Task List */}
-        <div className="h-full overflow-hidden flex flex-col">
+        <div className="section-container">
           {taskList}
         </div>
 
-        {/* Timer Container */}
-        <div className="h-full overflow-hidden flex flex-col">
+        <div className="section-container">
           {timer}
         </div>
       </div>
 
-      {/* Notes/Habits Panel Overlay */}
       <div 
         className={cn(
           "fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity duration-300 lg:hidden",
