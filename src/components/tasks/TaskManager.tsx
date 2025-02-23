@@ -30,16 +30,14 @@ const TaskManager = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-4">
-      <TaskList
-        tasks={tasks}
-        selectedTasks={selectedTaskId ? [selectedTaskId] : []}
-        onTaskClick={(task) => handleTaskClick(task.id)}
-        onTaskDelete={handleTaskDelete}
-        onTasksUpdate={handleTaskUpdate}
-        onTasksClear={handleTasksClear}
-      />
-    </div>
+    <TaskList
+      tasks={tasks}
+      selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+      onTaskClick={(task) => handleTaskClick(task.id)}
+      onTaskDelete={handleTaskDelete}
+      onTasksUpdate={handleTaskUpdate}
+      onTasksClear={handleTasksClear}
+    />
   );
 };
 

@@ -21,45 +21,43 @@ export const TimerSection = ({
 }: TimerSectionProps) => {
   if (!selectedTask) {
     return (
-      <div className="section-container">
-        <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20 flex flex-wrap justify-center items-center">
-          Select a task to start the timer
+      <>
+        <div className="section-header">
+          <h2 className="text-lg font-semibold">Timer</h2>
         </div>
-      </div>
+        <div className="scrollable-content flex items-center justify-center">
+          <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">
+            Select a task to start the timer
+          </div>
+        </div>
+      </>
     );
   }
 
   const durationInSeconds = selectedTask.duration || 1500;
 
-  console.log('TimerSection - Rendering with task:', {
-    taskId: selectedTask.id,
-    duration: durationInSeconds,
-    durationInMinutes: Math.floor(durationInSeconds / 60)
-  });
-
   return (
-    <div className="section-container">
-      <Timer
-        key={`timer-${selectedTask.id}-${durationInSeconds}`}
-        duration={durationInSeconds}
-        taskName={selectedTask.name}
-        onComplete={onTaskComplete}
-        onAddTime={() => {
-          console.log("Time added to task:", selectedTask.name);
-        }}
-        onDurationChange={(minutes) => {
-          const seconds = minutes * 60;
-          console.log('TimerSection - Converting minutes to seconds:', {
-            minutes,
-            seconds,
-            taskId: selectedTask.id,
-            currentDuration: durationInSeconds
-          });
-          onDurationChange(seconds);
-        }}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
-    </div>
+    <>
+      <div className="section-header">
+        <h2 className="text-lg font-semibold">Timer - {selectedTask.name}</h2>
+      </div>
+      <div className="scrollable-content flex items-center justify-center">
+        <Timer
+          key={`timer-${selectedTask.id}-${durationInSeconds}`}
+          duration={durationInSeconds}
+          taskName={selectedTask.name}
+          onComplete={onTaskComplete}
+          onAddTime={() => {
+            console.log("Time added to task:", selectedTask.name);
+          }}
+          onDurationChange={(minutes) => {
+            const seconds = minutes * 60;
+            onDurationChange(seconds);
+          }}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      </div>
+    </>
   );
 };

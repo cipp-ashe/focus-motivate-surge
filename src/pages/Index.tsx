@@ -34,7 +34,7 @@ const Index = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="min-h-screen flex flex-col space-y-4">
       <TaskLayout
         timer={
           <TimerSection

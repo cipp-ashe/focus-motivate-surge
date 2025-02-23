@@ -54,27 +54,15 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
     <div ref={containerRef} className="main-layout">
       <div className={cn(
         "content-grid",
-        !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2 lg:gap-6"
+        !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2"
       )}>
         <div className="section-container">
           {taskList}
         </div>
-
         <div className="section-container">
           {timer}
         </div>
       </div>
-
-      <div 
-        className={cn(
-          "fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity duration-300 lg:hidden",
-          (isNotesOpen || isHabitsOpen) ? "opacity-100 z-40" : "opacity-0 pointer-events-none z-0"
-        )}
-        onClick={() => {
-          closeNotes();
-          closeHabits();
-        }}
-      />
     </div>
   );
 };

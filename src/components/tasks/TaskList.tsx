@@ -28,14 +28,16 @@ export const TaskList = ({
   const { activeTemplates } = useTemplateManagement();
 
   return (
-    <div className="section-container">
-      <div className="flex-none p-1">
+    <>
+      <div className="section-header">
         <TaskInput onTaskAdd={(task) => actions.addTask(task)} />
       </div>
       
-      <HabitTaskManager 
-        activeTemplates={activeTemplates}
-      />
+      <div className="section-header">
+        <HabitTaskManager 
+          activeTemplates={activeTemplates}
+        />
+      </div>
 
       <div className="scrollable-content">
         <TaskTable
@@ -48,7 +50,7 @@ export const TaskList = ({
         />
       </div>
 
-      <div className="flex-none">
+      <div className="section-footer">
         <CompletedTasks 
           tasks={completedTasks}
           onTasksClear={() => {
@@ -56,6 +58,6 @@ export const TaskList = ({
           }}
         />
       </div>
-    </div>
+    </>
   );
 };
