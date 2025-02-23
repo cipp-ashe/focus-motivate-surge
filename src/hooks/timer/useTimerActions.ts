@@ -73,20 +73,14 @@ export const useTimerActions = ({
     setIsRunning(false);
     const now = new Date();
     
-    const metricUpdates: Partial<TimerMetrics> = {
+    updateMetrics((currentMetrics: TimerMetrics) => ({
       lastPauseTimestamp: now,
       isPaused: true,
-      pausedTimeLeft: timeLeft
-    };
-    
-    // Update metrics with function to access current state
-    updateMetrics((currentMetrics: TimerMetrics) => ({
-      ...metricUpdates,
-      pauseCount: (currentMetrics.pauseCount || 0) + 1,
+      pausedTimeLeft: timeLeft,
+      pauseCount: (currentMetrics.pauseCount || 0) + 1
     }));
     
     eventBus.emit('timer:pause', { timeLeft, taskName: 'Current Task' });
-    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
     toast.info("Timer paused ⏸️");
   }, [setIsRunning, updateMetrics, timeLeft]);
 

@@ -24,6 +24,7 @@ export const useTimerState = (initialDuration: number) => {
   });
 
   const isMountedRef = useRef(true);
+  const lastTimeLeftRef = useRef(initialDuration);
 
   const updateTimeLeft = (value: number | ((prev: number) => number)) => {
     if (isMountedRef.current) {
@@ -31,11 +32,19 @@ export const useTimerState = (initialDuration: number) => {
         setTimeLeft((prev) => {
           const newValue = value(prev);
           console.log('Updating time left:', { prev, newValue });
+          lastTimeLeftRef.current = newValue;
           return newValue;
         });
       } else {
-        console.log('Setting time left directly:', value);
-        setTimeLeft(value);
+        // Only update if not paused or if explicitly setting a new value
+        if (!metrics.isPaused || value !== lastTimeLeftRef.current) {
+          console.log('Setting time left directly:', value);
+          lastTimeLeftRef.current = value;
+          setTimeLeft(value);
+        } else {
+          console.log('Maintaining paused time:', metrics.pausedTimeLeft);
+          setTimeLeft(metrics.pausedTimeLeft || value);
+        }
       }
     }
   };
@@ -46,12 +55,27 @@ export const useTimerState = (initialDuration: number) => {
     }
   };
 
-  const updateMetrics = (updates: Partial<TimerStateMetrics>) => {
+  const updateMetrics = (updates: Partial<TimerStateMetrics> | ((prev: TimerStateMetrics) => Partial<TimerStateMetrics>)) => {
     if (isMountedRef.current) {
-      setMetrics(prev => ({
-        ...prev,
-        ...updates
-      }));
+      setMetrics(prev => {
+        const newUpdates = typeof updates === 'function' ? updates(prev) : updates;
+        const newMetrics = {
+          ...prev,
+          ...newUpdates
+        };
+        
+        // If pausing, store the current timeLeft
+        if (newUpdates.isPaused && !prev.isPaused) {
+          newMetrics.pausedTimeLeft = timeLeft;
+        }
+        
+        // If resuming, use the stored pausedTimeLeft
+        if (!newUpdates.isPaused && prev.isPaused && prev.pausedTimeLeft !== null) {
+          lastTimeLeftRef.current = prev.pausedTimeLeft;
+        }
+        
+        return newMetrics;
+      });
     }
   };
 
