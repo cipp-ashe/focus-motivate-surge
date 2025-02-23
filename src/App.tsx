@@ -21,27 +21,31 @@ const queryClient = new QueryClient();
 // Use HashRouter for electron, BrowserRouter for web
 const Router = window.electron ? HashRouter : BrowserRouter;
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AppStateProvider>
-      <TooltipProvider>
-        <Router>
-          <TaskProvider>
-            <NotesPanelProvider>
-              <HabitsPanelProvider>
-                <AppLayout>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                  </Routes>
-                </AppLayout>
-                <Toaster position="bottom-right" closeButton />
-              </HabitsPanelProvider>
-            </NotesPanelProvider>
-          </TaskProvider>
-        </Router>
-      </TooltipProvider>
-    </AppStateProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const { isDark } = useTheme(true);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppStateProvider>
+        <TooltipProvider>
+          <Router>
+            <TaskProvider>
+              <NotesPanelProvider>
+                <HabitsPanelProvider>
+                  <AppLayout>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                    </Routes>
+                  </AppLayout>
+                  <Toaster position="bottom-right" closeButton />
+                </HabitsPanelProvider>
+              </NotesPanelProvider>
+            </TaskProvider>
+          </Router>
+        </TooltipProvider>
+      </AppStateProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
