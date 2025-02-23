@@ -9,6 +9,7 @@ import { NotesPanelProvider } from "./hooks/useNotesPanel";
 import { HabitsPanelProvider } from "./hooks/useHabitsPanel";
 import { AppStateProvider } from "./contexts/AppStateContext";
 import { TaskProvider } from "./contexts/TaskContext";
+import { useTheme } from "@/hooks/useTheme";
 
 // Suppress specific React Router v7 warnings
 window.__reactRouterFutureWarnings = {
