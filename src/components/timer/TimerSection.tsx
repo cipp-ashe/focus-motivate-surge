@@ -25,9 +25,11 @@ export const TimerSection = ({
         <div className="section-header">
           <h2 className="text-lg font-semibold">Timer</h2>
         </div>
-        <div className="scrollable-content flex items-center justify-center">
-          <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20">
-            Select a task to start the timer
+        <div className="scrollable-content">
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="text-center text-muted-foreground p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20 w-full max-w-xl mx-4">
+              Select a task to start the timer
+            </div>
           </div>
         </div>
       </>
