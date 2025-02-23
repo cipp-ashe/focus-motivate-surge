@@ -53,7 +53,7 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   return (
     <div 
       ref={containerRef}
-      className="relative h-full"
+      className="relative h-[calc(100vh-4rem)]"
     >
       {/* Main content grid */}
       <div className={cn(
