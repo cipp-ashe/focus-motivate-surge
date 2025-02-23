@@ -7,8 +7,9 @@ import Index from "./pages/Index";
 import { AppLayout } from "./components/AppLayout";
 import { NotesPanelProvider } from "./hooks/useNotesPanel";
 import { HabitsPanelProvider } from "./hooks/useHabitsPanel";
-import { AppStateProvider } from "./contexts/AppStateContext";
-import { TaskProvider } from "./contexts/TaskContext";
+import { TaskProvider } from "./contexts/tasks/TaskContext";
+import { HabitProvider } from "./contexts/habits/HabitContext";
+import { NoteProvider } from "./contexts/notes/NoteContext";
 import { useTheme } from "@/hooks/useTheme";
 
 // Suppress specific React Router v7 warnings
@@ -27,24 +28,26 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppStateProvider>
-        <TooltipProvider>
-          <Router>
-            <TaskProvider>
-              <NotesPanelProvider>
-                <HabitsPanelProvider>
-                  <AppLayout>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                    </Routes>
-                  </AppLayout>
-                  <Toaster position="bottom-right" closeButton />
-                </HabitsPanelProvider>
-              </NotesPanelProvider>
-            </TaskProvider>
-          </Router>
-        </TooltipProvider>
-      </AppStateProvider>
+      <TaskProvider>
+        <HabitProvider>
+          <NoteProvider>
+            <TooltipProvider>
+              <Router>
+                <NotesPanelProvider>
+                  <HabitsPanelProvider>
+                    <AppLayout>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                      </Routes>
+                    </AppLayout>
+                    <Toaster position="bottom-right" closeButton />
+                  </HabitsPanelProvider>
+                </NotesPanelProvider>
+              </Router>
+            </TooltipProvider>
+          </NoteProvider>
+        </HabitProvider>
+      </TaskProvider>
     </QueryClientProvider>
   );
 };
