@@ -46,7 +46,7 @@ export const useTimer = ({
 
     const validDuration = Math.max(60, initialDuration);
     
-    if (timeLeft !== validDuration) {
+    if (timeLeft !== validDuration && !isRunning) {
       console.log('Timer - Initial duration changed:', {
         initialDuration,
         validDuration,
@@ -77,15 +77,7 @@ export const useTimer = ({
         });
       }
     }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = undefined;
-      }
-      setIsRunning(false);
-    };
-  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, setIsRunning, isMountedRef, timeLeft, minutes, metrics.startTime]);
+  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, timeLeft, minutes, metrics.startTime, isRunning]);
 
   // Handle timer countdown
   useEffect(() => {
@@ -104,7 +96,8 @@ export const useTimer = ({
         if (!isMountedRef.current) return;
 
         updateTimeLeft((time) => {
-          if (time <= 1) {
+          const newTime = time - 1;
+          if (newTime <= 0) {
             if (intervalRef.current) {
               clearInterval(intervalRef.current);
               intervalRef.current = undefined;
@@ -113,20 +106,21 @@ export const useTimer = ({
             onTimeUp?.();
             return 0;
           }
-          return time - 1;
+          return newTime;
         });
       }, 1000);
+
+      // Cleanup interval on unmount or when timer stops
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = undefined;
+        }
+      };
     } else if (!isRunning && intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = undefined;
     }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = undefined;
-      }
-    };
   }, [isRunning, timeLeft, onTimeUp, completeTimer, updateTimeLeft, isMountedRef, minutes]);
 
   // Cleanup on unmount
