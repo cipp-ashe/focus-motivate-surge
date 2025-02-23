@@ -46,8 +46,8 @@ export const useTimer = ({
 
     const validDuration = Math.max(60, initialDuration);
     
-    // Only update if not running and not paused
-    if (timeLeft !== validDuration && !isRunning && !metrics.isPaused) {
+    // Only update if not running and not paused, and time has actually changed
+    if (!isRunning && !metrics.isPaused && timeLeft !== validDuration) {
       console.log('Timer - Initial duration changed:', {
         initialDuration,
         validDuration,
