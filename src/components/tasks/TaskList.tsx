@@ -1,25 +1,30 @@
 
-import { TaskInput } from "./TaskInput";
-import { TaskTable } from "./TaskTable";
-import { CompletedTasks } from "./CompletedTasks";
-import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
-import { HabitTaskManager } from "../habits/HabitTaskManager";
-import { useTemplateManagement } from "@/components/habits/hooks/useTemplateManagement";
-import type { Quote } from "@/types/timer";
-
-interface TaskListProps {
-  initialFavorites?: Quote[];
-  onFavoritesChange?: (favorites: Quote[]) => void;
-}
+import React from 'react';
+import { TaskInput } from './TaskInput';
+import { TaskTable } from './TaskTable';
+import { CompletedTasks } from './CompletedTasks';
+import { useAppState, useAppStateActions } from '@/contexts/AppStateContext';
+import { HabitTaskManager } from '../habits/HabitTaskManager';
+import { useTemplateManagement } from '@/components/habits/hooks/useTemplateManagement';
+import type { Task } from '@/types/tasks';
 
 export const TaskList = ({
-  initialFavorites = [],
-  onFavoritesChange,
-}: TaskListProps) => {
-  const state = useAppState();
+  tasks,
+  selectedTasks,
+  onTaskClick,
+  onTaskDelete,
+  onTasksUpdate,
+  onTasksClear,
+}: {
+  tasks: Task[];
+  selectedTasks: string[];
+  onTaskClick: (task: Task) => void;
+  onTaskDelete: (taskId: string) => void;
+  onTasksUpdate: (taskId: string, updates: Partial<Task>) => void;
+  onTasksClear: () => void;
+}) => {
+  const { tasks: { completed: completedTasks } } = useAppState();
   const actions = useAppStateActions();
-  const { tasks: { items: tasks, completed: completedTasks, selected: selectedTaskId } } = state;
-
   const { activeTemplates } = useTemplateManagement();
 
   return (
@@ -32,13 +37,11 @@ export const TaskList = ({
 
       <TaskTable
         tasks={tasks}
-        selectedTasks={selectedTaskId ? [selectedTaskId] : []}
-        onTaskClick={(task) => actions.selectTask(task.id)}
-        onTaskDelete={actions.deleteTask}
-        onTasksUpdate={actions.updateTask}
-        onTasksClear={() => {
-          tasks.forEach(task => actions.deleteTask(task.id));
-        }}
+        selectedTasks={selectedTasks}
+        onTaskClick={onTaskClick}
+        onTaskDelete={onTaskDelete}
+        onTasksUpdate={onTasksUpdate}
+        onTasksClear={onTasksClear}
       />
 
       <CompletedTasks 
