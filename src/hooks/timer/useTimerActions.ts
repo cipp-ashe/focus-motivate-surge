@@ -10,7 +10,7 @@ interface UseTimerActionsProps {
   updateTimeLeft: (time: number) => void;
   updateMinutes: (minutes: number) => void;
   setIsRunning: (running: boolean) => void;
-  updateMetrics: (updates: Partial<TimerMetrics>) => void;
+  updateMetrics: (updates: Partial<TimerMetrics> | ((prev: TimerMetrics) => Partial<TimerMetrics>)) => void;
   onDurationChange?: (minutes: number) => void;
 }
 
@@ -72,21 +72,21 @@ export const useTimerActions = ({
   const pause = useCallback(() => {
     setIsRunning(false);
     const now = new Date();
-    updateMetrics(currentMetrics => {
-      const newPauseCount = (currentMetrics.pauseCount || 0) + 1;
-      const metricUpdates: Partial<TimerMetrics> = {
-        pauseCount: newPauseCount,
-        lastPauseTimestamp: now,
-        isPaused: true,
-        pausedTimeLeft: timeLeft
-      };
-      
-      eventBus.emit('timer:pause', { timeLeft, taskName: 'Current Task' });
-      eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
-      
-      return metricUpdates;
-    });
     
+    const metricUpdates: Partial<TimerMetrics> = {
+      lastPauseTimestamp: now,
+      isPaused: true,
+      pausedTimeLeft: timeLeft
+    };
+    
+    // Update metrics with function to access current state
+    updateMetrics((currentMetrics: TimerMetrics) => ({
+      ...metricUpdates,
+      pauseCount: (currentMetrics.pauseCount || 0) + 1,
+    }));
+    
+    eventBus.emit('timer:pause', { timeLeft, taskName: 'Current Task' });
+    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
     toast.info("Timer paused ⏸️");
   }, [setIsRunning, updateMetrics, timeLeft]);
 
