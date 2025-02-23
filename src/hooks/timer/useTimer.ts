@@ -46,7 +46,8 @@ export const useTimer = ({
 
     const validDuration = Math.max(60, initialDuration);
     
-    if (timeLeft !== validDuration && !isRunning) {
+    // Only update if not running and not paused
+    if (timeLeft !== validDuration && !isRunning && !metrics.isPaused) {
       console.log('Timer - Initial duration changed:', {
         initialDuration,
         validDuration,
@@ -76,7 +77,7 @@ export const useTimer = ({
         });
       }
     }
-  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, timeLeft, minutes, metrics.startTime, isRunning]);
+  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, timeLeft, minutes, metrics.startTime, isRunning, metrics.isPaused]);
 
   // Handle timer countdown
   useEffect(() => {
