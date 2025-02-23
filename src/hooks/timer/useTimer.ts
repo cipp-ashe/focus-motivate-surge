@@ -57,7 +57,6 @@ export const useTimer = ({
       updateTimeLeft(validDuration);
       updateMinutes(Math.floor(validDuration / 60));
       
-      // Only initialize metrics if they haven't been set yet
       if (!metrics.startTime) {
         updateMetrics({
           expectedTime: validDuration,
@@ -81,47 +80,50 @@ export const useTimer = ({
 
   // Handle timer countdown
   useEffect(() => {
-    if (isRunning && timeLeft > 0) {
-      console.log('Timer - Starting countdown:', {
-        timeLeft,
-        minutes,
-        isRunning
-      });
-      
+    // Don't start if not running or time is up
+    if (!isRunning || timeLeft <= 0) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
+      }
+      return;
+    }
+
+    console.log('Timer - Starting countdown:', {
+      timeLeft,
+      minutes,
+      isRunning
+    });
+    
+    intervalRef.current = setInterval(() => {
+      if (!isMountedRef.current) {
+        clearInterval(intervalRef.current);
+        return;
       }
 
-      intervalRef.current = setInterval(() => {
-        if (!isMountedRef.current) return;
-
-        updateTimeLeft((time) => {
-          const newTime = time - 1;
-          if (newTime <= 0) {
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = undefined;
-            }
-            completeTimer();
-            onTimeUp?.();
-            return 0;
-          }
-          return newTime;
-        });
-      }, 1000);
-
-      // Cleanup interval on unmount or when timer stops
-      return () => {
-        if (intervalRef.current) {
+      updateTimeLeft((currentTime) => {
+        const newTime = currentTime - 1;
+        console.log('Timer tick:', { currentTime, newTime });
+        
+        if (newTime <= 0) {
           clearInterval(intervalRef.current);
-          intervalRef.current = undefined;
+          setIsRunning(false);
+          completeTimer();
+          onTimeUp?.();
+          return 0;
         }
-      };
-    } else if (!isRunning && intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = undefined;
-    }
-  }, [isRunning, timeLeft, onTimeUp, completeTimer, updateTimeLeft, isMountedRef, minutes]);
+        return newTime;
+      });
+    }, 1000);
+
+    // Cleanup interval
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
+      }
+    };
+  }, [isRunning, timeLeft, onTimeUp, completeTimer, updateTimeLeft, setIsRunning, isMountedRef, minutes]);
 
   // Cleanup on unmount
   useEffect(() => {

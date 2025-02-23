@@ -27,7 +27,16 @@ export const useTimerState = (initialDuration: number) => {
 
   const updateTimeLeft = (value: number | ((prev: number) => number)) => {
     if (isMountedRef.current) {
-      setTimeLeft(value);
+      if (typeof value === 'function') {
+        setTimeLeft((prev) => {
+          const newValue = value(prev);
+          console.log('Updating time left:', { prev, newValue });
+          return newValue;
+        });
+      } else {
+        console.log('Setting time left directly:', value);
+        setTimeLeft(value);
+      }
     }
   };
 
