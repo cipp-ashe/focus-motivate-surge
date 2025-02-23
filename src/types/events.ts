@@ -1,3 +1,4 @@
+
 import { TimerMetrics } from './metrics';
 import { Quote } from './timer/models';
 import { Task } from './tasks';
@@ -7,6 +8,10 @@ import { EntityRelationship, EntityType } from './state';
 
 export interface TimerEventPayloads {
   // Timer Events
+  'timer:init': {
+    taskName: string;
+    duration: number;
+  };
   'timer:start': {
     taskName: string;
     duration: number;
