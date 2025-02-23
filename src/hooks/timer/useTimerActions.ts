@@ -38,7 +38,7 @@ export const useTimerActions = ({
     updateMinutes(clampedMinutes);
     updateTimeLeft(newSeconds);
     
-    const metricUpdates = {
+    const metricUpdates: Partial<TimerMetrics> = {
       expectedTime: newSeconds,
       startTime: null,
       endTime: null,
@@ -58,7 +58,7 @@ export const useTimerActions = ({
 
   const start = useCallback(() => {
     setIsRunning(true);
-    const metricUpdates = {
+    const metricUpdates: Partial<TimerMetrics> = {
       startTime: new Date(),
       isPaused: false,
       pausedTimeLeft: null
@@ -71,7 +71,7 @@ export const useTimerActions = ({
 
   const pause = useCallback(() => {
     setIsRunning(false);
-    const metricUpdates = {
+    const metricUpdates: Partial<TimerMetrics> = {
       pauseCount: 1,
       lastPauseTimestamp: new Date(),
       isPaused: true,
@@ -87,7 +87,7 @@ export const useTimerActions = ({
     setIsRunning(false);
     updateTimeLeft(newSeconds);
     
-    const metricUpdates = {
+    const metricUpdates: Partial<TimerMetrics> = {
       startTime: null,
       endTime: null,
       pauseCount: 0,
@@ -116,7 +116,7 @@ export const useTimerActions = ({
     updateTimeLeft(newTimeLeft);
     updateMinutes(newMinutes);
     
-    const metricUpdates = {
+    const metricUpdates: Partial<TimerMetrics> = {
       extensionTime: additionalSeconds,
       expectedTime: newTimeLeft
     };
@@ -129,17 +129,32 @@ export const useTimerActions = ({
   const completeTimer = useCallback(() => {
     setIsRunning(false);
     const now = new Date();
-    const metricUpdates = {
+    const metricUpdates: Partial<TimerMetrics> = {
       endTime: now,
       actualDuration: timeLeft,
       isPaused: false,
-      pausedTimeLeft: null
+      pausedTimeLeft: null,
+      completionStatus: 'Completed On Time'
     };
     
     updateMetrics(metricUpdates);
-    eventBus.emit('timer:complete', { metrics: metricUpdates, taskName: 'Current Task' });
+    eventBus.emit('timer:complete', { 
+      metrics: {
+        ...metricUpdates,
+        startTime: null,
+        pauseCount: 0,
+        expectedTime: minutes * 60,
+        favoriteQuotes: 0,
+        pausedTime: 0,
+        lastPauseTimestamp: null,
+        extensionTime: 0,
+        netEffectiveTime: 0,
+        efficiencyRatio: 0
+      },
+      taskName: 'Current Task' 
+    });
     eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
-  }, [setIsRunning, updateMetrics, timeLeft]);
+  }, [setIsRunning, updateMetrics, timeLeft, minutes]);
 
   return {
     setMinutes,
