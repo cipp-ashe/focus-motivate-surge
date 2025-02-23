@@ -2,11 +2,11 @@
 import React from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
-import { useAppState, useAppStateActions } from '@/contexts/AppStateContext';
+import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
 
 const TaskManager = () => {
-  const { tasks: { items: tasks, selected: selectedTaskId } } = useAppState();
-  const actions = useAppStateActions();
+  const { items: tasks, selected: selectedTaskId } = useTaskState();
+  const actions = useTaskActions();
   const { handleTimerStart } = useTimerEvents();
 
   const handleTaskClick = (taskId: string) => {

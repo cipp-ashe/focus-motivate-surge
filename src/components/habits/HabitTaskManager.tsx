@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
-import { useAppState, useAppStateActions } from "@/contexts/AppStateContext";
+import { useTaskState, useTaskActions } from "@/contexts/tasks/TaskContext";
 import type { ActiveTemplate } from '@/components/habits/types';
 
 interface HabitTaskManagerProps {
@@ -12,9 +12,8 @@ interface HabitTaskManagerProps {
 export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
   const { addTagToEntity } = useTagSystem();
-  const state = useAppState();
-  const actions = useAppStateActions();
-  const { tasks: { items: tasks } } = state;
+  const { items: tasks } = useTaskState();
+  const actions = useTaskActions();
   
   // Use a ref to track initialization
   const isInitialized = useRef(false);
@@ -46,10 +45,6 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     tasksToRemove.forEach(task => {
       console.log('Removing task:', task.id);
       actions.deleteTask(task.id);
-      
-      if (task.relationships?.habitId) {
-        actions.removeRelationship(task.id, task.relationships.habitId);
-      }
     });
 
     // Add new tasks (only once)
@@ -67,14 +62,6 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
           relationships: { habitId: habit.id }
         });
 
-        actions.addRelationship({
-          sourceId: taskId,
-          sourceType: 'task',
-          targetId: habit.id,
-          targetType: 'habit',
-          relationType: 'habit-task'
-        });
-
         addTagToEntity('Habit', taskId, 'task');
       }
     });
@@ -84,4 +71,3 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
 
   return null;
 };
-

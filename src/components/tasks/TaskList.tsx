@@ -3,7 +3,7 @@ import React from 'react';
 import { TaskInput } from './TaskInput';
 import { TaskTable } from './TaskTable';
 import { CompletedTasks } from './CompletedTasks';
-import { useAppState, useAppStateActions } from '@/contexts/AppStateContext';
+import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
 import { HabitTaskManager } from '../habits/HabitTaskManager';
 import { useTemplateManagement } from '@/components/habits/hooks/useTemplateManagement';
 import type { Task } from '@/types/tasks';
@@ -23,8 +23,8 @@ export const TaskList = ({
   onTasksUpdate: (taskId: string, updates: Partial<Task>) => void;
   onTasksClear: () => void;
 }) => {
-  const { tasks: { completed: completedTasks } } = useAppState();
-  const actions = useAppStateActions();
+  const { completed: completedTasks } = useTaskState();
+  const actions = useTaskActions();
   const { activeTemplates } = useTemplateManagement();
 
   return (

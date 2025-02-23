@@ -4,14 +4,14 @@ import { TaskLayout } from '@/components/tasks/TaskLayout';
 import TaskManager from '@/components/tasks/TaskManager';
 import HabitTracker from '@/components/habits/HabitTracker';
 import { TimerSection } from '@/components/timer/TimerSection';
-import { useAppState, useAppStateActions } from '@/contexts/AppStateContext';
+import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
 import { TimerStateMetrics } from '@/types/metrics';
 import { Quote } from '@/types/timer';
 import { useState } from 'react';
 
 const Index = () => {
-  const { tasks: { items, selected: selectedTaskId } } = useAppState();
-  const actions = useAppStateActions();
+  const { items, selected: selectedTaskId } = useTaskState();
+  const actions = useTaskActions();
   const [favorites, setFavorites] = useState<Quote[]>([]);
 
   const selectedTask = selectedTaskId 
