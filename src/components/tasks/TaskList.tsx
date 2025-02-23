@@ -28,28 +28,34 @@ export const TaskList = ({
   const { activeTemplates } = useTemplateManagement();
 
   return (
-    <div className="space-y-4 h-full overflow-y-auto px-1">
-      <TaskInput onTaskAdd={(task) => actions.addTask(task)} />
+    <div className="flex flex-col min-h-0 h-full">
+      <div className="flex-none p-1">
+        <TaskInput onTaskAdd={(task) => actions.addTask(task)} />
+      </div>
       
       <HabitTaskManager 
         activeTemplates={activeTemplates}
       />
 
-      <TaskTable
-        tasks={tasks}
-        selectedTasks={selectedTasks}
-        onTaskClick={onTaskClick}
-        onTaskDelete={onTaskDelete}
-        onTasksUpdate={onTasksUpdate}
-        onTasksClear={onTasksClear}
-      />
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <TaskTable
+          tasks={tasks}
+          selectedTasks={selectedTasks}
+          onTaskClick={onTaskClick}
+          onTaskDelete={onTaskDelete}
+          onTasksUpdate={onTasksUpdate}
+          onTasksClear={onTasksClear}
+        />
+      </div>
 
-      <CompletedTasks 
-        tasks={completedTasks}
-        onTasksClear={() => {
-          completedTasks.forEach(task => actions.deleteTask(task.id));
-        }}
-      />
+      <div className="flex-none">
+        <CompletedTasks 
+          tasks={completedTasks}
+          onTasksClear={() => {
+            completedTasks.forEach(task => actions.deleteTask(task.id));
+          }}
+        />
+      </div>
     </div>
   );
 };
