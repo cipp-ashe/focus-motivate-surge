@@ -25,6 +25,7 @@ export const useTimerState = (initialDuration: number) => {
 
   const isMountedRef = useRef(true);
   const lastTimeLeftRef = useRef(initialDuration);
+  const lastPauseStartRef = useRef<Date | null>(null);
 
   const updateTimeLeft = (value: number | ((prev: number) => number)) => {
     if (isMountedRef.current) {
@@ -64,9 +65,19 @@ export const useTimerState = (initialDuration: number) => {
           ...newUpdates
         };
         
-        // If pausing, store the current timeLeft
+        // If pausing, store the current timeLeft and pause start time
         if (newUpdates.isPaused && !prev.isPaused) {
           newMetrics.pausedTimeLeft = timeLeft;
+          lastPauseStartRef.current = new Date();
+        }
+        
+        // If resuming, calculate and add pause duration to total paused time
+        if (!newUpdates.isPaused && prev.isPaused && lastPauseStartRef.current) {
+          const pauseDuration = Math.floor(
+            (new Date().getTime() - lastPauseStartRef.current.getTime()) / 1000
+          );
+          newMetrics.pausedTime = (prev.pausedTime || 0) + pauseDuration;
+          lastPauseStartRef.current = null;
         }
         
         // If resuming, use the stored pausedTimeLeft
