@@ -138,19 +138,25 @@ export const useTimerActions = ({
     };
     
     updateMetrics(metricUpdates);
+    const completeMetrics: TimerMetrics = {
+      startTime: null,
+      endTime: now,  // Ensure endTime is included and matches the metricUpdates
+      pauseCount: 0,
+      expectedTime: minutes * 60,
+      actualDuration: timeLeft,
+      favoriteQuotes: 0,
+      pausedTime: 0,
+      lastPauseTimestamp: null,
+      extensionTime: 0,
+      netEffectiveTime: 0,
+      efficiencyRatio: 0,
+      completionStatus: 'Completed On Time',
+      isPaused: false,
+      pausedTimeLeft: null
+    };
+    
     eventBus.emit('timer:complete', { 
-      metrics: {
-        ...metricUpdates,
-        startTime: null,
-        pauseCount: 0,
-        expectedTime: minutes * 60,
-        favoriteQuotes: 0,
-        pausedTime: 0,
-        lastPauseTimestamp: null,
-        extensionTime: 0,
-        netEffectiveTime: 0,
-        efficiencyRatio: 0
-      },
+      metrics: completeMetrics,
       taskName: 'Current Task' 
     });
     eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
