@@ -72,15 +72,21 @@ export const useTimerActions = ({
   const pause = useCallback(() => {
     setIsRunning(false);
     const now = new Date();
-    const metricUpdates: Partial<TimerMetrics> = {
-      pauseCount: prev => (prev || 0) + 1,
-      lastPauseTimestamp: now,
-      isPaused: true,
-      pausedTimeLeft: timeLeft // Store the current timeLeft value
-    };
-    updateMetrics(metricUpdates);
-    eventBus.emit('timer:pause', { timeLeft, taskName: 'Current Task' });
-    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
+    updateMetrics(currentMetrics => {
+      const newPauseCount = (currentMetrics.pauseCount || 0) + 1;
+      const metricUpdates: Partial<TimerMetrics> = {
+        pauseCount: newPauseCount,
+        lastPauseTimestamp: now,
+        isPaused: true,
+        pausedTimeLeft: timeLeft
+      };
+      
+      eventBus.emit('timer:pause', { timeLeft, taskName: 'Current Task' });
+      eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
+      
+      return metricUpdates;
+    });
+    
     toast.info("Timer paused ⏸️");
   }, [setIsRunning, updateMetrics, timeLeft]);
 
