@@ -21,8 +21,10 @@ export const TimerSection = ({
 }: TimerSectionProps) => {
   if (!selectedTask) {
     return (
-      <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20 flex flex-wrap justify-center items-center">
-        Select a task to start the timer
+      <div className="section-container">
+        <div className="text-center text-muted-foreground p-4 sm:p-8 bg-card/50 backdrop-blur-sm rounded-lg border border-primary/20 flex flex-wrap justify-center items-center">
+          Select a task to start the timer
+        </div>
       </div>
     );
   }
@@ -36,27 +38,28 @@ export const TimerSection = ({
   });
 
   return (
-    <Timer
-      key={`timer-${selectedTask.id}-${durationInSeconds}`}
-      duration={durationInSeconds}
-      taskName={selectedTask.name}
-      onComplete={onTaskComplete}
-      onAddTime={() => {
-        console.log("Time added to task:", selectedTask.name);
-      }}
-      onDurationChange={(minutes) => {
-        const seconds = minutes * 60;
-        console.log('TimerSection - Converting minutes to seconds:', {
-          minutes,
-          seconds,
-          taskId: selectedTask.id,
-          currentDuration: durationInSeconds
-        });
-        onDurationChange(seconds);
-      }}
-      favorites={favorites}
-      setFavorites={setFavorites}
-    />
+    <div className="section-container">
+      <Timer
+        key={`timer-${selectedTask.id}-${durationInSeconds}`}
+        duration={durationInSeconds}
+        taskName={selectedTask.name}
+        onComplete={onTaskComplete}
+        onAddTime={() => {
+          console.log("Time added to task:", selectedTask.name);
+        }}
+        onDurationChange={(minutes) => {
+          const seconds = minutes * 60;
+          console.log('TimerSection - Converting minutes to seconds:', {
+            minutes,
+            seconds,
+            taskId: selectedTask.id,
+            currentDuration: durationInSeconds
+          });
+          onDurationChange(seconds);
+        }}
+        favorites={favorites}
+        setFavorites={setFavorites}
+      />
+    </div>
   );
 };
-
