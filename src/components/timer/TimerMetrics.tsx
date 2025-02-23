@@ -2,7 +2,7 @@
 import { TimerMetrics } from "@/types/metrics";
 import { Clock, Pause, Quote, Zap, BarChart } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useEventBus } from "@/lib/eventBus";
 import { cn } from "@/lib/utils";
 
@@ -28,26 +28,36 @@ const getEfficiencyColor = (ratio: number): string => {
 };
 
 export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayProps) => {
+  const [localMetrics, setLocalMetrics] = useState<TimerMetrics>(metrics);
+
   useEventBus('timer:metrics-update', ({ metrics: updatedMetrics }) => {
     console.log('Timer metrics updated:', updatedMetrics);
+    setLocalMetrics(prev => ({
+      ...prev,
+      ...updatedMetrics
+    }));
   }, []);
+
+  useEffect(() => {
+    setLocalMetrics(metrics);
+  }, [metrics]);
 
   useEffect(() => {
     console.log('TimerMetrics rendered with:', {
       isRunning,
-      metrics,
-      efficiencyRatio: metrics?.efficiencyRatio,
-      netEffectiveTime: metrics?.netEffectiveTime,
-      expectedTime: metrics?.expectedTime
+      metrics: localMetrics,
+      efficiencyRatio: localMetrics?.efficiencyRatio,
+      netEffectiveTime: localMetrics?.netEffectiveTime,
+      expectedTime: localMetrics?.expectedTime
     });
-  }, [isRunning, metrics]);
+  }, [isRunning, localMetrics]);
 
   // Only show metrics if timer has been started (startTime exists) or is paused
-  if (!metrics?.startTime && !metrics?.isPaused) return null;
+  if (!localMetrics?.startTime && !localMetrics?.isPaused) return null;
 
-  const efficiencyClass = getEfficiencyColor(metrics.efficiencyRatio || 0);
-  const progressValue = metrics.netEffectiveTime 
-    ? (metrics.netEffectiveTime / metrics.expectedTime) * 100
+  const efficiencyClass = getEfficiencyColor(localMetrics.efficiencyRatio || 0);
+  const progressValue = localMetrics.netEffectiveTime 
+    ? (localMetrics.netEffectiveTime / localMetrics.expectedTime) * 100
     : 0;
 
   return (

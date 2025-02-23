@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { toast } from "sonner";
 import { TimerMetrics } from '@/types/metrics';
+import { eventBus } from '@/lib/eventBus';
 
 interface UseTimerActionsProps {
   timeLeft: number;
@@ -36,7 +37,8 @@ export const useTimerActions = ({
     
     updateMinutes(clampedMinutes);
     updateTimeLeft(newSeconds);
-    updateMetrics({
+    
+    const metricUpdates = {
       expectedTime: newSeconds,
       startTime: null,
       endTime: null,
@@ -44,7 +46,10 @@ export const useTimerActions = ({
       actualDuration: 0,
       isPaused: false,
       pausedTimeLeft: null
-    });
+    };
+    
+    updateMetrics(metricUpdates);
+    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
     
     if (onDurationChange) {
       onDurationChange(clampedMinutes);
@@ -53,30 +58,36 @@ export const useTimerActions = ({
 
   const start = useCallback(() => {
     setIsRunning(true);
-    updateMetrics({
+    const metricUpdates = {
       startTime: new Date(),
       isPaused: false,
       pausedTimeLeft: null
-    });
+    };
+    updateMetrics(metricUpdates);
+    eventBus.emit('timer:start', { taskName: 'Current Task', duration: timeLeft });
+    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
     toast.success("Timer started ⏱️🚀");
-  }, [setIsRunning, updateMetrics]);
+  }, [setIsRunning, updateMetrics, timeLeft]);
 
   const pause = useCallback(() => {
     setIsRunning(false);
-    const currentMetrics = {
+    const metricUpdates = {
       pauseCount: 1,
       lastPauseTimestamp: new Date(),
       isPaused: true,
       pausedTimeLeft: timeLeft
     };
-    updateMetrics(currentMetrics);
+    updateMetrics(metricUpdates);
+    eventBus.emit('timer:pause', { timeLeft, taskName: 'Current Task' });
+    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
   }, [setIsRunning, updateMetrics, timeLeft]);
 
   const reset = useCallback(() => {
     const newSeconds = minutes * 60;
     setIsRunning(false);
     updateTimeLeft(newSeconds);
-    updateMetrics({
+    
+    const metricUpdates = {
       startTime: null,
       endTime: null,
       pauseCount: 0,
@@ -91,7 +102,10 @@ export const useTimerActions = ({
       completionStatus: 'Completed On Time',
       isPaused: false,
       pausedTimeLeft: null
-    });
+    };
+    
+    updateMetrics(metricUpdates);
+    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
   }, [minutes, setIsRunning, updateTimeLeft, updateMetrics]);
 
   const addTime = useCallback((additionalMinutes: number) => {
@@ -101,22 +115,30 @@ export const useTimerActions = ({
     
     updateTimeLeft(newTimeLeft);
     updateMinutes(newMinutes);
-    updateMetrics({
+    
+    const metricUpdates = {
       extensionTime: additionalSeconds,
       expectedTime: newTimeLeft
-    });
+    };
+    
+    updateMetrics(metricUpdates);
+    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
     toast.success(`+${additionalMinutes}m added ⌛💪`);
   }, [timeLeft, minutes, updateTimeLeft, updateMinutes, updateMetrics]);
 
   const completeTimer = useCallback(() => {
     setIsRunning(false);
     const now = new Date();
-    updateMetrics({
+    const metricUpdates = {
       endTime: now,
       actualDuration: timeLeft,
       isPaused: false,
       pausedTimeLeft: null
-    });
+    };
+    
+    updateMetrics(metricUpdates);
+    eventBus.emit('timer:complete', { metrics: metricUpdates, taskName: 'Current Task' });
+    eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
   }, [setIsRunning, updateMetrics, timeLeft]);
 
   return {
