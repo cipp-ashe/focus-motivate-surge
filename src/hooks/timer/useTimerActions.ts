@@ -71,15 +71,17 @@ export const useTimerActions = ({
 
   const pause = useCallback(() => {
     setIsRunning(false);
+    const now = new Date();
     const metricUpdates: Partial<TimerMetrics> = {
-      pauseCount: 1,
-      lastPauseTimestamp: new Date(),
+      pauseCount: prev => (prev || 0) + 1,
+      lastPauseTimestamp: now,
       isPaused: true,
-      pausedTimeLeft: timeLeft
+      pausedTimeLeft: timeLeft // Store the current timeLeft value
     };
     updateMetrics(metricUpdates);
     eventBus.emit('timer:pause', { timeLeft, taskName: 'Current Task' });
     eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
+    toast.info("Timer paused ⏸️");
   }, [setIsRunning, updateMetrics, timeLeft]);
 
   const reset = useCallback(() => {
@@ -138,25 +140,23 @@ export const useTimerActions = ({
     };
     
     updateMetrics(metricUpdates);
-    const completeMetrics: TimerMetrics = {
-      startTime: null,
-      endTime: now,  // Ensure endTime is included and matches the metricUpdates
-      pauseCount: 0,
-      expectedTime: minutes * 60,
-      actualDuration: timeLeft,
-      favoriteQuotes: 0,
-      pausedTime: 0,
-      lastPauseTimestamp: null,
-      extensionTime: 0,
-      netEffectiveTime: 0,
-      efficiencyRatio: 0,
-      completionStatus: 'Completed On Time',
-      isPaused: false,
-      pausedTimeLeft: null
-    };
-    
     eventBus.emit('timer:complete', { 
-      metrics: completeMetrics,
+      metrics: {
+        startTime: null,
+        endTime: now,
+        pauseCount: 0,
+        expectedTime: minutes * 60,
+        actualDuration: timeLeft,
+        favoriteQuotes: 0,
+        pausedTime: 0,
+        lastPauseTimestamp: null,
+        extensionTime: 0,
+        netEffectiveTime: 0,
+        efficiencyRatio: 0,
+        completionStatus: 'Completed On Time',
+        isPaused: false,
+        pausedTimeLeft: null
+      },
       taskName: 'Current Task' 
     });
     eventBus.emit('timer:metrics-update', { metrics: metricUpdates });
