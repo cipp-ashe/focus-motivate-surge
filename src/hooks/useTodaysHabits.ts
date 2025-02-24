@@ -5,6 +5,7 @@ import { eventBus } from '@/lib/eventBus';
 
 export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
+  const [processedHabits, setProcessedHabits] = useState<Set<string>>(new Set());
 
   const getTodaysHabits = useCallback(() => {
     const today = new Date();
@@ -29,19 +30,18 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       activeTemplates
     });
 
-    // Track which habits we've already processed to prevent duplicates
-    const processedHabits = new Set<string>();
-    
     habits.forEach(habit => {
-      // Skip if we've already processed this habit
-      if (habit.metrics.type === 'timer' && !processedHabits.has(habit.id)) {
-        processedHabits.add(habit.id);
-        
+      // Skip if we've already processed this habit today
+      if (habit.metrics?.type === 'timer' && !processedHabits.has(habit.id)) {
         const template = activeTemplates.find(t => 
           t.habits.some(h => h.id === habit.id)
         );
         
         if (template) {
+          // Store that we've processed this habit
+          setProcessedHabits(prev => new Set(prev).add(habit.id));
+          
+          // Check if task already exists before creating
           eventBus.emit('habit:generate-task', {
             habitId: habit.id,
             templateId: template.templateId,
@@ -53,7 +53,23 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     });
 
     setTodaysHabits(habits);
-  }, [getTodaysHabits, activeTemplates]);
+  }, [getTodaysHabits, activeTemplates, processedHabits]);
+
+  // Reset processed habits at midnight
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+    
+    const timer = setTimeout(() => {
+      setProcessedHabits(new Set());
+    }, timeUntilMidnight);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return { todaysHabits };
 };
