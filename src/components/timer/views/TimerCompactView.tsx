@@ -4,12 +4,12 @@ import { Card } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
 import { TimerDisplay } from "../TimerDisplay";
 import { TimerControls } from "../controls/TimerControls";
-import { TimerMetricsDisplay } from "../TimerMetrics";
-import { QuoteDisplay } from "../../quotes/QuoteDisplay";
 import { MinutesInput } from "../../minutes/MinutesInput";
 import { SoundSelector } from "../../SoundSelector";
 import { Quote, SoundOption } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
+import { ChevronUpIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TimerCompactViewProps {
   taskName: string;
@@ -45,7 +45,6 @@ export const TimerCompactView = memo(({
   taskName,
   timerCircleProps,
   timerControlsProps,
-  metrics,
   internalMinutes,
   onMinutesChange,
   selectedSound,
@@ -53,59 +52,58 @@ export const TimerCompactView = memo(({
   onTestSound,
   isLoadingAudio,
   onExpand,
-  onLike,
-  favorites,
-  setFavorites,
 }: TimerCompactViewProps) => {
   return (
-    <Card className="p-4 w-full mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg sm:p-4">
-      <div className="space-y-3 sm:space-y-4">
+    <Card className="relative p-3 w-full mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute right-2 top-2 p-1 h-6 w-6"
+        onClick={onExpand}
+      >
+        <ChevronUpIcon className="h-4 w-4" />
+      </Button>
+
+      <div className="space-y-2">
         <TimerHeader taskName={taskName} />
 
-        <div className={`overflow-hidden transition-all duration-700 ${
-          timerCircleProps.isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'
-        }`}>
-          <div className="flex flex-col items-center space-y-3 pt-1">
-            <MinutesInput
-              minutes={Math.floor(timerCircleProps.minutes)}
-              onMinutesChange={onMinutesChange}
-              minMinutes={1}
-              maxMinutes={60}
-            />
+        <div className="grid grid-cols-[1fr,auto] gap-2 items-center">
+          <TimerDisplay
+            circleProps={timerCircleProps}
+            size="normal"
+            onClick={onExpand}
+            isRunning={timerCircleProps.isRunning}
+          />
 
-            <SoundSelector
-              selectedSound={selectedSound}
-              onSoundChange={onSoundChange}
-              onTestSound={onTestSound}
-              isLoadingAudio={isLoadingAudio}
-            />
+          <div className="flex flex-col gap-2">
+            <div className={`transition-all duration-300 ${
+              timerCircleProps.isRunning ? 'opacity-0' : 'opacity-100'
+            }`}>
+              <MinutesInput
+                minutes={Math.floor(timerCircleProps.minutes)}
+                onMinutesChange={onMinutesChange}
+                minMinutes={1}
+                maxMinutes={60}
+              />
+            </div>
+
+            <div className={`transition-all duration-300 ${
+              timerCircleProps.isRunning ? 'opacity-0' : 'opacity-100'
+            }`}>
+              <SoundSelector
+                selectedSound={selectedSound}
+                onSoundChange={onSoundChange}
+                onTestSound={onTestSound}
+                isLoadingAudio={isLoadingAudio}
+              />
+            </div>
           </div>
         </div>
 
-        <TimerDisplay
-          circleProps={timerCircleProps}
-          size="normal"
-          onClick={onExpand}
-          isRunning={timerCircleProps.isRunning}
-        />
-
         <TimerControls {...timerControlsProps} />
-
-        <TimerMetricsDisplay
-          metrics={metrics}
-          isRunning={timerCircleProps.isRunning}
-        />
-
-        <QuoteDisplay
-          currentTask={taskName}
-          onLike={onLike}
-          favorites={favorites}
-          setFavorites={setFavorites}
-        />
       </div>
     </Card>
   );
 });
 
 TimerCompactView.displayName = 'TimerCompactView';
-
