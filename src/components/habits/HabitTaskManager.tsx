@@ -5,13 +5,66 @@ import { useTagSystem } from "@/hooks/useTagSystem";
 import { useTaskContext } from "@/contexts/TaskContext";
 import { useHabitState } from "@/contexts/habits/HabitContext";
 import { eventBus } from "@/lib/eventBus";
+import { relationshipManager } from "@/lib/relationshipManager";
 
 export const HabitTaskManager = () => {
   const { templates: activeTemplates } = useHabitState();
   const { todaysHabits } = useTodaysHabits(activeTemplates);
   const { addTagToEntity } = useTagSystem();
-  const { items: tasks, cleared } = useTaskContext();
+  const { items: tasks, completed } = useTaskContext();
   
+  useEffect(() => {
+    const handleHabitTask = (payload: { habitId: string; templateId: string; duration: number; name: string }) => {
+      const taskId = `habit-${payload.habitId}-${new Date().toISOString()}`;
+      
+      // Create task
+      eventBus.emit('task:create', {
+        id: taskId,
+        name: payload.name,
+        completed: false,
+        duration: payload.duration,
+        createdAt: new Date().toISOString(),
+        relationships: { habitId: payload.habitId }
+      });
+
+      // Create relationship
+      relationshipManager.createRelationship(
+        payload.habitId,
+        'habit',
+        taskId,
+        'task',
+        'habit-task'
+      );
+
+      // Add habit tag
+      addTagToEntity('Habit', taskId, 'task');
+    };
+
+    const handleHabitComplete = (payload: { habitId: string; taskId: string; templateId: string; metrics?: any }) => {
+      // Update relationships and mark task as completed
+      relationshipManager.updateRelationship(
+        payload.habitId,
+        payload.taskId,
+        { metadata: { completed: true, completedAt: new Date().toISOString() } }
+      );
+
+      eventBus.emit('task:complete', {
+        taskId: payload.taskId,
+        metrics: payload.metrics
+      });
+    };
+
+    // Subscribe to events
+    const unsubscribeGenerate = eventBus.on('habit:generate-task', handleHabitTask);
+    const unsubscribeComplete = eventBus.on('habit:complete-task', handleHabitComplete);
+
+    return () => {
+      unsubscribeGenerate();
+      unsubscribeComplete();
+    };
+  }, [addTagToEntity]);
+
+  // Process timer habits
   useEffect(() => {
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
     console.log('Processing timer habits:', timerHabits.length);
@@ -23,50 +76,19 @@ export const HabitTaskManager = () => {
         .map(task => task.relationships.habitId)
     );
 
-    // Get IDs of manually cleared habit tasks for today
-    const clearedHabitIds = new Set(
-      cleared
-        .filter(task => 
-          task.relationships?.habitId && 
-          task.clearReason === 'manual'
-        )
-        .map(task => task.relationships.habitId)
-    );
-
-    // Create Set of active habit IDs
-    const activeHabitIds = new Set(timerHabits.map(habit => habit.id));
-
-    // Remove tasks for habits that are no longer active
-    tasks
-      .filter(task => 
-        task.relationships?.habitId && 
-        !activeHabitIds.has(task.relationships.habitId)
-      )
-      .forEach(task => {
-        console.log('Removing inactive habit task:', task.id);
-        eventBus.emit('task:delete', { taskId: task.id, reason: 'habit-removed' });
-      });
-
-    // Add new tasks for habits that don't have one yet and weren't manually cleared
+    // Create tasks for timer habits that don't have one yet
     timerHabits.forEach(habit => {
-      if (!existingTaskIds.has(habit.id) && !clearedHabitIds.has(habit.id)) {
-        console.log('Creating new task for habit:', habit.id);
-        const target = habit.metrics?.target || 600;
-
-        const taskId = `habit-${habit.id}`;
-        eventBus.emit('task:create', {
-          id: taskId,
-          name: habit.name,
-          completed: false,
-          duration: target,
-          createdAt: new Date().toISOString(),
-          relationships: { habitId: habit.id }
+      if (!existingTaskIds.has(habit.id)) {
+        console.log('Generating task for habit:', habit.id);
+        eventBus.emit('habit:generate-task', {
+          habitId: habit.id,
+          templateId: habit.templateId,
+          duration: habit.metrics.target || 600,
+          name: habit.name
         });
-
-        addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits, tasks, cleared]);
+  }, [todaysHabits, tasks]);
 
   return null;
 };

@@ -1,4 +1,3 @@
-
 import { TimerMetrics } from './metrics';
 import { Quote } from './timer';
 import { Task } from './tasks';
@@ -69,8 +68,23 @@ export interface TimerEventPayloads {
   'note:delete': string;
   
   // Habit Events
-  'habit:generate-task': Task;
+  'habit:generate-task': {
+    habitId: string;
+    templateId: string;
+    duration: number;
+    name: string;
+  };
+  'habit:complete-task': {
+    habitId: string;
+    taskId: string;
+    templateId: string;
+    metrics?: TimerMetrics;
+  };
   'habit:template-update': ActiveTemplate;
+  'habit:sync-tasks': {
+    templateId: string;
+    date: string;
+  };
   
   // Relationship Events
   'relationship:create': EntityRelationship;
