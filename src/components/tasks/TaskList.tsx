@@ -26,6 +26,7 @@ export const TaskList = ({
   onCompletedTasksClear: () => void;
 }) => {
   const { completed: completedTasks } = useTaskState();
+  const actions = useTaskActions();
   const { activeTemplates } = useTemplateManagement();
 
   return (
