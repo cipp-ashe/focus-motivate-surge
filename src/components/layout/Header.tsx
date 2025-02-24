@@ -2,14 +2,15 @@
 import { Moon, Sun, StickyNote, ActivitySquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
+import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 
 interface HeaderProps {
   onNotesClick?: () => void;
-  onHabitsClick?: () => void;
 }
 
-export const Header = ({ onNotesClick, onHabitsClick }: HeaderProps) => {
+export const Header = ({ onNotesClick }: HeaderProps) => {
   const { isDark, toggleTheme } = useTheme();
+  const { toggle: toggleHabits } = useHabitsPanel();
 
   return (
     <div className="flex justify-between items-center mb-4 sm:mb-7">
@@ -18,7 +19,7 @@ export const Header = ({ onNotesClick, onHabitsClick }: HeaderProps) => {
       </h1>
       <div className="flex items-center gap-2">
         <button 
-          onClick={onHabitsClick}
+          onClick={toggleHabits}
           className="p-2 text-muted-foreground hover:text-foreground transition-colors"
           title="Habits"
         >

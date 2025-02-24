@@ -14,7 +14,6 @@ import { useHabitState } from '@/contexts/habits/HabitContext';
 const Index = () => {
   const { items, selected: selectedTaskId } = useTaskContext();
   const [favorites, setFavorites] = useState<Quote[]>([]);
-  const [isHabitDrawerOpen, setIsHabitDrawerOpen] = useState(false);
   const { templates } = useHabitState();
 
   const selectedTask = selectedTaskId 
@@ -59,9 +58,7 @@ const Index = () => {
       
       <HabitTracker 
         activeTemplates={templates}
-        onConfigureTemplates={() => setIsHabitDrawerOpen(true)}
-        isOpen={isHabitDrawerOpen}
-        onOpenChange={setIsHabitDrawerOpen}
+        onConfigureTemplates={() => {}}
       />
     </div>
   );
