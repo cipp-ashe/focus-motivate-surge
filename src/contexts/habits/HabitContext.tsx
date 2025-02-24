@@ -115,7 +115,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
                 habitId: habit.id,
                 templateId: template.templateId,
                 duration: habit.metrics.target || 1500,
-                name: `${habit.name} (${Math.floor((habit.metrics.target || 1500) / 60)}min)`
+                name: habit.name // Just use the habit name directly
               });
             }
           });

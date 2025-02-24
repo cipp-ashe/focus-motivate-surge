@@ -7,11 +7,9 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
 
   const getTodaysHabits = useCallback(() => {
-    // Get today's day name (e.g., "Monday")
     const today = new Date();
     const dayOfWeek = today.toLocaleString('en-US', { weekday: 'long' }) as DayOfWeek;
     
-    // Filter habits from templates that are active today
     const habitsForToday = activeTemplates.flatMap(template => {
       if (template.activeDays.includes(dayOfWeek)) {
         return template.habits;
@@ -42,8 +40,8 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
           eventBus.emit('habit:generate-task', {
             habitId: habit.id,
             templateId: template.templateId,
-            duration: habit.metrics.target || 25, // Default to 25 minutes if no target set
-            name: `${habit.name} (${habit.metrics.target || 25}min)`
+            duration: habit.metrics.target || 25,
+            name: habit.name // Just use the habit name directly
           });
         }
       }
