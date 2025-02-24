@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
@@ -9,13 +9,15 @@ import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
 
-const HabitTracker: React.FC = () => {
+interface HabitTrackerProps {
+  activeTemplates: any[];
+}
+
+const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [allTemplates, setAllTemplates] = useState<HabitTemplate[]>(habitTemplates);
 
   const {
-    activeTemplates,
-    addTemplate,
     updateTemplate,
     removeTemplate,
     updateTemplateDays,
@@ -35,10 +37,10 @@ const HabitTracker: React.FC = () => {
     handleConfigureTemplate,
     handleCloseTemplate,
     handleSaveTemplate,
-  } = useTemplateCreation(addTemplate, updateTemplate);
+  } = useTemplateCreation(updateTemplate, updateTemplate);
 
   // Load custom templates from localStorage
-  useEffect(() => {
+  React.useEffect(() => {
     const loadCustomTemplates = () => {
       const customTemplatesStr = localStorage.getItem('custom-templates');
       const customTemplates = customTemplatesStr ? JSON.parse(customTemplatesStr) : [];
@@ -52,26 +54,6 @@ const HabitTracker: React.FC = () => {
       window.removeEventListener('templatesUpdated', loadCustomTemplates);
     };
   }, []);
-
-  const handleTemplateSelect = (templateId: string) => {
-    const template = allTemplates.find(t => t.id === templateId);
-    if (template) {
-      const newTemplate = {
-        templateId: template.id,
-        habits: template.defaultHabits.map(habit => ({
-          ...habit,
-          completed: false,
-          streak: 0,
-          lastCompleted: null
-        })),
-        activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        customized: false,
-      };
-      addTemplate(newTemplate);
-      setIsConfigOpen(false);
-      window.dispatchEvent(new Event('templatesUpdated'));
-    }
-  };
 
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
@@ -89,7 +71,18 @@ const HabitTracker: React.FC = () => {
         onOpenChange={setIsConfigOpen}
         allTemplates={allTemplates}
         activeTemplateIds={activeTemplates.map(t => t.templateId)}
-        onSelectTemplate={handleTemplateSelect}
+        onSelectTemplate={(template) => {
+          const templateInfo = allTemplates.find(t => t.id === template.id);
+          if (templateInfo) {
+            updateTemplate(template.id, {
+              templateId: template.id,
+              habits: templateInfo.defaultHabits,
+              activeDays: templateInfo.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+              customized: false,
+            });
+            setIsConfigOpen(false);
+          }
+        }}
         onCreateTemplate={handleCreateTemplate}
       />
     </div>
