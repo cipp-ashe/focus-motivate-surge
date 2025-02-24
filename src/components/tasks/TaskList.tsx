@@ -7,6 +7,7 @@ import { TaskTable } from './TaskTable';
 import { CompletedTasks } from './CompletedTasks';
 import { HabitTaskManager } from '../habits/HabitTaskManager';
 import { useTaskContext } from '@/contexts/TaskContext';
+import { ListTodo, Award, TimerOff } from 'lucide-react';
 
 interface TaskListProps {
   tasks: Task[];
@@ -41,15 +42,30 @@ export const TaskList: React.FC<TaskListProps> = ({
       
       <HabitTaskManager />
 
+      <div className="flex-none px-4 py-3 border-b border-border/50">
+        <div className="flex items-center gap-2 text-foreground">
+          <ListTodo className="h-4 w-4 text-primary" />
+          <span className="font-medium">Active Tasks</span>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto">
-        <TaskTable
-          tasks={tasks}
-          selectedTasks={selectedTasks}
-          onTaskClick={onTaskClick}
-          onTaskDelete={(taskId) => eventBus.emit('task:delete', { taskId, reason: 'manual' })}
-          onTasksUpdate={onTasksUpdate}
-          onTasksClear={() => tasks.forEach(task => eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' }))}
-        />
+        {tasks.length > 0 ? (
+          <TaskTable
+            tasks={tasks}
+            selectedTasks={selectedTasks}
+            onTaskClick={onTaskClick}
+            onTaskDelete={(taskId) => eventBus.emit('task:delete', { taskId, reason: 'manual' })}
+            onTasksUpdate={onTasksUpdate}
+            onTasksClear={() => tasks.forEach(task => eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' }))}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground space-y-2">
+            <ListTodo className="h-8 w-8 text-muted-foreground/50" />
+            <p>No active tasks</p>
+            <p className="text-sm">Add a new task to get started</p>
+          </div>
+        )}
       </div>
 
       {completedTasks.length > 0 && (
