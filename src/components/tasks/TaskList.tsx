@@ -33,16 +33,6 @@ export const TaskList: React.FC<TaskListProps> = ({
     eventBus.emit('task:create', task);
   };
 
-  const handleTaskDelete = (taskId: string) => {
-    eventBus.emit('task:delete', { taskId, reason: 'manual' });
-  };
-
-  const handleTasksClear = () => {
-    tasks.forEach(task => {
-      eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
-    });
-  };
-
   return (
     <>
       <div className="section-header">
@@ -50,9 +40,7 @@ export const TaskList: React.FC<TaskListProps> = ({
       </div>
       
       <div className="section-header">
-        <HabitTaskManager 
-          activeTemplates={[]} // This should be passed from a parent component
-        />
+        <HabitTaskManager />
       </div>
 
       <div className="scrollable-content">

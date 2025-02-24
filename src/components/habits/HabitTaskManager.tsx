@@ -3,14 +3,11 @@ import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { useTaskContext } from "@/contexts/TaskContext";
-import type { ActiveTemplate } from '@/components/habits/types';
+import { useHabitState } from "@/contexts/habits/HabitContext";
 import { eventBus } from "@/lib/eventBus";
 
-interface HabitTaskManagerProps {
-  activeTemplates: ActiveTemplate[];
-}
-
-export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => {
+export const HabitTaskManager = () => {
+  const { templates: activeTemplates } = useHabitState();
   const { todaysHabits } = useTodaysHabits(activeTemplates);
   const { addTagToEntity } = useTagSystem();
   const { items: tasks, cleared } = useTaskContext();
