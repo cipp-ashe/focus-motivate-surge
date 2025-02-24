@@ -1,4 +1,3 @@
-
 import { TimerEventType, TimerEventPayloads, TimerEventCallback } from '@/types/events';
 
 /**
@@ -35,7 +34,7 @@ class EventBus {
       this.scheduleNextReset();
     };
 
-    const scheduleNextReset = () => {
+    this.scheduleNextReset = () => {
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -45,8 +44,10 @@ class EventBus {
       setTimeout(resetProcessedEvents, timeUntilMidnight);
     };
 
-    scheduleNextReset();
+    this.scheduleNextReset();
   }
+
+  private scheduleNextReset: () => void;
 
   /**
    * Checks if an event with the given ID has already been processed today
