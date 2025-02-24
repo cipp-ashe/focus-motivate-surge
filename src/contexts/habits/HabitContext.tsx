@@ -115,12 +115,15 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
                 habitId: habit.id,
                 templateId: template.templateId,
                 duration: habit.metrics.target || 1500,
-                name: habit.name // Just use the habit name directly
+                name: habit.name
               });
             }
           });
         }
       }),
+      eventBus.on('habit:template-delete', ({ templateId }) => {
+        dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+      })
     ];
 
     return () => unsubscribers.forEach(unsub => unsub());

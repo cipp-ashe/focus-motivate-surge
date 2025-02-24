@@ -8,6 +8,7 @@ import { HabitTemplate, ActiveTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
+import { eventBus } from '@/lib/eventBus';
 
 interface HabitTrackerProps {
   activeTemplates: ActiveTemplate[];
@@ -16,12 +17,6 @@ interface HabitTrackerProps {
 const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [allTemplates, setAllTemplates] = useState<HabitTemplate[]>(habitTemplates);
-
-  const {
-    updateTemplate,
-    removeTemplate,
-    updateTemplateDays,
-  } = useTemplateManagement();
 
   const {
     getTodayProgress,
@@ -37,9 +32,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
     handleConfigureTemplate,
     handleCloseTemplate,
     handleSaveTemplate,
-  } = useTemplateCreation((template: ActiveTemplate) => {
-    updateTemplate(template.templateId, template);
-  }, updateTemplate);
+  } = useTemplateCreation(() => {}, () => {});
 
   // Load custom templates from localStorage
   React.useEffect(() => {
@@ -57,13 +50,27 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
     };
   }, []);
 
+  // Listen for template events
+  React.useEffect(() => {
+    const handleTemplateUpdate = (template: ActiveTemplate) => {
+      eventBus.emit('habit:template-update', template);
+    };
+
+    const handleTemplateDelete = (templateId: string) => {
+      eventBus.emit('habit:template-delete', { templateId });
+    };
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, []);
+
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
       <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
 
       <ActiveTemplateList
         activeTemplates={activeTemplates}
-        onRemove={removeTemplate}
         getTodayProgress={getTodayProgress}
         onHabitUpdate={updateProgress}
       />
@@ -73,14 +80,17 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
         onOpenChange={setIsConfigOpen}
         allTemplates={allTemplates}
         activeTemplateIds={activeTemplates.map(t => t.templateId)}
-        onSelectTemplate={(template: HabitTemplate) => {
-          updateTemplate(template.id, {
-            templateId: template.id,
-            habits: template.defaultHabits,
-            activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-            customized: false,
-          });
-          setIsConfigOpen(false);
+        onSelectTemplate={(templateId: string) => {
+          const template = allTemplates.find(t => t.id === templateId);
+          if (template) {
+            eventBus.emit('habit:template-update', {
+              templateId: template.id,
+              habits: template.defaultHabits,
+              activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+              customized: false,
+            });
+            setIsConfigOpen(false);
+          }
         }}
         onCreateTemplate={handleCreateTemplate}
       />
