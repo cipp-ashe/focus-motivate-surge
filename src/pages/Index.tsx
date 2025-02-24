@@ -8,10 +8,14 @@ import { eventBus } from '@/lib/eventBus';
 import { TimerStateMetrics } from '@/types/metrics';
 import { Quote } from '@/types/timer';
 import { useState } from 'react';
+import HabitTracker from '@/components/habits/HabitTracker';
+import { useHabitState } from '@/contexts/habits/HabitContext';
 
 const Index = () => {
   const { items, selected: selectedTaskId } = useTaskContext();
   const [favorites, setFavorites] = useState<Quote[]>([]);
+  const [isHabitDrawerOpen, setIsHabitDrawerOpen] = useState(false);
+  const { templates } = useHabitState();
 
   const selectedTask = selectedTaskId 
     ? items.find(task => task.id === selectedTaskId)
@@ -51,6 +55,13 @@ const Index = () => {
           />
         }
         taskList={<TaskManager />}
+      />
+      
+      <HabitTracker 
+        activeTemplates={templates}
+        onConfigureTemplates={() => setIsHabitDrawerOpen(true)}
+        isOpen={isHabitDrawerOpen}
+        onOpenChange={setIsHabitDrawerOpen}
       />
     </div>
   );
