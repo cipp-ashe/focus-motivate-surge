@@ -13,13 +13,15 @@ interface NoteTagsProps {
   onAddTag: (tagName: string) => void;
   onRemoveTag: (tagName: string) => void;
   onTagClick: (tag: Tag) => void;
+  compact?: boolean;
 }
 
 export const NoteTags = ({
   tags,
   onAddTag,
   onRemoveTag,
-  onTagClick
+  onTagClick,
+  compact = false
 }: NoteTagsProps) => {
   const [tagInput, setTagInput] = useState('');
   const [isEditingTags, setIsEditingTags] = useState(false);
@@ -39,7 +41,8 @@ export const NoteTags = ({
           variant="secondary" 
           className={cn(
             "text-xs px-1.5 h-5 transition-colors cursor-pointer",
-            getTagStyles(tag.color)
+            getTagStyles(tag.color),
+            compact && "text-[10px] px-1 h-4"
           )}
           onClick={(e) => {
             e.stopPropagation();
@@ -48,7 +51,10 @@ export const NoteTags = ({
         >
           {tag.name}
           <X 
-            className="h-3 w-3 ml-1 cursor-pointer opacity-50 hover:opacity-100" 
+            className={cn(
+              "ml-1 cursor-pointer opacity-50 hover:opacity-100",
+              compact ? "h-2 w-2" : "h-3 w-3"
+            )}
             onClick={(e) => {
               e.stopPropagation();
               onRemoveTag(tag.name);
@@ -76,7 +82,10 @@ export const NoteTags = ({
               setIsEditingTags(false);
             }}
             placeholder="Add tag"
-            className="h-5 w-16 text-xs px-1.5"
+            className={cn(
+              "h-5 w-16 text-xs px-1.5",
+              compact && "h-4 text-[10px]"
+            )}
             autoFocus
           />
         </div>
@@ -87,7 +96,10 @@ export const NoteTags = ({
             e.stopPropagation();
             setIsEditingTags(true);
           }}
-          className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100"
+          className={cn(
+            "h-5 w-5 p-0 opacity-0 group-hover:opacity-100",
+            compact && "h-4 w-4"
+          )}
         />
       )}
     </div>

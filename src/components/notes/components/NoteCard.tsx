@@ -1,8 +1,8 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { ActionButton } from '@/components/ui/action-button';
-import type { Note } from '@/hooks/useNotes';
+import type { Note, TagColor } from '@/hooks/useNotes';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { NoteTags } from './NoteTags';
@@ -14,6 +14,7 @@ interface NoteCardProps {
   onDelete: (noteId: string) => void;
   onAddTag: (noteId: string, tagName: string) => void;
   onRemoveTag: (noteId: string, tagName: string) => void;
+  onUpdateTagColor?: (noteId: string, tagName: string, color: TagColor) => void;
   compact?: boolean;
 }
 
@@ -23,15 +24,18 @@ export const NoteCard = ({
   onDelete,
   onAddTag,
   onRemoveTag,
+  onUpdateTagColor,
   compact = false
 }: NoteCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const formattedDate = format(new Date(note.updatedAt || note.createdAt), compact ? 'HH:mm' : 'MMM d, HH:mm');
 
-  const previewLength = compact ? 40 : 80;
-  const previewContent = note.content.length > previewLength 
-    ? `${note.content.slice(0, previewLength)}...`
-    : note.content;
+  const handleTagClick = (tag: { name: string; color: TagColor }) => {
+    if (onUpdateTagColor) {
+      const nextColor = getNextColor(tag.color);
+      onUpdateTagColor(note.id, tag.name, nextColor);
+    }
+  };
 
   return (
     <div 
@@ -52,7 +56,7 @@ export const NoteCard = ({
               !isExpanded && "line-clamp-1",
               compact && "text-sm"
             )}>
-              {isExpanded ? note.content : previewContent}
+              {isExpanded ? note.content : note.content.slice(0, compact ? 40 : 80)}
             </span>
           </div>
           <div className={cn(
@@ -64,7 +68,7 @@ export const NoteCard = ({
                 tags={note.tags}
                 onAddTag={(tagName) => onAddTag(note.id, tagName)}
                 onRemoveTag={(tagName) => onRemoveTag(note.id, tagName)}
-                compact={compact}
+                onTagClick={handleTagClick}
               />
             )}
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -90,4 +94,11 @@ export const NoteCard = ({
       </div>
     </div>
   );
+};
+
+// Helper function to cycle through tag colors
+const getNextColor = (currentColor: TagColor): TagColor => {
+  const colors: TagColor[] = ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'];
+  const currentIndex = colors.indexOf(currentColor);
+  return colors[(currentIndex + 1) % colors.length];
 };
