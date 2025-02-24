@@ -2,7 +2,6 @@
 import React from 'react';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import TaskManager from '@/components/tasks/TaskManager';
-import HabitTracker from '@/components/habits/HabitTracker';
 import { TimerSection } from '@/components/timer/TimerSection';
 import { useTaskState } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
@@ -55,7 +54,6 @@ const Index = () => {
           }
           taskList={<TaskManager />}
         />
-        <HabitTracker />
       </div>
     </TaskProvider>
   );
