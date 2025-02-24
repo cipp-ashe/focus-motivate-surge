@@ -5,7 +5,9 @@ import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
-import { Sheet } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -17,27 +19,38 @@ const HabitsPage = () => {
         Habit Configuration
       </h1>
       
-      <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
+      <Sheet>
+        <div className="flex justify-end mb-4">
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Configure Templates
+            </Button>
+          </SheetTrigger>
+        </div>
+
         <HabitTracker 
           activeTemplates={templates}
           onConfigureTemplates={() => setIsConfigOpen(true)}
         />
 
-        <TemplateSelectionSheet
-          isOpen={isConfigOpen}
-          onOpenChange={setIsConfigOpen}
-          allTemplates={habitTemplates}
-          activeTemplateIds={templates.map(t => t.templateId)}
-          onSelectTemplate={(templateId) => {
-            const template = habitTemplates.find(t => t.id === templateId);
-            if (template) {
-              toast.success(`Added template: ${template.name}`);
-            }
-          }}
-          onCreateTemplate={() => {
-            toast.info('Creating new template');
-          }}
-        />
+        <SheetContent>
+          <TemplateSelectionSheet
+            isOpen={isConfigOpen}
+            onOpenChange={setIsConfigOpen}
+            allTemplates={habitTemplates}
+            activeTemplateIds={templates.map(t => t.templateId)}
+            onSelectTemplate={(templateId) => {
+              const template = habitTemplates.find(t => t.id === templateId);
+              if (template) {
+                toast.success(`Added template: ${template.name}`);
+              }
+            }}
+            onCreateTemplate={() => {
+              toast.info('Creating new template');
+            }}
+          />
+        </SheetContent>
       </Sheet>
     </div>
   );
