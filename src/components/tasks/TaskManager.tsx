@@ -12,8 +12,20 @@ const TaskManager = () => {
   const { addTagToEntity } = useTagSystem();
 
   useEffect(() => {
-    const handleTaskGeneration = (event: any) => {
-      const { habitId, templateId, name, duration } = event;
+    const handleHabitSchedule = (event: any) => {
+      const { habitId, templateId, name, duration, date } = event;
+      
+      // Check if task already exists for this habit and date
+      const existingTask = tasks.find(task => 
+        task.relationships?.habitId === habitId && 
+        task.relationships?.date === date
+      );
+      
+      if (existingTask) {
+        console.log(`Task already exists for habit ${habitId} on ${date}`);
+        return;
+      }
+
       const taskId = crypto.randomUUID();
       
       const task = {
@@ -24,7 +36,8 @@ const TaskManager = () => {
         createdAt: new Date().toISOString(),
         relationships: {
           habitId,
-          templateId
+          templateId,
+          date
         }
       };
 
@@ -44,13 +57,13 @@ const TaskManager = () => {
       });
     };
 
-    // Listen for habit task generation
-    eventBus.on('habit:generate-task', handleTaskGeneration);
+    // Listen for habit scheduling
+    eventBus.on('habit:schedule', handleHabitSchedule);
     
     return () => {
-      eventBus.off('habit:generate-task', handleTaskGeneration);
+      eventBus.off('habit:schedule', handleHabitSchedule);
     };
-  }, [addTagToEntity]);
+  }, [tasks, addTagToEntity]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);

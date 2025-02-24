@@ -3,73 +3,58 @@ import { useEffect, useState, useCallback } from 'react';
 import { HabitDetail, DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
 
+/**
+ * Custom hook to manage today's habits and their task generation
+ * Following Single Responsibility Principle - this hook only manages habit scheduling
+ */
 export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
-  const [processedHabits, setProcessedHabits] = useState<Set<string>>(new Set());
-
+  
+  // Get habits scheduled for today
   const getTodaysHabits = useCallback(() => {
     const today = new Date();
     const dayOfWeek = today.toLocaleString('en-US', { weekday: 'long' }) as DayOfWeek;
     
-    const habitsForToday = activeTemplates.flatMap(template => {
-      if (template.activeDays.includes(dayOfWeek)) {
-        return template.habits;
-      }
-      return [];
-    });
-
-    return habitsForToday;
+    return activeTemplates.flatMap(template => 
+      template.activeDays.includes(dayOfWeek) ? template.habits : []
+    );
   }, [activeTemplates]);
 
   useEffect(() => {
     const habits = getTodaysHabits();
-    console.log('Updating today\'s habits:', {
-      habits,
-      timerHabits: habits.filter(h => h.metrics?.type === 'timer'),
-      date: new Date().toLocaleString(),
-      activeTemplates
-    });
-
-    habits.forEach(habit => {
-      // Skip if we've already processed this habit today
-      if (habit.metrics?.type === 'timer' && !processedHabits.has(habit.id)) {
-        const template = activeTemplates.find(t => 
-          t.habits.some(h => h.id === habit.id)
-        );
-        
-        if (template) {
-          // Store that we've processed this habit
-          setProcessedHabits(prev => new Set(prev).add(habit.id));
+    
+    // Only emit events for new habits
+    const lastProcessedDate = localStorage.getItem('lastHabitProcessingDate');
+    const today = new Date().toDateString();
+    
+    // Process habits only once per day
+    if (lastProcessedDate !== today) {
+      console.log('Processing habits for new day:', today);
+      
+      habits.forEach(habit => {
+        if (habit.metrics?.type === 'timer') {
+          const template = activeTemplates.find(t => 
+            t.habits.some(h => h.id === habit.id)
+          );
           
-          // Check if task already exists before creating
-          eventBus.emit('habit:generate-task', {
-            habitId: habit.id,
-            templateId: template.templateId,
-            duration: habit.metrics.target || 25,
-            name: habit.name
-          });
+          if (template) {
+            // Emit a single event for habit task generation
+            eventBus.emit('habit:schedule', {
+              habitId: habit.id,
+              templateId: template.templateId,
+              duration: habit.metrics.target || 25,
+              name: habit.name,
+              date: today
+            });
+          }
         }
-      }
-    });
+      });
+      
+      localStorage.setItem('lastHabitProcessingDate', today);
+    }
 
     setTodaysHabits(habits);
-  }, [getTodaysHabits, activeTemplates, processedHabits]);
-
-  // Reset processed habits at midnight
-  useEffect(() => {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    
-    const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-    
-    const timer = setTimeout(() => {
-      setProcessedHabits(new Set());
-    }, timeUntilMidnight);
-
-    return () => clearTimeout(timer);
-  }, []);
+  }, [getTodaysHabits, activeTemplates]);
 
   return { todaysHabits };
 };
