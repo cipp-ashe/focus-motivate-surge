@@ -29,9 +29,11 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       activeTemplates
     });
 
-    // For each timer-based habit, generate a task
+    // For each timer-based habit, generate a task once
+    const processedHabitIds = new Set();
     habits.forEach(habit => {
-      if (habit.metrics.type === 'timer') {
+      if (habit.metrics.type === 'timer' && !processedHabitIds.has(habit.id)) {
+        processedHabitIds.add(habit.id);
         const template = activeTemplates.find(t => 
           t.habits.some(h => h.id === habit.id)
         );
@@ -41,7 +43,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
             habitId: habit.id,
             templateId: template.templateId,
             duration: habit.metrics.target || 25,
-            name: habit.name // Just use the habit name directly
+            name: habit.name
           });
         }
       }

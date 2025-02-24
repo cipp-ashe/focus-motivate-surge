@@ -8,7 +8,6 @@ import { useTaskContext } from '@/contexts/TaskContext';
 import { ListTodo, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
-import { useTagSystem } from '@/hooks/useTagSystem';
 
 interface TaskListProps {
   tasks: Task[];
@@ -30,58 +29,10 @@ export const TaskList: React.FC<TaskListProps> = ({
   onCompletedTasksClear,
 }) => {
   const { open: openHabits } = useHabitsPanel();
-  const { addTagToEntity } = useTagSystem();
 
   const handleTaskAdd = (task: Task) => {
     eventBus.emit('task:create', task);
   };
-
-  // Subscribe to habit task generation
-  React.useEffect(() => {
-    const handleHabitTaskGeneration = ({ 
-      habitId, 
-      templateId, 
-      duration, 
-      name 
-    }: { 
-      habitId: string; 
-      templateId: string; 
-      duration: number; 
-      name: string; 
-    }) => {
-      const task: Task = {
-        id: crypto.randomUUID(),
-        name,
-        completed: false,
-        duration,
-        createdAt: new Date().toISOString(),
-        relationships: {
-          habitId,
-          templateId
-        }
-      };
-
-      // Create the task
-      eventBus.emit('task:create', task);
-      
-      // Add the Habit tag
-      addTagToEntity('Habit', task.id, 'task');
-
-      // Create relationship
-      eventBus.emit('relationship:create', {
-        sourceId: habitId,
-        sourceType: 'habit',
-        targetId: task.id,
-        targetType: 'task',
-        relationType: 'habit-task'
-      });
-    };
-
-    eventBus.on('habit:generate-task', handleHabitTaskGeneration);
-    return () => {
-      eventBus.off('habit:generate-task', handleHabitTaskGeneration);
-    };
-  }, [addTagToEntity]);
 
   return (
     <div className="flex flex-col h-full">
