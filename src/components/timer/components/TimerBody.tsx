@@ -35,25 +35,25 @@ export const TimerBody = ({
       />
 
       <div className={cn(
-        "flex-1 grid gap-4",
-        "grid-cols-1 lg:grid-cols-[1fr,auto]",
-        "p-4 sm:p-6",
+        "flex-1 grid gap-6",
+        "grid-cols-1 lg:grid-cols-[1fr,280px]",
+        "p-6",
         "min-h-0" // Important for preventing overflow
       )}>
         {/* Timer Circle and Controls Section */}
-        <div className="flex flex-col items-center justify-center space-y-6">
+        <div className="flex flex-col items-center justify-center gap-8">
           <div className="relative w-full max-w-[300px] mx-auto">
             <TimerCircle {...timerCircleProps} size="normal" />
           </div>
-          <TimerControls {...timerControlsProps} />
+          <div className="w-full max-w-[300px]">
+            <TimerControls {...timerControlsProps} />
+          </div>
         </div>
 
         {/* Metrics Section */}
         <div className={cn(
           "flex flex-col",
-          "w-full lg:w-[280px]",
-          "bg-card/5 rounded-lg",
-          "overflow-y-auto"
+          "bg-card/5 rounded-lg"
         )}>
           <TimerMetricsDisplay
             metrics={metrics}
@@ -64,4 +64,3 @@ export const TimerBody = ({
     </div>
   );
 };
-

@@ -49,9 +49,10 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
   setFavorites,
 }, ref) => {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
-      <div className="relative w-full max-w-[900px] mx-auto px-4 py-4 z-[101] flex flex-col gap-4 h-[90vh] overflow-x-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto">
+      <div className="fixed inset-0 bg-background/95 backdrop-blur-md" />
+      
+      <div className="relative z-[101] w-full max-w-[1200px] mx-auto p-6 flex flex-col gap-6 min-h-screen">
         <QuoteDisplay 
           showAsOverlay
           currentTask={taskName}
@@ -60,45 +61,48 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
           setFavorites={setFavorites}
         />
 
-        <Card className="bg-card/90 backdrop-blur-md shadow-lg p-6 border-primary/20">
-          <div className="flex flex-col justify-center">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 tracking-tight">
-                {taskName}
-              </h1>
-            </div>
-            
-            <div className="relative">
-              <div className="absolute top-2 right-2">
-                <TimerMetricsDisplay 
-                  metrics={metrics}
-                  isRunning={timerCircleProps.isRunning}
-                />
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-6">
+          {/* Timer Section */}
+          <Card className="bg-card/90 backdrop-blur-md shadow-lg p-8 border-primary/20">
+            <div className="flex flex-col items-center gap-8">
+              <div className="text-center">
+                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 tracking-tight">
+                  {taskName}
+                </h1>
               </div>
-
-              <div className="flex flex-col items-center gap-8">
+              
+              <div className="relative w-full max-w-[400px]">
                 <TimerDisplay
                   circleProps={timerCircleProps}
                   size="large"
                   isRunning={timerCircleProps.isRunning}
                 />
+              </div>
 
-                <div className="w-full flex justify-center">
-                  <div className="w-[372px]">
-                    <TimerControls {...timerControlsProps} />
-                  </div>
-                </div>
+              <div className="w-full max-w-[400px]">
+                <TimerControls {...timerControlsProps} />
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
+          {/* Metrics Section */}
+          <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20">
+            <div className="p-6 h-full">
+              <TimerMetricsDisplay
+                metrics={metrics}
+                isRunning={timerCircleProps.isRunning}
+              />
+            </div>
+          </Card>
+        </div>
+
+        {/* Notes Section */}
         <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1">
-          <div className="p-4 h-full flex flex-col">
-            <h2 className="text-lg font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+          <div className="p-6 h-full flex flex-col">
+            <h2 className="text-lg font-semibold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
               Quick Notes
             </h2>
-            <div className="flex-1">
+            <div className="flex-1 min-h-[200px]">
               <NotesEditor ref={ref} />
             </div>
           </div>
