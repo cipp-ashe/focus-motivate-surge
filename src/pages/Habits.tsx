@@ -20,7 +20,6 @@ const HabitsPage = () => {
         activeTemplates={templates} 
         onConfigureTemplates={() => {
           setIsConfigOpen(true);
-          console.log('Opening template configuration');
         }} 
       />
 
