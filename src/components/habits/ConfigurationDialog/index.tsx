@@ -4,9 +4,13 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { HabitDetail, DayOfWeek } from '../types';
 import DialogHeader from './DialogHeader';
-import { default as CustomDialogContent } from './DialogContent';
+import DialogFooter from './DialogFooter';
+import DaySelector from './DaySelector';
+import DraggableHabitList from './DraggableHabitList';
 
 interface ConfigurationDialogProps {
   open: boolean;
