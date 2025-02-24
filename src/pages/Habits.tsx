@@ -11,7 +11,6 @@ import { Settings } from 'lucide-react';
 const HabitsPage = () => {
   const { templates } = useHabitState();
   const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [isHabitDrawerOpen, setIsHabitDrawerOpen] = useState(false);
 
   return (
     <div className="container mx-auto py-6">
@@ -34,8 +33,6 @@ const HabitsPage = () => {
       <HabitTracker 
         activeTemplates={templates}
         onConfigureTemplates={() => setIsConfigOpen(true)}
-        isOpen={isHabitDrawerOpen}
-        onOpenChange={setIsHabitDrawerOpen}
       />
 
       <TemplateSelectionSheet
