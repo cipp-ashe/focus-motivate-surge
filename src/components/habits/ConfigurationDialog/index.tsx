@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
-  DialogTrigger,
+  DialogContent,
 } from "@/components/ui/dialog";
 import { HabitDetail, DayOfWeek } from '../types';
 import DialogHeader from './DialogHeader';
-import DialogContent from './DialogContent';
+import DialogContent as CustomDialogContent from './DialogContent';
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -100,7 +100,7 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogHeader />
-      <DialogContent
+      <CustomDialogContent
         habits={habits}
         draggedIndex={draggedIndex}
         activeDays={activeDays}
