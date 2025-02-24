@@ -3,8 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { ActiveTemplate, HabitTemplate } from './types';
+import { ActiveTemplate, HabitTemplate, HabitDetail } from './types';
 import { HabitList } from './HabitList';
+import type { Habit } from '@/types/habits';
 
 interface TemplateCardProps {
   template: ActiveTemplate;
@@ -14,6 +15,15 @@ interface TemplateCardProps {
   onHabitUpdate: (habitId: string, value: boolean | number) => void;
 }
 
+const convertToHabit = (habitDetail: HabitDetail): Habit => ({
+  ...habitDetail,
+  completed: false,
+  streak: 0,
+  lastCompleted: null,
+  category: 'Personal',
+  timePreference: 'Anytime'
+});
+
 const TemplateCard: React.FC<TemplateCardProps> = ({
   template,
   templateInfo,
@@ -21,6 +31,8 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   getProgress,
   onHabitUpdate,
 }) => {
+  const habits: Habit[] = template.habits.map(convertToHabit);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -36,7 +48,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       </CardHeader>
       <CardContent>
         <HabitList
-          habits={template.habits}
+          habits={habits}
           getProgress={getProgress}
           onHabitUpdate={onHabitUpdate}
         />

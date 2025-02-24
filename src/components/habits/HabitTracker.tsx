@@ -4,7 +4,7 @@ import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
 import { useTemplateCreation } from './hooks/useTemplateCreation';
-import { HabitTemplate, DayOfWeek } from './types';
+import { HabitTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
@@ -53,6 +53,26 @@ const HabitTracker: React.FC = () => {
     };
   }, []);
 
+  const handleTemplateSelect = (templateId: string) => {
+    const template = allTemplates.find(t => t.id === templateId);
+    if (template) {
+      const newTemplate = {
+        templateId: template.id,
+        habits: template.defaultHabits.map(habit => ({
+          ...habit,
+          completed: false,
+          streak: 0,
+          lastCompleted: null
+        })),
+        activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        customized: false,
+      };
+      addTemplate(newTemplate);
+      setIsConfigOpen(false);
+      window.dispatchEvent(new Event('templatesUpdated'));
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
       <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
@@ -69,7 +89,7 @@ const HabitTracker: React.FC = () => {
         onOpenChange={setIsConfigOpen}
         allTemplates={allTemplates}
         activeTemplateIds={activeTemplates.map(t => t.templateId)}
-        onSelectTemplate={handleConfigureTemplate}
+        onSelectTemplate={handleTemplateSelect}
         onCreateTemplate={handleCreateTemplate}
       />
     </div>
