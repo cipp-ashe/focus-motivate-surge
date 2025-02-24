@@ -35,11 +35,11 @@ function App() {
               <Router>
                 <NotesPanelProvider>
                   <HabitsPanelProvider>
-                    <AppLayout>
-                      <Routes>
+                    <Routes>
+                      <Route element={<AppLayout />}>
                         <Route path="/" element={<Index />} />
-                      </Routes>
-                    </AppLayout>
+                      </Route>
+                    </Routes>
                     <Toaster position="bottom-right" closeButton />
                   </HabitsPanelProvider>
                 </NotesPanelProvider>
