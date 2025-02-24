@@ -49,10 +49,10 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
   setFavorites,
 }, ref) => {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto">
-      <div className="fixed inset-0 bg-background/95 backdrop-blur-md" />
+    <div className="fixed inset-0 z-[9999] isolate">
+      <div className="fixed inset-0 bg-background/95 backdrop-blur-md z-[9999]" />
       
-      <div className="relative z-[101] w-full max-w-[1200px] mx-auto p-6 flex flex-col gap-6 min-h-screen">
+      <div className="relative z-[10000] w-full max-w-[1200px] mx-auto p-6 flex flex-col gap-6 min-h-screen overflow-y-auto">
         <QuoteDisplay 
           showAsOverlay
           currentTask={taskName}
@@ -107,6 +107,28 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
             </div>
           </div>
         </Card>
+
+        <button
+          onClick={onClose}
+          className="fixed top-4 right-4 z-[10001] p-2 rounded-full bg-background/80 hover:bg-background/90 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-foreground"
+          >
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+          <span className="sr-only">Close expanded view</span>
+        </button>
       </div>
     </div>
   );
