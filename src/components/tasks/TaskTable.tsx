@@ -47,18 +47,17 @@ export const TaskTable = ({
           task={task}
           isSelected={selectedTasks.includes(task.id)}
           editingTaskId={editingTaskId}
-          onTaskClick={onTaskClick}
-          onTaskDelete={onTaskDelete}
+          onTaskClick={(task) => onTaskClick(task)}
+          onTaskDelete={() => onTaskDelete(task.id)}
           onDurationChange={handleDurationChange}
           onDurationClick={handleDurationClick}
           onInputBlur={handleInputBlur}
         />
       ))}
       
-      {tasks.length > 0 && (
+      {tasks.length > 1 && (
         <button
           onClick={onTasksClear}
-          onTouchStart={onTasksClear}
           className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200 mt-2"
         >
           Clear All

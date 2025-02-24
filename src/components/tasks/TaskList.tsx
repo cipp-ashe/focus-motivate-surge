@@ -113,9 +113,9 @@ export const TaskList: React.FC<TaskListProps> = ({
             tasks={tasks}
             selectedTasks={selectedTasks}
             onTaskClick={onTaskClick}
-            onTaskDelete={(taskId) => eventBus.emit('task:delete', { taskId, reason: 'manual' })}
+            onTaskDelete={onTaskDelete}
             onTasksUpdate={onTasksUpdate}
-            onTasksClear={() => tasks.forEach(task => eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' }))}
+            onTasksClear={onTasksClear}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground space-y-4">
