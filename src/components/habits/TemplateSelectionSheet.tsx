@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ActiveTemplate, DayOfWeek, HabitTemplate } from './types';
 import { Button } from '../ui/button';
+import { Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
+import ConfigurationDialog from './ConfigurationDialog';
 
 interface TemplateSelectionSheetProps {
   isOpen: boolean;
@@ -23,15 +25,33 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   onSelectTemplate,
   onCreateTemplate,
 }) => {
-  const handleTemplateSelect = (templateId: string) => {
-    // Emit template selection event
-    eventBus.emit('habit:template-update', {
-      templateId,
-      activeDays: [] as DayOfWeek[],
-      habits: [],
+  const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
+
+  const handleSelectTemplate = (template: HabitTemplate) => {
+    const newTemplate: ActiveTemplate = {
+      templateId: template.id,
+      habits: template.defaultHabits,
+      activeDays: template.defaultDays || [],
       customized: false
-    });
-    onSelectTemplate(templateId);
+    };
+    setConfiguringTemplate(newTemplate);
+  };
+
+  const handleUpdateDays = (days: DayOfWeek[]) => {
+    if (!configuringTemplate) return;
+    const updatedTemplate = {
+      ...configuringTemplate,
+      activeDays: days,
+      customized: true
+    };
+    setConfiguringTemplate(updatedTemplate);
+  };
+
+  const handleSaveConfiguration = () => {
+    if (!configuringTemplate) return;
+    eventBus.emit('habit:template-update', configuringTemplate);
+    onSelectTemplate(configuringTemplate.templateId);
+    setConfiguringTemplate(null);
   };
 
   return (
@@ -55,10 +75,10 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
                     <p className="text-sm text-muted-foreground">{template.description}</p>
                   </div>
                   <Button
-                    onClick={() => handleTemplateSelect(template.id)}
+                    onClick={() => handleSelectTemplate(template)}
                     disabled={activeTemplateIds.includes(template.id)}
                   >
-                    {activeTemplateIds.includes(template.id) ? 'Added' : 'Add Template'}
+                    {activeTemplateIds.includes(template.id) ? 'Added' : 'Configure'}
                   </Button>
                 </div>
               ))}
@@ -73,6 +93,18 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
           </div>
         </div>
       </SheetContent>
+
+      {configuringTemplate && (
+        <ConfigurationDialog
+          open={!!configuringTemplate}
+          onClose={() => setConfiguringTemplate(null)}
+          habits={configuringTemplate.habits}
+          activeDays={configuringTemplate.activeDays}
+          onUpdateDays={handleUpdateDays}
+          onSave={handleSaveConfiguration}
+          onSaveAsTemplate={() => {}}
+        />
+      )}
     </Sheet>
   );
 };
