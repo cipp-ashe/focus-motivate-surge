@@ -50,7 +50,6 @@ export const Timer = ({
     metrics,
     start,
     pause,
-    reset,
     addTime,
     setMinutes,
     completeTimer,
@@ -58,6 +57,7 @@ export const Timer = ({
     playSound,
     testSound,
     isLoadingAudio,
+    reset,
   } = useTimerState({
     duration,
     onComplete,
@@ -78,21 +78,28 @@ export const Timer = ({
 
   // Listen for timer view state changes
   useEffect(() => {
-    const unsubscribeExpand = eventBus.on('timer:expand', () => {
-      console.log('Timer expanding view');
-      setIsExpanded(true);
+    const unsubscribeExpand = eventBus.on('timer:expand', ({ taskName: eventTaskName }) => {
+      if (eventTaskName === taskName) {
+        console.log('Timer expanding view for:', eventTaskName);
+        setIsExpanded(true);
+      }
     });
 
-    const unsubscribeCollapse = eventBus.on('timer:collapse', () => {
-      console.log('Timer collapsing view');
-      setIsExpanded(false);
+    const unsubscribeCollapse = eventBus.on('timer:collapse', ({ taskName: eventTaskName }) => {
+      if (eventTaskName === taskName) {
+        console.log('Timer collapsing view for:', eventTaskName);
+        if (expandedViewRef.current?.saveNotes) {
+          expandedViewRef.current.saveNotes();
+        }
+        setIsExpanded(false);
+      }
     });
 
     return () => {
       unsubscribeExpand();
       unsubscribeCollapse();
     };
-  }, [setIsExpanded]);
+  }, [setIsExpanded, taskName]);
 
   const {
     handleComplete,
