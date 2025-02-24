@@ -1,13 +1,8 @@
 
-import React, { useState } from 'react';
-import { habitTemplates } from '../../utils/habitTemplates';
-import { useTemplateManagement } from './hooks/useTemplateManagement';
-import { useHabitProgress } from './hooks/useHabitProgress';
-import { useTemplateCreation } from './hooks/useTemplateCreation';
-import { HabitTemplate, ActiveTemplate } from './types';
+import React from 'react';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
-import { eventBus } from '@/lib/eventBus';
+import { ActiveTemplate } from './types';
 
 interface HabitTrackerProps {
   activeTemplates: ActiveTemplate[];
@@ -18,33 +13,14 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
   activeTemplates,
   onConfigureTemplates 
 }) => {
-  const {
-    getTodayProgress,
-    updateProgress,
-  } = useHabitProgress();
-
-  const {
-    selectedTemplate,
-    isCreatingTemplate,
-    newTemplateName,
-    setNewTemplateName,
-    handleCreateTemplate,
-    handleConfigureTemplate,
-    handleCloseTemplate,
-    handleSaveTemplate,
-  } = useTemplateCreation(() => {}, () => {});
-
   return (
-    <div className="space-y-4 max-w-4xl mx-auto">
+    <div className="space-y-6">
       <HabitTrackerHeader onConfigureTemplates={onConfigureTemplates} />
-
       <ActiveTemplateList
         activeTemplates={activeTemplates}
-        getTodayProgress={getTodayProgress}
-        onHabitUpdate={updateProgress}
-        onRemove={(templateId) => {
-          eventBus.emit('habit:template-delete', { templateId });
-        }}
+        getTodayProgress={() => ({})}
+        onHabitUpdate={() => {}}
+        onRemove={() => {}}
       />
     </div>
   );
