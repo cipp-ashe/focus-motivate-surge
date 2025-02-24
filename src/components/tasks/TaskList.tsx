@@ -69,17 +69,15 @@ export const TaskList: React.FC<TaskListProps> = ({
               <p>No active tasks</p>
               <p className="text-sm">Add a new task above to get started</p>
               <div className="pt-2">
-                <p className="text-sm">Or configure your weekly habits to</p>
-                <p className="text-sm">see them here on their active days</p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={openHabits}
+                  className="mt-2"
+                >
+                  Configure Habits
+                </Button>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={openHabits}
-                className="mt-2"
-              >
-                Configure Habits
-              </Button>
             </div>
           </div>
         )}
