@@ -9,6 +9,7 @@ import { TimerStateMetrics } from '@/types/metrics';
 import { Quote } from '@/types/timer';
 import { useState } from 'react';
 import { TaskProvider } from '@/contexts/TaskContext';
+import { HabitProvider } from '@/contexts/habits/HabitContext';
 
 const Index = () => {
   const { items, selected: selectedTaskId } = useTaskState();
@@ -40,22 +41,24 @@ const Index = () => {
   };
 
   return (
-    <TaskProvider>
-      <div className="min-h-screen flex flex-col space-y-4">
-        <TaskLayout
-          timer={
-            <TimerSection
-              selectedTask={selectedTask}
-              onTaskComplete={handleTaskComplete}
-              onDurationChange={handleDurationChange}
-              favorites={favorites}
-              setFavorites={setFavorites}
-            />
-          }
-          taskList={<TaskManager />}
-        />
-      </div>
-    </TaskProvider>
+    <HabitProvider>
+      <TaskProvider>
+        <div className="min-h-screen flex flex-col space-y-4">
+          <TaskLayout
+            timer={
+              <TimerSection
+                selectedTask={selectedTask}
+                onTaskComplete={handleTaskComplete}
+                onDurationChange={handleDurationChange}
+                favorites={favorites}
+                setFavorites={setFavorites}
+              />
+            }
+            taskList={<TaskManager />}
+          />
+        </div>
+      </TaskProvider>
+    </HabitProvider>
   );
 };
 
