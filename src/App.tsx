@@ -23,7 +23,7 @@ const queryClient = new QueryClient();
 // Use HashRouter for electron, BrowserRouter for web
 const Router = window.electron ? HashRouter : BrowserRouter;
 
-const App = () => {
+function App() {
   const { isDark } = useTheme(true);
 
   return (
@@ -50,6 +50,6 @@ const App = () => {
       </TaskProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

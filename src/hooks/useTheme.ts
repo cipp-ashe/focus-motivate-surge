@@ -17,4 +17,3 @@ export const useTheme = (initialDark = true) => {
     toggleTheme: () => setIsDark(prev => !prev)
   };
 };
-
