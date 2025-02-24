@@ -6,6 +6,7 @@ import { NotesDialog } from './NotesDialog';
 import { NotesListHeader } from './NotesListHeader';
 import { useNoteStorage } from '@/hooks/useNoteStorage';
 import { usePagination } from '@/hooks/usePagination';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface CompactNotesListProps {
   notes: Note[];
@@ -53,19 +54,21 @@ export const CompactNotesList = ({
         compact
       />
 
-      <div className="grid gap-1.5">
-        {paginatedNotes.map(note => (
-          <NoteCard
-            key={note.id}
-            note={note}
-            onEdit={onEditNote}
-            onDelete={handleDeleteNote}
-            onAddTag={handleAddTag}
-            onRemoveTag={handleRemoveTag}
-            compact
-          />
-        ))}
-      </div>
+      <ScrollArea className="h-[200px] w-full rounded-md border border-primary/10 bg-card/30 backdrop-blur-sm p-2">
+        <div className="grid gap-1">
+          {paginatedNotes.map(note => (
+            <NoteCard
+              key={note.id}
+              note={note}
+              onEdit={onEditNote}
+              onDelete={handleDeleteNote}
+              onAddTag={handleAddTag}
+              onRemoveTag={handleRemoveTag}
+              compact
+            />
+          ))}
+        </div>
+      </ScrollArea>
 
       <NotesDialog
         open={showClearDialog}
