@@ -7,11 +7,11 @@ import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
-import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isHabitDrawerOpen, setIsHabitDrawerOpen] = useState(false);
 
   return (
     <div className="container mx-auto py-6">
@@ -34,6 +34,8 @@ const HabitsPage = () => {
       <HabitTracker 
         activeTemplates={templates}
         onConfigureTemplates={() => setIsConfigOpen(true)}
+        isOpen={isHabitDrawerOpen}
+        onOpenChange={setIsHabitDrawerOpen}
       />
 
       <TemplateSelectionSheet
