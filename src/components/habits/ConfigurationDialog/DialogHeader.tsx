@@ -1,15 +1,19 @@
 
 import React from 'react';
 import {
-  DialogHeader as ShadcnDialogHeader,
+  DialogHeader as RadixDialogHeader,
   DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
 
-const DialogHeader = () => {
+const DialogHeader: React.FC = () => {
   return (
-    <ShadcnDialogHeader>
-      <DialogTitle>Configure Template</DialogTitle>
-    </ShadcnDialogHeader>
+    <RadixDialogHeader>
+      <DialogTitle>Configure Habits</DialogTitle>
+      <DialogDescription>
+        Set up your habits and tracking preferences. Drag to reorder habits.
+      </DialogDescription>
+    </RadixDialogHeader>
   );
 };
 

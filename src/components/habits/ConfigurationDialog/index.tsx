@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
+  DialogContent,
 } from "@/components/ui/dialog";
 import { HabitDetail, DayOfWeek } from '../types';
 import DialogHeader from './DialogHeader';
-import CustomDialogContent from './DialogContent';
+import { default as CustomDialogContent } from './DialogContent';
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -98,22 +99,52 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogHeader />
-      <CustomDialogContent
-        habits={habits}
-        draggedIndex={draggedIndex}
-        activeDays={activeDays}
-        onUpdateDays={onUpdateDays}
-        onAddHabit={handleAddHabit}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onUpdateHabit={handleUpdateHabit}
-        onDeleteHabit={handleDeleteHabit}
-        onSaveAsTemplate={onSaveAsTemplate}
-        onClose={onClose}
-        onSave={handleSave}
-      />
+      <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col">
+        <DialogHeader />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="space-y-4 p-6">
+            <div>
+              <h3 className="text-lg font-medium mb-2">Active Days</h3>
+              <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
+            </div>
+            
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium">Habits</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddHabit}
+                  className="gap-1"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Habit
+                </Button>
+              </div>
+
+              <div className="overflow-y-auto max-h-[calc(80vh-300px)] pr-2">
+                <DraggableHabitList
+                  habits={habits}
+                  draggedIndex={draggedIndex}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleDragEnd}
+                  onUpdateHabit={handleUpdateHabit}
+                  onDeleteHabit={handleDeleteHabit}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-auto border-t p-6">
+            <DialogFooter
+              onSaveAsTemplate={onSaveAsTemplate}
+              onClose={onClose}
+              onSave={handleSave}
+            />
+          </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 };
