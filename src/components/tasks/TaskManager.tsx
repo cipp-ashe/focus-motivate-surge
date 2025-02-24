@@ -2,40 +2,39 @@
 import React from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
-import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
-import { toast } from 'sonner';
+import { useTaskState } from '@/contexts/tasks/TaskContext';
+import { eventBus } from '@/lib/eventBus';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskState();
-  const actions = useTaskActions();
   const { handleTimerStart } = useTimerEvents();
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       handleTimerStart(task.name, task.duration || 1500);
-      actions.selectTask(taskId);
+      eventBus.emit('task:select', taskId);
     }
   };
 
   const handleTaskDelete = (taskId: string) => {
-    actions.deleteTask(taskId);
+    eventBus.emit('task:delete', taskId);
   };
 
   const handleTaskUpdate = (taskId: string, updates: any) => {
-    actions.updateTask(taskId, updates);
+    eventBus.emit('task:update', { taskId, updates });
   };
 
   const handleActiveTasksClear = () => {
-    // Clear only active tasks
-    tasks.forEach(task => actions.deleteTask(task.id));
-    toast.success('All active tasks cleared!');
+    tasks.forEach(task => {
+      eventBus.emit('task:delete', task.id);
+    });
   };
 
   const handleCompletedTasksClear = () => {
-    // Clear only completed tasks
-    completedTasks.forEach(task => actions.deleteTask(task.id));
-    toast.success('All completed tasks cleared!');
+    completedTasks.forEach(task => {
+      eventBus.emit('task:delete', task.id);
+    });
   };
 
   return (

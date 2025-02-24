@@ -3,9 +3,10 @@ import React from 'react';
 import { TaskInput } from './TaskInput';
 import { TaskTable } from './TaskTable';
 import { CompletedTasks } from './CompletedTasks';
-import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
+import { useTaskState } from '@/contexts/tasks/TaskContext';
 import { HabitTaskManager } from '../habits/HabitTaskManager';
 import { useTemplateManagement } from '@/components/habits/hooks/useTemplateManagement';
+import { eventBus } from '@/lib/eventBus';
 import type { Task } from '@/types/tasks';
 
 export const TaskList = ({
@@ -26,11 +27,10 @@ export const TaskList = ({
   onCompletedTasksClear: () => void;
 }) => {
   const { completed: completedTasks } = useTaskState();
-  const taskActions = useTaskActions();
   const { activeTemplates } = useTemplateManagement();
 
   const handleAddTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
-    taskActions.addTask(task);
+    eventBus.emit('task:create', task);
   };
 
   return (
