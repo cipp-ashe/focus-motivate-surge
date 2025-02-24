@@ -29,11 +29,14 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       activeTemplates
     });
 
-    // For each timer-based habit, generate a task once
-    const processedHabitIds = new Set();
+    // Track which habits we've already processed to prevent duplicates
+    const processedHabits = new Set<string>();
+    
     habits.forEach(habit => {
-      if (habit.metrics.type === 'timer' && !processedHabitIds.has(habit.id)) {
-        processedHabitIds.add(habit.id);
+      // Skip if we've already processed this habit
+      if (habit.metrics.type === 'timer' && !processedHabits.has(habit.id)) {
+        processedHabits.add(habit.id);
+        
         const template = activeTemplates.find(t => 
           t.habits.some(h => h.id === habit.id)
         );

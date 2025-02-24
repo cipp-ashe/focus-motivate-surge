@@ -4,7 +4,6 @@ import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { TaskInput } from './TaskInput';
 import { TaskTable } from './TaskTable';
-import { useTaskContext } from '@/contexts/TaskContext';
 import { ListTodo, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
@@ -28,10 +27,19 @@ export const TaskList: React.FC<TaskListProps> = ({
   onTasksClear,
   onCompletedTasksClear,
 }) => {
-  const { open: openHabits } = useHabitsPanel();
+  const { open: openHabits, isOpen } = useHabitsPanel();
 
   const handleTaskAdd = (task: Task) => {
+    // Prevent duplicate task creation
+    if (tasks.some(t => t.name === task.name && !t.completed)) {
+      return;
+    }
     eventBus.emit('task:create', task);
+  };
+
+  const handleConfigureHabits = () => {
+    console.log('Opening habits panel');
+    openHabits();
   };
 
   return (
@@ -49,7 +57,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           <Button 
             variant="outline" 
             size="sm"
-            onClick={openHabits}
+            onClick={handleConfigureHabits}
             className="flex items-center gap-2"
           >
             <Settings2 className="h-4 w-4" />
