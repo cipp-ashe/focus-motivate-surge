@@ -5,7 +5,6 @@ import { eventBus } from '@/lib/eventBus';
 import { TaskInput } from './TaskInput';
 import { TaskTable } from './TaskTable';
 import { CompletedTasks } from './CompletedTasks';
-import { HabitTaskManager } from '../habits/HabitTaskManager';
 import { useTaskContext } from '@/contexts/TaskContext';
 import { ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,6 +38,10 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   return (
     <div className="flex flex-col h-full">
+      <div className="flex-none">
+        <TaskInput onTaskAdd={handleTaskAdd} />
+      </div>
+
       <div className="flex-none px-4 py-3 border-b border-border/50">
         <div className="flex items-center gap-2 text-foreground">
           <ListTodo className="h-4 w-4 text-primary" />
@@ -77,7 +80,13 @@ export const TaskList: React.FC<TaskListProps> = ({
         )}
       </div>
 
-      <HabitTaskManager />
+      {/* Add CompletedTasks after the timer section */}
+      <CompletedTasks 
+        tasks={completedTasks}
+        onTasksClear={() => completedTasks.forEach(task => 
+          eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
+        )}
+      />
     </div>
   );
 };
