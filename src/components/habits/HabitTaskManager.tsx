@@ -41,11 +41,17 @@ export const HabitTaskManager = () => {
     };
 
     const handleHabitComplete = (payload: { habitId: string; taskId: string; templateId: string; metrics?: any }) => {
-      // Update relationships and mark task as completed
+      // Update relationship with valid properties
       relationshipManager.updateRelationship(
         payload.habitId,
         payload.taskId,
-        { metadata: { completed: true, completedAt: new Date().toISOString() } }
+        {
+          sourceId: payload.habitId,
+          targetId: payload.taskId,
+          relationType: 'habit-task',
+          sourceType: 'habit',
+          targetType: 'task'
+        }
       );
 
       eventBus.emit('task:complete', {
@@ -80,15 +86,21 @@ export const HabitTaskManager = () => {
     timerHabits.forEach(habit => {
       if (!existingTaskIds.has(habit.id)) {
         console.log('Generating task for habit:', habit.id);
+        
+        // Find the template this habit belongs to
+        const template = activeTemplates.find(t => 
+          t.habits.some(h => h.id === habit.id)
+        );
+        
         eventBus.emit('habit:generate-task', {
           habitId: habit.id,
-          templateId: habit.templateId,
+          templateId: template?.templateId || '',
           duration: habit.metrics.target || 600,
           name: habit.name
         });
       }
     });
-  }, [todaysHabits, tasks]);
+  }, [todaysHabits, tasks, activeTemplates]);
 
   return null;
 };
