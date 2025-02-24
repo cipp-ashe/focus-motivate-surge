@@ -29,14 +29,19 @@ export const TaskList = ({
   const { completed: completedTasks } = useTaskState();
   const { activeTemplates } = useTemplateManagement();
 
-  const handleAddTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
+  const handleTaskAdd = (taskData: Omit<Task, 'id' | 'createdAt'>) => {
+    const task: Task = {
+      ...taskData,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString()
+    };
     eventBus.emit('task:create', task);
   };
 
   return (
     <>
       <div className="section-header">
-        <TaskInput onTaskAdd={handleAddTask} />
+        <TaskInput onTaskAdd={handleTaskAdd} />
       </div>
       
       <div className="section-header">
@@ -50,16 +55,16 @@ export const TaskList = ({
           tasks={tasks}
           selectedTasks={selectedTasks}
           onTaskClick={onTaskClick}
-          onTaskDelete={onTaskDelete}
+          onTaskDelete={(taskId) => eventBus.emit('task:delete', taskId)}
           onTasksUpdate={onTasksUpdate}
-          onTasksClear={onTasksClear}
+          onTasksClear={() => tasks.forEach(task => eventBus.emit('task:delete', task.id))}
         />
       </div>
 
       <div className="section-footer">
         <CompletedTasks 
           tasks={completedTasks}
-          onTasksClear={onCompletedTasksClear}
+          onTasksClear={() => completedTasks.forEach(task => eventBus.emit('task:delete', task.id))}
         />
       </div>
     </>

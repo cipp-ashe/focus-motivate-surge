@@ -18,7 +18,6 @@ import { Award } from "lucide-react";
 import { TaskMetricsRow } from "./TaskMetricsRow";
 import { toast } from "sonner";
 import React from 'react';
-import { useTaskContext } from "@/contexts/TaskContext";
 
 interface CompletedTasksProps {
   tasks: Task[];
