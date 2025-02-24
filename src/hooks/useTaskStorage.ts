@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Task, TaskMetrics } from '@/types/tasks';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
@@ -32,24 +32,38 @@ export const useTaskStorage = () => {
 
     loadTasks();
 
-    const handleTaskCreate = (task: Omit<Task, 'id' | 'createdAt'>) => {
-      const newTask: Task = {
-        ...task,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-      };
-      setItems(prev => [...prev, newTask]);
-      toast.success('Task added 📝');
+    const handleTaskCreate = (task: Task) => {
+      setItems(prev => {
+        // Don't add if task with same ID already exists
+        if (prev.some(t => t.id === task.id)) {
+          return prev;
+        }
+        toast.success('Task added 📝');
+        return [...prev, task];
+      });
     };
 
     const handleTaskUpdate = ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) => {
-      setItems(prev => prev.map(task =>
-        task.id === taskId ? { ...task, ...updates } : task
-      ));
+      setItems(prev => {
+        const newItems = prev.map(task =>
+          task.id === taskId ? { ...task, ...updates } : task
+        );
+        // Only show toast if something actually changed
+        if (JSON.stringify(prev) !== JSON.stringify(newItems)) {
+          toast.success('Task updated ✏️');
+        }
+        return newItems;
+      });
     };
 
     const handleTaskDelete = (taskId: string) => {
-      setItems(prev => prev.filter(task => task.id !== taskId));
+      setItems(prev => {
+        if (prev.some(t => t.id === taskId)) {
+          toast.success('Task removed 🗑️');
+          return prev.filter(task => task.id !== taskId);
+        }
+        return prev;
+      });
       setCompleted(prev => prev.filter(task => task.id !== taskId));
       setSelected(prev => prev === taskId ? null : prev);
     };
@@ -89,7 +103,7 @@ export const useTaskStorage = () => {
       eventBus.off('task:select', handleTaskSelect);
       eventBus.off('task:complete', handleTaskComplete);
     };
-  }, [items]);
+  }, []); // No dependencies needed since we're using state updater functions
 
   // Persist changes to localStorage
   useEffect(() => {

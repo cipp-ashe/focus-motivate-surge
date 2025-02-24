@@ -15,7 +15,6 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   const { addTagToEntity } = useTagSystem();
   const { items: tasks } = useTaskState();
   
-  // Use a ref to track initialization
   useEffect(() => {
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
     console.log('Processing timer habits:', timerHabits.length);
@@ -23,31 +22,31 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     // Get existing task IDs for lookup
     const existingTaskIds = new Set(
       tasks
-        .filter(task => task.id.startsWith('habit-'))
-        .map(task => task.id)
+        .filter(task => task.relationships?.habitId)
+        .map(task => task.relationships.habitId)
     );
 
     // Create Set of active habit IDs
-    const activeHabitIds = new Set(timerHabits.map(habit => `habit-${habit.id}`));
+    const activeHabitIds = new Set(timerHabits.map(habit => habit.id));
 
-    // Remove inactive tasks
+    // Remove tasks for habits that are no longer active
     tasks
       .filter(task => 
-        task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
+        task.relationships?.habitId && 
+        !activeHabitIds.has(task.relationships.habitId)
       )
       .forEach(task => {
-        console.log('Removing task:', task.id);
+        console.log('Removing inactive habit task:', task.id);
         eventBus.emit('task:delete', task.id);
       });
 
-    // Add new tasks (only once)
+    // Add new tasks for habits that don't have one yet
     timerHabits.forEach(habit => {
-      const taskId = `habit-${habit.id}`;
-      
-      if (!existingTaskIds.has(taskId)) {
+      if (!existingTaskIds.has(habit.id)) {
         console.log('Creating new task for habit:', habit.id);
         const target = habit.metrics?.target || 600; // 10 minutes default
 
+        const taskId = `habit-${habit.id}`;
         eventBus.emit('task:create', {
           id: taskId,
           name: habit.name,
