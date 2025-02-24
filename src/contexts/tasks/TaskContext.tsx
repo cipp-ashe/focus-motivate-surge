@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -91,7 +92,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
         toast.success('Task completed 🎯');
       }),
-      eventBus.on('task:delete', ({ taskId, reason }: { taskId: string; reason?: Task['clearReason'] }) => {
+      eventBus.on('task:delete', ({ taskId, reason }) => {
         dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
       }),
       eventBus.on('task:update', ({ taskId, updates }) => {
@@ -102,17 +103,9 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       }),
     ];
 
-    const handleTaskDelete = ({ taskId, reason }: { taskId: string; reason?: Task['clearReason'] }) => {
-      dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
-    };
-
-    // Subscribe to events
-    eventBus.on('task:delete', handleTaskDelete);
-
     // Cleanup subscriptions
     return () => {
       unsubscribers.forEach(unsub => unsub());
-      eventBus.off('task:delete', handleTaskDelete);
     };
   }, []);
 
@@ -147,10 +140,10 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useTaskState = () => {
+export const useTaskContext = () => {
   const context = useContext(TaskContext);
   if (context === undefined) {
-    throw new Error('useTaskState must be used within a TaskProvider');
+    throw new Error('useTaskContext must be used within a TaskProvider');
   }
   return context;
 };
