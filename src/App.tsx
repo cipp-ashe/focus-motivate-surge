@@ -10,7 +10,7 @@ import { HabitsPanelProvider } from "./hooks/useHabitsPanel";
 import { TaskProvider } from "./contexts/tasks/TaskContext";
 import { HabitProvider } from "./contexts/habits/HabitContext";
 import { NoteProvider } from "./contexts/notes/NoteContext";
-import { useTheme } from "@/hooks/useTheme";
+import { ThemeProvider } from "next-themes";
 
 // Suppress specific React Router v7 warnings
 window.__reactRouterFutureWarnings = {
@@ -24,31 +24,31 @@ const queryClient = new QueryClient();
 const Router = window.electron ? HashRouter : BrowserRouter;
 
 function App() {
-  const { isDark } = useTheme(true);
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <TaskProvider>
-        <HabitProvider>
-          <NoteProvider>
-            <TooltipProvider>
-              <Router>
-                <NotesPanelProvider>
-                  <HabitsPanelProvider>
-                    <Routes>
-                      <Route element={<AppLayout />}>
-                        <Route path="/" element={<Index />} />
-                      </Route>
-                    </Routes>
-                    <Toaster position="bottom-right" closeButton />
-                  </HabitsPanelProvider>
-                </NotesPanelProvider>
-              </Router>
-            </TooltipProvider>
-          </NoteProvider>
-        </HabitProvider>
-      </TaskProvider>
-    </QueryClientProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark">
+      <QueryClientProvider client={queryClient}>
+        <TaskProvider>
+          <HabitProvider>
+            <NoteProvider>
+              <TooltipProvider>
+                <Router>
+                  <NotesPanelProvider>
+                    <HabitsPanelProvider>
+                      <Routes>
+                        <Route element={<AppLayout />}>
+                          <Route path="/" element={<Index />} />
+                        </Route>
+                      </Routes>
+                      <Toaster position="bottom-right" closeButton />
+                    </HabitsPanelProvider>
+                  </NotesPanelProvider>
+                </Router>
+              </TooltipProvider>
+            </NoteProvider>
+          </HabitProvider>
+        </TaskProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

@@ -1,16 +1,20 @@
 
 import { useState, useEffect } from 'react';
+import { useTheme as useNextTheme } from 'next-themes';
 
-export const useTheme = (initialDark = true) => {
-  const [isDark, setIsDark] = useState(initialDark);
+export const useTheme = () => {
+  const { theme, setTheme } = useNextTheme();
+  const [isDark, setIsDark] = useState(theme === 'dark');
 
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
+      setTheme('dark');
     } else {
       document.documentElement.classList.remove('dark');
+      setTheme('light');
     }
-  }, [isDark]);
+  }, [isDark, setTheme]);
 
   return {
     isDark,
