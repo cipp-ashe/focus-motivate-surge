@@ -4,6 +4,9 @@ import { useNotesPanel } from '@/hooks/useNotesPanel';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { cn } from '@/lib/utils';
 import { useWindowSize } from '@/hooks/useWindowSize';
+import { CompletedTasks } from './CompletedTasks';
+import { useTaskContext } from '@/contexts/TaskContext';
+import { eventBus } from '@/lib/eventBus';
 
 interface TaskLayoutProps {
   timer: React.ReactNode;
@@ -16,6 +19,7 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const { width } = useWindowSize();
+  const { completed: completedTasks } = useTaskContext();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -59,6 +63,12 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
         <div className="h-full flex flex-col">
           {taskList}
           {timer}
+          <CompletedTasks 
+            tasks={completedTasks}
+            onTasksClear={() => completedTasks.forEach(task => 
+              eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
+            )}
+          />
         </div>
       </div>
     </div>

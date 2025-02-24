@@ -4,7 +4,6 @@ import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { TaskInput } from './TaskInput';
 import { TaskTable } from './TaskTable';
-import { CompletedTasks } from './CompletedTasks';
 import { useTaskContext } from '@/contexts/TaskContext';
 import { ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,6 @@ export const TaskList: React.FC<TaskListProps> = ({
   onTasksClear,
   onCompletedTasksClear,
 }) => {
-  const { completed: completedTasks } = useTaskContext();
   const { open: openHabits } = useHabitsPanel();
 
   const handleTaskAdd = (task: Task) => {
@@ -79,14 +77,6 @@ export const TaskList: React.FC<TaskListProps> = ({
           </div>
         )}
       </div>
-
-      {/* Add CompletedTasks after the timer section */}
-      <CompletedTasks 
-        tasks={completedTasks}
-        onTasksClear={() => completedTasks.forEach(task => 
-          eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
-        )}
-      />
     </div>
   );
 };
