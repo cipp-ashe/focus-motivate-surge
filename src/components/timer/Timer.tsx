@@ -10,6 +10,7 @@ import { CompletionView } from "./views/CompletionView";
 import { MainTimerView } from "./views/MainTimerView";
 import type { TimerProps, SoundOption } from "@/types/timer";
 import { eventBus } from "@/lib/eventBus";
+import { toast } from "sonner";
 
 export const Timer = ({
   duration,
@@ -122,6 +123,12 @@ export const Timer = ({
     pauseTimeLeft,
   });
 
+  const handleExpandedClose = () => {
+    console.log('Handling expanded view close');
+    setIsExpanded(false);
+    toast.success("Timer view collapsed");
+  };
+
   if (showCompletion && completionMetrics) {
     return <CompletionView metrics={completionMetrics} onComplete={handleCloseCompletion} />;
   }
@@ -170,7 +177,7 @@ export const Timer = ({
             size: "large"
           }}
           metrics={metrics}
-          onClose={handleCloseTimer}
+          onClose={handleExpandedClose}
           onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
           favorites={favorites}
           setFavorites={setFavorites}
