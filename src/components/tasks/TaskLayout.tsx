@@ -58,6 +58,7 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
       )}>
         <div className="h-full flex flex-col">
           {taskList}
+          {timer}
         </div>
       </div>
     </div>
