@@ -44,13 +44,13 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
           ),
         };
       case 'DELETE_TASK': {
-        const taskInItems = state.items.find(task => task.id === action.payload.taskId);
-        const taskInCompleted = state.completed.find(task => task.id === action.payload.taskId);
-        
+        const isInItems = state.items.some(task => task.id === action.payload.taskId);
+        const isInCompleted = state.completed.some(task => task.id === action.payload.taskId);
+
         return {
           ...state,
-          items: state.items.filter(task => task.id !== action.payload.taskId),
-          completed: state.completed.filter(task => task.id !== action.payload.taskId),
+          items: isInItems ? state.items.filter(task => task.id !== action.payload.taskId) : state.items,
+          completed: isInCompleted ? state.completed.filter(task => task.id !== action.payload.taskId) : state.completed,
           selected: state.selected === action.payload.taskId ? null : state.selected,
         };
       }
@@ -94,6 +94,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       }),
       eventBus.on('task:delete', ({ taskId, reason }) => {
         dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
+        toast.success('Task deleted 🗑️');
       }),
       eventBus.on('task:update', ({ taskId, updates }) => {
         dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
