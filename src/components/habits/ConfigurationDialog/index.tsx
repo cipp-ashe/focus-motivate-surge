@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { HabitDetail, DayOfWeek } from '../types';
 import DialogHeader from './DialogHeader';
-import DialogContent as CustomDialogContent from './DialogContent';
+import { default as CustomDialogContent } from './DialogContent';
 
 interface ConfigurationDialogProps {
   open: boolean;
