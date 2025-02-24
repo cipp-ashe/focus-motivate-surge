@@ -1,3 +1,4 @@
+
 import { useRef, useEffect } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
@@ -81,7 +82,7 @@ export const Timer = ({
     handleToggle: handleTimerToggle,
     handleCloseCompletion,
     handleAddTime,
-    handleCloseTimer, // Renamed from handleClose to match the prop name expected by MainTimerView
+    handleCloseTimer,
   } = useTimerHandlers({
     isRunning,
     start,
@@ -128,50 +129,51 @@ export const Timer = ({
   const timerCircleProps = getTimerCircleProps();
   const timerControlsProps = getTimerControlsProps();
 
-  return (
-    <>
-      {isExpanded && (
-        <TimerExpandedView
-          ref={expandedViewRef}
-          taskName={taskName}
-          timerCircleProps={timerCircleProps}
-          timerControlsProps={{
-            ...timerControlsProps,
-            size: "large"
-          }}
-          metrics={metrics}
-          onClose={handleCloseTimer}
-          onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
-          favorites={favorites}
-          setFavorites={setFavorites}
-        />
-      )}
-
-      <MainTimerView
-        isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
-        showCompletion={showCompletion}
+  // Only render one view at a time
+  if (isExpanded) {
+    return (
+      <TimerExpandedView
+        ref={expandedViewRef}
         taskName={taskName}
         timerCircleProps={timerCircleProps}
-        timerControlsProps={timerControlsProps}
+        timerControlsProps={{
+          ...timerControlsProps,
+          size: "large"
+        }}
         metrics={metrics}
-        internalMinutes={internalMinutes}
-        handleMinutesChange={setInternalMinutes}
-        selectedSound={selectedSound}
-        setSelectedSound={(sound: SoundOption) => setSelectedSound(sound)}
-        testSound={testSound}
-        isLoadingAudio={isLoadingAudio}
-        updateMetrics={updateMetrics}
-        expandedViewRef={expandedViewRef}
-        handleCloseTimer={handleCloseTimer}
+        onClose={handleCloseTimer}
+        onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
         favorites={favorites}
         setFavorites={setFavorites}
-        showConfirmation={showConfirmation}
-        setShowConfirmation={setShowConfirmation}
-        handleAddTimeAndContinue={handleAddTimeAndContinue}
-        handleComplete={handleComplete}
       />
-    </>
+    );
+  }
+
+  return (
+    <MainTimerView
+      isExpanded={isExpanded}
+      setIsExpanded={setIsExpanded}
+      showCompletion={showCompletion}
+      taskName={taskName}
+      timerCircleProps={timerCircleProps}
+      timerControlsProps={timerControlsProps}
+      metrics={metrics}
+      internalMinutes={internalMinutes}
+      handleMinutesChange={setInternalMinutes}
+      selectedSound={selectedSound}
+      setSelectedSound={(sound: SoundOption) => setSelectedSound(sound)}
+      testSound={testSound}
+      isLoadingAudio={isLoadingAudio}
+      updateMetrics={updateMetrics}
+      expandedViewRef={expandedViewRef}
+      handleCloseTimer={handleCloseTimer}
+      favorites={favorites}
+      setFavorites={setFavorites}
+      showConfirmation={showConfirmation}
+      setShowConfirmation={setShowConfirmation}
+      handleAddTimeAndContinue={handleAddTimeAndContinue}
+      handleComplete={handleComplete}
+    />
   );
 };
 
