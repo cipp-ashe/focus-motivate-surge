@@ -7,7 +7,7 @@ import { TaskTable } from './TaskTable';
 import { CompletedTasks } from './CompletedTasks';
 import { HabitTaskManager } from '../habits/HabitTaskManager';
 import { useTaskContext } from '@/contexts/TaskContext';
-import { ListTodo, Award, TimerOff } from 'lucide-react';
+import { ListTodo } from 'lucide-react';
 
 interface TaskListProps {
   tasks: Task[];
@@ -36,7 +36,7 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-none border-b border-border/50">
+      <div className="flex-none">
         <TaskInput onTaskAdd={handleTaskAdd} />
       </div>
       
@@ -68,16 +68,12 @@ export const TaskList: React.FC<TaskListProps> = ({
         )}
       </div>
 
-      {completedTasks.length > 0 && (
-        <div className="flex-none border-t border-border/50">
-          <CompletedTasks 
-            tasks={completedTasks}
-            onTasksClear={() => completedTasks.forEach(task => 
-              eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
-            )}
-          />
-        </div>
-      )}
+      <CompletedTasks 
+        tasks={completedTasks}
+        onTasksClear={() => completedTasks.forEach(task => 
+          eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
+        )}
+      />
     </div>
   );
 };
