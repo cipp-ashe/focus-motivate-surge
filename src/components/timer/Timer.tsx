@@ -60,23 +60,25 @@ export const Timer = ({
     reset,
   } = useTimerState({
     duration,
+    taskName,
     onComplete,
     onAddTime,
     onDurationChange,
   });
 
-  // Listen for timer:init events
+  // Handle timer initialization
   useEffect(() => {
-    const unsubscribe = eventBus.on('timer:init', ({ taskName, duration }) => {
-      console.log('Timer initialized with:', { taskName, duration });
-      setInternalMinutes(Math.floor(duration / 60));
-      reset();
+    const unsubscribe = eventBus.on('timer:init', ({ taskName: eventTaskName, duration: newDuration }) => {
+      if (eventTaskName === taskName) {
+        console.log('Timer initialized with:', { taskName: eventTaskName, duration: newDuration });
+        setInternalMinutes(Math.floor(newDuration / 60));
+      }
     });
 
     return () => unsubscribe();
-  }, [setInternalMinutes, reset]);
+  }, [taskName, setInternalMinutes]);
 
-  // Listen for timer view state changes
+  // Handle view state changes
   useEffect(() => {
     const unsubscribeExpand = eventBus.on('timer:expand', ({ taskName: eventTaskName }) => {
       if (eventTaskName === taskName) {
@@ -85,10 +87,10 @@ export const Timer = ({
       }
     });
 
-    const unsubscribeCollapse = eventBus.on('timer:collapse', ({ taskName: eventTaskName }) => {
+    const unsubscribeCollapse = eventBus.on('timer:collapse', ({ taskName: eventTaskName, saveNotes }) => {
       if (eventTaskName === taskName) {
         console.log('Timer collapsing view for:', eventTaskName);
-        if (expandedViewRef.current?.saveNotes) {
+        if (saveNotes && expandedViewRef.current?.saveNotes) {
           expandedViewRef.current.saveNotes();
         }
         setIsExpanded(false);
@@ -99,7 +101,7 @@ export const Timer = ({
       unsubscribeExpand();
       unsubscribeCollapse();
     };
-  }, [setIsExpanded, taskName]);
+  }, [taskName, setIsExpanded]);
 
   const {
     handleComplete,
@@ -109,6 +111,7 @@ export const Timer = ({
     handleAddTime,
     handleCloseTimer,
   } = useTimerHandlers({
+    taskName,
     isRunning,
     start,
     pause,
@@ -122,7 +125,6 @@ export const Timer = ({
     setShowCompletion,
     setIsExpanded,
     metrics,
-    reset,
     updateMetrics,
     setPauseTimeLeft,
     pauseTimerRef,
@@ -195,7 +197,7 @@ export const Timer = ({
             size: "large"
           }}
           metrics={metrics}
-          onClose={() => eventBus.emit('timer:collapse', { taskName })}
+          onClose={() => eventBus.emit('timer:collapse', { taskName, saveNotes: true })}
           onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
           favorites={favorites}
           setFavorites={setFavorites}

@@ -1,4 +1,3 @@
-
 import { TimerMetrics } from './metrics';
 import { Quote } from './timer/models';
 import { Task } from './tasks';
@@ -7,7 +6,7 @@ import { ActiveTemplate } from '@/components/habits/types';
 import { EntityRelationship, EntityType } from './state';
 
 export interface TimerEventPayloads {
-  // Timer Events
+  // Timer Lifecycle Events
   'timer:init': {
     taskName: string;
     duration: number;
@@ -15,37 +14,51 @@ export interface TimerEventPayloads {
   'timer:start': {
     taskName: string;
     duration: number;
+    currentTime?: number;
   };
   'timer:pause': {
-    timeLeft: number;
     taskName: string;
+    timeLeft: number;
+    metrics: TimerMetrics;
+  };
+  'timer:resume': {
+    taskName: string;
+    timeLeft: number;
   };
   'timer:complete': {
+    taskName: string;
     metrics: TimerMetrics;
-    taskName: string;
   };
-  'timer:update': {
-    timeLeft: number;
-    isRunning: boolean;
-  };
-  'timer:metrics-update': {
-    metrics: Partial<TimerMetrics>;
-  };
-  'timer:quote-favorite': {
-    quote: Quote;
-    taskName: string;
-  };
-  'timer:external-start': {
+  'timer:reset': {
     taskName: string;
     duration: number;
   };
+
+  // Timer State Events
+  'timer:state-update': {
+    taskName: string;
+    timeLeft: number;
+    isRunning: boolean;
+    metrics: TimerMetrics;
+  };
+  'timer:metrics-update': {
+    taskName: string;
+    metrics: Partial<TimerMetrics>;
+  };
+
+  // View State Events
   'timer:expand': {
     taskName: string;
   };
   'timer:collapse': {
     taskName: string;
+    saveNotes?: boolean;
   };
-  
+  'timer:quote-favorite': {
+    taskName: string;
+    quote: Quote;
+  };
+
   // Task Events
   'task:create': Task;
   'task:update': { taskId: string; updates: Partial<Task> };
