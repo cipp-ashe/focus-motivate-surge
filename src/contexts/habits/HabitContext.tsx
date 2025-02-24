@@ -78,7 +78,45 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     }
   }, initialState);
 
-  // Load initial data and set up template monitoring
+  // Initialize today's habits
+  const { todaysHabits } = useTodaysHabits(state.templates);
+
+  useEffect(() => {
+    // Subscribe to template events
+    const unsubscribers = [
+      eventBus.on('habit:template-update', (template) => {
+        if (template.templateId) {
+          dispatch({ 
+            type: 'UPDATE_TEMPLATE', 
+            payload: { templateId: template.templateId, updates: template } 
+          });
+          localStorage.setItem('habit-templates', JSON.stringify(state.templates));
+          toast.success('Template updated successfully');
+        } else {
+          // If no templateId, this is a new template
+          const newTemplate = {
+            ...template,
+            templateId: crypto.randomUUID(),
+            customized: false,
+          };
+          dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+          const updatedTemplates = [...state.templates, newTemplate];
+          localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+          toast.success('Template added successfully');
+        }
+      }),
+      eventBus.on('habit:template-delete', ({ templateId }) => {
+        dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+        const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
+        localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+        toast.success('Template deleted successfully');
+      })
+    ];
+
+    return () => unsubscribers.forEach(unsub => unsub());
+  }, [state.templates]);
+
+  // Load initial templates
   useQuery({
     queryKey: ['habits'],
     queryFn: async () => {
@@ -94,72 +132,51 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  // Initialize today's habits
-  const { todaysHabits } = useTodaysHabits(state.templates);
-
-  // Event bus subscriptions for template updates
-  useEffect(() => {
-    const unsubscribers = [
-      eventBus.on('habit:template-update', (template) => {
-        dispatch({ 
-          type: 'UPDATE_TEMPLATE', 
-          payload: { templateId: template.templateId, updates: template } 
-        });
-        
-        // Force re-evaluation of today's habits when template is updated
-        const today = new Date().toLocaleString('en-US', { weekday: 'long' }) as DayOfWeek;
-        if (template.activeDays.includes(today)) {
-          template.habits.forEach(habit => {
-            if (habit.metrics.type === 'timer') {
-              eventBus.emit('habit:generate-task', {
-                habitId: habit.id,
-                templateId: template.templateId,
-                duration: habit.metrics.target || 1500,
-                name: habit.name
-              });
-            }
-          });
-        }
-      }),
-      eventBus.on('habit:template-delete', ({ templateId }) => {
-        dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
-      })
-    ];
-
-    return () => unsubscribers.forEach(unsub => unsub());
-  }, []);
-
-  // Save templates to localStorage when they change
-  useEffect(() => {
-    localStorage.setItem('habit-templates', JSON.stringify(state.templates));
-  }, [state.templates]);
-
   const actions: HabitContextActions = {
     addTemplate: (template) => {
-      const newTemplate: ActiveTemplate = {
+      const newTemplate = {
         ...template,
         templateId: crypto.randomUUID(),
         customized: false,
       };
       dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+      const updatedTemplates = [...state.templates, newTemplate];
+      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       toast.success('Template added successfully');
     },
     
     updateTemplate: (templateId, updates) => {
       dispatch({ type: 'UPDATE_TEMPLATE', payload: { templateId, updates } });
+      const updatedTemplates = state.templates.map(template =>
+        template.templateId === templateId
+          ? { ...template, ...updates, customized: true }
+          : template
+      );
+      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+      toast.success('Template updated successfully');
     },
     
     removeTemplate: (templateId) => {
       dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
-      toast.success('Template removed');
+      const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
+      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+      toast.success('Template removed successfully');
     },
     
     updateTemplateOrder: (templates) => {
       dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
+      localStorage.setItem('habit-templates', JSON.stringify(templates));
     },
     
     updateTemplateDays: (templateId, days) => {
       dispatch({ type: 'UPDATE_TEMPLATE_DAYS', payload: { templateId, days } });
+      const updatedTemplates = state.templates.map(template =>
+        template.templateId === templateId
+          ? { ...template, activeDays: days, customized: true }
+          : template
+      );
+      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+      toast.success('Template days updated successfully');
     },
   };
 
