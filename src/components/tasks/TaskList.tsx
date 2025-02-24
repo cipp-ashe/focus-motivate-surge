@@ -5,7 +5,7 @@ import { eventBus } from '@/lib/eventBus';
 import { TaskInput } from './TaskInput';
 import { TaskTable } from './TaskTable';
 import { useTaskContext } from '@/contexts/TaskContext';
-import { ListTodo } from 'lucide-react';
+import { ListTodo, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 
@@ -41,9 +41,20 @@ export const TaskList: React.FC<TaskListProps> = ({
       </div>
 
       <div className="flex-none px-4 py-3 border-b border-border/50">
-        <div className="flex items-center gap-2 text-foreground">
-          <ListTodo className="h-4 w-4 text-primary" />
-          <span className="font-medium">Active Tasks</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-foreground">
+            <ListTodo className="h-4 w-4 text-primary" />
+            <span className="font-medium">Active Tasks</span>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={openHabits}
+            className="flex items-center gap-2"
+          >
+            <Settings2 className="h-4 w-4" />
+            Configure Habits
+          </Button>
         </div>
       </div>
 
@@ -63,16 +74,6 @@ export const TaskList: React.FC<TaskListProps> = ({
             <div className="space-y-2">
               <p>No active tasks</p>
               <p className="text-sm">Add a new task above to get started</p>
-              <div className="pt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={openHabits}
-                  className="mt-2"
-                >
-                  Configure Habits
-                </Button>
-              </div>
             </div>
           </div>
         )}
