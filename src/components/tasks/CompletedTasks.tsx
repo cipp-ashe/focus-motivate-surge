@@ -1,3 +1,4 @@
+
 import { Task } from "@/types/tasks";
 import {
   Accordion,
@@ -17,6 +18,7 @@ import { Award } from "lucide-react";
 import { TaskMetricsRow } from "./TaskMetricsRow";
 import { toast } from "sonner";
 import React from 'react';
+import { useTaskContext } from "@/contexts/TaskContext";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -26,7 +28,8 @@ interface CompletedTasksProps {
 export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => {
   if (!tasks.length) return null;
 
-  const handleClearClick = () => {
+  const handleClearClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent accordion toggle
     onTasksClear();
     toast.success("Completed tasks cleared!", {
       description: "Keep up the great work! 🎯"
@@ -43,7 +46,7 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
           </div>
         </AccordionTrigger>
         <AccordionContent>
-          <div className="space-y-4 p-2">
+          <div className="pt-2 pb-4 px-2">
             <div className="rounded-lg border border-border/50 overflow-hidden bg-background/50">
               <Table>
                 <TableHeader>
@@ -80,7 +83,7 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
 
             <button
               onClick={handleClearClick}
-              className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
+              className="mt-4 text-sm text-muted-foreground hover:text-destructive transition-colors duration-200"
             >
               Clear All
             </button>

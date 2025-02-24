@@ -82,8 +82,8 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
   };
 
   return (
-    <Card className="p-4 w-full">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Card className="mb-4">
+      <form onSubmit={handleSubmit} className="p-4">
         <div className="flex items-start gap-2">
           <div className="flex-1 relative">
             {isBulkAdd ? (
