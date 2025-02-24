@@ -1,12 +1,20 @@
+
 import { TimerMetrics } from './metrics';
-import { Quote } from './timer/models';
+import { Quote } from './timer';
 import { Task } from './tasks';
 import { Note } from './notes';
 import { ActiveTemplate } from '@/components/habits/types';
 import { EntityRelationship, EntityType } from './state';
 
 export interface TimerEventPayloads {
-  // Timer Lifecycle Events
+  // Task Events
+  'task:create': Task;
+  'task:update': { taskId: string; updates: Partial<Task> };
+  'task:delete': string;
+  'task:complete': { taskId: string; metrics?: TimerMetrics };
+  'task:select': string | null;
+  
+  // Timer Events
   'timer:init': {
     taskName: string;
     duration: number;
@@ -33,8 +41,6 @@ export interface TimerEventPayloads {
     taskName: string;
     duration: number;
   };
-
-  // Timer State Events
   'timer:state-update': {
     taskName: string;
     timeLeft: number;
@@ -45,8 +51,6 @@ export interface TimerEventPayloads {
     taskName: string;
     metrics: Partial<TimerMetrics>;
   };
-
-  // View State Events
   'timer:expand': {
     taskName: string;
   };
@@ -58,13 +62,6 @@ export interface TimerEventPayloads {
     taskName: string;
     quote: Quote;
   };
-
-  // Task Events
-  'task:create': Task;
-  'task:update': { taskId: string; updates: Partial<Task> };
-  'task:delete': string;
-  'task:complete': { taskId: string; metrics?: TimerMetrics };
-  'task:select': string | null;
   
   // Note Events
   'note:create': Note;

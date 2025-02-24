@@ -43,12 +43,17 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
               : task
           ),
         };
-      case 'DELETE_TASK':
+      case 'DELETE_TASK': {
+        const taskInItems = state.items.find(task => task.id === action.payload);
+        const taskInCompleted = state.completed.find(task => task.id === action.payload);
+        
         return {
           ...state,
           items: state.items.filter(task => task.id !== action.payload),
+          completed: state.completed.filter(task => task.id !== action.payload),
           selected: state.selected === action.payload ? null : state.selected,
         };
+      }
       case 'COMPLETE_TASK': {
         const task = state.items.find(t => t.id === action.payload.taskId);
         if (!task) return state;
@@ -81,9 +86,11 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribers = [
       eventBus.on('task:create', (task) => {
         dispatch({ type: 'ADD_TASK', payload: task });
+        toast.success('Task added 📝');
       }),
       eventBus.on('task:complete', ({ taskId, metrics }) => {
         dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
+        toast.success('Task completed 🎯');
       }),
       eventBus.on('task:delete', (taskId) => {
         dispatch({ type: 'DELETE_TASK', payload: taskId });
@@ -117,6 +124,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   });
+
+  // Persist changes to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem('taskList', JSON.stringify(state.items));
+    localStorage.setItem('completedTasks', JSON.stringify(state.completed));
+  }, [state.items, state.completed]);
 
   return (
     <TaskContext.Provider value={state}>

@@ -4,14 +4,14 @@ import { TaskLayout } from '@/components/tasks/TaskLayout';
 import TaskManager from '@/components/tasks/TaskManager';
 import HabitTracker from '@/components/habits/HabitTracker';
 import { TimerSection } from '@/components/timer/TimerSection';
-import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
+import { useTaskState } from '@/contexts/tasks/TaskContext';
+import { eventBus } from '@/lib/eventBus';
 import { TimerStateMetrics } from '@/types/metrics';
 import { Quote } from '@/types/timer';
 import { useState } from 'react';
 
 const Index = () => {
   const { items, selected: selectedTaskId } = useTaskState();
-  const actions = useTaskActions();
   const [favorites, setFavorites] = useState<Quote[]>([]);
 
   const selectedTask = selectedTaskId 
@@ -20,16 +20,22 @@ const Index = () => {
 
   const handleTaskComplete = (metrics: TimerStateMetrics) => {
     if (selectedTaskId) {
-      actions.completeTask(selectedTaskId, {
-        ...metrics,
-        endTime: new Date(),
+      eventBus.emit('task:complete', {
+        taskId: selectedTaskId,
+        metrics: {
+          ...metrics,
+          endTime: new Date(),
+        }
       });
     }
   };
 
   const handleDurationChange = (seconds: number) => {
     if (selectedTaskId) {
-      actions.updateTask(selectedTaskId, { duration: seconds });
+      eventBus.emit('task:update', {
+        taskId: selectedTaskId,
+        updates: { duration: seconds }
+      });
     }
   };
 
