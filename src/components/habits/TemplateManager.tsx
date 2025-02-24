@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
 import ConfigurationDialog from '../habits/ConfigurationDialog';
 import { ActiveTemplate, DayOfWeek, HabitDetail } from './types';
 import { toast } from 'sonner';
+import { eventBus } from '@/lib/eventBus';
 
 interface TemplateManagerProps {
   templateToEdit: ActiveTemplate;
@@ -24,20 +25,48 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<ActiveTemplate>(templateToEdit);
 
+  // Sync with parent template changes
+  useEffect(() => {
+    setCurrentTemplate(templateToEdit);
+  }, [templateToEdit]);
+
   const handleUpdateDays = (days: DayOfWeek[]) => {
-    console.log('Updating days:', days); // Debug log
+    console.log('Updating days:', days);
+    
+    // Update local state
     setCurrentTemplate(prev => ({
       ...prev,
-      activeDays: days
+      activeDays: days,
+      customized: true
     }));
+    
+    // Emit template update event
+    eventBus.emit('habit:template-update', {
+      ...currentTemplate,
+      activeDays: days,
+      customized: true
+    });
+    
+    // Update parent state
     onUpdateDays(days);
   };
 
   const handleUpdateHabits = (habits: HabitDetail[]) => {
+    // Update local state
     setCurrentTemplate(prev => ({
       ...prev,
-      habits
+      habits,
+      customized: true
     }));
+    
+    // Emit template update event
+    eventBus.emit('habit:template-update', {
+      ...currentTemplate,
+      habits,
+      customized: true
+    });
+    
+    // Update parent state
     onUpdateTemplate({ habits });
   };
 
