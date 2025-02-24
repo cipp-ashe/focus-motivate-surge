@@ -3,7 +3,7 @@ import React from 'react';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import TaskManager from '@/components/tasks/TaskManager';
 import { TimerSection } from '@/components/timer/TimerSection';
-import { useTaskContext } from '@/contexts/TaskContext';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
 import { TimerStateMetrics } from '@/types/metrics';
 import { Quote } from '@/types/timer';

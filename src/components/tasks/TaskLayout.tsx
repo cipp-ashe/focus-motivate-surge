@@ -5,7 +5,7 @@ import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { cn } from '@/lib/utils';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { CompletedTasks } from './CompletedTasks';
-import { useTaskContext } from '@/contexts/TaskContext';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
 
 interface TaskLayoutProps {
