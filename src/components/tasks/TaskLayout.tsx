@@ -53,13 +53,13 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   return (
     <div ref={containerRef} className="main-layout">
       <div className={cn(
-        "content-grid",
+        "grid grid-cols-1 gap-4 h-full",
         !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2"
       )}>
-        <div className="section-container">
+        <div className="h-full">
           {taskList}
         </div>
-        <div className="section-container">
+        <div className="h-full">
           {timer}
         </div>
       </div>
