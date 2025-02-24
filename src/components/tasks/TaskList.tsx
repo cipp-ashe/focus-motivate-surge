@@ -8,6 +8,8 @@ import { CompletedTasks } from './CompletedTasks';
 import { HabitTaskManager } from '../habits/HabitTaskManager';
 import { useTaskContext } from '@/contexts/TaskContext';
 import { ListTodo } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 
 interface TaskListProps {
   tasks: Task[];
@@ -29,6 +31,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   onCompletedTasksClear,
 }) => {
   const { completed: completedTasks } = useTaskContext();
+  const { open: openHabits } = useHabitsPanel();
 
   const handleTaskAdd = (task: Task) => {
     eventBus.emit('task:create', task);
@@ -60,20 +63,27 @@ export const TaskList: React.FC<TaskListProps> = ({
             onTasksClear={() => tasks.forEach(task => eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' }))}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground space-y-2">
+          <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground space-y-4">
             <ListTodo className="h-8 w-8 text-muted-foreground/50" />
-            <p>No active tasks</p>
-            <p className="text-sm">Add a new task to get started</p>
+            <div className="space-y-2">
+              <p>No active tasks</p>
+              <p className="text-sm">Add a new task above to get started</p>
+              <div className="pt-2">
+                <p className="text-sm">Or configure your weekly habits to</p>
+                <p className="text-sm">see them here on their active days</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={openHabits}
+                className="mt-2"
+              >
+                Configure Habits
+              </Button>
+            </div>
           </div>
         )}
       </div>
-
-      <CompletedTasks 
-        tasks={completedTasks}
-        onTasksClear={() => completedTasks.forEach(task => 
-          eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
-        )}
-      />
     </div>
   );
 };

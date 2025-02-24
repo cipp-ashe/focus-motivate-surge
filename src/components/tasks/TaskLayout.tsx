@@ -56,10 +56,8 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
         "grid grid-cols-1 gap-4 h-full",
         !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2"
       )}>
-        <div className="h-full">
+        <div className="h-full flex flex-col">
           {taskList}
-        </div>
-        <div className="h-full">
           {timer}
         </div>
       </div>
