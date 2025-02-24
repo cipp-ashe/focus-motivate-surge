@@ -21,15 +21,9 @@ export interface Task {
   };
 }
 
-export interface TaskContextType {
-  tasks: Task[];
-  completedTasks: Task[];
-  selectedTaskId: string | null;
-  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
-  updateTask: (taskId: string, updates: Partial<Task>) => void;
-  deleteTask: (taskId: string) => void;
-  completeTask: (taskId: string, metrics?: TaskMetrics) => void;
-  selectTask: (taskId: string | null) => void;
-  clearTasks: () => void;
-  clearCompletedTasks: () => void;
+// We don't need TaskContextType anymore since we're using the event bus
+export interface TaskState {
+  items: Task[];
+  completed: Task[];
+  selected: string | null;
 }

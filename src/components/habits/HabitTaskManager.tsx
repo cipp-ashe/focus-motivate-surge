@@ -1,9 +1,10 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
-import { useTaskState, useTaskActions } from "@/contexts/tasks/TaskContext";
+import { useTaskState } from "@/contexts/tasks/TaskContext";
 import type { ActiveTemplate } from '@/components/habits/types';
+import { eventBus } from "@/lib/eventBus";
 
 interface HabitTaskManagerProps {
   activeTemplates: ActiveTemplate[];
@@ -13,17 +14,9 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
   const { todaysHabits } = useTodaysHabits(activeTemplates);
   const { addTagToEntity } = useTagSystem();
   const { items: tasks } = useTaskState();
-  const actions = useTaskActions();
   
   // Use a ref to track initialization
-  const isInitialized = useRef(false);
-
   useEffect(() => {
-    // Prevent multiple initializations
-    if (isInitialized.current) {
-      return;
-    }
-
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
     console.log('Processing timer habits:', timerHabits.length);
 
@@ -38,14 +31,14 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     const activeHabitIds = new Set(timerHabits.map(habit => `habit-${habit.id}`));
 
     // Remove inactive tasks
-    const tasksToRemove = tasks.filter(task => 
-      task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
-    );
-
-    tasksToRemove.forEach(task => {
-      console.log('Removing task:', task.id);
-      actions.deleteTask(task.id);
-    });
+    tasks
+      .filter(task => 
+        task.id.startsWith('habit-') && !activeHabitIds.has(task.id)
+      )
+      .forEach(task => {
+        console.log('Removing task:', task.id);
+        eventBus.emit('task:delete', task.id);
+      });
 
     // Add new tasks (only once)
     timerHabits.forEach(habit => {
@@ -55,19 +48,19 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
         console.log('Creating new task for habit:', habit.id);
         const target = habit.metrics?.target || 600; // 10 minutes default
 
-        actions.addTask({
+        eventBus.emit('task:create', {
+          id: taskId,
           name: habit.name,
           completed: false,
           duration: target,
+          createdAt: new Date().toISOString(),
           relationships: { habitId: habit.id }
         });
 
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-
-    isInitialized.current = true;
-  }, [todaysHabits]); // Only depend on todaysHabits
+  }, [todaysHabits, tasks]); // Only depend on todaysHabits and tasks
 
   return null;
 };

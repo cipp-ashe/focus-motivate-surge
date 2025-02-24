@@ -1,9 +1,9 @@
 
 import React, { createContext, useContext } from 'react';
 import { useTaskStorage } from '@/hooks/useTaskStorage';
-import type { TaskContextType } from '@/types/tasks';
+import type { TaskState } from '@/types/tasks';
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+const TaskContext = createContext<TaskState | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const taskStorage = useTaskStorage();
