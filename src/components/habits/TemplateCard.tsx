@@ -16,7 +16,9 @@ interface TemplateCardProps {
 }
 
 const convertToHabit = (habitDetail: HabitDetail): Habit => ({
-  ...habitDetail,
+  id: habitDetail.id,
+  name: habitDetail.name,
+  description: habitDetail.description || 'No description provided', // Ensure description is always provided
   completed: false,
   streak: 0,
   lastCompleted: null,
@@ -49,8 +51,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       <CardContent>
         <HabitList
           habits={habits}
-          getProgress={getProgress}
-          onHabitUpdate={onHabitUpdate}
+          onToggle={(habitId) => onHabitUpdate(habitId, true)}
         />
       </CardContent>
     </Card>
