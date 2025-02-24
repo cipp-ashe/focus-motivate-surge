@@ -34,16 +34,14 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <>
-      <div className="section-header">
+    <div className="flex flex-col h-full">
+      <div className="flex-none border-b border-border/50">
         <TaskInput onTaskAdd={handleTaskAdd} />
       </div>
       
-      <div className="section-header">
-        <HabitTaskManager />
-      </div>
+      <HabitTaskManager />
 
-      <div className="scrollable-content">
+      <div className="flex-1 overflow-y-auto">
         <TaskTable
           tasks={tasks}
           selectedTasks={selectedTasks}
@@ -54,14 +52,16 @@ export const TaskList: React.FC<TaskListProps> = ({
         />
       </div>
 
-      <div className="section-footer">
-        <CompletedTasks 
-          tasks={completedTasks}
-          onTasksClear={() => completedTasks.forEach(task => 
-            eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
-          )}
-        />
-      </div>
-    </>
+      {completedTasks.length > 0 && (
+        <div className="flex-none border-t border-border/50">
+          <CompletedTasks 
+            tasks={completedTasks}
+            onTasksClear={() => completedTasks.forEach(task => 
+              eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
+            )}
+          />
+        </div>
+      )}
+    </div>
   );
 };
