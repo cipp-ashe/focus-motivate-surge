@@ -151,13 +151,14 @@ export const useTimerActions = ({
 
   const completeTimer = useCallback(() => {
     const now = new Date();
-    const updates: Partial<TimerMetrics> = {
+    const updatedMetrics: TimerMetrics = {
+      ...metrics,
       endTime: now,
       actualDuration: metrics.startTime ? 
         Math.floor((now.getTime() - metrics.startTime.getTime()) / 1000) : 0
     };
-    updateMetrics(updates);
-    eventBus.emit('timer:complete', { taskName, metrics: updates });
+    updateMetrics(updatedMetrics);
+    eventBus.emit('timer:complete', { taskName, metrics: updatedMetrics });
   }, [metrics, updateMetrics, taskName]);
 
   return {
