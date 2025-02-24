@@ -55,29 +55,27 @@ export const MainTimerView = ({
   handleComplete,
 }: MainTimerViewProps) => {
   return (
-    <div className="relative w-full max-w-[600px] mx-auto">
-      <div className="flex flex-col items-center space-y-8">
-        <TimerBody
-          isExpanded={isExpanded}
-          setIsExpanded={setIsExpanded}
-          showCompletion={showCompletion}
-          taskName={taskName}
-          timerCircleProps={timerCircleProps}
-          timerControlsProps={timerControlsProps}
-          metrics={metrics}
-          internalMinutes={internalMinutes}
-          handleMinutesChange={handleMinutesChange}
-          selectedSound={selectedSound}
-          setSelectedSound={setSelectedSound}
-          testSound={testSound}
-          isLoadingAudio={isLoadingAudio}
-          updateMetrics={updateMetrics}
-          expandedViewRef={expandedViewRef}
-          handleCloseTimer={handleCloseTimer}
-          favorites={favorites}
-          setFavorites={setFavorites}
-        />
-      </div>
+    <>
+      <TimerBody
+        isExpanded={isExpanded}
+        setIsExpanded={setIsExpanded}
+        showCompletion={showCompletion}
+        taskName={taskName}
+        timerCircleProps={timerCircleProps}
+        timerControlsProps={timerControlsProps}
+        metrics={metrics}
+        internalMinutes={internalMinutes}
+        handleMinutesChange={handleMinutesChange}
+        selectedSound={selectedSound}
+        setSelectedSound={setSelectedSound}
+        testSound={testSound}
+        isLoadingAudio={isLoadingAudio}
+        updateMetrics={updateMetrics}
+        expandedViewRef={expandedViewRef}
+        handleCloseTimer={handleCloseTimer}
+        favorites={favorites}
+        setFavorites={setFavorites}
+      />
 
       <TimerCompletion
         showConfirmation={showConfirmation}
@@ -85,6 +83,6 @@ export const MainTimerView = ({
         handleAddTimeAndContinue={handleAddTimeAndContinue}
         handleComplete={handleComplete}
       />
-    </div>
+    </>
   );
 };
