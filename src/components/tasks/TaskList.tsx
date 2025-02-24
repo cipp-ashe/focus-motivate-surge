@@ -1,15 +1,18 @@
-
 import React from 'react';
-import { TaskInput } from './TaskInput';
-import { TaskTable } from './TaskTable';
-import { CompletedTasks } from './CompletedTasks';
-import { useTaskState } from '@/contexts/tasks/TaskContext';
-import { HabitTaskManager } from '../habits/HabitTaskManager';
-import { useTemplateManagement } from '@/components/habits/hooks/useTemplateManagement';
+import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
-import type { Task } from '@/types/tasks';
 
-export const TaskList = ({
+interface TaskListProps {
+  tasks: Task[];
+  selectedTasks: string[];
+  onTaskClick: (task: Task) => void;
+  onTaskDelete: (taskId: string) => void;
+  onTasksUpdate: (taskId: string, updates: any) => void;
+  onTasksClear: () => void;
+  onCompletedTasksClear: () => void;
+}
+
+export const TaskList: React.FC<TaskListProps> = ({
   tasks,
   selectedTasks,
   onTaskClick,
@@ -17,25 +20,19 @@ export const TaskList = ({
   onTasksUpdate,
   onTasksClear,
   onCompletedTasksClear,
-}: {
-  tasks: Task[];
-  selectedTasks: string[];
-  onTaskClick: (task: Task) => void;
-  onTaskDelete: (taskId: string) => void;
-  onTasksUpdate: (taskId: string, updates: Partial<Task>) => void;
-  onTasksClear: () => void;
-  onCompletedTasksClear: () => void;
 }) => {
-  const { completed: completedTasks } = useTaskState();
-  const { activeTemplates } = useTemplateManagement();
+  const handleTaskDelete = (taskId: string) => {
+    eventBus.emit('task:delete', { taskId, reason: 'manual' });
+  };
 
-  const handleTaskAdd = (taskData: Omit<Task, 'id' | 'createdAt'>) => {
-    const task: Task = {
-      ...taskData,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString()
-    };
-    eventBus.emit('task:create', task);
+  const handleTasksClear = () => {
+    tasks.forEach(task => {
+      eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
+    });
+  };
+
+  const handleCompletedTasksClear = () => {
+    eventBus.emit('task:delete', { taskId: tasks[0].id, reason: 'completed' });
   };
 
   return (
@@ -55,16 +52,16 @@ export const TaskList = ({
           tasks={tasks}
           selectedTasks={selectedTasks}
           onTaskClick={onTaskClick}
-          onTaskDelete={(taskId) => eventBus.emit('task:delete', taskId)}
+          onTaskDelete={(taskId) => eventBus.emit('task:delete', { taskId, reason: 'manual' })}
           onTasksUpdate={onTasksUpdate}
-          onTasksClear={() => tasks.forEach(task => eventBus.emit('task:delete', task.id))}
+          onTasksClear={() => tasks.forEach(task => eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' }))}
         />
       </div>
 
       <div className="section-footer">
         <CompletedTasks 
           tasks={completedTasks}
-          onTasksClear={() => completedTasks.forEach(task => eventBus.emit('task:delete', task.id))}
+          onTasksClear={() => completedTasks.forEach(task => eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' }))}
         />
       </div>
     </>

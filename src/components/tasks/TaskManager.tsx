@@ -2,11 +2,11 @@
 import React from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
-import { useTaskState } from '@/contexts/tasks/TaskContext';
+import { useTaskContext } from '@/contexts/TaskContext';
 import { eventBus } from '@/lib/eventBus';
 
 const TaskManager = () => {
-  const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskState();
+  const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
   const { handleTimerStart } = useTimerEvents();
 
   const handleTaskClick = (taskId: string) => {
@@ -18,7 +18,7 @@ const TaskManager = () => {
   };
 
   const handleTaskDelete = (taskId: string) => {
-    eventBus.emit('task:delete', taskId);
+    eventBus.emit('task:delete', { taskId, reason: 'manual' });
   };
 
   const handleTaskUpdate = (taskId: string, updates: any) => {
@@ -27,13 +27,13 @@ const TaskManager = () => {
 
   const handleActiveTasksClear = () => {
     tasks.forEach(task => {
-      eventBus.emit('task:delete', task.id);
+      eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
     });
   };
 
   const handleCompletedTasksClear = () => {
     completedTasks.forEach(task => {
-      eventBus.emit('task:delete', task.id);
+      eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' });
     });
   };
 

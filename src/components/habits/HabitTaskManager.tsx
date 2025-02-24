@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useTodaysHabits } from "@/hooks/useTodaysHabits";
 import { useTagSystem } from "@/hooks/useTagSystem";
-import { useTaskState } from "@/contexts/tasks/TaskContext";
+import { useTaskContext } from "@/contexts/TaskContext";
 import type { ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from "@/lib/eventBus";
 
@@ -13,7 +13,7 @@ interface HabitTaskManagerProps {
 export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => {
   const { todaysHabits } = useTodaysHabits(activeTemplates);
   const { addTagToEntity } = useTagSystem();
-  const { items: tasks } = useTaskState();
+  const { items: tasks, cleared } = useTaskContext();
   
   useEffect(() => {
     const timerHabits = todaysHabits.filter(habit => habit.metrics?.type === 'timer');
@@ -23,6 +23,16 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
     const existingTaskIds = new Set(
       tasks
         .filter(task => task.relationships?.habitId)
+        .map(task => task.relationships.habitId)
+    );
+
+    // Get IDs of manually cleared habit tasks for today
+    const clearedHabitIds = new Set(
+      cleared
+        .filter(task => 
+          task.relationships?.habitId && 
+          task.clearReason === 'manual'
+        )
         .map(task => task.relationships.habitId)
     );
 
@@ -40,11 +50,11 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
         eventBus.emit('task:delete', { taskId: task.id, reason: 'habit-removed' });
       });
 
-    // Add new tasks for habits that don't have one yet
+    // Add new tasks for habits that don't have one yet and weren't manually cleared
     timerHabits.forEach(habit => {
-      if (!existingTaskIds.has(habit.id)) {
+      if (!existingTaskIds.has(habit.id) && !clearedHabitIds.has(habit.id)) {
         console.log('Creating new task for habit:', habit.id);
-        const target = habit.metrics?.target || 600; // 10 minutes default
+        const target = habit.metrics?.target || 600;
 
         const taskId = `habit-${habit.id}`;
         eventBus.emit('task:create', {
@@ -59,7 +69,7 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits, tasks]);
+  }, [todaysHabits, tasks, cleared]);
 
   return null;
 };

@@ -1,4 +1,3 @@
-
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTaskStorage } from '../useTaskStorage';
 import { eventBus } from '@/lib/eventBus';
@@ -51,7 +50,7 @@ describe('useTaskStorage', () => {
     expect(result.current.items[0].name).toBe('Updated Task');
   });
 
-  it('should handle task deletion through event bus', () => {
+  it('should handle task deletion', () => {
     const { result } = renderHook(() => useTaskStorage());
     
     act(() => {
@@ -62,7 +61,7 @@ describe('useTaskStorage', () => {
         createdAt: new Date().toISOString()
       });
 
-      eventBus.emit('task:delete', '1');
+      eventBus.emit('task:delete', { taskId: '1', reason: 'manual' });
     });
 
     expect(result.current.items).toHaveLength(0);
