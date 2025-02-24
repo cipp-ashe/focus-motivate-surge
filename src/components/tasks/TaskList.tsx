@@ -26,13 +26,17 @@ export const TaskList = ({
   onCompletedTasksClear: () => void;
 }) => {
   const { completed: completedTasks } = useTaskState();
-  const actions = useTaskActions();
+  const taskActions = useTaskActions();
   const { activeTemplates } = useTemplateManagement();
+
+  const handleAddTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
+    taskActions.addTask(task);
+  };
 
   return (
     <>
       <div className="section-header">
-        <TaskInput onTaskAdd={(task) => actions.addTask(task)} />
+        <TaskInput onTaskAdd={handleAddTask} />
       </div>
       
       <div className="section-header">
