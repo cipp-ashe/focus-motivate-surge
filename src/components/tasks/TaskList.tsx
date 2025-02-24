@@ -27,6 +27,13 @@ export const TaskList = ({
   const actions = useTaskActions();
   const { activeTemplates } = useTemplateManagement();
 
+  const handleClearCompletedTasks = () => {
+    // Clear completed tasks from state
+    completedTasks.forEach(task => actions.deleteTask(task.id));
+    // Call the parent's onTasksClear for any additional cleanup
+    onTasksClear();
+  };
+
   return (
     <>
       <div className="section-header">
@@ -53,9 +60,7 @@ export const TaskList = ({
       <div className="section-footer">
         <CompletedTasks 
           tasks={completedTasks}
-          onTasksClear={() => {
-            completedTasks.forEach(task => actions.deleteTask(task.id));
-          }}
+          onTasksClear={handleClearCompletedTasks}
         />
       </div>
     </>

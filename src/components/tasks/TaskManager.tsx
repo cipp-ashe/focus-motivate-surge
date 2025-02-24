@@ -6,7 +6,7 @@ import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
 import { toast } from 'sonner';
 
 const TaskManager = () => {
-  const { items: tasks, selected: selectedTaskId } = useTaskState();
+  const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskState();
   const actions = useTaskActions();
   const { handleTimerStart } = useTimerEvents();
 
@@ -27,8 +27,8 @@ const TaskManager = () => {
   };
 
   const handleTasksClear = () => {
-    const tasksToDelete = tasks.filter(task => task.completed);
-    tasksToDelete.forEach(task => actions.deleteTask(task.id));
+    // Delete each completed task
+    completedTasks.forEach(task => actions.deleteTask(task.id));
     toast.success('All completed tasks cleared!');
   };
 
