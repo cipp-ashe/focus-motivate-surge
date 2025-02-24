@@ -29,7 +29,7 @@ export const useTimer = ({
     pause,
     reset,
     addTime,
-    completeTimer,
+    completeTimer
   } = useTimerActions({
     timeLeft,
     minutes,

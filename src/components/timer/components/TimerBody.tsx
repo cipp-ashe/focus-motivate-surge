@@ -1,16 +1,31 @@
 
 import React from "react";
-import { TimerHeader } from "../TimerHeader";
-import { TimerCircle } from "../TimerCircle";
-import { TimerControls } from "../controls/TimerControls";
-import { TimerMetricsDisplay } from "../TimerMetrics";
-import { cn } from "@/lib/utils";
-import type { TimerBodyProps } from "@/types/timer/components";
+import { TimerStateMetrics } from "@/types/metrics";
+import { Quote, SoundOption, TimerExpandedViewRef } from "@/types/timer";
+import { TimerCompactView } from "../views/TimerCompactView";
 
-export const TimerBody = ({
-  isExpanded,
-  setIsExpanded,
-  showCompletion,
+interface TimerBodyProps {
+  isExpanded: boolean;
+  setIsExpanded: (expanded: boolean) => void;
+  showCompletion: boolean;
+  taskName: string;
+  timerCircleProps: any;
+  timerControlsProps: any;
+  metrics: TimerStateMetrics;
+  internalMinutes: number;
+  handleMinutesChange: (minutes: number) => void;
+  selectedSound: SoundOption;
+  setSelectedSound: (sound: SoundOption) => void;
+  testSound: () => void;
+  isLoadingAudio: boolean;
+  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
+  expandedViewRef: React.RefObject<TimerExpandedViewRef>;
+  handleCloseTimer: () => void;
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+}
+
+export const TimerBody: React.FC<TimerBodyProps> = ({
   taskName,
   timerCircleProps,
   timerControlsProps,
@@ -21,46 +36,33 @@ export const TimerBody = ({
   setSelectedSound,
   testSound,
   isLoadingAudio,
+  setIsExpanded,
   updateMetrics,
-  expandedViewRef,
-  handleCloseTimer,
   favorites,
   setFavorites,
-}: TimerBodyProps) => {
+}) => {
+  const handleLike = () => {
+    updateMetrics({ 
+      favoriteQuotes: (metrics.favoriteQuotes || 0) + 1 
+    });
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      <TimerHeader
-        taskName={taskName}
-        onCloseTimer={handleCloseTimer}
-      />
-
-      <div className={cn(
-        "flex-1 grid gap-6",
-        "grid-cols-1 lg:grid-cols-[1fr,280px]",
-        "p-6",
-        "min-h-0" // Important for preventing overflow
-      )}>
-        {/* Timer Circle and Controls Section */}
-        <div className="flex flex-col items-center justify-center gap-8">
-          <div className="relative w-full max-w-[300px] mx-auto">
-            <TimerCircle {...timerCircleProps} size="normal" />
-          </div>
-          <div className="w-full max-w-[300px]">
-            <TimerControls {...timerControlsProps} />
-          </div>
-        </div>
-
-        {/* Metrics Section */}
-        <div className={cn(
-          "flex flex-col",
-          "bg-card/5 rounded-lg"
-        )}>
-          <TimerMetricsDisplay
-            metrics={metrics}
-            isRunning={timerControlsProps.isRunning}
-          />
-        </div>
-      </div>
-    </div>
+    <TimerCompactView
+      taskName={taskName}
+      timerCircleProps={timerCircleProps}
+      timerControlsProps={timerControlsProps}
+      metrics={metrics}
+      internalMinutes={internalMinutes}
+      onMinutesChange={handleMinutesChange}
+      selectedSound={selectedSound}
+      onSoundChange={setSelectedSound}
+      onTestSound={testSound}
+      isLoadingAudio={isLoadingAudio}
+      onExpand={() => setIsExpanded(true)}
+      onLike={handleLike}
+      favorites={favorites}
+      setFavorites={setFavorites}
+    />
   );
 };
