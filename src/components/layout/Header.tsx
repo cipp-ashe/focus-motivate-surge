@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 
 interface HeaderProps {
-  onNotesClick: () => void;
-  onHabitsClick: () => void;
+  onNotesClick?: () => void;
+  onHabitsClick?: () => void;
 }
 
 export const Header = ({ onNotesClick, onHabitsClick }: HeaderProps) => {
@@ -47,3 +47,5 @@ export const Header = ({ onNotesClick, onHabitsClick }: HeaderProps) => {
     </div>
   );
 };
+
+export default Header;

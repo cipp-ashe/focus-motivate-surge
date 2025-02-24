@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Header from './layout/Header';
+import { Header } from './layout/Header';
 import { HabitProvider } from '@/contexts/habits/HabitContext';
 
 const AppLayout = () => {
