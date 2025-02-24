@@ -129,51 +129,54 @@ export const Timer = ({
   const timerCircleProps = getTimerCircleProps();
   const timerControlsProps = getTimerControlsProps();
 
-  // Only render one view at a time
-  if (isExpanded) {
-    return (
-      <TimerExpandedView
-        ref={expandedViewRef}
-        taskName={taskName}
-        timerCircleProps={timerCircleProps}
-        timerControlsProps={{
-          ...timerControlsProps,
-          size: "large"
-        }}
-        metrics={metrics}
-        onClose={handleCloseTimer}
-        onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
-    );
-  }
-
   return (
-    <MainTimerView
-      isExpanded={isExpanded}
-      setIsExpanded={setIsExpanded}
-      showCompletion={showCompletion}
-      taskName={taskName}
-      timerCircleProps={timerCircleProps}
-      timerControlsProps={timerControlsProps}
-      metrics={metrics}
-      internalMinutes={internalMinutes}
-      handleMinutesChange={setInternalMinutes}
-      selectedSound={selectedSound}
-      setSelectedSound={(sound: SoundOption) => setSelectedSound(sound)}
-      testSound={testSound}
-      isLoadingAudio={isLoadingAudio}
-      updateMetrics={updateMetrics}
-      expandedViewRef={expandedViewRef}
-      handleCloseTimer={handleCloseTimer}
-      favorites={favorites}
-      setFavorites={setFavorites}
-      showConfirmation={showConfirmation}
-      setShowConfirmation={setShowConfirmation}
-      handleAddTimeAndContinue={handleAddTimeAndContinue}
-      handleComplete={handleComplete}
-    />
+    <div className="relative">
+      {/* Base timer view with controlled visibility */}
+      <div className={`transition-opacity duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <MainTimerView
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          showCompletion={showCompletion}
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={timerControlsProps}
+          metrics={metrics}
+          internalMinutes={internalMinutes}
+          handleMinutesChange={setInternalMinutes}
+          selectedSound={selectedSound}
+          setSelectedSound={(sound: SoundOption) => setSelectedSound(sound)}
+          testSound={testSound}
+          isLoadingAudio={isLoadingAudio}
+          updateMetrics={updateMetrics}
+          expandedViewRef={expandedViewRef}
+          handleCloseTimer={handleCloseTimer}
+          favorites={favorites}
+          setFavorites={setFavorites}
+          showConfirmation={showConfirmation}
+          setShowConfirmation={setShowConfirmation}
+          handleAddTimeAndContinue={handleAddTimeAndContinue}
+          handleComplete={handleComplete}
+        />
+      </div>
+
+      {/* Expanded view rendered at root level when active */}
+      {isExpanded && (
+        <TimerExpandedView
+          ref={expandedViewRef}
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={{
+            ...timerControlsProps,
+            size: "large"
+          }}
+          metrics={metrics}
+          onClose={handleCloseTimer}
+          onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      )}
+    </div>
   );
 };
 

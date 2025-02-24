@@ -55,8 +55,8 @@ export const MainTimerView = ({
   handleComplete,
 }: MainTimerViewProps) => {
   return (
-    <div className={`relative w-full transition-all duration-300 ${isExpanded ? 'scale-102' : 'scale-100'}`}>
-      <div className={`relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg transition-all duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+    <div className="relative w-full">
+      <div className="relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg">
         <TimerBody
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
