@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { ActiveTemplate, HabitTemplate } from './types';
-import HabitList from './HabitList';
+import { HabitList } from './HabitList';
 
 interface TemplateCardProps {
   template: ActiveTemplate;

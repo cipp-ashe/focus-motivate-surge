@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ActiveTemplate } from './types';
 import TemplateCard from './TemplateCard';
@@ -6,7 +7,6 @@ import { useDragAndDrop } from './hooks/useDragAndDrop';
 
 interface TemplateListProps {
   activeTemplates: ActiveTemplate[];
-  onConfigure: (template: ActiveTemplate) => void;
   onRemove: (templateId: string) => void;
   getTodayProgress: (habitId: string, templateId: string) => { value: boolean | number; streak: number; };
   onHabitUpdate: (habitId: string, templateId: string, value: boolean | number) => void;
@@ -14,7 +14,6 @@ interface TemplateListProps {
 
 const TemplateList: React.FC<TemplateListProps> = ({
   activeTemplates,
-  onConfigure,
   onRemove,
   getTodayProgress,
   onHabitUpdate,
@@ -46,7 +45,6 @@ const TemplateList: React.FC<TemplateListProps> = ({
             <TemplateCard
               template={template}
               templateInfo={templateInfo}
-              onConfigure={() => onConfigure(template)}
               onRemove={() => onRemove(template.templateId)}
               getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
               onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}

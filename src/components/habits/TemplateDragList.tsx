@@ -15,7 +15,6 @@ interface DraggableTemplateListProps {
   onDragStart: (e: React.DragEvent, index: number) => void;
   onDragOver: (e: React.DragEvent, index: number) => void;
   onDragEnd: () => void;
-  onCustomize: (template: ActiveTemplate) => void;
   onRemove: (templateId: string) => void;
   onToggleInsights: (template: ActiveTemplate) => void;
   getTodayProgress: (habitId: string, templateId: string) => { value: boolean | number; streak: number; };
@@ -31,7 +30,6 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
   onDragStart,
   onDragOver,
   onDragEnd,
-  onCustomize,
   onRemove,
   onToggleInsights,
   getTodayProgress,
@@ -58,7 +56,6 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
               <TemplateCard
                 template={template}
                 templateInfo={templateInfo}
-                onConfigure={() => onCustomize(template)}
                 onRemove={() => onRemove(template.templateId)}
                 getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
                 onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}

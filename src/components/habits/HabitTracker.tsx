@@ -8,7 +8,6 @@ import { HabitTemplate, DayOfWeek } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
-import TemplateConfigurationSheet from './TemplateConfigurationSheet';
 
 const HabitTracker: React.FC = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -54,32 +53,12 @@ const HabitTracker: React.FC = () => {
     };
   }, []);
 
-  const handleTemplateSelect = (templateId: string) => {
-    const template = allTemplates.find(t => t.id === templateId);
-    if (template) {
-      addTemplate({
-        templateId: template.id,
-        habits: template.defaultHabits || [],
-        activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        customized: false,
-      });
-      setIsConfigOpen(false);
-      window.dispatchEvent(new Event('templatesUpdated'));
-    }
-  };
-
-  const handleUpdateTemplate = (updates: Partial<typeof selectedTemplate>) => {
-    if (!selectedTemplate) return;
-    handleConfigureTemplate({ ...selectedTemplate, ...updates });
-  };
-
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
       <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
 
       <ActiveTemplateList
         activeTemplates={activeTemplates}
-        onConfigure={handleConfigureTemplate}
         onRemove={removeTemplate}
         getTodayProgress={getTodayProgress}
         onHabitUpdate={updateProgress}
@@ -90,19 +69,8 @@ const HabitTracker: React.FC = () => {
         onOpenChange={setIsConfigOpen}
         allTemplates={allTemplates}
         activeTemplateIds={activeTemplates.map(t => t.templateId)}
-        onSelectTemplate={handleTemplateSelect}
+        onSelectTemplate={handleConfigureTemplate}
         onCreateTemplate={handleCreateTemplate}
-      />
-
-      <TemplateConfigurationSheet
-        selectedTemplate={selectedTemplate}
-        isCreatingTemplate={isCreatingTemplate}
-        newTemplateName={newTemplateName}
-        onNewTemplateNameChange={setNewTemplateName}
-        onClose={handleCloseTemplate}
-        onUpdateTemplate={handleUpdateTemplate}
-        onUpdateDays={updateTemplateDays}
-        onSave={handleSaveTemplate}
       />
     </div>
   );
