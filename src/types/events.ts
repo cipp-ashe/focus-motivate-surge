@@ -39,6 +39,12 @@ export interface TimerEventPayloads {
     taskName: string;
     duration: number;
   };
+  'timer:expand': {
+    taskName: string;
+  };
+  'timer:collapse': {
+    taskName: string;
+  };
   
   // Task Events
   'task:create': Task;

@@ -153,7 +153,7 @@ export const Timer = ({
       <div className={`transition-opacity duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <MainTimerView
           isExpanded={isExpanded}
-          setIsExpanded={() => eventBus.emit('timer:expand')}
+          setIsExpanded={() => eventBus.emit('timer:expand', { taskName })}
           showCompletion={showCompletion}
           taskName={taskName}
           timerCircleProps={timerCircleProps}
@@ -188,7 +188,7 @@ export const Timer = ({
             size: "large"
           }}
           metrics={metrics}
-          onClose={() => eventBus.emit('timer:collapse')}
+          onClose={() => eventBus.emit('timer:collapse', { taskName })}
           onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
           favorites={favorites}
           setFavorites={setFavorites}
