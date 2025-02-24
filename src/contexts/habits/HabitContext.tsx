@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
+import { useTodaysHabits } from '@/hooks/useTodaysHabits';
 
 interface HabitState {
   templates: ActiveTemplate[];
@@ -42,13 +43,14 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
           templates: [...state.templates, action.payload],
         };
       case 'UPDATE_TEMPLATE':
+        const updatedTemplates = state.templates.map(template =>
+          template.templateId === action.payload.templateId
+            ? { ...template, ...action.payload.updates, customized: true }
+            : template
+        );
         return {
           ...state,
-          templates: state.templates.map(template =>
-            template.templateId === action.payload.templateId
-              ? { ...template, ...action.payload.updates }
-              : template
-          ),
+          templates: updatedTemplates,
         };
       case 'REMOVE_TEMPLATE':
         return {
@@ -67,7 +69,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
           ...state,
           templates: state.templates.map(template =>
             template.templateId === action.payload.templateId
-              ? { ...template, activeDays: action.payload.days }
+              ? { ...template, activeDays: action.payload.days, customized: true }
               : template
           ),
         };
@@ -76,7 +78,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     }
   }, initialState);
 
-  // Load initial data
+  // Load initial data and set up template monitoring
   useQuery({
     queryKey: ['habits'],
     queryFn: async () => {
@@ -92,7 +94,10 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  // Event bus subscriptions
+  // Initialize today's habits
+  const { todaysHabits } = useTodaysHabits(state.templates);
+
+  // Event bus subscriptions for template updates
   useEffect(() => {
     const unsubscribers = [
       eventBus.on('habit:template-update', (template) => {
@@ -100,11 +105,31 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
           type: 'UPDATE_TEMPLATE', 
           payload: { templateId: template.templateId, updates: template } 
         });
+        
+        // Force re-evaluation of today's habits when template is updated
+        const today = new Date().toLocaleString('en-US', { weekday: 'long' }) as DayOfWeek;
+        if (template.activeDays.includes(today)) {
+          template.habits.forEach(habit => {
+            if (habit.metrics.type === 'timer') {
+              eventBus.emit('habit:generate-task', {
+                habitId: habit.id,
+                templateId: template.templateId,
+                duration: habit.metrics.target || 1500,
+                name: `${habit.name} (${Math.floor((habit.metrics.target || 1500) / 60)}min)`
+              });
+            }
+          });
+        }
       }),
     ];
 
     return () => unsubscribers.forEach(unsub => unsub());
   }, []);
+
+  // Save templates to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('habit-templates', JSON.stringify(state.templates));
+  }, [state.templates]);
 
   const actions: HabitContextActions = {
     addTemplate: (template) => {
@@ -136,7 +161,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <HabitContext.Provider value={state}>
+    <HabitContext.Provider value={{ ...state, todaysHabits }}>
       <HabitActionsContext.Provider value={actions}>
         {children}
       </HabitActionsContext.Provider>
