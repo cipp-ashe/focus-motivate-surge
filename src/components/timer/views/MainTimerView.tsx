@@ -56,7 +56,15 @@ export const MainTimerView = ({
 }: MainTimerViewProps) => {
   return (
     <div className="relative w-full">
-      <div className="relative bg-background/95 backdrop-blur-xl shadow-lg rounded-lg">
+      <div className={`
+        relative rounded-lg p-6
+        bg-gradient-to-b from-background/40 to-background/60
+        backdrop-blur-xl shadow-lg
+        border border-primary/5
+        transition-all duration-300 ease-in-out
+        hover:shadow-xl hover:border-primary/10
+        ${timerCircleProps.isRunning ? 'bg-background/95' : ''}
+      `}>
         <TimerBody
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
