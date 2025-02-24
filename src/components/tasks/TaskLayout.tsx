@@ -17,50 +17,16 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen, close: closeNotes } = useNotesPanel();
   const { isOpen: isHabitsOpen, close: closeHabits } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const { width } = useWindowSize();
   const { completed: completedTasks } = useTaskContext();
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    if (resizeObserverRef.current) {
-      resizeObserverRef.current.disconnect();
-    }
-
-    let timeout: NodeJS.Timeout;
-    resizeObserverRef.current = new ResizeObserver((entries) => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-
-      timeout = setTimeout(() => {
-        if (!Array.isArray(entries) || !entries.length) return;
-        const entry = entries[0];
-        if (!entry.contentRect) return;
-        console.log('Container resized:', entry.contentRect);
-      }, 100);
-    });
-
-    resizeObserverRef.current.observe(containerRef.current);
-
-    return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-      if (resizeObserverRef.current) {
-        resizeObserverRef.current.disconnect();
-      }
-    };
-  }, []);
-
   return (
-    <div ref={containerRef} className="main-layout h-full">
+    <div ref={containerRef} className="main-layout h-full bg-background">
       <div className={cn(
-        "grid grid-cols-1 gap-4 h-full",
+        "grid grid-cols-1 gap-4 h-full p-4",
         !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2"
       )}>
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col space-y-4">
           {taskList}
           {timer}
           <CompletedTasks 

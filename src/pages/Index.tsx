@@ -3,14 +3,14 @@ import React from 'react';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import TaskManager from '@/components/tasks/TaskManager';
 import { TimerSection } from '@/components/timer/TimerSection';
-import { useTaskState } from '@/contexts/tasks/TaskContext';
+import { useTaskContext } from '@/contexts/TaskContext';
 import { eventBus } from '@/lib/eventBus';
 import { TimerStateMetrics } from '@/types/metrics';
 import { Quote } from '@/types/timer';
 import { useState } from 'react';
 
 const Index = () => {
-  const { items, selected: selectedTaskId } = useTaskState();
+  const { items, selected: selectedTaskId } = useTaskContext();
   const [favorites, setFavorites] = useState<Quote[]>([]);
 
   const selectedTask = selectedTaskId 
@@ -39,7 +39,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col space-y-4">
+    <div className="min-h-screen flex flex-col space-y-4 p-4">
       <TaskLayout
         timer={
           <TimerSection
