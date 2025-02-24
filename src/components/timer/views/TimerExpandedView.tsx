@@ -64,7 +64,7 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
       
       {/* Content */}
       <div className="relative h-full overflow-y-auto">
-        <div className="container mx-auto p-6 flex flex-col gap-6 min-h-screen max-w-[1200px]">
+        <div className="container mx-auto p-6 flex flex-col gap-6 min-h-screen max-w-[1400px]">
           <QuoteDisplay 
             showAsOverlay
             currentTask={taskName}
@@ -73,17 +73,17 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
             setFavorites={setFavorites}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-6">
             {/* Timer Section */}
             <Card className="bg-card/90 backdrop-blur-md shadow-lg p-8 border-primary/20">
               <div className="flex flex-col items-center gap-8">
-                <div className="text-center">
+                <div className="text-center w-full">
                   <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 tracking-tight">
                     {taskName}
                   </h1>
                 </div>
                 
-                <div className="relative w-full max-w-[400px]">
+                <div className="relative w-full max-w-[500px] mx-auto">
                   <TimerDisplay
                     circleProps={timerCircleProps}
                     size="large"
@@ -91,7 +91,7 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
                   />
                 </div>
 
-                <div className="w-full max-w-[400px]">
+                <div className="w-full max-w-[500px] mx-auto">
                   <TimerControls {...timerControlsProps} />
                 </div>
               </div>
@@ -109,12 +109,12 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
           </div>
 
           {/* Notes Section */}
-          <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1">
+          <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1 min-h-[300px]">
             <div className="p-6 h-full flex flex-col">
               <h2 className="text-lg font-semibold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                 Quick Notes
               </h2>
-              <div className="flex-1 min-h-[200px]">
+              <div className="flex-1">
                 <NotesEditor ref={ref} />
               </div>
             </div>
@@ -136,3 +136,4 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
 }));
 
 TimerExpandedView.displayName = 'TimerExpandedView';
+
