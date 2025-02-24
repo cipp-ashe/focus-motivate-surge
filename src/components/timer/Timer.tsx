@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
@@ -128,6 +127,7 @@ export const Timer = ({
     updateMetrics,
     setPauseTimeLeft,
     pauseTimerRef,
+    reset,
   });
 
   useTimerMonitor({
@@ -198,7 +198,12 @@ export const Timer = ({
           }}
           metrics={metrics}
           onClose={() => eventBus.emit('timer:collapse', { taskName, saveNotes: true })}
-          onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
+          onLike={() => {
+            const updates: Partial<TimerStateMetrics> = { 
+              favoriteQuotes: (metrics.favoriteQuotes || 0) + 1 
+            };
+            updateMetrics(updates);
+          }}
           favorites={favorites}
           setFavorites={setFavorites}
         />

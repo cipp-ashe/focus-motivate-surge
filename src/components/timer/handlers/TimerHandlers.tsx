@@ -5,6 +5,7 @@ import { TIMER_CONSTANTS } from "@/types/timer";
 import { toast } from "sonner";
 
 interface UseTimerHandlersProps {
+  taskName: string;
   isRunning: boolean;
   start: () => void;
   pause: () => void;
@@ -18,13 +19,14 @@ interface UseTimerHandlersProps {
   setShowCompletion: (show: boolean) => void;
   setIsExpanded: (expanded: boolean) => void;
   metrics: TimerStateMetrics;
-  reset: () => void;
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
   setPauseTimeLeft: (time: number | ((prev: number) => number)) => void;
   pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | undefined>;
+  reset: () => void;
 }
 
 export const useTimerHandlers = ({
+  taskName,
   isRunning,
   start,
   pause,
