@@ -6,11 +6,20 @@ export const useTimerEvents = () => {
   const handleTimerStart = useCallback((taskName: string, duration: number) => {
     console.log('Timer event - Task selected:', { taskName, duration });
     
-    // Just initialize the timer without starting it
+    // Initialize the timer and start it immediately
     eventBus.emit('timer:init', {
       taskName,
       duration,
     });
+
+    // After a short delay to ensure initialization is complete, start the timer
+    setTimeout(() => {
+      eventBus.emit('timer:start', { 
+        taskName, 
+        duration,
+        currentTime: duration
+      });
+    }, 100);
   }, []);
 
   return {
