@@ -2,7 +2,7 @@
 import React from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
-import { useTaskContext } from '@/contexts/TaskContext';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
 
 const TaskManager = () => {
