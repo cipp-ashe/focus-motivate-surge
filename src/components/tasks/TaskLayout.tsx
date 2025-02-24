@@ -51,12 +51,15 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   }, []);
 
   return (
-    <div ref={containerRef} className="main-layout">
+    <div ref={containerRef} className="main-layout h-full">
       <div className={cn(
         "grid grid-cols-1 gap-4 h-full",
         !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2"
       )}>
         <div className="h-full flex flex-col">
+          <div className="flex-none">
+            <TaskInput onTaskAdd={handleTaskAdd} />
+          </div>
           {taskList}
           {timer}
         </div>
