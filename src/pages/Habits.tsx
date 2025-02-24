@@ -4,6 +4,7 @@ import { useHabitState } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
+import { toast } from 'sonner';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -17,7 +18,10 @@ const HabitsPage = () => {
       
       <HabitTracker 
         activeTemplates={templates} 
-        onConfigureTemplates={() => setIsConfigOpen(true)} 
+        onConfigureTemplates={() => {
+          setIsConfigOpen(true);
+          console.log('Opening template configuration');
+        }} 
       />
 
       <TemplateSelectionSheet
@@ -28,11 +32,11 @@ const HabitsPage = () => {
         onSelectTemplate={(templateId) => {
           const template = habitTemplates.find(t => t.id === templateId);
           if (template) {
-            console.log('Selected template:', template);
+            toast.success(`Added template: ${template.name}`);
           }
         }}
         onCreateTemplate={() => {
-          console.log('Create new template');
+          toast.info('Creating new template');
         }}
       />
     </div>

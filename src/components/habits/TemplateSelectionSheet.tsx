@@ -52,45 +52,42 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     eventBus.emit('habit:template-update', configuringTemplate);
     onSelectTemplate(configuringTemplate.templateId);
     setConfiguringTemplate(null);
+    onOpenChange(false);
+    toast.success('Template configured successfully');
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
-        <div className="flex flex-col h-full">
-          <div className="p-6 pb-0">
-            <SheetHeader>
-              <SheetTitle>Configure Templates</SheetTitle>
-            </SheetHeader>
-          </div>
-          <div className="flex-1 p-6 overflow-auto">
-            <div className="space-y-4">
-              {allTemplates.map((template) => (
-                <div 
-                  key={template.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div>
-                    <h3 className="font-medium">{template.name}</h3>
-                    <p className="text-sm text-muted-foreground">{template.description}</p>
-                  </div>
-                  <Button
-                    onClick={() => handleSelectTemplate(template)}
-                    disabled={activeTemplateIds.includes(template.id)}
-                  >
-                    {activeTemplateIds.includes(template.id) ? 'Added' : 'Configure'}
-                  </Button>
-                </div>
-              ))}
-              <Button 
-                onClick={onCreateTemplate}
-                className="w-full"
-                variant="outline"
+      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+        <SheetHeader>
+          <SheetTitle>Configure Templates</SheetTitle>
+        </SheetHeader>
+        
+        <div className="mt-6 space-y-4">
+          {allTemplates.map((template) => (
+            <div 
+              key={template.id}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
+              <div>
+                <h3 className="font-medium">{template.name}</h3>
+                <p className="text-sm text-muted-foreground">{template.description}</p>
+              </div>
+              <Button
+                onClick={() => handleSelectTemplate(template)}
+                disabled={activeTemplateIds.includes(template.id)}
               >
-                Create New Template
+                {activeTemplateIds.includes(template.id) ? 'Added' : 'Configure'}
               </Button>
             </div>
-          </div>
+          ))}
+          <Button 
+            onClick={onCreateTemplate}
+            className="w-full"
+            variant="outline"
+          >
+            Create New Template
+          </Button>
         </div>
       </SheetContent>
 
