@@ -9,6 +9,8 @@ import { QuoteDisplay } from "../../quotes/QuoteDisplay";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { NotesEditor } from "../../notes/NotesEditor";
+import { Maximize2, Minimize2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface TimerExpandedViewRef {
   saveNotes: () => void;
@@ -118,27 +120,15 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
             </div>
           </Card>
 
-          <button
+          <Button
             onClick={onClose}
             className="fixed top-4 right-4 p-2 rounded-full bg-background/80 hover:bg-background/90 transition-colors"
-            aria-label="Close expanded view"
+            variant="ghost"
+            size="icon"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-foreground"
-            >
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
-            </svg>
-          </button>
+            <Minimize2 className="h-4 w-4" />
+            <span className="sr-only">Collapse timer view</span>
+          </Button>
         </div>
       </div>
     </div>
