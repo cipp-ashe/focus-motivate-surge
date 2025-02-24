@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
@@ -10,6 +9,7 @@ import { useTaskContext } from '@/contexts/TaskContext';
 import { ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
+import { TimerSection } from '../timer/TimerSection';
 
 interface TaskListProps {
   tasks: Task[];
@@ -82,6 +82,19 @@ export const TaskList: React.FC<TaskListProps> = ({
           </div>
         )}
       </div>
+
+      {/* Timer Section */}
+      <div className="flex-none">
+        
+      </div>
+
+      {/* Completed Tasks Section */}
+      <CompletedTasks 
+        tasks={completedTasks}
+        onTasksClear={() => completedTasks.forEach(task => 
+          eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
+        )}
+      />
     </div>
   );
 };
