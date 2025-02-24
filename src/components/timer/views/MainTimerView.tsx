@@ -55,47 +55,28 @@ export const MainTimerView = ({
   handleComplete,
 }: MainTimerViewProps) => {
   return (
-    <div className="relative w-full">
-      <div className={`
-        relative rounded-lg p-8
-        ${timerCircleProps.isRunning 
-          ? 'bg-background/95 shadow-lg' 
-          : 'bg-gradient-to-br from-purple-500/10 via-background/60 to-background/80'}
-        backdrop-blur-xl
-        border border-purple-500/10
-        transition-all duration-500 ease-in-out
-        hover:border-purple-500/20
-        hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]
-        group
-      `}>
-        <div className={`
-          absolute inset-0 rounded-lg
-          bg-gradient-to-br from-purple-500/5 via-transparent to-transparent
-          opacity-0 group-hover:opacity-100 transition-opacity duration-500
-        `} />
-        
-        <div className="relative z-10">
-          <TimerBody
-            isExpanded={isExpanded}
-            setIsExpanded={setIsExpanded}
-            showCompletion={showCompletion}
-            taskName={taskName}
-            timerCircleProps={timerCircleProps}
-            timerControlsProps={timerControlsProps}
-            metrics={metrics}
-            internalMinutes={internalMinutes}
-            handleMinutesChange={handleMinutesChange}
-            selectedSound={selectedSound}
-            setSelectedSound={setSelectedSound}
-            testSound={testSound}
-            isLoadingAudio={isLoadingAudio}
-            updateMetrics={updateMetrics}
-            expandedViewRef={expandedViewRef}
-            handleCloseTimer={handleCloseTimer}
-            favorites={favorites}
-            setFavorites={setFavorites}
-          />
-        </div>
+    <div className="relative w-full max-w-[600px] mx-auto">
+      <div className="flex flex-col items-center space-y-8">
+        <TimerBody
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+          showCompletion={showCompletion}
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={timerControlsProps}
+          metrics={metrics}
+          internalMinutes={internalMinutes}
+          handleMinutesChange={handleMinutesChange}
+          selectedSound={selectedSound}
+          setSelectedSound={setSelectedSound}
+          testSound={testSound}
+          isLoadingAudio={isLoadingAudio}
+          updateMetrics={updateMetrics}
+          expandedViewRef={expandedViewRef}
+          handleCloseTimer={handleCloseTimer}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
       </div>
 
       <TimerCompletion
