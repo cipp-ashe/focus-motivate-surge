@@ -1,11 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ActiveTemplate, DayOfWeek, HabitTemplate } from './types';
-import { Button } from '../ui/button';
+import { Button } from "@/components/ui/button";
 import { Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
+import { ActiveTemplate, DayOfWeek, HabitTemplate } from './types';
 import ConfigurationDialog from './ConfigurationDialog';
 
 interface TemplateSelectionSheetProps {
@@ -25,8 +25,6 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   onSelectTemplate,
   onCreateTemplate,
 }) => {
-  const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
-
   const handleSelectTemplate = (template: HabitTemplate) => {
     const newTemplate: ActiveTemplate = {
       templateId: template.id,
@@ -34,26 +32,10 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
       activeDays: template.defaultDays || [],
       customized: false
     };
-    setConfiguringTemplate(newTemplate);
-  };
-
-  const handleUpdateDays = (days: DayOfWeek[]) => {
-    if (!configuringTemplate) return;
-    const updatedTemplate = {
-      ...configuringTemplate,
-      activeDays: days,
-      customized: true
-    };
-    setConfiguringTemplate(updatedTemplate);
-  };
-
-  const handleSaveConfiguration = () => {
-    if (!configuringTemplate) return;
-    eventBus.emit('habit:template-update', configuringTemplate);
-    onSelectTemplate(configuringTemplate.templateId);
-    setConfiguringTemplate(null);
+    eventBus.emit('habit:template-update', newTemplate);
+    onSelectTemplate(template.id);
     onOpenChange(false);
-    toast.success('Template configured successfully');
+    toast.success('Template added successfully');
   };
 
   return (
@@ -95,18 +77,6 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
           </div>
         </div>
       </SheetContent>
-
-      {configuringTemplate && (
-        <ConfigurationDialog
-          open={!!configuringTemplate}
-          onClose={() => setConfiguringTemplate(null)}
-          habits={configuringTemplate.habits}
-          activeDays={configuringTemplate.activeDays}
-          onUpdateDays={handleUpdateDays}
-          onSave={handleSaveConfiguration}
-          onSaveAsTemplate={() => {}}
-        />
-      )}
     </Sheet>
   );
 };
