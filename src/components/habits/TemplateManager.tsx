@@ -25,44 +25,33 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<ActiveTemplate>(templateToEdit);
 
-  // Sync with parent template changes
+  // Sync with parent template changes, but preserve local changes if we're configuring
   useEffect(() => {
-    setCurrentTemplate(templateToEdit);
-  }, [templateToEdit]);
+    if (!isConfiguring) {
+      setCurrentTemplate(templateToEdit);
+    }
+  }, [templateToEdit, isConfiguring]);
 
-  const handleUpdateDays = (days: DayOfWeek[]) => {
-    console.log('Updating days:', days);
-    
+  const updateTemplateAndEmit = (updates: Partial<ActiveTemplate>) => {
     const updatedTemplate = {
       ...currentTemplate,
-      activeDays: days,
+      ...updates,
       customized: true
     };
     
-    // Update local state
     setCurrentTemplate(updatedTemplate);
-    
-    // Emit template update event with the updated template
     eventBus.emit('habit:template-update', updatedTemplate);
-    
-    // Update parent state
+    return updatedTemplate;
+  };
+
+  const handleUpdateDays = (days: DayOfWeek[]) => {
+    console.log('Updating days:', days);
+    const updated = updateTemplateAndEmit({ activeDays: days });
     onUpdateDays(days);
   };
 
   const handleUpdateHabits = (habits: HabitDetail[]) => {
-    const updatedTemplate = {
-      ...currentTemplate,
-      habits,
-      customized: true
-    };
-    
-    // Update local state
-    setCurrentTemplate(updatedTemplate);
-    
-    // Emit template update event with the updated template
-    eventBus.emit('habit:template-update', updatedTemplate);
-    
-    // Update parent state
+    const updated = updateTemplateAndEmit({ habits });
     onUpdateTemplate({ habits });
   };
 
@@ -80,6 +69,8 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 
   const handleCloseConfiguration = () => {
     setIsConfiguring(false);
+    // When closing, ensure parent state is updated with our final state
+    onUpdateTemplate(currentTemplate);
   };
 
   return (
