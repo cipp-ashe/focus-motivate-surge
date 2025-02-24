@@ -26,8 +26,14 @@ const TaskManager = () => {
     actions.updateTask(taskId, updates);
   };
 
-  const handleTasksClear = () => {
-    // Delete each completed task
+  const handleActiveTasksClear = () => {
+    // Clear only active tasks
+    tasks.forEach(task => actions.deleteTask(task.id));
+    toast.success('All active tasks cleared!');
+  };
+
+  const handleCompletedTasksClear = () => {
+    // Clear only completed tasks
     completedTasks.forEach(task => actions.deleteTask(task.id));
     toast.success('All completed tasks cleared!');
   };
@@ -39,7 +45,8 @@ const TaskManager = () => {
       onTaskClick={(task) => handleTaskClick(task.id)}
       onTaskDelete={handleTaskDelete}
       onTasksUpdate={handleTaskUpdate}
-      onTasksClear={handleTasksClear}
+      onTasksClear={handleActiveTasksClear}
+      onCompletedTasksClear={handleCompletedTasksClear}
     />
   );
 };

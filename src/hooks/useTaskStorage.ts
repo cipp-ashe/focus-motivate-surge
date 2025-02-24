@@ -102,9 +102,15 @@ export const useTaskStorage = () => {
   }, [tasks, updateTasks, dispatchTaskOperation]);
 
   const deleteTask = useCallback((taskId: string) => {
-    // Check both active and completed tasks
-    updateTasks(tasks.filter(task => task.id !== taskId));
-    updateCompletedTasks(completedTasks.filter(task => task.id !== taskId));
+    const isInActiveTasks = tasks.some(task => task.id === taskId);
+    const isInCompletedTasks = completedTasks.some(task => task.id === taskId);
+
+    if (isInActiveTasks) {
+      updateTasks(tasks.filter(task => task.id !== taskId));
+    }
+    if (isInCompletedTasks) {
+      updateCompletedTasks(completedTasks.filter(task => task.id !== taskId));
+    }
     
     if (selectedTaskId === taskId) {
       setSelectedTaskId(null);
@@ -138,7 +144,7 @@ export const useTaskStorage = () => {
     updateTasks([]);
     setSelectedTaskId(null);
     dispatchTaskOperation({ type: 'clear' });
-    toast.success('Tasks cleared 🗑️');
+    toast.success('Active tasks cleared 🗑️');
   }, [updateTasks, dispatchTaskOperation]);
 
   const clearCompletedTasks = useCallback(() => {

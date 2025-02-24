@@ -15,6 +15,7 @@ export const TaskList = ({
   onTaskDelete,
   onTasksUpdate,
   onTasksClear,
+  onCompletedTasksClear,
 }: {
   tasks: Task[];
   selectedTasks: string[];
@@ -22,17 +23,10 @@ export const TaskList = ({
   onTaskDelete: (taskId: string) => void;
   onTasksUpdate: (taskId: string, updates: Partial<Task>) => void;
   onTasksClear: () => void;
+  onCompletedTasksClear: () => void;
 }) => {
   const { completed: completedTasks } = useTaskState();
-  const actions = useTaskActions();
   const { activeTemplates } = useTemplateManagement();
-
-  const handleClearCompletedTasks = () => {
-    // Clear completed tasks from state
-    completedTasks.forEach(task => actions.deleteTask(task.id));
-    // Call the parent's onTasksClear for any additional cleanup
-    onTasksClear();
-  };
 
   return (
     <>
@@ -60,7 +54,7 @@ export const TaskList = ({
       <div className="section-footer">
         <CompletedTasks 
           tasks={completedTasks}
-          onTasksClear={handleClearCompletedTasks}
+          onTasksClear={onCompletedTasksClear}
         />
       </div>
     </>
