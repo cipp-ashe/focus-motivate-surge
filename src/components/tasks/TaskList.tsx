@@ -1,6 +1,12 @@
+
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
+import { TaskInput } from './TaskInput';
+import { TaskTable } from './TaskTable';
+import { CompletedTasks } from './CompletedTasks';
+import { HabitTaskManager } from '../habits/HabitTaskManager';
+import { useTaskContext } from '@/contexts/TaskContext';
 
 interface TaskListProps {
   tasks: Task[];
@@ -21,6 +27,12 @@ export const TaskList: React.FC<TaskListProps> = ({
   onTasksClear,
   onCompletedTasksClear,
 }) => {
+  const { completed: completedTasks } = useTaskContext();
+
+  const handleTaskAdd = (task: Task) => {
+    eventBus.emit('task:create', task);
+  };
+
   const handleTaskDelete = (taskId: string) => {
     eventBus.emit('task:delete', { taskId, reason: 'manual' });
   };
@@ -31,10 +43,6 @@ export const TaskList: React.FC<TaskListProps> = ({
     });
   };
 
-  const handleCompletedTasksClear = () => {
-    eventBus.emit('task:delete', { taskId: tasks[0].id, reason: 'completed' });
-  };
-
   return (
     <>
       <div className="section-header">
@@ -43,7 +51,7 @@ export const TaskList: React.FC<TaskListProps> = ({
       
       <div className="section-header">
         <HabitTaskManager 
-          activeTemplates={activeTemplates}
+          activeTemplates={[]} // This should be passed from a parent component
         />
       </div>
 
@@ -61,7 +69,9 @@ export const TaskList: React.FC<TaskListProps> = ({
       <div className="section-footer">
         <CompletedTasks 
           tasks={completedTasks}
-          onTasksClear={() => completedTasks.forEach(task => eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' }))}
+          onTasksClear={() => completedTasks.forEach(task => 
+            eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' })
+          )}
         />
       </div>
     </>
