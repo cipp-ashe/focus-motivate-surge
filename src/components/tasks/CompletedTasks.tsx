@@ -31,6 +31,7 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
   const handleClearClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent accordion toggle
     onTasksClear();
+    window.dispatchEvent(new Event('tasksUpdated')); // Trigger UI update
     toast.success("Completed tasks cleared!", {
       description: "Keep up the great work! 🎯"
     });

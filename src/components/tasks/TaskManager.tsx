@@ -3,6 +3,7 @@ import React from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 import { useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
+import { toast } from 'sonner';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId } = useTaskState();
@@ -26,7 +27,9 @@ const TaskManager = () => {
   };
 
   const handleTasksClear = () => {
-    tasks.forEach(task => actions.deleteTask(task.id));
+    const tasksToDelete = tasks.filter(task => task.completed);
+    tasksToDelete.forEach(task => actions.deleteTask(task.id));
+    toast.success('All completed tasks cleared!');
   };
 
   return (
