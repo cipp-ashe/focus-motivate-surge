@@ -4,13 +4,13 @@ import { habitTemplates } from '../../utils/habitTemplates';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { useHabitProgress } from './hooks/useHabitProgress';
 import { useTemplateCreation } from './hooks/useTemplateCreation';
-import { HabitTemplate } from './types';
+import { HabitTemplate, ActiveTemplate } from './types';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
 
 interface HabitTrackerProps {
-  activeTemplates: any[];
+  activeTemplates: ActiveTemplate[];
 }
 
 const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
@@ -37,7 +37,9 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
     handleConfigureTemplate,
     handleCloseTemplate,
     handleSaveTemplate,
-  } = useTemplateCreation(updateTemplate, updateTemplate);
+  } = useTemplateCreation((template: ActiveTemplate) => {
+    updateTemplate(template.templateId, template);
+  }, updateTemplate);
 
   // Load custom templates from localStorage
   React.useEffect(() => {
@@ -71,17 +73,14 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
         onOpenChange={setIsConfigOpen}
         allTemplates={allTemplates}
         activeTemplateIds={activeTemplates.map(t => t.templateId)}
-        onSelectTemplate={(template) => {
-          const templateInfo = allTemplates.find(t => t.id === template.id);
-          if (templateInfo) {
-            updateTemplate(template.id, {
-              templateId: template.id,
-              habits: templateInfo.defaultHabits,
-              activeDays: templateInfo.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-              customized: false,
-            });
-            setIsConfigOpen(false);
-          }
+        onSelectTemplate={(template: HabitTemplate) => {
+          updateTemplate(template.id, {
+            templateId: template.id,
+            habits: template.defaultHabits,
+            activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            customized: false,
+          });
+          setIsConfigOpen(false);
         }}
         onCreateTemplate={handleCreateTemplate}
       />
