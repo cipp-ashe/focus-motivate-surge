@@ -1,3 +1,4 @@
+
 import { TimerMetrics } from './metrics';
 import { Quote } from './timer';
 import { Task } from './tasks';
@@ -81,6 +82,7 @@ export interface TimerEventPayloads {
     metrics?: TimerMetrics;
   };
   'habit:template-update': ActiveTemplate;
+  'habit:template-delete': { templateId: string };
   'habit:sync-tasks': {
     templateId: string;
     date: string;

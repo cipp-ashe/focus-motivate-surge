@@ -4,7 +4,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './layout/Header';
 import { HabitProvider } from '@/contexts/habits/HabitContext';
 
-const AppLayout = () => {
+export const AppLayout = () => {
   const location = useLocation();
   const showHeader = location.pathname !== '/';
 
@@ -19,5 +19,3 @@ const AppLayout = () => {
     </HabitProvider>
   );
 };
-
-export default AppLayout;

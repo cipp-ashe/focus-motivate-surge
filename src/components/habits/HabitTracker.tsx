@@ -50,21 +50,6 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
     };
   }, []);
 
-  // Listen for template events
-  React.useEffect(() => {
-    const handleTemplateUpdate = (template: ActiveTemplate) => {
-      eventBus.emit('habit:template-update', template);
-    };
-
-    const handleTemplateDelete = (templateId: string) => {
-      eventBus.emit('habit:template-delete', { templateId });
-    };
-
-    return () => {
-      // Cleanup if needed
-    };
-  }, []);
-
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
       <HabitTrackerHeader onConfigureTemplates={() => setIsConfigOpen(true)} />
@@ -73,6 +58,9 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ activeTemplates }) => {
         activeTemplates={activeTemplates}
         getTodayProgress={getTodayProgress}
         onHabitUpdate={updateProgress}
+        onRemove={(templateId) => {
+          eventBus.emit('habit:template-delete', { templateId });
+        }}
       />
 
       <TemplateSelectionSheet
