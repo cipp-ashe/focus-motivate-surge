@@ -44,6 +44,8 @@ const TemplateConfigurationSheet: React.FC<TemplateConfigurationSheetProps> = ({
     onSave();
   };
 
+  console.log('Current template active days:', selectedTemplate.activeDays); // Debug log
+
   return (
     <Sheet 
       open={!!selectedTemplate} 
@@ -77,7 +79,10 @@ const TemplateConfigurationSheet: React.FC<TemplateConfigurationSheetProps> = ({
             <TemplateManager
               templateToEdit={selectedTemplate}
               onUpdateTemplate={onUpdateTemplate}
-              onUpdateDays={(days) => onUpdateDays(selectedTemplate.templateId, days)}
+              onUpdateDays={(days) => {
+                console.log('Days update requested:', days); // Debug log
+                onUpdateDays(selectedTemplate.templateId, days);
+              }}
               onClose={onClose}
               onSave={handleSave}
             />
