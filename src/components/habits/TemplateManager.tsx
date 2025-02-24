@@ -33,38 +33,34 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   const handleUpdateDays = (days: DayOfWeek[]) => {
     console.log('Updating days:', days);
     
-    // Update local state
-    setCurrentTemplate(prev => ({
-      ...prev,
-      activeDays: days,
-      customized: true
-    }));
-    
-    // Emit template update event
-    eventBus.emit('habit:template-update', {
+    const updatedTemplate = {
       ...currentTemplate,
       activeDays: days,
       customized: true
-    });
+    };
+    
+    // Update local state
+    setCurrentTemplate(updatedTemplate);
+    
+    // Emit template update event with the updated template
+    eventBus.emit('habit:template-update', updatedTemplate);
     
     // Update parent state
     onUpdateDays(days);
   };
 
   const handleUpdateHabits = (habits: HabitDetail[]) => {
-    // Update local state
-    setCurrentTemplate(prev => ({
-      ...prev,
-      habits,
-      customized: true
-    }));
-    
-    // Emit template update event
-    eventBus.emit('habit:template-update', {
+    const updatedTemplate = {
       ...currentTemplate,
       habits,
       customized: true
-    });
+    };
+    
+    // Update local state
+    setCurrentTemplate(updatedTemplate);
+    
+    // Emit template update event with the updated template
+    eventBus.emit('habit:template-update', updatedTemplate);
     
     // Update parent state
     onUpdateTemplate({ habits });
