@@ -10,7 +10,6 @@ import { CompletionView } from "./views/CompletionView";
 import { MainTimerView } from "./views/MainTimerView";
 import type { TimerProps, SoundOption } from "@/types/timer";
 import { eventBus } from "@/lib/eventBus";
-import { toast } from "sonner";
 
 export const Timer = ({
   duration,
@@ -77,6 +76,24 @@ export const Timer = ({
     return () => unsubscribe();
   }, [setInternalMinutes, reset]);
 
+  // Listen for timer view state changes
+  useEffect(() => {
+    const unsubscribeExpand = eventBus.on('timer:expand', () => {
+      console.log('Timer expanding view');
+      setIsExpanded(true);
+    });
+
+    const unsubscribeCollapse = eventBus.on('timer:collapse', () => {
+      console.log('Timer collapsing view');
+      setIsExpanded(false);
+    });
+
+    return () => {
+      unsubscribeExpand();
+      unsubscribeCollapse();
+    };
+  }, [setIsExpanded]);
+
   const {
     handleComplete,
     handleAddTimeAndContinue,
@@ -123,12 +140,6 @@ export const Timer = ({
     pauseTimeLeft,
   });
 
-  const handleExpandedClose = () => {
-    console.log('Handling expanded view close');
-    setIsExpanded(false);
-    toast.success("Timer view collapsed");
-  };
-
   if (showCompletion && completionMetrics) {
     return <CompletionView metrics={completionMetrics} onComplete={handleCloseCompletion} />;
   }
@@ -142,7 +153,7 @@ export const Timer = ({
       <div className={`transition-opacity duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <MainTimerView
           isExpanded={isExpanded}
-          setIsExpanded={setIsExpanded}
+          setIsExpanded={() => eventBus.emit('timer:expand')}
           showCompletion={showCompletion}
           taskName={taskName}
           timerCircleProps={timerCircleProps}
@@ -177,7 +188,7 @@ export const Timer = ({
             size: "large"
           }}
           metrics={metrics}
-          onClose={handleExpandedClose}
+          onClose={() => eventBus.emit('timer:collapse')}
           onLike={() => updateMetrics(prev => ({ ...prev, favoriteQuotes: prev.favoriteQuotes + 1 }))}
           favorites={favorites}
           setFavorites={setFavorites}
