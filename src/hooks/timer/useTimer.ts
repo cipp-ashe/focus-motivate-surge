@@ -33,6 +33,8 @@ export const useTimer = ({
   } = useTimerActions({
     timeLeft,
     minutes,
+    taskName: '',
+    metrics,
     updateTimeLeft,
     updateMinutes,
     setIsRunning,
