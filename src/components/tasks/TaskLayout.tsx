@@ -21,16 +21,17 @@ export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { completed: completedTasks } = useTaskContext();
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background overflow-hidden">
+    <div ref={containerRef} className="min-h-screen bg-background">
       <div className={cn(
-        "grid h-screen grid-rows-[1fr,auto] gap-4 p-4",
-        !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-2 lg:grid-rows-1"
+        "container mx-auto px-4 py-6",
+        "grid gap-6",
+        !(isNotesOpen || isHabitsOpen) && width >= 1024 && "lg:grid-cols-[1fr,1fr] lg:items-start"
       )}>
         <div className="h-full flex flex-col">
           {taskList}
         </div>
         
-        <div className="h-full flex flex-col space-y-4 min-h-0">
+        <div className="space-y-6 lg:sticky lg:top-6">
           {timer}
           <CompletedTasks 
             tasks={completedTasks}

@@ -58,27 +58,33 @@ export const TimerCompactView = memo(({
   setFavorites,
 }: TimerCompactViewProps) => {
   return (
-    <Card className="p-4 w-full mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg sm:p-4">
-      <div className="space-y-3 sm:space-y-4">
+    <Card className="p-6 w-full mx-auto bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg">
+      <div className="space-y-6">
         <TimerHeader taskName={taskName} />
 
-        <div className={`overflow-hidden transition-all duration-700 ${
-          timerCircleProps.isRunning ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'
+        <div className={`transition-all duration-700 ${
+          timerCircleProps.isRunning ? 'h-0 opacity-0 overflow-hidden' : 'h-auto opacity-100'
         }`}>
-          <div className="flex flex-col items-center space-y-3 pt-1">
-            <MinutesInput
-              minutes={Math.floor(timerCircleProps.minutes)}
-              onMinutesChange={onMinutesChange}
-              minMinutes={1}
-              maxMinutes={60}
-            />
+          <div className="grid gap-6 sm:grid-cols-2 items-start">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-foreground/70">Duration</h3>
+              <MinutesInput
+                minutes={Math.floor(timerCircleProps.minutes)}
+                onMinutesChange={onMinutesChange}
+                minMinutes={1}
+                maxMinutes={60}
+              />
+            </div>
 
-            <SoundSelector
-              selectedSound={selectedSound}
-              onSoundChange={onSoundChange}
-              onTestSound={onTestSound}
-              isLoadingAudio={isLoadingAudio}
-            />
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-foreground/70">Sound</h3>
+              <SoundSelector
+                selectedSound={selectedSound}
+                onSoundChange={onSoundChange}
+                onTestSound={onTestSound}
+                isLoadingAudio={isLoadingAudio}
+              />
+            </div>
           </div>
         </div>
 
@@ -108,4 +114,3 @@ export const TimerCompactView = memo(({
 });
 
 TimerCompactView.displayName = 'TimerCompactView';
-
