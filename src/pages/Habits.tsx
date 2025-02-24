@@ -5,6 +5,7 @@ import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
+import { Sheet } from '@/components/ui/sheet';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -16,28 +17,28 @@ const HabitsPage = () => {
         Habit Configuration
       </h1>
       
-      <HabitTracker 
-        activeTemplates={templates} 
-        onConfigureTemplates={() => {
-          setIsConfigOpen(true);
-        }} 
-      />
+      <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
+        <HabitTracker 
+          activeTemplates={templates}
+          onConfigureTemplates={() => setIsConfigOpen(true)}
+        />
 
-      <TemplateSelectionSheet
-        isOpen={isConfigOpen}
-        onOpenChange={setIsConfigOpen}
-        allTemplates={habitTemplates}
-        activeTemplateIds={templates.map(t => t.templateId)}
-        onSelectTemplate={(templateId) => {
-          const template = habitTemplates.find(t => t.id === templateId);
-          if (template) {
-            toast.success(`Added template: ${template.name}`);
-          }
-        }}
-        onCreateTemplate={() => {
-          toast.info('Creating new template');
-        }}
-      />
+        <TemplateSelectionSheet
+          isOpen={isConfigOpen}
+          onOpenChange={setIsConfigOpen}
+          allTemplates={habitTemplates}
+          activeTemplateIds={templates.map(t => t.templateId)}
+          onSelectTemplate={(templateId) => {
+            const template = habitTemplates.find(t => t.id === templateId);
+            if (template) {
+              toast.success(`Added template: ${template.name}`);
+            }
+          }}
+          onCreateTemplate={() => {
+            toast.info('Creating new template');
+          }}
+        />
+      </Sheet>
     </div>
   );
 };

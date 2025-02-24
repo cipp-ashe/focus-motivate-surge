@@ -3,6 +3,7 @@ import React from 'react';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import { ActiveTemplate } from './types';
+import { eventBus } from '@/lib/eventBus';
 
 interface HabitTrackerProps {
   activeTemplates: ActiveTemplate[];
@@ -18,9 +19,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
       <HabitTrackerHeader onConfigureTemplates={onConfigureTemplates} />
       <ActiveTemplateList
         activeTemplates={activeTemplates}
-        getTodayProgress={() => ({})}
+        getTodayProgress={() => ({ value: false, streak: 0 })}
         onHabitUpdate={() => {}}
-        onRemove={() => {}}
+        onRemove={(templateId) => {
+          eventBus.emit('habit:template-delete', { templateId });
+        }}
       />
     </div>
   );
