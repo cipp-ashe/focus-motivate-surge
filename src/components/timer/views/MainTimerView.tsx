@@ -2,8 +2,7 @@
 import { TimerBody } from "../components/TimerBody";
 import { TimerCompletion } from "../components/TimerCompletion";
 import { TimerStateMetrics } from "@/types/metrics";
-import { Quote } from "@/types/timer";
-import { TimerExpandedViewRef } from "./TimerExpandedView";
+import { Quote, SoundOption, TimerExpandedViewRef } from "@/types/timer";
 
 interface MainTimerViewProps {
   isExpanded: boolean;
@@ -15,8 +14,8 @@ interface MainTimerViewProps {
   metrics: TimerStateMetrics;
   internalMinutes: number;
   handleMinutesChange: (minutes: number) => void;
-  selectedSound: string;
-  setSelectedSound: (sound: string) => void;
+  selectedSound: SoundOption;
+  setSelectedSound: (sound: SoundOption) => void;
   testSound: () => void;
   isLoadingAudio: boolean;
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;

@@ -1,3 +1,4 @@
+
 // Re-export component types
 export type {
   TimerA11yProps,
@@ -15,3 +16,6 @@ export { TIMER_CONSTANTS, SOUND_OPTIONS } from './constants';
 
 // Re-export model types
 export type { QuoteCategory, Quote } from './models';
+
+// Re-export view types
+export type { TimerExpandedViewRef } from './views';

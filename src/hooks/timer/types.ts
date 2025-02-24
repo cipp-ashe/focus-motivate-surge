@@ -20,3 +20,12 @@ export interface UseTimerReturn {
   setMinutes: (minutes: number) => void;
   completeTimer: () => void;
 }
+
+export interface UseTimerActionsReturn {
+  setMinutes: (newMinutes: number) => void;
+  start: () => void;
+  pause: () => void;
+  reset: () => void;
+  addTime: (additionalMinutes: number) => void;
+  completeTimer: () => void;
+}
