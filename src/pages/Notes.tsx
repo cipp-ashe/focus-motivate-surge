@@ -7,7 +7,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Link } from 'react-router-dom';
 
 export default function NotesPage() {
-  const { isDark, toggleTheme } = useTheme(true);
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-background">

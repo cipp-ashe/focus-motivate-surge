@@ -9,7 +9,7 @@ interface HeaderProps {
 }
 
 export const Header = ({ onNotesClick, onHabitsClick }: HeaderProps) => {
-  const { isDark, toggleTheme } = useTheme(true);
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <div className="flex justify-between items-center mb-4 sm:mb-7">
