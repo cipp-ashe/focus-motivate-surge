@@ -13,9 +13,8 @@ const DaySelector: React.FC<DaySelectorProps> = ({
   onUpdateDays,
 }) => {
   const handleDayToggle = (values: string[]) => {
-    if (values.length > 0) {
-      onUpdateDays(values as DayOfWeek[]);
-    }
+    // Always update with the current selection, even if empty
+    onUpdateDays(values as DayOfWeek[]);
   };
 
   return (
