@@ -37,7 +37,7 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
       )
       .forEach(task => {
         console.log('Removing inactive habit task:', task.id);
-        eventBus.emit('task:delete', task.id);
+        eventBus.emit('task:delete', { taskId: task.id, reason: 'habit-removed' });
       });
 
     // Add new tasks for habits that don't have one yet
@@ -59,7 +59,7 @@ export const HabitTaskManager = ({ activeTemplates }: HabitTaskManagerProps) => 
         addTagToEntity('Habit', taskId, 'task');
       }
     });
-  }, [todaysHabits, tasks]); // Only depend on todaysHabits and tasks
+  }, [todaysHabits, tasks]);
 
   return null;
 };

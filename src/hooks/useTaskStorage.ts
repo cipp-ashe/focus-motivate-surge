@@ -6,6 +6,7 @@ import { eventBus } from '@/lib/eventBus';
 
 const TASKS_STORAGE_KEY = 'taskList';
 const COMPLETED_TASKS_STORAGE_KEY = 'completedTasks';
+const CLEARED_TASKS_STORAGE_KEY = 'clearedTasks';
 
 const parseStoredTasks = (stored: string | null): Task[] => {
   try {
@@ -19,22 +20,24 @@ const parseStoredTasks = (stored: string | null): Task[] => {
 export const useTaskStorage = () => {
   const [items, setItems] = useState<Task[]>([]);
   const [completed, setCompleted] = useState<Task[]>([]);
+  const [cleared, setCleared] = useState<Task[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTasks = () => {
       const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
       const savedCompletedTasks = localStorage.getItem(COMPLETED_TASKS_STORAGE_KEY);
+      const savedClearedTasks = localStorage.getItem(CLEARED_TASKS_STORAGE_KEY);
       
       setItems(parseStoredTasks(savedTasks));
       setCompleted(parseStoredTasks(savedCompletedTasks));
+      setCleared(parseStoredTasks(savedClearedTasks));
     };
 
     loadTasks();
 
     const handleTaskCreate = (task: Task) => {
       setItems(prev => {
-        // Don't add if task with same ID already exists
         if (prev.some(t => t.id === task.id)) {
           return prev;
         }
@@ -48,7 +51,6 @@ export const useTaskStorage = () => {
         const newItems = prev.map(task =>
           task.id === taskId ? { ...task, ...updates } : task
         );
-        // Only show toast if something actually changed
         if (JSON.stringify(prev) !== JSON.stringify(newItems)) {
           toast.success('Task updated ✏️');
         }
@@ -56,14 +58,20 @@ export const useTaskStorage = () => {
       });
     };
 
-    const handleTaskDelete = (taskId: string) => {
+    const handleTaskDelete = ({ taskId, reason = 'manual' }: { taskId: string; reason?: Task['clearReason'] }) => {
       setItems(prev => {
-        if (prev.some(t => t.id === taskId)) {
-          toast.success('Task removed 🗑️');
-          return prev.filter(task => task.id !== taskId);
+        const taskToDelete = prev.find(t => t.id === taskId);
+        if (!taskToDelete) return prev;
+
+        if (reason === 'manual') {
+          const clearedTask = { ...taskToDelete, clearReason: reason };
+          setCleared(prevCleared => [...prevCleared, clearedTask]);
+          toast.success('Task cleared 🗑️');
         }
-        return prev;
+
+        return prev.filter(task => task.id !== taskId);
       });
+      
       setCompleted(prev => prev.filter(task => task.id !== taskId));
       setSelected(prev => prev === taskId ? null : prev);
     };
@@ -80,6 +88,7 @@ export const useTaskStorage = () => {
         ...task,
         completed: true,
         metrics,
+        clearReason: 'completed'
       };
 
       setCompleted(prev => [...prev, completedTask]);
@@ -103,7 +112,7 @@ export const useTaskStorage = () => {
       eventBus.off('task:select', handleTaskSelect);
       eventBus.off('task:complete', handleTaskComplete);
     };
-  }, []); // No dependencies needed since we're using state updater functions
+  }, []); 
 
   // Persist changes to localStorage
   useEffect(() => {
@@ -114,9 +123,14 @@ export const useTaskStorage = () => {
     localStorage.setItem(COMPLETED_TASKS_STORAGE_KEY, JSON.stringify(completed));
   }, [completed]);
 
+  useEffect(() => {
+    localStorage.setItem(CLEARED_TASKS_STORAGE_KEY, JSON.stringify(cleared));
+  }, [cleared]);
+
   return {
     items,
     completed,
+    cleared,
     selected
   };
 };

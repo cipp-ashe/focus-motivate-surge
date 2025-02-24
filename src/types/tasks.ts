@@ -19,11 +19,12 @@ export interface Task {
     habitId?: string;
     templateId?: string;
   };
+  clearReason?: 'manual' | 'habit-removed' | 'completed';
 }
 
-// We don't need TaskContextType anymore since we're using the event bus
 export interface TaskState {
   items: Task[];
   completed: Task[];
+  cleared: Task[];
   selected: string | null;
 }

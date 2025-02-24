@@ -1,4 +1,3 @@
-
 import { Task } from "@/types/tasks";
 import { useState, useEffect } from "react";
 import { TaskContent } from "./TaskContent";
@@ -105,7 +104,7 @@ export const TaskRow = ({
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    eventBus.emit('task:delete', task.id);
+    eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
   };
 
   return (
