@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -44,14 +43,14 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
           ),
         };
       case 'DELETE_TASK': {
-        const taskInItems = state.items.find(task => task.id === action.payload);
-        const taskInCompleted = state.completed.find(task => task.id === action.payload);
+        const taskInItems = state.items.find(task => task.id === action.payload.taskId);
+        const taskInCompleted = state.completed.find(task => task.id === action.payload.taskId);
         
         return {
           ...state,
-          items: state.items.filter(task => task.id !== action.payload),
-          completed: state.completed.filter(task => task.id !== action.payload),
-          selected: state.selected === action.payload ? null : state.selected,
+          items: state.items.filter(task => task.id !== action.payload.taskId),
+          completed: state.completed.filter(task => task.id !== action.payload.taskId),
+          selected: state.selected === action.payload.taskId ? null : state.selected,
         };
       }
       case 'COMPLETE_TASK': {
@@ -92,8 +91,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
         toast.success('Task completed 🎯');
       }),
-      eventBus.on('task:delete', (taskId) => {
-        dispatch({ type: 'DELETE_TASK', payload: taskId });
+      eventBus.on('task:delete', ({ taskId, reason }: { taskId: string; reason?: Task['clearReason'] }) => {
+        dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
       }),
       eventBus.on('task:update', ({ taskId, updates }) => {
         dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
@@ -103,8 +102,18 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       }),
     ];
 
+    const handleTaskDelete = ({ taskId, reason }: { taskId: string; reason?: Task['clearReason'] }) => {
+      dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
+    };
+
+    // Subscribe to events
+    eventBus.on('task:delete', handleTaskDelete);
+
     // Cleanup subscriptions
-    return () => unsubscribers.forEach(unsub => unsub());
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+      eventBus.off('task:delete', handleTaskDelete);
+    };
   }, []);
 
   // Load initial data

@@ -10,7 +10,7 @@ export interface TimerEventPayloads {
   // Task Events
   'task:create': Task;
   'task:update': { taskId: string; updates: Partial<Task> };
-  'task:delete': string;
+  'task:delete': { taskId: string; reason?: 'manual' | 'habit-removed' | 'completed' };
   'task:complete': { taskId: string; metrics?: TimerMetrics };
   'task:select': string | null;
   
