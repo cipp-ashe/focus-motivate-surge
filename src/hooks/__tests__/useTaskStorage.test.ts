@@ -11,8 +11,8 @@ describe('useTaskStorage', () => {
 
   it('should initialize with empty tasks', () => {
     const { result } = renderHook(() => useTaskStorage());
-    expect(result.current.tasks).toEqual([]);
-    expect(result.current.completedTasks).toEqual([]);
+    expect(result.current.items).toEqual([]);
+    expect(result.current.completed).toEqual([]);
   });
 
   it('should handle task creation through event bus', () => {
@@ -27,8 +27,8 @@ describe('useTaskStorage', () => {
       });
     });
 
-    expect(result.current.tasks).toHaveLength(1);
-    expect(result.current.tasks[0].name).toBe('Test Task');
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0].name).toBe('Test Task');
   });
 
   it('should handle task updates through event bus', () => {
@@ -48,7 +48,7 @@ describe('useTaskStorage', () => {
       });
     });
 
-    expect(result.current.tasks[0].name).toBe('Updated Task');
+    expect(result.current.items[0].name).toBe('Updated Task');
   });
 
   it('should handle task deletion through event bus', () => {
@@ -65,7 +65,7 @@ describe('useTaskStorage', () => {
       eventBus.emit('task:delete', '1');
     });
 
-    expect(result.current.tasks).toHaveLength(0);
+    expect(result.current.items).toHaveLength(0);
   });
 
   it('should persist tasks to localStorage', () => {

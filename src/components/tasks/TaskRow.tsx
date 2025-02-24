@@ -2,6 +2,7 @@
 import { Task } from "@/types/tasks";
 import { useState, useEffect } from "react";
 import { TaskContent } from "./TaskContent";
+import { eventBus } from "@/lib/eventBus";
 
 interface TaskRowProps {
   task: Task;
@@ -94,14 +95,17 @@ export const TaskRow = ({
       isSelected
     });
     
-    onDurationChange(task.id, newDurationInSeconds);
+    eventBus.emit('task:update', {
+      taskId: task.id,
+      updates: { duration: parseInt(newDurationInSeconds) }
+    });
     onInputBlur();
   };
 
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    onTaskDelete(task.id);
+    eventBus.emit('task:delete', task.id);
   };
 
   return (
