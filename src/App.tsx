@@ -11,6 +11,8 @@ import { TaskProvider } from "./contexts/tasks/TaskContext";
 import { HabitProvider } from "./contexts/habits/HabitContext";
 import { NoteProvider } from "./contexts/notes/NoteContext";
 import { ThemeProvider } from "next-themes";
+import Habits from "./pages/Habits";
+import Notes from "./pages/Notes";
 
 // Suppress specific React Router v7 warnings
 window.__reactRouterFutureWarnings = {
@@ -37,6 +39,8 @@ function App() {
                       <Routes>
                         <Route element={<AppLayout />}>
                           <Route path="/" element={<Index />} />
+                          <Route path="/habits" element={<Habits />} />
+                          <Route path="/notes" element={<Notes />} />
                         </Route>
                       </Routes>
                       <Toaster position="bottom-right" closeButton />
