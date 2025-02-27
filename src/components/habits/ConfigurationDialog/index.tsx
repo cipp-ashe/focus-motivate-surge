@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -15,7 +16,7 @@ import DraggableHabitList from './DraggableHabitList';
 interface ConfigurationDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (habits: HabitDetail[]) => void;
+  onSave: () => void;
   onSaveAsTemplate: () => void;
   habits: HabitDetail[];
   activeDays: DayOfWeek[];
@@ -36,6 +37,7 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
 
   useEffect(() => {
     if (open) {
+      console.log("ConfigurationDialog opened with habits:", initialHabits);
       setHabits(initialHabits);
     } else {
       setDraggedIndex(null);
@@ -97,16 +99,16 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
     setDraggedIndex(null);
   };
 
-  const handleSave = () => {
-    onSave(habits);
-  };
+  if (!open) return null;
+
+  console.log("Rendering ConfigurationDialog, open:", open);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-[600px] h-[80vh] max-h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <div className="space-y-4 p-6">
+          <div className="space-y-4 p-6 overflow-y-auto">
             <div>
               <h3 className="text-lg font-medium mb-2">Active Days</h3>
               <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
@@ -144,7 +146,7 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
             <DialogFooter
               onSaveAsTemplate={onSaveAsTemplate}
               onClose={onClose}
-              onSave={handleSave}
+              onSave={onSave}
             />
           </div>
         </div>

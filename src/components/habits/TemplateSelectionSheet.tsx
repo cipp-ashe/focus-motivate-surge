@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
 import { ActiveTemplate, DayOfWeek, HabitTemplate } from './types';
@@ -26,8 +25,10 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   onCreateTemplate,
 }) => {
   const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
 
   const handleSelectTemplate = (template: HabitTemplate) => {
+    console.log("Selected template for configuration:", template.name);
     const newTemplate: ActiveTemplate = {
       templateId: template.id,
       habits: template.defaultHabits,
@@ -35,6 +36,7 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
       customized: false
     };
     setConfiguringTemplate(newTemplate);
+    setConfigDialogOpen(true);
   };
 
   const handleUpdateDays = (days: DayOfWeek[]) => {
@@ -51,10 +53,18 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     if (!configuringTemplate) return;
     eventBus.emit('habit:template-update', configuringTemplate);
     onSelectTemplate(configuringTemplate.templateId);
-    setConfiguringTemplate(null);
+    handleCloseConfigDialog();
     onOpenChange(false);
     toast.success('Template configured successfully');
   };
+
+  const handleCloseConfigDialog = () => {
+    setConfigDialogOpen(false);
+    setConfiguringTemplate(null);
+  };
+
+  console.log("TemplateSelectionSheet - configDialogOpen:", configDialogOpen);
+  console.log("TemplateSelectionSheet - configuringTemplate:", configuringTemplate?.templateId);
 
   return (
     <>
@@ -98,15 +108,19 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
         </SheetContent>
       </Sheet>
 
-      <ConfigurationDialog
-        open={!!configuringTemplate}
-        onClose={() => setConfiguringTemplate(null)}
-        habits={configuringTemplate?.habits || []}
-        activeDays={configuringTemplate?.activeDays || []}
-        onUpdateDays={handleUpdateDays}
-        onSave={handleSaveConfiguration}
-        onSaveAsTemplate={() => {}}
-      />
+      {configuringTemplate && (
+        <ConfigurationDialog
+          open={configDialogOpen}
+          onClose={handleCloseConfigDialog}
+          habits={configuringTemplate.habits}
+          activeDays={configuringTemplate.activeDays}
+          onUpdateDays={handleUpdateDays}
+          onSave={handleSaveConfiguration}
+          onSaveAsTemplate={() => {
+            toast.info("Save as template feature coming soon");
+          }}
+        />
+      )}
     </>
   );
 };

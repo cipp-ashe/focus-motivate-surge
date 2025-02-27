@@ -12,6 +12,13 @@ const HabitsPage = () => {
   const { templates } = useHabitState();
   const [isConfigOpen, setIsConfigOpen] = useState(false);
 
+  const handleSelectTemplate = (templateId: string) => {
+    const template = habitTemplates.find(t => t.id === templateId);
+    if (template) {
+      toast.success(`Added template: ${template.name}`);
+    }
+  };
+
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
@@ -40,12 +47,7 @@ const HabitsPage = () => {
         onOpenChange={setIsConfigOpen}
         allTemplates={habitTemplates}
         activeTemplateIds={templates.map(t => t.templateId)}
-        onSelectTemplate={(templateId) => {
-          const template = habitTemplates.find(t => t.id === templateId);
-          if (template) {
-            toast.success(`Added template: ${template.name}`);
-          }
-        }}
+        onSelectTemplate={handleSelectTemplate}
         onCreateTemplate={() => {
           toast.info('Creating new template');
         }}
