@@ -73,6 +73,12 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
     onUpdateTemplate(currentTemplate);
   };
 
+  // Fix for the type error - wrap the handler to match expected signature
+  const handleSaveConfiguration = () => {
+    // Call our internal handler which actually processes the habits
+    handleUpdateHabits(currentTemplate.habits);
+  };
+
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
@@ -92,7 +98,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
         habits={currentTemplate.habits}
         activeDays={currentTemplate.activeDays}
         onUpdateDays={handleUpdateDays}
-        onSave={handleUpdateHabits}
+        onSave={handleSaveConfiguration}
         onSaveAsTemplate={handleSaveTemplate}
       />
     </div>
