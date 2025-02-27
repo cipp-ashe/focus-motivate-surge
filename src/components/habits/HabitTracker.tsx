@@ -17,6 +17,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
   onConfigureTemplates,
 }) => {
   const { isOpen, close } = useHabitsPanel();
+  
+  // Debug when drawer opens/closes
+  React.useEffect(() => {
+    console.log("HabitTracker drawer isOpen:", isOpen);
+  }, [isOpen]);
 
   return (
     <Drawer open={isOpen} onOpenChange={close}>

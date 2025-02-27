@@ -13,9 +13,20 @@ const HabitsPanelContext = createContext<HabitsPanelContextType | undefined>(und
 export function HabitsPanelProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggle = () => setIsOpen(prev => !prev);
-  const open = () => setIsOpen(true);
-  const close = () => setIsOpen(false);
+  const toggle = () => {
+    console.log("Toggling habits panel, current state:", isOpen);
+    setIsOpen(prev => !prev);
+  };
+  
+  const open = () => {
+    console.log("Opening habits panel");
+    setIsOpen(true);
+  };
+  
+  const close = () => {
+    console.log("Closing habits panel");
+    setIsOpen(false);
+  };
 
   return (
     <HabitsPanelContext.Provider value={{ isOpen, toggle, open, close }}>

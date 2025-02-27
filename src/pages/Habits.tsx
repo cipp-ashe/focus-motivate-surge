@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
@@ -12,7 +12,23 @@ const HabitsPage = () => {
   const { templates } = useHabitState();
   const [isConfigOpen, setIsConfigOpen] = useState(false);
 
+  // Debug when this component renders
+  useEffect(() => {
+    console.log("HabitsPage rendered, isConfigOpen:", isConfigOpen);
+  }, [isConfigOpen]);
+
+  const handleOpenConfig = () => {
+    console.log("Opening config sheet");
+    setIsConfigOpen(true);
+  };
+
+  const handleCloseConfig = (open: boolean) => {
+    console.log("Config sheet state change:", open);
+    setIsConfigOpen(open);
+  };
+
   const handleSelectTemplate = (templateId: string) => {
+    console.log("Template selected:", templateId);
     const template = habitTemplates.find(t => t.id === templateId);
     if (template) {
       toast.success(`Added template: ${template.name}`);
@@ -30,7 +46,7 @@ const HabitsPage = () => {
           variant="outline" 
           size="sm" 
           className="flex items-center gap-2"
-          onClick={() => setIsConfigOpen(true)}
+          onClick={handleOpenConfig}
         >
           <Settings className="h-4 w-4" />
           Configure Templates
@@ -39,12 +55,12 @@ const HabitsPage = () => {
 
       <HabitTracker 
         activeTemplates={templates}
-        onConfigureTemplates={() => setIsConfigOpen(true)}
+        onConfigureTemplates={handleOpenConfig}
       />
 
       <TemplateSelectionSheet
         isOpen={isConfigOpen}
-        onOpenChange={setIsConfigOpen}
+        onOpenChange={handleCloseConfig}
         allTemplates={habitTemplates}
         activeTemplateIds={templates.map(t => t.templateId)}
         onSelectTemplate={handleSelectTemplate}

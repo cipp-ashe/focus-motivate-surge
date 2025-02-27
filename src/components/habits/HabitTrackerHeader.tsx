@@ -1,31 +1,41 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
-import { SheetTrigger } from "@/components/ui/sheet";
+import { Settings2 } from "lucide-react";
+import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 
 interface HabitTrackerHeaderProps {
   onConfigureTemplates?: () => void;
 }
 
-const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ 
-  onConfigureTemplates 
-}) => {
+const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ onConfigureTemplates }) => {
+  const { close } = useHabitsPanel();
+  
+  const handleConfigureClick = () => {
+    console.log("Configure Templates button clicked");
+    // Close the habits panel first to avoid nesting dialogs
+    close();
+    // Then open the template configuration 
+    if (onConfigureTemplates) {
+      console.log("Calling onConfigureTemplates callback");
+      setTimeout(() => {
+        onConfigureTemplates();
+      }, 100); // Short delay to ensure panel is closed first
+    }
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h2 className="text-lg font-semibold">Habit Tracker</h2>
-      {onConfigureTemplates && (
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Settings className="h-4 w-4" />
-            Configure Templates
-          </Button>
-        </SheetTrigger>
-      )}
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-xl font-semibold">Habit Tracking</h2>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={handleConfigureClick}
+        className="flex items-center gap-2"
+      >
+        <Settings2 className="h-4 w-4" />
+        Configure Templates
+      </Button>
     </div>
   );
 };
