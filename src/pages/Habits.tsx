@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
@@ -11,27 +11,35 @@ import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
-  const { open, isOpen } = useHabitsPanel();
+  const { open, close, isOpen } = useHabitsPanel();
   const [configOpen, setConfigOpen] = useState(false);
 
-  // Simplified logic to handle template configuration
-  const handleOpenConfig = useCallback(() => {
-    console.log("Opening config sheet");
+  // Function to open config sheet directly
+  const openConfig = () => {
+    console.log("Opening config sheet directly");
     setConfigOpen(true);
-  }, []);
+  };
 
-  const handleCloseConfig = useCallback((open: boolean) => {
+  // Function to handle the drawer first, then config
+  const openDrawerFirst = () => {
+    console.log("Opening drawer first");
+    open();
+  };
+
+  // Handle closing config
+  const handleCloseConfig = (open: boolean) => {
     console.log("Config sheet state change:", open);
     setConfigOpen(open);
-  }, []);
+  };
 
-  const handleSelectTemplate = useCallback((templateId: string) => {
+  // Handle template selection
+  const handleSelectTemplate = (templateId: string) => {
     console.log("Template selected:", templateId);
     const template = habitTemplates.find(t => t.id === templateId);
     if (template) {
       toast.success(`Added template: ${template.name}`);
     }
-  }, []);
+  };
 
   return (
     <div className="container mx-auto py-6">
@@ -39,29 +47,34 @@ const HabitsPage = () => {
         Habit Configuration
       </h1>
       
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">
         <Button 
           variant="outline" 
           size="sm" 
           className="flex items-center gap-2"
-          onClick={() => {
-            if (!isOpen) {
-              open();
-            } else {
-              handleOpenConfig();
-            }
-          }}
+          onClick={openDrawerFirst}
+        >
+          <Settings className="h-4 w-4" />
+          Open Habit Drawer
+        </Button>
+        
+        <Button 
+          variant="default" 
+          size="sm" 
+          className="flex items-center gap-2"
+          onClick={openConfig}
         >
           <Settings className="h-4 w-4" />
           Configure Templates
         </Button>
       </div>
 
+      {/* Habit drawer */}
       <HabitTracker 
         activeTemplates={templates}
-        onConfigureTemplates={handleOpenConfig}
       />
 
+      {/* Template configuration (completely separate from drawer) */}
       <TemplateSelectionSheet
         isOpen={configOpen}
         onOpenChange={handleCloseConfig}

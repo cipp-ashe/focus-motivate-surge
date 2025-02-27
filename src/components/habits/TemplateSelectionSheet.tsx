@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
@@ -114,6 +114,11 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
                   Create New Template
                 </Button>
               </div>
+            </div>
+            <div className="p-4 border-t">
+              <SheetClose asChild>
+                <Button variant="outline" className="w-full">Close</Button>
+              </SheetClose>
             </div>
           </div>
         </SheetContent>
