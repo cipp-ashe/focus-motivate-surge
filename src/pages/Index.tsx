@@ -8,16 +8,13 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
+import { TimerSection } from '@/components/timer/TimerSection';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import TaskManager from '@/components/tasks/TaskManager';
+import { TaskLayout } from '@/components/tasks/TaskLayout';
+import { useState } from 'react';
+import { Quote } from "@/types/timer";
 
 // Main dashboard content that provides navigation to other sections
 const MainDashboard = () => {
@@ -29,43 +26,51 @@ const MainDashboard = () => {
           Your all-in-one productivity dashboard to help you stay focused, track habits, and manage your tasks.
         </p>
         
-        <NavigationMenu className="max-w-full w-full justify-start my-6">
-          <NavigationMenuList className="flex flex-col sm:flex-row gap-2 w-full">
-            <NavigationMenuItem className="w-full sm:w-auto">
-              <Link to="/habits" className={navigationMenuTriggerStyle() + " w-full justify-between"}>
-                Habits
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem className="w-full sm:w-auto">
-              <Link to="/notes" className={navigationMenuTriggerStyle() + " w-full justify-between"}>
-                Notes
-              </Link>
-            </NavigationMenuItem>
-            {/* Add more navigation items as needed */}
-          </NavigationMenuList>
-        </NavigationMenu>
-      </div>
-      
-      {/* Quick actions section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-lg border p-6 shadow-sm bg-card">
-          <h3 className="text-xl font-medium mb-3">Quick Actions</h3>
-          <div className="space-y-2">
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/habits">Manage Habit Templates</Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/notes">View Notes</Link>
-            </Button>
-          </div>
-        </div>
-        
-        <div className="rounded-lg border p-6 shadow-sm bg-card">
-          <h3 className="text-xl font-medium mb-3">Recent Activity</h3>
-          <p className="text-muted-foreground">No recent activity to display.</p>
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
+          <Button variant="outline" className="w-full sm:w-auto justify-between" asChild>
+            <Link to="/habits">Habits</Link>
+          </Button>
+          <Button variant="outline" className="w-full sm:w-auto justify-between" asChild>
+            <Link to="/notes">Notes</Link>
+          </Button>
         </div>
       </div>
     </div>
+  );
+};
+
+// This component handles the timer and task functionality
+const TimerTaskSection = () => {
+  const { items: tasks, selected: selectedTaskId } = useTaskContext();
+  const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
+  const [favorites, setFavorites] = useState<Quote[]>([]);
+
+  const handleTaskComplete = (metrics: any) => {
+    if (selectedTask) {
+      console.log("Task completed:", selectedTask.name, metrics);
+      toast.success(`Task completed: ${selectedTask.name}`);
+    }
+  };
+
+  const handleDurationChange = (seconds: number) => {
+    if (selectedTask) {
+      console.log("Duration changed for task:", selectedTask.name, seconds);
+    }
+  };
+
+  return (
+    <TaskLayout
+      timer={
+        <TimerSection
+          selectedTask={selectedTask}
+          onTaskComplete={handleTaskComplete}
+          onDurationChange={handleDurationChange}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      }
+      taskList={<TaskManager />}
+    />
   );
 };
 
@@ -147,6 +152,9 @@ const IndexPage = () => {
       
       {/* Main dashboard content with navigation */}
       <MainDashboard />
+      
+      {/* Timer and Task components */}
+      <TimerTaskSection />
       
       {/* Add the habit section */}
       <HabitsSection />
