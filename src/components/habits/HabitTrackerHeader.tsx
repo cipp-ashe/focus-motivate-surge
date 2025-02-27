@@ -2,31 +2,18 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
-import { useHabitsPanel } from "@/hooks/useHabitsPanel";
 
 interface HabitTrackerHeaderProps {
   onConfigureTemplates?: () => void;
 }
 
+// Simplified component that doesn't directly access context
 const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ onConfigureTemplates }) => {
-  const { close, startConfiguring } = useHabitsPanel();
-  
   const handleConfigureClick = () => {
     console.log("Configure Templates button clicked");
-    
-    // Close the habits panel first
-    close();
-    
-    // Wait for the drawer to finish closing before attempting to open the configuration
-    setTimeout(() => {
-      if (onConfigureTemplates) {
-        console.log("Calling onConfigureTemplates callback");
-        onConfigureTemplates();
-      } else {
-        console.log("Using startConfiguring from context");
-        startConfiguring();
-      }
-    }, 500); // Increased timeout to ensure drawer is fully closed
+    if (onConfigureTemplates) {
+      onConfigureTemplates();
+    }
   };
 
   return (

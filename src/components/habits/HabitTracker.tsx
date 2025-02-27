@@ -29,17 +29,30 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
     console.log("HabitTracker drawer isOpen:", isOpen);
   }, [isOpen]);
 
+  // Define a handler for configure templates that properly manages the drawer closing
+  const handleConfigureTemplates = () => {
+    // First close the drawer
+    close();
+    
+    // Then wait for drawer animation to complete before opening template config
+    setTimeout(() => {
+      if (onConfigureTemplates) {
+        onConfigureTemplates();
+      }
+    }, 500);
+  };
+
   return (
     <Drawer open={isOpen} onOpenChange={close}>
-      <DrawerContent aria-describedby="habit-drawer-description">
+      <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Habit Configuration</DrawerTitle>
-          <DrawerDescription id="habit-drawer-description">
+          <DrawerDescription>
             Manage your active habit templates
           </DrawerDescription>
         </DrawerHeader>
         <div className="p-6 space-y-6">
-          <HabitTrackerHeader onConfigureTemplates={onConfigureTemplates} />
+          <HabitTrackerHeader onConfigureTemplates={handleConfigureTemplates} />
           <ActiveTemplateList
             activeTemplates={activeTemplates}
             getTodayProgress={() => ({ value: false, streak: 0 })}

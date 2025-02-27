@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
@@ -11,38 +11,19 @@ import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
-  const { isConfiguring, stopConfiguring, startConfiguring } = useHabitsPanel();
-  const [displayConfig, setDisplayConfig] = useState(false);
+  const { open, isOpen } = useHabitsPanel();
+  const [configOpen, setConfigOpen] = useState(false);
 
-  // Debug when this component renders
-  useEffect(() => {
-    console.log("HabitsPage rendered, isConfiguring:", isConfiguring);
-  }, [isConfiguring]);
-
-  // This effect handles the display timing to prevent flashing
-  useEffect(() => {
-    if (isConfiguring) {
-      setDisplayConfig(true);
-    } else {
-      // Add a delay before hiding to allow for animations
-      const timer = setTimeout(() => {
-        setDisplayConfig(false);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isConfiguring]);
-
+  // Simplified logic to handle template configuration
   const handleOpenConfig = useCallback(() => {
-    console.log("Opening config sheet from page button");
-    startConfiguring();
-  }, [startConfiguring]);
+    console.log("Opening config sheet");
+    setConfigOpen(true);
+  }, []);
 
   const handleCloseConfig = useCallback((open: boolean) => {
     console.log("Config sheet state change:", open);
-    if (!open) {
-      stopConfiguring();
-    }
-  }, [stopConfiguring]);
+    setConfigOpen(open);
+  }, []);
 
   const handleSelectTemplate = useCallback((templateId: string) => {
     console.log("Template selected:", templateId);
@@ -63,7 +44,13 @@ const HabitsPage = () => {
           variant="outline" 
           size="sm" 
           className="flex items-center gap-2"
-          onClick={handleOpenConfig}
+          onClick={() => {
+            if (!isOpen) {
+              open();
+            } else {
+              handleOpenConfig();
+            }
+          }}
         >
           <Settings className="h-4 w-4" />
           Configure Templates
@@ -75,18 +62,16 @@ const HabitsPage = () => {
         onConfigureTemplates={handleOpenConfig}
       />
 
-      {displayConfig && (
-        <TemplateSelectionSheet
-          isOpen={isConfiguring}
-          onOpenChange={handleCloseConfig}
-          allTemplates={habitTemplates}
-          activeTemplateIds={templates.map(t => t.templateId)}
-          onSelectTemplate={handleSelectTemplate}
-          onCreateTemplate={() => {
-            toast.info('Creating new template');
-          }}
-        />
-      )}
+      <TemplateSelectionSheet
+        isOpen={configOpen}
+        onOpenChange={handleCloseConfig}
+        allTemplates={habitTemplates}
+        activeTemplateIds={templates.map(t => t.templateId)}
+        onSelectTemplate={handleSelectTemplate}
+        onCreateTemplate={() => {
+          toast.info('Creating new template');
+        }}
+      />
     </div>
   );
 };
