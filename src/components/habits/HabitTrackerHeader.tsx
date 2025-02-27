@@ -14,18 +14,19 @@ const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ onConfigureTemp
   const handleConfigureClick = () => {
     console.log("Configure Templates button clicked");
     
-    // First close the drawer panel
+    // Close the habits panel first
     close();
     
-    // Then start configuring (after a small delay to ensure drawer is closed)
+    // Wait for the drawer to finish closing before attempting to open the configuration
     setTimeout(() => {
       if (onConfigureTemplates) {
-        console.log("Starting template configuration");
+        console.log("Calling onConfigureTemplates callback");
         onConfigureTemplates();
       } else {
+        console.log("Using startConfiguring from context");
         startConfiguring();
       }
-    }, 300);
+    }, 500); // Increased timeout to ensure drawer is fully closed
   };
 
   return (

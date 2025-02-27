@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
@@ -32,23 +32,25 @@ const HabitsPage = () => {
     }
   }, [isConfiguring]);
 
-  const handleOpenConfig = () => {
+  const handleOpenConfig = useCallback(() => {
     console.log("Opening config sheet from page button");
     startConfiguring();
-  };
+  }, [startConfiguring]);
 
-  const handleCloseConfig = () => {
-    console.log("Closing config sheet");
-    stopConfiguring();
-  };
+  const handleCloseConfig = useCallback((open: boolean) => {
+    console.log("Config sheet state change:", open);
+    if (!open) {
+      stopConfiguring();
+    }
+  }, [stopConfiguring]);
 
-  const handleSelectTemplate = (templateId: string) => {
+  const handleSelectTemplate = useCallback((templateId: string) => {
     console.log("Template selected:", templateId);
     const template = habitTemplates.find(t => t.id === templateId);
     if (template) {
       toast.success(`Added template: ${template.name}`);
     }
-  };
+  }, []);
 
   return (
     <div className="container mx-auto py-6">
@@ -76,9 +78,7 @@ const HabitsPage = () => {
       {displayConfig && (
         <TemplateSelectionSheet
           isOpen={isConfiguring}
-          onOpenChange={(open) => {
-            if (!open) handleCloseConfig();
-          }}
+          onOpenChange={handleCloseConfig}
           allTemplates={habitTemplates}
           activeTemplateIds={templates.map(t => t.templateId)}
           onSelectTemplate={handleSelectTemplate}

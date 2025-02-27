@@ -31,10 +31,10 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 
   return (
     <Drawer open={isOpen} onOpenChange={close}>
-      <DrawerContent>
+      <DrawerContent aria-describedby="habit-drawer-description">
         <DrawerHeader>
           <DrawerTitle>Habit Configuration</DrawerTitle>
-          <DrawerDescription>
+          <DrawerDescription id="habit-drawer-description">
             Manage your active habit templates
           </DrawerDescription>
         </DrawerHeader>
