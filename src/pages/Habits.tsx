@@ -11,19 +11,13 @@ import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
-  const { open, close, isOpen } = useHabitsPanel();
+  const { open } = useHabitsPanel();
   const [configOpen, setConfigOpen] = useState(false);
 
   // Function to open config sheet directly
   const openConfig = () => {
     console.log("Opening config sheet directly");
     setConfigOpen(true);
-  };
-
-  // Function to handle the drawer first, then config
-  const openDrawerFirst = () => {
-    console.log("Opening drawer first");
-    open();
   };
 
   // Handle closing config
@@ -52,7 +46,7 @@ const HabitsPage = () => {
           variant="outline" 
           size="sm" 
           className="flex items-center gap-2"
-          onClick={openDrawerFirst}
+          onClick={open}
         >
           <Settings className="h-4 w-4" />
           Open Habit Drawer
