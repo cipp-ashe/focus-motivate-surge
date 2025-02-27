@@ -1,6 +1,5 @@
 
-import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import React from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
