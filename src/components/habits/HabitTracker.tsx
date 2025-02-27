@@ -4,7 +4,13 @@ import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import { ActiveTemplate } from './types';
 import { eventBus } from '@/lib/eventBus';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { 
+  Drawer, 
+  DrawerContent, 
+  DrawerHeader, 
+  DrawerTitle,
+  DrawerDescription 
+} from "@/components/ui/drawer";
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 
 interface HabitTrackerProps {
@@ -28,6 +34,9 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Habit Configuration</DrawerTitle>
+          <DrawerDescription>
+            Manage your active habit templates
+          </DrawerDescription>
         </DrawerHeader>
         <div className="p-6 space-y-6">
           <HabitTrackerHeader onConfigureTemplates={onConfigureTemplates} />

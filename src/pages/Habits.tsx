@@ -7,24 +7,39 @@ import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
+import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const { isConfiguring, stopConfiguring, startConfiguring } = useHabitsPanel();
+  const [displayConfig, setDisplayConfig] = useState(false);
 
   // Debug when this component renders
   useEffect(() => {
-    console.log("HabitsPage rendered, isConfigOpen:", isConfigOpen);
-  }, [isConfigOpen]);
+    console.log("HabitsPage rendered, isConfiguring:", isConfiguring);
+  }, [isConfiguring]);
+
+  // This effect handles the display timing to prevent flashing
+  useEffect(() => {
+    if (isConfiguring) {
+      setDisplayConfig(true);
+    } else {
+      // Add a delay before hiding to allow for animations
+      const timer = setTimeout(() => {
+        setDisplayConfig(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfiguring]);
 
   const handleOpenConfig = () => {
-    console.log("Opening config sheet");
-    setIsConfigOpen(true);
+    console.log("Opening config sheet from page button");
+    startConfiguring();
   };
 
-  const handleCloseConfig = (open: boolean) => {
-    console.log("Config sheet state change:", open);
-    setIsConfigOpen(open);
+  const handleCloseConfig = () => {
+    console.log("Closing config sheet");
+    stopConfiguring();
   };
 
   const handleSelectTemplate = (templateId: string) => {
@@ -58,16 +73,20 @@ const HabitsPage = () => {
         onConfigureTemplates={handleOpenConfig}
       />
 
-      <TemplateSelectionSheet
-        isOpen={isConfigOpen}
-        onOpenChange={handleCloseConfig}
-        allTemplates={habitTemplates}
-        activeTemplateIds={templates.map(t => t.templateId)}
-        onSelectTemplate={handleSelectTemplate}
-        onCreateTemplate={() => {
-          toast.info('Creating new template');
-        }}
-      />
+      {displayConfig && (
+        <TemplateSelectionSheet
+          isOpen={isConfiguring}
+          onOpenChange={(open) => {
+            if (!open) handleCloseConfig();
+          }}
+          allTemplates={habitTemplates}
+          activeTemplateIds={templates.map(t => t.templateId)}
+          onSelectTemplate={handleSelectTemplate}
+          onCreateTemplate={() => {
+            toast.info('Creating new template');
+          }}
+        />
+      )}
     </div>
   );
 };

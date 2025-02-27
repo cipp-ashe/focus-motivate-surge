@@ -9,19 +9,23 @@ interface HabitTrackerHeaderProps {
 }
 
 const HabitTrackerHeader: React.FC<HabitTrackerHeaderProps> = ({ onConfigureTemplates }) => {
-  const { close } = useHabitsPanel();
+  const { close, startConfiguring } = useHabitsPanel();
   
   const handleConfigureClick = () => {
     console.log("Configure Templates button clicked");
-    // Close the habits panel first to avoid nesting dialogs
+    
+    // First close the drawer panel
     close();
-    // Then open the template configuration 
-    if (onConfigureTemplates) {
-      console.log("Calling onConfigureTemplates callback");
-      setTimeout(() => {
+    
+    // Then start configuring (after a small delay to ensure drawer is closed)
+    setTimeout(() => {
+      if (onConfigureTemplates) {
+        console.log("Starting template configuration");
         onConfigureTemplates();
-      }, 100); // Short delay to ensure panel is closed first
-    }
+      } else {
+        startConfiguring();
+      }
+    }, 300);
   };
 
   return (

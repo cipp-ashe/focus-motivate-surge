@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import React, { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
@@ -26,6 +26,14 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
 }) => {
   const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  
+  // Reset state when sheet closes
+  useEffect(() => {
+    if (!isOpen) {
+      setConfigDialogOpen(false);
+      setConfiguringTemplate(null);
+    }
+  }, [isOpen]);
 
   const handleSelectTemplate = (template: HabitTemplate) => {
     console.log("Selected template for configuration:", template.name);
@@ -63,8 +71,8 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     setConfiguringTemplate(null);
   };
 
+  console.log("TemplateSelectionSheet - Sheet isOpen:", isOpen);
   console.log("TemplateSelectionSheet - configDialogOpen:", configDialogOpen);
-  console.log("TemplateSelectionSheet - configuringTemplate:", configuringTemplate?.templateId);
 
   return (
     <>
@@ -74,6 +82,9 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
             <div className="p-6 pb-0">
               <SheetHeader>
                 <SheetTitle>Configure Templates</SheetTitle>
+                <SheetDescription>
+                  Select a template to add to your habit tracker
+                </SheetDescription>
               </SheetHeader>
             </div>
             <div className="flex-1 p-6 overflow-auto">
