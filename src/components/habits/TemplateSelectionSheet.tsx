@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,6 +35,7 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   const [activeTab, setActiveTab] = useState("built-in");
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const isMobile = useIsMobile();
+  const processingTemplateRef = useRef<string | null>(null);
   
   // Load custom templates from local storage
   useEffect(() => {
@@ -57,13 +58,40 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
       setConfigDialogOpen(false);
       setConfiguringTemplate(null);
       setIsCreatingNew(false);
+      processingTemplateRef.current = null;
     }
   }, [isOpen]);
 
   const handleSelectTemplate = (template: HabitTemplate) => {
-    // Directly add the template without opening configuration dialog
+    // Prevent duplicate template selection
+    if (activeTemplateIds.includes(template.id)) {
+      toast.info(`Template already active`);
+      return;
+    }
+    
+    // Prevent selecting the same template twice rapidly
+    if (processingTemplateRef.current === template.id) {
+      console.log(`Already adding template ${template.id}, skipping duplicate action`);
+      return;
+    }
+    
+    // Set processing flag
+    processingTemplateRef.current = template.id;
+    
+    // Add template only once
+    console.log(`Adding template: ${template.id}`);
     onSelectTemplate(template.id);
     toast.success(`Added template: ${template.name}`);
+    
+    // Close sheet after selection
+    setTimeout(() => {
+      onOpenChange(false);
+    }, 300);
+    
+    // Clear the processing flag after a delay
+    setTimeout(() => {
+      processingTemplateRef.current = null;
+    }, 1000);
   };
 
   const handleUpdateDays = (days: DayOfWeek[]) => {

@@ -12,6 +12,7 @@ class EventBus {
   private processedEvents: Map<string, Set<string>>;
   private processingEvents: Map<string, boolean>; // Track events currently being processed
   private emitCounts: Map<string, number>; // Track how many times an event has been emitted
+  private lastEmitTimestamps: Map<string, number>; // Track when events were last emitted
 
   private constructor() {
     this.listeners = new Map();
@@ -19,6 +20,7 @@ class EventBus {
     this.processedEvents = new Map();
     this.processingEvents = new Map();
     this.emitCounts = new Map();
+    this.lastEmitTimestamps = new Map();
     this.setupEventDeduplication();
   }
 
@@ -37,6 +39,7 @@ class EventBus {
     const resetProcessedEvents = () => {
       this.processedEvents.clear();
       this.emitCounts.clear();
+      this.lastEmitTimestamps.clear();
       this.scheduleNextReset();
     };
 
@@ -120,6 +123,30 @@ class EventBus {
     // Generate a unique event ID for deduplication
     const eventId = this.getEventId(event, payload);
     
+    // Check if this is a rapid repeat of the same event (debounce)
+    const now = Date.now();
+    const lastEmitTime = this.lastEmitTimestamps.get(`${event}-${eventId}`) || 0;
+    const timeSinceLastEmit = now - lastEmitTime;
+    
+    // Strong debounce for template-add events (1000ms)
+    if (event === 'habit:template-add' && timeSinceLastEmit < 1000) {
+      if (this.debugMode) {
+        console.log(`[EventBus] Debouncing ${event} with ID ${eventId}, last emitted ${timeSinceLastEmit}ms ago`);
+      }
+      return;
+    }
+    
+    // Normal debounce for other events (300ms)
+    if (timeSinceLastEmit < 300 && (event === 'habit:schedule' || event.includes('template'))) {
+      if (this.debugMode) {
+        console.log(`[EventBus] Debouncing ${event} with ID ${eventId}, last emitted ${timeSinceLastEmit}ms ago`);
+      }
+      return;
+    }
+    
+    // Update last emit timestamp
+    this.lastEmitTimestamps.set(`${event}-${eventId}`, now);
+    
     // Track emit counts for debugging
     const countKey = `${event}-${eventId}`;
     const currentCount = this.emitCounts.get(countKey) || 0;
@@ -156,6 +183,15 @@ class EventBus {
         return;
       }
     }
+    
+    // For template-add events, ensure they're only processed once per day
+    if (event === 'habit:template-add') {
+      const templateId = payload as string;
+      if (this.hasProcessedEvent('habit:template-add', templateId)) {
+        console.log(`[EventBus] Skipping duplicate template addition for ${templateId}`);
+        return;
+      }
+    }
 
     // Set processing flag
     this.processingEvents.set(processingKey, true);
@@ -185,6 +221,7 @@ class EventBus {
     this.processedEvents.clear();
     this.processingEvents.clear();
     this.emitCounts.clear();
+    this.lastEmitTimestamps.clear();
   }
 }
 

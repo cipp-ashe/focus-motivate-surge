@@ -16,8 +16,8 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   const [configOpen, setConfigOpen] = useState(false);
   const [customTemplates, setCustomTemplates] = useState([]);
   const processingTemplateRef = useRef<string | null>(null);
-  const eventTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+  const processedTodayRef = useRef(new Set<string>());
+  
   // Load custom templates
   useEffect(() => {
     try {
@@ -28,6 +28,29 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     } catch (error) {
       console.error('Error loading custom templates:', error);
     }
+    
+    // Clear processed templates at midnight
+    const clearProcessedTemplatesAtMidnight = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      setTimeout(() => {
+        console.log("HabitTemplateManager: Resetting processed templates for the new day");
+        processedTodayRef.current.clear();
+        setupResetTimer();
+      }, timeUntilMidnight);
+    };
+    
+    const setupResetTimer = () => {
+      clearProcessedTemplatesAtMidnight();
+    };
+    
+    setupResetTimer();
+    
   }, []);
 
   // Function to open config sheet
@@ -38,16 +61,14 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   // Handle closing config
   const handleCloseConfig = (open: boolean) => {
     setConfigOpen(open);
+    if (!open) {
+      // Reset processing state when sheet closes
+      processingTemplateRef.current = null;
+    }
   };
 
   // Handle template selection with proper debounce protection
   const handleSelectTemplate = (templateId: string) => {
-    // Clear any pending timeouts to prevent multiple emissions
-    if (eventTimeoutRef.current) {
-      clearTimeout(eventTimeoutRef.current);
-      eventTimeoutRef.current = null;
-    }
-
     // Prevent duplicate template selection
     if (activeTemplates.some(t => t.templateId === templateId)) {
       toast.info(`Template already active`);
@@ -60,6 +81,12 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       return;
     }
     
+    // Check if template was already processed today (additional protection)
+    if (processedTodayRef.current.has(templateId)) {
+      console.log(`Template ${templateId} was already processed today, avoiding duplicate processing`);
+      return;
+    }
+    
     // Check both built-in and custom templates
     const template = 
       habitTemplates.find(t => t.id === templateId) || 
@@ -68,29 +95,19 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     if (template) {
       console.log("Adding template:", template);
       processingTemplateRef.current = templateId;
+      processedTodayRef.current.add(templateId);
       
-      // Use a timeout to ensure only one event is emitted
-      eventTimeoutRef.current = setTimeout(() => {
-        // Pass the string templateId, not an object
-        eventBus.emit('habit:template-add', templateId);
-        toast.success(`Added template: ${template.name}`);
-        
-        // Clear processing state after a short delay
-        setTimeout(() => {
-          processingTemplateRef.current = null;
-        }, 500);
-      }, 50);
+      // Pass the string templateId, not an object
+      eventBus.emit('habit:template-add', templateId);
+      toast.success(`Added template: ${template.name}`);
+      
+      // Clear processing state after a delay
+      setTimeout(() => {
+        processingTemplateRef.current = null;
+        setConfigOpen(false); // Close the sheet after adding
+      }, 500);
     }
   };
-
-  // Clean up timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (eventTimeoutRef.current) {
-        clearTimeout(eventTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return (
     <>
