@@ -67,7 +67,7 @@ const HabitsPage = () => {
         )}
 
         <div className="bg-background">
-          {/* Habit tracker */}
+          {/* Habit tracker - now only shows the template manager */}
           <HabitTracker />
         </div>
       </div>
