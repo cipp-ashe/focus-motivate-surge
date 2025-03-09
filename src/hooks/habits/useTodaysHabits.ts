@@ -1,243 +1,106 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { HabitDetail, DayOfWeek, ActiveTemplate } from '@/components/habits/types';
-import { eventBus } from '@/lib/eventBus';
 
-export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
-  const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
-  const processingRef = useRef(false);
-  const initialProcessingCompleteRef = useRef(false);
-  const lastProcessedDateRef = useRef<string | null>(null);
-  const activeTemplatesSignatureRef = useRef<string>("");
-  const pendingProcessingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Get the current day of week
-  const getCurrentDayOfWeek = useCallback((): DayOfWeek => {
-    const today = new Date();
-    const dayIndex = today.getDay();
-    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return daysOfWeek[dayIndex] as DayOfWeek;
-  }, []);
-  
-  // Create a signature for the active templates to detect changes
-  const getActiveTemplatesSignature = useCallback((templates: ActiveTemplate[]): string => {
-    return templates.map(t => `${t.templateId}-${t.customized}`).join('|');
-  }, []);
-  
-  // Get habits scheduled for today
-  const getTodaysHabits = useCallback(() => {
-    if (activeTemplates.length === 0) {
-      console.log(`useTodaysHabits - No active templates, returning empty habits list`);
-      return [];
+import { useCallback, useEffect, useState } from 'react';
+import { Habit } from '@/types/habits';
+import { useHabitContext } from '@/contexts/habits/HabitContext';
+import { timeUtils } from '@/utils/timeUtils';
+import { eventBus } from '@/lib/eventBus';
+import { useLocation } from 'react-router-dom';
+
+/**
+ * Hook to get today's habits based on active templates
+ */
+export const useTodaysHabits = () => {
+  const { state } = useHabitContext();
+  const { activeTemplates } = state;
+  const [todaysHabits, setTodaysHabits] = useState<Habit[]>([]);
+  const location = useLocation();
+
+  // Function to process habits - defined before use
+  const processHabits = useCallback(() => {
+    // No active templates, return empty array
+    if (!activeTemplates || activeTemplates.length === 0) {
+      console.log("useTodaysHabits - No active templates, returning empty habits list");
+      setTodaysHabits([]);
+      return;
     }
+
+    const today = timeUtils.getCurrentDayName();
+    console.log(`useTodaysHabits - Today is ${today}, checking active templates:`, activeTemplates);
+
+    // Collect habits from active templates that are scheduled for today
+    const habits: Habit[] = [];
     
-    const dayOfWeek = getCurrentDayOfWeek();
-    const today = new Date().toDateString();
-    
-    console.log(`useTodaysHabits - Today is ${dayOfWeek}, checking active templates:`, activeTemplates);
-    
-    // Find habits for templates active today
-    const habits = activeTemplates.flatMap(template => {
-      console.log(`Checking template ${template.templateId} - active days:`, template.activeDays);
-      const isActiveToday = template.activeDays.includes(dayOfWeek);
-      console.log(`Template ${template.templateId} is active today: ${isActiveToday}`);
+    activeTemplates.forEach(template => {
+      // Check if template is active today
+      const isActiveToday = template.activeDays?.includes(today);
+      
+      console.log(`Checking template ${template.id} - active days:`, template.activeDays);
+      console.log(`Template ${template.id} is active today:`, isActiveToday);
       
       if (isActiveToday) {
-        // Return all habits in the template with a processing flag
-        return template.habits.map(habit => ({
-          ...habit,
-          // Add a reference to the template ID for easier tracking
-          _templateId: template.templateId
-        }));
+        // Add all habits from this template
+        if (template.habits && template.habits.length > 0) {
+          template.habits.forEach(habit => {
+            habits.push({
+              ...habit,
+              templateId: template.id
+            });
+          });
+        }
       }
-      
-      return [];
     });
     
-    console.log("useTodaysHabits - Today's habits:", habits);
-    console.log("useTodaysHabits - Number of habits found for today:", habits.length);
+    console.log(`useTodaysHabits - Today's habits:`, habits);
+    console.log(`useTodaysHabits - Number of habits found for today:`, habits.length);
+    setTodaysHabits(habits);
     
-    // Process habits immediately (create tasks for timer habits, etc)
+    // Schedule tasks for timer habits
     if (habits.length > 0) {
-      processHabits(habits, today);
+      const formattedDate = timeUtils.getCurrentDateString();
+      console.log(`Processing habits for today: ${formattedDate}`);
       
-      // Also trigger an event to alert other components that today's habits have been processed
-      setTimeout(() => {
-        window.dispatchEvent(new Event('todays-habits-processed'));
-        eventBus.emit('habits:processed', { habits, date: today });
-      }, 100);
+      habits.forEach(habit => {
+        // Only process timer type habits
+        if (habit.type === 'timer' && habit.duration) {
+          console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${habit.templateId}`);
+          console.log(`Creating task for habit ${habit.name} with duration ${habit.duration} seconds (${habit.duration / 60} minutes)`);
+          
+          // Schedule task creation via event bus
+          eventBus.emit('habit:schedule', {
+            habitId: habit.id,
+            templateId: habit.templateId,
+            name: habit.name,
+            duration: habit.duration,
+            date: formattedDate
+          });
+        }
+      });
     }
-    
-    return habits;
-  }, [activeTemplates, getCurrentDayOfWeek, processHabits]);
-  
-  // Process habits (e.g., create tasks for timer habits)
-  const processHabits = useCallback((habits: HabitDetail[], date: string) => {
-    console.log(`Processing habits for today: ${date}`);
-    
-    if (habits.length === 0) {
-      console.log("No habits or templates to process, clearing today's habits");
-      return;
-    }
-    
-    // Schedule timer-based habits as tasks
-    habits.forEach(habit => {
-      if (habit.metrics.type === 'timer') {
-        const templateId = (habit as any)._templateId;
-        if (!templateId) return;
-        
-        console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${templateId}`);
-        const duration = habit.metrics.target || 600; // Default to 10 minutes
-        
-        console.log(`Creating task for habit ${habit.name} with duration ${duration} seconds (${Math.floor(duration / 60)} minutes)`);
-        
-        // Use event bus to schedule this habit
-        eventBus.emit('habit:schedule', {
-          habitId: habit.id,
-          templateId,
-          duration,
-          name: habit.name,
-          date
-        });
-      }
-    });
-  }, []);
-  
-  // Process templates whenever they change
-  useEffect(() => {
-    const newSignature = getActiveTemplatesSignature(activeTemplates);
-    
-    // Skip if nothing has changed and we've already processed
-    if (newSignature === activeTemplatesSignatureRef.current && initialProcessingCompleteRef.current) {
-      return;
-    }
-    
-    // Update ref for future comparisons
-    activeTemplatesSignatureRef.current = newSignature;
-    
-    // Cancel any pending processing
-    if (pendingProcessingTimeoutRef.current) {
-      clearTimeout(pendingProcessingTimeoutRef.current);
-    }
-    
-    // Skip if we're already processing
-    if (processingRef.current) {
-      console.log("Already processing habits, scheduling for later");
-      pendingProcessingTimeoutRef.current = setTimeout(() => {
-        const habits = getTodaysHabits();
-        setTodaysHabits(habits);
-        initialProcessingCompleteRef.current = true;
-      }, 100);
-      return;
-    }
-    
-    // Process habits
-    processingRef.current = true;
-    try {
-      const habits = getTodaysHabits();
-      setTodaysHabits(habits);
-      initialProcessingCompleteRef.current = true;
-    } finally {
-      processingRef.current = false;
-    }
-    
-    // Immediate processing when component mounts
-    if (!initialProcessingCompleteRef.current) {
-      console.log("useTodaysHabits - Initial processing of templates");
-      const habits = getTodaysHabits();
-      setTodaysHabits(habits);
-      initialProcessingCompleteRef.current = true;
-      
-      // Force a task update after processing
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-      }, 200);
-    }
-  }, [activeTemplates, getTodaysHabits, getActiveTemplatesSignature]);
-  
-  // Set up event listeners for force updates
-  useEffect(() => {
-    const handleForceUpdate = () => {
-      console.log("Force updating today's habits");
-      const habits = getTodaysHabits();
-      setTodaysHabits(habits);
-    };
-    
-    // Listen for template changes
-    const onTemplateUpdate = () => {
-      console.log("Template updated, refreshing today's habits");
-      const habits = getTodaysHabits();
-      setTodaysHabits(habits);
-    };
-    
-    const onTemplateDelete = ({ templateId }: { templateId: string }) => {
-      console.log(`Template ${templateId} deleted, removing its habits from today's list`);
-      setTodaysHabits(prev => prev.filter(habit => (habit as any)._templateId !== templateId));
-    };
-    
-    // Add a specific listener for navigation between pages
-    const handlePageNavigation = () => {
-      console.log("Navigation detected, reprocessing today's habits");
-      const habits = getTodaysHabits();
-      setTodaysHabits(habits);
-      
-      // Force tasks to update after navigation
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-      }, 100);
-    };
-    
-    window.addEventListener('force-habits-update', handleForceUpdate);
-    const unsubUpdate = eventBus.on('habit:template-update', onTemplateUpdate);
-    const unsubDelete = eventBus.on('habit:template-delete', onTemplateDelete);
-    window.addEventListener('popstate', handlePageNavigation);
-    
-    // Clean up
-    return () => {
-      window.removeEventListener('force-habits-update', handleForceUpdate);
-      unsubUpdate();
-      unsubDelete();
-      window.removeEventListener('popstate', handlePageNavigation);
-      
-      if (pendingProcessingTimeoutRef.current) {
-        clearTimeout(pendingProcessingTimeoutRef.current);
-      }
-    };
-  }, [getTodaysHabits]);
-  
-  // Reset processing at midnight
-  useEffect(() => {
-    const setupMidnightReset = () => {
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      
-      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-      
-      setTimeout(() => {
-        console.log("Midnight reset for today's habits");
-        lastProcessedDateRef.current = null;
-        initialProcessingCompleteRef.current = false;
-        
-        // Process habits for the new day
-        const habits = getTodaysHabits();
-        setTodaysHabits(habits);
-        
-        // Set up next reset
-        setupMidnightReset();
-      }, timeUntilMidnight);
-    };
-    
-    setupMidnightReset();
-    
-    // Clean up
-    return () => {
-      // Any cleanup needed
-    };
-  }, [getTodaysHabits]);
+  }, [activeTemplates]);
 
-  return {
-    todaysHabits,
-    getTodaysHabits,
+  // Process habits when activeTemplates change or on location change
+  useEffect(() => {
+    processHabits();
+  }, [processHabits, activeTemplates]);
+  
+  // Also reprocess when location changes (navigating between pages)
+  useEffect(() => {
+    console.log(`useTodaysHabits - Location changed to ${location.pathname}, reprocessing habits`);
+    processHabits();
+    
+    // Also listen for specific habit events
+    const unsubscribeProcessed = eventBus.on('habits:processed', () => {
+      console.log('useTodaysHabits - Received habits:processed event, updating habits');
+      processHabits();
+    });
+    
+    return () => {
+      unsubscribeProcessed();
+    };
+  }, [location, processHabits]);
+
+  return { 
+    todaysHabits, 
+    refreshHabits: processHabits 
   };
 };

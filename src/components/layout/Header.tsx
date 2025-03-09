@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Moon, Sun, StickyNote, ActivitySquare } from "lucide-react";
+import { Moon, Sun, StickyNote, ActivitySquare, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -14,6 +14,14 @@ export const Header = () => {
       </h1>
       <div className="flex items-center gap-4">
         <nav className="flex items-center space-x-1">
+          <Link 
+            to="/timer"
+            className="px-3 py-2 rounded-md hover:bg-muted transition-colors flex items-center gap-2"
+            title="Timer"
+          >
+            <Timer className="h-5 w-5" />
+            <span className="hidden sm:inline">Timer</span>
+          </Link>
           <Link 
             to="/habits"
             className="px-3 py-2 rounded-md hover:bg-muted transition-colors flex items-center gap-2"

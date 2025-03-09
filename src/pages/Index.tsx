@@ -1,137 +1,83 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from "react-router-dom";
-import { Moon, Sun, StickyNote, ActivitySquare } from "lucide-react";
+import { Timer, StickyNote, ActivitySquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/useTheme";
-import { TimerSection } from '@/components/timer/TimerSection';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import TaskManager from '@/components/tasks/TaskManager';
-import { TaskLayout } from '@/components/tasks/TaskLayout';
-import { useState } from 'react';
-import { Quote } from "@/types/timer";
 import { HabitsPanelProvider } from '@/hooks/useHabitsPanel';
-import { eventBus } from '@/lib/eventBus';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const IndexPage = () => {
-  const { isDark, toggleTheme } = useTheme();
-  const { items: tasks, selected: selectedTaskId } = useTaskContext();
-  const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
-  const [favorites, setFavorites] = useState<Quote[]>([]);
-  const [pageLoaded, setPageLoaded] = useState(false);
-
-  // Force a task update when the page first loads
-  useEffect(() => {
-    if (!pageLoaded) {
-      console.log("IndexPage: Initial load, forcing task and tag updates");
-      
-      // Small delay to ensure everything is ready
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-        window.dispatchEvent(new Event('force-tags-update'));
-        
-        // Also check if any habit tasks need to be scheduled
-        eventBus.emit('habits:check-pending', {});
-        
-        setPageLoaded(true);
-      }, 100);
-    }
-  }, [pageLoaded]);
-
-  // Force a task update when returning to this page
-  useEffect(() => {
-    console.log("IndexPage: Component mounted");
-    
-    // Delay to ensure navigation is complete
-    setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-      window.dispatchEvent(new Event('force-tags-update'));
-    }, 100);
-    
-    // Set up event listener for popstate (browser back/forward)
-    const handlePopState = () => {
-      console.log("IndexPage: Navigation occurred, updating tasks");
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-        window.dispatchEvent(new Event('force-tags-update'));
-      }, 100);
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-
-  const handleTaskComplete = (metrics: any) => {
-    if (selectedTask) {
-      console.log("Task completed:", selectedTask.name, metrics);
-    }
-  };
-
-  const handleDurationChange = (seconds: number) => {
-    if (selectedTask) {
-      console.log("Duration changed for task:", selectedTask.name, seconds);
-    }
-  };
+  const { isDark } = useTheme();
 
   return (
     <HabitsPanelProvider>
       <div className="min-h-screen bg-background">
-        {/* App Header */}
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
               Focus Timer
             </h1>
-            <div className="flex items-center gap-4">
-              <nav className="flex items-center space-x-1">
-                <Link 
-                  to="/habits"
-                  className="px-3 py-2 rounded-md hover:bg-muted transition-colors flex items-center gap-2"
-                  title="Habits"
-                >
-                  <ActivitySquare className="h-5 w-5" />
-                  <span className="hidden sm:inline">Habits</span>
-                </Link>
-                <Link 
-                  to="/notes"
-                  className="px-3 py-2 rounded-md hover:bg-muted transition-colors flex items-center gap-2"
-                  title="Notes"
-                >
-                  <StickyNote className="h-5 w-5" />
-                  <span className="hidden sm:inline">Notes</span>
-                </Link>
-              </nav>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="rounded-full hover:bg-primary/20"
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5 sm:h-6 sm:w-6" />
-                ) : (
-                  <Moon className="h-5 w-5 sm:h-6 sm:w-6" />
-                )}
-              </Button>
-            </div>
+            <p className="text-muted-foreground text-lg">
+              Get focused, get motivated, surge ahead
+            </p>
           </div>
 
-          {/* Timer and Task components */}
-          <TaskLayout
-            timer={
-              <TimerSection
-                selectedTask={selectedTask}
-                onTaskComplete={handleTaskComplete}
-                onDurationChange={handleDurationChange}
-                favorites={favorites}
-                setFavorites={setFavorites}
-              />
-            }
-            taskList={<TaskManager />}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* Timer Card */}
+            <Card className="hover:shadow-lg transition-all duration-300">
+              <CardHeader className="text-center">
+                <div className="mx-auto bg-primary/10 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-2">
+                  <Timer className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle>Timer</CardTitle>
+                <CardDescription>Focus timer and task management</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <Link to="/timer">
+                  <Button className="w-full">
+                    Go to Timer
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Habits Card */}
+            <Card className="hover:shadow-lg transition-all duration-300">
+              <CardHeader className="text-center">
+                <div className="mx-auto bg-primary/10 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-2">
+                  <ActivitySquare className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle>Habits</CardTitle>
+                <CardDescription>Track and manage your habits</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <Link to="/habits">
+                  <Button className="w-full">
+                    Go to Habits
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Notes Card */}
+            <Card className="hover:shadow-lg transition-all duration-300">
+              <CardHeader className="text-center">
+                <div className="mx-auto bg-primary/10 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-2">
+                  <StickyNote className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle>Notes</CardTitle>
+                <CardDescription>Create and manage your notes</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <Link to="/notes">
+                  <Button className="w-full">
+                    Go to Notes
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </HabitsPanelProvider>

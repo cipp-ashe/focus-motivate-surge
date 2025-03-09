@@ -13,6 +13,7 @@ import { NoteProvider } from "./contexts/notes/NoteContext";
 import { ThemeProvider } from "next-themes";
 import Habits from "./pages/Habits";
 import Notes from "./pages/Notes";
+import Timer from "./pages/Timer";
 
 // Suppress specific React Router v7 warnings
 window.__reactRouterFutureWarnings = {
@@ -39,6 +40,7 @@ function App() {
                       <Routes>
                         <Route element={<AppLayout />}>
                           <Route path="/" element={<Index />} />
+                          <Route path="/timer" element={<Timer />} />
                           <Route path="/habits" element={<Habits />} />
                           <Route path="/notes" element={<Notes />} />
                         </Route>
