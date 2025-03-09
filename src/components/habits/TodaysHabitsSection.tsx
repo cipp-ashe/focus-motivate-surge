@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { TodaysHabitCard } from './TodaysHabitCard';
+import { TodaysHabitCard } from '@/components/habits';
 import { HabitDetail } from './types';
 
 interface TodaysHabitsSectionProps {

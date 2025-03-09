@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import TemplateSelectionSheet from './TemplateSelectionSheet';
+import { TemplateSelectionSheet } from '@/components/habits';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { eventBus } from '@/lib/eventBus';
 

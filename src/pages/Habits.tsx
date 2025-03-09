@@ -1,16 +1,17 @@
 
 import React from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
-import HabitTracker from '@/components/habits/HabitTracker';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { useTodaysHabits } from '@/hooks/useTodaysHabits';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-import HabitDebugLogger from '@/components/habits/HabitDebugLogger';
-import TodaysHabitsSection from '@/components/habits/TodaysHabitsSection';
-import HabitTemplateManager from '@/components/habits/HabitTemplateManager';
-import { useHabitCompletion } from '@/hooks/useHabitCompletion';
+import { 
+  HabitTracker,
+  HabitDebugLogger,
+  TodaysHabitsSection,
+  HabitTemplateManager
+} from '@/components/habits';
+import { useTodaysHabits, useHabitCompletion } from '@/hooks/habits';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
