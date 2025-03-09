@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { useHabitsPanel } from './useHabitsPanel';
 
 interface NotesPanelContextType {
   isOpen: boolean;
@@ -13,23 +12,12 @@ const NotesPanelContext = createContext<NotesPanelContextType | undefined>(undef
 
 export function NotesPanelProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const habitsPanel = useHabitsPanel();
 
   const toggle = () => {
-    const newState = !isOpen;
-    setIsOpen(newState);
-    if (newState && habitsPanel.isOpen) {
-      habitsPanel.close();
-    }
+    setIsOpen(prev => !prev);
   };
   
-  const open = () => {
-    setIsOpen(true);
-    if (habitsPanel.isOpen) {
-      habitsPanel.close();
-    }
-  };
-  
+  const open = () => setIsOpen(true);
   const close = () => setIsOpen(false);
 
   return (

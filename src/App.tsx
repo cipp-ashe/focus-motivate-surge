@@ -36,8 +36,8 @@ function App() {
             <NoteProvider>
               <TooltipProvider>
                 <Router>
-                  <NotesPanelProvider>
-                    <HabitsPanelProvider>
+                  <HabitsPanelProvider>
+                    <NotesPanelProvider>
                       <Routes>
                         <Route element={<AppLayout />}>
                           <Route path="/" element={<Index />} />
@@ -47,8 +47,8 @@ function App() {
                         </Route>
                       </Routes>
                       <Toaster position="bottom-right" closeButton />
-                    </HabitsPanelProvider>
-                  </NotesPanelProvider>
+                    </NotesPanelProvider>
+                  </HabitsPanelProvider>
                 </Router>
               </TooltipProvider>
             </NoteProvider>
