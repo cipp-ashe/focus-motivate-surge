@@ -59,7 +59,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       
       // Only process once per day per template signature unless forced
       if (lastProcessedDateRef.current === today && 
-          activeTemplateSignatureRef.current === currentTemplateSignature &&
+          activeTemplatesSignatureRef.current === currentTemplateSignature &&
           initialProcessingCompleteRef.current) {
         console.log("Already processed habits for today with the same templates, skipping");
         processingRef.current = false;
@@ -67,7 +67,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       }
       
       // Update the template signature
-      activeTemplateSignatureRef.current = currentTemplateSignature;
+      activeTemplatesSignatureRef.current = currentTemplateSignature;
       
       // Track which templates we've processed
       const processedTemplateIds = new Set<string>();
@@ -149,7 +149,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     );
     
     // Only update if templates have changed or if first run
-    if (currentTemplateSignature !== activeTemplateSignatureRef.current || !initialProcessingCompleteRef.current) {
+    if (currentTemplateSignature !== activeTemplatesSignatureRef.current || !initialProcessingCompleteRef.current) {
       const habits = getTodaysHabits();
       setTodaysHabits(habits);
       

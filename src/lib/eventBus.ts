@@ -11,12 +11,14 @@ class EventBus {
   private debugMode: boolean;
   private processedEvents: Map<string, Set<string>>;
   private processingEvents: Map<string, boolean>; // Track events currently being processed
+  private emitCounts: Map<string, number>; // Track how many times an event has been emitted
 
   private constructor() {
     this.listeners = new Map();
     this.debugMode = process.env.NODE_ENV === 'development';
     this.processedEvents = new Map();
     this.processingEvents = new Map();
+    this.emitCounts = new Map();
     this.setupEventDeduplication();
   }
 
@@ -34,6 +36,7 @@ class EventBus {
   private setupEventDeduplication() {
     const resetProcessedEvents = () => {
       this.processedEvents.clear();
+      this.emitCounts.clear();
       this.scheduleNextReset();
     };
 
@@ -117,6 +120,25 @@ class EventBus {
     // Generate a unique event ID for deduplication
     const eventId = this.getEventId(event, payload);
     
+    // Track emit counts for debugging
+    const countKey = `${event}-${eventId}`;
+    const currentCount = this.emitCounts.get(countKey) || 0;
+    this.emitCounts.set(countKey, currentCount + 1);
+    
+    if (currentCount > 0 && (event === 'habit:schedule' || event === 'habit:template-add')) {
+      if (this.debugMode) {
+        console.log(`[EventBus] Event ${event} with ID ${eventId} has been emitted ${currentCount + 1} times, throttling`);
+      }
+      
+      // Special handling for frequently emitted events
+      if (currentCount > 2) {
+        if (this.debugMode) {
+          console.log(`[EventBus] Skipping overly repeated event ${event} with ID ${eventId}`);
+        }
+        return;
+      }
+    }
+    
     // Check if this specific event is currently being processed
     const processingKey = `${event}-${eventId}`;
     if (this.processingEvents.get(processingKey)) {
@@ -162,6 +184,7 @@ class EventBus {
     this.listeners.clear();
     this.processedEvents.clear();
     this.processingEvents.clear();
+    this.emitCounts.clear();
   }
 }
 
