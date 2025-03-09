@@ -36,7 +36,8 @@ export interface TimerEventPayloads {
     habitId: string;
     habitName: string;
     description: string;
-    templateId?: string; // Add templateId as optional
+    templateId?: string; // Optional templateId
+    content?: string;    // Optional content from the journal
   };
   'tag:link': any;
   'tag:unlink': any;

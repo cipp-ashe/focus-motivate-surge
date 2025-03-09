@@ -184,18 +184,11 @@ const JournalModal: React.FC<JournalModalProps> = ({
     // Create a new note with data from the habit
     const tags: Tag[] = [
       { name: 'journal', color: 'default' }, 
-      { name: journalType, color: 'default' },
-      { name: habitName.toLowerCase().replace(/\s+/g, '-'), color: 'default' }
+      { name: journalType, color: 'default' }
     ];
     
-    const newNote = {
-      title: `${habitName} - ${new Date().toLocaleDateString()}`,
-      content,
-      tags
-    };
-    
-    // Add the note using the context
-    noteActions.addNote(newNote);
+    // This note creation will be handled by the event bus
+    // so we don't need to create it directly here
     
     // Mark as completed
     onComplete();
@@ -205,7 +198,8 @@ const JournalModal: React.FC<JournalModalProps> = ({
       habitId,
       habitName,
       description: description || '',
-      templateId // Pass the templateId if available
+      templateId, // Pass the templateId if available
+      content // Pass the content to avoid double saving
     });
     
     toast.success(`Created new journal entry for: ${habitName}`, {

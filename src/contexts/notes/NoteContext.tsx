@@ -94,11 +94,18 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
       
       eventBus.on('note:create-from-habit', (habitData) => {
         console.log('Creating note from habit:', habitData);
+        
+        // Create tags for the journal entry - just journal and the journal type
+        const tags: Tag[] = [
+          { name: 'journal', color: 'default' },
+          { name: getJournalType(habitData.habitName, habitData.description), color: 'default' }
+        ];
+        
         const newNote: Note = {
           id: crypto.randomUUID(),
-          content: `## ${habitData.habitName}\n\n${habitData.description}\n\n`,
+          content: habitData.content || `## ${habitData.habitName}\n\n${habitData.description}\n\n`,
           createdAt: new Date().toISOString(),
-          tags: [{ name: 'journal', color: 'default' }, { name: habitData.habitName.toLowerCase(), color: 'default' }]
+          tags
         };
         
         // Save to state via dispatch
@@ -112,6 +119,24 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
 
     return () => unsubscribers.forEach(unsub => unsub());
   }, []);
+
+  // Helper function to determine journal type
+  const getJournalType = (habitName: string, description: string = ""): string => {
+    const lowerName = habitName.toLowerCase();
+    const lowerDesc = description.toLowerCase();
+    
+    if (lowerName.includes("gratitude") || lowerDesc.includes("gratitude")) {
+      return "gratitude";
+    } else if (lowerName.includes("reflect") || lowerDesc.includes("reflect")) {
+      return "reflection";
+    } else if (lowerName.includes("mindful") || lowerDesc.includes("mindful") || 
+               lowerName.includes("meditat") || lowerDesc.includes("meditat")) {
+      return "mindfulness";
+    }
+    
+    // Default to gratitude if no match
+    return "gratitude";
+  };
 
   const actions: NoteContextActions = {
     addNote: (noteInput) => {
