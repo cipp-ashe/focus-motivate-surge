@@ -56,7 +56,8 @@ export const useTemplateEventHandlers = (
   const handleCustomTemplateDelete = ({ templateId }: { templateId: string }) => {
     console.log("Event received: habit:custom-template-delete", templateId);
     dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: templateId });
-    const updatedTemplates = templates.filter(t => t.id !== templateId);
+    // Fixed: Use templateId instead of id
+    const updatedTemplates = templates.filter(t => t.templateId !== templateId);
     localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
   };
 

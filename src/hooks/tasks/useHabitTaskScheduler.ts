@@ -56,7 +56,10 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
     return () => {
       unsubscribeSchedule();
       clearTimeout(timeout);
-      clearTimeout(cleanupTimeout);
+      // Fixed: clearTimeout expects a timeout ID, not a function
+      if (cleanupTimeout) {
+        clearTimeout(cleanupTimeout);
+      }
     };
   }, [handleHabitSchedule, setupDailyCleanup, clearAllTrackedTasks, processPendingTasks]);
 
