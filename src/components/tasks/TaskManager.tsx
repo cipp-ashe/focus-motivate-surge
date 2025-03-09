@@ -149,6 +149,12 @@ const TaskManager = () => {
           scheduledTasksRef.current.delete(taskKey);
         }
       });
+      
+      // Force a UI update after deleting tasks
+      setTimeout(() => {
+        console.log('TaskManager: Forcing task list update after template removal');
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 100);
     };
 
     // Clean up tracking map daily

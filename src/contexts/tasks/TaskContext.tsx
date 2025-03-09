@@ -82,6 +82,35 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
           selected: state.selected === action.payload.taskId ? null : state.selected,
         };
       }
+      case 'DELETE_TASKS_BY_TEMPLATE': {
+        const templateId = action.payload.templateId;
+        console.log(`TaskContext: Deleting all tasks for template ${templateId}`);
+        
+        // Filter out tasks from this template
+        const updatedItems = state.items.filter(task => 
+          task.relationships?.templateId !== templateId
+        );
+        
+        const updatedCompleted = state.completed.filter(task => 
+          task.relationships?.templateId !== templateId
+        );
+        
+        // Reset selected if it was part of the deleted template
+        const selectedTask = state.selected ? 
+          state.items.find(t => t.id === state.selected) : 
+          null;
+          
+        const resetSelected = selectedTask?.relationships?.templateId === templateId;
+        
+        console.log(`TaskContext: Removed ${state.items.length - updatedItems.length} active tasks and ${state.completed.length - updatedCompleted.length} completed tasks`);
+        
+        return {
+          ...state,
+          items: updatedItems,
+          completed: updatedCompleted,
+          selected: resetSelected ? null : state.selected,
+        };
+      }
       case 'SELECT_TASK':
         return {
           ...state,
@@ -123,6 +152,10 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       eventBus.on('task:select', (taskId) => {
         console.log("TaskContext: Selecting task", taskId);
         dispatch({ type: 'SELECT_TASK', payload: taskId });
+      }),
+      eventBus.on('habit:template-delete', ({ templateId }) => {
+        console.log("TaskContext: Received template delete event for", templateId);
+        dispatch({ type: 'DELETE_TASKS_BY_TEMPLATE', payload: { templateId } });
       }),
     ];
 

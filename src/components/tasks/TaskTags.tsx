@@ -1,10 +1,11 @@
 
+import React, { useState, useEffect } from "react";
 import { NoteTags } from "../notes/components/NoteTags";
 import { Tag } from "@/types/core";
 import { Task } from "@/types/tasks";
-import { useState, useEffect } from "react";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { toast } from "sonner";
+import { eventBus } from "@/lib/eventBus";
 
 interface TaskTagsProps {
   task: Task;
@@ -17,6 +18,9 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
 
   useEffect(() => {
     const updateTags = () => {
+      if (!task?.id) return;
+      
+      console.log(`Updating tags for task ${task.id}`);
       const currentTags = getEntityTags(task.id, 'task');
       // Deduplicate tags by name
       const uniqueTags = currentTags.reduce((acc: Tag[], current) => {
@@ -29,16 +33,42 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
       setTags(uniqueTags);
     };
 
+    // Initial tag loading
     updateTags();
+    
+    // Event listeners for tag updates
     window.addEventListener('tagsUpdated', updateTags);
-    return () => window.removeEventListener('tagsUpdated', updateTags);
-  }, [task.id, getEntityTags]);
+    
+    // Listen for template deletions to refresh tags
+    const handleTemplateDelete = () => {
+      setTimeout(updateTags, 100); // Refresh tags after short delay
+    };
+    
+    // Listen for force task updates
+    const handleTaskUpdate = () => {
+      setTimeout(updateTags, 100); // Refresh tags after short delay
+    };
+    
+    const unsubscribeTemplateDelete = eventBus.on('habit:template-delete', handleTemplateDelete);
+    window.addEventListener('force-task-update', handleTaskUpdate);
+    
+    return () => {
+      window.removeEventListener('tagsUpdated', updateTags);
+      window.removeEventListener('force-task-update', handleTaskUpdate);
+      unsubscribeTemplateDelete();
+    };
+  }, [task?.id, getEntityTags]);
 
   const handleAddTag = (tagName: string) => {
     // Check if tag already exists before adding
     const existingTag = tags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
     if (!existingTag) {
       addTagToEntity(tagName, task.id, 'task');
+      
+      // Force immediate UI update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('tagsUpdated'));
+      }, 50);
     }
   };
 
@@ -48,6 +78,11 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
       return;
     }
     removeTagFromEntity(tagName, task.id, 'task');
+    
+    // Force immediate UI update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('tagsUpdated'));
+    }, 50);
   };
 
   const handleTagClick = (tag: Tag) => {
@@ -58,6 +93,11 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     const nextColor = colors[(currentIndex + 1) % colors.length];
     
     updateTagColor(tag.name, nextColor);
+    
+    // Force immediate UI update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('tagsUpdated'));
+    }, 50);
   };
 
   if (!tags || tags.length === 0) return null;
@@ -77,4 +117,3 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     </div>
   );
 };
-
