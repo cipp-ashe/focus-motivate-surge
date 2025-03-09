@@ -1,14 +1,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
-import { HabitDetail } from '@/components/habits/types';
+import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import { eventBus } from '@/lib/eventBus';
 import { useLocation } from 'react-router-dom';
 
 // Add timeUtils helper functions
 const timeUtils = {
-  getCurrentDayName: (): string => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  getCurrentDayName: (): DayOfWeek => {
+    const days: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return days[new Date().getDay()];
   },
   getCurrentDateString: (): string => {
@@ -50,9 +50,13 @@ export const useTodaysHabits = () => {
         // Add all habits from this template
         if (template.habits && template.habits.length > 0) {
           template.habits.forEach(habit => {
+            // Create a new habit object with the templateId in the relationships field
             habits.push({
               ...habit,
-              templateId: template.templateId
+              relationships: {
+                ...habit.relationships,
+                templateId: template.templateId
+              }
             });
           });
         }
@@ -71,13 +75,13 @@ export const useTodaysHabits = () => {
       habits.forEach(habit => {
         // Only process timer type habits
         if (habit.metrics?.type === 'timer' && habit.metrics?.target) {
-          console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${habit.templateId}`);
+          console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${habit.relationships?.templateId}`);
           console.log(`Creating task for habit ${habit.name} with duration ${habit.metrics.target} seconds (${habit.metrics.target / 60} minutes)`);
           
           // Schedule task creation via event bus
           eventBus.emit('habit:schedule', {
             habitId: habit.id,
-            templateId: habit.templateId,
+            templateId: habit.relationships?.templateId,
             name: habit.name,
             duration: habit.metrics.target,
             date: formattedDate
