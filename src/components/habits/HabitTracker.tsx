@@ -29,22 +29,28 @@ const HabitTracker = () => {
     window.addEventListener('force-habits-update', handleForceHabitsUpdate);
     
     // Listen for template changes via event bus
-    const unsubUpdate = eventBus.on('habit:template-update', () => {
-      console.log("HabitTracker: Detected template update via event bus");
-      setForceUpdate(prev => prev + 1);
-    });
-    
-    const unsubDelete = eventBus.on('habit:template-delete', () => {
-      console.log("HabitTracker: Detected template delete via event bus");
-      setForceUpdate(prev => prev + 1);
-    });
+    const unsubscribe = [
+      eventBus.on('habit:template-update', () => {
+        console.log("HabitTracker: Detected template update via event bus");
+        setForceUpdate(prev => prev + 1);
+        
+        // Force habit processing to create tasks
+        setTimeout(() => {
+          eventBus.emit('habits:processed', {});
+        }, 100);
+      }),
+      
+      eventBus.on('habit:template-delete', () => {
+        console.log("HabitTracker: Detected template delete via event bus");
+        setForceUpdate(prev => prev + 1);
+      })
+    ];
     
     // Clean up listeners
     return () => {
       window.removeEventListener('templatesUpdated', handleTemplatesUpdated);
       window.removeEventListener('force-habits-update', handleForceHabitsUpdate);
-      unsubUpdate();
-      unsubDelete();
+      unsubscribe.forEach(unsub => unsub());
     };
   }, []);
 
@@ -69,6 +75,13 @@ const HabitTracker = () => {
   // Handler for updating habits in templates
   const handleHabitUpdate = (habitId: string, templateId: string, value: boolean | number) => {
     updateProgress(habitId, templateId, value);
+    
+    // If a habit is completed, trigger habit processing to ensure tasks are updated
+    if (value) {
+      setTimeout(() => {
+        eventBus.emit('habits:processed', {});
+      }, 100);
+    }
   };
 
   return (

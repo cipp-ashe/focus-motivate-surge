@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { Task } from '@/types/tasks';
@@ -24,6 +24,8 @@ const initialState: TaskContextState = {
 
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
+  const isInitializingRef = useRef(true);
+  const lastTaskLoadTimeRef = useRef(Date.now());
 
   // Load tasks from storage
   const loadTasksFromStorage = () => {
@@ -31,8 +33,17 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
       const completed = JSON.parse(localStorage.getItem('completedTasks') || '[]');
       
+      const now = Date.now();
+      // Avoid excessive reloads - only reload if it's been at least 200ms since the last load
+      if (now - lastTaskLoadTimeRef.current < 200 && !isInitializingRef.current) {
+        console.log("TaskContext: Skipping rapid reload, last load was", now - lastTaskLoadTimeRef.current, "ms ago");
+        return { tasks: state.items, completed: state.completed };
+      }
+      
+      lastTaskLoadTimeRef.current = now;
       console.log("TaskContext: Loading tasks from storage", tasks.length, "completed:", completed.length);
       dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
+      isInitializingRef.current = false;
 
       return { tasks, completed };
     } catch (error) {
@@ -166,6 +177,11 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
 
   // Persist changes to localStorage whenever state changes
   useEffect(() => {
+    // Don't persist during initialization
+    if (isInitializingRef.current) {
+      return;
+    }
+    
     console.log("TaskContext: Persisting", state.items.length, "tasks to localStorage");
     localStorage.setItem('taskList', JSON.stringify(state.items));
     localStorage.setItem('completedTasks', JSON.stringify(state.completed));

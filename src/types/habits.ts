@@ -1,6 +1,14 @@
 
 export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink';
 
+export type MetricType = 'timer' | 'journal' | 'boolean' | string;
+
+export interface HabitMetrics {
+  type: MetricType;
+  target?: number;
+  unit?: string;
+}
+
 export interface Habit {
   id: string;
   name: string;
@@ -10,11 +18,7 @@ export interface Habit {
   completed: boolean;
   streak: number;
   lastCompleted: Date | null;
-  metrics?: {
-    type: 'timer' | 'journal' | 'boolean' | string;
-    target?: number;
-    unit?: string;
-  };
+  metrics?: HabitMetrics;
   relationships?: {
     templateId?: string;
     [key: string]: any;
@@ -22,4 +26,3 @@ export interface Habit {
 }
 
 export const STORAGE_KEY = 'habits';
-

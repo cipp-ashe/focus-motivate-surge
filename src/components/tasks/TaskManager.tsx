@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -16,6 +16,7 @@ const TaskManager = () => {
   const { getEntityTags } = useTagSystem();
   const { deleteTask, updateTask, checkPendingHabits } = useTaskEvents();
   const { currentPath } = useTasksNavigation();
+  const initialCheckDoneRef = useRef(false);
   
   // Initialize task schedulers and get the check function
   const { checkForMissingHabitTasks } = useHabitTaskScheduler(tasks);
@@ -24,14 +25,17 @@ const TaskManager = () => {
   // Force tag update when task list changes
   useEffect(() => {
     if (tasks.length > 0) {
-      console.log(`TaskManager: Tasks changed, updating tags for ${tasks.length} tasks`);
+      console.log(`TaskManager: Task list updated with ${tasks.length} tasks`);
       eventBus.emit('task:tags-update', { count: tasks.length });
     }
   }, [tasks]);
   
-  // Check for pending habits when TaskManager mounts and when tasks change
+  // Check for pending habits only once when TaskManager first mounts
   useEffect(() => {
-    console.log('TaskManager mounted or tasks changed, checking for pending habits');
+    if (initialCheckDoneRef.current) return;
+    
+    console.log('TaskManager mounted, performing initial habits check');
+    initialCheckDoneRef.current = true;
     
     // Check for pending habits on mount with a small delay
     const timeout = setTimeout(() => {
@@ -40,7 +44,6 @@ const TaskManager = () => {
       // Double-check after a slightly longer delay to catch any that might have been missed
       setTimeout(() => {
         checkForMissingHabitTasks();
-        
         // Force localStorage sync and UI update
         window.dispatchEvent(new Event('force-task-update'));
       }, 300);
@@ -48,38 +51,6 @@ const TaskManager = () => {
     
     return () => clearTimeout(timeout);
   }, [checkPendingHabits, checkForMissingHabitTasks]);
-  
-  // Also check when the component first mounts, regardless of tasks
-  useEffect(() => {
-    console.log('TaskManager initial mount, triggering habit check');
-    
-    // Force a task load from localStorage first
-    window.dispatchEvent(new Event('force-task-update'));
-    
-    // Then check for pending habits - with progressive checks to ensure all habits are captured
-    const timeouts = [
-      setTimeout(() => {
-        console.log('First habit check on mount');
-        eventBus.emit('habits:check-pending', {});
-      }, 300),
-      
-      setTimeout(() => {
-        console.log('Second habit check on mount to catch any missed habits');
-        eventBus.emit('habits:check-pending', {});
-        checkForMissingHabitTasks();
-      }, 800),
-      
-      setTimeout(() => {
-        console.log('Final habit check and force update');
-        checkForMissingHabitTasks();
-        window.dispatchEvent(new Event('force-task-update'));
-      }, 1500)
-    ];
-    
-    return () => {
-      timeouts.forEach(clearTimeout);
-    };
-  }, [checkForMissingHabitTasks]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
