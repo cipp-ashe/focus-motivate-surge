@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -9,7 +8,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Save, Template } from "lucide-react";
+import { Plus, Save, BookTemplate } from "lucide-react";
 import { HabitDetail, DayOfWeek } from '../types';
 import DaySelector from './DaySelector';
 import DraggableHabitList from './DraggableHabitList';
@@ -159,7 +158,7 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
               onClick={onSaveAsTemplate}
               className="gap-1"
             >
-              <Template className="h-3.5 w-3.5" />
+              <BookTemplate className="h-3.5 w-3.5" />
               <span className="text-xs">Save as Template</span>
             </Button>
             <div className="flex gap-2">
