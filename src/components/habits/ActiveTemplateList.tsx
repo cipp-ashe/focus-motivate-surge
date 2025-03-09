@@ -7,6 +7,7 @@ import { useDragAndDrop } from './hooks/useDragAndDrop';
 import ConfigurationDialog from './ConfigurationDialog';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
+import { cn } from '@/lib/utils';
 
 interface TemplateListProps {
   activeTemplates: ActiveTemplate[];
@@ -65,16 +66,19 @@ const TemplateList: React.FC<TemplateListProps> = ({
 
   if (activeTemplates.length === 0) {
     return (
-      <div className="text-center p-8 bg-secondary/30 rounded-lg border border-border">
+      <div className="text-center p-6 bg-muted/30 rounded-lg border border-dashed">
         <p className="text-muted-foreground">No active templates found</p>
-        <p className="text-sm text-muted-foreground mt-2">Add templates using the "Manage Habit Templates" button</p>
+        <p className="text-xs text-muted-foreground mt-2">Add templates using the "Manage Habit Templates" button</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={cn(
+        "grid gap-3",
+        activeTemplates.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+      )}>
         {activeTemplates.map((template, index) => {
           const templateInfo = habitTemplates.find(t => t.id === template.templateId);
           
@@ -87,9 +91,10 @@ const TemplateList: React.FC<TemplateListProps> = ({
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDragEnd={handleDragEnd}
-                className={`transition-transform ${
-                  draggedIndex === index ? 'scale-[1.02] opacity-75' : ''
-                }`}
+                className={cn(
+                  "transition-transform cursor-move",
+                  draggedIndex === index ? 'scale-[1.01] opacity-80 shadow-md' : ''
+                )}
               >
                 <TemplateCard
                   template={template}
@@ -116,9 +121,10 @@ const TemplateList: React.FC<TemplateListProps> = ({
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
-              className={`transition-transform ${
-                draggedIndex === index ? 'scale-[1.02] opacity-75' : ''
-              }`}
+              className={cn(
+                "transition-transform cursor-move",
+                draggedIndex === index ? 'scale-[1.01] opacity-80 shadow-md' : ''
+              )}
             >
               <TemplateCard
                 template={template}

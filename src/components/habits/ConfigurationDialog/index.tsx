@@ -3,15 +3,17 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Save, Template } from "lucide-react";
 import { HabitDetail, DayOfWeek } from '../types';
-import DialogHeader from './DialogHeader';
-import DialogFooter from './DialogFooter';
 import DaySelector from './DaySelector';
 import DraggableHabitList from './DraggableHabitList';
+import { cn } from '@/lib/utils';
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -105,30 +107,36 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[600px] h-[80vh] max-h-[80vh] flex flex-col overflow-hidden">
-        <DialogHeader />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <div className="space-y-4 p-6 overflow-y-auto">
+      <DialogContent className="sm:max-w-[550px] max-h-[80vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-6 py-4 border-b">
+          <DialogTitle>Configure Template</DialogTitle>
+          <DialogDescription className="text-xs">
+            Set active days and customize habits
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-medium mb-2">Active Days</h3>
+              <h3 className="text-sm font-medium mb-2">Active Days</h3>
               <DaySelector activeDays={activeDays} onUpdateDays={onUpdateDays} />
             </div>
             
             <div>
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-medium">Habits</h3>
+                <h3 className="text-sm font-medium">Habits</h3>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleAddHabit}
-                  className="gap-1"
+                  className="h-7 gap-1"
                 >
-                  <Plus className="h-4 w-4" />
-                  Add Habit
+                  <Plus className="h-3.5 w-3.5" />
+                  <span className="text-xs">Add Habit</span>
                 </Button>
               </div>
 
-              <div className="overflow-y-auto max-h-[calc(80vh-300px)] pr-2">
+              <div className="space-y-2">
                 <DraggableHabitList
                   habits={habits}
                   draggedIndex={draggedIndex}
@@ -141,15 +149,39 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
               </div>
             </div>
           </div>
-
-          <div className="mt-auto border-t p-6">
-            <DialogFooter
-              onSaveAsTemplate={onSaveAsTemplate}
-              onClose={onClose}
-              onSave={onSave}
-            />
-          </div>
         </div>
+
+        <DialogFooter className="px-6 py-4 border-t">
+          <div className="flex justify-between w-full">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onSaveAsTemplate}
+              className="gap-1"
+            >
+              <Template className="h-3.5 w-3.5" />
+              <span className="text-xs">Save as Template</span>
+            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={onSave}
+                className="gap-1"
+              >
+                <Save className="h-3.5 w-3.5" />
+                <span className="text-xs">Save Changes</span>
+              </Button>
+            </div>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

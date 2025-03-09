@@ -12,6 +12,7 @@ import { eventBus } from '@/lib/eventBus';
 import { useTodaysHabits } from '@/hooks/useTodaysHabits';
 import { TodaysHabitCard } from '@/components/habits/TodaysHabitCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -87,8 +88,8 @@ const HabitsPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="container mx-auto py-4 px-4">
+      <div className="flex items-center gap-4 mb-5">
         <Link 
           to="/"
           className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -96,27 +97,37 @@ const HabitsPage = () => {
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
           Habit Tracker
         </h1>
       </div>
       
-      <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-6">
+      <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">
         <Button 
           variant="default" 
           size="sm" 
-          className="flex items-center gap-2 shadow-sm hover:shadow transition-all"
+          className="flex items-center gap-1.5 shadow-sm hover:shadow transition-all"
           onClick={openConfig}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
           Manage Habit Templates
         </Button>
       </div>
 
-      <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-1 lg:grid-cols-[1fr_300px] gap-8'}`}>
+      <div className={cn(
+        "grid gap-4",
+        isMobile 
+          ? "grid-cols-1" 
+          : todaysHabits && todaysHabits.length > 0 
+            ? "grid-cols-1 lg:grid-cols-[1fr_300px]" 
+            : "grid-cols-1"
+      )}>
         {/* Today's Habits Card */}
         {todaysHabits && todaysHabits.length > 0 && (
-          <div className={`${isMobile ? 'order-first' : 'lg:order-last'}`}>
+          <div className={cn(
+            isMobile ? 'order-first' : 'lg:order-last',
+            "bg-card/50 border border-border rounded-lg shadow-sm overflow-hidden"
+          )}>
             <TodaysHabitCard
               habits={todaysHabits}
               completedHabits={completedHabits}

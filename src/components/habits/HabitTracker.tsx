@@ -6,7 +6,9 @@ import { ActiveTemplate } from './types';
 import { eventBus } from '@/lib/eventBus';
 import { 
   Drawer, 
-  DrawerContent, 
+  DrawerContent,
+  DrawerClose,
+  DrawerFooter,
   DrawerHeader, 
   DrawerTitle,
   DrawerDescription 
@@ -14,6 +16,9 @@ import {
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface HabitTrackerProps {
   activeTemplates: ActiveTemplate[];
@@ -46,7 +51,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <h2 className="text-xl font-semibold text-foreground">Active Templates</h2>
         <ActiveTemplateList
           activeTemplates={activeTemplates}
@@ -59,14 +64,24 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
       </div>
 
       <Drawer open={isOpen} onOpenChange={close}>
-        <DrawerContent className={isMobile ? 'max-h-[85vh]' : ''}>
-          <DrawerHeader>
-            <DrawerTitle>Habit Configuration</DrawerTitle>
-            <DrawerDescription>
+        <DrawerContent className={cn(
+          isMobile ? 'max-h-[85vh]' : '',
+          "p-0 rounded-t-lg border border-border overflow-hidden"
+        )}>
+          <DrawerHeader className="px-4 py-3 border-b bg-muted/30">
+            <div className="flex items-center justify-between">
+              <DrawerTitle>Habit Configuration</DrawerTitle>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <X className="h-4 w-4" />
+                </Button>
+              </DrawerClose>
+            </div>
+            <DrawerDescription className="text-xs">
               Manage your active habit templates
             </DrawerDescription>
           </DrawerHeader>
-          <div className="p-6 space-y-6 overflow-y-auto">
+          <div className="p-4 space-y-4 overflow-y-auto">
             <HabitTrackerHeader />
             <ActiveTemplateList
               activeTemplates={activeTemplates}
@@ -77,6 +92,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
               }}
             />
           </div>
+          <DrawerFooter className="px-4 py-3 border-t bg-muted/30">
+            <Button variant="outline" onClick={close}>
+              Close
+            </Button>
+          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     </>

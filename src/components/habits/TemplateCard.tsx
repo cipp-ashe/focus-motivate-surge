@@ -41,43 +41,70 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     <div className={cn(
       "rounded-lg border border-border p-4 shadow-sm",
       "bg-gradient-to-br from-card to-card/95",
-      "hover:shadow-md transition-all duration-200"
+      "hover:shadow-md transition-all duration-200 relative overflow-hidden"
     )}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold">{templateInfo.name}</h3>
+      {/* Card decoration */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 to-purple-500/60" />
+      
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-base font-semibold">{templateInfo.name}</h3>
         <div className="flex gap-1">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 hover:bg-secondary/80"
+            className="h-7 w-7 hover:bg-secondary/80"
             onClick={onEdit}
             title="Edit template"
           >
-            <Settings2 className="h-4 w-4" />
+            <Settings2 className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+            className="h-7 w-7 text-destructive hover:bg-destructive/10"
             onClick={onRemove}
             title="Remove template"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
       
       {templateInfo.description && (
-        <div className="text-sm text-muted-foreground mb-3 line-clamp-2">
+        <div className="text-xs text-muted-foreground mb-2 line-clamp-1">
           {templateInfo.description}
         </div>
       )}
       
-      <div className="bg-background/50 p-3 rounded-md">
-        <HabitList
-          habits={habits}
-          onToggle={(habitId) => onHabitUpdate(habitId, true)}
-        />
+      <div className="bg-background/50 p-2 rounded-md">
+        <div className="text-xs text-muted-foreground mb-1 font-medium">
+          Active days: {template.activeDays.join(', ')}
+        </div>
+        <div className="divide-y divide-border/30">
+          {habits.map((habit) => (
+            <div key={habit.id} className="py-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{habit.name}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "h-6 px-2 text-xs rounded-full",
+                    getProgress(habit.id).value 
+                      ? "bg-green-500/20 text-green-700 hover:bg-green-500/30" 
+                      : "bg-secondary/50 hover:bg-secondary"
+                  )}
+                  onClick={() => onHabitUpdate(habit.id, true)}
+                >
+                  {getProgress(habit.id).value ? "Completed" : "Mark Complete"}
+                </Button>
+              </div>
+              {habit.description && (
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{habit.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ interface DraggableTemplateListProps {
   onHabitUpdate: (habitId: string, templateId: string, value: boolean | number) => void;
   getWeeklyProgress: (habitId: string, templateId: string) => any[];
   onCreateTemplate: () => void;
+  onEdit: (template: ActiveTemplate) => void;
 }
 
 const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
@@ -36,6 +37,7 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
   onHabitUpdate,
   getWeeklyProgress,
   onCreateTemplate,
+  onEdit,
 }) => {
   return (
     <div className="space-y-4">      
@@ -57,6 +59,7 @@ const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
                 template={template}
                 templateInfo={templateInfo}
                 onRemove={() => onRemove(template.templateId)}
+                onEdit={() => onEdit(template)}
                 getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
                 onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
               />
