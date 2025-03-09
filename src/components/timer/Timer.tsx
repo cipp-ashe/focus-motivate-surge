@@ -1,4 +1,4 @@
-<lov-codelov-code>
+
 import { useRef, useEffect, useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
@@ -243,4 +243,3 @@ export const Timer = ({
 };
 
 Timer.displayName = 'Timer';
-</lov-code>
