@@ -51,13 +51,14 @@ export const useTodaysHabits = () => {
         if (template.habits && template.habits.length > 0) {
           template.habits.forEach(habit => {
             // Create a new habit object with the templateId in the relationships field
-            habits.push({
+            const newHabit: HabitDetail = {
               ...habit,
               relationships: {
                 ...habit.relationships,
                 templateId: template.templateId
               }
-            });
+            };
+            habits.push(newHabit);
           });
         }
       }
@@ -117,3 +118,4 @@ export const useTodaysHabits = () => {
     refreshHabits: processHabits 
   };
 };
+

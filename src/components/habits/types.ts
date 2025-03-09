@@ -1,3 +1,4 @@
+
 export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
 
 export const DAYS_OF_WEEK: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -36,6 +37,11 @@ export interface HabitDetail {
   insights?: HabitInsight[];
   tips?: string[];
   order?: number;
+  relationships?: {
+    templateId?: string;
+    habitId?: string;
+    [key: string]: string | undefined;
+  };
 }
 
 export interface HabitTemplate {
@@ -75,3 +81,4 @@ export const createEmptyHabit = (): HabitDetail => ({
     target: 1
   }
 });
+

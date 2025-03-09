@@ -58,3 +58,4 @@ it('should return empty array if no habits are active today', () => {
   const { result } = renderHook(() => useTodaysHabits());
   expect(result.current.todaysHabits).toHaveLength(0);
 });
+
