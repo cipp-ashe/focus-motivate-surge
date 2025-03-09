@@ -86,16 +86,22 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     localStorage.setItem('lastHabitProcessingDate', today);
   }, [activeTemplates, lastProcessedTemplates]);
 
-  // Immediate processing when templates change
+  // Immediate processing when templates change - FIXED: add memoization check
   useEffect(() => {
-    const habits = getTodaysHabits();
-    setTodaysHabits(habits);
+    // Add check to prevent reprocessing if templates haven't changed
+    const currentTemplateIds = activeTemplates.map(t => t.templateId).sort().join(',');
+    const prevTemplateIds = lastProcessedTemplates.sort().join(',');
     
-    // Force process habits on first load and every time templates change
-    processHabits(habits);
+    // Only update if templates have changed
+    if (currentTemplateIds !== prevTemplateIds) {
+      const habits = getTodaysHabits();
+      setTodaysHabits(habits);
+      
+      // Process habits when templates actually change
+      processHabits(habits);
+    }
     
-    // Also listen for template-add events to immediately process 
-    // new templates without requiring a refresh
+    // Handle template-add events
     const handleTemplateAdd = () => {
       console.log("Template added, immediately processing habits");
       const updatedHabits = getTodaysHabits();
@@ -108,7 +114,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     return () => {
       unsubscribe();
     };
-  }, [getTodaysHabits, processHabits]);
+  }, [getTodaysHabits, processHabits, activeTemplates, lastProcessedTemplates]);
 
   return { todaysHabits };
 };
