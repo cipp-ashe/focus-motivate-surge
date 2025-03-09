@@ -7,7 +7,6 @@ import { TaskTable } from './TaskTable';
 import { ListTodo, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
-import { Link } from 'react-router-dom';
 
 interface TaskListProps {
   tasks: Task[];
@@ -64,16 +63,6 @@ export const TaskList: React.FC<TaskListProps> = ({
             >
               <Settings2 className="h-4 w-4" />
               Configure Habits
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-            >
-              <Link to="/habits" className="flex items-center gap-2">
-                <Settings2 className="h-4 w-4" />
-                Habits Page
-              </Link>
             </Button>
           </div>
         </div>
