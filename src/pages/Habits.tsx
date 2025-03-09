@@ -101,11 +101,11 @@ const HabitsPage = () => {
         </h1>
       </div>
       
-      <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">
+      <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-6">
         <Button 
           variant="default" 
           size="sm" 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 shadow-sm hover:shadow transition-all"
           onClick={openConfig}
         >
           <Plus className="h-4 w-4" />
@@ -113,17 +113,10 @@ const HabitsPage = () => {
         </Button>
       </div>
 
-      <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-[1fr_300px]'} gap-6`}>
-        <div className="bg-background">
-          {/* Habit tracker */}
-          <HabitTracker 
-            activeTemplates={templates}
-          />
-        </div>
-
+      <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'grid-cols-1 lg:grid-cols-[1fr_300px] gap-8'}`}>
         {/* Today's Habits Card */}
         {todaysHabits && todaysHabits.length > 0 && (
-          <div className={`${isMobile ? 'order-first' : ''}`}>
+          <div className={`${isMobile ? 'order-first' : 'lg:order-last'}`}>
             <TodaysHabitCard
               habits={todaysHabits}
               completedHabits={completedHabits}
@@ -132,6 +125,13 @@ const HabitsPage = () => {
             />
           </div>
         )}
+
+        <div className="bg-background">
+          {/* Habit tracker */}
+          <HabitTracker 
+            activeTemplates={templates}
+          />
+        </div>
       </div>
 
       {/* Template configuration */}

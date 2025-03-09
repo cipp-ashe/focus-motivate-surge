@@ -5,6 +5,7 @@ import { Trash2, Settings2 } from "lucide-react";
 import { ActiveTemplate, HabitTemplate, HabitDetail } from './types';
 import { HabitList } from './HabitList';
 import type { Habit } from '@/types/habits';
+import { cn } from '@/lib/utils';
 
 interface TemplateCardProps {
   template: ActiveTemplate;
@@ -37,14 +38,18 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   const habits: Habit[] = template.habits.map(convertToHabit);
 
   return (
-    <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
+    <div className={cn(
+      "rounded-lg border border-border p-4 shadow-sm",
+      "bg-gradient-to-br from-card to-card/95",
+      "hover:shadow-md transition-all duration-200"
+    )}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">{templateInfo.name}</h3>
         <div className="flex gap-1">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-secondary/80"
             onClick={onEdit}
             title="Edit template"
           >
@@ -53,7 +58,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-destructive"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10"
             onClick={onRemove}
             title="Remove template"
           >
@@ -61,13 +66,19 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
           </Button>
         </div>
       </div>
-      <div className="text-sm text-muted-foreground mb-3">
-        {templateInfo.description}
+      
+      {templateInfo.description && (
+        <div className="text-sm text-muted-foreground mb-3 line-clamp-2">
+          {templateInfo.description}
+        </div>
+      )}
+      
+      <div className="bg-background/50 p-3 rounded-md">
+        <HabitList
+          habits={habits}
+          onToggle={(habitId) => onHabitUpdate(habitId, true)}
+        />
       </div>
-      <HabitList
-        habits={habits}
-        onToggle={(habitId) => onHabitUpdate(habitId, true)}
-      />
     </div>
   );
 };

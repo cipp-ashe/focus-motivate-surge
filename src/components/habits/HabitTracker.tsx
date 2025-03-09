@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/drawer";
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface HabitTrackerProps {
   activeTemplates: ActiveTemplate[];
@@ -33,23 +33,21 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 
   if (activeTemplates.length === 0) {
     return (
-      <Card className="border-dashed border-2">
+      <Card className="border-dashed border-2 bg-card/50 hover:bg-card/80 transition-colors">
         <CardHeader>
           <CardTitle className="text-center text-muted-foreground">No Active Templates</CardTitle>
-        </CardHeader>
-        <CardContent className="flex justify-center pb-6">
-          <p className="text-center text-muted-foreground max-w-md">
+          <CardDescription className="text-center">
             Add templates using the "Manage Habit Templates" button to start tracking your habits
-          </p>
-        </CardContent>
+          </CardDescription>
+        </CardHeader>
       </Card>
     );
   }
 
   return (
     <>
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Active Templates</h2>
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold text-foreground">Active Templates</h2>
         <ActiveTemplateList
           activeTemplates={activeTemplates}
           getTodayProgress={() => ({ value: false, streak: 0 })}

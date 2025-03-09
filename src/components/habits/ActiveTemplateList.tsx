@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { ActiveTemplate } from './types';
+import { ActiveTemplate, DayOfWeek } from './types';
 import TemplateCard from './TemplateCard';
 import { habitTemplates } from '../../utils/habitTemplates';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
@@ -63,18 +63,23 @@ const TemplateList: React.FC<TemplateListProps> = ({
     });
   };
 
+  if (activeTemplates.length === 0) {
+    return (
+      <div className="text-center p-8 bg-secondary/30 rounded-lg border border-border">
+        <p className="text-muted-foreground">No active templates found</p>
+        <p className="text-sm text-muted-foreground mt-2">Add templates using the "Manage Habit Templates" button</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {activeTemplates.map((template, index) => {
           const templateInfo = habitTemplates.find(t => t.id === template.templateId);
           
-          console.log(`Looking for template with ID: ${template.templateId}`);
-          console.log("Found template info:", templateInfo);
-          
           // Allow showing custom templates that may not be in the predefined list
           if (!templateInfo) {
-            console.log(`Custom template with ID ${template.templateId}`);
             return (
               <div
                 key={template.templateId}
