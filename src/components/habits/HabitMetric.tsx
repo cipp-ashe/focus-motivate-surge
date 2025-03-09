@@ -7,8 +7,9 @@ import { Star, Timer, BookOpen } from 'lucide-react';
 import { HabitDetail } from './types';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
-import { useNoteActions } from '@/contexts/notes/NoteContext';
+import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
 import JournalModal from './journal/JournalModal';
+import { relationshipManager } from '@/lib/relationshipManager';
 
 interface ProgressResult {
   value: boolean | number;
@@ -29,7 +30,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   templateId,
 }) => {
   const [journalModalOpen, setJournalModalOpen] = useState(false);
-  const noteActions = useNoteActions();
+  const noteState = useNoteState();
 
   const handleOpenJournal = () => {
     setJournalModalOpen(true);
@@ -99,6 +100,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
           </div>
         );
       case 'journal':
+        const isCompleted = !!progress.value;
         return (
           <>
             <Button 
@@ -106,9 +108,10 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
               size="sm"
               className="h-6 px-2 text-xs flex items-center gap-1"
               onClick={handleOpenJournal}
+              title={isCompleted ? "View journal entry" : "Create journal entry"}
             >
               <BookOpen className="h-3 w-3" />
-              Write
+              {isCompleted ? "View" : "Write"}
             </Button>
             <JournalModal
               open={journalModalOpen}

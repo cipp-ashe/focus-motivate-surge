@@ -3,12 +3,13 @@ import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { Quote } from "@/types/timer/models";
-import { Tag } from "@/types/notes";
-import { useNoteActions } from "@/contexts/notes/NoteContext";
+import { Tag, Note } from "@/types/notes";
+import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
 import { toast } from "sonner";
 import { eventBus } from "@/lib/eventBus";
 import { Minimize2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { relationshipManager } from "@/lib/relationshipManager";
 
 // Add quotes specific to different journal types
 const journalQuotes: Record<string, Quote[]> = {
@@ -157,7 +158,9 @@ const JournalModal: React.FC<JournalModalProps> = ({
   const [content, setContent] = useState("");
   const [randomQuote, setRandomQuote] = useState<Quote | null>(null);
   const [randomPrompt, setRandomPrompt] = useState<string>("");
+  const [existingNote, setExistingNote] = useState<Note | null>(null);
   const noteActions = useNoteActions();
+  const noteState = useNoteState();
   const editorRef = useRef<HTMLDivElement>(null);
   
   // Determine journal type
@@ -165,46 +168,82 @@ const JournalModal: React.FC<JournalModalProps> = ({
   const template = journalTemplates[journalType] || journalTemplates.gratitude;
   const quotes = journalQuotes[journalType] || journalQuotes.gratitude;
   
-  // Initialize content from template and select random quote/prompt
+  // Check for an existing note when opening the modal
   useEffect(() => {
     if (open) {
-      setContent(template.initialContent);
+      // Find any related notes for this habit
+      const relatedEntities = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
       
-      // Select random quote
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      setRandomQuote(quotes[randomIndex]);
-      
-      // Select random prompt
-      const promptIndex = Math.floor(Math.random() * template.prompts.length);
-      setRandomPrompt(template.prompts[promptIndex]);
+      if (relatedEntities.length > 0) {
+        // We have a related note, find it in our notes collection
+        const noteId = relatedEntities[0].id;
+        const foundNote = noteState.items.find(note => note.id === noteId);
+        
+        if (foundNote) {
+          // Use existing note content
+          setExistingNote(foundNote);
+          setContent(foundNote.content);
+          console.log("Found existing journal note:", foundNote);
+        } else {
+          // We have a relationship but the note doesn't exist anymore
+          resetToNewNote();
+        }
+      } else {
+        // No existing note, reset to template
+        resetToNewNote();
+      }
     }
-  }, [open, journalType]);
+  }, [open, habitId, noteState.items]);
+  
+  // Reset to a new note with template
+  const resetToNewNote = () => {
+    setExistingNote(null);
+    setContent(template.initialContent);
+    
+    // Select random quote
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setRandomQuote(quotes[randomIndex]);
+    
+    // Select random prompt
+    const promptIndex = Math.floor(Math.random() * template.prompts.length);
+    setRandomPrompt(template.prompts[promptIndex]);
+  };
   
   const handleSave = () => {
-    // Create a new note with data from the habit
-    const tags: Tag[] = [
-      { name: 'journal', color: 'default' }, 
-      { name: journalType, color: 'default' }
-    ];
-    
-    // This note creation will be handled by the event bus
-    // so we don't need to create it directly here
-    
-    // Mark as completed
-    onComplete();
-    
-    // Use event bus to notify about the new journal entry
-    eventBus.emit('note:create-from-habit', {
-      habitId,
-      habitName,
-      description: description || '',
-      templateId, // Pass the templateId if available
-      content // Pass the content to avoid double saving
-    });
-    
-    toast.success(`Created new journal entry for: ${habitName}`, {
-      description: "Your journal entry has been saved"
-    });
+    // Check if we're updating an existing note
+    if (existingNote) {
+      // Update the existing note
+      noteActions.updateNote(existingNote.id, {
+        content: content.trim(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      toast.success(`Updated journal entry for: ${habitName}`, {
+        description: "Your journal entry has been updated"
+      });
+    } else {
+      // Create tags for the journal entry
+      const tags: Tag[] = [
+        { name: 'journal', color: 'default' },
+        { name: journalType, color: 'default' }
+      ];
+      
+      // This note creation will be handled by the event bus
+      eventBus.emit('note:create-from-habit', {
+        habitId,
+        habitName,
+        description: description || '',
+        templateId, // Pass the templateId if available
+        content // Pass the content to avoid double saving
+      });
+      
+      // Mark as completed if not already
+      onComplete();
+      
+      toast.success(`Created new journal entry for: ${habitName}`, {
+        description: "Your journal entry has been saved"
+      });
+    }
     
     onOpenChange(false);
   };
@@ -231,7 +270,7 @@ const JournalModal: React.FC<JournalModalProps> = ({
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-                  {template.title}
+                  {existingNote ? `Edit ${template.title}` : template.title}
                 </h1>
                 <Button
                   onClick={() => onOpenChange(false)}
@@ -244,17 +283,19 @@ const JournalModal: React.FC<JournalModalProps> = ({
                 </Button>
               </div>
               
-              {randomQuote && (
+              {!existingNote && randomQuote && (
                 <div className="p-4 bg-primary/5 rounded-md border border-primary/10 italic">
                   <p className="text-base">"{randomQuote.text}"</p>
                   <p className="text-sm text-muted-foreground mt-1 text-right">— {randomQuote.author}</p>
                 </div>
               )}
               
-              <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-1">Today's prompt:</p>
-                <p className="text-base font-medium">{randomPrompt}</p>
-              </div>
+              {!existingNote && (
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground mb-1">Today's prompt:</p>
+                  <p className="text-base font-medium">{randomPrompt}</p>
+                </div>
+              )}
             </div>
           </Card>
 
@@ -279,7 +320,7 @@ const JournalModal: React.FC<JournalModalProps> = ({
                 Cancel
               </Button>
               <Button onClick={handleSave}>
-                Save Journal Entry
+                {existingNote ? "Update Journal Entry" : "Save Journal Entry"}
               </Button>
             </div>
           </Card>

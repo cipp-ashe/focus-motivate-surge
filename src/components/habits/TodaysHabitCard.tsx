@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Timer, Plus, BookOpen, CheckCircle, Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -8,8 +9,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import type { HabitDetail } from "@/components/habits/types";
 import { eventBus } from "@/lib/eventBus";
-import { useNoteActions } from "@/contexts/notes/NoteContext";
+import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
 import JournalModal from "./journal/JournalModal";
+import { relationshipManager } from "@/lib/relationshipManager";
 
 interface HabitRowProps {
   habit: HabitDetail;
@@ -21,7 +23,7 @@ interface HabitRowProps {
 
 const HabitRow = ({ habit, isCompleted, onComplete, onStart, templateId }: HabitRowProps) => {
   const [journalModalOpen, setJournalModalOpen] = useState(false);
-  const noteActions = useNoteActions();
+  const noteState = useNoteState();
   const isTimerHabit = habit.metrics.type === 'timer';
   const isJournalHabit = habit.metrics.type === 'journal';
   
@@ -123,6 +125,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart, templateId }: Habit
               size="icon"
               onClick={handleJournalClick}
               className="h-8 w-8"
+              title={isCompleted ? "View journal entry" : "Create journal entry"}
             >
               <BookOpen className="h-4 w-4" />
             </Button>
