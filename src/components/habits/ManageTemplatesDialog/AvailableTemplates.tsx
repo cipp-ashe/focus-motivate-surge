@@ -15,7 +15,7 @@ const AvailableTemplates: React.FC<AvailableTemplatesProps> = ({
   onSelect,
 }) => {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="flex flex-col space-y-4">
       {templates.map((template) => {
         const isActive = activeTemplateIds.includes(template.id);
         
