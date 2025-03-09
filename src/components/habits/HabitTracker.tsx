@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
-import { useTodaysHabits, useHabitEvents } from '@/hooks/habits';
-import { HabitTemplateManager, HabitDebugLogger } from '@/components/habits';
+import { useTodaysHabits, useHabitEvents, useHabitCompletion, useHabitProgress } from '@/hooks/habits';
+import { HabitTemplateManager, HabitDebugLogger, ActiveTemplateList } from '@/components/habits';
+import { eventBus } from '@/lib/eventBus';
 
 const HabitTracker = () => {
   const { templates } = useHabitState();
