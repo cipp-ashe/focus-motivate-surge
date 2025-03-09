@@ -42,7 +42,7 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
     const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
     
     // Set up daily cleanup
-    const cleanupTimeout = setupDailyCleanup(clearAllTrackedTasks);
+    const cleanupTimeoutId = setupDailyCleanup(clearAllTrackedTasks);
     
     // Also check for pending habits when component mounts
     const timeout = setTimeout(() => {
@@ -57,8 +57,8 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
       unsubscribeSchedule();
       clearTimeout(timeout);
       // Fixed: clearTimeout expects a timeout ID, not a function
-      if (cleanupTimeout) {
-        clearTimeout(cleanupTimeout);
+      if (cleanupTimeoutId) {
+        clearTimeout(cleanupTimeoutId);
       }
     };
   }, [handleHabitSchedule, setupDailyCleanup, clearAllTrackedTasks, processPendingTasks]);

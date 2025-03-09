@@ -41,7 +41,7 @@ export const useHabitTaskCleanup = (tasks: Task[]) => {
       setupDailyCleanup(clearAllTrackedTasks); // Set up next day's cleanup
     }, timeUntilMidnight);
     
-    return () => clearTimeout(timeoutId);
+    return timeoutId; // Return the actual timeout ID instead of a function
   }, []);
   
   return {
