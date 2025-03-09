@@ -1,19 +1,33 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TimerSection } from '@/components/timer/TimerSection';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import TaskManager from '@/components/tasks/TaskManager';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { Quote } from "@/types/timer";
 import { useTasksInitializer } from '@/hooks/tasks/useTasksInitializer';
+import { eventBus } from '@/lib/eventBus';
 
 const TimerPage = () => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
   const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
   const [favorites, setFavorites] = React.useState<Quote[]>([]);
+  const { pageLoaded } = useTasksInitializer();
   
-  // Initialize tasks and handle page load events
-  useTasksInitializer();
+  // Track when TimerPage is mounted and ready
+  useEffect(() => {
+    console.log("TimerPage mounted and ready");
+    
+    // Notify that the timer page is ready
+    eventBus.emit('page:timer-ready', {
+      timestamp: new Date().toISOString()
+    });
+    
+    // Only run when components are fully initialized
+    if (pageLoaded) {
+      console.log("TimerPage: pageLoaded state is true, app is fully initialized");
+    }
+  }, [pageLoaded]);
 
   const handleTaskComplete = (metrics: any) => {
     if (selectedTask) {

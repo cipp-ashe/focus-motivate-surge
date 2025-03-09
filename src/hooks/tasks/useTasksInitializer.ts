@@ -1,62 +1,90 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { useTaskEvents } from './useTaskEvents';
 
 /**
  * Hook to initialize tasks and handle task-related events on page load
+ * with optimized event flow to prevent redundant processing
  */
 export const useTasksInitializer = () => {
   const [pageLoaded, setPageLoaded] = useState(false);
   const { forceTaskUpdate, forceTagsUpdate, checkPendingHabits } = useTaskEvents();
+  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const initProcessedRef = useRef(false);
 
-  // Force a task update when the page first loads
+  // Coordinated initialization to prevent redundant processing
   useEffect(() => {
-    if (!pageLoaded) {
-      console.log("useTasksInitializer: Initial load, forcing task and tag updates");
+    // Only run the initialization once
+    if (!pageLoaded && !initProcessedRef.current) {
+      console.log("useTasksInitializer: Running coordinated initialization");
+      initProcessedRef.current = true;
       
-      // Small delay to ensure everything is ready
-      setTimeout(() => {
+      // Create a sequenced initialization
+      initTimeoutRef.current = setTimeout(() => {
+        // Step 1: Force task data update
         forceTaskUpdate();
-        forceTagsUpdate();
         
-        // Also check if any habit tasks need to be scheduled
-        checkPendingHabits();
-        
-        setPageLoaded(true);
-      }, 300); // Delay to ensure other components are ready
+        // Step 2: Update tags after tasks are loaded
+        setTimeout(() => {
+          forceTagsUpdate();
+          
+          // Step 3: Check for pending habits
+          setTimeout(() => {
+            checkPendingHabits();
+            
+            // Step 4: Mark initialization as complete
+            setPageLoaded(true);
+            
+            // Step 5: Notify that initialization is complete
+            eventBus.emit('app:initialization-complete', {
+              component: 'tasks',
+              timestamp: new Date().toISOString()
+            });
+          }, 100);
+        }, 100);
+      }, 150);
     }
-  }, [pageLoaded, forceTaskUpdate, forceTagsUpdate, checkPendingHabits]);
-
-  // Force a task update when returning to this page
-  useEffect(() => {
-    console.log("useTasksInitializer: Component mounted");
-    
-    // Delay to ensure navigation is complete
-    setTimeout(() => {
-      forceTaskUpdate();
-      forceTagsUpdate();
-      
-      // Trigger creation of pending habit tasks 
-      eventBus.emit('habits:processed', {});
-    }, 300); // Delay for more reliable processing
-    
-    // Set up event listener for popstate (browser back/forward)
-    const handlePopState = () => {
-      console.log("useTasksInitializer: Navigation occurred, updating tasks");
-      setTimeout(() => {
-        forceTaskUpdate();
-        forceTagsUpdate();
-        
-        // Also recheck pending habit tasks
-        eventBus.emit('habits:processed', {});
-      }, 300);
-    };
-    
-    window.addEventListener('popstate', handlePopState);
     
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
+    };
+  }, [pageLoaded, forceTaskUpdate, forceTagsUpdate, checkPendingHabits]);
+
+  // Handle navigation events with debounced processing
+  useEffect(() => {
+    const lastProcessTime = useRef(0);
+    const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    
+    const handleNavigation = () => {
+      const now = Date.now();
+      // Only process navigation events if it's been more than 500ms since the last one
+      if (now - lastProcessTime.current > 500) {
+        console.log("useTasksInitializer: Navigation occurred, processing with debounce");
+        
+        // Clear any pending timeout
+        if (navigationTimeoutRef.current) {
+          clearTimeout(navigationTimeoutRef.current);
+        }
+        
+        // Set a new timeout for processing
+        navigationTimeoutRef.current = setTimeout(() => {
+          forceTaskUpdate();
+          setTimeout(() => forceTagsUpdate(), 100);
+          lastProcessTime.current = Date.now();
+        }, 200);
+      }
+    };
+    
+    window.addEventListener('popstate', handleNavigation);
+    
+    return () => {
+      window.removeEventListener('popstate', handleNavigation);
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
     };
   }, [forceTaskUpdate, forceTagsUpdate]);
 

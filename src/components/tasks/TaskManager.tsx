@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
@@ -13,62 +14,25 @@ const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
   const { handleTimerStart } = useTimerEvents();
   const { getEntityTags } = useTagSystem();
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const { deleteTask, updateTask } = useTaskEvents();
   const { currentPath } = useTasksNavigation();
-  const { deleteTask, updateTask, forceTaskUpdate, forceTagsUpdate } = useTaskEvents();
   
   // Initialize task schedulers
   useHabitTaskScheduler(tasks);
   useTemplateTasksManager(tasks);
 
-  // Force tag reloading when tasks change
+  // Force tag update when task list changes
   useEffect(() => {
     if (tasks.length > 0) {
-      console.log(`TaskManager: Tasks changed, force updating tags for ${tasks.length} tasks`);
-      
-      // Force tag update on all tasks
-      setTimeout(() => {
-        forceTagsUpdate();
-      }, 100);
+      console.log(`TaskManager: Tasks changed, updating tags for ${tasks.length} tasks`);
+      eventBus.emit('task:tags-update', { count: tasks.length });
     }
-  }, [tasks, forceTagsUpdate]);
-
-  // Force rerender when needed
-  useEffect(() => {
-    const handleForceUpdate = () => {
-      console.log("TaskManager: Force updating task list");
-      setForceUpdate(prev => prev + 1);
-      
-      // Force tag update on all tasks
-      setTimeout(() => {
-        forceTagsUpdate();
-      }, 100);
-    };
-    
-    window.addEventListener('force-task-update', handleForceUpdate);
-    
-    // Also update when component mounts
-    setForceUpdate(prev => prev + 1);
-    
-    return () => {
-      window.removeEventListener('force-task-update', handleForceUpdate);
-    };
-  }, [forceTagsUpdate]);
-
-  // Check for pending habit tasks on initial load
-  useEffect(() => {
-    setTimeout(() => {
-      console.log('TaskManager: Initial load, checking for pending habit tasks');
-      forceTaskUpdate();
-      forceTagsUpdate();
-    }, 200);
-  }, [forceTaskUpdate, forceTagsUpdate]);
+  }, [tasks]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       handleTimerStart(task.name, task.duration || 1500);
-      // Use the task:select event
       eventBus.emit('task:select', taskId);
     }
   };
