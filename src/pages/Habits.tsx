@@ -6,8 +6,9 @@ import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, ArrowLeft } from 'lucide-react';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
+import { Link } from 'react-router-dom';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -37,9 +38,18 @@ const HabitsPage = () => {
 
   return (
     <div className="container mx-auto py-6">
-      <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-        Habit Configuration
-      </h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Link 
+          to="/"
+          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+          title="Back to Dashboard"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+          Habit Configuration
+        </h1>
+      </div>
       
       <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">
         <Button 

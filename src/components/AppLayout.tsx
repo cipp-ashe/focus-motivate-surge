@@ -5,6 +5,7 @@ import { Header } from './layout/Header';
 
 export const AppLayout = () => {
   const location = useLocation();
+  // Only hide header on the main dashboard page
   const showHeader = location.pathname !== '/';
 
   return (

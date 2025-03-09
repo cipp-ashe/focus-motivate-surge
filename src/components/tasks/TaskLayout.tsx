@@ -15,11 +15,17 @@ interface TaskLayoutProps {
 }
 
 export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
-  const { isOpen: isNotesOpen, close: closeNotes } = useNotesPanel();
-  const { isOpen: isHabitsOpen, close: closeHabits } = useHabitsPanel();
+  const { isOpen: isNotesOpen } = useNotesPanel();
+  const { isOpen: isHabitsOpen } = useHabitsPanel();
   const containerRef = useRef<HTMLDivElement>(null);
   const { width } = useWindowSize();
   const { completed: completedTasks, selected: selectedTaskId } = useTaskContext();
+
+  // Log panel states for debugging
+  React.useEffect(() => {
+    console.log("TaskLayout - Notes panel open:", isNotesOpen);
+    console.log("TaskLayout - Habits panel open:", isHabitsOpen);
+  }, [isNotesOpen, isHabitsOpen]);
 
   return (
     <div ref={containerRef} className="min-h-screen bg-background">

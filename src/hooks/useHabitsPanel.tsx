@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 interface HabitsPanelContextType {
   isOpen: boolean;
@@ -13,20 +13,20 @@ const HabitsPanelContext = createContext<HabitsPanelContextType | undefined>(und
 export function HabitsPanelProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggle = () => {
+  const toggle = useCallback(() => {
     console.log("Toggling habits panel, current state:", isOpen);
     setIsOpen(prev => !prev);
-  };
+  }, [isOpen]);
   
-  const open = () => {
+  const open = useCallback(() => {
     console.log("Opening habits panel");
     setIsOpen(true);
-  };
+  }, []);
   
-  const close = () => {
+  const close = useCallback(() => {
     console.log("Closing habits panel");
     setIsOpen(false);
-  };
+  }, []);
 
   return (
     <HabitsPanelContext.Provider value={{ 
