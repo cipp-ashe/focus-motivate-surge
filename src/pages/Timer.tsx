@@ -18,6 +18,7 @@ const TimerPage = () => {
   const tasksLoadedRef = useRef(false);
   const initCompletedRef = useRef(false);
   const [forceUpdateCount, setForceUpdateCount] = useState(0);
+  const updateTriggeredTimeRef = useRef(0);
   
   // Track when TimerPage is mounted and ready - only run once
   useEffect(() => {
@@ -43,6 +44,8 @@ const TimerPage = () => {
         eventBus.emit('habits:check-pending', {});
         
         // Force a task update to ensure any new tasks are loaded
+        const now = Date.now();
+        updateTriggeredTimeRef.current = now;
         setForceUpdateCount(prev => prev + 1);
         
         // For really stubborn cases, directly check localStorage
@@ -56,14 +59,18 @@ const TimerPage = () => {
             console.log(`No tasks loaded in memory yet, forcing update`);
             // Force another task update with delay
             setTimeout(() => {
-              window.dispatchEvent(new Event('force-task-update'));
+              const now = Date.now();
+              if (now - updateTriggeredTimeRef.current > 500) {
+                updateTriggeredTimeRef.current = now;
+                window.dispatchEvent(new Event('force-task-update'));
+              }
               
               // If there are still no tasks loaded after a second update, try to schedule them again
               if (tasks.length === 0) {
                 console.log('Still no tasks loaded after update, triggering habits:processed event');
                 eventBus.emit('habits:processed', {});
               }
-            }, 100);
+            }, 300);
           } else {
             // Check if all habit tasks from localStorage are in memory
             const missingTasks = habitTasks.filter((storageTask: any) => 
@@ -105,12 +112,14 @@ const TimerPage = () => {
     
     const handleForceUpdate = () => {
       const now = Date.now();
-      // Limit updates to no more than once every 500ms to avoid infinite loops
-      if (now - lastUpdateTime.current > 500) {
+      // Limit updates to no more than once every 800ms to avoid infinite loops
+      if (now - lastUpdateTime.current > 800) {
         console.log('TimerPage: Received force-task-update event (debounced)');
         lastUpdateTime.current = now;
         // Use state update to trigger a controlled re-render
         setForceUpdateCount(prev => prev + 1);
+      } else {
+        console.log('TimerPage: Skipping too frequent force-task-update');
       }
     };
     
@@ -130,7 +139,7 @@ const TimerPage = () => {
       <TimerErrorBoundary>
         <TaskLayout
           key={renderKey}
-          mainContent={<TimerSection
+          main={<TimerSection
             selectedTask={selectedTask}
             onTaskComplete={(metrics) => {
               eventBus.emit('task:complete', { taskId: selectedTaskId, metrics });
@@ -146,7 +155,7 @@ const TimerPage = () => {
             favorites={favorites}
             setFavorites={setFavorites}
           />}
-          sidebar={<TaskManager />}
+          aside={<TaskManager />}
         />
       </TimerErrorBoundary>
     </HabitsPanelProvider>

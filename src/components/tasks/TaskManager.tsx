@@ -21,6 +21,7 @@ const TaskManager = () => {
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tasksExistRef = useRef(false);
+  const forceUpdateTimeRef = useRef(0);
   
   // Initialize task schedulers and get the check function
   const { checkForMissingHabitTasks } = useHabitTaskScheduler(tasks);
@@ -39,7 +40,14 @@ const TaskManager = () => {
     if (tasks.length > 0) {
       tasksExistRef.current = true;
       console.log(`TaskManager: Task list updated with ${tasks.length} tasks`);
-      eventBus.emit('task:tags-update', { count: tasks.length });
+      
+      // Only update tags once per 800ms to prevent event flood
+      const now = Date.now();
+      if (now - forceUpdateTimeRef.current > 800) {
+        forceUpdateTimeRef.current = now;
+        eventBus.emit('task:tags-update', { count: tasks.length });
+      }
+      
       setIsLoading(false);
       
       // Clear loading timeout if tasks are loaded
@@ -50,13 +58,25 @@ const TaskManager = () => {
     } else if (tasksExistRef.current) {
       // If tasks previously existed but now don't, this is probably an issue
       console.log('Tasks were previously loaded but now none exist, forcing reload');
-      forceTaskUpdate();
+      
+      // Only force update if it's been a while since the last update
+      const now = Date.now();
+      if (now - forceUpdateTimeRef.current > 1000) {
+        forceUpdateTimeRef.current = now;
+        forceTaskUpdate();
+      }
     } else {
       // Check local storage for tasks
       const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
       if (storedTasks.length > 0) {
         console.log('Tasks found in storage but not in state, forcing reload');
-        forceTaskUpdate();
+        
+        // Only force update if it's been a while since the last update
+        const now = Date.now();
+        if (now - forceUpdateTimeRef.current > 1000) {
+          forceUpdateTimeRef.current = now;
+          forceTaskUpdate();
+        }
         
         // Set a timeout to end loading state if still no tasks
         setTimeout(() => {
@@ -143,8 +163,12 @@ const TaskManager = () => {
         <button 
           className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           onClick={() => {
-            checkPendingHabits();
-            forceTaskUpdate();
+            const now = Date.now();
+            if (now - forceUpdateTimeRef.current > 1000) {
+              forceUpdateTimeRef.current = now;
+              checkPendingHabits();
+              forceTaskUpdate();
+            }
           }}
         >
           Refresh Tasks

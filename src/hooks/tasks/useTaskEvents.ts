@@ -16,29 +16,24 @@ export const useTaskEvents = () => {
   const createTask = useCallback((task: Task) => {
     console.log("useTaskEvents: Creating task", task);
     
-    // First, add task to storage directly for immediate persistence
+    // First, verify the task doesn't already exist
+    const exists = taskStorage.taskExistsById(task.id);
+    
+    if (exists) {
+      console.log(`Task ${task.id} already exists, skipping creation`);
+      return;
+    }
+    
+    // Add task to storage directly for immediate persistence
     const added = taskStorage.addTask(task);
     
     if (added) {
-      // Check if task really exists in storage (extra verification)
-      const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-      const taskExists = storedTasks.some((t: Task) => t.id === task.id);
-      
-      if (!taskExists) {
-        console.log(`Task ${task.id} was not properly stored, forcing it into storage again`);
-        // Force task into storage if somehow it didn't get stored properly
-        storedTasks.push(task);
-        localStorage.setItem('taskList', JSON.stringify(storedTasks));
-      }
-      
       // Then emit event for state updates with direct object reference
       eventBus.emit('task:create', task);
       toast.success('Task added 📝');
       
-      // Force task update to ensure it appears in UI
-      forceTaskUpdate();
-    } else {
-      console.log(`Task ${task.id} already exists, skipping creation`);
+      // Force task update to ensure it appears in UI - but with delay
+      setTimeout(() => forceTaskUpdate(), 50);
     }
   }, []);
 
@@ -96,8 +91,9 @@ export const useTaskEvents = () => {
   const forceTaskUpdate = useCallback(() => {
     // Prevent multiple rapid calls with time-based debouncing
     const now = Date.now();
-    if (now - lastForceUpdateTimeRef.current < 300) {
-      console.log("useTaskEvents: Skipping force update, too soon since last update");
+    if (now - lastForceUpdateTimeRef.current < 1000) {
+      console.log("useTaskEvents: Skipping force update, too soon since last update", 
+                  now - lastForceUpdateTimeRef.current, "ms");
       return;
     }
     
@@ -118,17 +114,26 @@ export const useTaskEvents = () => {
       forceUpdateTimeoutRef.current = null;
     }
     
-    // Dispatch event to trigger reloading
-    window.dispatchEvent(new Event('force-task-update'));
-    
-    // Reset processing flag after a delay
+    // Dispatch event to trigger reloading with delay
     forceUpdateTimeoutRef.current = setTimeout(() => {
-      processingRef.current = false;
-      forceUpdateTimeoutRef.current = null;
-    }, 300);
+      window.dispatchEvent(new Event('force-task-update'));
+      
+      // Reset processing flag after a delay
+      forceUpdateTimeoutRef.current = setTimeout(() => {
+        processingRef.current = false;
+        forceUpdateTimeoutRef.current = null;
+      }, 300);
+    }, 50);
   }, []);
 
   const forceTagsUpdate = useCallback(() => {
+    // Add debouncing to tags update too
+    const now = Date.now();
+    if (now - lastForceUpdateTimeRef.current < 800) {
+      console.log("useTaskEvents: Skipping tags update, too soon since last update");
+      return;
+    }
+    
     console.log("useTaskEvents: Forcing tags update");
     window.dispatchEvent(new Event('force-tags-update'));
   }, []);

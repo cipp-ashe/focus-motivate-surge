@@ -19,6 +19,7 @@ export const useTaskEvents = (
   const pendingTaskUpdatesRef = useRef<Task[]>([]);
   const isInitializingRef = useRef(true);
   const preventReentrantUpdateRef = useRef(false);
+  const lastEventTime = useRef<Record<string, number>>({});
   
   // Force reload tasks from storage
   const forceTasksReload = useCallback(() => {
@@ -29,17 +30,17 @@ export const useTaskEvents = (
         return;
       }
       
-      preventReentrantUpdateRef.current = true;
-      
+      // Debounce force reloads heavily
       const now = Date.now();
-      // Avoid excessive reloads
-      if (now - lastTaskLoadTimeRef.current < 300 && !isInitializingRef.current) {
-        console.log("TaskEvents: Skipping rapid reload, last load was", now - lastTaskLoadTimeRef.current, "ms ago");
-        preventReentrantUpdateRef.current = false;
+      const lastReloadTime = lastEventTime.current['forceReload'] || 0;
+      if (now - lastReloadTime < 800) {
+        console.log("TaskEvents: Skipping rapid reload, last reload was", now - lastReloadTime, "ms ago");
         return;
       }
       
-      lastTaskLoadTimeRef.current = now;
+      lastEventTime.current['forceReload'] = now;
+      preventReentrantUpdateRef.current = true;
+      
       const { tasks, completed } = taskState.loadFromStorage();
       
       // Process any pending task updates
@@ -66,12 +67,26 @@ export const useTaskEvents = (
       // Release the lock after a small delay to prevent rapid successive calls
       setTimeout(() => {
         preventReentrantUpdateRef.current = false;
-      }, 200);
+      }, 300);
     } catch (error) {
       console.error('TaskEvents: Error forcing tasks reload:', error);
       preventReentrantUpdateRef.current = false;
     }
   }, [dispatch]);
+  
+  // Helper function to debounce events
+  const shouldProcessEvent = useCallback((eventType: string, minDelay: number = 300): boolean => {
+    const now = Date.now();
+    const lastTime = lastEventTime.current[eventType] || 0;
+    
+    if (now - lastTime < minDelay) {
+      console.log(`TaskEvents: Skipping ${eventType}, too frequent (${now - lastTime}ms)`);
+      return false;
+    }
+    
+    lastEventTime.current[eventType] = now;
+    return true;
+  }, []);
   
   // Set up event listeners
   useEffect(() => {
@@ -79,6 +94,8 @@ export const useTaskEvents = (
       // Handle task creation
       eventBus.on('task:create', (task: Task) => {
         console.log("TaskEvents: Creating task", task.id, task.name);
+        
+        if (!shouldProcessEvent(`task:create:${task.id}`, 500)) return;
         
         // First, verify the task doesn't already exist
         if (taskState.taskExists(items, task)) {
@@ -131,6 +148,9 @@ export const useTaskEvents = (
       // Handle habit checking with improved verification
       eventBus.on('habits:check-pending', () => {
         console.log("TaskEvents: Checking for pending habits");
+        
+        if (!shouldProcessEvent('habits:check-pending', 1000)) return;
+        
         eventBus.emit('habits:processed', {});
         
         // Check for tasks in storage that aren't in memory
@@ -154,7 +174,7 @@ export const useTaskEvents = (
     const handleForceUpdate = () => {
       const now = Date.now();
       // Debounce force updates to prevent infinite loops
-      if (now - lastForceUpdateTime.current > 500) {
+      if (now - lastForceUpdateTime.current > 800) {
         lastForceUpdateTime.current = now;
         console.log("TaskEvents: Force updating task list (debounced)");
         forceTasksReload();
@@ -183,7 +203,7 @@ export const useTaskEvents = (
       window.removeEventListener('force-task-update', handleForceUpdate);
       verificationCleanup();
     };
-  }, [dispatch, forceTasksReload, items]);
+  }, [dispatch, forceTasksReload, items, shouldProcessEvent]);
   
   // Provide the reload function
   return { forceTasksReload };

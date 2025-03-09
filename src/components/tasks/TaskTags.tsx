@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NoteTags } from "../notes/components/NoteTags";
 import { Tag } from "@/types/core";
 import { Task } from "@/types/tasks";
@@ -15,11 +15,23 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
   const { getEntityTags, addTagToEntity, removeTagFromEntity, updateTagColor } = useTagSystem();
   const [tags, setTags] = useState<Tag[]>([]);
   const [forceUpdate, setForceUpdate] = useState(0);
+  const lastUpdateTimeRef = useRef(0);
+  const isInitialMountRef = useRef(true);
 
-  // Update tags more aggressively
+  // Update tags more efficiently with debouncing
   useEffect(() => {
     const updateTags = () => {
       if (!task?.id) return;
+      
+      const now = Date.now();
+      // Debounce updates to prevent excessive re-renders
+      if (!isInitialMountRef.current && now - lastUpdateTimeRef.current < 800) {
+        console.log(`Skipping tags update for task ${task.id}, too frequent`);
+        return;
+      }
+      
+      lastUpdateTimeRef.current = now;
+      isInitialMountRef.current = false;
       
       console.log(`Updating tags for task ${task.id}`);
       const currentTags = getEntityTags(task.id, 'task');
@@ -37,65 +49,62 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     // Initial tag loading
     updateTags();
     
-    // Set up more event listeners for tag updates
-    const events = [
-      'tagsUpdated',
-      'force-task-update',
-      'force-tags-update',
-      'task:create',
-      'task:update',
-      'task:delete',
-      'habit:template-delete'
-    ];
+    // Set up fewer event listeners to reduce the update frequency
+    const domEvents = ['tagsUpdated', 'force-tags-update'];
+    const busEvents = ['task:create', 'task:update', 'task:delete', 'habit:template-delete'];
     
-    // Listen for all events that might affect tags
-    const eventHandlers = events.map(eventName => {
+    const domHandlers = domEvents.map(eventName => {
       const handler = () => {
+        const now = Date.now();
+        if (now - lastUpdateTimeRef.current < 800) return;
+        
         console.log(`TaskTags: Detected ${eventName} event, updating tags for ${task.id}`);
         setTimeout(updateTags, 50);
       };
       
-      if (eventName.includes(':')) {
-        // EventBus event
-        return { 
-          eventName, 
-          unsubscribe: eventBus.on(eventName, handler),
-          isEventBus: true 
-        };
-      } else {
-        // DOM event
-        window.addEventListener(eventName, handler);
-        return { 
-          eventName,
-          handler,
-          isEventBus: false 
-        };
-      }
+      window.addEventListener(eventName, handler);
+      return { eventName, handler };
     });
     
-    // Set up periodic tag refresh (every 2 seconds)
-    const intervalId = setInterval(() => {
-      setForceUpdate(prev => prev + 1);
-    }, 2000);
+    const unsubscribers = busEvents.map(eventName => {
+      return eventBus.on(eventName, () => {
+        const now = Date.now();
+        if (now - lastUpdateTimeRef.current < 800) return;
+        
+        console.log(`TaskTags: Detected ${eventName} event, updating tags for ${task.id}`);
+        setTimeout(updateTags, 50);
+      });
+    });
     
-    // Trigger a tags update whenever forceUpdate changes
-    if (forceUpdate > 0) {
-      updateTags();
+    // Instead of updating every 2 seconds, update only every 5 seconds maximum
+    const intervalId = setInterval(() => {
+      const now = Date.now();
+      if (now - lastUpdateTimeRef.current >= 5000) {
+        setForceUpdate(prev => prev + 1);
+      }
+    }, 5000);
+    
+    // Trigger a tags update whenever forceUpdate changes, but with debouncing
+    if (forceUpdate > 0 && !isInitialMountRef.current) {
+      const now = Date.now();
+      if (now - lastUpdateTimeRef.current >= 2000) {
+        updateTags();
+      }
     }
     
     return () => {
-      // Clean up all event listeners
-      eventHandlers.forEach(eh => {
-        if (eh.isEventBus) {
-          eh.unsubscribe();
-        } else {
-          window.removeEventListener(eh.eventName, eh.handler);
-        }
+      // Clean up dom event listeners
+      domHandlers.forEach(({ eventName, handler }) => {
+        window.removeEventListener(eventName, handler);
       });
       
+      // Clean up event bus listeners
+      unsubscribers.forEach(unsub => unsub());
+      
+      // Clear interval
       clearInterval(intervalId);
     };
-  }, [task?.id, getEntityTags, forceUpdate]);
+  }, [task.id, getEntityTags, forceUpdate]);
 
   // Use effect specifically for task changes
   useEffect(() => {
