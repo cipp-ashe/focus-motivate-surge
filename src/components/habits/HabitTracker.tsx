@@ -11,8 +11,8 @@ const HabitTracker = () => {
   const { todaysHabits } = useTodaysHabits(templates);
   const { getTodayProgress, updateProgress } = useHabitProgress();
   
-  // Call useHabitEvents with the correct dependency
-  const { state } = useHabitState();
+  // Use the useHabitState hook directly without trying to access a non-existent state property
+  const habitState = useHabitState();
   
   const [debugMode, setDebugMode] = useState(false);
 
