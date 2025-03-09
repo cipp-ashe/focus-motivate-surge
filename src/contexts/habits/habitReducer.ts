@@ -11,8 +11,12 @@ type HabitAction =
   | { type: 'UPDATE_TEMPLATE_ORDER'; payload: ActiveTemplate[] }
   | { type: 'UPDATE_TEMPLATE_DAYS'; payload: { templateId: string; days: DayOfWeek[] } }
   | { type: 'ADD_CUSTOM_TEMPLATE'; payload: any }
-  | { type: 'REMOVE_CUSTOM_TEMPLATE'; payload: string };
+  | { type: 'REMOVE_CUSTOM_TEMPLATE'; payload: string }
+  | { type: 'UPDATE_TEMPLATE_CUSTOMIZATION'; payload: { templateId: string; customized: boolean } };
 
+/**
+ * Unified habit reducer that handles all template-related state updates
+ */
 export const habitReducer = (state: HabitState, action: HabitAction): HabitState => {
   switch (action.type) {
     case 'LOAD_TEMPLATES':
@@ -71,6 +75,15 @@ export const habitReducer = (state: HabitState, action: HabitAction): HabitState
         ...state,
         customTemplates: state.customTemplates.filter(
           template => template.id !== action.payload
+        ),
+      };
+    case 'UPDATE_TEMPLATE_CUSTOMIZATION':
+      return {
+        ...state,
+        templates: state.templates.map(template =>
+          template.templateId === action.payload.templateId
+            ? { ...template, customized: action.payload.customized }
+            : template
         ),
       };
     default:

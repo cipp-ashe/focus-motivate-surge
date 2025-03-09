@@ -13,6 +13,9 @@ export interface HabitTaskSchedulerReturn {
   checkForMissingHabitTasks: () => void;
 }
 
+/**
+ * Re-export all habit task related hooks with consolidated interface
+ */
 export {
   useHabitTaskTracker,
   useHabitTaskProcessor,
@@ -20,3 +23,14 @@ export {
   useHabitTaskChecker,
   useHabitTaskCreator
 };
+
+// Define the unified interface for task verification
+export interface TaskVerificationResult {
+  missingTasks: Task[];
+  duplicateTasks: Task[];
+  inconsistentTasks: Task[];
+}
+
+// Export a unified verification interface
+export { taskVerification } from '@/lib/verification/taskVerification';
+export { taskStorage } from '@/lib/storage/taskStorage';

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { startOfDay, isToday } from "date-fns";
 import type { Task } from "@/types/tasks";
 import { toast } from "sonner";
+import { eventBus } from "@/lib/eventBus";
 
 interface DailySyncManagerProps {
   lastSyncDate: Date;
@@ -11,6 +12,9 @@ interface DailySyncManagerProps {
   onLastSyncUpdate: (date: Date) => void;
 }
 
+/**
+ * Component to handle daily task synchronization and reset
+ */
 export const DailySyncManager = ({ 
   lastSyncDate, 
   tasks, 
@@ -23,19 +27,34 @@ export const DailySyncManager = ({
     const lastSync = startOfDay(new Date(lastSyncDate));
 
     if (!isToday(lastSync)) {
-      // Clear non-habit tasks and reset habit tasks for the new day
-      const habitTasks = tasks.filter(task => task.id.startsWith('habit-'));
+      console.log('DailySyncManager: New day detected, resetting tasks');
+      
+      // Get habit tasks (relationships.habitId exists)
+      const habitTasks = tasks.filter(task => task.relationships?.habitId);
+      
+      // Reset habit tasks to uncompleted state
       const resetHabitTasks = habitTasks.map(task => ({
         ...task,
         completed: false
       }));
 
+      // Update tasks
       onTasksUpdate(resetHabitTasks);
       onLastSyncUpdate(today);
+      
+      // Notify the user
       toast.info("Tasks have been reset for the new day");
+      
+      // Trigger habit checks to ensure all habit tasks are created for today
+      setTimeout(() => {
+        console.log('DailySyncManager: Triggering habit checks for the new day');
+        eventBus.emit('habits:check-pending', {});
+        window.dispatchEvent(new Event('force-habits-update'));
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 300);
     }
   }, [lastSyncDate, tasks, onTasksUpdate, onLastSyncUpdate]);
 
+  // Render nothing - this is a behavior-only component
   return null;
 };
-

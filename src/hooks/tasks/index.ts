@@ -12,9 +12,8 @@ export {
   useHabitTaskProcessor,
   useHabitTaskCleanup,
   useHabitTaskChecker,
-  useHabitTaskCreator 
+  useHabitTaskCreator,
+  // Re-export the task verification and storage interfaces
+  taskVerification,
+  taskStorage
 } from './habitTasks';
-
-// Re-export task verification utilities
-export { taskVerification } from '@/lib/verification/taskVerification';
-export { taskStorage } from '@/lib/storage/taskStorage';

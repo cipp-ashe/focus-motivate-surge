@@ -1,25 +1,69 @@
 
 import { useCallback } from 'react';
-import { toast } from 'sonner';
 import { Note } from '@/types/notes';
-import { STORAGE_KEY, sanitizeContent } from '@/utils/noteUtils';
+import { noteStorage } from '@/lib/storage/noteStorage';
+import { toast } from 'sonner';
 
+/**
+ * Hook for interacting with the note storage service
+ */
 export const useNotesStorage = () => {
   const saveNotes = useCallback((notes: Note[]) => {
-    const sanitizedNotes = notes.map(note => ({
-      ...note,
-      content: sanitizeContent(note.content)
-    }));
+    const success = noteStorage.saveNotes(notes);
     
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizedNotes));
-      window.dispatchEvent(new Event('notesUpdated'));
-    } catch (error) {
-      console.error('Error saving notes:', error);
-      toast.error('Failed to save notes. Please try again.');
+    if (success) {
+      // We don't need to show a success toast as it will make too many notifications
+      // during normal app usage
+    } else {
+      toast.error('Failed to save notes');
     }
   }, []);
 
-  return { saveNotes };
-};
+  const addTagToNote = useCallback((noteId: string, tagName: string, color: string = 'default') => {
+    const success = noteStorage.addTagToNote(noteId, tagName, color);
+    
+    if (success) {
+      toast.success("Tag added ✨");
+    } else {
+      toast.error("Failed to add tag");
+    }
+  }, []);
 
+  const removeTagFromNote = useCallback((noteId: string, tagName: string) => {
+    const success = noteStorage.removeTagFromNote(noteId, tagName);
+    
+    if (success) {
+      toast.success("Tag removed 🗑️");
+    } else {
+      toast.error("Failed to remove tag");
+    }
+  }, []);
+
+  const clearAllNotes = useCallback(() => {
+    const success = noteStorage.clearNotes();
+    
+    if (success) {
+      toast.success("All notes cleared 🗑️");
+    } else {
+      toast.error("Failed to clear notes");
+    }
+  }, []);
+
+  const deleteNote = useCallback((noteId: string) => {
+    const success = noteStorage.deleteNote(noteId);
+    
+    if (success) {
+      toast.success("Note deleted 🗑️");
+    } else {
+      toast.error("Failed to delete note");
+    }
+  }, []);
+
+  return {
+    saveNotes,
+    addTagToNote,
+    removeTagFromNote,
+    clearAllNotes,
+    deleteNote
+  };
+};
