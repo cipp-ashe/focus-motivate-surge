@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GripVertical, Trash2 } from "lucide-react";
-import { HabitDetail } from '../types';
+import { HabitDetail, MetricType } from '../types';
 import { MinutesInput } from "@/components/minutes/MinutesInput";
 import { cn } from '@/lib/utils';
 
@@ -27,6 +27,16 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
   onUpdateHabit,
   onDeleteHabit,
 }) => {
+  // Convert seconds to minutes for display
+  const convertSecondsToMinutes = (seconds: number): number => {
+    return Math.round(seconds / 60);
+  };
+
+  // Convert minutes to seconds for storage
+  const convertMinutesToSeconds = (minutes: number): number => {
+    return minutes * 60;
+  };
+
   return (
     <div className="space-y-2">
       {habits.map((habit, index) => (
@@ -58,15 +68,36 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 
                 <Select
                   value={habit.metrics.type}
-                  onValueChange={(value: 'boolean' | 'timer' | 'count' | 'rating') => {
-                    onUpdateHabit(index, {
+                  onValueChange={(value: MetricType) => {
+                    const updates: Partial<HabitDetail> = {
                       metrics: {
                         type: value,
-                        ...(value === 'timer' && { unit: 'minutes', min: 5, target: 600 }),
-                        ...(value === 'count' && { target: 1 }),
-                        ...(value === 'rating' && { min: 1, max: 5 }),
-                      },
-                    });
+                        target: 1,
+                      }
+                    };
+                    
+                    // Set appropriate defaults based on type
+                    if (value === 'timer') {
+                      updates.metrics = {
+                        ...updates.metrics,
+                        target: 600, // 10 minutes in seconds
+                        unit: 'minutes'
+                      };
+                    } else if (value === 'counter') {
+                      updates.metrics = {
+                        ...updates.metrics,
+                        target: 3
+                      };
+                    } else if (value === 'rating') {
+                      updates.metrics = {
+                        ...updates.metrics,
+                        target: 3,
+                        min: 1, 
+                        max: 5
+                      };
+                    }
+                    
+                    onUpdateHabit(index, updates);
                   }}
                 >
                   <SelectTrigger className="w-[90px] h-7 text-xs">
@@ -75,7 +106,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                   <SelectContent>
                     <SelectItem value="boolean">Checkbox</SelectItem>
                     <SelectItem value="timer">Timer</SelectItem>
-                    <SelectItem value="count">Counter</SelectItem>
+                    <SelectItem value="counter">Counter</SelectItem>
                     <SelectItem value="rating">Rating</SelectItem>
                   </SelectContent>
                 </Select>
@@ -102,22 +133,22 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                   <div className="flex items-center gap-1">
                     <span className="text-xs text-muted-foreground">Target:</span>
                     <MinutesInput
-                      minutes={Math.round((habit.metrics.target || 600) / 60)}
+                      minutes={convertSecondsToMinutes(habit.metrics.target || 600)}
                       onMinutesChange={(newMinutes) => {
                         onUpdateHabit(index, {
                           metrics: {
                             ...habit.metrics,
-                            target: newMinutes * 60,
+                            target: convertMinutesToSeconds(newMinutes),
                           },
                         });
                       }}
-                      minMinutes={5}
-                      maxMinutes={60}
+                      minMinutes={1}
+                      maxMinutes={120}
                     />
                   </div>
                 )}
 
-                {(habit.metrics.type === 'count' || habit.metrics.type === 'rating') && (
+                {(habit.metrics.type === 'counter' || habit.metrics.type === 'rating') && (
                   <div className="flex items-center gap-1">
                     <span className="text-xs text-muted-foreground">Target:</span>
                     <Input
