@@ -18,7 +18,7 @@ export const useQuoteManager = () => {
   // Get a random quote, optionally filtered by category
   const getRandomQuote = useCallback((category?: QuoteCategory) => {
     const filteredQuotes = category
-      ? quotes.filter(quote => quote.category === category)
+      ? quotes.filter(quote => quote.categories.includes(category))
       : quotes;
     
     if (filteredQuotes.length === 0) return null;
@@ -49,10 +49,10 @@ export const useQuoteManager = () => {
   // Toggle favorite status of a quote
   const toggleFavorite = useCallback((quote: Quote) => {
     setFavoriteQuotes(prev => {
-      const isAlreadyFavorite = prev.some(q => q.id === quote.id);
+      const isAlreadyFavorite = prev.some(q => q.text === quote.text);
       
       if (isAlreadyFavorite) {
-        return prev.filter(q => q.id !== quote.id);
+        return prev.filter(q => q.text !== quote.text);
       } else {
         return [...prev, quote];
       }
@@ -60,8 +60,8 @@ export const useQuoteManager = () => {
   }, []);
 
   // Check if a quote is favorited
-  const isFavorite = useCallback((quoteId: string) => {
-    return favoriteQuotes.some(q => q.id === quoteId);
+  const isFavorite = useCallback((quoteText: string) => {
+    return favoriteQuotes.some(q => q.text === quoteText);
   }, [favoriteQuotes]);
 
   return {
