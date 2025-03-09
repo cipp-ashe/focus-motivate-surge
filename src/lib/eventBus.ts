@@ -14,6 +14,7 @@ class EventBus {
   private emitCounts: Map<string, number>; // Track how many times an event has been emitted
   private lastEmitTimestamps: Map<string, number>; // Track when events were last emitted
   private templateAddCooldown: boolean = false; // Special flag just for template-add
+  private pendingEvents: Map<string, {payload: any, timeout: NodeJS.Timeout}>; // Store delayed events
 
   private constructor() {
     this.listeners = new Map();
@@ -22,6 +23,7 @@ class EventBus {
     this.processingEvents = new Map();
     this.emitCounts = new Map();
     this.lastEmitTimestamps = new Map();
+    this.pendingEvents = new Map();
     this.setupEventDeduplication();
   }
 
@@ -41,6 +43,7 @@ class EventBus {
       this.processedEvents.clear();
       this.emitCounts.clear();
       this.lastEmitTimestamps.clear();
+      this.pendingEvents.clear();
       this.scheduleNextReset();
     };
 
@@ -114,41 +117,56 @@ class EventBus {
   }
 
   /**
-   * Emit an event with payload
+   * Emit an event with payload, with improved synchronization
    */
   emit<T extends TimerEventType>(event: T, payload: TimerEventPayloads[T]) {
     if (this.debugMode) {
       console.log(`[EventBus] ${event}`, payload);
     }
 
-    // Special case for template-add - global cooldown
+    // Generate a unique event ID for deduplication
+    const eventId = this.getEventId(event, payload);
+    const eventKey = `${event}-${eventId}`;
+    
+    // ========= Special case for template-add - stronger protection =========
     if (event === 'habit:template-add') {
       if (this.templateAddCooldown) {
         if (this.debugMode) {
-          console.log(`[EventBus] Global cooldown active for template-add events, skipping`);
+          console.log(`[EventBus] Global cooldown active for template-add events, queueing for later`, eventId);
         }
+        
+        // If we already have a pending event for this template, clear it
+        if (this.pendingEvents.has(eventKey)) {
+          clearTimeout(this.pendingEvents.get(eventKey)!.timeout);
+          this.pendingEvents.delete(eventKey);
+        }
+        
+        // Queue for later with a longer delay to ensure state is updated
+        const timeout = setTimeout(() => {
+          this.pendingEvents.delete(eventKey);
+          this.emit(event, payload);
+        }, 500); // Retry after a longer delay
+        
+        this.pendingEvents.set(eventKey, { payload, timeout });
         return;
       }
       
-      // Set cooldown
+      // Set cooldown - much longer for template-add (3 seconds)
       this.templateAddCooldown = true;
       setTimeout(() => {
         this.templateAddCooldown = false;
-      }, 2000); // 2 second global cooldown
+      }, 3000);
     }
 
-    // Generate a unique event ID for deduplication
-    const eventId = this.getEventId(event, payload);
-    
     // Check if this is a rapid repeat of the same event (debounce)
     const now = Date.now();
-    const lastEmitTime = this.lastEmitTimestamps.get(`${event}-${eventId}`) || 0;
+    const lastEmitTime = this.lastEmitTimestamps.get(eventKey) || 0;
     const timeSinceLastEmit = now - lastEmitTime;
     
-    // Strong debounce for template-add events (2000ms)
-    if (event === 'habit:template-add' && timeSinceLastEmit < 2000) {
+    // Extra strong debounce for template-add events (3000ms)
+    if (event === 'habit:template-add' && timeSinceLastEmit < 3000) {
       if (this.debugMode) {
-        console.log(`[EventBus] Debouncing ${event} with ID ${eventId}, last emitted ${timeSinceLastEmit}ms ago`);
+        console.log(`[EventBus] Strong debouncing ${event} with ID ${eventId}, last emitted ${timeSinceLastEmit}ms ago`);
       }
       return;
     }
@@ -162,12 +180,11 @@ class EventBus {
     }
     
     // Update last emit timestamp
-    this.lastEmitTimestamps.set(`${event}-${eventId}`, now);
+    this.lastEmitTimestamps.set(eventKey, now);
     
     // Track emit counts for debugging
-    const countKey = `${event}-${eventId}`;
-    const currentCount = this.emitCounts.get(countKey) || 0;
-    this.emitCounts.set(countKey, currentCount + 1);
+    const currentCount = this.emitCounts.get(eventKey) || 0;
+    this.emitCounts.set(eventKey, currentCount + 1);
     
     if (currentCount > 0) {
       if (this.debugMode) {
@@ -184,8 +201,7 @@ class EventBus {
     }
     
     // Check if this specific event is currently being processed
-    const processingKey = `${event}-${eventId}`;
-    if (this.processingEvents.get(processingKey)) {
+    if (this.processingEvents.get(eventKey)) {
       if (this.debugMode) {
         console.log(`[EventBus] Event ${event} with ID ${eventId} is already being processed, skipping`);
       }
@@ -211,7 +227,7 @@ class EventBus {
     }
 
     // Set processing flag
-    this.processingEvents.set(processingKey, true);
+    this.processingEvents.set(eventKey, true);
     
     // Process the event
     try {
@@ -223,10 +239,11 @@ class EventBus {
         }
       });
     } finally {
-      // Clear processing flag after a short delay
+      // Clear processing flag with delay based on event type
+      const delay = event === 'habit:template-add' ? 1000 : 100;
       setTimeout(() => {
-        this.processingEvents.delete(processingKey);
-      }, 50);
+        this.processingEvents.delete(eventKey);
+      }, delay);
     }
   }
 
@@ -239,6 +256,8 @@ class EventBus {
     this.processingEvents.clear();
     this.emitCounts.clear();
     this.lastEmitTimestamps.clear();
+    this.pendingEvents.forEach(entry => clearTimeout(entry.timeout));
+    this.pendingEvents.clear();
   }
 }
 

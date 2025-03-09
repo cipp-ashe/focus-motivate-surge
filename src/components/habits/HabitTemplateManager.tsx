@@ -19,6 +19,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   const processedTodayRef = useRef<Set<string>>(new Set<string>());
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAddingRef = useRef<boolean>(false);
+  const templateAddTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Load custom templates
   useEffect(() => {
@@ -57,6 +58,10 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       if (cooldownTimerRef.current) {
         clearTimeout(cooldownTimerRef.current);
       }
+      
+      if (templateAddTimeoutRef.current) {
+        clearTimeout(templateAddTimeoutRef.current);
+      }
     };
     
   }, []);
@@ -83,12 +88,18 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       isAddingRef.current = true;
       cooldownTimerRef.current = setTimeout(() => {
         isAddingRef.current = false;
-      }, 1000);
+      }, 2000); // Longer cooldown to prevent issues
     }
   };
 
   // Handle template selection with proper debounce protection
   const handleSelectTemplate = (templateId: string) => {
+    // Cancel any pending template add
+    if (templateAddTimeoutRef.current) {
+      clearTimeout(templateAddTimeoutRef.current);
+      templateAddTimeoutRef.current = null;
+    }
+    
     // Prevent duplicate template selection
     if (activeTemplates.some(t => t.templateId === templateId)) {
       toast.info(`Template already active`);
@@ -126,20 +137,26 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       processingTemplateRef.current = templateId;
       processedTodayRef.current.add(templateId);
       
-      // Pass the string templateId, not an object
-      eventBus.emit('habit:template-add', templateId);
-      toast.success(`Added template: ${template.name}`);
-      
-      // Clear processing state after a delay
-      setTimeout(() => {
-        processingTemplateRef.current = null;
-        setConfigOpen(false); // Close the sheet after adding
+      // Use a controlled delay to reduce race conditions
+      templateAddTimeoutRef.current = setTimeout(() => {
+        // Emit template-add event to context first to update state
+        eventBus.emit('habit:template-add', templateId);
+        toast.success(`Added template: ${template.name}`);
         
-        // Allow new additions after a delay
+        // Cleanup state
+        processingTemplateRef.current = null;
+        templateAddTimeoutRef.current = null;
+        
+        // Close sheet after processing completes
         setTimeout(() => {
-          isAddingRef.current = false;
-        }, 1000);
-      }, 500);
+          setConfigOpen(false);
+          
+          // Allow new additions after a longer delay
+          setTimeout(() => {
+            isAddingRef.current = false;
+          }, 2000);
+        }, 500);
+      }, 100);
     }
   };
 
