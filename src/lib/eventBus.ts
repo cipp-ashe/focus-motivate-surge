@@ -26,8 +26,20 @@ class EventBus {
     
     // Return unsubscribe function
     return () => {
-      this.listeners[eventName] = this.listeners[eventName].filter(cb => cb !== callback);
+      this.off(eventName, callback);
     };
+  }
+
+  // Add the off method to remove specific event listeners
+  public off(eventName: string, callback: EventCallback): void {
+    if (!this.listeners[eventName]) return;
+    
+    this.listeners[eventName] = this.listeners[eventName].filter(cb => cb !== callback);
+    
+    // Clean up the event entirely if no listeners remain
+    if (this.listeners[eventName].length === 0) {
+      delete this.listeners[eventName];
+    }
   }
 
   public emit(eventName: string, payload: any = {}): void {

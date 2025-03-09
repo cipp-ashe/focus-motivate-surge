@@ -3,7 +3,7 @@ import { TimerMetrics } from "@/types/metrics";
 import { Clock, Pause, Quote, Zap, BarChart } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
-import { useEventBus } from "@/lib/eventBus";
+import { useEventBus } from "@/hooks/useEventBus";
 import { cn } from "@/lib/utils";
 
 interface TimerMetricsDisplayProps {

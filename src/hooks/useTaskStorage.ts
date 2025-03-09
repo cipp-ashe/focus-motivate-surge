@@ -97,20 +97,20 @@ export const useTaskStorage = () => {
       toast.success('Task completed 🎯');
     };
 
-    // Subscribe to events
-    eventBus.on('task:create', handleTaskCreate);
-    eventBus.on('task:update', handleTaskUpdate);
-    eventBus.on('task:delete', handleTaskDelete);
-    eventBus.on('task:select', handleTaskSelect);
-    eventBus.on('task:complete', handleTaskComplete);
+    // Subscribe to events and store unsubscribe functions
+    const unsubCreate = eventBus.on('task:create', handleTaskCreate);
+    const unsubUpdate = eventBus.on('task:update', handleTaskUpdate);
+    const unsubDelete = eventBus.on('task:delete', handleTaskDelete);
+    const unsubSelect = eventBus.on('task:select', handleTaskSelect);
+    const unsubComplete = eventBus.on('task:complete', handleTaskComplete);
 
     // Cleanup subscriptions
     return () => {
-      eventBus.off('task:create', handleTaskCreate);
-      eventBus.off('task:update', handleTaskUpdate);
-      eventBus.off('task:delete', handleTaskDelete);
-      eventBus.off('task:select', handleTaskSelect);
-      eventBus.off('task:complete', handleTaskComplete);
+      unsubCreate();
+      unsubUpdate();
+      unsubDelete();
+      unsubSelect();
+      unsubComplete();
     };
   }, []); 
 
