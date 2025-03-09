@@ -61,20 +61,21 @@ const TemplateCardView: React.FC<TemplateCardViewProps> = ({
       <CardFooter>
         <Button
           variant={isActive ? "secondary" : "default"}
-          size="auto"
+          size="sm"
           className={cn(
             "w-full", 
-            !isActive && "bg-primary hover:bg-primary/90"
+            !isActive && "bg-primary hover:bg-primary/90",
+            "text-xs sm:text-sm whitespace-normal h-auto py-2"
           )}
           onClick={onSelect}
           disabled={isActive}
         >
           {isActive ? (
-            <Check className="h-4 w-4 mr-2 flex-shrink-0" />
+            <Check className="h-4 w-4 mr-1.5 flex-shrink-0" />
           ) : (
-            <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+            <Plus className="h-4 w-4 mr-1.5 flex-shrink-0" />
           )}
-          <span className="whitespace-nowrap">{isActive ? "Already Added" : "Add Template"}</span>
+          <span>{isActive ? "Already Added" : "Add Template"}</span>
         </Button>
       </CardFooter>
     </Card>
