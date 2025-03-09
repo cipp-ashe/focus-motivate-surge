@@ -140,6 +140,8 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   useEffect(() => {
     // Don't process if no templates or if already processing
     if (activeTemplates.length === 0) {
+      // Clear today's habits when no active templates exist
+      setTodaysHabits([]);
       return;
     }
     
@@ -161,6 +163,33 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       return () => clearTimeout(timeoutId);
     }
   }, [activeTemplates, getTodaysHabits, processHabits]);
+  
+  // Listen for template deletion events to update today's habits
+  useEffect(() => {
+    const handleTemplateDelete = ({ templateId }: { templateId: string }) => {
+      console.log(`useTodaysHabits - Template deleted: ${templateId}`);
+      
+      // Update today's habits by filtering out habits from the deleted template
+      setTodaysHabits(prev => {
+        // Find which habits belong to the deleted template
+        const habitsToRemove = activeTemplates
+          .filter(t => t.templateId === templateId)
+          .flatMap(t => t.habits.map(h => h.id));
+          
+        // Filter out those habits
+        const updatedHabits = prev.filter(habit => !habitsToRemove.includes(habit.id));
+        console.log(`useTodaysHabits - Filtered out ${prev.length - updatedHabits.length} habits from deleted template`);
+        
+        return updatedHabits;
+      });
+    };
+    
+    const unsubscribeDelete = eventBus.on('habit:template-delete', handleTemplateDelete);
+    
+    return () => {
+      unsubscribeDelete();
+    };
+  }, [activeTemplates]);
   
   // Handle template-add events - separate from the main effect to avoid circular dependencies
   useEffect(() => {

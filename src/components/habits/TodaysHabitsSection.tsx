@@ -24,6 +24,7 @@ const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
+  // Don't render anything if there are no habits for today
   if (!todaysHabits || todaysHabits.length === 0) {
     return null;
   }
