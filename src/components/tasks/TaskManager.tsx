@@ -52,7 +52,27 @@ const TaskManager = () => {
       
       // Add template tag if available (e.g., "Mindfulness")
       if (templateId) {
-        const templateName = templateId.charAt(0).toUpperCase() + templateId.slice(1);
+        // Format template name correctly with first letter capitalized
+        // Handles both camelCase and kebab-case formats
+        let templateName = '';
+        
+        if (templateId.includes('-')) {
+          // Handle kebab-case: "morning-routine" -> "Morning Routine"
+          templateName = templateId
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        } else {
+          // Handle camelCase: "morningRoutine" -> "Morning Routine"
+          templateName = templateId
+            // Insert a space before all capital letters
+            .replace(/([A-Z])/g, ' $1')
+            // Capitalize the first letter
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
+        }
+        
+        console.log(`Adding template tag "${templateName}" to task ${taskId}`);
         addTagToEntity(templateName, taskId, 'task');
       }
 
