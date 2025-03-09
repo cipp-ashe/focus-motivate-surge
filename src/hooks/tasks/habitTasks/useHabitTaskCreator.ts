@@ -12,7 +12,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
  */
 export const useHabitTaskCreator = () => {
   const { addTagToEntity } = useTagSystem();
-  const { forceTaskUpdate } = useTaskEvents();
+  const { createTask, forceTaskUpdate } = useTaskEvents();
   
   /**
    * Create a new task for a habit with improved storage handling and verification
@@ -61,27 +61,9 @@ export const useHabitTaskCreator = () => {
         }
       };
       
-      // Add task to storage using the new storage service
-      const added = taskStorage.addTask(task);
-      
-      if (!added) {
-        console.log('Task was not added to storage, possibly already exists');
-        // Check again for an existing task
-        const existingTaskRetry = taskStorage.taskExists(habitId, date);
-        if (existingTaskRetry) {
-          return existingTaskRetry.id;
-        }
-        
-        // Something went wrong - force a reload and return the task ID anyway
-        setTimeout(() => {
-          window.dispatchEvent(new Event('force-task-update'));
-        }, 100);
-        
-        return taskId;
-      }
-      
-      // Create the task via event bus
-      eventBus.emit('task:create', task);
+      // Add task directly to state through the createTask function instead of just emitting an event
+      // This ensures the task is immediately available in the UI
+      createTask(task);
       
       // Add the Habit tag
       addTagToEntity('Habit', taskId, 'task');
@@ -137,7 +119,7 @@ export const useHabitTaskCreator = () => {
       toast.error('Failed to create habit task');
       return null;
     }
-  }, [addTagToEntity, forceTaskUpdate]);
+  }, [addTagToEntity, forceTaskUpdate, createTask]);
   
   return { createHabitTask };
 };

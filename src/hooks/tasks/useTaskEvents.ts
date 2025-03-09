@@ -19,9 +19,25 @@ export const useTaskEvents = () => {
     const added = taskStorage.addTask(task);
     
     if (added) {
-      // Then emit event for state updates
+      // Check if task really exists in storage (extra verification)
+      const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+      const taskExists = storedTasks.some((t: Task) => t.id === task.id);
+      
+      if (!taskExists) {
+        console.log(`Task ${task.id} was not properly stored, forcing it into storage again`);
+        // Force task into storage if somehow it didn't get stored properly
+        storedTasks.push(task);
+        localStorage.setItem('taskList', JSON.stringify(storedTasks));
+      }
+      
+      // Then emit event for state updates with direct object reference
       eventBus.emit('task:create', task);
       toast.success('Task added 📝');
+      
+      // Force task update to ensure it appears in UI
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 100);
     } else {
       console.log(`Task ${task.id} already exists, skipping creation`);
     }
