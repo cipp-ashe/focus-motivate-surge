@@ -95,6 +95,12 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                         min: 1, 
                         max: 5
                       };
+                    } else if (value === 'journal') {
+                      updates.metrics = {
+                        ...updates.metrics,
+                        type: 'journal',
+                        target: 1
+                      };
                     }
                     
                     onUpdateHabit(index, updates);
@@ -108,6 +114,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                     <SelectItem value="timer">Timer</SelectItem>
                     <SelectItem value="counter">Counter</SelectItem>
                     <SelectItem value="rating">Rating</SelectItem>
+                    <SelectItem value="journal">Journal</SelectItem>
                   </SelectContent>
                 </Select>
 

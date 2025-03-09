@@ -4,7 +4,7 @@ import { HabitTemplate, HabitDetail, DayOfWeek, DEFAULT_ACTIVE_DAYS } from '../c
 const createHabitDetail = (
   name: string,
   description: string,
-  metricType: 'timer' | 'counter' | 'boolean' | 'rating',
+  metricType: 'timer' | 'counter' | 'boolean' | 'rating' | 'journal',
   target?: number,
   tips?: string[]
 ): HabitDetail => ({
@@ -41,8 +41,8 @@ export const habitTemplates: HabitTemplate[] = [
       createHabitDetail(
         'Gratitude Journal',
         'Write down things you are grateful for',
-        'counter',
-        3,
+        'journal',
+        1,
         [
           'Aim to write down 3 things you\'re grateful for each day',
           'Be specific about what you appreciate and why',
@@ -72,9 +72,9 @@ export const habitTemplates: HabitTemplate[] = [
         ]
       ),
       createHabitDetail(
-        'Evening Review',
+        'Evening Journal',
         'Reflect on your day and plan for tomorrow',
-        'boolean',
+        'journal',
         1,
         [
           'Review what went well today and what could improve',

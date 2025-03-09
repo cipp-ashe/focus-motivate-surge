@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Star, Timer, BookOpen } from 'lucide-react';
 import { HabitDetail } from './types';
 import { toast } from 'sonner';
+import { eventBus } from '@/lib/eventBus';
 
 interface ProgressResult {
   value: boolean | number;
@@ -24,10 +25,17 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   onUpdate,
 }) => {
   const handleOpenJournal = () => {
-    // This would be integrated with a notes feature
-    toast.info(`Opening journal for: ${habit.name}`, {
-      description: "This feature will connect to the notes system"
+    // Emit an event to open journal for this habit
+    eventBus.emit('note:create-from-habit', { 
+      habitId: habit.id, 
+      habitName: habit.name,
+      description: habit.description || ''
     });
+    toast.info(`Opening journal for: ${habit.name}`, {
+      description: "Creating a new note for your journal entry"
+    });
+    // Mark as completed when journal is opened
+    onUpdate(true);
   };
 
   const formatTime = (seconds: number) => {
@@ -77,17 +85,27 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
                 {countValue}/{countTarget}
               </p>
             </div>
-            {habit.name.toLowerCase().includes('journal') && (
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-6 w-6 rounded-full"
-                onClick={handleOpenJournal}
-              >
-                <BookOpen className="h-3 w-3" />
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-6 w-6 rounded-full"
+              onClick={() => onUpdate(countValue + 1)}
+            >
+              <span className="text-xs">+1</span>
+            </Button>
           </div>
+        );
+      case 'journal':
+        return (
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={handleOpenJournal}
+          >
+            <BookOpen className="h-3 w-3 mr-1" />
+            Write
+          </Button>
         );
       case 'rating':
         const ratingValue = typeof progress.value === 'number' ? progress.value : 0;
