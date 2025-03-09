@@ -13,11 +13,19 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   // Get habits scheduled for today
   const getTodaysHabits = useCallback(() => {
     const today = new Date();
-    const dayOfWeek = today.toLocaleString('en-US', { weekday: 'long' }) as DayOfWeek;
+    const dayIndex = today.getDay();
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayOfWeek = daysOfWeek[dayIndex] as DayOfWeek;
     
-    return activeTemplates.flatMap(template => 
-      template.activeDays.includes(dayOfWeek) ? template.habits : []
-    );
+    console.log(`useTodaysHabits - Today is ${dayOfWeek}, checking active templates:`, activeTemplates);
+    
+    const habits = activeTemplates.flatMap(template => {
+      console.log(`Checking template ${template.templateId} - active days:`, template.activeDays);
+      return template.activeDays.includes(dayOfWeek) ? template.habits : [];
+    });
+    
+    console.log("useTodaysHabits - Today's habits:", habits);
+    return habits;
   }, [activeTemplates]);
 
   useEffect(() => {

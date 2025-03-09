@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import HabitTrackerHeader from './HabitTrackerHeader';
 import ActiveTemplateList from './ActiveTemplateList';
 import { ActiveTemplate } from './types';
@@ -25,10 +25,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
   const { isOpen, close } = useHabitsPanel();
   const isMobile = useIsMobile();
   
-  // Debug when drawer opens/closes
-  React.useEffect(() => {
+  // Debug when drawer opens/closes and active templates
+  useEffect(() => {
     console.log("HabitTracker drawer isOpen:", isOpen);
-  }, [isOpen]);
+    console.log("HabitTracker activeTemplates:", activeTemplates);
+  }, [isOpen, activeTemplates]);
 
   if (activeTemplates.length === 0) {
     return (

@@ -21,6 +21,20 @@ const HabitsPage = () => {
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);
   const isMobile = useIsMobile();
 
+  // Debug to see what data we have
+  useEffect(() => {
+    console.log("HabitsPage - templates from context:", templates);
+    console.log("HabitsPage - today's habits:", todaysHabits);
+    
+    // Check localStorage directly
+    try {
+      const storedTemplates = localStorage.getItem('habit-templates');
+      console.log("HabitsPage - templates from localStorage:", storedTemplates ? JSON.parse(storedTemplates) : "none");
+    } catch (error) {
+      console.error("Error parsing templates from localStorage:", error);
+    }
+  }, [templates, todaysHabits]);
+
   // Load custom templates
   useEffect(() => {
     try {
@@ -51,6 +65,7 @@ const HabitsPage = () => {
       customTemplates.find(t => t.id === templateId);
     
     if (template) {
+      console.log("Adding template:", template);
       eventBus.emit('habit:template-add', templateId);
       toast.success(`Added template: ${template.name}`);
     }

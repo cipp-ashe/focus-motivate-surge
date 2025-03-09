@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -106,6 +107,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     // Subscribe to template events
     const unsubscribers = [
       eventBus.on('habit:template-update', (template) => {
+        console.log("Event received: habit:template-update", template);
         if (template.templateId) {
           dispatch({ 
             type: 'UPDATE_TEMPLATE', 
@@ -127,10 +129,52 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
         }
       }),
       eventBus.on('habit:template-delete', ({ templateId }) => {
+        console.log("Event received: habit:template-delete", templateId);
         dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
         const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
         localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
         toast.success('Template deleted successfully');
+      }),
+      // Listen for template add events
+      eventBus.on('habit:template-add', (templateId) => {
+        console.log("Event received: habit:template-add", templateId);
+        // Find template in predefined templates or custom templates
+        const template = habitTemplates.find(t => t.id === templateId);
+        if (template) {
+          const newTemplate: ActiveTemplate = {
+            templateId: template.id,
+            habits: template.defaultHabits,
+            activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            customized: false,
+          };
+          dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+          const updatedTemplates = [...state.templates, newTemplate];
+          localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+          toast.success(`Template added: ${template.name}`);
+        } else {
+          // Check for custom template
+          const customTemplatesStr = localStorage.getItem('custom-templates');
+          if (customTemplatesStr) {
+            const customTemplates = JSON.parse(customTemplatesStr);
+            const customTemplate = customTemplates.find(t => t.id === templateId);
+            if (customTemplate) {
+              const newTemplate: ActiveTemplate = {
+                templateId: customTemplate.id,
+                habits: customTemplate.defaultHabits,
+                activeDays: customTemplate.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                customized: false,
+              };
+              dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+              const updatedTemplates = [...state.templates, newTemplate];
+              localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+              toast.success(`Custom template added: ${customTemplate.name}`);
+            } else {
+              toast.error(`Template not found: ${templateId}`);
+            }
+          } else {
+            toast.error(`Template not found: ${templateId}`);
+          }
+        }
       }),
       // Listen for custom template updates
       window.addEventListener('templatesUpdated', () => {
@@ -155,6 +199,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     queryFn: async () => {
       try {
         const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
+        console.log("Initial templates loaded from localStorage:", templates);
         dispatch({ type: 'LOAD_TEMPLATES', payload: templates });
         
         // Also load custom templates
