@@ -2,7 +2,7 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useTodaysHabits } from '@/hooks/useTodaysHabits';
+import { useTodaysHabits } from '@/hooks/habits/useTodaysHabits';
 import { habitReducer } from './habitReducer';
 import { HabitState, HabitContextActions, initialState } from './types';
 import { useHabitEvents } from './useHabitEvents';

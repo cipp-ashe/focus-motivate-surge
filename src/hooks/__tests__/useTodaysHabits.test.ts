@@ -1,5 +1,6 @@
+
 import { renderHook } from '@testing-library/react-hooks';
-import { useTodaysHabits } from '../useTodaysHabits';
+import { useTodaysHabits } from '../habits/useTodaysHabits';
 import type { ActiveTemplate } from '@/components/habits/types';
 
 const mockTemplate: ActiveTemplate = {
