@@ -15,6 +15,7 @@ interface HabitTemplateManagerProps {
 const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTemplates }) => {
   const [configOpen, setConfigOpen] = useState(false);
   const [customTemplates, setCustomTemplates] = useState([]);
+  const [processingTemplate, setProcessingTemplate] = useState<string | null>(null);
 
   // Load custom templates
   useEffect(() => {
@@ -38,8 +39,20 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     setConfigOpen(open);
   };
 
-  // Handle template selection
+  // Handle template selection with debounce protection
   const handleSelectTemplate = (templateId: string) => {
+    // Prevent duplicate template selection
+    if (activeTemplates.some(t => t.templateId === templateId)) {
+      toast.info(`Template already active`);
+      return;
+    }
+    
+    // Prevent selecting another template while one is being processed
+    if (processingTemplate) {
+      console.log(`Already processing template ${processingTemplate}, deferring ${templateId}`);
+      return;
+    }
+    
     // Check both built-in and custom templates
     const template = 
       habitTemplates.find(t => t.id === templateId) || 
@@ -47,9 +60,16 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     
     if (template) {
       console.log("Adding template:", template);
+      setProcessingTemplate(templateId);
+      
       // Pass the string templateId, not an object
       eventBus.emit('habit:template-add', templateId);
       toast.success(`Added template: ${template.name}`);
+      
+      // Clear processing state after a short delay
+      setTimeout(() => {
+        setProcessingTemplate(null);
+      }, 500);
     }
   };
 

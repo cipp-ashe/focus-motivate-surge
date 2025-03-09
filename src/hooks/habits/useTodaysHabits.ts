@@ -9,8 +9,9 @@ import { eventBus } from '@/lib/eventBus';
  */
 export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
-  const [lastProcessedTemplates, setLastProcessedTemplates] = useState<string[]>([]);
+  const [lastProcessedTemplateIds, setLastProcessedTemplateIds] = useState<string[]>([]);
   const processingRef = useRef(false);
+  const templateAddInProgressRef = useRef(false);
   
   // Get habits scheduled for today
   const getTodaysHabits = useCallback(() => {
@@ -75,7 +76,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       
       // Find templates that were previously processed but are no longer active
       const currentTemplateIds = Array.from(processedTemplateIds);
-      const removedTemplates = lastProcessedTemplates.filter(
+      const removedTemplates = lastProcessedTemplateIds.filter(
         id => !currentTemplateIds.includes(id)
       );
       
@@ -86,21 +87,21 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       });
       
       // Update the list of last processed templates
-      setLastProcessedTemplates(currentTemplateIds);
+      setLastProcessedTemplateIds(currentTemplateIds);
       
       localStorage.setItem('lastHabitProcessingDate', today);
     } finally {
       processingRef.current = false;
     }
-  }, [activeTemplates, lastProcessedTemplates]);
+  }, [activeTemplates, lastProcessedTemplateIds]);
 
   // Handle template changes and process habits
   useEffect(() => {
     // Add check to prevent reprocessing if templates haven't changed
     const currentTemplateIds = activeTemplates.map(t => t.templateId).sort().join(',');
-    const prevTemplateIds = lastProcessedTemplates.sort().join(',');
+    const prevTemplateIds = lastProcessedTemplateIds.sort().join(',');
     
-    // Only update if templates have changed
+    // Only update if templates have changed and we're not already processing
     if (currentTemplateIds !== prevTemplateIds && !processingRef.current) {
       const habits = getTodaysHabits();
       setTodaysHabits(habits);
@@ -108,20 +109,38 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       // Process habits when templates actually change
       processHabits(habits);
     }
-  }, [getTodaysHabits, processHabits, activeTemplates]);
+  }, [activeTemplates, getTodaysHabits, processHabits, lastProcessedTemplateIds]);
   
-  // Handle template-add events
+  // Handle template-add events - separate from the main effect to avoid circular dependencies
   useEffect(() => {
     const handleTemplateAdd = (templateId: string) => {
       console.log(`Event received: habit:template-add ${templateId}`);
       
-      // Avoid duplicate processing if we're already handling it
-      if (processingRef.current) return;
+      // Prevent duplicate processing with a ref
+      if (templateAddInProgressRef.current) {
+        console.log("Template add already in progress, skipping duplicate event");
+        return;
+      }
       
-      console.log("Template added, immediately processing habits");
-      const updatedHabits = getTodaysHabits();
-      setTodaysHabits(updatedHabits);
-      processHabits(updatedHabits);
+      // Check if we've already processed this template
+      if (lastProcessedTemplateIds.includes(templateId)) {
+        console.log(`Template ${templateId} already processed, skipping`);
+        return;
+      }
+      
+      templateAddInProgressRef.current = true;
+      
+      try {
+        console.log("Template added, immediately processing habits");
+        const updatedHabits = getTodaysHabits();
+        setTodaysHabits(updatedHabits);
+        processHabits(updatedHabits);
+      } finally {
+        // Clear the flag only after a short delay to prevent race conditions
+        setTimeout(() => {
+          templateAddInProgressRef.current = false;
+        }, 100);
+      }
     };
     
     const unsubscribe = eventBus.on('habit:template-add', handleTemplateAdd);
@@ -129,7 +148,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     return () => {
       unsubscribe();
     };
-  }, [getTodaysHabits, processHabits]);
+  }, [getTodaysHabits, processHabits, lastProcessedTemplateIds]);
 
   return { todaysHabits };
 };

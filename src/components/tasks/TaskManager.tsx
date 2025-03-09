@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -10,12 +9,22 @@ const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
   const { handleTimerStart } = useTimerEvents();
   const { addTagToEntity, getEntityTags } = useTagSystem();
+  const scheduledTasksRef = useRef(new Set<string>());
 
   useEffect(() => {
     const handleHabitSchedule = (event: any) => {
       const { habitId, templateId, name, duration, date } = event;
       
       console.log('TaskManager received habit:schedule event:', event);
+      
+      // Create a unique key to track this scheduled task
+      const taskKey = `${habitId}-${date}`;
+      
+      // Check if we've already processed this exact habit-date combination
+      if (scheduledTasksRef.current.has(taskKey)) {
+        console.log(`Task already scheduled for habit ${habitId} on ${date}`);
+        return;
+      }
       
       // Check if task already exists for this habit and date
       const existingTask = tasks.find(task => 
@@ -28,6 +37,9 @@ const TaskManager = () => {
         return;
       }
 
+      // Add to our tracking set
+      scheduledTasksRef.current.add(taskKey);
+      
       const taskId = crypto.randomUUID();
       console.log(`Creating new task for habit ${habitId}:`, { taskId, name, duration });
       
@@ -87,10 +99,6 @@ const TaskManager = () => {
         targetType: 'task',
         relationType: 'habit-task'
       });
-      
-      // Emit template-add event to ensure immediate processing
-      // Fix: Pass the string templateId instead of an object
-      eventBus.emit('habit:template-add', templateId);
     };
 
     // Handle template deletion - clean up associated tasks
@@ -114,8 +122,32 @@ const TaskManager = () => {
       relatedTasks.forEach(task => {
         console.log(`Removing task ${task.id} associated with deleted template ${templateId}`);
         eventBus.emit('task:delete', { taskId: task.id, reason: 'template-removed' });
+        
+        // Also remove from our tracking set
+        if (task.relationships?.habitId && task.relationships?.date) {
+          const taskKey = `${task.relationships.habitId}-${task.relationships.date}`;
+          scheduledTasksRef.current.delete(taskKey);
+        }
       });
     };
+
+    // Clean up tracking set daily
+    const setupDailyCleanup = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      setTimeout(() => {
+        console.log('Clearing scheduled tasks tracking set');
+        scheduledTasksRef.current.clear();
+        setupDailyCleanup(); // Set up next day's cleanup
+      }, timeUntilMidnight);
+    };
+    
+    setupDailyCleanup();
 
     // Listen for habit scheduling
     const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
