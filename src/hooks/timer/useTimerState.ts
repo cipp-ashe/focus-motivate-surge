@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
 
 export const useTimerState = (initialDuration: number) => {
@@ -27,7 +27,7 @@ export const useTimerState = (initialDuration: number) => {
   const lastTimeLeftRef = useRef(initialDuration);
   const lastPauseStartRef = useRef<Date | null>(null);
 
-  const updateTimeLeft = (value: number | ((prev: number) => number)) => {
+  const updateTimeLeft = useCallback((value: number | ((prev: number) => number)) => {
     if (isMountedRef.current) {
       if (typeof value === 'function') {
         setTimeLeft((prev) => {
@@ -48,15 +48,15 @@ export const useTimerState = (initialDuration: number) => {
         }
       }
     }
-  };
+  }, [metrics.isPaused, metrics.pausedTimeLeft]);
 
-  const updateMinutes = (value: number) => {
+  const updateMinutes = useCallback((value: number) => {
     if (isMountedRef.current) {
       setMinutes(value);
     }
-  };
+  }, []);
 
-  const updateMetrics = (updates: Partial<TimerStateMetrics> | ((prev: TimerStateMetrics) => Partial<TimerStateMetrics>)) => {
+  const updateMetrics = useCallback((updates: Partial<TimerStateMetrics> | ((prev: TimerStateMetrics) => Partial<TimerStateMetrics>)) => {
     if (isMountedRef.current) {
       setMetrics(prev => {
         const newUpdates = typeof updates === 'function' ? updates(prev) : updates;
@@ -88,7 +88,7 @@ export const useTimerState = (initialDuration: number) => {
         return newMetrics;
       });
     }
-  };
+  }, [timeLeft]);
 
   return {
     timeLeft,

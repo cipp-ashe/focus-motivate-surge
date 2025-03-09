@@ -3,7 +3,6 @@ import { useCallback } from 'react';
 import { toast } from "sonner";
 import { TimerMetrics } from '@/types/metrics';
 import { eventBus } from '@/lib/eventBus';
-import { UseTimerActionsReturn } from './types';
 
 interface UseTimerActionsProps {
   timeLeft: number;
@@ -27,7 +26,7 @@ export const useTimerActions = ({
   updateMetrics,
   metrics,
   onDurationChange,
-}: UseTimerActionsProps): UseTimerActionsReturn => {
+}: UseTimerActionsProps) => {
   const setMinutes = useCallback((newMinutes: number) => {
     const clampedMinutes = Math.max(1, Math.min(60, newMinutes));
     const newSeconds = clampedMinutes * 60;
@@ -137,7 +136,7 @@ export const useTimerActions = ({
     updateMinutes(newMinutes);
     
     const metricUpdates: Partial<TimerMetrics> = {
-      extensionTime: additionalSeconds,
+      extensionTime: (metrics.extensionTime || 0) + additionalSeconds,
       expectedTime: newTimeLeft
     };
     
@@ -147,7 +146,7 @@ export const useTimerActions = ({
       metrics: metricUpdates 
     });
     toast.success(`+${additionalMinutes}m added ⌛💪`);
-  }, [timeLeft, minutes, updateTimeLeft, updateMinutes, updateMetrics, taskName]);
+  }, [timeLeft, minutes, updateTimeLeft, updateMinutes, updateMetrics, taskName, metrics]);
 
   const completeTimer = useCallback(() => {
     const now = new Date();

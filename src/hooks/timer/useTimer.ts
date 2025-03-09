@@ -1,6 +1,6 @@
 
-import { useEffect, useRef } from 'react';
-import { UseTimerOptions, UseTimerReturn } from './types';
+import { useEffect, useRef, useCallback } from 'react';
+import { UseTimerOptions } from './types';
 import { useTimerState } from './useTimerState';
 import { useTimerActions } from './useTimerActions';
 
@@ -8,7 +8,7 @@ export const useTimer = ({
   initialDuration,
   onTimeUp,
   onDurationChange,
-}: UseTimerOptions): UseTimerReturn => {
+}: UseTimerOptions) => {
   const {
     timeLeft,
     minutes,
@@ -23,14 +23,7 @@ export const useTimer = ({
 
   const intervalRef = useRef<NodeJS.Timeout>();
 
-  const {
-    setMinutes,
-    start,
-    pause,
-    reset,
-    addTime,
-    completeTimer
-  } = useTimerActions({
+  const actions = useTimerActions({
     timeLeft,
     minutes,
     taskName: '',
@@ -41,6 +34,15 @@ export const useTimer = ({
     updateMetrics,
     onDurationChange,
   });
+
+  const { 
+    setMinutes, 
+    start, 
+    pause, 
+    reset, 
+    addTime, 
+    completeTimer 
+  } = actions;
 
   // Handle duration changes and initialization
   useEffect(() => {

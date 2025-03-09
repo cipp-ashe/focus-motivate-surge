@@ -5,14 +5,13 @@ import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import TaskManager from '@/components/tasks/TaskManager';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { Quote } from "@/types/timer";
-import { useTasksInitializer } from '@/hooks/tasks/useTasksInitializer';
 import { eventBus } from '@/lib/eventBus';
+import { TimerErrorBoundary } from '@/components/timer/TimerErrorBoundary';
 
 const TimerPage = () => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
   const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
   const [favorites, setFavorites] = React.useState<Quote[]>([]);
-  const { pageLoaded } = useTasksInitializer();
   
   // Track when TimerPage is mounted and ready
   useEffect(() => {
@@ -22,12 +21,7 @@ const TimerPage = () => {
     eventBus.emit('page:timer-ready', {
       timestamp: new Date().toISOString()
     });
-    
-    // Only run when components are fully initialized
-    if (pageLoaded) {
-      console.log("TimerPage: pageLoaded state is true, app is fully initialized");
-    }
-  }, [pageLoaded]);
+  }, []);
 
   const handleTaskComplete = (metrics: any) => {
     if (selectedTask) {
@@ -44,18 +38,20 @@ const TimerPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
-        <TaskLayout
-          timer={
-            <TimerSection
-              selectedTask={selectedTask}
-              onTaskComplete={handleTaskComplete}
-              onDurationChange={handleDurationChange}
-              favorites={favorites}
-              setFavorites={setFavorites}
-            />
-          }
-          taskList={<TaskManager />}
-        />
+        <TimerErrorBoundary>
+          <TaskLayout
+            timer={
+              <TimerSection
+                selectedTask={selectedTask}
+                onTaskComplete={handleTaskComplete}
+                onDurationChange={handleDurationChange}
+                favorites={favorites}
+                setFavorites={setFavorites}
+              />
+            }
+            taskList={<TaskManager />}
+          />
+        </TimerErrorBoundary>
       </div>
     </div>
   );
