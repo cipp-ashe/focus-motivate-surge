@@ -128,6 +128,11 @@ export const useHabitTaskScheduler = (tasks: Task[]) => {
         // Dispatch a synthetic event to ensure TaskContext updates
         window.dispatchEvent(new Event('force-task-update'));
         
+        // Also persist to localStorage explicitly
+        const currentTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+        const updatedTasks = [...currentTasks, task];
+        localStorage.setItem('taskList', JSON.stringify(updatedTasks));
+        
         console.log('Forced task update after creating task from habit');
       }, 200);
     } finally {
@@ -194,5 +199,14 @@ export const useHabitTaskScheduler = (tasks: Task[]) => {
     };
   }, [handleTaskDelete]);
 
-  return { scheduledTasksRef };
+  // Add method to manually check for habit tasks that should be scheduled
+  const checkForMissingHabitTasks = useCallback(() => {
+    console.log("Manually checking for missing habit tasks");
+    eventBus.emit('habits:check-pending', {});
+  }, []);
+
+  return { 
+    scheduledTasksRef,
+    checkForMissingHabitTasks 
+  };
 };

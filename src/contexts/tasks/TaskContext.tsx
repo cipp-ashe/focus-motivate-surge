@@ -66,7 +66,17 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribers = [
       eventBus.on('task:create', (task) => {
         console.log("TaskContext: Creating task in context", task);
-        dispatch({ type: 'ADD_TASK', payload: task });
+        
+        // Verify task doesn't already exist
+        const tasksFromStorage = JSON.parse(localStorage.getItem('taskList') || '[]');
+        const exists = tasksFromStorage.some((t: Task) => t.id === task.id);
+        
+        if (!exists) {
+          console.log("TaskContext: Task doesn't exist yet, adding to context", task);
+          dispatch({ type: 'ADD_TASK', payload: task });
+        } else {
+          console.log("TaskContext: Task already exists, skipping", task.id);
+        }
       }),
       
       eventBus.on('task:complete', ({ taskId, metrics }) => {
@@ -126,6 +136,9 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       // Force task update after initial load
       setTimeout(() => {
         window.dispatchEvent(new Event('force-task-update'));
+        
+        // Also check for pending habits
+        eventBus.emit('habits:check-pending', {});
       }, 100);
       
       return result;

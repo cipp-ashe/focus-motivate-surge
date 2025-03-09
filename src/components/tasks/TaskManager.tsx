@@ -17,8 +17,8 @@ const TaskManager = () => {
   const { deleteTask, updateTask, checkPendingHabits } = useTaskEvents();
   const { currentPath } = useTasksNavigation();
   
-  // Initialize task schedulers
-  useHabitTaskScheduler(tasks);
+  // Initialize task schedulers and get the check function
+  const { checkForMissingHabitTasks } = useHabitTaskScheduler(tasks);
   useTemplateTasksManager(tasks);
 
   // Force tag update when task list changes
@@ -29,16 +29,37 @@ const TaskManager = () => {
     }
   }, [tasks]);
   
-  // Check for pending habits when TaskManager mounts
+  // Check for pending habits when TaskManager mounts and when tasks change
   useEffect(() => {
-    console.log('TaskManager mounted, checking for pending habits');
+    console.log('TaskManager mounted or tasks changed, checking for pending habits');
+    
     // Check for pending habits on mount with a small delay
     const timeout = setTimeout(() => {
       checkPendingHabits();
+      
+      // Double-check after a slightly longer delay to catch any that might have been missed
+      setTimeout(() => {
+        checkForMissingHabitTasks();
+      }, 300);
+    }, 300);
+    
+    return () => clearTimeout(timeout);
+  }, [checkPendingHabits, checkForMissingHabitTasks]);
+  
+  // Also check when the component first mounts, regardless of tasks
+  useEffect(() => {
+    console.log('TaskManager initial mount, triggering habit check');
+    
+    // Force a task load from localStorage first
+    window.dispatchEvent(new Event('force-task-update'));
+    
+    // Then check for pending habits
+    const timeout = setTimeout(() => {
+      eventBus.emit('habits:check-pending', {});
     }, 500);
     
     return () => clearTimeout(timeout);
-  }, [checkPendingHabits]);
+  }, []);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
