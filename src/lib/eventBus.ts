@@ -13,6 +13,7 @@ class EventBus {
   private processingEvents: Map<string, boolean>; // Track events currently being processed
   private emitCounts: Map<string, number>; // Track how many times an event has been emitted
   private lastEmitTimestamps: Map<string, number>; // Track when events were last emitted
+  private templateAddCooldown: boolean = false; // Special flag just for template-add
 
   private constructor() {
     this.listeners = new Map();
@@ -120,6 +121,22 @@ class EventBus {
       console.log(`[EventBus] ${event}`, payload);
     }
 
+    // Special case for template-add - global cooldown
+    if (event === 'habit:template-add') {
+      if (this.templateAddCooldown) {
+        if (this.debugMode) {
+          console.log(`[EventBus] Global cooldown active for template-add events, skipping`);
+        }
+        return;
+      }
+      
+      // Set cooldown
+      this.templateAddCooldown = true;
+      setTimeout(() => {
+        this.templateAddCooldown = false;
+      }, 2000); // 2 second global cooldown
+    }
+
     // Generate a unique event ID for deduplication
     const eventId = this.getEventId(event, payload);
     
@@ -128,8 +145,8 @@ class EventBus {
     const lastEmitTime = this.lastEmitTimestamps.get(`${event}-${eventId}`) || 0;
     const timeSinceLastEmit = now - lastEmitTime;
     
-    // Strong debounce for template-add events (1000ms)
-    if (event === 'habit:template-add' && timeSinceLastEmit < 1000) {
+    // Strong debounce for template-add events (2000ms)
+    if (event === 'habit:template-add' && timeSinceLastEmit < 2000) {
       if (this.debugMode) {
         console.log(`[EventBus] Debouncing ${event} with ID ${eventId}, last emitted ${timeSinceLastEmit}ms ago`);
       }
@@ -152,13 +169,13 @@ class EventBus {
     const currentCount = this.emitCounts.get(countKey) || 0;
     this.emitCounts.set(countKey, currentCount + 1);
     
-    if (currentCount > 0 && (event === 'habit:schedule' || event === 'habit:template-add')) {
+    if (currentCount > 0) {
       if (this.debugMode) {
         console.log(`[EventBus] Event ${event} with ID ${eventId} has been emitted ${currentCount + 1} times, throttling`);
       }
       
       // Special handling for frequently emitted events
-      if (currentCount > 2) {
+      if (currentCount > 2 || (event === 'habit:template-add' && currentCount > 0)) {
         if (this.debugMode) {
           console.log(`[EventBus] Skipping overly repeated event ${event} with ID ${eventId}`);
         }

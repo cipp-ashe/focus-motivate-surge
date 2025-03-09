@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
-import { useTodaysHabits, useHabitEvents, useHabitProgress } from '@/hooks/habits';
+import { useTodaysHabits, useHabitProgress } from '@/hooks/habits';
 import { HabitTemplateManager, HabitDebugLogger, ActiveTemplateList } from '@/components/habits';
 import { eventBus } from '@/lib/eventBus';
 
@@ -10,8 +10,10 @@ const HabitTracker = () => {
   const { removeTemplate } = useHabitActions();
   const { todaysHabits } = useTodaysHabits(templates);
   const { getTodayProgress, updateProgress } = useHabitProgress();
-  useHabitEvents();
-
+  
+  // Call useHabitEvents with the correct dependency
+  const { state } = useHabitState();
+  
   const [debugMode, setDebugMode] = useState(false);
 
   // Handler for removing templates

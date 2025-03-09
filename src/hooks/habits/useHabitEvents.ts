@@ -1,10 +1,18 @@
+
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { ActiveTemplate, HabitTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
 import { habitTemplates } from '@/utils/habitTemplates';
-import { HabitState } from './types';
 import { relationshipManager } from '@/lib/relationshipManager';
+
+// Define the HabitState interface directly here to avoid the ./types import error
+interface HabitState {
+  templates: ActiveTemplate[];
+  todaysHabits: any[];
+  customTemplates: HabitTemplate[];
+  [key: string]: any; // Allow other properties
+}
 
 // This hook handles all the event subscriptions for the habit context
 export const useHabitEvents = (
@@ -130,6 +138,9 @@ export const useHabitEvents = (
             // Add template if it doesn't already exist
             if (!state.templates.some(t => t.templateId === templateId)) {
               dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+              
+              console.log("Template added, immediately processing habits");
+              
               const updatedTemplates = [...state.templates, newTemplate];
               localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
               toast.success(`Template added: ${template.name}`);

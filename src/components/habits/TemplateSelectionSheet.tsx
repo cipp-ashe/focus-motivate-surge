@@ -36,6 +36,34 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const isMobile = useIsMobile();
   const processingTemplateRef = useRef<string | null>(null);
+  const processedToday = useRef<Set<string>>(new Set());
+  
+  // Reset processed templates at midnight
+  useEffect(() => {
+    const resetProcessedTemplates = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      setTimeout(() => {
+        processedToday.current.clear();
+        setupNextReset();
+      }, timeUntilMidnight);
+    };
+    
+    const setupNextReset = () => {
+      resetProcessedTemplates();
+    };
+    
+    setupNextReset();
+    
+    return () => {
+      // Clean up any resources if needed
+    };
+  }, []);
   
   // Load custom templates from local storage
   useEffect(() => {
@@ -69,6 +97,12 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
       return;
     }
     
+    // Check if this template was already processed today
+    if (processedToday.current.has(template.id)) {
+      console.log(`Template ${template.id} was already processed today, avoiding repeat selection`);
+      return;
+    }
+    
     // Prevent selecting the same template twice rapidly
     if (processingTemplateRef.current === template.id) {
       console.log(`Already adding template ${template.id}, skipping duplicate action`);
@@ -77,6 +111,9 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     
     // Set processing flag
     processingTemplateRef.current = template.id;
+    
+    // Mark as processed for today
+    processedToday.current.add(template.id);
     
     // Add template only once
     console.log(`Adding template: ${template.id}`);
