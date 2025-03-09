@@ -31,9 +31,27 @@ const TemplateList: React.FC<TemplateListProps> = ({
 
   const [editingTemplate, setEditingTemplate] = useState<ActiveTemplate | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<Record<string, any>>({});
 
   useEffect(() => {
     console.log("ActiveTemplateList - activeTemplates:", activeTemplates);
+    
+    // Load custom templates for reference
+    try {
+      const customTemplatesStr = localStorage.getItem('custom-templates');
+      if (customTemplatesStr) {
+        const templates = JSON.parse(customTemplatesStr);
+        const templateMap = {};
+        
+        templates.forEach(template => {
+          templateMap[template.id] = template;
+        });
+        
+        setCustomTemplates(templateMap);
+      }
+    } catch (error) {
+      console.error('Error loading custom templates:', error);
+    }
   }, [activeTemplates]);
 
   const handleEditTemplate = (template: ActiveTemplate) => {
@@ -64,6 +82,14 @@ const TemplateList: React.FC<TemplateListProps> = ({
     });
   };
 
+  const isCustomTemplate = (templateId: string) => {
+    return templateId.startsWith('custom-');
+  };
+
+  const getCustomTemplateInfo = (templateId: string) => {
+    return customTemplates[templateId];
+  };
+
   if (activeTemplates.length === 0) {
     return (
       <div className="text-center p-6 bg-muted/30 rounded-lg border border-dashed">
@@ -80,10 +106,10 @@ const TemplateList: React.FC<TemplateListProps> = ({
         activeTemplates.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
       )}>
         {activeTemplates.map((template, index) => {
-          const templateInfo = habitTemplates.find(t => t.id === template.templateId);
-          
-          // Allow showing custom templates that may not be in the predefined list
-          if (!templateInfo) {
+          // Check if it's a custom template first
+          if (isCustomTemplate(template.templateId)) {
+            const customTemplateInfo = getCustomTemplateInfo(template.templateId);
+            
             return (
               <div
                 key={template.templateId}
@@ -100,8 +126,8 @@ const TemplateList: React.FC<TemplateListProps> = ({
                   template={template}
                   templateInfo={{
                     id: template.templateId,
-                    name: "Custom Template",
-                    description: "Your custom template",
+                    name: customTemplateInfo?.name || template.name || "Custom Template",
+                    description: customTemplateInfo?.description || template.description || "Your custom template",
                     defaultHabits: template.habits,
                     defaultDays: template.activeDays
                   }}
@@ -112,6 +138,13 @@ const TemplateList: React.FC<TemplateListProps> = ({
                 />
               </div>
             );
+          }
+
+          // Standard predefined template
+          const templateInfo = habitTemplates.find(t => t.id === template.templateId);
+          
+          if (!templateInfo) {
+            return null;
           }
 
           return (

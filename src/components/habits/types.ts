@@ -59,6 +59,8 @@ export interface ActiveTemplate {
   habits: HabitDetail[];
   activeDays: DayOfWeek[];
   customized: boolean;
+  name?: string;  // Added name field
+  description?: string;  // Added description field
   relationships?: {
     habitId?: string;
   };
@@ -81,4 +83,3 @@ export const createEmptyHabit = (): HabitDetail => ({
     target: 1
   }
 });
-

@@ -7,6 +7,7 @@ import { ActiveTemplate, HabitTemplate } from './types';
 import ConfigurationDialog from './ConfigurationDialog';
 import TabSection from './ManageTemplatesDialog/TabSection';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { eventBus } from '@/lib/eventBus';
 
 interface TemplateSelectionSheetProps {
   isOpen: boolean;
@@ -72,6 +73,17 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     };
 
     setCustomTemplates(loadCustomTemplates());
+    
+    // Also listen for template updates
+    const handleTemplatesUpdated = () => {
+      setCustomTemplates(loadCustomTemplates());
+    };
+    
+    window.addEventListener('templatesUpdated', handleTemplatesUpdated);
+    
+    return () => {
+      window.removeEventListener('templatesUpdated', handleTemplatesUpdated);
+    };
   }, [isOpen]); // Reload when sheet opens
   
   // Reset state when sheet closes
@@ -110,6 +122,11 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     
     // Add template only once
     console.log(`Adding template: ${template.id}`);
+    
+    // Fire an event to add this template to active templates
+    eventBus.emit('habit:template-add', template.id);
+    
+    // Also call the provided callback
     onSelectTemplate(template.id);
     toast.success(`Added template: ${template.name}`);
     
@@ -129,18 +146,9 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     setCustomTemplates(updated);
     localStorage.setItem('custom-templates', JSON.stringify(updated));
     toast.success('Custom template deleted');
-  };
-
-  const handleCreateTemplate = (newTemplate: Omit<HabitTemplate, 'id'>) => {
-    const template: HabitTemplate = {
-      ...newTemplate,
-      id: `custom-${Date.now()}`,
-    };
     
-    const updated = [...customTemplates, template];
-    setCustomTemplates(updated);
-    localStorage.setItem('custom-templates', JSON.stringify(updated));
-    toast.success('Custom template created successfully');
+    // Emit event for custom template deletion
+    eventBus.emit('habit:custom-template-delete', { templateId });
   };
 
   return (
@@ -166,7 +174,7 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
               activeTemplateIds={activeTemplateIds}
               onSelectTemplate={handleSelectTemplate}
               onDeleteCustomTemplate={handleDeleteCustomTemplate}
-              onCreateTemplate={handleCreateTemplate}
+              onCreateTemplate={onCreateTemplate}
             />
             
             <div className="p-4 border-t">

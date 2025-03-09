@@ -33,6 +33,8 @@ export const useTemplateManagement = () => {
           habits: template.defaultHabits,
           activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
           customized: false,
+          name: template.name,
+          description: template.description,
         };
         
         toast.success('Template added successfully');

@@ -78,6 +78,8 @@ export const useTemplateCreation = (
         habits: selectedTemplate.habits,
         activeDays: selectedTemplate.activeDays,
         customized: true,
+        name: newTemplateName,  // Make sure we keep the name
+        description: 'Custom template' // Include the description
       };
       
       // Add template to active templates
