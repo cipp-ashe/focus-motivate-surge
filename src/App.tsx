@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -36,19 +35,18 @@ function App() {
             <NoteProvider>
               <TooltipProvider>
                 <Router>
-                  <HabitsPanelProvider>
-                    <NotesPanelProvider>
-                      <Routes>
-                        <Route element={<AppLayout />}>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/timer" element={<Timer />} />
-                          <Route path="/habits" element={<Habits />} />
-                          <Route path="/notes" element={<Notes />} />
-                        </Route>
-                      </Routes>
-                      <Toaster position="bottom-right" closeButton />
-                    </NotesPanelProvider>
-                  </HabitsPanelProvider>
+                  {/* Moved HabitsPanelProvider to individual pages, keeping NotesPanelProvider here */}
+                  <NotesPanelProvider>
+                    <Routes>
+                      <Route element={<AppLayout />}>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/timer" element={<Timer />} />
+                        <Route path="/habits" element={<Habits />} />
+                        <Route path="/notes" element={<Notes />} />
+                      </Route>
+                    </Routes>
+                    <Toaster position="bottom-right" closeButton />
+                  </NotesPanelProvider>
                 </Router>
               </TooltipProvider>
             </NoteProvider>

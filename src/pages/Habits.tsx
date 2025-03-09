@@ -13,6 +13,7 @@ import {
 import { useTodaysHabits } from '@/hooks/habits/useTodaysHabits';
 import { useHabitCompletion } from '@/hooks/habits/useHabitCompletion';
 import { eventBus } from '@/lib/eventBus';
+import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -59,49 +60,51 @@ const HabitsPage = () => {
   }, []);
 
   return (
-    <div className="container mx-auto py-4 px-4">
-      {/* Debug logger - doesn't render anything */}
-      <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
-      
-      <div className="flex items-center gap-4 mb-5">
-        <Link 
-          to="/"
-          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
-          title="Back to Dashboard"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-          Habit Tracker
-        </h1>
-      </div>
-      
-      <div className={cn(
-        "grid gap-4",
-        isMobile 
-          ? "grid-cols-1" 
-          : todaysHabits && todaysHabits.length > 0 
-            ? "grid-cols-1 lg:grid-cols-[1fr_300px]" 
-            : "grid-cols-1"
-      )}>
-        {/* Today's Habits Card */}
-        {todaysHabits && todaysHabits.length > 0 && (
-          <TodaysHabitsSection
-            todaysHabits={todaysHabits}
-            completedHabits={completedHabits}
-            onHabitComplete={handleHabitComplete}
-            onAddHabitToTasks={handleAddHabitToTasks}
-            templateId={todaysHabitsTemplateId}
-            key={`todaysHabits-${forceUpdate}`}
-          />
-        )}
+    <HabitsPanelProvider>
+      <div className="container mx-auto py-4 px-4">
+        {/* Debug logger - doesn't render anything */}
+        <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
+        
+        <div className="flex items-center gap-4 mb-5">
+          <Link 
+            to="/"
+            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+            title="Back to Dashboard"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+            Habit Tracker
+          </h1>
+        </div>
+        
+        <div className={cn(
+          "grid gap-4",
+          isMobile 
+            ? "grid-cols-1" 
+            : todaysHabits && todaysHabits.length > 0 
+              ? "grid-cols-1 lg:grid-cols-[1fr_300px]" 
+              : "grid-cols-1"
+        )}>
+          {/* Today's Habits Card */}
+          {todaysHabits && todaysHabits.length > 0 && (
+            <TodaysHabitsSection
+              todaysHabits={todaysHabits}
+              completedHabits={completedHabits}
+              onHabitComplete={handleHabitComplete}
+              onAddHabitToTasks={handleAddHabitToTasks}
+              templateId={todaysHabitsTemplateId}
+              key={`todaysHabits-${forceUpdate}`}
+            />
+          )}
 
-        <div className="bg-background">
-          {/* Habit tracker with template management */}
-          <HabitTracker />
+          <div className="bg-background">
+            {/* Habit tracker with template management */}
+            <HabitTracker />
+          </div>
         </div>
       </div>
-    </div>
+    </HabitsPanelProvider>
   );
 };
 

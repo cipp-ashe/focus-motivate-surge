@@ -1,7 +1,7 @@
 
 import React, { useRef } from 'react';
 import { useNotesPanel } from '@/hooks/useNotesPanel';
-import { useHabitsPanel } from '@/hooks/useHabitsPanel';
+import { useHabitsPanel } from '@/hooks/ui/useHabitsPanel';
 import { cn } from '@/lib/utils';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { CompletedTasks } from './CompletedTasks';
@@ -16,7 +16,15 @@ interface TaskLayoutProps {
 
 export const TaskLayout = ({ timer, taskList }: TaskLayoutProps) => {
   const { isOpen: isNotesOpen } = useNotesPanel();
-  const { isOpen: isHabitsOpen } = useHabitsPanel();
+  // Try to get habits panel context, but don't throw if it's not available
+  let isHabitsOpen = false;
+  try {
+    const habitsPanel = useHabitsPanel();
+    isHabitsOpen = habitsPanel.isOpen;
+  } catch (error) {
+    console.warn("HabitsPanel context not available in TaskLayout, defaulting to closed");
+  }
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const { width } = useWindowSize();
   const { completed: completedTasks, selected: selectedTaskId } = useTaskContext();

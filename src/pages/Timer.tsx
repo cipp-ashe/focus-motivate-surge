@@ -7,6 +7,7 @@ import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { Quote } from "@/types/timer";
 import { eventBus } from '@/lib/eventBus';
 import { TimerErrorBoundary } from '@/components/timer/TimerErrorBoundary';
+import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
 
 const TimerPage = () => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
@@ -90,25 +91,28 @@ const TimerPage = () => {
     }
   };
 
+  // Ensure we're wrapping everything with the required context providers
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        <TimerErrorBoundary>
-          <TaskLayout
-            timer={
-              <TimerSection
-                selectedTask={selectedTask}
-                onTaskComplete={handleTaskComplete}
-                onDurationChange={handleDurationChange}
-                favorites={favorites}
-                setFavorites={setFavorites}
-              />
-            }
-            taskList={<TaskManager />}
-          />
-        </TimerErrorBoundary>
+    <HabitsPanelProvider>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6">
+          <TimerErrorBoundary>
+            <TaskLayout
+              timer={
+                <TimerSection
+                  selectedTask={selectedTask}
+                  onTaskComplete={handleTaskComplete}
+                  onDurationChange={handleDurationChange}
+                  favorites={favorites}
+                  setFavorites={setFavorites}
+                />
+              }
+              taskList={<TaskManager />}
+            />
+          </TimerErrorBoundary>
+        </div>
       </div>
-    </div>
+    </HabitsPanelProvider>
   );
 };
 
