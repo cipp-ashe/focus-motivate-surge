@@ -30,38 +30,80 @@ export const useHabitProgress = () => {
   const getTodayProgress = (habitId: string, templateId: string): HabitProgress => {
     const today = new Date().toISOString().split('T')[0];
     
-    // First check if there are relationships with notes for this habit
-    // This ensures deleted notes always update the habit status immediately
+    // CRITICAL: First check if there are relationships with notes for this habit
+    // This ensures note relationships take precedence over stored progress
     const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+    console.log(`Checking habit ${habitId} related notes:`, relatedNotes);
     const hasJournalEntry = relatedNotes.length > 0;
     
     // Check localStorage progress
     const storedProgress = progress[templateId]?.[habitId]?.[today];
     
-    // If there's stored progress and it matches the relationship status, use it
-    if (storedProgress) {
-      // If the stored completion doesn't match the actual journal relationship status,
-      // we should return a corrected version (this handles deleted notes)
-      if (storedProgress.completed && !hasJournalEntry) {
-        return {
-          value: false,
-          streak: 0,
+    // If there's a journal entry, that always takes precedence - create a progress entry if needed
+    if (hasJournalEntry) {
+      if (!storedProgress || !storedProgress.completed) {
+        // If we have a journal but no stored progress or it shows as incomplete, update it
+        const journalProgress: HabitProgress = {
+          value: true,
+          streak: storedProgress?.streak ? storedProgress.streak + 1 : 1,
           date: today,
-          completed: false,
+          completed: true,
         };
+        
+        // Update local state
+        setProgress(prev => {
+          const templateData = prev[templateId] || {};
+          const habitData = templateData[habitId] || {};
+          
+          return {
+            ...prev,
+            [templateId]: {
+              ...templateData,
+              [habitId]: {
+                ...habitData,
+                [today]: journalProgress,
+              },
+            },
+          };
+        });
+        
+        return journalProgress;
       }
-      
       return storedProgress;
     }
     
-    // If not found in localStorage but there are related notes, mark as completed
-    if (hasJournalEntry) {
-      return {
-        value: true,
-        streak: 1, // Assume at least streak of 1
+    // If there's stored progress but no journal entry, update stored progress to match reality
+    if (storedProgress && storedProgress.completed && !hasJournalEntry) {
+      const updatedProgress: HabitProgress = {
+        value: false,
+        streak: 0,
         date: today,
-        completed: true,
+        completed: false,
       };
+      
+      // Update local state
+      setProgress(prev => {
+        const templateData = prev[templateId] || {};
+        const habitData = templateData[habitId] || {};
+        
+        return {
+          ...prev,
+          [templateId]: {
+            ...templateData,
+            [habitId]: {
+              ...habitData,
+              [today]: updatedProgress,
+            },
+          },
+        };
+      });
+      
+      return updatedProgress;
+    }
+    
+    // If there's stored progress and it matches the reality, return it
+    if (storedProgress) {
+      return storedProgress;
     }
     
     // Default return if nothing is found
@@ -89,23 +131,42 @@ export const useHabitProgress = () => {
       // Get the stored progress data
       const storedData = progress[templateId]?.[habitId]?.[dateStr];
       
-      // If store data shows completed but there are no journal entries, override it
-      if (storedData?.completed && dateStr === today.toISOString().split('T')[0] && !hasJournalEntry) {
-        weeklyProgress.push({
-          value: false,
-          streak: 0,
-          date: dateStr,
-          completed: false,
-        });
-      } else if (storedData) {
-        weeklyProgress.push(storedData);
+      // If today and we have journal entries, they take precedence
+      if (dateStr === today.toISOString().split('T')[0]) {
+        if (hasJournalEntry) {
+          weeklyProgress.push({
+            value: true,
+            streak: storedData?.streak || 1,
+            date: dateStr,
+            completed: true,
+          });
+        } else if (storedData) {
+          // If stored data exists but no journal entries, adjust the completion status
+          weeklyProgress.push({
+            ...storedData,
+            value: hasJournalEntry ? true : storedData.value,
+            completed: hasJournalEntry ? true : storedData.completed,
+          });
+        } else {
+          weeklyProgress.push({
+            value: false,
+            streak: 0,
+            date: dateStr,
+            completed: false,
+          });
+        }
       } else {
-        weeklyProgress.push({
-          value: false,
-          streak: 0,
-          date: dateStr,
-          completed: false,
-        });
+        // For past days, trust the stored data
+        if (storedData) {
+          weeklyProgress.push(storedData);
+        } else {
+          weeklyProgress.push({
+            value: false,
+            streak: 0,
+            date: dateStr,
+            completed: false,
+          });
+        }
       }
     }
 

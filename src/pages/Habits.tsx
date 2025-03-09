@@ -15,6 +15,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
 import { HabitDetail } from '@/components/habits/types';
+import { relationshipManager } from '@/lib/relationshipManager';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -47,21 +48,32 @@ const HabitsPage = () => {
   useEffect(() => {
     if (!todaysHabits.length) return;
     
-    // Find habits that are already completed today
+    // Find habits that are already completed today based on relationships OR progress
     const completed: string[] = [];
     
     templates.forEach(template => {
       const templateId = template.templateId;
       todaysHabits.forEach(habit => {
-        const progress = getTodayProgress(habit.id, templateId);
-        if (progress.completed) {
+        // Check if this habit has a related note (journal entry)
+        const relatedNotes = relationshipManager.getRelatedEntities(habit.id, 'habit', 'note');
+        const hasJournalEntry = relatedNotes.length > 0;
+        
+        // If there's a journal entry OR the progress shows completed, mark it as completed
+        if (hasJournalEntry) {
+          console.log(`Found related notes for habit ${habit.id}:`, relatedNotes);
           completed.push(habit.id);
+        } else {
+          // If no journal entry, check the stored progress
+          const progress = getTodayProgress(habit.id, templateId);
+          if (progress.completed) {
+            completed.push(habit.id);
+          }
         }
       });
     });
     
     if (completed.length > 0) {
-      console.log("Found completed habits from localStorage:", completed);
+      console.log("Found completed habits:", completed);
       setCompletedHabits(completed);
     }
   }, [todaysHabits, templates, getTodayProgress]);
@@ -114,12 +126,20 @@ const HabitsPage = () => {
       return;
     }
 
+    // Check if there's an existing journal entry
+    const relatedNotes = relationshipManager.getRelatedEntities(habit.id, 'habit', 'note');
+    const hasJournalEntry = relatedNotes.length > 0;
+
     // Track locally for UI updates
     setCompletedHabits(prev => {
       if (prev.includes(habit.id)) {
-        // If already completed, mark as incomplete
-        updateProgress(habit.id, actualTemplateId, false);
-        return prev.filter(id => id !== habit.id);
+        // If already completed and it's not a journal habit, mark as incomplete
+        if (!hasJournalEntry && habit.metrics.type !== 'journal') {
+          updateProgress(habit.id, actualTemplateId, false);
+          return prev.filter(id => id !== habit.id);
+        } 
+        // If it's a journal habit or has a journal entry, don't allow unchecking directly
+        return prev;
       } else {
         // If not completed, mark as complete
         updateProgress(habit.id, actualTemplateId, true);
