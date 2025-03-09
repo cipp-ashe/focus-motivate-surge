@@ -1,20 +1,40 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
-import { useTodaysHabits, useHabitProgress } from '@/hooks/habits';
 import { HabitTemplateManager, HabitDebugLogger, ActiveTemplateList } from '@/components/habits';
 import { eventBus } from '@/lib/eventBus';
 
 const HabitTracker = () => {
   const { templates } = useHabitState();
   const { removeTemplate } = useHabitActions();
-  const { todaysHabits } = useTodaysHabits(templates);
   const { getTodayProgress, updateProgress } = useHabitProgress();
+  const [forceUpdate, setForceUpdate] = useState(0);
   
   // Use the useHabitState hook directly without trying to access a non-existent state property
   const habitState = useHabitState();
   
   const [debugMode, setDebugMode] = useState(false);
+  
+  // Force rerender when templates change
+  useEffect(() => {
+    const handleTemplatesUpdated = () => {
+      console.log("HabitTracker: Detected templates updated event");
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    const handleForceHabitsUpdate = () => {
+      console.log("HabitTracker: Detected force-habits-update event");
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    window.addEventListener('templatesUpdated', handleTemplatesUpdated);
+    window.addEventListener('force-habits-update', handleForceHabitsUpdate);
+    
+    return () => {
+      window.removeEventListener('templatesUpdated', handleTemplatesUpdated);
+      window.removeEventListener('force-habits-update', handleForceHabitsUpdate);
+    };
+  }, []);
 
   // Handler for removing templates
   const handleRemoveTemplate = (templateId: string) => {
@@ -30,6 +50,7 @@ const HabitTracker = () => {
     setTimeout(() => {
       console.log('HabitTracker: Forcing global update after template removal');
       window.dispatchEvent(new Event('force-task-update'));
+      window.dispatchEvent(new Event('force-habits-update'));
     }, 50);
   };
 
@@ -54,10 +75,13 @@ const HabitTracker = () => {
       </div>
 
       {debugMode && (
-        <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
+        <HabitDebugLogger templates={templates} todaysHabits={[]} />
       )}
     </div>
   );
 };
+
+// Add the import at the top
+import { useHabitProgress } from '@/hooks/habits';
 
 export default HabitTracker;

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -12,6 +12,21 @@ const TaskManager = () => {
   const { addTagToEntity, getEntityTags } = useTagSystem();
   const scheduledTasksRef = useRef(new Map<string, string>()); // Map habitId-date to taskId
   const processingEventRef = useRef(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Force rerender when needed
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      console.log("TaskManager: Force updating task list");
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    window.addEventListener('force-task-update', handleForceUpdate);
+    
+    return () => {
+      window.removeEventListener('force-task-update', handleForceUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     const handleHabitSchedule = (event: any) => {
@@ -113,6 +128,11 @@ const TaskManager = () => {
           targetType: 'task',
           relationType: 'habit-task'
         });
+        
+        // Force a UI update
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+        }, 50);
       } finally {
         // Release the lock after a short delay to prevent race conditions
         setTimeout(() => {
@@ -127,19 +147,19 @@ const TaskManager = () => {
       console.log(`TaskManager received template deletion event for ${templateId}`);
       
       // Find all tasks related to this template
-      const relatedTasks = tasks.filter(task => 
+      const tasksToRemove = tasks.filter(task => 
         task.relationships?.templateId === templateId
       );
       
-      if (relatedTasks.length === 0) {
+      if (tasksToRemove.length === 0) {
         console.log(`No tasks found for template ${templateId}`);
         return;
       }
       
-      console.log(`Found ${relatedTasks.length} tasks to remove for template ${templateId}`);
+      console.log(`Found ${tasksToRemove.length} tasks to remove for template ${templateId}`);
       
       // Delete each task associated with the deleted template
-      relatedTasks.forEach(task => {
+      tasksToRemove.forEach(task => {
         console.log(`Removing task ${task.id} associated with deleted template ${templateId}`);
         eventBus.emit('task:delete', { taskId: task.id, reason: 'template-removed' });
         
@@ -185,7 +205,7 @@ const TaskManager = () => {
       unsubscribeSchedule();
       unsubscribeTemplateDelete();
     };
-  }, [tasks, addTagToEntity]);
+  }, [tasks, addTagToEntity, forceUpdate]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);

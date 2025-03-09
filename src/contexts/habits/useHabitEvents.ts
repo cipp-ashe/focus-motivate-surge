@@ -27,6 +27,8 @@ export const useHabitEvents = (
     const templateId = templateAddQueue.current.shift()!;
     
     try {
+      console.log(`Processing queued template: ${templateId}`);
+      
       // Find template in predefined templates or custom templates
       const template = habitTemplates.find(t => t.id === templateId);
       if (template) {
@@ -39,11 +41,13 @@ export const useHabitEvents = (
         
         // Add template if it doesn't already exist
         if (!state.templates.some(t => t.templateId === templateId)) {
-          console.log(`Processing queued template: ${templateId}`);
           dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
           const updatedTemplates = [...state.templates, newTemplate];
           localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
           toast.success(`Template added: ${template.name}`);
+          
+          // Force reprocessing of today's habits (don't rely on the state update alone)
+          window.dispatchEvent(new Event('force-habits-update'));
         }
       } else {
         // Check for custom template
@@ -65,6 +69,9 @@ export const useHabitEvents = (
               const updatedTemplates = [...state.templates, newTemplate];
               localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
               toast.success(`Custom template added: ${customTemplate.name}`);
+              
+              // Force reprocessing of today's habits
+              window.dispatchEvent(new Event('force-habits-update'));
             }
           } else {
             toast.error(`Template not found: ${templateId}`);
@@ -83,6 +90,14 @@ export const useHabitEvents = (
   };
   
   useEffect(() => {
+    // Listen for force-habits-update custom event
+    const handleForceHabitsUpdate = () => {
+      console.log("Received force-habits-update event");
+      // Just having this event will cause a rerender in components that listen for it
+    };
+    
+    window.addEventListener('force-habits-update', handleForceHabitsUpdate);
+    
     // Subscribe to template events
     const unsubscribers = [
       eventBus.on('habit:template-update', (template) => {
@@ -282,6 +297,7 @@ export const useHabitEvents = (
       templateProcessTimeouts.current.clear();
       
       unsubscribers.forEach(unsub => typeof unsub === 'function' && unsub());
+      window.removeEventListener('force-habits-update', handleForceHabitsUpdate);
       window.removeEventListener('templatesUpdated', () => {});
     };
   }, [state, dispatch]);

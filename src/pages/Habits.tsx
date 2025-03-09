@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -15,6 +15,7 @@ import { useTodaysHabits, useHabitCompletion } from '@/hooks/habits';
 const HabitsPage = () => {
   const { templates } = useHabitState();
   const { todaysHabits } = useTodaysHabits(templates);
+  const [forceUpdate, setForceUpdate] = useState(0);
   const isMobile = useIsMobile();
   
   // Use our custom hook for habit completion
@@ -28,6 +29,20 @@ const HabitsPage = () => {
   const todaysHabitsTemplateId = templates.find(t => 
     t.habits.some(h => todaysHabits.some(th => th.id === h.id))
   )?.templateId;
+  
+  // Force rerender when habits might have changed
+  useEffect(() => {
+    const handleForceHabitsUpdate = () => {
+      console.log("HabitsPage: Detected force-habits-update event");
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    window.addEventListener('force-habits-update', handleForceHabitsUpdate);
+    
+    return () => {
+      window.removeEventListener('force-habits-update', handleForceHabitsUpdate);
+    };
+  }, []);
 
   return (
     <div className="container mx-auto py-4 px-4">
@@ -63,6 +78,7 @@ const HabitsPage = () => {
             onHabitComplete={handleHabitComplete}
             onAddHabitToTasks={handleAddHabitToTasks}
             templateId={todaysHabitsTemplateId}
+            key={`todaysHabits-${forceUpdate}`}
           />
         )}
 

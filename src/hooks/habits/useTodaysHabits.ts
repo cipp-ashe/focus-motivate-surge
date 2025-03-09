@@ -15,6 +15,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const lastProcessedDateRef = useRef<string | null>(null);
   const processedTemplatesMapRef = useRef(new Map<string, Set<string>>());
   const initialProcessingCompleteRef = useRef(false);
+  const forceUpdateCounterRef = useRef(0);
   const activeTemplatesSignatureRef = useRef<string>("");
   const pendingProcessingRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -84,11 +85,15 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       if (lastProcessedDateRef.current === today && 
           activeTemplatesSignatureRef.current === currentTemplateSignature &&
           initialProcessingCompleteRef.current &&
-          habits.length > 0) {
+          habits.length > 0 &&
+          forceUpdateCounterRef.current === 0) {
         console.log("Already processed habits for today with the same templates, skipping");
         processingRef.current = false;
         return;
       }
+      
+      // Reset the force update counter
+      forceUpdateCounterRef.current = 0;
       
       // Update the template signature
       activeTemplatesSignatureRef.current = currentTemplateSignature;
@@ -189,13 +194,15 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     const currentTemplateSignature = JSON.stringify(
       activeTemplates.map(t => t.templateId).sort()
     );
-    
-    // Only update if templates have changed or if first run
+
     if (currentTemplateSignature !== activeTemplatesSignatureRef.current || !initialProcessingCompleteRef.current) {
+      // Get today's habits based on active templates
       const habits = getTodaysHabits();
+      
+      // Important: set today's habits immediately for UI responsiveness
       setTodaysHabits(habits);
       
-      // Use a delay to ensure consistency
+      // Use a short delay to ensure consistency
       const timeoutId = setTimeout(() => {
         processHabits(habits);
       }, 200);
@@ -204,8 +211,46 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     }
   }, [activeTemplates, getTodaysHabits, processHabits]);
   
-  // Listen for template deletion events to update today's habits
+  // Listen for template-add event and immediately update today's habits
   useEffect(() => {
+    const handleTemplateAdd = (templateId: string) => {
+      console.log(`Event received: habit:template-add ${templateId}`);
+      
+      // Prevent duplicate processing with a ref
+      if (templateAddInProgressRef.current) {
+        console.log("Template add already in progress, skipping duplicate event");
+        return;
+      }
+      
+      templateAddInProgressRef.current = true;
+      
+      try {
+        // Force a refresh of today's habits after template is fully added to state
+        setTimeout(() => {
+          console.log("Template added, updating today's habits immediately");
+          forceUpdateCounterRef.current += 1; // Force update
+          
+          // Get fresh habits directly
+          const updatedHabits = getTodaysHabits();
+          setTodaysHabits(updatedHabits);
+          
+          // Force refresh of template signature to trigger reprocessing
+          activeTemplatesSignatureRef.current = "";
+          
+          // Process with a slight delay to ensure UI updates first
+          setTimeout(() => {
+            processHabits(updatedHabits);
+          }, 250);
+        }, 200);
+      } finally {
+        // Clear the flag after a delay
+        setTimeout(() => {
+          templateAddInProgressRef.current = false;
+        }, 1500);
+      }
+    };
+    
+    // Listen for template deletion
     const handleTemplateDelete = ({ templateId }: { templateId: string }) => {
       console.log(`useTodaysHabits - Template deleted: ${templateId}`);
       
@@ -243,66 +288,21 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
         return updatedHabits;
       });
       
-      // Force an update of the template signature to trigger reprocessing
-      activeTemplatesSignatureRef.current = "";
-    };
-    
-    const unsubscribeDelete = eventBus.on('habit:template-delete', handleTemplateDelete);
-    
-    return () => {
-      unsubscribeDelete();
-    };
-  }, [activeTemplates]);
-  
-  // Handle template-add events - separate from the main effect to avoid circular dependencies
-  useEffect(() => {
-    const handleTemplateAdd = (templateId: string) => {
-      console.log(`Event received: habit:template-add ${templateId}`);
-      
-      // Prevent duplicate processing with a ref
-      if (templateAddInProgressRef.current) {
-        console.log("Template add already in progress, skipping duplicate event");
-        return;
-      }
-      
-      // Check if we've already processed this template
-      if (lastProcessedTemplateIds.includes(templateId)) {
-        console.log(`Template ${templateId} already processed, skipping`);
-        return;
-      }
-      
-      templateAddInProgressRef.current = true;
-      
-      try {
-        // We need to delay processing to ensure the template state has been updated
-        console.log("Template added, scheduling processing after state update");
+      // Force a refresh of today's habits
+      setTimeout(() => {
+        const updatedHabits = getTodaysHabits();
+        setTodaysHabits(updatedHabits);
         
-        // Wait for next tick to allow state updates to propagate
-        setTimeout(() => {
-          const updatedHabits = getTodaysHabits();
-          setTodaysHabits(updatedHabits);
-          
-          // Force refresh of template signature
-          activeTemplatesSignatureRef.current = "";
-          
-          // Then process with a small delay
-          setTimeout(() => {
-            processHabits(updatedHabits);
-          }, 300);
-        }, 500);
-      } finally {
-        // Clear the flag only after a longer delay to prevent race conditions
-        setTimeout(() => {
-          templateAddInProgressRef.current = false;
-        }, 1000);
-      }
+        // Force an update of the template signature to trigger reprocessing
+        activeTemplatesSignatureRef.current = "";
+      }, 100);
     };
     
-    // Reset processed templates when day changes
+    // Reset processed templates at midnight
     const resetProcessedTemplatesAtMidnight = () => {
       const now = new Date();
       const tomorrow = new Date(now);
-      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
       
       const timeUntilMidnight = tomorrow.getTime() - now.getTime();
@@ -322,15 +322,17 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     
     setupResetTimer();
     
-    const unsubscribe = eventBus.on('habit:template-add', handleTemplateAdd);
+    const unsubscribeAdd = eventBus.on('habit:template-add', handleTemplateAdd);
+    const unsubscribeDelete = eventBus.on('habit:template-delete', handleTemplateDelete);
     
     return () => {
-      unsubscribe();
+      unsubscribeAdd();
+      unsubscribeDelete();
       if (pendingProcessingRef.current) {
         clearTimeout(pendingProcessingRef.current);
       }
     };
-  }, [getTodaysHabits, processHabits, lastProcessedTemplateIds]);
+  }, [getTodaysHabits, processHabits, activeTemplates]);
 
   return { todaysHabits };
 };

@@ -19,7 +19,6 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   const processedTodayRef = useRef<Set<string>>(new Set<string>());
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAddingRef = useRef<boolean>(false);
-  const templateAddTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Load custom templates
   useEffect(() => {
@@ -58,17 +57,12 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       if (cooldownTimerRef.current) {
         clearTimeout(cooldownTimerRef.current);
       }
-      
-      if (templateAddTimeoutRef.current) {
-        clearTimeout(templateAddTimeoutRef.current);
-      }
     };
-    
   }, []);
 
-  // Function to open config sheet with cooldown protection
+  // Function to open config sheet
   const openConfig = () => {
-    // Prevent rapid re-opening
+    // Prevent opening if we're currently adding a template
     if (isAddingRef.current) {
       console.log("Currently processing a template, postponing config open");
       return;
@@ -88,18 +82,12 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       isAddingRef.current = true;
       cooldownTimerRef.current = setTimeout(() => {
         isAddingRef.current = false;
-      }, 2000); // Longer cooldown to prevent issues
+      }, 500); // Shorter cooldown still prevents issues
     }
   };
 
-  // Handle template selection with proper debounce protection
+  // Handle template selection with proper protection
   const handleSelectTemplate = (templateId: string) => {
-    // Cancel any pending template add
-    if (templateAddTimeoutRef.current) {
-      clearTimeout(templateAddTimeoutRef.current);
-      templateAddTimeoutRef.current = null;
-    }
-    
     // Prevent duplicate template selection
     if (activeTemplates.some(t => t.templateId === templateId)) {
       toast.info(`Template already active`);
@@ -124,8 +112,10 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       return;
     }
     
-    // Set global cooldown
+    // Set global cooldown and processing state
     isAddingRef.current = true;
+    processingTemplateRef.current = templateId;
+    processedTodayRef.current.add(templateId);
     
     // Check both built-in and custom templates
     const template = 
@@ -134,29 +124,21 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     
     if (template) {
       console.log("Adding template:", template);
-      processingTemplateRef.current = templateId;
-      processedTodayRef.current.add(templateId);
       
-      // Use a controlled delay to reduce race conditions
-      templateAddTimeoutRef.current = setTimeout(() => {
-        // Emit template-add event to context first to update state
-        eventBus.emit('habit:template-add', templateId);
-        toast.success(`Added template: ${template.name}`);
+      // Emit template-add event to context
+      eventBus.emit('habit:template-add', templateId);
+      toast.success(`Added template: ${template.name}`);
+      
+      // Close sheet with slight delay for visual feedback
+      setTimeout(() => {
+        setConfigOpen(false);
         
-        // Cleanup state
-        processingTemplateRef.current = null;
-        templateAddTimeoutRef.current = null;
-        
-        // Close sheet after processing completes
+        // Allow new additions after a delay
         setTimeout(() => {
-          setConfigOpen(false);
-          
-          // Allow new additions after a longer delay
-          setTimeout(() => {
-            isAddingRef.current = false;
-          }, 2000);
-        }, 500);
-      }, 100);
+          processingTemplateRef.current = null;
+          isAddingRef.current = false;
+        }, 1000);
+      }, 300);
     }
   };
 
