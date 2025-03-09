@@ -92,7 +92,9 @@ describe('useHabitProgress', () => {
         }
       }
     };
-    localStorage.getItem.mockReturnValueOnce(JSON.stringify(mockData));
+    
+    // Manually set the mock return value for this specific test
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => JSON.stringify(mockData));
     
     const { result } = renderHook(() => useHabitProgress());
     
