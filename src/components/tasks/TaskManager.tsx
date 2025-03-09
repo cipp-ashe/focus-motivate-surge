@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
@@ -82,6 +83,7 @@ const TaskManager = () => {
         if (scheduledTasksRef.current.has(taskKey)) {
           const existingTaskId = scheduledTasksRef.current.get(taskKey);
           console.log(`Task already scheduled for habit ${habitId} on ${date}, taskId: ${existingTaskId}`);
+          processingEventRef.current = false;
           return;
         }
         
@@ -94,6 +96,7 @@ const TaskManager = () => {
         if (existingTask) {
           console.log(`Task already exists for habit ${habitId} on ${date}:`, existingTask);
           scheduledTasksRef.current.set(taskKey, existingTask.id);
+          processingEventRef.current = false;
           return;
         }
 
@@ -104,7 +107,7 @@ const TaskManager = () => {
         scheduledTasksRef.current.set(taskKey, taskId);
         
         // Ensure we're storing the duration in seconds
-        const durationInSeconds = duration;
+        const durationInSeconds = typeof duration === 'number' ? duration : 1500;
         
         const task = {
           id: taskId,
@@ -248,6 +251,12 @@ const TaskManager = () => {
     
     // Listen for task deletions
     const unsubscribeTaskDelete = eventBus.on('task:delete', handleTaskDelete);
+    
+    // Force an initial check for pending habit schedules
+    setTimeout(() => {
+      console.log('TaskManager: Initial load, checking for pending habit tasks');
+      eventBus.emit('habits:check-pending', {});
+    }, 500);
     
     return () => {
       unsubscribeSchedule();

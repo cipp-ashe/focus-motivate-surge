@@ -28,7 +28,7 @@ const TimerPage = () => {
         eventBus.emit('habits:check-pending', {});
         
         setPageLoaded(true);
-      }, 100);
+      }, 500); // Increased delay to ensure other components are ready
     }
   }, [pageLoaded]);
 
@@ -40,7 +40,10 @@ const TimerPage = () => {
     setTimeout(() => {
       window.dispatchEvent(new Event('force-task-update'));
       window.dispatchEvent(new Event('force-tags-update'));
-    }, 100);
+      
+      // Trigger creation of pending habit tasks 
+      eventBus.emit('habits:processed', {});
+    }, 500); // Increased delay for more reliable processing
     
     // Set up event listener for popstate (browser back/forward)
     const handlePopState = () => {
@@ -48,7 +51,10 @@ const TimerPage = () => {
       setTimeout(() => {
         window.dispatchEvent(new Event('force-task-update'));
         window.dispatchEvent(new Event('force-tags-update'));
-      }, 100);
+        
+        // Also recheck pending habit tasks
+        eventBus.emit('habits:processed', {});
+      }, 500);
     };
     
     window.addEventListener('popstate', handlePopState);

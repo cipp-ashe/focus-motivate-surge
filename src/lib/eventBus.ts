@@ -110,6 +110,13 @@ class EventBus {
       this.lastEmitted[debounceKey] = now;
     }
     
+    // For habit:schedule events, always process them immediately 
+    // even if we have debouncing enabled
+    if (eventName === 'habit:schedule') {
+      this.executeEvent(eventName, payload);
+      return;
+    }
+    
     // For non-debounced events or the first emission of a debounced event
     this.executeEvent(eventName, payload);
   }

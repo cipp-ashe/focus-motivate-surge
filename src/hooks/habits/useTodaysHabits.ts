@@ -79,7 +79,7 @@ export const useTodaysHabits = () => {
           console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${habit.relationships?.templateId}`);
           console.log(`Creating task for habit ${habit.name} with duration ${habit.metrics.target} seconds (${habit.metrics.target / 60} minutes)`);
           
-          // Schedule task creation via event bus
+          // Schedule task creation via event bus with clear data
           eventBus.emit('habit:schedule', {
             habitId: habit.id,
             templateId: habit.relationships?.templateId,
@@ -118,4 +118,3 @@ export const useTodaysHabits = () => {
     refreshHabits: processHabits 
   };
 };
-

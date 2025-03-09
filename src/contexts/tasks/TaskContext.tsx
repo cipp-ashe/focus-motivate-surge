@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -39,8 +40,10 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
             (task.relationships?.habitId === action.payload.relationships?.habitId && 
              task.relationships?.date === action.payload.relationships?.date);
         })) {
+          console.log(`TaskContext: Skipping duplicate task ${action.payload.id} for habit ${action.payload.relationships?.habitId}`);
           return state;
         }
+        console.log(`TaskContext: Added new task ${action.payload.id}:`, action.payload);
         return {
           ...state,
           items: [...state.items, action.payload],
@@ -151,6 +154,9 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     // Add event listener for navigation events
     window.addEventListener('popstate', handleRouteChange);
     
+    // Initial load
+    loadTasksFromStorage();
+    
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
     };
@@ -191,6 +197,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       eventBus.on('habit:template-delete', ({ templateId }) => {
         console.log("TaskContext: Received template delete event for", templateId);
         dispatch({ type: 'DELETE_TASKS_BY_TEMPLATE', payload: { templateId } });
+      }),
+      // Add handler for habits:check-pending event
+      eventBus.on('habits:check-pending', () => {
+        console.log("TaskContext: Checking for pending habits to schedule");
+        // Trigger a reprocessing of today's habits via the event bus
+        eventBus.emit('habits:processed', {});
       }),
     ];
 
