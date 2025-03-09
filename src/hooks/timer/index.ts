@@ -11,7 +11,7 @@ export { useTimerA11y } from './useTimerA11y';
 export { useTimerEffects } from './useTimerEffects';
 export { useTimerShortcuts } from './useTimerShortcuts';
 export { useTimerEvents } from './useTimerEvents';
-export { useTimerMonitor } from './useTimerMonitor';
+export { useTimerMonitor } from '../useTimerMonitor';
 
 // Types
 export * from './types';
