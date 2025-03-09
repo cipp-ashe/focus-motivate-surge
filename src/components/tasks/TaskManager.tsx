@@ -89,7 +89,8 @@ const TaskManager = () => {
       });
       
       // Emit template-add event to ensure immediate processing
-      eventBus.emit('habit:template-add', { templateId });
+      // Fix: Pass the string templateId instead of an object
+      eventBus.emit('habit:template-add', templateId);
     };
 
     // Handle template deletion - clean up associated tasks
