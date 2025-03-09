@@ -6,9 +6,10 @@ import { toast } from 'sonner';
 import { TemplateSelectionSheet } from '@/components/habits';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { eventBus } from '@/lib/eventBus';
+import { ActiveTemplate } from './types';
 
 interface HabitTemplateManagerProps {
-  activeTemplates: any[];
+  activeTemplates: ActiveTemplate[];
 }
 
 const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTemplates }) => {

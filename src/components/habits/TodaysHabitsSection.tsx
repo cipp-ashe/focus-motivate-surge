@@ -9,7 +9,7 @@ interface TodaysHabitsSectionProps {
   todaysHabits: HabitDetail[];
   completedHabits: string[];
   onHabitComplete: (habit: HabitDetail, templateId?: string) => void;
-  onAddHabitToTasks: (habit: HabitDetail) => void;
+  onAddHabitToTasks?: (habit: HabitDetail) => void;
   templateId?: string;
   className?: string;
 }

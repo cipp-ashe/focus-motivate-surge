@@ -9,7 +9,6 @@ import {
   HabitTracker,
   HabitDebugLogger,
   TodaysHabitsSection,
-  HabitTemplateManager
 } from '@/components/habits';
 import { useTodaysHabits, useHabitCompletion } from '@/hooks/habits';
 
@@ -48,9 +47,6 @@ const HabitsPage = () => {
         </h1>
       </div>
       
-      {/* Template management section */}
-      <HabitTemplateManager activeTemplates={templates} />
-
       <div className={cn(
         "grid gap-4",
         isMobile 
@@ -72,9 +68,7 @@ const HabitsPage = () => {
 
         <div className="bg-background">
           {/* Habit tracker */}
-          <HabitTracker 
-            activeTemplates={templates}
-          />
+          <HabitTracker />
         </div>
       </div>
     </div>
