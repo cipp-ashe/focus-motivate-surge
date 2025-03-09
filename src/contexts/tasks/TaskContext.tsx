@@ -30,6 +30,10 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
           completed: action.payload.completed,
         };
       case 'ADD_TASK':
+        // Avoid duplicate tasks
+        if (state.items.some(task => task.id === action.payload.id)) {
+          return state;
+        }
         return {
           ...state,
           items: [...state.items, action.payload],
@@ -85,21 +89,30 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     // Subscribe to events
     const unsubscribers = [
       eventBus.on('task:create', (task) => {
+        console.log("TaskContext: Creating task in context", task);
         dispatch({ type: 'ADD_TASK', payload: task });
         toast.success('Task added 📝');
       }),
       eventBus.on('task:complete', ({ taskId, metrics }) => {
+        console.log("TaskContext: Completing task", taskId);
         dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
         toast.success('Task completed 🎯');
       }),
       eventBus.on('task:delete', ({ taskId, reason }) => {
+        console.log("TaskContext: Deleting task", taskId, "reason:", reason);
         dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
-        toast.success('Task deleted 🗑️');
+        
+        // Only show toast for manual deletions
+        if (reason === 'manual') {
+          toast.success('Task deleted 🗑️');
+        }
       }),
       eventBus.on('task:update', ({ taskId, updates }) => {
+        console.log("TaskContext: Updating task", taskId, updates);
         dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
       }),
       eventBus.on('task:select', (taskId) => {
+        console.log("TaskContext: Selecting task", taskId);
         dispatch({ type: 'SELECT_TASK', payload: taskId });
       }),
     ];
@@ -118,6 +131,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
         const completed = JSON.parse(localStorage.getItem('completedTasks') || '[]');
         
+        console.log("TaskContext: Loading initial tasks", tasks.length, "completed:", completed.length);
         dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
         return { tasks, completed };
       } catch (error) {
@@ -130,6 +144,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
 
   // Persist changes to localStorage whenever state changes
   useEffect(() => {
+    console.log("TaskContext: Persisting", state.items.length, "tasks to localStorage");
     localStorage.setItem('taskList', JSON.stringify(state.items));
     localStorage.setItem('completedTasks', JSON.stringify(state.completed));
   }, [state.items, state.completed]);

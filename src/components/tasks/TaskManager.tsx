@@ -89,11 +89,32 @@ const TaskManager = () => {
       });
     };
 
+    // Handle template deletion - clean up associated tasks
+    const handleTemplateDelete = (event: any) => {
+      const { templateId } = event;
+      console.log(`TaskManager received template deletion event for ${templateId}`);
+      
+      // Find all tasks related to this template
+      const relatedTasks = tasks.filter(task => 
+        task.relationships?.templateId === templateId
+      );
+      
+      // Delete each task associated with the deleted template
+      relatedTasks.forEach(task => {
+        console.log(`Removing task ${task.id} associated with deleted template ${templateId}`);
+        eventBus.emit('task:delete', { taskId: task.id, reason: 'template-removed' });
+      });
+    };
+
     // Listen for habit scheduling
-    const unsubscribe = eventBus.on('habit:schedule', handleHabitSchedule);
+    const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
+    
+    // Listen for template deletions
+    const unsubscribeTemplateDelete = eventBus.on('habit:template-delete', handleTemplateDelete);
     
     return () => {
-      unsubscribe();
+      unsubscribeSchedule();
+      unsubscribeTemplateDelete();
     };
   }, [tasks, addTagToEntity]);
 

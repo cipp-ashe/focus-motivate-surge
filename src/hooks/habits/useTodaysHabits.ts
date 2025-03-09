@@ -9,6 +9,7 @@ import { eventBus } from '@/lib/eventBus';
  */
 export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
+  const [lastProcessedTemplates, setLastProcessedTemplates] = useState<string[]>([]);
   
   // Get habits scheduled for today
   const getTodaysHabits = useCallback(() => {
@@ -37,6 +38,9 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     const today = new Date().toDateString();
     console.log('Processing habits for today:', today);
     
+    // Track which templates we've processed
+    const processedTemplateIds = new Set<string>();
+    
     habits.forEach(habit => {
       if (habit.metrics?.type === 'timer') {
         const template = activeTemplates.find(t => 
@@ -45,6 +49,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
         
         if (template) {
           console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${template.templateId}`);
+          processedTemplateIds.add(template.templateId);
           
           // The target is stored in seconds in the habit.metrics.target
           const durationInSeconds = habit.metrics.target || 600; // Default to 10 minutes (600 seconds)
@@ -63,8 +68,17 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       }
     });
     
+    // Find templates that were previously processed but are no longer active
+    const currentTemplateIds = Array.from(processedTemplateIds);
+    const removedTemplates = lastProcessedTemplates.filter(
+      id => !currentTemplateIds.includes(id)
+    );
+    
+    // Update the list of last processed templates
+    setLastProcessedTemplates(currentTemplateIds);
+    
     localStorage.setItem('lastHabitProcessingDate', today);
-  }, [activeTemplates]);
+  }, [activeTemplates, lastProcessedTemplates]);
 
   useEffect(() => {
     const habits = getTodaysHabits();
