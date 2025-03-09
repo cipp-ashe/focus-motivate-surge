@@ -51,7 +51,7 @@ export const habitTemplates: HabitTemplate[] = [
         ]
       ),
     ],
-    defaultDays: DEFAULT_ACTIVE_DAYS,
+    defaultDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   },
   {
     id: 'daily-review',
@@ -84,7 +84,7 @@ export const habitTemplates: HabitTemplate[] = [
         ]
       ),
     ],
-    defaultDays: DEFAULT_ACTIVE_DAYS,
+    defaultDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   },
   {
     id: 'fitness',
@@ -117,7 +117,7 @@ export const habitTemplates: HabitTemplate[] = [
         ]
       ),
     ],
-    defaultDays: DEFAULT_ACTIVE_DAYS,
+    defaultDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   },
 ];
 

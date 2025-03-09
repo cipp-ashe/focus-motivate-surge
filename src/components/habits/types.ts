@@ -1,9 +1,8 @@
-
 export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
 
 export const DAYS_OF_WEEK: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export type MetricType = 'timer' | 'counter' | 'boolean' | 'rating' | 'journal';
 
@@ -42,7 +41,7 @@ export interface HabitDetail {
 export interface HabitTemplate {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   category?: string;
   defaultHabits: HabitDetail[];
   defaultDays?: DayOfWeek[];

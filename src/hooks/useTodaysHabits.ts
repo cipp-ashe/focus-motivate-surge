@@ -21,10 +21,14 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     
     const habits = activeTemplates.flatMap(template => {
       console.log(`Checking template ${template.templateId} - active days:`, template.activeDays);
-      return template.activeDays.includes(dayOfWeek) ? template.habits : [];
+      const isActiveToday = template.activeDays.includes(dayOfWeek);
+      console.log(`Template ${template.templateId} is active today: ${isActiveToday}`);
+      
+      return isActiveToday ? template.habits : [];
     });
     
     console.log("useTodaysHabits - Today's habits:", habits);
+    console.log("useTodaysHabits - Number of habits found for today:", habits.length);
     return habits;
   }, [activeTemplates]);
 
