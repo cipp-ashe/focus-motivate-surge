@@ -9,7 +9,7 @@ const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
   const { handleTimerStart } = useTimerEvents();
   const { addTagToEntity, getEntityTags } = useTagSystem();
-  const scheduledTasksRef = useRef(new Set<string>());
+  const scheduledTasksRef = useRef(new Map<string, string>()); // Map habitId-date to taskId
 
   useEffect(() => {
     const handleHabitSchedule = (event: any) => {
@@ -22,7 +22,8 @@ const TaskManager = () => {
       
       // Check if we've already processed this exact habit-date combination
       if (scheduledTasksRef.current.has(taskKey)) {
-        console.log(`Task already scheduled for habit ${habitId} on ${date}`);
+        const existingTaskId = scheduledTasksRef.current.get(taskKey);
+        console.log(`Task already scheduled for habit ${habitId} on ${date}, taskId: ${existingTaskId}`);
         return;
       }
       
@@ -34,14 +35,15 @@ const TaskManager = () => {
       
       if (existingTask) {
         console.log(`Task already exists for habit ${habitId} on ${date}:`, existingTask);
+        scheduledTasksRef.current.set(taskKey, existingTask.id);
         return;
       }
 
-      // Add to our tracking set
-      scheduledTasksRef.current.add(taskKey);
-      
       const taskId = crypto.randomUUID();
       console.log(`Creating new task for habit ${habitId}:`, { taskId, name, duration });
+      
+      // Add to our tracking map
+      scheduledTasksRef.current.set(taskKey, taskId);
       
       // Ensure we're storing the duration in seconds
       const durationInSeconds = duration;
@@ -123,7 +125,7 @@ const TaskManager = () => {
         console.log(`Removing task ${task.id} associated with deleted template ${templateId}`);
         eventBus.emit('task:delete', { taskId: task.id, reason: 'template-removed' });
         
-        // Also remove from our tracking set
+        // Also remove from our tracking map
         if (task.relationships?.habitId && task.relationships?.date) {
           const taskKey = `${task.relationships.habitId}-${task.relationships.date}`;
           scheduledTasksRef.current.delete(taskKey);
@@ -131,7 +133,7 @@ const TaskManager = () => {
       });
     };
 
-    // Clean up tracking set daily
+    // Clean up tracking map daily
     const setupDailyCleanup = () => {
       const now = new Date();
       const tomorrow = new Date(now);
@@ -141,7 +143,7 @@ const TaskManager = () => {
       const timeUntilMidnight = tomorrow.getTime() - now.getTime();
       
       setTimeout(() => {
-        console.log('Clearing scheduled tasks tracking set');
+        console.log('Clearing scheduled tasks tracking map');
         scheduledTasksRef.current.clear();
         setupDailyCleanup(); // Set up next day's cleanup
       }, timeUntilMidnight);

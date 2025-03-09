@@ -12,6 +12,7 @@ export const useHabitEvents = (
   dispatch: React.Dispatch<any>
 ) => {
   const processingTemplateRef = useRef<string | null>(null);
+  const templateProcessTimeouts = useRef(new Map<string, NodeJS.Timeout>());
   
   useEffect(() => {
     // Subscribe to template events
@@ -56,6 +57,12 @@ export const useHabitEvents = (
       eventBus.on('habit:template-add', (templateId: string) => {
         console.log("Event received: habit:template-add", templateId);
         
+        // Clear any existing timeout for this template
+        if (templateProcessTimeouts.current.has(templateId)) {
+          clearTimeout(templateProcessTimeouts.current.get(templateId)!);
+          templateProcessTimeouts.current.delete(templateId);
+        }
+        
         // Skip duplicate events for the same template
         if (processingTemplateRef.current === templateId) {
           console.log(`Already processing template ${templateId}, skipping duplicate event`);
@@ -71,61 +78,67 @@ export const useHabitEvents = (
         // Set processing flag
         processingTemplateRef.current = templateId;
         
-        try {
-          // Find template in predefined templates or custom templates
-          const template = habitTemplates.find(t => t.id === templateId);
-          if (template) {
-            const newTemplate: ActiveTemplate = {
-              templateId: template.id,
-              habits: template.defaultHabits,
-              activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-              customized: false,
-            };
-            
-            // Add template if it doesn't already exist
-            if (!state.templates.some(t => t.templateId === templateId)) {
-              dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
-              const updatedTemplates = [...state.templates, newTemplate];
-              localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
-              toast.success(`Template added: ${template.name}`);
-            }
-          } else {
-            // Check for custom template
-            const customTemplatesStr = localStorage.getItem('custom-templates');
-            if (customTemplatesStr) {
-              const customTemplates = JSON.parse(customTemplatesStr);
-              const customTemplate = customTemplates.find(t => t.id === templateId);
-              if (customTemplate) {
-                const newTemplate: ActiveTemplate = {
-                  templateId: customTemplate.id,
-                  habits: customTemplate.defaultHabits,
-                  activeDays: customTemplate.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                  customized: false,
-                };
-                
-                // Only add if not already present
-                if (!state.templates.some(t => t.templateId === templateId)) {
-                  dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
-                  const updatedTemplates = [...state.templates, newTemplate];
-                  localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
-                  toast.success(`Custom template added: ${customTemplate.name}`);
+        // Use timeout to debounce multiple rapid events for the same template
+        const timeout = setTimeout(() => {
+          try {
+            // Find template in predefined templates or custom templates
+            const template = habitTemplates.find(t => t.id === templateId);
+            if (template) {
+              const newTemplate: ActiveTemplate = {
+                templateId: template.id,
+                habits: template.defaultHabits,
+                activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                customized: false,
+              };
+              
+              // Add template if it doesn't already exist
+              if (!state.templates.some(t => t.templateId === templateId)) {
+                dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+                const updatedTemplates = [...state.templates, newTemplate];
+                localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+                toast.success(`Template added: ${template.name}`);
+              }
+            } else {
+              // Check for custom template
+              const customTemplatesStr = localStorage.getItem('custom-templates');
+              if (customTemplatesStr) {
+                const customTemplates = JSON.parse(customTemplatesStr);
+                const customTemplate = customTemplates.find(t => t.id === templateId);
+                if (customTemplate) {
+                  const newTemplate: ActiveTemplate = {
+                    templateId: customTemplate.id,
+                    habits: customTemplate.defaultHabits,
+                    activeDays: customTemplate.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    customized: false,
+                  };
+                  
+                  // Only add if not already present
+                  if (!state.templates.some(t => t.templateId === templateId)) {
+                    dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+                    const updatedTemplates = [...state.templates, newTemplate];
+                    localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+                    toast.success(`Custom template added: ${customTemplate.name}`);
+                  }
+                } else {
+                  toast.error(`Template not found: ${templateId}`);
                 }
               } else {
                 toast.error(`Template not found: ${templateId}`);
               }
-            } else {
-              toast.error(`Template not found: ${templateId}`);
             }
+          } finally {
+            // Clear processing flag after a delay
+            setTimeout(() => {
+              processingTemplateRef.current = null;
+            }, 300);
+            
+            templateProcessTimeouts.current.delete(templateId);
           }
-        } finally {
-          // Clear processing flag after a short delay
-          setTimeout(() => {
-            processingTemplateRef.current = null;
-          }, 300);
-        }
+        }, 50); // Short delay to debounce events
+        
+        templateProcessTimeouts.current.set(templateId, timeout);
       }),
       
-      // Listen for template order updates
       eventBus.on('habit:template-order-update', (templates) => {
         console.log("Event received: habit:template-order-update", templates);
         dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
@@ -251,6 +264,10 @@ export const useHabitEvents = (
     ];
 
     return () => {
+      // Clear all timeouts on unmount
+      templateProcessTimeouts.current.forEach(timeout => clearTimeout(timeout));
+      templateProcessTimeouts.current.clear();
+      
       unsubscribers.forEach(unsub => typeof unsub === 'function' && unsub());
       window.removeEventListener('templatesUpdated', () => {});
     };

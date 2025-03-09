@@ -12,6 +12,8 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [lastProcessedTemplateIds, setLastProcessedTemplateIds] = useState<string[]>([]);
   const processingRef = useRef(false);
   const templateAddInProgressRef = useRef(false);
+  const lastProcessedDateRef = useRef<string | null>(null);
+  const processedTemplatesMapRef = useRef(new Map<string, Set<string>>());
   
   // Get habits scheduled for today
   const getTodaysHabits = useCallback(() => {
@@ -37,12 +39,22 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
 
   // Process today's habits and generate tasks for timer-based habits
   const processHabits = useCallback((habits: HabitDetail[]) => {
-    if (processingRef.current) return;
+    if (processingRef.current) {
+      console.log("Already processing habits, skipping duplicate processing");
+      return;
+    }
+    
     processingRef.current = true;
     
     try {
       const today = new Date().toDateString();
       console.log('Processing habits for today:', today);
+      
+      // Only process once per day unless templates change
+      if (lastProcessedDateRef.current === today && habits.length === todaysHabits.length) {
+        console.log("Already processed habits for today with the same templates, skipping");
+        return;
+      }
       
       // Track which templates we've processed
       const processedTemplateIds = new Set<string>();
@@ -54,8 +66,22 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
           );
           
           if (template) {
-            console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${template.templateId}`);
-            processedTemplateIds.add(template.templateId);
+            const templateId = template.templateId;
+            
+            // Check if we've already processed this habit for today
+            if (!processedTemplatesMapRef.current.has(today)) {
+              processedTemplatesMapRef.current.set(today, new Set());
+            }
+            
+            const processedHabitsForToday = processedTemplatesMapRef.current.get(today);
+            if (processedHabitsForToday?.has(habit.id)) {
+              console.log(`Already processed habit ${habit.id} (${habit.name}) for today, skipping`);
+              return;
+            }
+            
+            console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${templateId}`);
+            processedTemplateIds.add(templateId);
+            processedHabitsForToday?.add(habit.id);
             
             // The target is stored in seconds in the habit.metrics.target
             const durationInSeconds = habit.metrics.target || 600; // Default to 10 minutes (600 seconds)
@@ -65,7 +91,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
             // Emit the event to ensure task creation
             eventBus.emit('habit:schedule', {
               habitId: habit.id,
-              templateId: template.templateId,
+              templateId: templateId,
               duration: durationInSeconds,
               name: habit.name,
               date: today
@@ -88,21 +114,27 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       
       // Update the list of last processed templates
       setLastProcessedTemplateIds(currentTemplateIds);
+      lastProcessedDateRef.current = today;
       
       localStorage.setItem('lastHabitProcessingDate', today);
     } finally {
       processingRef.current = false;
     }
-  }, [activeTemplates, lastProcessedTemplateIds]);
+  }, [activeTemplates, lastProcessedTemplateIds, todaysHabits.length]);
 
   // Handle template changes and process habits
   useEffect(() => {
+    // Don't process if no templates or if already processing
+    if (activeTemplates.length === 0 || processingRef.current) {
+      return;
+    }
+    
     // Add check to prevent reprocessing if templates haven't changed
     const currentTemplateIds = activeTemplates.map(t => t.templateId).sort().join(',');
     const prevTemplateIds = lastProcessedTemplateIds.sort().join(',');
     
-    // Only update if templates have changed and we're not already processing
-    if (currentTemplateIds !== prevTemplateIds && !processingRef.current) {
+    // Only update if templates have changed
+    if (currentTemplateIds !== prevTemplateIds) {
       const habits = getTodaysHabits();
       setTodaysHabits(habits);
       
@@ -142,6 +174,29 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
         }, 100);
       }
     };
+    
+    // Reset processed templates when day changes
+    const resetProcessedTemplatesAtMidnight = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      setTimeout(() => {
+        console.log("Resetting processed templates for the new day");
+        processedTemplatesMapRef.current.clear();
+        lastProcessedDateRef.current = null;
+        setupResetTimer();
+      }, timeUntilMidnight);
+    };
+    
+    const setupResetTimer = () => {
+      resetProcessedTemplatesAtMidnight();
+    };
+    
+    setupResetTimer();
     
     const unsubscribe = eventBus.on('habit:template-add', handleTemplateAdd);
     

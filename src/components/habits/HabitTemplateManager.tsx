@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -15,7 +15,8 @@ interface HabitTemplateManagerProps {
 const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTemplates }) => {
   const [configOpen, setConfigOpen] = useState(false);
   const [customTemplates, setCustomTemplates] = useState([]);
-  const [processingTemplate, setProcessingTemplate] = useState<string | null>(null);
+  const processingTemplateRef = useRef<string | null>(null);
+  const eventTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load custom templates
   useEffect(() => {
@@ -39,8 +40,14 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     setConfigOpen(open);
   };
 
-  // Handle template selection with debounce protection
+  // Handle template selection with proper debounce protection
   const handleSelectTemplate = (templateId: string) => {
+    // Clear any pending timeouts to prevent multiple emissions
+    if (eventTimeoutRef.current) {
+      clearTimeout(eventTimeoutRef.current);
+      eventTimeoutRef.current = null;
+    }
+
     // Prevent duplicate template selection
     if (activeTemplates.some(t => t.templateId === templateId)) {
       toast.info(`Template already active`);
@@ -48,8 +55,8 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     }
     
     // Prevent selecting another template while one is being processed
-    if (processingTemplate) {
-      console.log(`Already processing template ${processingTemplate}, deferring ${templateId}`);
+    if (processingTemplateRef.current) {
+      console.log(`Already processing template ${processingTemplateRef.current}, deferring ${templateId}`);
       return;
     }
     
@@ -60,18 +67,30 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     
     if (template) {
       console.log("Adding template:", template);
-      setProcessingTemplate(templateId);
+      processingTemplateRef.current = templateId;
       
-      // Pass the string templateId, not an object
-      eventBus.emit('habit:template-add', templateId);
-      toast.success(`Added template: ${template.name}`);
-      
-      // Clear processing state after a short delay
-      setTimeout(() => {
-        setProcessingTemplate(null);
-      }, 500);
+      // Use a timeout to ensure only one event is emitted
+      eventTimeoutRef.current = setTimeout(() => {
+        // Pass the string templateId, not an object
+        eventBus.emit('habit:template-add', templateId);
+        toast.success(`Added template: ${template.name}`);
+        
+        // Clear processing state after a short delay
+        setTimeout(() => {
+          processingTemplateRef.current = null;
+        }, 500);
+      }, 50);
     }
   };
+
+  // Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (eventTimeoutRef.current) {
+        clearTimeout(eventTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
