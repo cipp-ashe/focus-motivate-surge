@@ -37,8 +37,8 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
           <Card 
             key={template.id} 
             className={cn(
-              "transition-all duration-200",
-              isActive && "border-primary"
+              "bg-card border-border transition-all duration-200 hover:shadow-md",
+              isActive ? "border-primary ring-1 ring-primary/20" : "hover:border-primary/50"
             )}
           >
             <CardHeader className="pb-2 flex flex-row items-start justify-between">
@@ -53,7 +53,7 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
                   e.stopPropagation();
                   onDelete(template.id);
                 }}
-                className="h-8 w-8 -mt-1 -mr-1 text-destructive"
+                className="h-8 w-8 -mt-1 -mr-1 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -72,7 +72,10 @@ const CustomTemplates: React.FC<CustomTemplatesProps> = ({
             <CardFooter>
               <Button
                 variant={isActive ? "secondary" : "default"}
-                className="w-full"
+                className={cn(
+                  "w-full", 
+                  !isActive && "bg-primary hover:bg-primary/90"
+                )}
                 onClick={() => onSelect(template)}
                 disabled={isActive}
               >
