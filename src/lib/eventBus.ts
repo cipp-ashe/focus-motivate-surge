@@ -66,7 +66,14 @@ class EventBus {
       this.storePendingEvent(eventName, payload);
     }
     
-    // For events that need debouncing (like habit:schedule)
+    // For habit:schedule, always process immediately regardless of debounce settings
+    // This is critical to ensure tasks are created reliably
+    if (eventName === 'habit:schedule') {
+      this.executeEvent(eventName, payload);
+      return;
+    }
+    
+    // For events that need debouncing
     if (this.debounceIntervals[eventName]) {
       const now = Date.now();
       const debounceInterval = this.debounceIntervals[eventName];
@@ -74,12 +81,8 @@ class EventBus {
       // Generate a unique key for debouncing if we have identifiable properties
       let debounceKey = eventName;
       
-      // For habit scheduling, create a unique key based on habitId and date
-      if (eventName === 'habit:schedule' && payload.habitId && payload.date) {
-        debounceKey = `${eventName}-${payload.habitId}-${payload.date}`;
-      }
       // For template addition, create a unique key based on templateId
-      else if (eventName === 'habit:template-add' && payload.templateId) {
+      if (eventName === 'habit:template-add' && payload.templateId) {
         debounceKey = `${eventName}-${payload.templateId}`;
       }
       // For task operations, create a unique key based on taskId
@@ -108,13 +111,6 @@ class EventBus {
       
       // Update last emitted time
       this.lastEmitted[debounceKey] = now;
-    }
-    
-    // For habit:schedule events, always process them immediately 
-    // even if we have debouncing enabled
-    if (eventName === 'habit:schedule') {
-      this.executeEvent(eventName, payload);
-      return;
     }
     
     // For non-debounced events or the first emission of a debounced event
