@@ -5,8 +5,16 @@ export { useTasksInitializer } from './useTasksInitializer';
 export { useTasksNavigation } from './useTasksNavigation';
 export { useTemplateTasksManager } from './useTemplateTasksManager';
 
-// Habit task scheduler
+// Habit task scheduler and related hooks
 export { useHabitTaskScheduler } from './useHabitTaskScheduler';
+export { 
+  useHabitTaskTracker,
+  useHabitTaskProcessor,
+  useHabitTaskCleanup,
+  useHabitTaskChecker,
+  useHabitTaskCreator 
+} from './habitTasks';
 
-// Habit task internal hooks (not directly exposed)
-// These are used by the useHabitTaskScheduler and other hooks
+// Re-export task verification utilities
+export { taskVerification } from '@/lib/verification/taskVerification';
+export { taskStorage } from '@/lib/storage/taskStorage';

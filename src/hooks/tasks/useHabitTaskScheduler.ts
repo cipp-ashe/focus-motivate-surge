@@ -11,7 +11,7 @@ import {
 } from './habitTasks';
 
 /**
- * Hook for scheduling and managing habit tasks
+ * Hook for scheduling and managing habit tasks with improved reliability
  */
 export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn => {
   // Initialize the task tracker
@@ -37,31 +37,56 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
     checkForMissingHabitTasks
   } = useHabitTaskChecker(tasks);
 
-  // Setup event listener for habit scheduling
+  // Setup event listener for habit scheduling with improved reliability
   useEffect(() => {
+    console.log('Setting up habit task scheduler with improved reliability');
+    
+    // Subscribe to habit:schedule events
     const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
     
     // Set up daily cleanup
     const cleanupTimeoutId = setupDailyCleanup();
     
-    // Also check for pending habits when component mounts
-    const timeout = setTimeout(() => {
+    // Process any pending habits when component mounts with staggered timing
+    const timeouts: NodeJS.Timeout[] = [];
+    
+    // Initial check
+    timeouts.push(setTimeout(() => {
       eventBus.emit('habits:check-pending', {});
-      console.log('Checking for pending habits on task scheduler mount');
-      
-      // Process any pending tasks
+      console.log('Checking for pending habits on task scheduler mount (initial)');
+    }, 300));
+    
+    // Process any pending tasks
+    timeouts.push(setTimeout(() => {
       processPendingTasks();
-    }, 500);
+      console.log('Processing pending tasks (initial)');
+    }, 600));
+    
+    // Additional verification check
+    timeouts.push(setTimeout(() => {
+      checkForMissingHabitTasks();
+      console.log('Verifying all habit tasks are loaded (initial)');
+    }, 1200));
     
     return () => {
+      // Clean up subscriptions
       unsubscribeSchedule();
-      clearTimeout(timeout);
-      // Fixed: clearTimeout expects a timeout ID, not a function
+      
+      // Clear all timeouts
+      timeouts.forEach(timeout => clearTimeout(timeout));
+      
+      // Clear the cleanup timeout
       if (cleanupTimeoutId) {
         clearTimeout(cleanupTimeoutId);
       }
     };
-  }, [handleHabitSchedule, setupDailyCleanup, clearAllTrackedTasks, processPendingTasks]);
+  }, [
+    handleHabitSchedule, 
+    setupDailyCleanup, 
+    clearAllTrackedTasks, 
+    processPendingTasks,
+    checkForMissingHabitTasks
+  ]);
 
   // Setup task deletion listener
   useEffect(() => {
@@ -72,6 +97,7 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
     };
   }, [handleTaskDelete]);
 
+  // Return the public API
   return { 
     scheduledTasksRef,
     checkForMissingHabitTasks 

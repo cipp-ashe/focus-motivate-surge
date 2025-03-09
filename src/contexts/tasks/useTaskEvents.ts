@@ -4,9 +4,11 @@ import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { taskState } from './taskState';
 import { toast } from 'sonner';
+import { taskStorage } from '@/lib/storage/taskStorage';
+import { taskVerification } from '@/lib/verification/taskVerification';
 
 /**
- * Hook for handling task-related events with improved error handling and synchronization
+ * Hook for handling task-related events with improved error handling, synchronization and verification
  */
 export const useTaskEvents = (
   items: Task[],
@@ -17,7 +19,7 @@ export const useTaskEvents = (
   const pendingTaskUpdatesRef = useRef<Task[]>([]);
   const isInitializingRef = useRef(true);
   
-  // Force reload tasks from localStorage
+  // Force reload tasks from storage
   const forceTasksReload = useCallback(() => {
     try {
       const now = Date.now();
@@ -44,8 +46,8 @@ export const useTaskEvents = (
         // Clear pending tasks
         pendingTaskUpdatesRef.current = [];
         
-        // Update localStorage
-        localStorage.setItem('taskList', JSON.stringify(tasks));
+        // Update storage with merged tasks
+        taskStorage.saveTasks(tasks);
       }
       
       dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
@@ -73,12 +75,6 @@ export const useTaskEvents = (
         
         // Add to state
         dispatch({ type: 'ADD_TASK', payload: task });
-        
-        // Update localStorage directly for immediate persistence
-        const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-        if (!storedTasks.some((t: Task) => t.id === task.id)) {
-          localStorage.setItem('taskList', JSON.stringify([...storedTasks, task]));
-        }
       }),
       
       // Handle task completion
@@ -108,25 +104,28 @@ export const useTaskEvents = (
       // Handle template deletion
       eventBus.on('habit:template-delete', ({ templateId }) => {
         console.log("TaskEvents: Received template delete event for", templateId);
+        
+        // Delete tasks from storage first
+        taskStorage.deleteTasksByTemplate(templateId);
+        
+        // Then update state
         dispatch({ type: 'DELETE_TASKS_BY_TEMPLATE', payload: { templateId } });
       }),
       
-      // Handle habit checking
+      // Handle habit checking with improved verification
       eventBus.on('habits:check-pending', () => {
         console.log("TaskEvents: Checking for pending habits");
         eventBus.emit('habits:processed', {});
         
-        // Check for tasks in localStorage that aren't in memory
+        // Check for tasks in storage that aren't in memory
         setTimeout(() => {
-          const missingTasks = taskState.verifyConsistency(items);
+          const missingTasks = taskVerification.recoverMissingTasks(items);
+          
           if (missingTasks.length > 0) {
             console.log(`TaskEvents: Adding ${missingTasks.length} missing tasks to state`);
+            
             missingTasks.forEach(task => {
               dispatch({ type: 'ADD_TASK', payload: task });
-            });
-            
-            toast.info(`Loaded ${missingTasks.length} habit tasks`, {
-              description: "Your habit tasks have been synchronized."
             });
           }
         }, 150);
@@ -141,9 +140,21 @@ export const useTaskEvents = (
     
     window.addEventListener('force-task-update', handleForceUpdate);
     
+    // Set up periodic verification for task consistency
+    const verificationCleanup = taskVerification.setupPeriodicVerification(
+      () => items,
+      (missingTasks) => {
+        missingTasks.forEach(task => {
+          dispatch({ type: 'ADD_TASK', payload: task });
+        });
+      },
+      30000 // Check every 30 seconds
+    );
+    
     return () => {
       unsubscribers.forEach(unsub => unsub());
       window.removeEventListener('force-task-update', handleForceUpdate);
+      verificationCleanup();
     };
   }, [dispatch, forceTasksReload, items]);
   

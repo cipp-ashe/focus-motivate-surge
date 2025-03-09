@@ -3,9 +3,10 @@ import { useCallback, useRef } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { toast } from 'sonner';
+import { taskStorage } from '@/lib/storage/taskStorage';
 
 /**
- * Hook to emit task-related events with optimized coordination
+ * Hook to emit task-related events with optimized coordination and storage sync
  */
 export const useTaskEvents = () => {
   const processingRef = useRef(false);
@@ -13,30 +14,63 @@ export const useTaskEvents = () => {
   
   const createTask = useCallback((task: Task) => {
     console.log("useTaskEvents: Creating task", task);
-    eventBus.emit('task:create', task);
-    toast.success('Task added 📝');
+    
+    // First, add task to storage directly for immediate persistence
+    const added = taskStorage.addTask(task);
+    
+    if (added) {
+      // Then emit event for state updates
+      eventBus.emit('task:create', task);
+      toast.success('Task added 📝');
+    } else {
+      console.log(`Task ${task.id} already exists, skipping creation`);
+    }
   }, []);
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     console.log("useTaskEvents: Updating task", taskId, updates);
-    eventBus.emit('task:update', { taskId, updates });
+    
+    // Update storage first
+    const updated = taskStorage.updateTask(taskId, updates);
+    
+    if (updated) {
+      // Then emit event for state updates
+      eventBus.emit('task:update', { taskId, updates });
+    } else {
+      console.log(`Task ${taskId} not found for update`);
+    }
   }, []);
 
   const deleteTask = useCallback((taskId: string, reason: 'manual' | 'completed' | 'template-removed' = 'manual') => {
     console.log("useTaskEvents: Deleting task", taskId, "reason:", reason);
+    
+    // Remove from storage first
+    const removed = taskStorage.removeTask(taskId);
+    
+    // Emit event for state updates even if not found in storage
+    // This ensures any in-memory references are also cleaned up
     eventBus.emit('task:delete', { taskId, reason });
     
-    if (reason === 'manual') {
+    if (removed && reason === 'manual') {
       toast.success('Task deleted 🗑️');
-    } else if (reason === 'template-removed') {
+    } else if (removed && reason === 'template-removed') {
       toast.info('Task removed with habit template');
     }
   }, []);
 
   const completeTask = useCallback((taskId: string, metrics: any) => {
     console.log("useTaskEvents: Completing task", taskId);
-    eventBus.emit('task:complete', { taskId, metrics });
-    toast.success('Task completed 🎯');
+    
+    // Complete task in storage first
+    const completed = taskStorage.completeTask(taskId, metrics);
+    
+    if (completed) {
+      // Then emit event for state updates
+      eventBus.emit('task:complete', { taskId, metrics });
+      toast.success('Task completed 🎯');
+    } else {
+      console.log(`Task ${taskId} not found for completion`);
+    }
   }, []);
 
   const selectTask = useCallback((taskId: string) => {
@@ -59,6 +93,7 @@ export const useTaskEvents = () => {
       clearTimeout(forceUpdateTimeoutRef.current);
     }
     
+    // Dispatch event to trigger reloading
     window.dispatchEvent(new Event('force-task-update'));
     
     // Reset processing flag after a delay

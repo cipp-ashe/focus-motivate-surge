@@ -1,12 +1,14 @@
 
 import { useRef, useCallback } from 'react';
 
+type TrackedTasks = Record<string, string>;
+
 /**
- * Hook for tracking scheduled habit tasks
+ * Hook for tracking scheduled habit tasks with improved typing
  */
 export const useHabitTaskTracker = () => {
   // Reference to store tracked tasks
-  const scheduledTasksRef = useRef<Record<string, any>>({});
+  const scheduledTasksRef = useRef<TrackedTasks>({});
   
   // Clear all tracked tasks
   const clearAllTrackedTasks = useCallback(() => {

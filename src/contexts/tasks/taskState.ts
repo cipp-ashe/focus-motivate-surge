@@ -1,19 +1,21 @@
 
 import { Task } from '@/types/tasks';
 import { TaskContextState } from './types';
+import { taskStorage } from '@/lib/storage/taskStorage';
+import { taskVerification } from '@/lib/verification/taskVerification';
 
 /**
- * Task state manager with improved persistence and loading
+ * Task state manager with improved persistence, verification and loading
  */
 export const taskState = {
   /**
-   * Load tasks from localStorage with improved error handling and logging
+   * Load tasks from storage with improved error handling and logging
    */
   loadFromStorage: (): { tasks: Task[], completed: Task[] } => {
     try {
-      console.log("TaskState: Loading tasks from localStorage");
-      const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-      const completed = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+      console.log("TaskState: Loading tasks from storage");
+      const tasks = taskStorage.loadTasks();
+      const completed = taskStorage.loadCompletedTasks();
       
       console.log(`TaskState: Loaded ${tasks.length} tasks and ${completed.length} completed tasks`);
       return { tasks, completed };
@@ -24,13 +26,13 @@ export const taskState = {
   },
   
   /**
-   * Save tasks to localStorage with improved error handling
+   * Save tasks to storage with improved error handling and atomic updates
    */
   saveToStorage: (items: Task[], completed: Task[]): void => {
     try {
-      console.log(`TaskState: Saving ${items.length} tasks to localStorage`);
-      localStorage.setItem('taskList', JSON.stringify(items));
-      localStorage.setItem('completedTasks', JSON.stringify(completed));
+      console.log(`TaskState: Saving ${items.length} tasks to storage`);
+      taskStorage.saveTasks(items);
+      taskStorage.saveCompletedTasks(completed);
     } catch (error) {
       console.error('TaskState: Error saving tasks to storage:', error);
     }
@@ -61,25 +63,9 @@ export const taskState = {
   },
   
   /**
-   * Verify consistency between localStorage and application state
+   * Verify consistency between storage and application state
    */
   verifyConsistency: (currentTasks: Task[]): Task[] => {
-    try {
-      const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-      
-      // Find tasks in localStorage but not in current state
-      const missingTasks = storedTasks.filter((storedTask: Task) => 
-        !currentTasks.some(memTask => memTask.id === storedTask.id)
-      );
-      
-      if (missingTasks.length > 0) {
-        console.log(`TaskState: Found ${missingTasks.length} tasks in localStorage missing from memory state`);
-        return missingTasks;
-      }
-    } catch (error) {
-      console.error('TaskState: Error verifying task consistency:', error);
-    }
-    
-    return [];
+    return taskVerification.recoverMissingTasks(currentTasks);
   }
 };

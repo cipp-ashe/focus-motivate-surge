@@ -1,10 +1,10 @@
 
 import { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
-import { taskState } from './taskState';
+import { taskStorage } from '@/lib/storage/taskStorage';
 
 /**
- * Hook to handle persisting tasks to localStorage with debouncing and error handling
+ * Hook to handle persisting tasks to localStorage with debouncing, atomic updates, and error handling
  */
 export const useTaskPersistence = (
   items: Task[],
@@ -13,7 +13,7 @@ export const useTaskPersistence = (
   const isInitializingRef = useRef(true);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Persist changes to localStorage with debouncing
+  // Persist changes to localStorage with debouncing and atomic updates
   useEffect(() => {
     // Don't persist during initialization
     if (isInitializingRef.current) {
@@ -29,7 +29,10 @@ export const useTaskPersistence = (
     // Debounce storage updates to avoid excessive writes
     saveTimeoutRef.current = setTimeout(() => {
       console.log(`TaskPersistence: Saving ${items.length} tasks to localStorage`);
-      taskState.saveToStorage(items, completed);
+      
+      // Use the storage service to save both tasks and completed tasks
+      taskStorage.saveTasks(items);
+      taskStorage.saveCompletedTasks(completed);
     }, 50);
     
     return () => {
