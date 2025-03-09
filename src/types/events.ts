@@ -1,3 +1,4 @@
+
 export interface TimerEventPayloads {
   'habit:schedule': {
     habitId: string;
@@ -14,7 +15,7 @@ export interface TimerEventPayloads {
   'habit:template-order-update': any[];
   'habit:journal-deleted': {
     habitId: string;
-    templateId?: string; // Add optional templateId to make it more robust
+    templateId?: string; // Optional templateId to make it more robust
   };
   'task:create': any;
   'task:update': any;

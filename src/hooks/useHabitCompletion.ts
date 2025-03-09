@@ -53,9 +53,44 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
       setCompletedHabits(prev => prev.filter(id => id !== habitId));
     };
     
-    const unsub = eventBus.on('habit:journal-deleted', handleJournalDeleted);
-    return () => unsub();
-  }, []);
+    const handleTaskComplete = ({ taskId }: { taskId: string }) => {
+      // Get the task relationships
+      const relationships = relationshipManager.getRelationships(taskId, 'task');
+      
+      // Find habit relationships
+      const habitRelationship = relationships.find(r => 
+        r.relationType === 'habit-task' && r.targetId === taskId
+      );
+      
+      if (habitRelationship) {
+        const habitId = habitRelationship.sourceId;
+        
+        // Update completed habits
+        setCompletedHabits(prev => {
+          if (!prev.includes(habitId)) {
+            // Find the template for this habit
+            const template = templates.find(t => 
+              t.habits.some(h => h.id === habitId)
+            );
+            
+            if (template) {
+              updateProgress(habitId, template.templateId, true);
+              return [...prev, habitId];
+            }
+          }
+          return prev;
+        });
+      }
+    };
+    
+    const unsubJournal = eventBus.on('habit:journal-deleted', handleJournalDeleted);
+    const unsubComplete = eventBus.on('task:complete', handleTaskComplete);
+    
+    return () => {
+      unsubJournal();
+      unsubComplete();
+    };
+  }, [templates, updateProgress]);
 
   const handleHabitComplete = (habit: HabitDetail, templateId?: string) => {
     // If no templateId provided, find the template that contains this habit
@@ -94,8 +129,75 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
   };
 
   const handleAddHabitToTasks = (habit: HabitDetail) => {
-    // This function would add the habit as a task
-    toast.success(`Added "${habit.name}" to tasks`);
+    // Only timer-based habits can be added as tasks
+    if (habit.metrics.type !== 'timer') {
+      toast.error("Only timer-based habits can be added as tasks");
+      return;
+    }
+    
+    // Find template for this habit
+    const template = templates.find(t => 
+      t.habits.some(h => h.id === habit.id)
+    );
+    
+    if (!template) {
+      toast.error("Could not find template for habit");
+      return;
+    }
+    
+    // Create a new task for this habit
+    const today = new Date().toDateString();
+    const taskId = crypto.randomUUID();
+    const duration = habit.metrics.target || 1500; // Default to 25 minutes if no target set
+    
+    const task = {
+      id: taskId,
+      name: habit.name,
+      description: habit.description,
+      completed: false,
+      duration,
+      createdAt: new Date().toISOString(),
+      relationships: {
+        habitId: habit.id,
+        templateId: template.templateId,
+        date: today
+      }
+    };
+    
+    // Create the task
+    eventBus.emit('task:create', task);
+    
+    // Add the Habit tag
+    eventBus.emit('tag:link', {
+      tagId: 'Habit',
+      entityId: taskId,
+      entityType: 'task'
+    });
+    
+    // Create relationship
+    eventBus.emit('relationship:create', {
+      sourceId: habit.id,
+      sourceType: 'habit',
+      targetId: taskId,
+      targetType: 'task',
+      relationType: 'habit-task'
+    });
+    
+    // Select the task and start the timer
+    eventBus.emit('task:select', taskId);
+    
+    // Send timer events
+    setTimeout(() => {
+      eventBus.emit('timer:start', { 
+        taskName: task.name, 
+        duration: task.duration
+      });
+      
+      // Expand timer view
+      eventBus.emit('timer:expand', { taskName: task.name });
+    }, 100);
+    
+    toast.success(`Added "${habit.name}" to tasks and started timer`);
   };
 
   return {

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { useTimerState } from "./state/TimerState";
@@ -155,6 +155,48 @@ export const Timer = ({
 
   const timerCircleProps = getTimerCircleProps();
   const timerControlsProps = getTimerControlsProps();
+
+  const handleComplete = useCallback(async () => {
+    if (isRunning) {
+      pause();
+    }
+    
+    // Play completion sound
+    playSound();
+    
+    // Prepare completion metrics
+    const completionMetrics: TimerStateMetrics = {
+      ...metrics,
+      actualTime: minutes * 60 - timeLeft,
+      estimatedTime: minutes * 60,
+      pauseCount: metrics.pauseCount || 0,
+      completionStatus: "completed"
+    };
+    
+    // Mark the timer as complete
+    await completeTimer();
+    
+    // Set completion state for showing completion view
+    setCompletionMetrics(completionMetrics);
+    setShowCompletion(true);
+    
+    // Notify the parent component about completion
+    if (onComplete) {
+      onComplete(completionMetrics);
+    }
+    
+    // Check if this task is tied to a habit
+    const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+    const habitTask = tasks.find((t: any) => t.name === taskName && t.relationships?.habitId);
+    
+    if (habitTask) {
+      // Auto-complete the related habit
+      eventBus.emit('task:complete', { 
+        taskId: habitTask.id,
+        metrics: completionMetrics
+      });
+    }
+  }, [isRunning, pause, playSound, metrics, minutes, timeLeft, completeTimer, onComplete, taskName]);
 
   return (
     <div className="relative">
