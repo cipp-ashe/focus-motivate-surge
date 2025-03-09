@@ -29,7 +29,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 }) => {
   // Convert seconds to minutes for display
   const convertSecondsToMinutes = (seconds: number): number => {
-    return Math.round(seconds / 60);
+    return Math.floor(seconds / 60);
   };
 
   // Convert minutes to seconds for storage
@@ -142,6 +142,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                     <MinutesInput
                       minutes={convertSecondsToMinutes(habit.metrics.target || 600)}
                       onMinutesChange={(newMinutes) => {
+                        console.log(`Updating habit timer target from ${habit.metrics.target} seconds to ${convertMinutesToSeconds(newMinutes)} seconds (${newMinutes} minutes)`);
                         onUpdateHabit(index, {
                           metrics: {
                             ...habit.metrics,

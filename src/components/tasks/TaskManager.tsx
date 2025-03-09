@@ -31,11 +31,14 @@ const TaskManager = () => {
       const taskId = crypto.randomUUID();
       console.log(`Creating new task for habit ${habitId}:`, { taskId, name, duration });
       
+      // Ensure we're storing the duration in seconds
+      const durationInSeconds = duration;
+      
       const task = {
         id: taskId,
         name,
         completed: false,
-        duration,
+        duration: durationInSeconds, // Store in seconds
         createdAt: new Date().toISOString(),
         relationships: {
           habitId,

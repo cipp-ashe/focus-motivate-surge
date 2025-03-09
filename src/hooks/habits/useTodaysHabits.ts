@@ -46,9 +46,10 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
         if (template) {
           console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${template.templateId}`);
           
-          // Important: The target is stored in seconds in the habit.metrics.target
-          // We don't need to convert here, just pass it directly
+          // The target is stored in seconds in the habit.metrics.target
           const durationInSeconds = habit.metrics.target || 600; // Default to 10 minutes (600 seconds)
+          
+          console.log(`Creating task for habit ${habit.name} with duration ${durationInSeconds} seconds (${Math.floor(durationInSeconds / 60)} minutes)`);
           
           // Emit the event to ensure task creation
           eventBus.emit('habit:schedule', {
