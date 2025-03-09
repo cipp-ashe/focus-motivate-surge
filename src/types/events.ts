@@ -21,7 +21,10 @@ export interface TimerEventPayloads {
   'task:update': any;
   'task:delete': any;
   'task:select': string;
-  'task:complete': any;
+  'task:complete': {
+    taskId: string;
+    metrics?: any;
+  };
   'timer:init': { taskName: string; duration: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };

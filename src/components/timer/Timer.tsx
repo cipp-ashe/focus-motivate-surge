@@ -1,3 +1,4 @@
+
 import { useRef, useEffect, useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
@@ -156,7 +157,8 @@ export const Timer = ({
   const timerCircleProps = getTimerCircleProps();
   const timerControlsProps = getTimerControlsProps();
 
-  const handleComplete = useCallback(async () => {
+  // Define auto-complete handler for habit tasks
+  const handleAutoComplete = useCallback(async () => {
     if (isRunning) {
       pause();
     }
@@ -170,7 +172,7 @@ export const Timer = ({
       actualTime: minutes * 60 - timeLeft,
       estimatedTime: minutes * 60,
       pauseCount: metrics.pauseCount || 0,
-      completionStatus: "completed"
+      completionStatus: "Completed On Time"
     };
     
     // Mark the timer as complete
