@@ -58,8 +58,17 @@ export const useHabitTaskProcessor = (tasks: Task[]) => {
       const existingTaskId = taskTracker.isTaskTracked(habitId, date);
       if (existingTaskId) {
         console.log(`Task already scheduled for habit ${habitId} on ${date}, taskId: ${existingTaskId}`);
-        taskTracker.setProcessingState(false);
-        return;
+        
+        // Verify the task actually exists and force update if needed
+        const taskExists = checkTaskExistsInStorage(habitId, date);
+        if (!taskExists) {
+          console.log(`Tracked task ${existingTaskId} not found in storage, recreating`);
+          taskTracker.removeTrackedTask(habitId, date);
+          // Continue execution to recreate the task
+        } else {
+          taskTracker.setProcessingState(false);
+          return;
+        }
       }
       
       // Check in memory task list
@@ -88,9 +97,14 @@ export const useHabitTaskProcessor = (tasks: Task[]) => {
 
       // Create the habit task and get its ID
       const taskId = createHabitTask(habitId, templateId, name, duration, date);
+      console.log(`Created new habit task with ID: ${taskId}`);
       
       // Add to our tracking map
       taskTracker.trackTask(habitId, date, taskId);
+      
+      // Force a task update to make sure UI reflects the new task
+      setTimeout(() => forceTaskUpdate(), 200);
+      
     } finally {
       // Release the lock after a short delay to prevent race conditions
       setTimeout(() => {

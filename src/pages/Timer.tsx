@@ -52,6 +52,12 @@ const TimerPage = () => {
             // Force another task update with delay
             setTimeout(() => {
               window.dispatchEvent(new Event('force-task-update'));
+              
+              // If there are still no tasks loaded after a second update, try to schedule them again
+              if (tasks.length === 0) {
+                console.log('Still no tasks loaded after update, triggering habits:processed event');
+                eventBus.emit('habits:processed', {});
+              }
             }, 100);
           } else {
             // Check if all habit tasks from localStorage are in memory
@@ -61,11 +67,21 @@ const TimerPage = () => {
             
             if (missingTasks.length > 0) {
               console.log(`Found ${missingTasks.length} tasks in localStorage missing from memory`);
+              // Add each task via task:create event
+              missingTasks.forEach((task: any) => {
+                console.log(`Adding missing task to memory: ${task.name} (${task.id})`);
+                eventBus.emit('task:create', task);
+              });
+              
               setTimeout(() => {
                 window.dispatchEvent(new Event('force-task-update'));
               }, 100);
             }
           }
+        } else {
+          // No habit tasks in localStorage, check if we need to trigger habit processing
+          console.log('No habit tasks found in localStorage, checking if we need to reprocess habits');
+          eventBus.emit('habits:processed', {});
         }
         
         // If we still need more iterations, schedule the next check

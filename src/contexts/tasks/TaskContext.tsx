@@ -26,6 +26,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
   const isInitializingRef = useRef(true);
   const lastTaskLoadTimeRef = useRef(Date.now());
+  const pendingTaskUpdatesRef = useRef<Task[]>([]);
 
   // Load tasks from storage
   const loadTasksFromStorage = () => {
@@ -42,6 +43,25 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       
       lastTaskLoadTimeRef.current = now;
       console.log("TaskContext: Loading tasks from storage", tasks.length, "completed:", completed.length);
+      
+      // Check for pendingTaskUpdates that may not be in localStorage yet
+      if (pendingTaskUpdatesRef.current.length > 0) {
+        console.log(`TaskContext: Adding ${pendingTaskUpdatesRef.current.length} pending tasks to loaded tasks`);
+        
+        // Merge in pending tasks, avoiding duplicates
+        pendingTaskUpdatesRef.current.forEach(pendingTask => {
+          if (!tasks.some((t: Task) => t.id === pendingTask.id)) {
+            tasks.push(pendingTask);
+          }
+        });
+        
+        // Clear pending tasks after we've handled them
+        pendingTaskUpdatesRef.current = [];
+        
+        // Update localStorage with the merged tasks
+        localStorage.setItem('taskList', JSON.stringify(tasks));
+      }
+      
       dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
       isInitializingRef.current = false;
 
@@ -90,6 +110,11 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         
         if (!exists) {
           console.log("TaskContext: Task doesn't exist yet, adding to context", task);
+          
+          // Add to pending updates queue
+          pendingTaskUpdatesRef.current.push(task);
+          
+          // Add to state via dispatch
           dispatch({ type: 'ADD_TASK', payload: task });
           
           // Also update localStorage directly to ensure persistence
@@ -169,7 +194,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         
         // Also check for pending habits
         eventBus.emit('habits:check-pending', {});
-      }, 100);
+      }, 200);
       
       return result;
     }
