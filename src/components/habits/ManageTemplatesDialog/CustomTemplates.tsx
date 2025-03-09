@@ -2,6 +2,7 @@
 import React from 'react';
 import { HabitTemplate } from '../types';
 import TemplateCard from './TemplateCard';
+import { cn } from '@/lib/utils';
 
 interface CustomTemplatesProps {
   templates: HabitTemplate[];

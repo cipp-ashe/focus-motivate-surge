@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
 import { HabitContextActions, HabitState } from './types';
@@ -10,11 +9,15 @@ export const useHabitActions = (
 ): HabitContextActions => {
   return {
     addTemplate: (template) => {
+      // Generate a UUID if no templateId exists
+      const templateId = 'templateId' in template ? template.templateId : crypto.randomUUID();
+      
       const newTemplate = {
         ...template,
-        templateId: crypto.randomUUID(),
+        templateId: templateId,
         customized: false,
       };
+      
       dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
       const updatedTemplates = [...state.templates, newTemplate];
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
@@ -22,6 +25,11 @@ export const useHabitActions = (
       // Emit event for other components to react
       eventBus.emit('habit:template-update', newTemplate);
       toast.success('Template added successfully');
+      
+      // Trigger a global UI update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-habits-update'));
+      }, 100);
     },
     
     updateTemplate: (templateId, updates) => {

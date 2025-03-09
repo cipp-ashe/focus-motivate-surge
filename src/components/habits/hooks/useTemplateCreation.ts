@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { ActiveTemplate, HabitTemplate, DayOfWeek } from '../types';
 import { toast } from 'sonner';
+import { eventBus } from '@/lib/eventBus';
 
 export const useTemplateCreation = (
   addTemplate: (template: ActiveTemplate) => void,
-  updateTemplate: (templateId: string, template: ActiveTemplate) => void,
+  updateTemplate: (templateId: string, template: Partial<ActiveTemplate>) => void,
 ) => {
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
@@ -48,8 +49,12 @@ export const useTemplateCreation = (
     }
 
     if (isCreatingTemplate) {
+      // Create a unique ID for the template
+      const templateId = `custom-${Date.now()}`;
+      
+      // Create the template object for storage
       const customTemplate: HabitTemplate = {
-        id: selectedTemplate.templateId,
+        id: templateId,
         name: newTemplateName,
         description: 'Custom template',
         category: 'Custom',
@@ -58,25 +63,40 @@ export const useTemplateCreation = (
         duration: null,
       };
 
+      // Save the custom template
       const existingTemplatesStr = localStorage.getItem('custom-templates');
       const existingTemplates = existingTemplatesStr ? JSON.parse(existingTemplatesStr) : [];
       const updatedTemplates = [...existingTemplates, customTemplate];
       localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
 
-      const updatedTemplate = { 
-        ...selectedTemplate,
-        name: newTemplateName,
+      // Emit event for custom template creation
+      eventBus.emit('habit:custom-template-create', customTemplate);
+
+      // Add the template to active templates
+      const activeTemplate: ActiveTemplate = { 
+        templateId: templateId,
+        habits: selectedTemplate.habits,
+        activeDays: selectedTemplate.activeDays,
         customized: true,
       };
-      addTemplate(updatedTemplate);
-      toast.success('Template saved successfully');
+      
+      // Add template to active templates
+      addTemplate(activeTemplate);
+      
+      toast.success('Template created and added successfully');
       handleCloseTemplate();
+      
+      // Ensure templates are updated in UI
+      eventBus.emit('habit:template-update', activeTemplate);
       window.dispatchEvent(new Event('templatesUpdated'));
+      window.dispatchEvent(new Event('force-habits-update'));
     } else {
+      // Update existing template
       updateTemplate(selectedTemplate.templateId, selectedTemplate);
       toast.success('Template updated successfully');
       handleCloseTemplate();
       window.dispatchEvent(new Event('templatesUpdated'));
+      window.dispatchEvent(new Event('force-habits-update'));
     }
   };
 

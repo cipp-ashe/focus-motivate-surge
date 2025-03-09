@@ -55,6 +55,11 @@ export const useTemplateManagement = () => {
       // Emit event for template addition
       eventBus.emit('habit:template-update', template);
       
+      // Trigger UI update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-habits-update'));
+      }, 100);
+      
       return [...prev, template];
     });
   }, []);
