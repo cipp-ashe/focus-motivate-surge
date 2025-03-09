@@ -1,5 +1,5 @@
 
-// This file is for backward compatibility
-// We should update all imports to use the new path: @/hooks/ui/useIsMobile
+// This file is for backward compatibility with imports like @/hooks/use-mobile
+// We re-export the hooks from their new location
 export { useIsMobile } from './ui/useIsMobile';
 export { useMobile } from './ui/useMobile';

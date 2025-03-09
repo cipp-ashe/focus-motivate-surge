@@ -11,5 +11,4 @@ export * from './ui';
 export { useTheme } from './useTheme';
 export { useEventBus } from './useEventBus';
 export { useMinutesHandlers } from './useMinutesHandlers';
-export { useIsMobile } from './ui/useIsMobile';
-export { useMobile } from './ui/useMobile';
+export { useIsMobile, useMobile } from './use-mobile';

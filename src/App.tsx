@@ -14,6 +14,7 @@ import { ThemeProvider } from "next-themes";
 import Habits from "./pages/Habits";
 import Notes from "./pages/Notes";
 import Timer from "./pages/Timer";
+import "./App.css"; // Make sure styles are loaded
 
 // Suppress specific React Router v7 warnings
 window.__reactRouterFutureWarnings = {
