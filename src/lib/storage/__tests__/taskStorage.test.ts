@@ -1,5 +1,5 @@
 
-import { taskStorage } from '../taskStorage';
+import { taskStorage, ACTIVE_TASKS_KEY, COMPLETED_TASKS_KEY } from '../taskStorage';
 import { Task } from '@/types/tasks';
 
 describe('taskStorage', () => {
@@ -30,13 +30,13 @@ describe('taskStorage', () => {
       createdAt: '2023-01-01T00:00:00.000Z'
     };
     
-    mockLocalStorage[taskStorage.TASKS_KEY] = JSON.stringify([mockTask]);
+    mockLocalStorage[ACTIVE_TASKS_KEY] = JSON.stringify([mockTask]);
     
     const tasks = taskStorage.loadTasks();
     
     expect(tasks).toHaveLength(1);
     expect(tasks[0].id).toBe('task-1');
-    expect(localStorage.getItem).toHaveBeenCalledWith(taskStorage.TASKS_KEY);
+    expect(localStorage.getItem).toHaveBeenCalledWith(ACTIVE_TASKS_KEY);
   });
   
   it('should save tasks to storage', () => {
@@ -53,7 +53,7 @@ describe('taskStorage', () => {
     
     expect(result).toBe(true);
     expect(localStorage.setItem).toHaveBeenCalledWith(
-      taskStorage.TASKS_KEY,
+      ACTIVE_TASKS_KEY,
       JSON.stringify(tasks)
     );
   });
@@ -70,7 +70,7 @@ describe('taskStorage', () => {
     
     expect(result).toBe(true);
     expect(localStorage.setItem).toHaveBeenCalled();
-    expect(JSON.parse(mockLocalStorage[taskStorage.TASKS_KEY])).toHaveLength(1);
+    expect(JSON.parse(mockLocalStorage[ACTIVE_TASKS_KEY])).toHaveLength(1);
   });
   
   it('should not add duplicate tasks by ID', () => {
@@ -82,7 +82,7 @@ describe('taskStorage', () => {
       createdAt: '2023-01-01T00:00:00.000Z'
     };
     
-    mockLocalStorage[taskStorage.TASKS_KEY] = JSON.stringify([existingTask]);
+    mockLocalStorage[ACTIVE_TASKS_KEY] = JSON.stringify([existingTask]);
     
     // Try to add duplicate
     const duplicateTask: Task = {
@@ -95,7 +95,7 @@ describe('taskStorage', () => {
     const result = taskStorage.addTask(duplicateTask);
     
     expect(result).toBe(false);
-    const storedTasks = JSON.parse(mockLocalStorage[taskStorage.TASKS_KEY]);
+    const storedTasks = JSON.parse(mockLocalStorage[ACTIVE_TASKS_KEY]);
     expect(storedTasks).toHaveLength(1);
     expect(storedTasks[0].name).toBe('Existing Task'); // Original name retained
   });
@@ -113,7 +113,7 @@ describe('taskStorage', () => {
       }
     };
     
-    mockLocalStorage[taskStorage.TASKS_KEY] = JSON.stringify([existingTask]);
+    mockLocalStorage[ACTIVE_TASKS_KEY] = JSON.stringify([existingTask]);
     
     // Try to add duplicate by relationship
     const duplicateTask: Task = {
@@ -130,7 +130,7 @@ describe('taskStorage', () => {
     const result = taskStorage.addTask(duplicateTask);
     
     expect(result).toBe(false);
-    const storedTasks = JSON.parse(mockLocalStorage[taskStorage.TASKS_KEY]);
+    const storedTasks = JSON.parse(mockLocalStorage[ACTIVE_TASKS_KEY]);
     expect(storedTasks).toHaveLength(1);
     expect(storedTasks[0].id).toBe('task-1'); // Original task retained
   });
@@ -152,7 +152,7 @@ describe('taskStorage', () => {
       }
     ];
     
-    mockLocalStorage[taskStorage.TASKS_KEY] = JSON.stringify(storedTasks);
+    mockLocalStorage[ACTIVE_TASKS_KEY] = JSON.stringify(storedTasks);
     
     // Only one task in memory
     const memoryTasks: Task[] = [
@@ -179,19 +179,19 @@ describe('taskStorage', () => {
       createdAt: '2023-01-01T00:00:00.000Z'
     };
     
-    mockLocalStorage[taskStorage.TASKS_KEY] = JSON.stringify([task]);
-    mockLocalStorage[taskStorage.COMPLETED_TASKS_KEY] = JSON.stringify([]);
+    mockLocalStorage[ACTIVE_TASKS_KEY] = JSON.stringify([task]);
+    mockLocalStorage[COMPLETED_TASKS_KEY] = JSON.stringify([]);
     
     const result = taskStorage.completeTask('task-1', { actualTime: 1500 });
     
     expect(result).toBe(true);
     
     // Task should be removed from active tasks
-    const activeTasks = JSON.parse(mockLocalStorage[taskStorage.TASKS_KEY]);
+    const activeTasks = JSON.parse(mockLocalStorage[ACTIVE_TASKS_KEY]);
     expect(activeTasks).toHaveLength(0);
     
     // Task should be added to completed tasks
-    const completedTasks = JSON.parse(mockLocalStorage[taskStorage.COMPLETED_TASKS_KEY]);
+    const completedTasks = JSON.parse(mockLocalStorage[COMPLETED_TASKS_KEY]);
     expect(completedTasks).toHaveLength(1);
     expect(completedTasks[0].id).toBe('task-1');
     expect(completedTasks[0].completed).toBe(true);
@@ -230,13 +230,13 @@ describe('taskStorage', () => {
       }
     ];
     
-    mockLocalStorage[taskStorage.TASKS_KEY] = JSON.stringify(tasks);
+    mockLocalStorage[ACTIVE_TASKS_KEY] = JSON.stringify(tasks);
     
     const result = taskStorage.deleteTasksByTemplate('template-1');
     
     expect(result).toBe(true);
     
-    const remainingTasks = JSON.parse(mockLocalStorage[taskStorage.TASKS_KEY]);
+    const remainingTasks = JSON.parse(mockLocalStorage[ACTIVE_TASKS_KEY]);
     expect(remainingTasks).toHaveLength(1);
     expect(remainingTasks[0].id).toBe('task-3');
   });
