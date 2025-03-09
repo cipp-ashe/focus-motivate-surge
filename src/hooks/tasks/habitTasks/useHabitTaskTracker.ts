@@ -1,71 +1,43 @@
 
 import { useRef, useCallback } from 'react';
-import { Task } from '@/types/tasks';
 
 /**
- * Hook to track scheduled habit tasks
+ * Hook for tracking scheduled habit tasks
  */
 export const useHabitTaskTracker = () => {
-  // Map habitId-date to taskId
-  const scheduledTasksRef = useRef(new Map<string, string>());
+  // Reference to store tracked tasks
+  const scheduledTasksRef = useRef<Record<string, any>>({});
   
-  // Track processing state to prevent concurrent processing
-  const processingEventRef = useRef(false);
-  
-  // Track pending tasks that couldn't be processed immediately
-  const pendingTasksRef = useRef<any[]>([]);
-  
-  const trackTask = useCallback((habitId: string, date: string, taskId: string) => {
-    const taskKey = `${habitId}-${date}`;
-    scheduledTasksRef.current.set(taskKey, taskId);
-  }, []);
-  
-  const isTaskTracked = useCallback((habitId: string, date: string): string | null => {
-    const taskKey = `${habitId}-${date}`;
-    const taskId = scheduledTasksRef.current.get(taskKey);
-    return taskId || null;
-  }, []);
-  
-  const removeTrackedTask = useCallback((habitId: string, date: string) => {
-    const taskKey = `${habitId}-${date}`;
-    if (scheduledTasksRef.current.has(taskKey)) {
-      scheduledTasksRef.current.delete(taskKey);
-      return true;
-    }
-    return false;
-  }, []);
-  
+  // Clear all tracked tasks
   const clearAllTrackedTasks = useCallback(() => {
-    scheduledTasksRef.current.clear();
+    console.log('Clearing all tracked habit tasks');
+    scheduledTasksRef.current = {};
   }, []);
   
-  const queuePendingTask = useCallback((task: any) => {
-    pendingTasksRef.current.push(task);
+  // Add a task to tracking
+  const trackTask = useCallback((habitId: string, date: string, taskId: string) => {
+    const key = `${habitId}-${date}`;
+    scheduledTasksRef.current[key] = taskId;
+    console.log(`Tracking habit task: ${habitId} on ${date} with taskId ${taskId}`);
   }, []);
   
-  const getPendingTasks = useCallback(() => {
-    const tasks = [...pendingTasksRef.current];
-    pendingTasksRef.current = [];
-    return tasks;
+  // Check if a task is already tracked
+  const isTaskTracked = useCallback((habitId: string, date: string) => {
+    const key = `${habitId}-${date}`;
+    return !!scheduledTasksRef.current[key];
   }, []);
   
-  const setProcessingState = useCallback((isProcessing: boolean) => {
-    processingEventRef.current = isProcessing;
-  }, []);
-  
-  const isProcessing = useCallback(() => {
-    return processingEventRef.current;
+  // Get a tracked task ID
+  const getTrackedTaskId = useCallback((habitId: string, date: string) => {
+    const key = `${habitId}-${date}`;
+    return scheduledTasksRef.current[key];
   }, []);
   
   return {
+    scheduledTasksRef,
+    clearAllTrackedTasks,
     trackTask,
     isTaskTracked,
-    removeTrackedTask,
-    clearAllTrackedTasks,
-    queuePendingTask,
-    getPendingTasks,
-    setProcessingState,
-    isProcessing,
-    scheduledTasksRef
+    getTrackedTaskId
   };
 };

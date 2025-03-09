@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
@@ -66,13 +67,22 @@ export const useHabitTaskProcessor = () => {
   // Process any pending tasks (useful after navigation or initial load)
   const processPendingTasks = useCallback(() => {
     console.log('Checking for any pending habit tasks...');
-    // This is just a placeholder for now to ensure the API matches
-    // In a real implementation, we might query localStorage for unprocessed tasks
-    
-    // Force task update
-    setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-    }, 100);
+    // Try to find any tasks in localStorage that aren't in memory
+    try {
+      const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+      const habitTasks = storedTasks.filter((task: Task) => task.relationships?.habitId);
+      
+      if (habitTasks.length > 0) {
+        console.log(`Found ${habitTasks.length} habit tasks in localStorage, ensuring they're loaded in memory`);
+        
+        // Force task update to load any missing tasks
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error processing pending tasks:', error);
+    }
   }, []);
   
   // Hook up event listener in the component that uses this hook
