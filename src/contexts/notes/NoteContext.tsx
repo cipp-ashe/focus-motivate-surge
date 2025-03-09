@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -202,17 +201,8 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
       const filteredNotes = notes.filter((note: Note) => note.id !== noteId);
       localStorage.setItem('notes', JSON.stringify(filteredNotes));
       
-      // Delete any relationships
-      relatedHabits.forEach(entity => {
-        relationshipManager.deleteRelationship(entity.id, noteId);
-        
-        // Emit an event to update the habit completion status
-        eventBus.emit('habit:journal-deleted', {
-          habitId: entity.id,
-        });
-        
-        console.log(`Relationship deleted between habit ${entity.id} and note ${noteId}`);
-      });
+      // Emit note:deleted event to notify other systems
+      eventBus.emit('note:deleted', { noteId });
       
       toast.success('Note deleted 🗑️');
     },

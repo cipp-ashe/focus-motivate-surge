@@ -1,4 +1,3 @@
-
 export interface TimerEventPayloads {
   'habit:schedule': {
     habitId: string;
@@ -46,6 +45,9 @@ export interface TimerEventPayloads {
   'tag:link': any;
   'tag:unlink': any;
   'quote:link-task': any;
+  'note:deleted': {
+    noteId: string;
+  };
 }
 
 export type TimerEventType = keyof TimerEventPayloads;
