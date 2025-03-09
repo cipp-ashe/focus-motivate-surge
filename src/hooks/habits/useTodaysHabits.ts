@@ -32,41 +32,43 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     return habits;
   }, [activeTemplates]);
 
+  // Process today's habits and generate tasks for timer-based habits
+  const processHabits = useCallback((habits: HabitDetail[]) => {
+    const today = new Date().toDateString();
+    console.log('Processing habits for today:', today);
+    
+    habits.forEach(habit => {
+      if (habit.metrics?.type === 'timer') {
+        const template = activeTemplates.find(t => 
+          t.habits.some(h => h.id === habit.id)
+        );
+        
+        if (template) {
+          console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${template.templateId}`);
+          
+          // Force emit the event to ensure task creation
+          eventBus.emit('habit:schedule', {
+            habitId: habit.id,
+            templateId: template.templateId,
+            duration: (habit.metrics.target || 25) * 60, // Convert minutes to seconds
+            name: habit.name,
+            date: today
+          });
+        }
+      }
+    });
+    
+    localStorage.setItem('lastHabitProcessingDate', today);
+  }, [activeTemplates]);
+
   useEffect(() => {
     const habits = getTodaysHabits();
-    
-    // Only emit events for new habits
-    const lastProcessedDate = localStorage.getItem('lastHabitProcessingDate');
-    const today = new Date().toDateString();
-    
-    // Process habits only once per day
-    if (lastProcessedDate !== today) {
-      console.log('Processing habits for new day:', today);
-      
-      habits.forEach(habit => {
-        if (habit.metrics?.type === 'timer') {
-          const template = activeTemplates.find(t => 
-            t.habits.some(h => h.id === habit.id)
-          );
-          
-          if (template) {
-            // Emit a single event for habit task generation
-            eventBus.emit('habit:schedule', {
-              habitId: habit.id,
-              templateId: template.templateId,
-              duration: habit.metrics.target || 25,
-              name: habit.name,
-              date: today
-            });
-          }
-        }
-      });
-      
-      localStorage.setItem('lastHabitProcessingDate', today);
-    }
-
     setTodaysHabits(habits);
-  }, [getTodaysHabits, activeTemplates]);
+    
+    // Force process habits on first load and every time templates change
+    processHabits(habits);
+    
+  }, [getTodaysHabits, processHabits]);
 
   return { todaysHabits };
 };

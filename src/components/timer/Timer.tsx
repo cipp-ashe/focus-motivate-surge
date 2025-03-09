@@ -169,7 +169,6 @@ export const Timer = ({
     // Prepare completion metrics
     const completionMetrics: TimerStateMetrics = {
       ...metrics,
-      actualTime: minutes * 60 - timeLeft,
       estimatedTime: minutes * 60,
       pauseCount: metrics.pauseCount || 0,
       completionStatus: "Completed On Time"

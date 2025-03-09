@@ -15,6 +15,8 @@ const TaskManager = () => {
     const handleHabitSchedule = (event: any) => {
       const { habitId, templateId, name, duration, date } = event;
       
+      console.log('TaskManager received habit:schedule event:', event);
+      
       // Check if task already exists for this habit and date
       const existingTask = tasks.find(task => 
         task.relationships?.habitId === habitId && 
@@ -22,11 +24,12 @@ const TaskManager = () => {
       );
       
       if (existingTask) {
-        console.log(`Task already exists for habit ${habitId} on ${date}`);
+        console.log(`Task already exists for habit ${habitId} on ${date}:`, existingTask);
         return;
       }
 
       const taskId = crypto.randomUUID();
+      console.log(`Creating new task for habit ${habitId}:`, { taskId, name, duration });
       
       const task = {
         id: taskId,
@@ -58,10 +61,10 @@ const TaskManager = () => {
     };
 
     // Listen for habit scheduling
-    eventBus.on('habit:schedule', handleHabitSchedule);
+    const unsubscribe = eventBus.on('habit:schedule', handleHabitSchedule);
     
     return () => {
-      eventBus.off('habit:schedule', handleHabitSchedule);
+      unsubscribe();
     };
   }, [tasks, addTagToEntity]);
 
