@@ -4,14 +4,27 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
 
 describe('useHabitProgress', () => {
+  // Mock localStorage
+  let localStorageMock = {};
+  
   beforeEach(() => {
     vi.useFakeTimers();
     const today = new Date('2024-02-20');
     vi.setSystemTime(today);
+    
+    // Setup localStorage mock
+    localStorageMock = {};
+    Storage.prototype.getItem = vi.fn((key) => {
+      return localStorageMock[key] || null;
+    });
+    Storage.prototype.setItem = vi.fn((key, value) => {
+      localStorageMock[key] = value;
+    });
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('should initialize with empty progress', () => {
@@ -36,6 +49,9 @@ describe('useHabitProgress', () => {
     const progress = result.current.getTodayProgress('habit1', 'template1');
     expect(progress.completed).toBe(true);
     expect(progress.streak).toBe(1);
+    
+    // Verify localStorage was updated
+    expect(localStorage.setItem).toHaveBeenCalled();
   });
 
   it('should get weekly progress', () => {
@@ -60,5 +76,28 @@ describe('useHabitProgress', () => {
 
     const progress = result.current.getTodayProgress('habit1', 'template1');
     expect(progress.streak).toBe(0);
+  });
+  
+  it('should load saved progress from localStorage', () => {
+    // Setup mock data in localStorage
+    const mockData = {
+      template1: {
+        habit1: {
+          '2024-02-20': {
+            value: true,
+            streak: 3,
+            date: '2024-02-20',
+            completed: true
+          }
+        }
+      }
+    };
+    localStorage.getItem.mockReturnValueOnce(JSON.stringify(mockData));
+    
+    const { result } = renderHook(() => useHabitProgress());
+    
+    const progress = result.current.getTodayProgress('habit1', 'template1');
+    expect(progress.completed).toBe(true);
+    expect(progress.streak).toBe(3);
   });
 });

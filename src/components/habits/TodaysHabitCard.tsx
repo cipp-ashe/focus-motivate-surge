@@ -41,6 +41,12 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
     setJournalModalOpen(true);
   };
   
+  const handleJournalComplete = () => {
+    // Mark the journal habit as completed
+    onComplete();
+    setJournalModalOpen(false);
+  };
+  
   return (
     <div className="flex items-center justify-between p-3 bg-card hover:bg-accent/50 rounded-md transition-colors">
       <div className="flex items-center gap-3">
@@ -125,7 +131,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
               habitId={habit.id}
               habitName={habit.name}
               description={habit.description}
-              onComplete={onComplete}
+              onComplete={handleJournalComplete}
             />
           </>
         )}

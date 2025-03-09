@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -30,6 +31,12 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
 
   const handleOpenJournal = () => {
     setJournalModalOpen(true);
+  };
+
+  const handleJournalComplete = () => {
+    // Mark the journal habit as completed
+    onUpdate(true);
+    setJournalModalOpen(false);
   };
 
   const formatTime = (seconds: number) => {
@@ -107,7 +114,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
               habitId={habit.id}
               habitName={habit.name}
               description={habit.description}
-              onComplete={() => onUpdate(true)}
+              onComplete={handleJournalComplete}
             />
           </>
         );
