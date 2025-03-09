@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
@@ -66,7 +65,6 @@ export const Timer = ({
     onDurationChange,
   });
 
-  // Handle timer initialization
   useEffect(() => {
     const unsubscribe = eventBus.on('timer:init', ({ taskName: eventTaskName, duration: newDuration }) => {
       if (eventTaskName === taskName) {
@@ -78,7 +76,6 @@ export const Timer = ({
     return () => unsubscribe();
   }, [taskName, setInternalMinutes]);
 
-  // Handle view state changes
   useEffect(() => {
     const unsubscribeExpand = eventBus.on('timer:expand', ({ taskName: eventTaskName }) => {
       if (eventTaskName === taskName) {
@@ -157,51 +154,40 @@ export const Timer = ({
   const timerCircleProps = getTimerCircleProps();
   const timerControlsProps = getTimerControlsProps();
 
-  // Define auto-complete handler for habit tasks
   const handleAutoComplete = useCallback(async () => {
     if (isRunning) {
       pause();
     }
     
-    // Play completion sound
     playSound();
     
-    // Prepare completion metrics
     const completionMetrics: TimerStateMetrics = {
       ...metrics,
-      estimatedTime: minutes * 60,
-      pauseCount: metrics.pauseCount || 0,
       completionStatus: "Completed On Time"
     };
     
-    // Mark the timer as complete
     await completeTimer();
     
-    // Set completion state for showing completion view
     setCompletionMetrics(completionMetrics);
     setShowCompletion(true);
     
-    // Notify the parent component about completion
     if (onComplete) {
       onComplete(completionMetrics);
     }
     
-    // Check if this task is tied to a habit
     const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
     const habitTask = tasks.find((t: any) => t.name === taskName && t.relationships?.habitId);
     
     if (habitTask) {
-      // Auto-complete the related habit
       eventBus.emit('task:complete', { 
         taskId: habitTask.id,
         metrics: completionMetrics
       });
     }
-  }, [isRunning, pause, playSound, metrics, minutes, timeLeft, completeTimer, onComplete, taskName]);
+  }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName]);
 
   return (
     <div className="relative">
-      {/* Base timer view with controlled visibility */}
       <div className={`transition-opacity duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <MainTimerView
           isExpanded={isExpanded}
@@ -229,7 +215,6 @@ export const Timer = ({
         />
       </div>
 
-      {/* Expanded view rendered at root level when active */}
       {isExpanded && (
         <TimerExpandedView
           ref={expandedViewRef}

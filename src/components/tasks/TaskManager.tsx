@@ -49,6 +49,12 @@ const TaskManager = () => {
       
       // Add the Habit tag
       addTagToEntity('Habit', taskId, 'task');
+      
+      // Add template tag if available (e.g., "Mindfulness")
+      if (templateId) {
+        const templateName = templateId.charAt(0).toUpperCase() + templateId.slice(1);
+        addTagToEntity(templateName, taskId, 'task');
+      }
 
       // Create relationship
       eventBus.emit('relationship:create', {
