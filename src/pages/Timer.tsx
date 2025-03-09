@@ -21,6 +21,20 @@ const TimerPage = () => {
     eventBus.emit('page:timer-ready', {
       timestamp: new Date().toISOString()
     });
+    
+    // Check for any pending habit tasks when the timer page loads
+    const checkForPendingHabits = () => {
+      console.log("Checking for pending habits from TimerPage");
+      eventBus.emit('habits:check-pending', {});
+      
+      // Force a task update to ensure any new tasks are loaded
+      window.dispatchEvent(new Event('force-task-update'));
+    };
+    
+    // Allow some time for other components to initialize
+    const timeout = setTimeout(checkForPendingHabits, 300);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   const handleTaskComplete = (metrics: any) => {

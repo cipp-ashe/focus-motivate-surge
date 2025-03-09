@@ -14,7 +14,7 @@ const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
   const { handleTimerStart } = useTimerEvents();
   const { getEntityTags } = useTagSystem();
-  const { deleteTask, updateTask } = useTaskEvents();
+  const { deleteTask, updateTask, checkPendingHabits } = useTaskEvents();
   const { currentPath } = useTasksNavigation();
   
   // Initialize task schedulers
@@ -28,6 +28,17 @@ const TaskManager = () => {
       eventBus.emit('task:tags-update', { count: tasks.length });
     }
   }, [tasks]);
+  
+  // Check for pending habits when TaskManager mounts
+  useEffect(() => {
+    console.log('TaskManager mounted, checking for pending habits');
+    // Check for pending habits on mount with a small delay
+    const timeout = setTimeout(() => {
+      checkPendingHabits();
+    }, 500);
+    
+    return () => clearTimeout(timeout);
+  }, [checkPendingHabits]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);

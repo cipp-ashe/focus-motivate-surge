@@ -80,8 +80,8 @@ export const useHabitTaskScheduler = (tasks: Task[]) => {
         }
       };
 
-      // Create the task
-      createTask(task);
+      // Create the task - use direct event emission to avoid any potential wrapping issues
+      eventBus.emit('task:create', task);
       
       // Add the Habit tag
       addTagToEntity('Habit', taskId, 'task');
@@ -121,10 +121,15 @@ export const useHabitTaskScheduler = (tasks: Task[]) => {
         relationType: 'habit-task'
       });
       
-      // Force a UI update
+      // Force a UI update with a slight delay to ensure everything is processed
       setTimeout(() => {
         forceTaskUpdate();
-      }, 50);
+        
+        // Dispatch a synthetic event to ensure TaskContext updates
+        window.dispatchEvent(new Event('force-task-update'));
+        
+        console.log('Forced task update after creating task from habit');
+      }, 200);
     } finally {
       // Release the lock after a short delay to prevent race conditions
       setTimeout(() => {
@@ -154,6 +159,12 @@ export const useHabitTaskScheduler = (tasks: Task[]) => {
     };
     
     setupDailyCleanup();
+    
+    // Also check for pending habits when component mounts
+    setTimeout(() => {
+      eventBus.emit('habits:check-pending', {});
+      console.log('Checking for pending habits on task scheduler mount');
+    }, 500);
     
     return () => {
       unsubscribeSchedule();
