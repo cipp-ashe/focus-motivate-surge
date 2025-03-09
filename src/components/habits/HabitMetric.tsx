@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { HabitDetail } from './types';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
 import { useNoteActions } from '@/contexts/notes/NoteContext';
+import JournalModal from './journal/JournalModal';
 
 interface ProgressResult {
   value: boolean | number;
@@ -25,32 +26,11 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   progress,
   onUpdate,
 }) => {
+  const [journalModalOpen, setJournalModalOpen] = useState(false);
   const noteActions = useNoteActions();
 
   const handleOpenJournal = () => {
-    // Create a new note with data from the habit
-    const newNote = {
-      title: `${habit.name} - ${new Date().toLocaleDateString()}`,
-      content: `## ${habit.name}\n\n${habit.description || ''}\n\n`,
-      tags: [{ name: 'journal', color: 'default' }, { name: habit.name.toLowerCase(), color: 'default' }]
-    };
-    
-    // Add the note using the context
-    noteActions.addNote(newNote);
-    
-    // Mark as completed when journal is created
-    onUpdate(true);
-    
-    // Also emit the event for other parts of the app that might be listening
-    eventBus.emit('note:create-from-habit', { 
-      habitId: habit.id, 
-      habitName: habit.name,
-      description: habit.description || ''
-    });
-    
-    toast.success(`Created new journal entry for: ${habit.name}`, {
-      description: "Your journal entry has been created"
-    });
+    setJournalModalOpen(true);
   };
 
   const formatTime = (seconds: number) => {
@@ -112,15 +92,25 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         );
       case 'journal':
         return (
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={handleOpenJournal}
-          >
-            <BookOpen className="h-3 w-3 mr-1" />
-            Write
-          </Button>
+          <>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={handleOpenJournal}
+            >
+              <BookOpen className="h-3 w-3 mr-1" />
+              Write
+            </Button>
+            <JournalModal
+              open={journalModalOpen}
+              onOpenChange={setJournalModalOpen}
+              habitId={habit.id}
+              habitName={habit.name}
+              description={habit.description}
+              onComplete={() => onUpdate(true)}
+            />
+          </>
         );
       case 'rating':
         const ratingValue = typeof progress.value === 'number' ? progress.value : 0;

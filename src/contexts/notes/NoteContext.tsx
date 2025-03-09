@@ -2,16 +2,21 @@
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { Note } from '@/types/notes';
+import type { Note, Tag } from '@/types/notes';
 import { eventBus } from '@/lib/eventBus';
 
+// Add a title field to the Note interface
 interface NoteState {
   items: Note[];
   selected: string | null;
 }
 
+interface NoteInput extends Omit<Note, 'id' | 'createdAt'> {
+  title?: string; // Optional title for better UX
+}
+
 interface NoteContextActions {
-  addNote: (note: Omit<Note, 'id' | 'createdAt'>) => void;
+  addNote: (note: NoteInput) => void;
   updateNote: (noteId: string, updates: Partial<Note>) => void;
   deleteNote: (noteId: string) => void;
   selectNote: (noteId: string | null) => void;
@@ -91,7 +96,6 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
         console.log('Creating note from habit:', habitData);
         const newNote: Note = {
           id: crypto.randomUUID(),
-          title: `${habitData.habitName} - ${new Date().toLocaleDateString()}`,
           content: `## ${habitData.habitName}\n\n${habitData.description}\n\n`,
           createdAt: new Date().toISOString(),
           tags: [{ name: 'journal', color: 'default' }, { name: habitData.habitName.toLowerCase(), color: 'default' }]
@@ -110,9 +114,20 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const actions: NoteContextActions = {
-    addNote: (note) => {
+    addNote: (noteInput) => {
+      // Handle the title field - add it to content if provided
+      let content = noteInput.content;
+      
+      if (noteInput.title) {
+        // If content doesn't start with a heading, add the title as a heading
+        if (!content.trim().startsWith('#')) {
+          content = `# ${noteInput.title}\n\n${content}`;
+        }
+      }
+      
       const newNote: Note = {
-        ...note,
+        content,
+        tags: noteInput.tags || [],
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       };

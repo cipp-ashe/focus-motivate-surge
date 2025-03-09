@@ -5,7 +5,10 @@ export type QuoteCategory =
   | 'creativity' 
   | 'learning' 
   | 'persistence' 
-  | 'growth';
+  | 'growth'
+  | 'gratitude'
+  | 'mindfulness'
+  | 'reflection';
 
 export interface Quote {
   text: string;

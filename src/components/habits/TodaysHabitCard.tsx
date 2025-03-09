@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Timer, Plus, BookOpen, CheckCircle, Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import type { HabitDetail } from "@/components/habits/types";
 import { eventBus } from "@/lib/eventBus";
 import { useNoteActions } from "@/contexts/notes/NoteContext";
+import JournalModal from "./journal/JournalModal";
 
 interface HabitRowProps {
   habit: HabitDetail;
@@ -17,6 +19,7 @@ interface HabitRowProps {
 }
 
 const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
+  const [journalModalOpen, setJournalModalOpen] = useState(false);
   const noteActions = useNoteActions();
   const isTimerHabit = habit.metrics.type === 'timer';
   const isJournalHabit = habit.metrics.type === 'journal';
@@ -35,30 +38,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
 
   const handleJournalClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Create a new note with data from the habit
-    const newNote = {
-      title: `${habit.name} - ${new Date().toLocaleDateString()}`,
-      content: `## ${habit.name}\n\n${habit.description || ''}\n\n`,
-      tags: [{ name: 'journal', color: 'default' }, { name: habit.name.toLowerCase(), color: 'default' }]
-    };
-    
-    // Add the note using the context
-    noteActions.addNote(newNote);
-    
-    // Mark as completed
-    onComplete();
-    
-    // Use event bus for any other components that might be listening
-    eventBus.emit('note:create-from-habit', {
-      habitId: habit.id,
-      habitName: habit.name,
-      description: habit.description || ''
-    });
-    
-    toast.success(`Created new journal entry for: ${habit.name}`, {
-      description: "Your journal entry has been created"
-    });
+    setJournalModalOpen(true);
   };
   
   return (
@@ -130,14 +110,24 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
         )}
 
         {isJournalHabit && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleJournalClick}
-            className="h-8 w-8"
-          >
-            <BookOpen className="h-4 w-4" />
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleJournalClick}
+              className="h-8 w-8"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
+            <JournalModal
+              open={journalModalOpen}
+              onOpenChange={setJournalModalOpen}
+              habitId={habit.id}
+              habitName={habit.name}
+              description={habit.description}
+              onComplete={onComplete}
+            />
+          </>
         )}
       </div>
     </div>
