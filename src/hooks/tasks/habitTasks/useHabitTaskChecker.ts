@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { useTaskEvents } from '../useTaskEvents';
+import { toast } from 'sonner';
 
 /**
  * Hook to check for missing habit tasks and verify against localStorage
@@ -19,8 +20,8 @@ export const useHabitTaskChecker = (tasks: Task[]) => {
     // Trigger a habit check
     eventBus.emit('habits:check-pending', {});
     
-    // Verify against localStorage tasks
-    setTimeout(() => {
+    // Verify against localStorage tasks with multiple attempts
+    const checkAndFix = (attempt = 1, maxAttempts = 3) => {
       // Get all tasks from localStorage
       const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
       
@@ -28,7 +29,7 @@ export const useHabitTaskChecker = (tasks: Task[]) => {
       const habitTasks = storedTasks.filter((task: Task) => task.relationships?.habitId);
       
       if (habitTasks.length > 0) {
-        console.log(`Found ${habitTasks.length} habit tasks in localStorage during check`);
+        console.log(`Found ${habitTasks.length} habit tasks in localStorage during check (attempt ${attempt})`);
         
         // Find tasks that exist in localStorage but not in memory
         const missingTasks = habitTasks.filter((storedTask: Task) => 
@@ -45,9 +46,26 @@ export const useHabitTaskChecker = (tasks: Task[]) => {
           });
           
           // Force a task update to ensure UI updates
-          setTimeout(() => forceTaskUpdate(), 200);
+          setTimeout(() => {
+            forceTaskUpdate();
+            
+            // If not the final attempt, schedule another check
+            if (attempt < maxAttempts) {
+              setTimeout(() => checkAndFix(attempt + 1, maxAttempts), 300 * attempt);
+            } else {
+              // Final attempt - show user notification
+              toast.info(`Loaded ${missingTasks.length} habit tasks`, {
+                description: "Your scheduled habit tasks have been synchronized."
+              });
+            }
+          }, 200);
         } else {
           console.log('All habit tasks from localStorage are already loaded in memory');
+          
+          // If we have habit tasks but they're all loaded, we're good
+          if (attempt === maxAttempts) {
+            console.log('Task verification completed successfully');
+          }
         }
       } else if (tasks.some(task => task.relationships?.habitId)) {
         // We have habit tasks in memory but none in localStorage - need to persist them
@@ -59,8 +77,16 @@ export const useHabitTaskChecker = (tasks: Task[]) => {
         localStorage.setItem('taskList', JSON.stringify([...storedTasks, ...habitTasksInMemory]));
         
         console.log(`Persisted ${habitTasksInMemory.length} habit tasks to localStorage`);
+      } else if (attempt === maxAttempts) {
+        // Last attempt and no habit tasks - inform the system
+        eventBus.emit('habits:processed', {});
+        console.log('No habit tasks found after multiple verification attempts');
       }
-    }, 200);
+    };
+    
+    // Start the checking process
+    checkAndFix(1, 3);
+    
   }, [tasks, forceTaskUpdate]);
   
   return {

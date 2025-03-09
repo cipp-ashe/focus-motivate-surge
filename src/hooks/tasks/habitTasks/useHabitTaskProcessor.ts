@@ -7,6 +7,7 @@ import { useTaskVerification } from './useTaskVerification';
 import { useHabitTaskCreator } from './useHabitTaskCreator';
 import { eventBus } from '@/lib/eventBus';
 import { useTaskEvents } from '../useTaskEvents';
+import { toast } from 'sonner';
 
 /**
  * Hook to process habit task events
@@ -51,9 +52,6 @@ export const useHabitTaskProcessor = (tasks: Task[]) => {
       
       console.log('TaskScheduler received habit:schedule event:', event);
       
-      // Create a unique key to track this scheduled task
-      const taskKey = `${habitId}-${date}`;
-      
       // Check if we've already processed this exact habit-date combination
       const existingTaskId = taskTracker.isTaskTracked(habitId, date);
       if (existingTaskId) {
@@ -66,6 +64,13 @@ export const useHabitTaskProcessor = (tasks: Task[]) => {
           taskTracker.removeTrackedTask(habitId, date);
           // Continue execution to recreate the task
         } else {
+          // The task exists in storage, verify it's loaded in memory
+          const existsInMemory = checkTaskExistsInMemory(habitId, date);
+          if (!existsInMemory) {
+            console.log(`Task exists in storage but not in memory, forcing reload`);
+            setTimeout(() => forceTaskUpdate(), 100);
+          }
+          
           taskTracker.setProcessingState(false);
           return;
         }
@@ -88,8 +93,12 @@ export const useHabitTaskProcessor = (tasks: Task[]) => {
         console.log(`Task already exists in localStorage for habit ${habitId} on ${date}:`, existingTaskInStorage);
         taskTracker.trackTask(habitId, date, existingTaskInStorage.id);
         
-        // Force a task update to ensure the task is loaded
-        setTimeout(() => forceTaskUpdate(), 100);
+        // Force a task update to ensure the task is loaded into memory
+        setTimeout(() => {
+          forceTaskUpdate();
+          // Add an explicit toast notification to confirm task was found
+          toast.info(`Found existing habit task: ${name}`);
+        }, 100);
         
         taskTracker.setProcessingState(false);
         return;
@@ -102,8 +111,47 @@ export const useHabitTaskProcessor = (tasks: Task[]) => {
       // Add to our tracking map
       taskTracker.trackTask(habitId, date, taskId);
       
-      // Force a task update to make sure UI reflects the new task
-      setTimeout(() => forceTaskUpdate(), 200);
+      // Force a task update to make sure UI reflects the new task - multiple times with increasing delays
+      const updateIntervals = [100, 300, 800];
+      updateIntervals.forEach(delay => {
+        setTimeout(() => {
+          console.log(`Force updating tasks after ${delay}ms`);
+          forceTaskUpdate();
+          
+          // Explicitly check if the task exists after update
+          if (delay === updateIntervals[updateIntervals.length - 1]) {
+            setTimeout(() => {
+              const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+              const taskExists = storedTasks.some((t: Task) => 
+                t.relationships?.habitId === habitId && t.relationships?.date === date
+              );
+              
+              if (!taskExists) {
+                console.log(`Task still missing from localStorage after updates, final attempt to recreate`);
+                // Final attempt to create the task directly in localStorage
+                const task: Task = {
+                  id: taskId,
+                  name,
+                  completed: false,
+                  duration: typeof duration === 'number' ? duration : 1500,
+                  createdAt: new Date().toISOString(),
+                  relationships: {
+                    habitId,
+                    templateId,
+                    date
+                  }
+                };
+                
+                storedTasks.push(task);
+                localStorage.setItem('taskList', JSON.stringify(storedTasks));
+                
+                // Force one more task update
+                setTimeout(() => forceTaskUpdate(), 100);
+              }
+            }, 200);
+          }
+        }, delay);
+      });
       
     } finally {
       // Release the lock after a short delay to prevent race conditions

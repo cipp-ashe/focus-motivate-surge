@@ -8,12 +8,14 @@ import { Quote } from "@/types/timer";
 import { eventBus } from '@/lib/eventBus';
 import { TimerErrorBoundary } from '@/components/timer/TimerErrorBoundary';
 import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
+import { toast } from 'sonner';
 
 const TimerPage = () => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
   const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
   const [favorites, setFavorites] = React.useState<Quote[]>([]);
   const habitCheckDoneRef = useRef(false);
+  const tasksLoadedRef = useRef(false);
   
   // Track when TimerPage is mounted and ready
   useEffect(() => {
@@ -76,6 +78,17 @@ const TimerPage = () => {
               setTimeout(() => {
                 window.dispatchEvent(new Event('force-task-update'));
               }, 100);
+              
+              // Show notification if this is the first time loading tasks
+              if (!tasksLoadedRef.current) {
+                tasksLoadedRef.current = true;
+                toast.info(`Loaded ${missingTasks.length} habit tasks`, {
+                  description: "Your scheduled habit tasks have been synchronized."
+                });
+              }
+            } else {
+              console.log('All habit tasks are properly loaded');
+              tasksLoadedRef.current = true;
             }
           }
         } else {
@@ -87,6 +100,10 @@ const TimerPage = () => {
         // If we still need more iterations, schedule the next check
         if (iteration < 3) {
           setTimeout(() => checkHabits(iteration + 1), checkInterval * iteration);
+        } else if (!tasksLoadedRef.current && tasks.length === 0) {
+          // After all iterations, if still no tasks, try one more time with direct creation
+          console.log('Final attempt to load habit tasks from templates');
+          eventBus.emit('habits:reprocess-all', {});
         }
       };
       
@@ -94,6 +111,23 @@ const TimerPage = () => {
       setTimeout(() => checkHabits(1), 300);
     }
   }, [tasks.length]);
+  
+  // Listen for force-task-update events
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      console.log('TimerPage: Received force-task-update event');
+      // Check if we need to load any tasks that aren't in memory
+      const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+      const habitTasks = storedTasks.filter((task: any) => task.relationships?.habitId);
+      
+      if (habitTasks.length > 0 && habitTasks.length !== tasks.filter(t => t.relationships?.habitId).length) {
+        console.log(`Mismatch between stored habit tasks (${habitTasks.length}) and memory tasks (${tasks.filter(t => t.relationships?.habitId).length})`);
+      }
+    };
+    
+    window.addEventListener('force-task-update', handleForceUpdate);
+    return () => window.removeEventListener('force-task-update', handleForceUpdate);
+  }, [tasks]);
 
   const handleTaskComplete = (metrics: any) => {
     if (selectedTask) {
