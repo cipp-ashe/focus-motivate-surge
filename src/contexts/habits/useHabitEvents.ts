@@ -4,10 +4,11 @@ import { toast } from 'sonner';
 import { ActiveTemplate, HabitTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
 import { habitTemplates } from '@/utils/habitTemplates';
+import { HabitState } from './types';
 
 // This hook handles all the event subscriptions for the habit context
 export const useHabitEvents = (
-  state: { templates: ActiveTemplate[]; customTemplates: HabitTemplate[] },
+  state: HabitState,
   dispatch: React.Dispatch<any>
 ) => {
   useEffect(() => {
@@ -20,7 +21,12 @@ export const useHabitEvents = (
             type: 'UPDATE_TEMPLATE', 
             payload: { templateId: template.templateId, updates: template } 
           });
-          localStorage.setItem('habit-templates', JSON.stringify(state.templates));
+          
+          // Save to localStorage
+          const updatedTemplates = state.templates.map(t => 
+            t.templateId === template.templateId ? { ...t, ...template, customized: true } : t
+          );
+          localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
           toast.success('Template updated successfully');
         } else {
           // If no templateId, this is a new template
@@ -86,7 +92,22 @@ export const useHabitEvents = (
         }
       }),
       
-      // Listen for custom template updates
+      // Listen for template order updates
+      eventBus.on('habit:template-order-update', (templates) => {
+        console.log("Event received: habit:template-order-update", templates);
+        dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
+        localStorage.setItem('habit-templates', JSON.stringify(templates));
+      }),
+      
+      // Listen for custom template deletion
+      eventBus.on('habit:custom-template-delete', ({ templateId }) => {
+        console.log("Event received: habit:custom-template-delete", templateId);
+        dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: templateId });
+        const updatedTemplates = state.customTemplates.filter(t => t.id !== templateId);
+        localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
+      }),
+      
+      // Listen for custom template updates via localStorage
       window.addEventListener('templatesUpdated', () => {
         try {
           const customTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
@@ -101,5 +122,5 @@ export const useHabitEvents = (
       unsubscribers.forEach(unsub => typeof unsub === 'function' && unsub());
       window.removeEventListener('templatesUpdated', () => {});
     };
-  }, [state.templates, dispatch]);
+  }, [state, dispatch]);
 };

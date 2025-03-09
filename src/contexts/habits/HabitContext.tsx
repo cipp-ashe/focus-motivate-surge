@@ -6,7 +6,7 @@ import { useTodaysHabits } from '@/hooks/useTodaysHabits';
 import { habitReducer } from './habitReducer';
 import { HabitState, HabitContextActions, initialState } from './types';
 import { useHabitEvents } from './useHabitEvents';
-import { useHabitActions } from './useHabitActions';
+import { useHabitActions as createHabitActions } from './useHabitActions';
 
 const HabitContext = createContext<HabitState | undefined>(undefined);
 const HabitActionsContext = createContext<HabitContextActions | undefined>(undefined);
@@ -43,7 +43,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // Create action handlers
-  const actions = useHabitActions(state, dispatch);
+  const actions = createHabitActions(state, dispatch);
 
   return (
     <HabitContext.Provider value={{ ...state, todaysHabits }}>
