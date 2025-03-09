@@ -49,18 +49,18 @@ const AvailableTemplates: React.FC<AvailableTemplatesProps> = ({
               <Button
                 variant={isActive ? "secondary" : "default"}
                 className={cn(
-                  "w-full", 
+                  "w-full py-2 h-auto min-h-10", 
                   !isActive && "bg-primary hover:bg-primary/90"
                 )}
                 onClick={() => onSelect(template)}
                 disabled={isActive}
               >
                 {isActive ? (
-                  <Check className="h-4 w-4 mr-2" />
+                  <Check className="h-4 w-4 mr-2 flex-shrink-0" />
                 ) : (
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
                 )}
-                {isActive ? "Already Added" : "Add Template"}
+                <span className="whitespace-nowrap">{isActive ? "Already Added" : "Add Template"}</span>
               </Button>
             </CardFooter>
           </Card>
