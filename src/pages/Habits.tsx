@@ -6,30 +6,29 @@ import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Settings, ArrowLeft } from 'lucide-react';
+import { Settings, ArrowLeft, Sun, Moon } from 'lucide-react';
 import { useHabitsPanel } from '@/hooks/useHabitsPanel';
 import { Link } from 'react-router-dom';
+import { useTheme } from "@/hooks/useTheme";
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
   const { open } = useHabitsPanel();
   const [configOpen, setConfigOpen] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   // Function to open config sheet directly
   const openConfig = () => {
-    console.log("Opening config sheet directly");
     setConfigOpen(true);
   };
 
   // Handle closing config
   const handleCloseConfig = (open: boolean) => {
-    console.log("Config sheet state change:", open);
     setConfigOpen(open);
   };
 
   // Handle template selection
   const handleSelectTemplate = (templateId: string) => {
-    console.log("Template selected:", templateId);
     const template = habitTemplates.find(t => t.id === templateId);
     if (template) {
       toast.success(`Added template: ${template.name}`);
@@ -47,8 +46,22 @@ const HabitsPage = () => {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-          Habit Configuration
+          Habit Tracker
         </h1>
+        <div className="ml-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="rounded-full hover:bg-primary/20"
+          >
+            {isDark ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
       </div>
       
       <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">

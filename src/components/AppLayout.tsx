@@ -9,9 +9,9 @@ export const AppLayout = () => {
   const showHeader = location.pathname !== '/';
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {showHeader && <Header />}
-      <main>
+      <main className="h-full">
         <Outlet />
       </main>
     </div>

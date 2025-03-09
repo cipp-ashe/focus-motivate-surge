@@ -14,17 +14,14 @@ export function HabitsPanelProvider({ children }: { children: React.ReactNode })
   const [isOpen, setIsOpen] = useState(false);
 
   const toggle = useCallback(() => {
-    console.log("Toggling habits panel, current state:", isOpen);
     setIsOpen(prev => !prev);
-  }, [isOpen]);
+  }, []);
   
   const open = useCallback(() => {
-    console.log("Opening habits panel");
     setIsOpen(true);
   }, []);
   
   const close = useCallback(() => {
-    console.log("Closing habits panel");
     setIsOpen(false);
   }, []);
 
