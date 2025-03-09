@@ -1,10 +1,10 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
 import { useTagSystem } from '@/hooks/useTagSystem';
+import { useLocation } from 'react-router-dom';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
@@ -12,21 +12,52 @@ const TaskManager = () => {
   const { addTagToEntity, getEntityTags } = useTagSystem();
   const scheduledTasksRef = useRef(new Map<string, string>()); // Map habitId-date to taskId
   const processingEventRef = useRef(false);
+  const location = useLocation();
   const [forceUpdate, setForceUpdate] = useState(0);
 
-  // Force rerender when needed
+  // Force tag reloading when tasks change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      console.log(`TaskManager: Tasks changed, force updating tags for ${tasks.length} tasks`);
+      
+      // Force tag update on all tasks
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-tags-update'));
+      }, 100);
+    }
+  }, [tasks]);
+
+  // Force rerender when needed or when location changes
   useEffect(() => {
     const handleForceUpdate = () => {
       console.log("TaskManager: Force updating task list");
       setForceUpdate(prev => prev + 1);
+      
+      // Force tag update on all tasks
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-tags-update'));
+      }, 100);
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
     
+    // Also update when location changes (navigating back from habits page)
+    setForceUpdate(prev => prev + 1);
+    console.log("TaskManager: Location changed to", location.pathname);
+    
+    // When returning from /habits to / root, force an immediate tag update
+    if (location.pathname === '/') {
+      console.log("TaskManager: Returned to home page, forcing task and tag update");
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+        window.dispatchEvent(new Event('force-tags-update'));
+      }, 50);
+    }
+    
     return () => {
       window.removeEventListener('force-task-update', handleForceUpdate);
     };
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     const handleHabitSchedule = (event: any) => {
@@ -223,7 +254,7 @@ const TaskManager = () => {
       unsubscribeTemplateDelete();
       unsubscribeTaskDelete();
     };
-  }, [tasks, addTagToEntity, forceUpdate]);
+  }, [tasks, addTagToEntity, forceUpdate, location]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);

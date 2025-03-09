@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { NoteTags } from "../notes/components/NoteTags";
 import { Tag } from "@/types/core";
@@ -15,7 +14,9 @@ interface TaskTagsProps {
 export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
   const { getEntityTags, addTagToEntity, removeTagFromEntity, updateTagColor } = useTagSystem();
   const [tags, setTags] = useState<Tag[]>([]);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
+  // Update tags more aggressively
   useEffect(() => {
     const updateTags = () => {
       if (!task?.id) return;
@@ -36,28 +37,79 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     // Initial tag loading
     updateTags();
     
-    // Event listeners for tag updates
-    window.addEventListener('tagsUpdated', updateTags);
+    // Set up more event listeners for tag updates
+    const events = [
+      'tagsUpdated',
+      'force-task-update',
+      'force-tags-update',
+      'task:create',
+      'task:update',
+      'task:delete',
+      'habit:template-delete'
+    ];
     
-    // Listen for template deletions to refresh tags
-    const handleTemplateDelete = () => {
-      setTimeout(updateTags, 100); // Refresh tags after short delay
-    };
+    // Listen for all events that might affect tags
+    const eventHandlers = events.map(eventName => {
+      const handler = () => {
+        console.log(`TaskTags: Detected ${eventName} event, updating tags for ${task.id}`);
+        setTimeout(updateTags, 50);
+      };
+      
+      if (eventName.includes(':')) {
+        // EventBus event
+        return { 
+          eventName, 
+          unsubscribe: eventBus.on(eventName, handler),
+          isEventBus: true 
+        };
+      } else {
+        // DOM event
+        window.addEventListener(eventName, handler);
+        return { 
+          eventName,
+          handler,
+          isEventBus: false 
+        };
+      }
+    });
     
-    // Listen for force task updates
-    const handleTaskUpdate = () => {
-      setTimeout(updateTags, 100); // Refresh tags after short delay
-    };
+    // Set up periodic tag refresh (every 2 seconds)
+    const intervalId = setInterval(() => {
+      setForceUpdate(prev => prev + 1);
+    }, 2000);
     
-    const unsubscribeTemplateDelete = eventBus.on('habit:template-delete', handleTemplateDelete);
-    window.addEventListener('force-task-update', handleTaskUpdate);
+    // Trigger a tags update whenever forceUpdate changes
+    if (forceUpdate > 0) {
+      updateTags();
+    }
     
     return () => {
-      window.removeEventListener('tagsUpdated', updateTags);
-      window.removeEventListener('force-task-update', handleTaskUpdate);
-      unsubscribeTemplateDelete();
+      // Clean up all event listeners
+      eventHandlers.forEach(eh => {
+        if (eh.isEventBus) {
+          eh.unsubscribe();
+        } else {
+          window.removeEventListener(eh.eventName, eh.handler);
+        }
+      });
+      
+      clearInterval(intervalId);
     };
-  }, [task?.id, getEntityTags]);
+  }, [task?.id, getEntityTags, forceUpdate]);
+
+  // Use effect specifically for task changes
+  useEffect(() => {
+    if (task?.id) {
+      console.log(`Task changed, updating tags for task ${task.id}`);
+      const currentTags = getEntityTags(task.id, 'task');
+      setTags(currentTags);
+      
+      // Dispatch event after a small delay to ensure all related data is loaded
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-tags-update'));
+      }, 100);
+    }
+  }, [task, getEntityTags]);
 
   const handleAddTag = (tagName: string) => {
     // Check if tag already exists before adding

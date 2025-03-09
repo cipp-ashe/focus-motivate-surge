@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { HabitDetail, DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
@@ -57,13 +56,19 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     console.log("useTodaysHabits - Today's habits:", habits);
     console.log("useTodaysHabits - Number of habits found for today:", habits.length);
     
-    // Process habits (create tasks for timer habits, etc)
+    // Process habits immediately (create tasks for timer habits, etc)
     if (habits.length > 0) {
       processHabits(habits, today);
+      
+      // Also trigger an event to alert other components that today's habits have been processed
+      setTimeout(() => {
+        window.dispatchEvent(new Event('todays-habits-processed'));
+        eventBus.emit('habits:processed', { habits, date: today });
+      }, 100);
     }
     
     return habits;
-  }, [activeTemplates, getCurrentDayOfWeek]);
+  }, [activeTemplates, getCurrentDayOfWeek, processHabits]);
   
   // Process habits (e.g., create tasks for timer habits)
   const processHabits = useCallback((habits: HabitDetail[], date: string) => {
@@ -134,6 +139,19 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     } finally {
       processingRef.current = false;
     }
+    
+    // Immediate processing when component mounts
+    if (!initialProcessingCompleteRef.current) {
+      console.log("useTodaysHabits - Initial processing of templates");
+      const habits = getTodaysHabits();
+      setTodaysHabits(habits);
+      initialProcessingCompleteRef.current = true;
+      
+      // Force a task update after processing
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 200);
+    }
   }, [activeTemplates, getTodaysHabits, getActiveTemplatesSignature]);
   
   // Set up event listeners for force updates
@@ -156,15 +174,29 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       setTodaysHabits(prev => prev.filter(habit => (habit as any)._templateId !== templateId));
     };
     
+    // Add a specific listener for navigation between pages
+    const handlePageNavigation = () => {
+      console.log("Navigation detected, reprocessing today's habits");
+      const habits = getTodaysHabits();
+      setTodaysHabits(habits);
+      
+      // Force tasks to update after navigation
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 100);
+    };
+    
     window.addEventListener('force-habits-update', handleForceUpdate);
     const unsubUpdate = eventBus.on('habit:template-update', onTemplateUpdate);
     const unsubDelete = eventBus.on('habit:template-delete', onTemplateDelete);
+    window.addEventListener('popstate', handlePageNavigation);
     
     // Clean up
     return () => {
       window.removeEventListener('force-habits-update', handleForceUpdate);
       unsubUpdate();
       unsubDelete();
+      window.removeEventListener('popstate', handlePageNavigation);
       
       if (pendingProcessingTimeoutRef.current) {
         clearTimeout(pendingProcessingTimeoutRef.current);

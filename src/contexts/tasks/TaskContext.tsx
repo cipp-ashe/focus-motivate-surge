@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -10,6 +9,7 @@ interface TaskContextState {
   items: Task[];
   completed: Task[];
   selected: string | null;
+  isLoaded: boolean;
 }
 
 const TaskContext = createContext<TaskContextState | undefined>(undefined);
@@ -18,6 +18,7 @@ const initialState: TaskContextState = {
   items: [],
   completed: [],
   selected: null,
+  isLoaded: false,
 };
 
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
@@ -28,6 +29,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
           ...state,
           items: action.payload.tasks,
           completed: action.payload.completed,
+          isLoaded: true,
         };
       case 'ADD_TASK':
         // Avoid duplicate tasks
@@ -121,8 +123,41 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     }
   }, initialState);
 
+  // Force a reload of tasks when navigating between pages
   useEffect(() => {
-    // Subscribe to events
+    const loadTasksFromStorage = () => {
+      try {
+        const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+        const completed = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+        
+        console.log("TaskContext: Loading tasks from storage on navigation", tasks.length, "completed:", completed.length);
+        dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
+
+        // Force a UI update after loading tasks
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+        }, 50);
+      } catch (error) {
+        console.error('Error loading tasks from storage:', error);
+      }
+    };
+
+    // Listen for route changes
+    const handleRouteChange = () => {
+      console.log("TaskContext: Route changed, reloading tasks");
+      loadTasksFromStorage();
+    };
+
+    // Add event listener for navigation events
+    window.addEventListener('popstate', handleRouteChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, []);
+
+  // Subscribe to events
+  useEffect(() => {
     const unsubscribers = [
       eventBus.on('task:create', (task) => {
         console.log("TaskContext: Creating task in context", task);
@@ -187,6 +222,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         
         console.log("TaskContext: Loading initial tasks", tasks.length, "completed:", completed.length);
         dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
+        
+        // Force task update after initial load
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+        }, 100);
+        
         return { tasks, completed };
       } catch (error) {
         console.error('Error loading tasks:', error);

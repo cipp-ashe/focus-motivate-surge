@@ -10,12 +10,28 @@ class EventBus {
   private listeners: Record<string, EventCallback[]> = {};
   private debounceTimeouts: Record<string, NodeJS.Timeout> = {};
   private lastEmitted: Record<string, number> = {};
+  private pendingEvents: Record<string, any> = {};
   private debounceIntervals: Record<string, number> = {
     'habit:schedule': 300, // 300ms debounce for habit scheduling
     'habit:template-add': 500, // 500ms debounce for template addition
     'task:update': 200, // 200ms debounce for task updates
     'task:create': 200, // 200ms debounce for task creation
+    'habits:processed': 300, // 300ms debounce for habits processed events
+    'habits:check-pending': 100, // 100ms debounce for habit checking
   };
+
+  constructor() {
+    // Set up listeners for page navigation
+    window.addEventListener('popstate', () => {
+      console.log('[EventBus] Page navigation detected, processing pending events');
+      this.processPendingEvents();
+    });
+    
+    // Also process pending events regularly
+    setInterval(() => {
+      this.processPendingEvents();
+    }, 5000); // Check every 5 seconds
+  }
 
   public on(eventName: string, callback: EventCallback): () => void {
     if (!this.listeners[eventName]) {
@@ -44,6 +60,11 @@ class EventBus {
 
   public emit(eventName: string, payload: any = {}): void {
     console.log(`[EventBus] ${eventName}`, payload);
+    
+    // Always store events that might need to be reprocessed on page navigation
+    if (['habit:schedule', 'habit:template-add', 'habit:template-update'].includes(eventName)) {
+      this.storePendingEvent(eventName, payload);
+    }
     
     // For events that need debouncing (like habit:schedule)
     if (this.debounceIntervals[eventName]) {
@@ -106,12 +127,70 @@ class EventBus {
     });
   }
 
+  // Store events that might need to be reprocessed on page navigation
+  private storePendingEvent(eventName: string, payload: any): void {
+    // For certain events, store them to potentially replay later
+    const storageKey = `${eventName}-${Date.now()}`;
+    this.pendingEvents[storageKey] = {
+      eventName,
+      payload,
+      timestamp: Date.now()
+    };
+    
+    // Limit the number of pending events
+    const keys = Object.keys(this.pendingEvents);
+    if (keys.length > 100) {
+      // Remove oldest events if we have too many
+      const oldestKey = keys.sort((a, b) => 
+        this.pendingEvents[a].timestamp - this.pendingEvents[b].timestamp
+      )[0];
+      delete this.pendingEvents[oldestKey];
+    }
+  }
+
+  // Process any pending events, typically after page navigation
+  private processPendingEvents(): void {
+    const now = Date.now();
+    let count = 0;
+    
+    // Get all pending events less than 1 minute old
+    const recentEvents = Object.entries(this.pendingEvents)
+      .filter(([_, event]) => (now - event.timestamp) < 60000) // Less than 1 minute old
+      .map(([key, event]) => ({ key, ...event }));
+    
+    if (recentEvents.length > 0) {
+      console.log(`[EventBus] Processing ${recentEvents.length} pending events after navigation`);
+      
+      // Process events
+      recentEvents.forEach(event => {
+        // Only process certain event types that are likely to need replaying
+        if (event.eventName === 'habit:schedule') {
+          console.log(`[EventBus] Reprocessing pending event ${event.eventName}`, event.payload);
+          this.executeEvent(event.eventName, event.payload);
+          count++;
+        }
+        
+        // Remove from pending events
+        delete this.pendingEvents[event.key];
+      });
+      
+      // Force task update if we processed any events
+      if (count > 0) {
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+          window.dispatchEvent(new Event('force-tags-update'));
+        }, 200);
+      }
+    }
+  }
+
   public clear(): void {
     this.listeners = {};
     // Clear all debounce timeouts
     Object.values(this.debounceTimeouts).forEach(timeout => clearTimeout(timeout));
     this.debounceTimeouts = {};
     this.lastEmitted = {};
+    this.pendingEvents = {};
   }
 }
 
