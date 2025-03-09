@@ -8,7 +8,9 @@ export interface TimerEventPayloads {
     date: string;
   };
   'habit:template-update': any;
-  'habit:template-delete': any;
+  'habit:template-delete': { templateId: string };
+  'habit:template-add': string;
+  'habit:custom-template-create': any;
   'task:create': any;
   'task:update': any;
   'task:delete': any;
