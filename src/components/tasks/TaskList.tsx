@@ -6,7 +6,7 @@ import { TaskInput } from './TaskInput';
 import { TaskTable } from './TaskTable';
 import { ListTodo, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useHabitsPanel } from '@/hooks/useHabitsPanel';
+import { useNavigate } from 'react-router-dom';
 
 interface TaskListProps {
   tasks: Task[];
@@ -27,7 +27,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   onTasksClear,
   onCompletedTasksClear,
 }) => {
-  const { open: openHabits } = useHabitsPanel();
+  const navigate = useNavigate();
 
   const handleTaskAdd = (task: Task) => {
     // Prevent duplicate task creation
@@ -38,8 +38,8 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   const handleConfigureHabits = () => {
-    console.log('Opening habits panel');
-    openHabits();
+    console.log('Navigating to habits page');
+    navigate('/habits');
   };
 
   return (
