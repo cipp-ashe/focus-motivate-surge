@@ -23,6 +23,7 @@ export const useTodaysHabits = () => {
   const { templates: activeTemplates } = useHabitState();
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
   const location = useLocation();
+  const [lastProcessedDate, setLastProcessedDate] = useState<string>('');
 
   // Function to process habits - defined before use
   const processHabits = useCallback(() => {
@@ -34,6 +35,8 @@ export const useTodaysHabits = () => {
     }
 
     const today = timeUtils.getCurrentDayName();
+    const currentDate = timeUtils.getCurrentDateString();
+    
     console.log(`useTodaysHabits - Today is ${today}, checking active templates:`, activeTemplates);
 
     // Collect habits from active templates that are scheduled for today
@@ -68,29 +71,49 @@ export const useTodaysHabits = () => {
     console.log(`useTodaysHabits - Number of habits found for today:`, habits.length);
     setTodaysHabits(habits);
     
-    // Schedule tasks for timer habits
-    if (habits.length > 0) {
-      const formattedDate = timeUtils.getCurrentDateString();
-      console.log(`Processing habits for today: ${formattedDate}`);
+    // Schedule tasks for timer habits - but only if date changed or first run
+    if (habits.length > 0 && (currentDate !== lastProcessedDate)) {
+      console.log(`Processing habits for today: ${currentDate} (last processed: ${lastProcessedDate || 'never'})`);
+      setLastProcessedDate(currentDate);
       
-      habits.forEach(habit => {
-        // Only process timer type habits
-        if (habit.metrics?.type === 'timer' && habit.metrics?.target) {
-          console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${habit.relationships?.templateId}`);
-          console.log(`Creating task for habit ${habit.name} with duration ${habit.metrics.target} seconds (${habit.metrics.target / 60} minutes)`);
-          
-          // Schedule task creation via event bus with clear data
-          eventBus.emit('habit:schedule', {
-            habitId: habit.id,
-            templateId: habit.relationships?.templateId,
-            name: habit.name,
-            duration: habit.metrics.target,
-            date: formattedDate
-          });
-        }
-      });
+      // Schedule timer tasks with a slight delay to ensure all context is ready
+      setTimeout(() => {
+        scheduleHabitTasks(habits, currentDate);
+      }, 300);
     }
-  }, [activeTemplates]);
+  }, [activeTemplates, lastProcessedDate]);
+
+  // Helper function to schedule habit tasks
+  const scheduleHabitTasks = (habits: HabitDetail[], formattedDate: string) => {
+    // Count how many timer habits we'll be scheduling
+    const timerHabits = habits.filter(habit => 
+      habit.metrics?.type === 'timer' && habit.metrics?.target
+    );
+    
+    console.log(`Scheduling ${timerHabits.length} timer habits for ${formattedDate}`);
+    
+    // Schedule each timer habit as a task
+    timerHabits.forEach(habit => {
+      console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${habit.relationships?.templateId}`);
+      console.log(`Creating task for habit ${habit.name} with duration ${habit.metrics?.target} seconds (${(habit.metrics?.target || 0) / 60} minutes)`);
+      
+      // Schedule task creation via event bus with clear data
+      eventBus.emit('habit:schedule', {
+        habitId: habit.id,
+        templateId: habit.relationships?.templateId,
+        name: habit.name,
+        duration: habit.metrics?.target || 1500, // Default to 25 minutes if no target is set
+        date: formattedDate
+      });
+    });
+    
+    // Force task update after scheduling all habits
+    if (timerHabits.length > 0) {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 500);
+    }
+  };
 
   // Process habits when activeTemplates change or on location change
   useEffect(() => {
@@ -108,10 +131,21 @@ export const useTodaysHabits = () => {
       processHabits();
     });
     
+    // Force habit processing on mount
+    const timeout = setTimeout(() => {
+      const currentDate = timeUtils.getCurrentDateString();
+      if (todaysHabits.length > 0 && lastProcessedDate !== currentDate) {
+        console.log('Force scheduling habit tasks after initial load');
+        scheduleHabitTasks(todaysHabits, currentDate);
+        setLastProcessedDate(currentDate);
+      }
+    }, 1000);
+    
     return () => {
       unsubscribeProcessed();
+      clearTimeout(timeout);
     };
-  }, [location, processHabits]);
+  }, [location, processHabits, todaysHabits, lastProcessedDate]);
 
   return { 
     todaysHabits, 

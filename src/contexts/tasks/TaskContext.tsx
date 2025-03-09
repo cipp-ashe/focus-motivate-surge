@@ -69,11 +69,21 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         
         // Verify task doesn't already exist
         const tasksFromStorage = JSON.parse(localStorage.getItem('taskList') || '[]');
-        const exists = tasksFromStorage.some((t: Task) => t.id === task.id);
+        
+        // Check for existing task by ID or habit relationship
+        const exists = tasksFromStorage.some((t: Task) => {
+          return t.id === task.id || 
+            (t.relationships?.habitId === task.relationships?.habitId && 
+             t.relationships?.date === task.relationships?.date);
+        });
         
         if (!exists) {
           console.log("TaskContext: Task doesn't exist yet, adding to context", task);
           dispatch({ type: 'ADD_TASK', payload: task });
+          
+          // Also update localStorage directly to ensure persistence
+          const updatedTasks = [...tasksFromStorage, task];
+          localStorage.setItem('taskList', JSON.stringify(updatedTasks));
         } else {
           console.log("TaskContext: Task already exists, skipping", task.id);
         }
@@ -109,6 +119,15 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         console.log("TaskContext: Checking for pending habits to schedule");
         // Trigger a reprocessing of today's habits via the event bus
         eventBus.emit('habits:processed', {});
+        
+        // Also ensure we fetch latest tasks from localStorage
+        setTimeout(() => {
+          const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+          if (tasks.length > 0 && state.items.length !== tasks.length) {
+            console.log("TaskContext: Found mismatch between localStorage and state, reloading tasks");
+            loadTasksFromStorage();
+          }
+        }, 100);
       }),
     ];
 
@@ -125,7 +144,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       unsubscribers.forEach(unsub => unsub());
       window.removeEventListener('force-task-update', handleForceUpdate);
     };
-  }, []);
+  }, [state.items.length]);
 
   // Load initial data
   useQuery({

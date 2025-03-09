@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -40,6 +40,9 @@ const TaskManager = () => {
       // Double-check after a slightly longer delay to catch any that might have been missed
       setTimeout(() => {
         checkForMissingHabitTasks();
+        
+        // Force localStorage sync and UI update
+        window.dispatchEvent(new Event('force-task-update'));
       }, 300);
     }, 300);
     
@@ -53,13 +56,30 @@ const TaskManager = () => {
     // Force a task load from localStorage first
     window.dispatchEvent(new Event('force-task-update'));
     
-    // Then check for pending habits
-    const timeout = setTimeout(() => {
-      eventBus.emit('habits:check-pending', {});
-    }, 500);
+    // Then check for pending habits - with progressive checks to ensure all habits are captured
+    const timeouts = [
+      setTimeout(() => {
+        console.log('First habit check on mount');
+        eventBus.emit('habits:check-pending', {});
+      }, 300),
+      
+      setTimeout(() => {
+        console.log('Second habit check on mount to catch any missed habits');
+        eventBus.emit('habits:check-pending', {});
+        checkForMissingHabitTasks();
+      }, 800),
+      
+      setTimeout(() => {
+        console.log('Final habit check and force update');
+        checkForMissingHabitTasks();
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 1500)
+    ];
     
-    return () => clearTimeout(timeout);
-  }, []);
+    return () => {
+      timeouts.forEach(clearTimeout);
+    };
+  }, [checkForMissingHabitTasks]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);

@@ -22,20 +22,41 @@ const TimerPage = () => {
       timestamp: new Date().toISOString()
     });
     
-    // Check for any pending habit tasks when the timer page loads
-    const checkForPendingHabits = () => {
-      console.log("Checking for pending habits from TimerPage");
+    // Progressive checks for habit tasks to ensure they're loaded
+    const checkForPendingHabits = (iteration = 1) => {
+      console.log(`Checking for pending habits from TimerPage (iteration ${iteration})`);
+      
+      // Check for pending habits
       eventBus.emit('habits:check-pending', {});
       
       // Force a task update to ensure any new tasks are loaded
       window.dispatchEvent(new Event('force-task-update'));
+      
+      // For really stubborn cases, directly check localStorage
+      const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+      const habitTasks = storedTasks.filter((task: any) => task.relationships?.habitId);
+      
+      if (habitTasks.length > 0 && tasks.length === 0) {
+        console.log(`Found ${habitTasks.length} habit tasks in localStorage but none loaded in memory`);
+        
+        // Force another task update with delay
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+        }, 300);
+      }
     };
     
-    // Allow some time for other components to initialize
-    const timeout = setTimeout(checkForPendingHabits, 300);
+    // Perform multiple checks with increasing delays to catch all cases
+    const timeouts = [
+      setTimeout(() => checkForPendingHabits(1), 300),
+      setTimeout(() => checkForPendingHabits(2), 800),
+      setTimeout(() => checkForPendingHabits(3), 1500)
+    ];
     
-    return () => clearTimeout(timeout);
-  }, []);
+    return () => {
+      timeouts.forEach(clearTimeout);
+    };
+  }, [tasks.length]);
 
   const handleTaskComplete = (metrics: any) => {
     if (selectedTask) {
