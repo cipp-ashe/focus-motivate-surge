@@ -2,10 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
 import { ActiveTemplate, DayOfWeek, HabitTemplate } from './types';
 import ConfigurationDialog from './ConfigurationDialog';
+import AvailableTemplates from './ManageTemplatesDialog/AvailableTemplates';
+import CustomTemplates from './ManageTemplatesDialog/CustomTemplates';
+import CreateTemplateForm from './ManageTemplatesDialog/CreateTemplateForm';
 
 interface TemplateSelectionSheetProps {
   isOpen: boolean;
@@ -26,12 +30,31 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
 }) => {
   const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
+  const [activeTab, setActiveTab] = useState("built-in");
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  
+  // Load custom templates from local storage
+  useEffect(() => {
+    const loadCustomTemplates = () => {
+      try {
+        const saved = localStorage.getItem('custom-templates');
+        return saved ? JSON.parse(saved) : [];
+      } catch (error) {
+        console.error('Error loading custom templates:', error);
+        return [];
+      }
+    };
+
+    setCustomTemplates(loadCustomTemplates());
+  }, [isOpen]); // Reload when sheet opens
   
   // Reset state when sheet closes
   useEffect(() => {
     if (!isOpen) {
       setConfigDialogOpen(false);
       setConfiguringTemplate(null);
+      setIsCreatingNew(false);
     }
   }, [isOpen]);
 
@@ -71,6 +94,27 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     setConfiguringTemplate(null);
   };
 
+  const handleDeleteCustomTemplate = (templateId: string) => {
+    const updated = customTemplates.filter(t => t.id !== templateId);
+    setCustomTemplates(updated);
+    localStorage.setItem('custom-templates', JSON.stringify(updated));
+    toast.success('Custom template deleted');
+  };
+
+  const handleCreateTemplate = (newTemplate: Omit<HabitTemplate, 'id'>) => {
+    const template: HabitTemplate = {
+      ...newTemplate,
+      id: `custom-${Date.now()}`,
+    };
+    
+    const updated = [...customTemplates, template];
+    setCustomTemplates(updated);
+    localStorage.setItem('custom-templates', JSON.stringify(updated));
+    setIsCreatingNew(false);
+    setActiveTab("custom");
+    toast.success('Custom template created successfully');
+  };
+
   console.log("TemplateSelectionSheet - Sheet isOpen:", isOpen);
   console.log("TemplateSelectionSheet - configDialogOpen:", configDialogOpen);
 
@@ -83,38 +127,64 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
               <SheetHeader>
                 <SheetTitle>Configure Templates</SheetTitle>
                 <SheetDescription>
-                  Select a template to add to your habit tracker
+                  Select or create templates to add to your habit tracker
                 </SheetDescription>
               </SheetHeader>
             </div>
-            <div className="flex-1 p-6 overflow-auto">
-              <div className="space-y-4">
-                {allTemplates.map((template) => (
-                  <div 
-                    key={template.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+            
+            {isCreatingNew ? (
+              <div className="flex-1 p-6 overflow-auto">
+                <div className="mb-4">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setIsCreatingNew(false)}
+                    className="mb-2"
                   >
-                    <div>
-                      <h3 className="font-medium">{template.name}</h3>
-                      <p className="text-sm text-muted-foreground">{template.description}</p>
-                    </div>
-                    <Button
-                      onClick={() => handleSelectTemplate(template)}
-                      disabled={activeTemplateIds.includes(template.id)}
-                    >
-                      {activeTemplateIds.includes(template.id) ? 'Added' : 'Configure'}
-                    </Button>
-                  </div>
-                ))}
-                <Button 
-                  onClick={onCreateTemplate}
-                  className="w-full"
-                  variant="outline"
-                >
-                  Create New Template
-                </Button>
+                    ← Back to Templates
+                  </Button>
+                  <h3 className="text-lg font-medium">Create New Template</h3>
+                </div>
+                <CreateTemplateForm 
+                  onSubmit={handleCreateTemplate} 
+                  onCancel={() => setIsCreatingNew(false)} 
+                />
               </div>
-            </div>
+            ) : (
+              <div className="flex-1 p-6 overflow-auto">
+                <Tabs defaultValue="built-in" value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="built-in">Built-in Templates</TabsTrigger>
+                    <TabsTrigger value="custom">Custom Templates</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="built-in" className="mt-0">
+                    <AvailableTemplates 
+                      templates={allTemplates}
+                      activeTemplateIds={activeTemplateIds}
+                      onSelect={handleSelectTemplate}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="custom" className="mt-0">
+                    <div className="mb-4">
+                      <Button 
+                        onClick={() => setIsCreatingNew(true)}
+                        className="w-full"
+                      >
+                        Create New Template
+                      </Button>
+                    </div>
+                    <CustomTemplates 
+                      templates={customTemplates}
+                      activeTemplateIds={activeTemplateIds}
+                      onSelect={handleSelectTemplate}
+                      onDelete={handleDeleteCustomTemplate}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
+            
             <div className="p-4 border-t">
               <SheetClose asChild>
                 <Button variant="outline" className="w-full">Close</Button>

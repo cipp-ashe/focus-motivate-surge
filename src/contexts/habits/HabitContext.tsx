@@ -1,15 +1,16 @@
-
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
+import type { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
 import { useTodaysHabits } from '@/hooks/useTodaysHabits';
+import { habitTemplates } from '@/utils/habitTemplates';
 
 interface HabitState {
   templates: ActiveTemplate[];
   todaysHabits: any[];
   progress: Record<string, Record<string, boolean | number>>;
+  customTemplates: HabitTemplate[];
 }
 
 interface HabitContextActions {
@@ -18,6 +19,8 @@ interface HabitContextActions {
   removeTemplate: (templateId: string) => void;
   updateTemplateOrder: (templates: ActiveTemplate[]) => void;
   updateTemplateDays: (templateId: string, days: DayOfWeek[]) => void;
+  addCustomTemplate: (template: Omit<HabitTemplate, 'id'>) => void;
+  removeCustomTemplate: (templateId: string) => void;
 }
 
 const HabitContext = createContext<HabitState | undefined>(undefined);
@@ -27,6 +30,7 @@ const initialState: HabitState = {
   templates: [],
   todaysHabits: [],
   progress: {},
+  customTemplates: [],
 };
 
 export const HabitProvider = ({ children }: { children: ReactNode }) => {
@@ -36,6 +40,11 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
         return {
           ...state,
           templates: action.payload,
+        };
+      case 'LOAD_CUSTOM_TEMPLATES':
+        return {
+          ...state,
+          customTemplates: action.payload,
         };
       case 'ADD_TEMPLATE':
         return {
@@ -71,6 +80,18 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
             template.templateId === action.payload.templateId
               ? { ...template, activeDays: action.payload.days, customized: true }
               : template
+          ),
+        };
+      case 'ADD_CUSTOM_TEMPLATE':
+        return {
+          ...state,
+          customTemplates: [...state.customTemplates, action.payload],
+        };
+      case 'REMOVE_CUSTOM_TEMPLATE':
+        return {
+          ...state,
+          customTemplates: state.customTemplates.filter(
+            template => template.id !== action.payload
           ),
         };
       default:
@@ -110,10 +131,22 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
         const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
         localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
         toast.success('Template deleted successfully');
+      }),
+      // Listen for custom template updates
+      window.addEventListener('templatesUpdated', () => {
+        try {
+          const customTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
+          dispatch({ type: 'LOAD_CUSTOM_TEMPLATES', payload: customTemplates });
+        } catch (error) {
+          console.error('Error loading custom templates:', error);
+        }
       })
     ];
 
-    return () => unsubscribers.forEach(unsub => unsub());
+    return () => {
+      unsubscribers.forEach(unsub => typeof unsub === 'function' && unsub());
+      window.removeEventListener('templatesUpdated', () => {});
+    };
   }, [state.templates]);
 
   // Load initial templates
@@ -123,6 +156,11 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
       try {
         const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
         dispatch({ type: 'LOAD_TEMPLATES', payload: templates });
+        
+        // Also load custom templates
+        const customTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
+        dispatch({ type: 'LOAD_CUSTOM_TEMPLATES', payload: customTemplates });
+        
         return templates;
       } catch (error) {
         console.error('Error loading habits:', error);
@@ -178,6 +216,33 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       toast.success('Template days updated successfully');
     },
+    
+    addCustomTemplate: (template) => {
+      const newTemplate: HabitTemplate = {
+        ...template,
+        id: `custom-${Date.now()}`,
+      };
+      
+      dispatch({ type: 'ADD_CUSTOM_TEMPLATE', payload: newTemplate });
+      
+      const updatedTemplates = [...state.customTemplates, newTemplate];
+      localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
+      toast.success('Custom template added successfully');
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('templatesUpdated'));
+    },
+    
+    removeCustomTemplate: (templateId) => {
+      dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: templateId });
+      
+      const updatedTemplates = state.customTemplates.filter(t => t.id !== templateId);
+      localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
+      toast.success('Custom template removed successfully');
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('templatesUpdated'));
+    }
   };
 
   return (

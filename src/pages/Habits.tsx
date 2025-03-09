@@ -1,23 +1,34 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Settings, ArrowLeft, Sun, Moon } from 'lucide-react';
-import { useHabitsPanel } from '@/hooks/useHabitsPanel';
+import { Settings, ArrowLeft, Sun, Moon, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from "@/hooks/useTheme";
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
-  const { open } = useHabitsPanel();
   const [configOpen, setConfigOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+  const [customTemplates, setCustomTemplates] = useState([]);
 
-  // Function to open config sheet directly
+  // Load custom templates
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('custom-templates');
+      if (saved) {
+        setCustomTemplates(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading custom templates:', error);
+    }
+  }, []);
+
+  // Function to open config sheet
   const openConfig = () => {
     setConfigOpen(true);
   };
@@ -29,7 +40,11 @@ const HabitsPage = () => {
 
   // Handle template selection
   const handleSelectTemplate = (templateId: string) => {
-    const template = habitTemplates.find(t => t.id === templateId);
+    // Check both built-in and custom templates
+    const template = 
+      habitTemplates.find(t => t.id === templateId) || 
+      customTemplates.find(t => t.id === templateId);
+    
     if (template) {
       toast.success(`Added template: ${template.name}`);
     }
@@ -66,32 +81,22 @@ const HabitsPage = () => {
       
       <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">
         <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-2"
-          onClick={open}
-        >
-          <Settings className="h-4 w-4" />
-          Open Habit Drawer
-        </Button>
-        
-        <Button 
           variant="default" 
           size="sm" 
           className="flex items-center gap-2"
           onClick={openConfig}
         >
-          <Settings className="h-4 w-4" />
-          Configure Templates
+          <Plus className="h-4 w-4" />
+          Manage Habit Templates
         </Button>
       </div>
 
-      {/* Habit drawer */}
+      {/* Habit tracker */}
       <HabitTracker 
         activeTemplates={templates}
       />
 
-      {/* Template configuration (completely separate from drawer) */}
+      {/* Template configuration */}
       <TemplateSelectionSheet
         isOpen={configOpen}
         onOpenChange={handleCloseConfig}
