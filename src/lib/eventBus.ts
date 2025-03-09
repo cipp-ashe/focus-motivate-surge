@@ -1,278 +1,106 @@
 
-import { TimerEventType, TimerEventPayloads, TimerEventCallback } from '@/types/events';
+type EventCallback = (payload: any) => void;
 
-/**
- * Event Bus implementation following the Observer pattern
- * Handles all application events in a centralized manner
- */
+interface EventSubscription {
+  eventName: string;
+  callback: EventCallback;
+}
+
 class EventBus {
-  private static instance: EventBus;
-  private listeners: Map<TimerEventType, Set<Function>>;
-  private debugMode: boolean;
-  private processedEvents: Map<string, Set<string>>;
-  private processingEvents: Map<string, boolean>; // Track events currently being processed
-  private emitCounts: Map<string, number>; // Track how many times an event has been emitted
-  private lastEmitTimestamps: Map<string, number>; // Track when events were last emitted
-  private templateAddCooldown: boolean = false; // Special flag just for template-add
-  private pendingEvents: Map<string, {payload: any, timeout: NodeJS.Timeout}>; // Store delayed events
+  private listeners: Record<string, EventCallback[]> = {};
+  private debounceTimeouts: Record<string, NodeJS.Timeout> = {};
+  private lastEmitted: Record<string, number> = {};
+  private debounceIntervals: Record<string, number> = {
+    'habit:schedule': 300, // 300ms debounce for habit scheduling
+    'habit:template-add': 500, // 500ms debounce for template addition
+    'task:update': 200, // 200ms debounce for task updates
+    'task:create': 200, // 200ms debounce for task creation
+  };
 
-  private constructor() {
-    this.listeners = new Map();
-    this.debugMode = process.env.NODE_ENV === 'development';
-    this.processedEvents = new Map();
-    this.processingEvents = new Map();
-    this.emitCounts = new Map();
-    this.lastEmitTimestamps = new Map();
-    this.pendingEvents = new Map();
-    this.setupEventDeduplication();
-  }
-
-  static getInstance(): EventBus {
-    if (!EventBus.instance) {
-      EventBus.instance = new EventBus();
+  public on(eventName: string, callback: EventCallback): () => void {
+    if (!this.listeners[eventName]) {
+      this.listeners[eventName] = [];
     }
-    return EventBus.instance;
-  }
-
-  /**
-   * Sets up event deduplication system
-   * Clears processed events at midnight to allow new day's processing
-   */
-  private setupEventDeduplication() {
-    const resetProcessedEvents = () => {
-      this.processedEvents.clear();
-      this.emitCounts.clear();
-      this.lastEmitTimestamps.clear();
-      this.pendingEvents.clear();
-      this.scheduleNextReset();
+    
+    this.listeners[eventName].push(callback);
+    
+    // Return unsubscribe function
+    return () => {
+      this.listeners[eventName] = this.listeners[eventName].filter(cb => cb !== callback);
     };
+  }
 
-    this.scheduleNextReset = () => {
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
+  public emit(eventName: string, payload: any = {}): void {
+    console.log(`[EventBus] ${eventName}`, payload);
+    
+    // For events that need debouncing (like habit:schedule)
+    if (this.debounceIntervals[eventName]) {
+      const now = Date.now();
+      const debounceInterval = this.debounceIntervals[eventName];
       
-      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-      setTimeout(resetProcessedEvents, timeUntilMidnight);
-    };
-
-    this.scheduleNextReset();
-  }
-
-  private scheduleNextReset: () => void;
-
-  /**
-   * Checks if an event with the given ID has already been processed today
-   */
-  private hasProcessedEvent(eventType: string, eventId: string): boolean {
-    const processed = this.processedEvents.get(eventType)?.has(eventId) ?? false;
-    if (!processed) {
-      const eventSet = this.processedEvents.get(eventType) || new Set();
-      eventSet.add(eventId);
-      this.processedEvents.set(eventType, eventSet);
-    }
-    return processed;
-  }
-
-  /**
-   * Generate a unique identifier for an event based on its payload
-   */
-  private getEventId(event: TimerEventType, payload: any): string {
-    if (event === 'habit:schedule' && payload?.habitId && payload?.date) {
-      return `${payload.habitId}-${payload.date}`;
-    }
-    
-    // For habit:template-add events, use the template ID
-    if (event === 'habit:template-add' && typeof payload === 'string') {
-      return payload;
-    }
-    
-    // For habit:template-delete events
-    if (event === 'habit:template-delete' && payload?.templateId) {
-      return payload.templateId;
-    }
-    
-    // For other events, create a hash from the payload
-    return JSON.stringify(payload);
-  }
-
-  /**
-   * Subscribe to an event
-   */
-  on<T extends TimerEventType>(event: T, callback: TimerEventCallback<T>) {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, new Set());
-    }
-    this.listeners.get(event)!.add(callback);
-    
-    return () => this.off(event, callback);
-  }
-
-  /**
-   * Unsubscribe from an event
-   */
-  off<T extends TimerEventType>(event: T, callback: TimerEventCallback<T>) {
-    this.listeners.get(event)?.delete(callback);
-  }
-
-  /**
-   * Emit an event with payload, with improved synchronization
-   */
-  emit<T extends TimerEventType>(event: T, payload: TimerEventPayloads[T]) {
-    if (this.debugMode) {
-      console.log(`[EventBus] ${event}`, payload);
-    }
-
-    // Generate a unique event ID for deduplication
-    const eventId = this.getEventId(event, payload);
-    const eventKey = `${event}-${eventId}`;
-    
-    // ========= Special case for template-add - stronger protection =========
-    if (event === 'habit:template-add') {
-      if (this.templateAddCooldown) {
-        if (this.debugMode) {
-          console.log(`[EventBus] Global cooldown active for template-add events, queueing for later`, eventId);
+      // Generate a unique key for debouncing if we have identifiable properties
+      let debounceKey = eventName;
+      
+      // For habit scheduling, create a unique key based on habitId and date
+      if (eventName === 'habit:schedule' && payload.habitId && payload.date) {
+        debounceKey = `${eventName}-${payload.habitId}-${payload.date}`;
+      }
+      // For template addition, create a unique key based on templateId
+      else if (eventName === 'habit:template-add' && payload.templateId) {
+        debounceKey = `${eventName}-${payload.templateId}`;
+      }
+      // For task operations, create a unique key based on taskId
+      else if ((eventName === 'task:update' || eventName === 'task:create') && payload.taskId) {
+        debounceKey = `${eventName}-${payload.taskId}`;
+      }
+      
+      // Check if we've emitted this event recently
+      if (this.lastEmitted[debounceKey] && (now - this.lastEmitted[debounceKey] < debounceInterval)) {
+        console.log(`[EventBus] Debouncing ${eventName} with ID ${debounceKey}, last emitted ${now - this.lastEmitted[debounceKey]}ms ago`);
+        
+        // Clear existing timeout
+        if (this.debounceTimeouts[debounceKey]) {
+          clearTimeout(this.debounceTimeouts[debounceKey]);
         }
         
-        // If we already have a pending event for this template, clear it
-        if (this.pendingEvents.has(eventKey)) {
-          clearTimeout(this.pendingEvents.get(eventKey)!.timeout);
-          this.pendingEvents.delete(eventKey);
-        }
+        // Set new timeout
+        this.debounceTimeouts[debounceKey] = setTimeout(() => {
+          this.executeEvent(eventName, payload);
+          delete this.debounceTimeouts[debounceKey];
+          this.lastEmitted[debounceKey] = Date.now();
+        }, debounceInterval);
         
-        // Queue for later with a longer delay to ensure state is updated
-        const timeout = setTimeout(() => {
-          this.pendingEvents.delete(eventKey);
-          this.emit(event, payload);
-        }, 500); // Retry after a longer delay
-        
-        this.pendingEvents.set(eventKey, { payload, timeout });
         return;
       }
       
-      // Set cooldown - much longer for template-add (3 seconds)
-      this.templateAddCooldown = true;
-      setTimeout(() => {
-        this.templateAddCooldown = false;
-      }, 3000);
-    }
-
-    // Check if this is a rapid repeat of the same event (debounce)
-    const now = Date.now();
-    const lastEmitTime = this.lastEmitTimestamps.get(eventKey) || 0;
-    const timeSinceLastEmit = now - lastEmitTime;
-    
-    // Extra strong debounce for template-add events (3000ms)
-    if (event === 'habit:template-add' && timeSinceLastEmit < 3000) {
-      if (this.debugMode) {
-        console.log(`[EventBus] Strong debouncing ${event} with ID ${eventId}, last emitted ${timeSinceLastEmit}ms ago`);
-      }
-      return;
+      // Update last emitted time
+      this.lastEmitted[debounceKey] = now;
     }
     
-    // Normal debounce for other events (300ms)
-    if (timeSinceLastEmit < 300 && (event === 'habit:schedule' || event.includes('template'))) {
-      if (this.debugMode) {
-        console.log(`[EventBus] Debouncing ${event} with ID ${eventId}, last emitted ${timeSinceLastEmit}ms ago`);
-      }
-      return;
-    }
-    
-    // Update last emit timestamp
-    this.lastEmitTimestamps.set(eventKey, now);
-    
-    // Track emit counts for debugging
-    const currentCount = this.emitCounts.get(eventKey) || 0;
-    this.emitCounts.set(eventKey, currentCount + 1);
-    
-    if (currentCount > 0) {
-      if (this.debugMode) {
-        console.log(`[EventBus] Event ${event} with ID ${eventId} has been emitted ${currentCount + 1} times, throttling`);
-      }
-      
-      // Special handling for frequently emitted events
-      if (currentCount > 2 || (event === 'habit:template-add' && currentCount > 0)) {
-        if (this.debugMode) {
-          console.log(`[EventBus] Skipping overly repeated event ${event} with ID ${eventId}`);
-        }
-        return;
-      }
-    }
-    
-    // Check if this specific event is currently being processed
-    if (this.processingEvents.get(eventKey)) {
-      if (this.debugMode) {
-        console.log(`[EventBus] Event ${event} with ID ${eventId} is already being processed, skipping`);
-      }
-      return;
-    }
-    
-    // Handle special cases for deduplication based on event type
-    if (event === 'habit:schedule') {
-      const habitId = (payload as any).habitId;
-      if (this.hasProcessedEvent('habit:schedule', habitId)) {
-        console.log(`[EventBus] Skipping duplicate habit schedule for ${habitId}`);
-        return;
-      }
-    }
-    
-    // For template-add events, ensure they're only processed once per day
-    if (event === 'habit:template-add') {
-      const templateId = payload as string;
-      if (this.hasProcessedEvent('habit:template-add', templateId)) {
-        console.log(`[EventBus] Skipping duplicate template addition for ${templateId}`);
-        return;
-      }
-    }
-
-    // Set processing flag
-    this.processingEvents.set(eventKey, true);
-    
-    // Process the event
-    try {
-      this.listeners.get(event)?.forEach(callback => {
-        try {
-          callback(payload);
-        } catch (error) {
-          console.error(`[EventBus] Error in ${event} handler:`, error);
-        }
-      });
-    } finally {
-      // Clear processing flag with delay based on event type
-      const delay = event === 'habit:template-add' ? 1000 : 100;
-      setTimeout(() => {
-        this.processingEvents.delete(eventKey);
-      }, delay);
-    }
+    // For non-debounced events or the first emission of a debounced event
+    this.executeEvent(eventName, payload);
   }
 
-  /**
-   * Clear all listeners - useful for testing
-   */
-  clear() {
-    this.listeners.clear();
-    this.processedEvents.clear();
-    this.processingEvents.clear();
-    this.emitCounts.clear();
-    this.lastEmitTimestamps.clear();
-    this.pendingEvents.forEach(entry => clearTimeout(entry.timeout));
-    this.pendingEvents.clear();
+  private executeEvent(eventName: string, payload: any): void {
+    if (!this.listeners[eventName]) return;
+    
+    const callbacks = [...this.listeners[eventName]]; // Create a copy to avoid issues if callbacks modify the listeners
+    callbacks.forEach(callback => {
+      try {
+        callback(payload);
+      } catch (error) {
+        console.error(`Error in event handler for ${eventName}:`, error);
+      }
+    });
+  }
+
+  public clear(): void {
+    this.listeners = {};
+    // Clear all debounce timeouts
+    Object.values(this.debounceTimeouts).forEach(timeout => clearTimeout(timeout));
+    this.debounceTimeouts = {};
+    this.lastEmitted = {};
   }
 }
 
-export const eventBus = EventBus.getInstance();
-
-// Custom hook for using EventBus in components
-import { useEffect } from 'react';
-
-export const useEventBus = <T extends TimerEventType>(
-  event: T,
-  callback: TimerEventCallback<T>,
-  deps: any[] = []
-) => {
-  useEffect(() => {
-    const unsubscribe = eventBus.on(event, callback);
-    return () => unsubscribe();
-  }, [event, ...deps]); // eslint-disable-line react-hooks/exhaustive-deps
-};
+export const eventBus = new EventBus();

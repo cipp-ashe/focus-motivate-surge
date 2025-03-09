@@ -10,7 +10,9 @@ import {
   HabitDebugLogger,
   TodaysHabitsSection,
 } from '@/components/habits';
-import { useTodaysHabits, useHabitCompletion } from '@/hooks/habits';
+import { useTodaysHabits } from '@/hooks/habits/useTodaysHabits';
+import { useHabitCompletion } from '@/hooks/habits/useHabitCompletion';
+import { eventBus } from '@/lib/eventBus';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -37,10 +39,22 @@ const HabitsPage = () => {
       setForceUpdate(prev => prev + 1);
     };
     
+    const handleTemplateChange = () => {
+      console.log("HabitsPage: Detected template change event");
+      setForceUpdate(prev => prev + 1);
+    };
+    
     window.addEventListener('force-habits-update', handleForceHabitsUpdate);
+    
+    const unsubTemplateAdd = eventBus.on('habit:template-add', handleTemplateChange);
+    const unsubTemplateUpdate = eventBus.on('habit:template-update', handleTemplateChange);
+    const unsubTemplateDelete = eventBus.on('habit:template-delete', handleTemplateChange);
     
     return () => {
       window.removeEventListener('force-habits-update', handleForceHabitsUpdate);
+      unsubTemplateAdd();
+      unsubTemplateUpdate();
+      unsubTemplateDelete();
     };
   }, []);
 

@@ -1,18 +1,15 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
 import { HabitTemplateManager, HabitDebugLogger, ActiveTemplateList } from '@/components/habits';
 import { eventBus } from '@/lib/eventBus';
+import { useHabitProgress } from '@/hooks/habits/useHabitProgress';
 
 const HabitTracker = () => {
   const { templates } = useHabitState();
   const { removeTemplate } = useHabitActions();
   const { getTodayProgress, updateProgress } = useHabitProgress();
   const [forceUpdate, setForceUpdate] = useState(0);
-  
-  // Use the useHabitState hook directly without trying to access a non-existent state property
-  const habitState = useHabitState();
-  
   const [debugMode, setDebugMode] = useState(false);
   
   // Force rerender when templates change
@@ -27,12 +24,27 @@ const HabitTracker = () => {
       setForceUpdate(prev => prev + 1);
     };
     
+    // Listen for template changes via custom event
     window.addEventListener('templatesUpdated', handleTemplatesUpdated);
     window.addEventListener('force-habits-update', handleForceHabitsUpdate);
     
+    // Listen for template changes via event bus
+    const unsubUpdate = eventBus.on('habit:template-update', () => {
+      console.log("HabitTracker: Detected template update via event bus");
+      setForceUpdate(prev => prev + 1);
+    });
+    
+    const unsubDelete = eventBus.on('habit:template-delete', () => {
+      console.log("HabitTracker: Detected template delete via event bus");
+      setForceUpdate(prev => prev + 1);
+    });
+    
+    // Clean up listeners
     return () => {
       window.removeEventListener('templatesUpdated', handleTemplatesUpdated);
       window.removeEventListener('force-habits-update', handleForceHabitsUpdate);
+      unsubUpdate();
+      unsubDelete();
     };
   }, []);
 
@@ -80,8 +92,5 @@ const HabitTracker = () => {
     </div>
   );
 };
-
-// Add the import at the top
-import { useHabitProgress } from '@/hooks/habits';
 
 export default HabitTracker;

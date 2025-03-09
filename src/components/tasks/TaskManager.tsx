@@ -177,6 +177,20 @@ const TaskManager = () => {
       }, 100);
     };
 
+    // Handler for task deletion at a lower level
+    const handleTaskDelete = ({ taskId, reason }: { taskId: string, reason: string }) => {
+      // Find the task
+      const task = tasks.find(t => t.id === taskId);
+      if (!task || !task.relationships?.habitId || !task.relationships?.date) return;
+      
+      // Remove from tracking map
+      const taskKey = `${task.relationships.habitId}-${task.relationships.date}`;
+      if (scheduledTasksRef.current.has(taskKey)) {
+        console.log(`Removing tracked task key ${taskKey} for task ${taskId}`);
+        scheduledTasksRef.current.delete(taskKey);
+      }
+    };
+
     // Clean up tracking map daily
     const setupDailyCleanup = () => {
       const now = new Date();
@@ -201,9 +215,13 @@ const TaskManager = () => {
     // Listen for template deletions
     const unsubscribeTemplateDelete = eventBus.on('habit:template-delete', handleTemplateDelete);
     
+    // Listen for task deletions
+    const unsubscribeTaskDelete = eventBus.on('task:delete', handleTaskDelete);
+    
     return () => {
       unsubscribeSchedule();
       unsubscribeTemplateDelete();
+      unsubscribeTaskDelete();
     };
   }, [tasks, addTagToEntity, forceUpdate]);
 

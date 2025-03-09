@@ -15,10 +15,8 @@ interface HabitTemplateManagerProps {
 const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTemplates }) => {
   const [configOpen, setConfigOpen] = useState(false);
   const [customTemplates, setCustomTemplates] = useState([]);
-  const processingTemplateRef = useRef<string | null>(null);
-  const processedTodayRef = useRef<Set<string>>(new Set<string>());
-  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isAddingRef = useRef<boolean>(false);
+  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Load custom templates
   useEffect(() => {
@@ -30,28 +28,6 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     } catch (error) {
       console.error('Error loading custom templates:', error);
     }
-    
-    // Clear processed templates at midnight
-    const clearProcessedTemplatesAtMidnight = () => {
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      
-      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-      
-      setTimeout(() => {
-        console.log("HabitTemplateManager: Resetting processed templates for the new day");
-        processedTodayRef.current.clear();
-        setupResetTimer();
-      }, timeUntilMidnight);
-    };
-    
-    const setupResetTimer = () => {
-      clearProcessedTemplatesAtMidnight();
-    };
-    
-    setupResetTimer();
     
     return () => {
       if (cooldownTimerRef.current) {
@@ -75,9 +51,6 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   const handleCloseConfig = (open: boolean) => {
     setConfigOpen(open);
     if (!open) {
-      // Reset processing state when sheet closes
-      processingTemplateRef.current = null;
-      
       // Set cooldown timer to prevent immediate reopening
       isAddingRef.current = true;
       cooldownTimerRef.current = setTimeout(() => {
@@ -86,7 +59,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     }
   };
 
-  // Handle template selection with proper protection
+  // Handle template selection
   const handleSelectTemplate = (templateId: string) => {
     // Prevent duplicate template selection
     if (activeTemplates.some(t => t.templateId === templateId)) {
@@ -100,22 +73,8 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       return;
     }
     
-    // Prevent selecting another template while one is being processed
-    if (processingTemplateRef.current) {
-      console.log(`Already processing template ${processingTemplateRef.current}, deferring ${templateId}`);
-      return;
-    }
-    
-    // Check if template was already processed today (additional protection)
-    if (processedTodayRef.current.has(templateId)) {
-      console.log(`Template ${templateId} was already processed today, avoiding duplicate processing`);
-      return;
-    }
-    
-    // Set global cooldown and processing state
+    // Set global cooldown
     isAddingRef.current = true;
-    processingTemplateRef.current = templateId;
-    processedTodayRef.current.add(templateId);
     
     // Check both built-in and custom templates
     const template = 
@@ -135,7 +94,6 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
         
         // Allow new additions after a delay
         setTimeout(() => {
-          processingTemplateRef.current = null;
           isAddingRef.current = false;
         }, 1000);
       }, 300);
