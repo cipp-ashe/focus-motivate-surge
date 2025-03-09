@@ -30,6 +30,11 @@ export interface TimerEventPayloads {
   'relationship:update': any;
   'relationship:batch-update': any;
   'note:create': any;
+  'note:create-from-habit': {
+    habitId: string;
+    habitName: string;
+    description: string;
+  };
   'tag:link': any;
   'tag:unlink': any;
   'quote:link-task': any;

@@ -36,7 +36,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
           target: 600, // Default 10 minutes
           min: 60,
         }),
-        ...(value === 'count' && { target: 1 }),
+        ...(value === 'counter' && { target: 1 }),
         ...(value === 'rating' && { min: 1, max: 5 }),
       },
     };
@@ -132,8 +132,9 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
                 <SelectContent>
                   <SelectItem value="boolean">Checkbox</SelectItem>
                   <SelectItem value="timer">Timer</SelectItem>
-                  <SelectItem value="count">Counter</SelectItem>
+                  <SelectItem value="counter">Counter</SelectItem>
                   <SelectItem value="rating">Rating</SelectItem>
+                  <SelectItem value="journal">Journal</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -148,7 +149,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
                 </div>
               )}
 
-              {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && (
+              {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && habit.metrics.type !== 'journal' && (
                 <Input
                   type="number"
                   placeholder="Target"
@@ -225,8 +226,9 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
               <SelectContent>
                 <SelectItem value="boolean">Checkbox</SelectItem>
                 <SelectItem value="timer">Timer</SelectItem>
-                <SelectItem value="count">Counter</SelectItem>
+                <SelectItem value="counter">Counter</SelectItem>
                 <SelectItem value="rating">Rating</SelectItem>
+                <SelectItem value="journal">Journal</SelectItem>
               </SelectContent>
             </Select>
 
@@ -241,7 +243,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
               </div>
             )}
 
-            {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && (
+            {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && habit.metrics.type !== 'journal' && (
               <Input
                 type="number"
                 placeholder="Target"
