@@ -1,14 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Quote } from "../types/timer";
+import { Quote, QuoteCategory } from "../types/timer";
 import { toast } from "sonner";
 
-type QuoteCategory = 
-  | 'focus'
-  | 'creativity'
-  | 'learning'
-  | 'persistence'
-  | 'motivation'
-  | 'growth';
 import { quotes } from "../data/quotes";
 
 interface UseQuoteManagerProps {
@@ -46,7 +39,10 @@ export const useQuoteManager = ({
       learning: ['learn', 'study', 'research', 'understand', 'explore','education'],
       persistence: ['finish', 'complete', 'continue', 'keep', 'remain'],
       motivation: ['start', 'begin', 'initiate', 'launch', 'plan'],
-      growth: ['improve', 'develop', 'grow', 'progress', 'advance']
+      growth: ['improve', 'develop', 'grow', 'progress', 'advance'],
+      gratitude: ['gratitude', 'thankful', 'appreciate', 'grateful', 'blessing'],
+      mindfulness: ['mindful', 'present', 'aware', 'meditation', 'breath'],
+      reflection: ['reflect', 'review', 'think', 'consider', 'contemplate']
     };
 
     Object.entries(categoryKeywords).forEach(([category, keywords]) => {
