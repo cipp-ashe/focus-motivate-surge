@@ -7,6 +7,7 @@ import { Star, Timer, BookOpen } from 'lucide-react';
 import { HabitDetail } from './types';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
+import { useNoteActions } from '@/contexts/notes/NoteContext';
 
 interface ProgressResult {
   value: boolean | number;
@@ -24,16 +25,28 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   progress,
   onUpdate,
 }) => {
+  const noteActions = useNoteActions();
+
   const handleOpenJournal = () => {
-    // Emit an event to open journal for this habit
+    // Create a new note with data from the habit
+    const newNote = {
+      title: `${habit.name} - ${new Date().toLocaleDateString()}`,
+      content: `## ${habit.name}\n\n${habit.description || ''}\n\n`,
+      tags: [{ name: 'journal', color: 'default' }, { name: habit.name.toLowerCase(), color: 'default' }]
+    };
+    
+    // Add the note using the context
+    noteActions.addNote(newNote);
+    
+    // Mark as completed when journal is created
+    onUpdate(true);
+    
+    // Also emit the event for other parts of the app that might be listening
     eventBus.emit('note:create-from-habit', { 
       habitId: habit.id, 
       habitName: habit.name,
       description: habit.description || ''
     });
-    
-    // Mark as completed when journal is opened
-    onUpdate(true);
     
     toast.success(`Created new journal entry for: ${habit.name}`, {
       description: "Your journal entry has been created"

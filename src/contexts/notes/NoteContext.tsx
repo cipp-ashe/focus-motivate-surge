@@ -37,6 +37,7 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
         return {
           ...state,
           items: [...state.items, action.payload],
+          selected: action.payload.id,
         };
       case 'UPDATE_NOTE':
         return {
@@ -85,6 +86,24 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
       eventBus.on('note:create', (note) => {
         dispatch({ type: 'ADD_NOTE', payload: note });
       }),
+      
+      eventBus.on('note:create-from-habit', (habitData) => {
+        console.log('Creating note from habit:', habitData);
+        const newNote: Note = {
+          id: crypto.randomUUID(),
+          title: `${habitData.habitName} - ${new Date().toLocaleDateString()}`,
+          content: `## ${habitData.habitName}\n\n${habitData.description}\n\n`,
+          createdAt: new Date().toISOString(),
+          tags: [{ name: 'journal', color: 'default' }, { name: habitData.habitName.toLowerCase(), color: 'default' }]
+        };
+        
+        // Save to state via dispatch
+        dispatch({ type: 'ADD_NOTE', payload: newNote });
+        
+        // Also save to localStorage
+        const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+        localStorage.setItem('notes', JSON.stringify([newNote, ...existingNotes]));
+      }),
     ];
 
     return () => unsubscribers.forEach(unsub => unsub());
@@ -97,16 +116,36 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       };
-      eventBus.emit('note:create', newNote);
+      
+      // Save to state
+      dispatch({ type: 'ADD_NOTE', payload: newNote });
+      
+      // Also save to localStorage
+      const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+      localStorage.setItem('notes', JSON.stringify([newNote, ...existingNotes]));
+      
       toast.success('Note added ✨');
     },
     
     updateNote: (noteId, updates) => {
       dispatch({ type: 'UPDATE_NOTE', payload: { noteId, updates } });
+      
+      // Update in localStorage too
+      const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+      const updatedNotes = notes.map((note: Note) => 
+        note.id === noteId ? { ...note, ...updates } : note
+      );
+      localStorage.setItem('notes', JSON.stringify(updatedNotes));
     },
     
     deleteNote: (noteId) => {
       dispatch({ type: 'DELETE_NOTE', payload: noteId });
+      
+      // Delete from localStorage too
+      const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+      const filteredNotes = notes.filter((note: Note) => note.id !== noteId);
+      localStorage.setItem('notes', JSON.stringify(filteredNotes));
+      
       toast.success('Note deleted 🗑️');
     },
     

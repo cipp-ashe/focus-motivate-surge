@@ -1,4 +1,3 @@
-
 import { Timer, Plus, BookOpen, CheckCircle, Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import type { HabitDetail } from "@/components/habits/types";
 import { eventBus } from "@/lib/eventBus";
+import { useNoteActions } from "@/contexts/notes/NoteContext";
 
 interface HabitRowProps {
   habit: HabitDetail;
@@ -17,6 +17,7 @@ interface HabitRowProps {
 }
 
 const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
+  const noteActions = useNoteActions();
   const isTimerHabit = habit.metrics.type === 'timer';
   const isJournalHabit = habit.metrics.type === 'journal';
   
@@ -35,15 +36,25 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
   const handleJournalClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Use event bus to create a note from this habit
+    // Create a new note with data from the habit
+    const newNote = {
+      title: `${habit.name} - ${new Date().toLocaleDateString()}`,
+      content: `## ${habit.name}\n\n${habit.description || ''}\n\n`,
+      tags: [{ name: 'journal', color: 'default' }, { name: habit.name.toLowerCase(), color: 'default' }]
+    };
+    
+    // Add the note using the context
+    noteActions.addNote(newNote);
+    
+    // Mark as completed
+    onComplete();
+    
+    // Use event bus for any other components that might be listening
     eventBus.emit('note:create-from-habit', {
       habitId: habit.id,
       habitName: habit.name,
       description: habit.description || ''
     });
-    
-    // Mark as completed
-    onComplete();
     
     toast.success(`Created new journal entry for: ${habit.name}`, {
       description: "Your journal entry has been created"
@@ -72,7 +83,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
       </div>
       <div className="flex items-center gap-2">
         {habit.tips && habit.tips.length > 0 && (
-          <TooltipProvider delayDuration={100}>
+          <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -87,6 +98,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
                 side="left" 
                 className="max-w-[300px] bg-popover border-border shadow-md z-50"
                 sideOffset={5}
+                align="center"
               >
                 <div className="space-y-2 p-1">
                   <p className="font-medium text-sm">Tips:</p>
