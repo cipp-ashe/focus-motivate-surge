@@ -1,4 +1,3 @@
-
 export interface BaseEntity {
   id: string;
   createdAt: string;
@@ -31,7 +30,7 @@ export interface TaggableEntity extends BaseEntity {
 }
 
 export type EntityType = 'note' | 'task' | 'habit';
-export type RelationType = 'habit-task' | 'task-note' | 'habit-note';
+export type RelationType = 'habit-task' | 'task-note' | 'habit-note' | 'habit-journal';
 
 // Schema version for managing migrations
 export const SCHEMA_VERSION = '1.0.0';
@@ -54,4 +53,3 @@ export const initializeDataStore = () => {
     return false;
   }
 };
-
