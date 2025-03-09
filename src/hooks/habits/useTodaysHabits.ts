@@ -74,12 +74,19 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       id => !currentTemplateIds.includes(id)
     );
     
+    // For removed templates, emit an event to clean up their tasks
+    removedTemplates.forEach(templateId => {
+      console.log(`Template ${templateId} was removed, cleaning up its tasks`);
+      eventBus.emit('habit:template-delete', { templateId });
+    });
+    
     // Update the list of last processed templates
     setLastProcessedTemplates(currentTemplateIds);
     
     localStorage.setItem('lastHabitProcessingDate', today);
   }, [activeTemplates, lastProcessedTemplates]);
 
+  // Immediate processing when templates change
   useEffect(() => {
     const habits = getTodaysHabits();
     setTodaysHabits(habits);
@@ -87,6 +94,20 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     // Force process habits on first load and every time templates change
     processHabits(habits);
     
+    // Also listen for template-add events to immediately process 
+    // new templates without requiring a refresh
+    const handleTemplateAdd = () => {
+      console.log("Template added, immediately processing habits");
+      const updatedHabits = getTodaysHabits();
+      setTodaysHabits(updatedHabits);
+      processHabits(updatedHabits);
+    };
+    
+    const unsubscribe = eventBus.on('habit:template-add', handleTemplateAdd);
+    
+    return () => {
+      unsubscribe();
+    };
   }, [getTodaysHabits, processHabits]);
 
   return { todaysHabits };

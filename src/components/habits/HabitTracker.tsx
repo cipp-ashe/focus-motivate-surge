@@ -16,6 +16,10 @@ const HabitTracker = () => {
 
   // Handler for removing templates
   const handleRemoveTemplate = (templateId: string) => {
+    // First emit event to remove any tasks associated with this template
+    eventBus.emit('habit:template-delete', { templateId });
+    
+    // Then remove the template from state
     removeTemplate(templateId);
   };
 

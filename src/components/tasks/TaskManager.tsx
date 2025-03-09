@@ -9,7 +9,7 @@ import { useTagSystem } from '@/hooks/useTagSystem';
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
   const { handleTimerStart } = useTimerEvents();
-  const { addTagToEntity } = useTagSystem();
+  const { addTagToEntity, getEntityTags } = useTagSystem();
 
   useEffect(() => {
     const handleHabitSchedule = (event: any) => {

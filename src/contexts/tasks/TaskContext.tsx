@@ -31,7 +31,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         };
       case 'ADD_TASK':
         // Avoid duplicate tasks
-        if (state.items.some(task => task.id === action.payload.id)) {
+        if (state.items.some(task => {
+          // Check for duplicate by both ID and relationship to habit
+          return task.id === action.payload.id || 
+            (task.relationships?.habitId === action.payload.relationships?.habitId && 
+             task.relationships?.date === action.payload.relationships?.date);
+        })) {
           return state;
         }
         return {
