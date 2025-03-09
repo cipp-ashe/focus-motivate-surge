@@ -24,7 +24,7 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
   const {
     handleHabitSchedule,
     processPendingTasks
-  } = useHabitTaskProcessor(tasks);
+  } = useHabitTaskProcessor();
   
   // Initialize the task cleanup handler
   const {
@@ -42,7 +42,7 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
     const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
     
     // Set up daily cleanup
-    const cleanupTimeoutId = setupDailyCleanup(clearAllTrackedTasks);
+    const cleanupTimeoutId = setupDailyCleanup();
     
     // Also check for pending habits when component mounts
     const timeout = setTimeout(() => {
