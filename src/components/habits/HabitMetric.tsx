@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -96,10 +95,10 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
             <Button 
               variant="outline" 
               size="sm"
-              className="h-6 px-2 text-xs"
+              className="h-6 px-2 text-xs flex items-center gap-1"
               onClick={handleOpenJournal}
             >
-              <BookOpen className="h-3 w-3 mr-1" />
+              <BookOpen className="h-3 w-3" />
               Write
             </Button>
             <JournalModal

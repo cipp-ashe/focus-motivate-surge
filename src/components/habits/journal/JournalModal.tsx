@@ -1,20 +1,14 @@
-
-import React, { useState, useEffect } from "react";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import React, { useState, useEffect, useRef } from "react";
+import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { Quote } from "@/types/timer/models";
 import { Tag } from "@/types/notes";
 import { useNoteActions } from "@/contexts/notes/NoteContext";
 import { toast } from "sonner";
 import { eventBus } from "@/lib/eventBus";
+import { Minimize2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 // Add quotes specific to different journal types
 const journalQuotes: Record<string, Quote[]> = {
@@ -160,14 +154,16 @@ const JournalModal: React.FC<JournalModalProps> = ({
 }) => {
   const [content, setContent] = useState("");
   const [randomQuote, setRandomQuote] = useState<Quote | null>(null);
+  const [randomPrompt, setRandomPrompt] = useState<string>("");
   const noteActions = useNoteActions();
+  const editorRef = useRef<HTMLDivElement>(null);
   
   // Determine journal type
   const journalType = getJournalType(habitName, description);
   const template = journalTemplates[journalType] || journalTemplates.gratitude;
   const quotes = journalQuotes[journalType] || journalQuotes.gratitude;
   
-  // Initialize content from template
+  // Initialize content from template and select random quote/prompt
   useEffect(() => {
     if (open) {
       setContent(template.initialContent);
@@ -175,6 +171,10 @@ const JournalModal: React.FC<JournalModalProps> = ({
       // Select random quote
       const randomIndex = Math.floor(Math.random() * quotes.length);
       setRandomQuote(quotes[randomIndex]);
+      
+      // Select random prompt
+      const promptIndex = Math.floor(Math.random() * template.prompts.length);
+      setRandomPrompt(template.prompts[promptIndex]);
     }
   }, [open, journalType]);
   
@@ -211,48 +211,84 @@ const JournalModal: React.FC<JournalModalProps> = ({
     
     onOpenChange(false);
   };
-  
-  const renderPrompt = () => {
-    // Pick a random prompt each time
-    const randomIndex = Math.floor(Math.random() * template.prompts.length);
-    return template.prompts[randomIndex];
-  };
+
+  if (!open) return null;
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{template.title}</DialogTitle>
-          {randomQuote && (
-            <div className="mt-2 p-3 bg-primary/5 rounded-md border border-primary/10 italic text-sm">
-              "{randomQuote.text}"
-              <div className="text-xs text-muted-foreground mt-1 text-right">— {randomQuote.author}</div>
+    <div 
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50"
+    >
+      {/* Overlay/Backdrop */}
+      <div 
+        className="fixed inset-0 bg-background/95 backdrop-blur-md" 
+        aria-hidden="true"
+      />
+      
+      {/* Content */}
+      <div className="relative h-full overflow-y-auto">
+        <div className="container mx-auto p-6 flex flex-col gap-6 min-h-screen max-w-[1200px]">
+          {/* Header Section with Quote */}
+          <Card className="bg-card/90 backdrop-blur-md shadow-lg p-6 border-primary/20">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                  {template.title}
+                </h1>
+                <Button
+                  onClick={() => onOpenChange(false)}
+                  className="p-2 rounded-full bg-background/80 hover:bg-background/90 transition-colors"
+                  variant="ghost"
+                  size="icon"
+                >
+                  <Minimize2 className="h-4 w-4" />
+                  <span className="sr-only">Close journal</span>
+                </Button>
+              </div>
+              
+              {randomQuote && (
+                <div className="p-4 bg-primary/5 rounded-md border border-primary/10 italic">
+                  <p className="text-base">"{randomQuote.text}"</p>
+                  <p className="text-sm text-muted-foreground mt-1 text-right">— {randomQuote.author}</p>
+                </div>
+              )}
+              
+              <div className="mt-2">
+                <p className="text-sm text-muted-foreground mb-1">Today's prompt:</p>
+                <p className="text-base font-medium">{randomPrompt}</p>
+              </div>
             </div>
-          )}
-          <div className="mt-2 text-sm text-muted-foreground">
-            Prompt: <span className="font-medium text-foreground">{renderPrompt()}</span>
-          </div>
-        </DialogHeader>
-        
-        <div className="flex-1 min-h-0 mt-2">
-          <MarkdownEditor
-            value={content}
-            onChange={setContent}
-            height="100%"
-            preview="edit"
-          />
+          </Card>
+
+          {/* Editor Section */}
+          <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1 min-h-[500px]">
+            <div className="p-6 h-full flex flex-col">
+              <div className="flex-1" ref={editorRef}>
+                <MarkdownEditor
+                  value={content}
+                  onChange={setContent}
+                  height="100%"
+                  preview="edit"
+                />
+              </div>
+            </div>
+          </Card>
+
+          {/* Footer with Actions */}
+          <Card className="bg-card/90 backdrop-blur-md shadow-lg p-4 border-primary/20">
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Journal Entry
+              </Button>
+            </div>
+          </Card>
         </div>
-        
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>
-            Save Journal Entry
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
