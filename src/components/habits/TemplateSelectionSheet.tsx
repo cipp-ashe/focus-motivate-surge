@@ -82,7 +82,10 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
 
   const handleSaveConfiguration = () => {
     if (!configuringTemplate) return;
+    
+    // Use event bus to emit template update event
     eventBus.emit('habit:template-update', configuringTemplate);
+    
     onSelectTemplate(configuringTemplate.templateId);
     handleCloseConfigDialog();
     onOpenChange(false);
@@ -98,6 +101,10 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     const updated = customTemplates.filter(t => t.id !== templateId);
     setCustomTemplates(updated);
     localStorage.setItem('custom-templates', JSON.stringify(updated));
+    
+    // Use event bus to emit template delete event
+    eventBus.emit('habit:template-delete', { templateId });
+    
     toast.success('Custom template deleted');
   };
 
@@ -112,6 +119,10 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     localStorage.setItem('custom-templates', JSON.stringify(updated));
     setIsCreatingNew(false);
     setActiveTab("custom");
+    
+    // Emit event for template creation
+    eventBus.emit('habit:custom-template-create', template);
+    
     toast.success('Custom template created successfully');
   };
 

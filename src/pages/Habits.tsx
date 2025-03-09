@@ -6,14 +6,13 @@ import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Settings, ArrowLeft, Sun, Moon, Plus } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTheme } from "@/hooks/useTheme";
+import { eventBus } from '@/lib/eventBus';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
   const [configOpen, setConfigOpen] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
   const [customTemplates, setCustomTemplates] = useState([]);
 
   // Load custom templates
@@ -46,6 +45,7 @@ const HabitsPage = () => {
       customTemplates.find(t => t.id === templateId);
     
     if (template) {
+      eventBus.emit('habit:template-add', templateId);
       toast.success(`Added template: ${template.name}`);
     }
   };
@@ -63,20 +63,6 @@ const HabitsPage = () => {
         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
           Habit Tracker
         </h1>
-        <div className="ml-auto">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="rounded-full hover:bg-primary/20"
-          >
-            {isDark ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
       </div>
       
       <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">
