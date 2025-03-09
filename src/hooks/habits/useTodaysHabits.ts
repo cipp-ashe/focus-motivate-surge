@@ -1,18 +1,27 @@
 
 import { useCallback, useEffect, useState } from 'react';
-import { Habit } from '@/types/habits';
-import { useHabitContext } from '@/contexts/habits/HabitContext';
-import { timeUtils } from '@/utils/timeUtils';
+import { HabitDetail } from '@/components/habits/types';
+import { useHabitState } from '@/contexts/habits/HabitContext';
 import { eventBus } from '@/lib/eventBus';
 import { useLocation } from 'react-router-dom';
+
+// Add timeUtils helper functions
+const timeUtils = {
+  getCurrentDayName: (): string => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return days[new Date().getDay()];
+  },
+  getCurrentDateString: (): string => {
+    return new Date().toDateString();
+  }
+};
 
 /**
  * Hook to get today's habits based on active templates
  */
 export const useTodaysHabits = () => {
-  const { state } = useHabitContext();
-  const { activeTemplates } = state;
-  const [todaysHabits, setTodaysHabits] = useState<Habit[]>([]);
+  const { templates: activeTemplates } = useHabitState();
+  const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
   const location = useLocation();
 
   // Function to process habits - defined before use
@@ -28,14 +37,14 @@ export const useTodaysHabits = () => {
     console.log(`useTodaysHabits - Today is ${today}, checking active templates:`, activeTemplates);
 
     // Collect habits from active templates that are scheduled for today
-    const habits: Habit[] = [];
+    const habits: HabitDetail[] = [];
     
     activeTemplates.forEach(template => {
       // Check if template is active today
       const isActiveToday = template.activeDays?.includes(today);
       
-      console.log(`Checking template ${template.id} - active days:`, template.activeDays);
-      console.log(`Template ${template.id} is active today:`, isActiveToday);
+      console.log(`Checking template ${template.templateId} - active days:`, template.activeDays);
+      console.log(`Template ${template.templateId} is active today:`, isActiveToday);
       
       if (isActiveToday) {
         // Add all habits from this template
@@ -43,7 +52,7 @@ export const useTodaysHabits = () => {
           template.habits.forEach(habit => {
             habits.push({
               ...habit,
-              templateId: template.id
+              templateId: template.templateId
             });
           });
         }
@@ -61,16 +70,16 @@ export const useTodaysHabits = () => {
       
       habits.forEach(habit => {
         // Only process timer type habits
-        if (habit.type === 'timer' && habit.duration) {
+        if (habit.metrics?.type === 'timer' && habit.metrics?.target) {
           console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${habit.templateId}`);
-          console.log(`Creating task for habit ${habit.name} with duration ${habit.duration} seconds (${habit.duration / 60} minutes)`);
+          console.log(`Creating task for habit ${habit.name} with duration ${habit.metrics.target} seconds (${habit.metrics.target / 60} minutes)`);
           
           // Schedule task creation via event bus
           eventBus.emit('habit:schedule', {
             habitId: habit.id,
             templateId: habit.templateId,
             name: habit.name,
-            duration: habit.duration,
+            duration: habit.metrics.target,
             date: formattedDate
           });
         }

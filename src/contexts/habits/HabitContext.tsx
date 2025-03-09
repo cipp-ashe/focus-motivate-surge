@@ -2,7 +2,6 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useTodaysHabits } from '@/hooks/habits/useTodaysHabits';
 import { habitReducer } from './habitReducer';
 import { HabitState, HabitContextActions, initialState } from './types';
 import { useHabitEvents } from './useHabitEvents';
@@ -13,9 +12,6 @@ const HabitActionsContext = createContext<HabitContextActions | undefined>(undef
 
 export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
-  
-  // Initialize today's habits
-  const { todaysHabits } = useTodaysHabits(state.templates);
   
   // Set up event handlers
   useHabitEvents(state, dispatch);
@@ -46,7 +42,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const actions = createHabitActions(state, dispatch);
 
   return (
-    <HabitContext.Provider value={{ ...state, todaysHabits }}>
+    <HabitContext.Provider value={state}>
       <HabitActionsContext.Provider value={actions}>
         {children}
       </HabitActionsContext.Provider>

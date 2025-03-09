@@ -16,7 +16,7 @@ import { eventBus } from '@/lib/eventBus';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
-  const { todaysHabits } = useTodaysHabits(templates);
+  const { todaysHabits } = useTodaysHabits();
   const [forceUpdate, setForceUpdate] = useState(0);
   const isMobile = useIsMobile();
   
