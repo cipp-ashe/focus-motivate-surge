@@ -1,9 +1,10 @@
 
-import { Timer, Plus } from "lucide-react";
+import { Timer, Plus, BookOpen, CheckCircle, Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import type { HabitDetail } from "@/components/habits/types";
 
@@ -16,12 +17,26 @@ interface HabitRowProps {
 
 const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
   const isTimerHabit = habit.metrics.type === 'timer';
+  const isJournalHabit = habit.name.toLowerCase().includes('journal') || 
+                         habit.description.toLowerCase().includes('journal');
+  
+  const formatMinutes = (seconds?: number) => {
+    if (!seconds) return '0m';
+    return `${Math.floor(seconds / 60)}m`;
+  };
   
   const handleTimerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onStart) {
       onStart();
     }
+  };
+
+  const handleJournalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast.info(`Opening journal for ${habit.name}`, {
+      description: "This will connect to notes in a future update"
+    });
   };
   
   return (
@@ -33,25 +48,69 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
           onChange={onComplete}
           className="h-5 w-5 rounded border-primary"
         />
-        <span className={`${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
-          {habit.name}
-        </span>
+        <div className="flex flex-col">
+          <span className={`${isCompleted ? 'line-through text-muted-foreground' : 'font-medium'}`}>
+            {habit.name}
+          </span>
+          {habit.description && (
+            <span className="text-xs text-muted-foreground">
+              {habit.description}
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2">
+        {habit.tips && habit.tips.length > 0 && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                >
+                  <Info className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="max-w-[300px]">
+                <div className="space-y-2 p-1">
+                  <p className="font-medium text-sm">Tips:</p>
+                  <ul className="list-disc pl-5 text-xs space-y-1">
+                    {habit.tips.map((tip, index) => (
+                      <li key={index}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+
         {isTimerHabit && habit.metrics.target && (
-          <>
+          <div className="flex items-center gap-1">
             <span className="text-sm text-muted-foreground">
-              {habit.metrics.target}m
+              {formatMinutes(habit.metrics.target)}
             </span>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={handleTimerClick}
               className="h-8 w-8"
             >
               <Timer className="h-4 w-4" />
             </Button>
-          </>
+          </div>
+        )}
+
+        {isJournalHabit && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleJournalClick}
+            className="h-8 w-8"
+          >
+            <BookOpen className="h-4 w-4" />
+          </Button>
         )}
       </div>
     </div>
@@ -109,8 +168,17 @@ export const TodaysHabitCard = ({
   const durationHabits = habits.filter(habit => 
     habit.metrics.type === 'timer' && habit.metrics.target
   );
-  const nonDurationHabits = habits.filter(habit => 
+  
+  const journalHabits = habits.filter(habit => 
+    (habit.name.toLowerCase().includes('journal') || 
+     habit.description.toLowerCase().includes('journal')) &&
     habit.metrics.type !== 'timer'
+  );
+  
+  const otherHabits = habits.filter(habit => 
+    habit.metrics.type !== 'timer' && 
+    !habit.name.toLowerCase().includes('journal') &&
+    !habit.description.toLowerCase().includes('journal')
   );
 
   const handleStartHabit = (habit: HabitDetail) => {
@@ -128,7 +196,7 @@ export const TodaysHabitCard = ({
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
-            <Timer className="h-5 w-5 text-primary" />
+            <CheckCircle className="h-5 w-5 text-primary" />
             Today's Habits
           </h2>
           <span className="text-sm text-muted-foreground">
@@ -148,14 +216,27 @@ export const TodaysHabitCard = ({
             />
           )}
           
-          {durationHabits.length > 0 && nonDurationHabits.length > 0 && (
+          {durationHabits.length > 0 && (journalHabits.length > 0 || otherHabits.length > 0) && (
             <Separator className="my-4" />
           )}
           
-          {nonDurationHabits.length > 0 && (
+          {journalHabits.length > 0 && (
+            <HabitSection
+              title="Journal Habits"
+              habits={journalHabits}
+              completedHabits={completedHabits}
+              onHabitComplete={onHabitComplete}
+            />
+          )}
+          
+          {journalHabits.length > 0 && otherHabits.length > 0 && (
+            <Separator className="my-4" />
+          )}
+          
+          {otherHabits.length > 0 && (
             <HabitSection
               title="Daily Habits"
-              habits={nonDurationHabits}
+              habits={otherHabits}
               completedHabits={completedHabits}
               onHabitComplete={onHabitComplete}
             />
@@ -165,4 +246,3 @@ export const TodaysHabitCard = ({
     </Card>
   );
 };
-
