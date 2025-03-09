@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,39 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   templateId,
 }) => {
   const [journalModalOpen, setJournalModalOpen] = useState(false);
+  const [hasExistingEntry, setHasExistingEntry] = useState(false);
   const noteState = useNoteState();
+
+  // Check if there's an existing journal note whenever this component mounts
+  // or when the notes change or the habit changes
+  useEffect(() => {
+    const checkForExistingEntry = () => {
+      // Find any related notes for this habit
+      const relatedEntities = relationshipManager.getRelatedEntities(habit.id, 'habit', 'note');
+      
+      if (relatedEntities.length > 0) {
+        // We have a relationship, but verify the note still exists
+        const noteId = relatedEntities[0].id;
+        const foundNote = noteState.items.find(note => note.id === noteId);
+        
+        setHasExistingEntry(!!foundNote);
+        console.log(`Habit ${habit.id} journal entry exists: ${!!foundNote}`);
+        
+        // If the note doesn't exist but progress shows completed, update progress
+        if (!foundNote && progress.value) {
+          // Find the template that contains this habit
+          setTimeout(() => {
+            console.log("No journal found but habit marked complete - updating state");
+            onUpdate(false);
+          }, 0);
+        }
+      } else {
+        setHasExistingEntry(false);
+      }
+    };
+    
+    checkForExistingEntry();
+  }, [habit.id, noteState.items, progress.value, onUpdate]);
 
   const handleOpenJournal = () => {
     setJournalModalOpen(true);
@@ -100,7 +131,6 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
           </div>
         );
       case 'journal':
-        const isCompleted = !!progress.value;
         return (
           <>
             <Button 
@@ -108,10 +138,10 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
               size="sm"
               className="h-6 px-2 text-xs flex items-center gap-1"
               onClick={handleOpenJournal}
-              title={isCompleted ? "View journal entry" : "Create journal entry"}
+              title={hasExistingEntry ? "View journal entry" : "Create journal entry"}
             >
               <BookOpen className="h-3 w-3" />
-              {isCompleted ? "View" : "Write"}
+              {hasExistingEntry ? "View" : "Write"}
             </Button>
             <JournalModal
               open={journalModalOpen}
