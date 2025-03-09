@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HabitDetail } from './types';
 import HabitMetric from './HabitMetric';
 import { Checkbox } from "@/components/ui/checkbox";
-import { Timer } from 'lucide-react';
+import { Timer, BookText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { eventBus } from '@/lib/eventBus';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -55,9 +54,9 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
   };
 
   return (
-    <Card className="bg-card/50 border">
+    <Card className="shadow-md border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Today's Habits</CardTitle>
+        <CardTitle className="text-lg font-semibold text-primary">Today's Habits</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -71,7 +70,7 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
                   id={`habit-${habit.id}`}
                   checked={completedHabits.includes(habit.id)}
                   onCheckedChange={() => onHabitComplete(habit, templateId)}
-                  className="h-5 w-5"
+                  className="h-5 w-5 border-primary"
                 />
                 <div>
                   <label 
@@ -86,23 +85,41 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
                 </div>
               </div>
               
-              {/* For timer habits, add a timer button that starts the timer directly */}
+              {/* Timer habit button */}
               {habit.metrics.type === 'timer' && (
                 <div className="flex items-center gap-2 mr-2">
                   <Button
                     variant="outline"
                     size="icon"
-                    className="h-7 w-7 rounded-full"
+                    className="h-8 w-8 rounded-full"
                     onClick={() => handleStartTimer(habit)}
                     title="Start Timer"
                   >
-                    <Timer className="h-3.5 w-3.5" />
+                    <Timer className="h-4 w-4" />
                   </Button>
                 </div>
               )}
               
-              {/* Special habit types still use HabitMetric */}
-              {habit.metrics.type !== 'boolean' && habit.metrics.type !== 'timer' && (
+              {/* Journal habit button */}
+              {habit.metrics.type === 'journal' && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline" 
+                    size="sm"
+                    className="h-8 px-3 rounded-md border-primary/50"
+                    onClick={() => {
+                      eventBus.emit('journal:open', { habitId: habit.id, habitName: habit.name });
+                    }}
+                  >
+                    <BookText className="h-4 w-4 mr-1" /> Write
+                  </Button>
+                </div>
+              )}
+              
+              {/* Other habit types */}
+              {habit.metrics.type !== 'boolean' && 
+               habit.metrics.type !== 'timer' && 
+               habit.metrics.type !== 'journal' && (
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col items-end">
                     <HabitMetric

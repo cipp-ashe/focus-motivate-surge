@@ -32,7 +32,6 @@ const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
   return (
     <div className={cn(
       isMobile ? 'order-first' : 'lg:order-last',
-      "bg-card/50 border border-border rounded-lg shadow-sm overflow-hidden",
       className
     )}>
       <TodaysHabitCard
