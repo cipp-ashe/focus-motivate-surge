@@ -11,6 +11,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 export const useTaskEvents = () => {
   const processingRef = useRef(false);
   const forceUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastForceUpdateTimeRef = useRef(0);
   
   const createTask = useCallback((task: Task) => {
     console.log("useTaskEvents: Creating task", task);
@@ -35,9 +36,7 @@ export const useTaskEvents = () => {
       toast.success('Task added 📝');
       
       // Force task update to ensure it appears in UI
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-      }, 100);
+      forceTaskUpdate();
     } else {
       console.log(`Task ${task.id} already exists, skipping creation`);
     }
@@ -95,7 +94,16 @@ export const useTaskEvents = () => {
   }, []);
 
   const forceTaskUpdate = useCallback(() => {
-    // Prevent multiple rapid calls
+    // Prevent multiple rapid calls with time-based debouncing
+    const now = Date.now();
+    if (now - lastForceUpdateTimeRef.current < 300) {
+      console.log("useTaskEvents: Skipping force update, too soon since last update");
+      return;
+    }
+    
+    lastForceUpdateTimeRef.current = now;
+    
+    // Prevent simultaneous processing
     if (processingRef.current) {
       console.log("useTaskEvents: Task update already in progress, skipping");
       return;
@@ -107,6 +115,7 @@ export const useTaskEvents = () => {
     // Clear any existing timeout
     if (forceUpdateTimeoutRef.current) {
       clearTimeout(forceUpdateTimeoutRef.current);
+      forceUpdateTimeoutRef.current = null;
     }
     
     // Dispatch event to trigger reloading
@@ -115,7 +124,8 @@ export const useTaskEvents = () => {
     // Reset processing flag after a delay
     forceUpdateTimeoutRef.current = setTimeout(() => {
       processingRef.current = false;
-    }, 200);
+      forceUpdateTimeoutRef.current = null;
+    }, 300);
   }, []);
 
   const forceTagsUpdate = useCallback(() => {

@@ -18,14 +18,24 @@ export const useTaskEvents = (
   const lastTaskLoadTimeRef = useRef(Date.now());
   const pendingTaskUpdatesRef = useRef<Task[]>([]);
   const isInitializingRef = useRef(true);
+  const preventReentrantUpdateRef = useRef(false);
   
   // Force reload tasks from storage
   const forceTasksReload = useCallback(() => {
     try {
+      // Prevent reentrant calls - if we're already in a reload, don't start another
+      if (preventReentrantUpdateRef.current) {
+        console.log("TaskEvents: Preventing reentrant force reload");
+        return;
+      }
+      
+      preventReentrantUpdateRef.current = true;
+      
       const now = Date.now();
       // Avoid excessive reloads
-      if (now - lastTaskLoadTimeRef.current < 200 && !isInitializingRef.current) {
+      if (now - lastTaskLoadTimeRef.current < 300 && !isInitializingRef.current) {
         console.log("TaskEvents: Skipping rapid reload, last load was", now - lastTaskLoadTimeRef.current, "ms ago");
+        preventReentrantUpdateRef.current = false;
         return;
       }
       
@@ -52,8 +62,14 @@ export const useTaskEvents = (
       
       dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
       isInitializingRef.current = false;
+      
+      // Release the lock after a small delay to prevent rapid successive calls
+      setTimeout(() => {
+        preventReentrantUpdateRef.current = false;
+      }, 200);
     } catch (error) {
       console.error('TaskEvents: Error forcing tasks reload:', error);
+      preventReentrantUpdateRef.current = false;
     }
   }, [dispatch]);
   
@@ -132,23 +148,34 @@ export const useTaskEvents = (
       }),
     ];
     
-    // Handle force update events from window
+    // Handle force update events from window with debouncing
+    const lastForceUpdateTime = useRef(0);
+    
     const handleForceUpdate = () => {
-      console.log("TaskEvents: Force updating task list");
-      forceTasksReload();
+      const now = Date.now();
+      // Debounce force updates to prevent infinite loops
+      if (now - lastForceUpdateTime.current > 500) {
+        lastForceUpdateTime.current = now;
+        console.log("TaskEvents: Force updating task list (debounced)");
+        forceTasksReload();
+      } else {
+        console.log("TaskEvents: Skipping force update, too frequent");
+      }
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
     
-    // Set up periodic verification for task consistency
+    // Set up periodic verification for task consistency with reduced frequency
     const verificationCleanup = taskVerification.setupPeriodicVerification(
       () => items,
       (missingTasks) => {
-        missingTasks.forEach(task => {
-          dispatch({ type: 'ADD_TASK', payload: task });
-        });
+        if (missingTasks.length > 0) {
+          missingTasks.forEach(task => {
+            dispatch({ type: 'ADD_TASK', payload: task });
+          });
+        }
       },
-      30000 // Check every 30 seconds
+      60000 // Check every minute instead of every 30 seconds to reduce overhead
     );
     
     return () => {

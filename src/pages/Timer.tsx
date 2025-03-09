@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TimerSection } from '@/components/timer/TimerSection';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import TaskManager from '@/components/tasks/TaskManager';
@@ -16,9 +16,14 @@ const TimerPage = () => {
   const [favorites, setFavorites] = React.useState<Quote[]>([]);
   const habitCheckDoneRef = useRef(false);
   const tasksLoadedRef = useRef(false);
+  const initCompletedRef = useRef(false);
+  const [forceUpdateCount, setForceUpdateCount] = useState(0);
   
-  // Track when TimerPage is mounted and ready
+  // Track when TimerPage is mounted and ready - only run once
   useEffect(() => {
+    if (initCompletedRef.current) return;
+    initCompletedRef.current = true;
+    
     console.log("TimerPage mounted and ready");
     
     // Notify that the timer page is ready
@@ -30,17 +35,15 @@ const TimerPage = () => {
     if (!habitCheckDoneRef.current) {
       habitCheckDoneRef.current = true;
       
-      // Progressive checks for habit tasks to ensure they're loaded
-      const checkInterval = 300; // milliseconds between checks
-      
-      const checkHabits = (iteration: number) => {
-        console.log(`Checking for pending habits from TimerPage (iteration ${iteration})`);
+      // Simpler, single check for habit tasks to avoid loops
+      setTimeout(() => {
+        console.log(`Checking for pending habits from TimerPage (one-time check)`);
         
         // Check for pending habits
         eventBus.emit('habits:check-pending', {});
         
         // Force a task update to ensure any new tasks are loaded
-        window.dispatchEvent(new Event('force-task-update'));
+        setForceUpdateCount(prev => prev + 1);
         
         // For really stubborn cases, directly check localStorage
         const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
@@ -75,10 +78,6 @@ const TimerPage = () => {
                 eventBus.emit('task:create', task);
               });
               
-              setTimeout(() => {
-                window.dispatchEvent(new Event('force-task-update'));
-              }, 100);
-              
               // Show notification if this is the first time loading tasks
               if (!tasksLoadedRef.current) {
                 tasksLoadedRef.current = true;
@@ -96,72 +95,60 @@ const TimerPage = () => {
           console.log('No habit tasks found in localStorage, checking if we need to reprocess habits');
           eventBus.emit('habits:processed', {});
         }
-        
-        // If we still need more iterations, schedule the next check
-        if (iteration < 3) {
-          setTimeout(() => checkHabits(iteration + 1), checkInterval * iteration);
-        } else if (!tasksLoadedRef.current && tasks.length === 0) {
-          // After all iterations, if still no tasks, try one more time with direct creation
-          console.log('Final attempt to load habit tasks from templates');
-          eventBus.emit('habits:reprocess-all', {});
-        }
-      };
-      
-      // Start the progressive checking after a short delay
-      setTimeout(() => checkHabits(1), 300);
+      }, 300);
     }
   }, [tasks.length]);
   
-  // Listen for force-task-update events
+  // Listen for force-task-update events with debouncing
   useEffect(() => {
+    const lastUpdateTime = useRef(0);
+    
     const handleForceUpdate = () => {
-      console.log('TimerPage: Received force-task-update event');
-      // Check if we need to load any tasks that aren't in memory
-      const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-      const habitTasks = storedTasks.filter((task: any) => task.relationships?.habitId);
-      
-      if (habitTasks.length > 0 && habitTasks.length !== tasks.filter(t => t.relationships?.habitId).length) {
-        console.log(`Mismatch between stored habit tasks (${habitTasks.length}) and memory tasks (${tasks.filter(t => t.relationships?.habitId).length})`);
+      const now = Date.now();
+      // Limit updates to no more than once every 500ms to avoid infinite loops
+      if (now - lastUpdateTime.current > 500) {
+        console.log('TimerPage: Received force-task-update event (debounced)');
+        lastUpdateTime.current = now;
+        // Use state update to trigger a controlled re-render
+        setForceUpdateCount(prev => prev + 1);
       }
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
-    return () => window.removeEventListener('force-task-update', handleForceUpdate);
-  }, [tasks]);
+    
+    return () => {
+      window.removeEventListener('force-task-update', handleForceUpdate);
+    };
+  }, []);
+  
+  // This gives us a render key that changes on each force update
+  // but doesn't cause a completely new component tree to be created
+  const renderKey = `timer-page-${forceUpdateCount % 3}`;
 
-  const handleTaskComplete = (metrics: any) => {
-    if (selectedTask) {
-      console.log("Task completed:", selectedTask.name, metrics);
-    }
-  };
-
-  const handleDurationChange = (seconds: number) => {
-    if (selectedTask) {
-      console.log("Duration changed for task:", selectedTask.name, seconds);
-    }
-  };
-
-  // Ensure we're wrapping everything with the required context providers
   return (
     <HabitsPanelProvider>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-6">
-          <TimerErrorBoundary>
-            <TaskLayout
-              timer={
-                <TimerSection
-                  selectedTask={selectedTask}
-                  onTaskComplete={handleTaskComplete}
-                  onDurationChange={handleDurationChange}
-                  favorites={favorites}
-                  setFavorites={setFavorites}
-                />
+      <TimerErrorBoundary>
+        <TaskLayout
+          key={renderKey}
+          mainContent={<TimerSection
+            selectedTask={selectedTask}
+            onTaskComplete={(metrics) => {
+              eventBus.emit('task:complete', { taskId: selectedTaskId, metrics });
+            }}
+            onDurationChange={(seconds) => {
+              if (selectedTaskId) {
+                eventBus.emit('task:update', {
+                  taskId: selectedTaskId,
+                  updates: { duration: seconds }
+                });
               }
-              taskList={<TaskManager />}
-            />
-          </TimerErrorBoundary>
-        </div>
-      </div>
+            }}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />}
+          sidebar={<TaskManager />}
+        />
+      </TimerErrorBoundary>
     </HabitsPanelProvider>
   );
 };
