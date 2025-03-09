@@ -31,11 +31,13 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
       habitName: habit.name,
       description: habit.description || ''
     });
-    toast.info(`Opening journal for: ${habit.name}`, {
-      description: "Creating a new note for your journal entry"
-    });
+    
     // Mark as completed when journal is opened
     onUpdate(true);
+    
+    toast.success(`Created new journal entry for: ${habit.name}`, {
+      description: "Your journal entry has been created"
+    });
   };
 
   const formatTime = (seconds: number) => {

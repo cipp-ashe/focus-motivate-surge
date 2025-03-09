@@ -1,3 +1,4 @@
+
 import { memo } from "react";
 import { Keyboard } from "lucide-react";
 import { Button } from "./ui/button";
@@ -18,8 +19,8 @@ interface ShortcutsInfoProps {
 }
 
 export const ShortcutsInfo = memo(({ shortcuts }: ShortcutsInfoProps) => (
-  <TooltipProvider>
-    <Tooltip delayDuration={0}>
+  <TooltipProvider delayDuration={100}>
+    <Tooltip>
       <TooltipTrigger asChild>
         <Button
           variant="ghost"
@@ -29,7 +30,7 @@ export const ShortcutsInfo = memo(({ shortcuts }: ShortcutsInfoProps) => (
           <Keyboard className="h-4 w-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent align="end" className="bg-card">
+      <TooltipContent align="end" className="bg-card border-border shadow-md z-50">
         <div className="space-y-2">
           <p className="text-sm font-semibold">Keyboard Shortcuts</p>
           <div className="space-y-1">

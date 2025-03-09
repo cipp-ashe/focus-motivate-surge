@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import type { HabitDetail } from "@/components/habits/types";
+import { eventBus } from "@/lib/eventBus";
 
 interface HabitRowProps {
   habit: HabitDetail;
@@ -17,8 +18,7 @@ interface HabitRowProps {
 
 const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
   const isTimerHabit = habit.metrics.type === 'timer';
-  const isJournalHabit = habit.name.toLowerCase().includes('journal') || 
-                         habit.description.toLowerCase().includes('journal');
+  const isJournalHabit = habit.metrics.type === 'journal';
   
   const formatMinutes = (seconds?: number) => {
     if (!seconds) return '0m';
@@ -34,8 +34,19 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
 
   const handleJournalClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.info(`Opening journal for ${habit.name}`, {
-      description: "This will connect to notes in a future update"
+    
+    // Use event bus to create a note from this habit
+    eventBus.emit('note:create-from-habit', {
+      habitId: habit.id,
+      habitName: habit.name,
+      description: habit.description || ''
+    });
+    
+    // Mark as completed
+    onComplete();
+    
+    toast.success(`Created new journal entry for: ${habit.name}`, {
+      description: "Your journal entry has been created"
     });
   };
   
@@ -61,7 +72,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
       </div>
       <div className="flex items-center gap-2">
         {habit.tips && habit.tips.length > 0 && (
-          <TooltipProvider>
+          <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -72,7 +83,11 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="left" className="max-w-[300px]">
+              <TooltipContent 
+                side="left" 
+                className="max-w-[300px] bg-popover border-border shadow-md z-50"
+                sideOffset={5}
+              >
                 <div className="space-y-2 p-1">
                   <p className="font-medium text-sm">Tips:</p>
                   <ul className="list-disc pl-5 text-xs space-y-1">
