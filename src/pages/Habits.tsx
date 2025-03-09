@@ -114,7 +114,7 @@ const HabitsPage = () => {
       </div>
 
       <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-[1fr_300px]'} gap-6`}>
-        <div>
+        <div className="bg-background">
           {/* Habit tracker */}
           <HabitTracker 
             activeTemplates={templates}

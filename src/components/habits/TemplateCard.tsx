@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { ActiveTemplate, HabitTemplate, HabitDetail } from './types';
@@ -18,7 +17,7 @@ interface TemplateCardProps {
 const convertToHabit = (habitDetail: HabitDetail): Habit => ({
   id: habitDetail.id,
   name: habitDetail.name,
-  description: habitDetail.description || 'No description provided', // Ensure description is always provided
+  description: habitDetail.description || 'No description provided',
   completed: false,
   streak: 0,
   lastCompleted: null,
@@ -36,9 +35,9 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   const habits: Habit[] = template.habits.map(convertToHabit);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold">{templateInfo.name}</CardTitle>
+    <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold">{templateInfo.name}</h3>
         <Button
           variant="ghost"
           size="icon"
@@ -47,14 +46,15 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         >
           <Trash2 className="h-4 w-4" />
         </Button>
-      </CardHeader>
-      <CardContent>
-        <HabitList
-          habits={habits}
-          onToggle={(habitId) => onHabitUpdate(habitId, true)}
-        />
-      </CardContent>
-    </Card>
+      </div>
+      <div className="text-sm text-muted-foreground mb-3">
+        {templateInfo.description}
+      </div>
+      <HabitList
+        habits={habits}
+        onToggle={(habitId) => onHabitUpdate(habitId, true)}
+      />
+    </div>
   );
 };
 

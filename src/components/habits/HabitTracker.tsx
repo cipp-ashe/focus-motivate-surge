@@ -48,21 +48,17 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Templates</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <ActiveTemplateList
-            activeTemplates={activeTemplates}
-            getTodayProgress={() => ({ value: false, streak: 0 })}
-            onHabitUpdate={() => {}}
-            onRemove={(templateId) => {
-              eventBus.emit('habit:template-delete', { templateId });
-            }}
-          />
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Active Templates</h2>
+        <ActiveTemplateList
+          activeTemplates={activeTemplates}
+          getTodayProgress={() => ({ value: false, streak: 0 })}
+          onHabitUpdate={() => {}}
+          onRemove={(templateId) => {
+            eventBus.emit('habit:template-delete', { templateId });
+          }}
+        />
+      </div>
 
       <Drawer open={isOpen} onOpenChange={close}>
         <DrawerContent className={isMobile ? 'max-h-[85vh]' : ''}>
