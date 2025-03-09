@@ -56,6 +56,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         const isInItems = state.items.some(task => task.id === action.payload.taskId);
         const isInCompleted = state.completed.some(task => task.id === action.payload.taskId);
 
+        console.log(`TaskContext: Deleting task ${action.payload.taskId}, exists in items: ${isInItems}, exists in completed: ${isInCompleted}`);
+
         return {
           ...state,
           items: isInItems ? state.items.filter(task => task.id !== action.payload.taskId) : state.items,
@@ -110,6 +112,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         // Only show toast for manual deletions
         if (reason === 'manual') {
           toast.success('Task deleted 🗑️');
+        } else if (reason === 'template-removed') {
+          toast.info('Task removed with habit template');
         }
       }),
       eventBus.on('task:update', ({ taskId, updates }) => {
@@ -122,9 +126,21 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       }),
     ];
 
+    // Listen for global force-task-update events
+    const handleForceUpdate = () => {
+      console.log("TaskContext: Force updating task list");
+      // Re-load tasks from localStorage to ensure everything is in sync
+      const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+      const completed = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+      dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
+    };
+    
+    window.addEventListener('force-task-update', handleForceUpdate);
+    
     // Cleanup subscriptions
     return () => {
       unsubscribers.forEach(unsub => unsub());
+      window.removeEventListener('force-task-update', handleForceUpdate);
     };
   }, []);
 

@@ -87,6 +87,9 @@ const TaskManager = () => {
         targetType: 'task',
         relationType: 'habit-task'
       });
+      
+      // Emit template-add event to ensure immediate processing
+      eventBus.emit('habit:template-add', { templateId });
     };
 
     // Handle template deletion - clean up associated tasks
@@ -98,6 +101,13 @@ const TaskManager = () => {
       const relatedTasks = tasks.filter(task => 
         task.relationships?.templateId === templateId
       );
+      
+      if (relatedTasks.length === 0) {
+        console.log(`No tasks found for template ${templateId}`);
+        return;
+      }
+      
+      console.log(`Found ${relatedTasks.length} tasks to remove for template ${templateId}`);
       
       // Delete each task associated with the deleted template
       relatedTasks.forEach(task => {
