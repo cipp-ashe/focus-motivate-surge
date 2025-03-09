@@ -36,4 +36,3 @@ export const createNewNote = (content: string): Note => ({
   createdAt: new Date().toISOString(),
   tags: []
 });
-

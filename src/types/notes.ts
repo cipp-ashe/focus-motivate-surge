@@ -16,3 +16,13 @@ export interface Note {
   updatedAt?: string;
   tags: Tag[];
 }
+
+// Define notes props
+export interface NotesProps {
+  hideNotes?: boolean;
+}
+
+// Check if a color is a valid TagColor
+export function isValidTagColor(color: string): color is TagColor {
+  return ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'].includes(color as TagColor);
+}

@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Note } from '@/types/notes';
+import { Note, TagColor, isValidTagColor } from '@/types/notes';
 import { noteStorage } from '@/lib/storage/noteStorage';
 import { toast } from 'sonner';
 
@@ -19,7 +19,10 @@ export const useNotesStorage = () => {
     }
   }, []);
 
-  const addTagToNote = useCallback((noteId: string, tagName: string, color: string = 'default') => {
+  const addTagToNote = useCallback((noteId: string, tagName: string, colorString: string = 'default') => {
+    // Validate the color before passing it
+    const color: TagColor = isValidTagColor(colorString) ? colorString as TagColor : 'default';
+    
     const success = noteStorage.addTagToNote(noteId, tagName, color);
     
     if (success) {

@@ -1,8 +1,9 @@
 
 import { Task, TaskMetrics } from '@/types/tasks';
 
-const ACTIVE_TASKS_KEY = 'taskList';
-const COMPLETED_TASKS_KEY = 'completedTasks';
+// Export constants for testing
+export const ACTIVE_TASKS_KEY = 'taskList';
+export const COMPLETED_TASKS_KEY = 'completedTasks';
 
 /**
  * Service for managing task storage
@@ -204,11 +205,12 @@ export const taskStorage = {
       
       // Get task and mark as completed
       const task = tasks[taskIndex];
-      const completedTask = {
+      const completedTask: Task = {
         ...task,
         completed: true,
         metrics,
-        clearReason: 'completed'
+        // Ensuring type safety for clearReason
+        clearReason: "completed" as "completed" | "manual"
       };
       
       // Remove from active tasks
@@ -263,6 +265,21 @@ export const taskStorage = {
     } catch (error) {
       console.error('Error deleting tasks by template from storage:', error);
       return false;
+    }
+  },
+  
+  /**
+   * Find missing tasks that are in storage but not in memory
+   */
+  findMissingTasks: (memoryTasks: Task[]): Task[] => {
+    try {
+      const storedTasks = taskStorage.loadTasks();
+      return storedTasks.filter((storedTask: Task) => 
+        !memoryTasks.some(memTask => memTask.id === storedTask.id)
+      );
+    } catch (error) {
+      console.error('Error finding missing tasks:', error);
+      return [];
     }
   }
 };
