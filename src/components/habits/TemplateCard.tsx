@@ -85,19 +85,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
             <div key={habit.id} className="py-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{habit.name}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "h-6 px-2 text-xs rounded-full",
-                    getProgress(habit.id).value 
-                      ? "bg-green-500/20 text-green-700 hover:bg-green-500/30" 
-                      : "bg-secondary/50 hover:bg-secondary"
-                  )}
-                  onClick={() => onHabitUpdate(habit.id, true)}
-                >
-                  {getProgress(habit.id).value ? "Completed" : "Mark Complete"}
-                </Button>
+                {getProgress(habit.id).value && (
+                  <span className="text-xs bg-green-500/20 text-green-700 px-2 py-0.5 rounded-full">
+                    Done
+                  </span>
+                )}
               </div>
               {habit.description && (
                 <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{habit.description}</p>
