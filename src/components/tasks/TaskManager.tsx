@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
@@ -8,6 +7,7 @@ import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { useHabitTaskScheduler } from '@/hooks/tasks/useHabitTaskScheduler';
 import { useTemplateTasksManager } from '@/hooks/tasks/useTemplateTasksManager';
 import { useTasksNavigation } from '@/hooks/tasks/useTasksNavigation';
+import { eventBus } from '@/lib/eventBus';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
