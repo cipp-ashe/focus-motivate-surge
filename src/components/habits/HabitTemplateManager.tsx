@@ -51,11 +51,11 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   const handleCloseConfig = (open: boolean) => {
     setConfigOpen(open);
     if (!open) {
-      // Set cooldown timer to prevent immediate reopening
-      isAddingRef.current = true;
-      cooldownTimerRef.current = setTimeout(() => {
-        isAddingRef.current = false;
-      }, 500); // Shorter cooldown still prevents issues
+      // Clear any pending cooldown when explicitly closed
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current);
+      }
+      isAddingRef.current = false;
     }
   };
 
@@ -64,12 +64,6 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     // Prevent duplicate template selection
     if (activeTemplates.some(t => t.templateId === templateId)) {
       toast.info(`Template already active`);
-      return;
-    }
-    
-    // Prevent selecting template during cooldown
-    if (isAddingRef.current) {
-      console.log("Currently in cooldown period, ignoring template selection");
       return;
     }
     
@@ -92,10 +86,10 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       setTimeout(() => {
         setConfigOpen(false);
         
-        // Allow new additions after a delay
-        setTimeout(() => {
+        // Allow new additions after a shorter delay
+        cooldownTimerRef.current = setTimeout(() => {
           isAddingRef.current = false;
-        }, 1000);
+        }, 300); // Reduced from 1000ms to 300ms for better UX
       }, 300);
     }
   };
@@ -108,7 +102,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
           size="sm" 
           className="flex items-center gap-1.5 shadow-sm hover:shadow transition-all"
           onClick={openConfig}
-          disabled={isAddingRef.current} // Disable during cooldown
+          disabled={isAddingRef.current} // Disable only during active cooldown
         >
           <Plus className="h-3.5 w-3.5" />
           Manage Habit Templates
