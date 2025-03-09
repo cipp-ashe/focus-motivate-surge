@@ -47,6 +47,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     
     if (template) {
       console.log("Adding template:", template);
+      // Pass the string templateId, not an object
       eventBus.emit('habit:template-add', templateId);
       toast.success(`Added template: ${template.name}`);
     }

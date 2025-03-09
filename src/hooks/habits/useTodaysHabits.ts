@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { HabitDetail, DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
 
@@ -10,6 +10,7 @@ import { eventBus } from '@/lib/eventBus';
 export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
   const [lastProcessedTemplates, setLastProcessedTemplates] = useState<string[]>([]);
+  const processingRef = useRef(false);
   
   // Get habits scheduled for today
   const getTodaysHabits = useCallback(() => {
@@ -35,74 +36,88 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
 
   // Process today's habits and generate tasks for timer-based habits
   const processHabits = useCallback((habits: HabitDetail[]) => {
-    const today = new Date().toDateString();
-    console.log('Processing habits for today:', today);
+    if (processingRef.current) return;
+    processingRef.current = true;
     
-    // Track which templates we've processed
-    const processedTemplateIds = new Set<string>();
-    
-    habits.forEach(habit => {
-      if (habit.metrics?.type === 'timer') {
-        const template = activeTemplates.find(t => 
-          t.habits.some(h => h.id === habit.id)
-        );
-        
-        if (template) {
-          console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${template.templateId}`);
-          processedTemplateIds.add(template.templateId);
+    try {
+      const today = new Date().toDateString();
+      console.log('Processing habits for today:', today);
+      
+      // Track which templates we've processed
+      const processedTemplateIds = new Set<string>();
+      
+      habits.forEach(habit => {
+        if (habit.metrics?.type === 'timer') {
+          const template = activeTemplates.find(t => 
+            t.habits.some(h => h.id === habit.id)
+          );
           
-          // The target is stored in seconds in the habit.metrics.target
-          const durationInSeconds = habit.metrics.target || 600; // Default to 10 minutes (600 seconds)
-          
-          console.log(`Creating task for habit ${habit.name} with duration ${durationInSeconds} seconds (${Math.floor(durationInSeconds / 60)} minutes)`);
-          
-          // Emit the event to ensure task creation
-          eventBus.emit('habit:schedule', {
-            habitId: habit.id,
-            templateId: template.templateId,
-            duration: durationInSeconds,
-            name: habit.name,
-            date: today
-          });
+          if (template) {
+            console.log(`Scheduling timer habit: ${habit.name} (${habit.id}) from template ${template.templateId}`);
+            processedTemplateIds.add(template.templateId);
+            
+            // The target is stored in seconds in the habit.metrics.target
+            const durationInSeconds = habit.metrics.target || 600; // Default to 10 minutes (600 seconds)
+            
+            console.log(`Creating task for habit ${habit.name} with duration ${durationInSeconds} seconds (${Math.floor(durationInSeconds / 60)} minutes)`);
+            
+            // Emit the event to ensure task creation
+            eventBus.emit('habit:schedule', {
+              habitId: habit.id,
+              templateId: template.templateId,
+              duration: durationInSeconds,
+              name: habit.name,
+              date: today
+            });
+          }
         }
-      }
-    });
-    
-    // Find templates that were previously processed but are no longer active
-    const currentTemplateIds = Array.from(processedTemplateIds);
-    const removedTemplates = lastProcessedTemplates.filter(
-      id => !currentTemplateIds.includes(id)
-    );
-    
-    // For removed templates, emit an event to clean up their tasks
-    removedTemplates.forEach(templateId => {
-      console.log(`Template ${templateId} was removed, cleaning up its tasks`);
-      eventBus.emit('habit:template-delete', { templateId });
-    });
-    
-    // Update the list of last processed templates
-    setLastProcessedTemplates(currentTemplateIds);
-    
-    localStorage.setItem('lastHabitProcessingDate', today);
+      });
+      
+      // Find templates that were previously processed but are no longer active
+      const currentTemplateIds = Array.from(processedTemplateIds);
+      const removedTemplates = lastProcessedTemplates.filter(
+        id => !currentTemplateIds.includes(id)
+      );
+      
+      // For removed templates, emit an event to clean up their tasks
+      removedTemplates.forEach(templateId => {
+        console.log(`Template ${templateId} was removed, cleaning up its tasks`);
+        eventBus.emit('habit:template-delete', { templateId });
+      });
+      
+      // Update the list of last processed templates
+      setLastProcessedTemplates(currentTemplateIds);
+      
+      localStorage.setItem('lastHabitProcessingDate', today);
+    } finally {
+      processingRef.current = false;
+    }
   }, [activeTemplates, lastProcessedTemplates]);
 
-  // Immediate processing when templates change - FIXED: add memoization check
+  // Handle template changes and process habits
   useEffect(() => {
     // Add check to prevent reprocessing if templates haven't changed
     const currentTemplateIds = activeTemplates.map(t => t.templateId).sort().join(',');
     const prevTemplateIds = lastProcessedTemplates.sort().join(',');
     
     // Only update if templates have changed
-    if (currentTemplateIds !== prevTemplateIds) {
+    if (currentTemplateIds !== prevTemplateIds && !processingRef.current) {
       const habits = getTodaysHabits();
       setTodaysHabits(habits);
       
       // Process habits when templates actually change
       processHabits(habits);
     }
-    
-    // Handle template-add events
-    const handleTemplateAdd = () => {
+  }, [getTodaysHabits, processHabits, activeTemplates]);
+  
+  // Handle template-add events
+  useEffect(() => {
+    const handleTemplateAdd = (templateId: string) => {
+      console.log(`Event received: habit:template-add ${templateId}`);
+      
+      // Avoid duplicate processing if we're already handling it
+      if (processingRef.current) return;
+      
       console.log("Template added, immediately processing habits");
       const updatedHabits = getTodaysHabits();
       setTodaysHabits(updatedHabits);
@@ -114,7 +129,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
     return () => {
       unsubscribe();
     };
-  }, [getTodaysHabits, processHabits, activeTemplates, lastProcessedTemplates]);
+  }, [getTodaysHabits, processHabits]);
 
   return { todaysHabits };
 };
