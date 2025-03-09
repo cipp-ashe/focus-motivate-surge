@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { habitReducer } from './habitReducer';
 import { HabitState, HabitContextActions, initialState } from './types';
 import { useHabitEvents } from './useHabitEvents';
-import { useHabitActions } from './useHabitActions';
+import { createHabitActions } from './useHabitActions';
 import { eventBus } from '@/lib/eventBus';
 
 // Create contexts with proper typing
@@ -47,7 +47,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // Create action handlers with refetch capability
-  const baseActions = useHabitActions(state, dispatch);
+  const baseActions = createHabitActions(state, dispatch);
   const actions: HabitContextActions = {
     ...baseActions,
     reloadTemplates: () => {

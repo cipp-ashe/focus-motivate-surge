@@ -1,12 +1,13 @@
+
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
 import { HabitContextActions, HabitState } from './types';
 import { eventBus } from '@/lib/eventBus';
 
-export const useHabitActions = (
+export const createHabitActions = (
   state: HabitState,
   dispatch: React.Dispatch<any>
-): HabitContextActions => {
+): Omit<HabitContextActions, 'reloadTemplates'> => {
   return {
     addTemplate: (template) => {
       // Generate a UUID if no templateId exists
