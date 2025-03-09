@@ -69,7 +69,11 @@ export const useHabitProgress = () => {
         
         return journalProgress;
       }
-      return storedProgress;
+      return {
+        ...storedProgress,
+        value: true,
+        completed: true
+      };
     }
     
     // If there's stored progress but no journal entry, update stored progress to match reality
@@ -114,6 +118,77 @@ export const useHabitProgress = () => {
       completed: false,
     };
   };
+
+  // Force a sync check of all journal relationships on initial load
+  useEffect(() => {
+    // This runs once on component mount to sync journal entries with progress
+    const syncJournalRelationships = () => {
+      // For each template and habit, check if there's a related journal entry
+      Object.keys(progress).forEach(templateId => {
+        Object.keys(progress[templateId] || {}).forEach(habitId => {
+          const today = new Date().toISOString().split('T')[0];
+          const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+          const hasJournalEntry = relatedNotes.length > 0;
+          
+          // If there's a journal entry but progress shows incomplete, update it
+          if (hasJournalEntry) {
+            const storedProgress = progress[templateId]?.[habitId]?.[today];
+            if (!storedProgress || !storedProgress.completed) {
+              setProgress(prev => {
+                const templateData = prev[templateId] || {};
+                const habitData = templateData[habitId] || {};
+                
+                return {
+                  ...prev,
+                  [templateId]: {
+                    ...templateData,
+                    [habitId]: {
+                      ...habitData,
+                      [today]: {
+                        value: true,
+                        streak: storedProgress?.streak ? storedProgress.streak + 1 : 1,
+                        date: today,
+                        completed: true,
+                      },
+                    },
+                  },
+                };
+              });
+            }
+          }
+          // If there's no journal entry but progress shows complete, update it
+          else {
+            const storedProgress = progress[templateId]?.[habitId]?.[today];
+            if (storedProgress && storedProgress.completed) {
+              setProgress(prev => {
+                const templateData = prev[templateId] || {};
+                const habitData = templateData[habitId] || {};
+                
+                return {
+                  ...prev,
+                  [templateId]: {
+                    ...templateData,
+                    [habitId]: {
+                      ...habitData,
+                      [today]: {
+                        value: false,
+                        streak: 0,
+                        date: today,
+                        completed: false,
+                      },
+                    },
+                  },
+                };
+              });
+            }
+          }
+        });
+      });
+    };
+    
+    // Run the sync on mount
+    syncJournalRelationships();
+  }, []); // Empty dependency array means this runs once on mount
 
   const getWeeklyProgress = (habitId: string, templateId: string): HabitProgress[] => {
     const today = new Date();

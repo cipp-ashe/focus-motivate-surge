@@ -44,7 +44,7 @@ const HabitsPage = () => {
     }
   }, [templates, todaysHabits]);
 
-  // Load completed habits from localStorage on initial load
+  // Load completed habits from localStorage and relationships on initial load and whenever todaysHabits changes
   useEffect(() => {
     if (!todaysHabits.length) return;
     
@@ -62,6 +62,9 @@ const HabitsPage = () => {
         if (hasJournalEntry) {
           console.log(`Found related notes for habit ${habit.id}:`, relatedNotes);
           completed.push(habit.id);
+          
+          // Ensure the progress is updated to match the relationship
+          updateProgress(habit.id, templateId, true);
         } else {
           // If no journal entry, check the stored progress
           const progress = getTodayProgress(habit.id, templateId);
@@ -76,7 +79,17 @@ const HabitsPage = () => {
       console.log("Found completed habits:", completed);
       setCompletedHabits(completed);
     }
-  }, [todaysHabits, templates, getTodayProgress]);
+  }, [todaysHabits, templates, getTodayProgress, updateProgress]);
+
+  // Listen for events that could change completion status
+  useEffect(() => {
+    const handleJournalDeleted = ({ habitId }: { habitId: string }) => {
+      setCompletedHabits(prev => prev.filter(id => id !== habitId));
+    };
+    
+    const unsub = eventBus.on('habit:journal-deleted', handleJournalDeleted);
+    return () => unsub();
+  }, []);
 
   // Load custom templates
   useEffect(() => {
