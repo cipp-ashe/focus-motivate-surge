@@ -1,284 +1,71 @@
 
-import { useState } from "react";
-import { Timer, Plus, BookOpen, CheckCircle, Info } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import type { HabitDetail } from "@/components/habits/types";
-import { eventBus } from "@/lib/eventBus";
-import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
-import JournalModal from "./journal/JournalModal";
-import { relationshipManager } from "@/lib/relationshipManager";
-
-interface HabitRowProps {
-  habit: HabitDetail;
-  isCompleted: boolean;
-  onComplete: () => void;
-  onStart?: () => void;
-  templateId?: string;
-}
-
-const HabitRow = ({ habit, isCompleted, onComplete, onStart, templateId }: HabitRowProps) => {
-  const [journalModalOpen, setJournalModalOpen] = useState(false);
-  const noteState = useNoteState();
-  const isTimerHabit = habit.metrics.type === 'timer';
-  const isJournalHabit = habit.metrics.type === 'journal';
-  
-  const formatMinutes = (seconds?: number) => {
-    if (!seconds) return '0m';
-    return `${Math.floor(seconds / 60)}m`;
-  };
-  
-  const handleTimerClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onStart) {
-      onStart();
-    }
-  };
-
-  const handleJournalClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setJournalModalOpen(true);
-  };
-  
-  const handleJournalComplete = () => {
-    // Mark the journal habit as completed
-    onComplete();
-    setJournalModalOpen(false);
-  };
-  
-  return (
-    <div className="flex items-center justify-between p-3 bg-card hover:bg-accent/50 rounded-md transition-colors">
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          checked={isCompleted}
-          onChange={onComplete}
-          className="h-5 w-5 rounded border-primary"
-        />
-        <div className="flex flex-col">
-          <span className={`${isCompleted ? 'line-through text-muted-foreground' : 'font-medium'}`}>
-            {habit.name}
-          </span>
-          {habit.description && (
-            <span className="text-xs text-muted-foreground">
-              {habit.description}
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        {habit.tips && habit.tips.length > 0 && (
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
-                >
-                  <Info className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent 
-                side="left" 
-                className="max-w-[300px] bg-popover border-border shadow-md z-50"
-                sideOffset={5}
-                align="center"
-              >
-                <div className="space-y-2 p-1">
-                  <p className="font-medium text-sm">Tips:</p>
-                  <ul className="list-disc pl-5 text-xs space-y-1">
-                    {habit.tips.map((tip, index) => (
-                      <li key={index}>{tip}</li>
-                    ))}
-                  </ul>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-
-        {isTimerHabit && habit.metrics.target && (
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-muted-foreground">
-              {formatMinutes(habit.metrics.target)}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleTimerClick}
-              className="h-8 w-8"
-            >
-              <Timer className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-
-        {isJournalHabit && (
-          <>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleJournalClick}
-              className="h-8 w-8"
-              title={isCompleted ? "View journal entry" : "Create journal entry"}
-            >
-              <BookOpen className="h-4 w-4" />
-            </Button>
-            <JournalModal
-              open={journalModalOpen}
-              onOpenChange={setJournalModalOpen}
-              habitId={habit.id}
-              habitName={habit.name}
-              description={habit.description}
-              onComplete={handleJournalComplete}
-              templateId={templateId} // Pass templateId
-            />
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-interface HabitSectionProps {
-  title: string;
-  habits: HabitDetail[];
-  completedHabits: string[];
-  onHabitComplete: (habit: HabitDetail, templateId?: string) => void; // Updated signature
-  onAddHabitToTasks?: (habit: HabitDetail) => void;
-  templateId?: string; // Add templateId prop
-}
-
-const HabitSection = ({
-  title,
-  habits,
-  completedHabits,
-  onHabitComplete,
-  onAddHabitToTasks,
-  templateId,
-}: HabitSectionProps) => {
-  if (habits.length === 0) return null;
-
-  return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-      {habits.map((habit) => (
-        <HabitRow
-          key={habit.id}
-          habit={habit}
-          isCompleted={completedHabits.includes(habit.id)}
-          onComplete={() => onHabitComplete(habit, templateId)}
-          onStart={onAddHabitToTasks ? () => onAddHabitToTasks(habit) : undefined}
-          templateId={templateId}
-        />
-      ))}
-    </div>
-  );
-};
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HabitDetail } from './types';
+import HabitMetric from './HabitMetric';
 
 interface TodaysHabitCardProps {
   habits: HabitDetail[];
   completedHabits: string[];
-  onHabitComplete: (habit: HabitDetail, templateId?: string) => void; // Updated signature
+  onHabitComplete: (habit: HabitDetail, templateId?: string) => void;
   onAddHabitToTasks: (habit: HabitDetail) => void;
-  templateId?: string; // Add templateId prop
+  templateId?: string;
 }
 
-export const TodaysHabitCard = ({
+const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
   habits,
   completedHabits,
   onHabitComplete,
   onAddHabitToTasks,
-  templateId,
-}: TodaysHabitCardProps) => {
-  if (habits.length === 0) return null;
-
-  const durationHabits = habits.filter(habit => 
-    habit.metrics.type === 'timer' && habit.metrics.target
-  );
-  
-  const journalHabits = habits.filter(habit => 
-    (habit.name.toLowerCase().includes('journal') || 
-     habit.description.toLowerCase().includes('journal')) &&
-    habit.metrics.type !== 'timer'
-  );
-  
-  const otherHabits = habits.filter(habit => 
-    habit.metrics.type !== 'timer' && 
-    !habit.name.toLowerCase().includes('journal') &&
-    !habit.description.toLowerCase().includes('journal')
-  );
-
-  const handleStartHabit = (habit: HabitDetail) => {
-    if (!habit.metrics.target) {
-      console.warn('Habit has no target duration:', habit);
-      toast.error("This habit doesn't have a duration set");
-      return;
-    }
-    onAddHabitToTasks(habit);
-    toast.success(`Started "${habit.name}"`);
-  };
+  templateId
+}) => {
+  if (!habits || habits.length === 0) {
+    return null;
+  }
 
   return (
-    <Card className="mt-6">
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-primary" />
-            Today's Habits
-          </h2>
-          <span className="text-sm text-muted-foreground">
-            {habits.length} habit{habits.length !== 1 ? 's' : ''}
-          </span>
+    <Card className="bg-card/50 border">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Today's Habits</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {habits.map(habit => (
+            <div 
+              key={habit.id}
+              className="flex items-center justify-between py-2 border-b last:border-none"
+            >
+              <div className="flex-1">
+                <h3 className="font-medium">{habit.name}</h3>
+                {habit.description && (
+                  <p className="text-sm text-muted-foreground">{habit.description}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end">
+                  <HabitMetric
+                    habit={habit}
+                    progress={{
+                      value: completedHabits.includes(habit.id),
+                      streak: 0
+                    }}
+                    onUpdate={(value) => {
+                      if (value) {
+                        onHabitComplete(habit, templateId);
+                      } else {
+                        onHabitComplete(habit, templateId);
+                      }
+                    }}
+                    templateId={templateId}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-      <ScrollArea className="h-[300px]">
-        <div className="p-4 space-y-4">
-          {durationHabits.length > 0 && (
-            <HabitSection
-              title="Timed Habits"
-              habits={durationHabits}
-              completedHabits={completedHabits}
-              onHabitComplete={onHabitComplete}
-              onAddHabitToTasks={handleStartHabit}
-              templateId={templateId}
-            />
-          )}
-          
-          {durationHabits.length > 0 && (journalHabits.length > 0 || otherHabits.length > 0) && (
-            <Separator className="my-4" />
-          )}
-          
-          {journalHabits.length > 0 && (
-            <HabitSection
-              title="Journal Habits"
-              habits={journalHabits}
-              completedHabits={completedHabits}
-              onHabitComplete={onHabitComplete}
-              templateId={templateId}
-            />
-          )}
-          
-          {journalHabits.length > 0 && otherHabits.length > 0 && (
-            <Separator className="my-4" />
-          )}
-          
-          {otherHabits.length > 0 && (
-            <HabitSection
-              title="Daily Habits"
-              habits={otherHabits}
-              completedHabits={completedHabits}
-              onHabitComplete={onHabitComplete}
-              templateId={templateId}
-            />
-          )}
-        </div>
-      </ScrollArea>
+      </CardContent>
     </Card>
   );
 };
+
+export default TodaysHabitCard;

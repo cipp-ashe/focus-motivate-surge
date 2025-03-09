@@ -1,34 +1,23 @@
 
 import { useEffect } from 'react';
+import { ActiveTemplate, HabitDetail } from './types';
 
 interface HabitDebugLoggerProps {
-  templates: any[];
-  todaysHabits: any[];
+  templates: ActiveTemplate[];
+  todaysHabits: HabitDetail[];
 }
 
+// This component doesn't render anything - it just logs debug info
 const HabitDebugLogger: React.FC<HabitDebugLoggerProps> = ({ 
   templates, 
   todaysHabits 
 }) => {
-  // Debug to see what data we have
   useEffect(() => {
-    console.log("HabitsPage - templates from context:", templates);
-    console.log("HabitsPage - today's habits:", todaysHabits);
-    
-    // Check localStorage directly
-    try {
-      const storedTemplates = localStorage.getItem('habit-templates');
-      console.log("HabitsPage - templates from localStorage:", storedTemplates ? JSON.parse(storedTemplates) : "none");
-      
-      // Also check habit progress
-      const storedProgress = localStorage.getItem('habit-progress');
-      console.log("HabitsPage - habit progress from localStorage:", storedProgress ? JSON.parse(storedProgress) : "none");
-    } catch (error) {
-      console.error("Error parsing data from localStorage:", error);
-    }
+    console.log("HabitDebugLogger - Active templates:", templates);
+    console.log("HabitDebugLogger - Today's habits:", todaysHabits);
   }, [templates, todaysHabits]);
-
-  return null; // This is a utility component that doesn't render anything
+  
+  return null;
 };
 
 export default HabitDebugLogger;
