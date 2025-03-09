@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
@@ -10,97 +11,114 @@ const TaskManager = () => {
   const { handleTimerStart } = useTimerEvents();
   const { addTagToEntity, getEntityTags } = useTagSystem();
   const scheduledTasksRef = useRef(new Map<string, string>()); // Map habitId-date to taskId
+  const processingEventRef = useRef(false);
 
   useEffect(() => {
     const handleHabitSchedule = (event: any) => {
-      const { habitId, templateId, name, duration, date } = event;
-      
-      console.log('TaskManager received habit:schedule event:', event);
-      
-      // Create a unique key to track this scheduled task
-      const taskKey = `${habitId}-${date}`;
-      
-      // Check if we've already processed this exact habit-date combination
-      if (scheduledTasksRef.current.has(taskKey)) {
-        const existingTaskId = scheduledTasksRef.current.get(taskKey);
-        console.log(`Task already scheduled for habit ${habitId} on ${date}, taskId: ${existingTaskId}`);
+      // Prevent concurrent processing of events
+      if (processingEventRef.current) {
+        console.log('TaskManager: Already processing a habit:schedule event, deferring');
+        setTimeout(() => eventBus.emit('habit:schedule', event), 100);
         return;
       }
       
-      // Check if task already exists for this habit and date
-      const existingTask = tasks.find(task => 
-        task.relationships?.habitId === habitId && 
-        task.relationships?.date === date
-      );
+      processingEventRef.current = true;
       
-      if (existingTask) {
-        console.log(`Task already exists for habit ${habitId} on ${date}:`, existingTask);
-        scheduledTasksRef.current.set(taskKey, existingTask.id);
-        return;
-      }
-
-      const taskId = crypto.randomUUID();
-      console.log(`Creating new task for habit ${habitId}:`, { taskId, name, duration });
-      
-      // Add to our tracking map
-      scheduledTasksRef.current.set(taskKey, taskId);
-      
-      // Ensure we're storing the duration in seconds
-      const durationInSeconds = duration;
-      
-      const task = {
-        id: taskId,
-        name,
-        completed: false,
-        duration: durationInSeconds, // Store in seconds
-        createdAt: new Date().toISOString(),
-        relationships: {
-          habitId,
-          templateId,
-          date
-        }
-      };
-
-      // Create the task
-      eventBus.emit('task:create', task);
-      
-      // Add the Habit tag
-      addTagToEntity('Habit', taskId, 'task');
-      
-      // Add template tag if available (e.g., "Mindfulness")
-      if (templateId) {
-        // Format template name correctly with first letter capitalized
-        // Handles both camelCase and kebab-case formats
-        let templateName = '';
+      try {
+        const { habitId, templateId, name, duration, date } = event;
         
-        if (templateId.includes('-')) {
-          // Handle kebab-case: "morning-routine" -> "Morning Routine"
-          templateName = templateId
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-        } else {
-          // Handle camelCase: "morningRoutine" -> "Morning Routine"
-          templateName = templateId
-            // Insert a space before all capital letters
-            .replace(/([A-Z])/g, ' $1')
-            // Capitalize the first letter
-            .replace(/^./, str => str.toUpperCase())
-            .trim();
+        console.log('TaskManager received habit:schedule event:', event);
+        
+        // Create a unique key to track this scheduled task
+        const taskKey = `${habitId}-${date}`;
+        
+        // Check if we've already processed this exact habit-date combination
+        if (scheduledTasksRef.current.has(taskKey)) {
+          const existingTaskId = scheduledTasksRef.current.get(taskKey);
+          console.log(`Task already scheduled for habit ${habitId} on ${date}, taskId: ${existingTaskId}`);
+          return;
         }
         
-        console.log(`Adding template tag "${templateName}" to task ${taskId}`);
-        addTagToEntity(templateName, taskId, 'task');
-      }
+        // Check if task already exists for this habit and date
+        const existingTask = tasks.find(task => 
+          task.relationships?.habitId === habitId && 
+          task.relationships?.date === date
+        );
+        
+        if (existingTask) {
+          console.log(`Task already exists for habit ${habitId} on ${date}:`, existingTask);
+          scheduledTasksRef.current.set(taskKey, existingTask.id);
+          return;
+        }
 
-      // Create relationship
-      eventBus.emit('relationship:create', {
-        sourceId: habitId,
-        sourceType: 'habit',
-        targetId: taskId,
-        targetType: 'task',
-        relationType: 'habit-task'
-      });
+        const taskId = crypto.randomUUID();
+        console.log(`Creating new task for habit ${habitId}:`, { taskId, name, duration });
+        
+        // Add to our tracking map
+        scheduledTasksRef.current.set(taskKey, taskId);
+        
+        // Ensure we're storing the duration in seconds
+        const durationInSeconds = duration;
+        
+        const task = {
+          id: taskId,
+          name,
+          completed: false,
+          duration: durationInSeconds, // Store in seconds
+          createdAt: new Date().toISOString(),
+          relationships: {
+            habitId,
+            templateId,
+            date
+          }
+        };
+
+        // Create the task
+        eventBus.emit('task:create', task);
+        
+        // Add the Habit tag
+        addTagToEntity('Habit', taskId, 'task');
+        
+        // Add template tag if available (e.g., "Mindfulness")
+        if (templateId) {
+          // Format template name correctly with first letter capitalized
+          // Handles both camelCase and kebab-case formats
+          let templateName = '';
+          
+          if (templateId.includes('-')) {
+            // Handle kebab-case: "morning-routine" -> "Morning Routine"
+            templateName = templateId
+              .split('-')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+          } else {
+            // Handle camelCase: "morningRoutine" -> "Morning Routine"
+            templateName = templateId
+              // Insert a space before all capital letters
+              .replace(/([A-Z])/g, ' $1')
+              // Capitalize the first letter
+              .replace(/^./, str => str.toUpperCase())
+              .trim();
+          }
+          
+          console.log(`Adding template tag "${templateName}" to task ${taskId}`);
+          addTagToEntity(templateName, taskId, 'task');
+        }
+
+        // Create relationship
+        eventBus.emit('relationship:create', {
+          sourceId: habitId,
+          sourceType: 'habit',
+          targetId: taskId,
+          targetType: 'task',
+          relationType: 'habit-task'
+        });
+      } finally {
+        // Release the lock after a short delay to prevent race conditions
+        setTimeout(() => {
+          processingEventRef.current = false;
+        }, 50);
+      }
     };
 
     // Handle template deletion - clean up associated tasks

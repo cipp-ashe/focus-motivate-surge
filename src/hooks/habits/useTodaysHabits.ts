@@ -14,6 +14,8 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
   const templateAddInProgressRef = useRef(false);
   const lastProcessedDateRef = useRef<string | null>(null);
   const processedTemplatesMapRef = useRef(new Map<string, Set<string>>());
+  const initialProcessingCompleteRef = useRef(false);
+  const activeTemplatesSignatureRef = useRef<string>("");
   
   // Get habits scheduled for today
   const getTodaysHabits = useCallback(() => {
@@ -50,11 +52,22 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       const today = new Date().toDateString();
       console.log('Processing habits for today:', today);
       
-      // Only process once per day unless templates change
-      if (lastProcessedDateRef.current === today && habits.length === todaysHabits.length) {
+      // Calculate a signature from activeTemplates to detect changes
+      const currentTemplateSignature = JSON.stringify(
+        activeTemplates.map(t => t.templateId).sort()
+      );
+      
+      // Only process once per day per template signature unless forced
+      if (lastProcessedDateRef.current === today && 
+          activeTemplateSignatureRef.current === currentTemplateSignature &&
+          initialProcessingCompleteRef.current) {
         console.log("Already processed habits for today with the same templates, skipping");
+        processingRef.current = false;
         return;
       }
+      
+      // Update the template signature
+      activeTemplateSignatureRef.current = currentTemplateSignature;
       
       // Track which templates we've processed
       const processedTemplateIds = new Set<string>();
@@ -115,33 +128,39 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
       // Update the list of last processed templates
       setLastProcessedTemplateIds(currentTemplateIds);
       lastProcessedDateRef.current = today;
+      initialProcessingCompleteRef.current = true;
       
       localStorage.setItem('lastHabitProcessingDate', today);
     } finally {
       processingRef.current = false;
     }
-  }, [activeTemplates, lastProcessedTemplateIds, todaysHabits.length]);
+  }, [activeTemplates, lastProcessedTemplateIds]);
 
   // Handle template changes and process habits
   useEffect(() => {
     // Don't process if no templates or if already processing
-    if (activeTemplates.length === 0 || processingRef.current) {
+    if (activeTemplates.length === 0) {
       return;
     }
     
-    // Add check to prevent reprocessing if templates haven't changed
-    const currentTemplateIds = activeTemplates.map(t => t.templateId).sort().join(',');
-    const prevTemplateIds = lastProcessedTemplateIds.sort().join(',');
+    // Calculate a signature from activeTemplates to detect changes
+    const currentTemplateSignature = JSON.stringify(
+      activeTemplates.map(t => t.templateId).sort()
+    );
     
-    // Only update if templates have changed
-    if (currentTemplateIds !== prevTemplateIds) {
+    // Only update if templates have changed or if first run
+    if (currentTemplateSignature !== activeTemplateSignatureRef.current || !initialProcessingCompleteRef.current) {
       const habits = getTodaysHabits();
       setTodaysHabits(habits);
       
-      // Process habits when templates actually change
-      processHabits(habits);
+      // Use a short timeout to ensure we don't process multiple times during mount
+      const timeoutId = setTimeout(() => {
+        processHabits(habits);
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [activeTemplates, getTodaysHabits, processHabits, lastProcessedTemplateIds]);
+  }, [activeTemplates, getTodaysHabits, processHabits]);
   
   // Handle template-add events - separate from the main effect to avoid circular dependencies
   useEffect(() => {
@@ -166,7 +185,11 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
         console.log("Template added, immediately processing habits");
         const updatedHabits = getTodaysHabits();
         setTodaysHabits(updatedHabits);
-        processHabits(updatedHabits);
+        
+        // Use a short timeout to prevent duplicate processing
+        setTimeout(() => {
+          processHabits(updatedHabits);
+        }, 50);
       } finally {
         // Clear the flag only after a short delay to prevent race conditions
         setTimeout(() => {
@@ -188,6 +211,7 @@ export const useTodaysHabits = (activeTemplates: ActiveTemplate[]) => {
         console.log("Resetting processed templates for the new day");
         processedTemplatesMapRef.current.clear();
         lastProcessedDateRef.current = null;
+        initialProcessingCompleteRef.current = false;
         setupResetTimer();
       }, timeUntilMidnight);
     };

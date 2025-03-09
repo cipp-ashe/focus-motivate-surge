@@ -1,3 +1,4 @@
+
 import { TimerEventType, TimerEventPayloads, TimerEventCallback } from '@/types/events';
 
 /**
@@ -9,11 +10,13 @@ class EventBus {
   private listeners: Map<TimerEventType, Set<Function>>;
   private debugMode: boolean;
   private processedEvents: Map<string, Set<string>>;
+  private processingEvents: Map<string, boolean>; // Track events currently being processed
 
   private constructor() {
     this.listeners = new Map();
     this.debugMode = process.env.NODE_ENV === 'development';
     this.processedEvents = new Map();
+    this.processingEvents = new Map();
     this.setupEventDeduplication();
   }
 
@@ -63,6 +66,28 @@ class EventBus {
   }
 
   /**
+   * Generate a unique identifier for an event based on its payload
+   */
+  private getEventId(event: TimerEventType, payload: any): string {
+    if (event === 'habit:schedule' && payload?.habitId && payload?.date) {
+      return `${payload.habitId}-${payload.date}`;
+    }
+    
+    // For habit:template-add events, use the template ID
+    if (event === 'habit:template-add' && typeof payload === 'string') {
+      return payload;
+    }
+    
+    // For habit:template-delete events
+    if (event === 'habit:template-delete' && payload?.templateId) {
+      return payload.templateId;
+    }
+    
+    // For other events, create a hash from the payload
+    return JSON.stringify(payload);
+  }
+
+  /**
    * Subscribe to an event
    */
   on<T extends TimerEventType>(event: T, callback: TimerEventCallback<T>) {
@@ -89,7 +114,19 @@ class EventBus {
       console.log(`[EventBus] ${event}`, payload);
     }
 
-    // Handle special cases for deduplication
+    // Generate a unique event ID for deduplication
+    const eventId = this.getEventId(event, payload);
+    
+    // Check if this specific event is currently being processed
+    const processingKey = `${event}-${eventId}`;
+    if (this.processingEvents.get(processingKey)) {
+      if (this.debugMode) {
+        console.log(`[EventBus] Event ${event} with ID ${eventId} is already being processed, skipping`);
+      }
+      return;
+    }
+    
+    // Handle special cases for deduplication based on event type
     if (event === 'habit:schedule') {
       const habitId = (payload as any).habitId;
       if (this.hasProcessedEvent('habit:schedule', habitId)) {
@@ -98,13 +135,24 @@ class EventBus {
       }
     }
 
-    this.listeners.get(event)?.forEach(callback => {
-      try {
-        callback(payload);
-      } catch (error) {
-        console.error(`[EventBus] Error in ${event} handler:`, error);
-      }
-    });
+    // Set processing flag
+    this.processingEvents.set(processingKey, true);
+    
+    // Process the event
+    try {
+      this.listeners.get(event)?.forEach(callback => {
+        try {
+          callback(payload);
+        } catch (error) {
+          console.error(`[EventBus] Error in ${event} handler:`, error);
+        }
+      });
+    } finally {
+      // Clear processing flag after a short delay
+      setTimeout(() => {
+        this.processingEvents.delete(processingKey);
+      }, 50);
+    }
   }
 
   /**
@@ -113,6 +161,7 @@ class EventBus {
   clear() {
     this.listeners.clear();
     this.processedEvents.clear();
+    this.processingEvents.clear();
   }
 }
 
