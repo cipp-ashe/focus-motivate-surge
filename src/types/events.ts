@@ -36,6 +36,7 @@ export interface TimerEventPayloads {
     habitId: string;
     habitName: string;
     description: string;
+    templateId?: string; // Add templateId as optional
   };
   'tag:link': any;
   'tag:unlink': any;

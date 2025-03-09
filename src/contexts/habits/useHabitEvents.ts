@@ -107,6 +107,28 @@ export const useHabitEvents = (
         localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
       }),
       
+      // Listen for journal creation events to potentially mark habits as complete
+      eventBus.on('note:create-from-habit', ({ habitId, templateId }) => {
+        console.log("Event received: note:create-from-habit", { habitId, templateId });
+        
+        if (templateId) {
+          // We already have the templateId, so we can immediately mark it as completed
+          console.log(`Marking habit ${habitId} in template ${templateId} as completed via event`);
+          
+          // Note: We don't need to dispatch an action here because the habit progress
+          // is tracked separately from the template state
+        } else {
+          // If no templateId provided, find which template contains this habit
+          const template = state.templates.find(t => t.habits.some(h => h.id === habitId));
+          if (template) {
+            console.log(`Marking habit ${habitId} in template ${template.templateId} as completed via event lookup`);
+            // As above, progress tracking is separate
+          } else {
+            console.warn(`Could not find template for habit ${habitId} to mark as complete`);
+          }
+        }
+      }),
+      
       // Listen for custom template updates via localStorage
       window.addEventListener('templatesUpdated', () => {
         try {

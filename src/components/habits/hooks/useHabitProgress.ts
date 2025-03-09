@@ -20,6 +20,7 @@ export const useHabitProgress = () => {
   useEffect(() => {
     try {
       localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+      console.log('Saved progress to localStorage:', progress);
     } catch (error) {
       console.error('Error saving habit progress to localStorage:', error);
     }
@@ -65,12 +66,16 @@ export const useHabitProgress = () => {
     const streak = currentProgress?.streak || 0;
 
     setProgress((prev) => {
+      // Create a proper nested structure if it doesn't exist
+      const templateData = prev[templateId] || {};
+      const habitData = templateData[habitId] || {};
+      
       const updated = {
         ...prev,
         [templateId]: {
-          ...prev[templateId],
+          ...templateData,
           [habitId]: {
-            ...prev[templateId]?.[habitId],
+            ...habitData,
             [today]: {
               value,
               streak: value ? streak + 1 : streak,
@@ -81,6 +86,7 @@ export const useHabitProgress = () => {
         },
       };
 
+      console.log(`Updated progress for habit ${habitId} in template ${templateId}:`, updated[templateId][habitId][today]);
       return updated;
     });
   };

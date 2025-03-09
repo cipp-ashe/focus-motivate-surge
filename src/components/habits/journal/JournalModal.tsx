@@ -142,6 +142,7 @@ interface JournalModalProps {
   habitName: string;
   description?: string;
   onComplete: () => void;
+  templateId?: string; // Add templateId prop
 }
 
 const JournalModal: React.FC<JournalModalProps> = ({
@@ -150,7 +151,8 @@ const JournalModal: React.FC<JournalModalProps> = ({
   habitId,
   habitName,
   description = "",
-  onComplete
+  onComplete,
+  templateId
 }) => {
   const [content, setContent] = useState("");
   const [randomQuote, setRandomQuote] = useState<Quote | null>(null);
@@ -198,11 +200,12 @@ const JournalModal: React.FC<JournalModalProps> = ({
     // Mark as completed
     onComplete();
     
-    // Use event bus for any other components that might be listening
+    // Use event bus to notify about the new journal entry
     eventBus.emit('note:create-from-habit', {
       habitId,
       habitName,
-      description: description || ''
+      description: description || '',
+      templateId // Pass the templateId if available
     });
     
     toast.success(`Created new journal entry for: ${habitName}`, {

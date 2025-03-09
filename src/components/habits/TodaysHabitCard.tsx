@@ -16,9 +16,10 @@ interface HabitRowProps {
   isCompleted: boolean;
   onComplete: () => void;
   onStart?: () => void;
+  templateId?: string;
 }
 
-const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) => {
+const HabitRow = ({ habit, isCompleted, onComplete, onStart, templateId }: HabitRowProps) => {
   const [journalModalOpen, setJournalModalOpen] = useState(false);
   const noteActions = useNoteActions();
   const isTimerHabit = habit.metrics.type === 'timer';
@@ -132,6 +133,7 @@ const HabitRow = ({ habit, isCompleted, onComplete, onStart }: HabitRowProps) =>
               habitName={habit.name}
               description={habit.description}
               onComplete={handleJournalComplete}
+              templateId={templateId} // Pass templateId
             />
           </>
         )}
@@ -144,8 +146,9 @@ interface HabitSectionProps {
   title: string;
   habits: HabitDetail[];
   completedHabits: string[];
-  onHabitComplete: (habit: HabitDetail) => void;
+  onHabitComplete: (habit: HabitDetail, templateId?: string) => void; // Updated signature
   onAddHabitToTasks?: (habit: HabitDetail) => void;
+  templateId?: string; // Add templateId prop
 }
 
 const HabitSection = ({
@@ -154,6 +157,7 @@ const HabitSection = ({
   completedHabits,
   onHabitComplete,
   onAddHabitToTasks,
+  templateId,
 }: HabitSectionProps) => {
   if (habits.length === 0) return null;
 
@@ -165,8 +169,9 @@ const HabitSection = ({
           key={habit.id}
           habit={habit}
           isCompleted={completedHabits.includes(habit.id)}
-          onComplete={() => onHabitComplete(habit)}
+          onComplete={() => onHabitComplete(habit, templateId)}
           onStart={onAddHabitToTasks ? () => onAddHabitToTasks(habit) : undefined}
+          templateId={templateId}
         />
       ))}
     </div>
@@ -176,8 +181,9 @@ const HabitSection = ({
 interface TodaysHabitCardProps {
   habits: HabitDetail[];
   completedHabits: string[];
-  onHabitComplete: (habit: HabitDetail) => void;
+  onHabitComplete: (habit: HabitDetail, templateId?: string) => void; // Updated signature
   onAddHabitToTasks: (habit: HabitDetail) => void;
+  templateId?: string; // Add templateId prop
 }
 
 export const TodaysHabitCard = ({
@@ -185,6 +191,7 @@ export const TodaysHabitCard = ({
   completedHabits,
   onHabitComplete,
   onAddHabitToTasks,
+  templateId,
 }: TodaysHabitCardProps) => {
   if (habits.length === 0) return null;
 
@@ -236,6 +243,7 @@ export const TodaysHabitCard = ({
               completedHabits={completedHabits}
               onHabitComplete={onHabitComplete}
               onAddHabitToTasks={handleStartHabit}
+              templateId={templateId}
             />
           )}
           
@@ -249,6 +257,7 @@ export const TodaysHabitCard = ({
               habits={journalHabits}
               completedHabits={completedHabits}
               onHabitComplete={onHabitComplete}
+              templateId={templateId}
             />
           )}
           
@@ -262,6 +271,7 @@ export const TodaysHabitCard = ({
               habits={otherHabits}
               completedHabits={completedHabits}
               onHabitComplete={onHabitComplete}
+              templateId={templateId}
             />
           )}
         </div>

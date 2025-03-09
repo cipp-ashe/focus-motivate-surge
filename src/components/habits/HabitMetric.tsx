@@ -19,12 +19,14 @@ interface HabitMetricProps {
   habit: HabitDetail;
   progress: ProgressResult;
   onUpdate: (value: boolean | number) => void;
+  templateId?: string; // Add templateId prop
 }
 
 const HabitMetric: React.FC<HabitMetricProps> = ({
   habit,
   progress,
   onUpdate,
+  templateId,
 }) => {
   const [journalModalOpen, setJournalModalOpen] = useState(false);
   const noteActions = useNoteActions();
@@ -115,6 +117,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
               habitName={habit.name}
               description={habit.description}
               onComplete={handleJournalComplete}
+              templateId={templateId} // Pass the templateId
             />
           </>
         );

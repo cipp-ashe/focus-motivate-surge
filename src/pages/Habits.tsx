@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useHabitState } from '@/contexts/habits/HabitContext';
+import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
 import HabitTracker from '@/components/habits/HabitTracker';
 import TemplateSelectionSheet from '@/components/habits/TemplateSelectionSheet';
 import { habitTemplates } from '@/utils/habitTemplates';
@@ -13,6 +13,8 @@ import { useTodaysHabits } from '@/hooks/useTodaysHabits';
 import { TodaysHabitCard } from '@/components/habits/TodaysHabitCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
+import { HabitDetail } from '@/components/habits/types';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
@@ -21,6 +23,7 @@ const HabitsPage = () => {
   const [customTemplates, setCustomTemplates] = useState([]);
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);
   const isMobile = useIsMobile();
+  const { updateProgress, getTodayProgress } = useHabitProgress();
 
   // Debug to see what data we have
   useEffect(() => {
@@ -31,10 +34,37 @@ const HabitsPage = () => {
     try {
       const storedTemplates = localStorage.getItem('habit-templates');
       console.log("HabitsPage - templates from localStorage:", storedTemplates ? JSON.parse(storedTemplates) : "none");
+      
+      // Also check habit progress
+      const storedProgress = localStorage.getItem('habit-progress');
+      console.log("HabitsPage - habit progress from localStorage:", storedProgress ? JSON.parse(storedProgress) : "none");
     } catch (error) {
-      console.error("Error parsing templates from localStorage:", error);
+      console.error("Error parsing data from localStorage:", error);
     }
   }, [templates, todaysHabits]);
+
+  // Load completed habits from localStorage on initial load
+  useEffect(() => {
+    if (!todaysHabits.length) return;
+    
+    // Find habits that are already completed today
+    const completed: string[] = [];
+    
+    templates.forEach(template => {
+      const templateId = template.templateId;
+      todaysHabits.forEach(habit => {
+        const progress = getTodayProgress(habit.id, templateId);
+        if (progress.completed) {
+          completed.push(habit.id);
+        }
+      });
+    });
+    
+    if (completed.length > 0) {
+      console.log("Found completed habits from localStorage:", completed);
+      setCompletedHabits(completed);
+    }
+  }, [todaysHabits, templates, getTodayProgress]);
 
   // Load custom templates
   useEffect(() => {
@@ -72,20 +102,43 @@ const HabitsPage = () => {
     }
   };
 
-  const handleHabitComplete = (habit) => {
+  const handleHabitComplete = (habit: HabitDetail, templateId?: string) => {
+    // If no templateId provided, find the template that contains this habit
+    const actualTemplateId = templateId || templates.find(t => 
+      t.habits.some(h => h.id === habit.id)
+    )?.templateId;
+    
+    if (!actualTemplateId) {
+      console.error("Could not find template for habit:", habit);
+      toast.error("Error marking habit as complete");
+      return;
+    }
+
+    // Track locally for UI updates
     setCompletedHabits(prev => {
       if (prev.includes(habit.id)) {
+        // If already completed, mark as incomplete
+        updateProgress(habit.id, actualTemplateId, false);
         return prev.filter(id => id !== habit.id);
       } else {
+        // If not completed, mark as complete
+        updateProgress(habit.id, actualTemplateId, true);
         return [...prev, habit.id];
       }
     });
+    
+    console.log(`Marked habit ${habit.id} in template ${actualTemplateId} as complete`);
   };
 
-  const handleAddHabitToTasks = (habit) => {
+  const handleAddHabitToTasks = (habit: HabitDetail) => {
     // This function would add the habit as a task
     toast.success(`Added "${habit.name}" to tasks`);
   };
+
+  // Find template for today's habits
+  const todaysHabitsTemplateId = templates.find(t => 
+    t.habits.some(h => todaysHabits.some(th => th.id === h.id))
+  )?.templateId;
 
   return (
     <div className="container mx-auto py-4 px-4">
@@ -133,6 +186,7 @@ const HabitsPage = () => {
               completedHabits={completedHabits}
               onHabitComplete={handleHabitComplete}
               onAddHabitToTasks={handleAddHabitToTasks}
+              templateId={todaysHabitsTemplateId}
             />
           </div>
         )}
