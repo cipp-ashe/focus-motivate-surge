@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Check, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { HabitTemplate } from '../types';
 
 interface AvailableTemplatesProps {
@@ -17,29 +18,51 @@ const AvailableTemplates: React.FC<AvailableTemplatesProps> = ({
   onSelect,
 }) => {
   return (
-    <div className="space-y-4 mt-4">
-      {templates.map((template) => (
-        <Card key={template.id}>
-          <CardHeader>
-            <CardTitle>{template.name}</CardTitle>
-            <CardDescription>{template.description}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">
-              {template.category} • {template.defaultHabits.length} habits
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onSelect(template)}
-              disabled={activeTemplateIds.includes(template.id)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Template
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="grid gap-4 md:grid-cols-2">
+      {templates.map((template) => {
+        const isActive = activeTemplateIds.includes(template.id);
+        
+        return (
+          <Card 
+            key={template.id} 
+            className={cn(
+              "transition-all duration-200",
+              isActive && "border-primary"
+            )}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">{template.name}</CardTitle>
+              <CardDescription>{template.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-2">Includes:</p>
+              <ul className="space-y-1.5 text-sm mb-1.5">
+                {template.defaultHabits.map((habit) => (
+                  <li key={habit.id} className="flex items-start">
+                    <Check className="h-4 w-4 mr-2 mt-0.5 text-primary" />
+                    <span>{habit.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Button
+                variant={isActive ? "secondary" : "default"}
+                className="w-full"
+                onClick={() => onSelect(template)}
+                disabled={isActive}
+              >
+                {isActive ? (
+                  <Check className="h-4 w-4 mr-2" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                {isActive ? "Already Added" : "Add Template"}
+              </Button>
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 };

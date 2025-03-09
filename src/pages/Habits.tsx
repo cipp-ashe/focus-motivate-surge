@@ -9,11 +9,17 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { eventBus } from '@/lib/eventBus';
+import { useTodaysHabits } from '@/hooks/useTodaysHabits';
+import { TodaysHabitCard } from '@/components/habits/TodaysHabitCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const HabitsPage = () => {
   const { templates } = useHabitState();
+  const { todaysHabits } = useTodaysHabits(templates);
   const [configOpen, setConfigOpen] = useState(false);
   const [customTemplates, setCustomTemplates] = useState([]);
+  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
+  const isMobile = useIsMobile();
 
   // Load custom templates
   useEffect(() => {
@@ -50,8 +56,23 @@ const HabitsPage = () => {
     }
   };
 
+  const handleHabitComplete = (habit) => {
+    setCompletedHabits(prev => {
+      if (prev.includes(habit.id)) {
+        return prev.filter(id => id !== habit.id);
+      } else {
+        return [...prev, habit.id];
+      }
+    });
+  };
+
+  const handleAddHabitToTasks = (habit) => {
+    // This function would add the habit as a task
+    toast.success(`Added "${habit.name}" to tasks`);
+  };
+
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 px-4">
       <div className="flex items-center gap-4 mb-6">
         <Link 
           to="/"
@@ -77,10 +98,26 @@ const HabitsPage = () => {
         </Button>
       </div>
 
-      {/* Habit tracker */}
-      <HabitTracker 
-        activeTemplates={templates}
-      />
+      <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-[1fr_300px]'} gap-6`}>
+        <div>
+          {/* Habit tracker */}
+          <HabitTracker 
+            activeTemplates={templates}
+          />
+        </div>
+
+        {/* Today's Habits Card */}
+        {todaysHabits && todaysHabits.length > 0 && (
+          <div className={`${isMobile ? 'order-first' : ''}`}>
+            <TodaysHabitCard
+              habits={todaysHabits}
+              completedHabits={completedHabits}
+              onHabitComplete={handleHabitComplete}
+              onAddHabitToTasks={handleAddHabitToTasks}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Template configuration */}
       <TemplateSelectionSheet

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import ConfigurationDialog from './ConfigurationDialog';
 import AvailableTemplates from './ManageTemplatesDialog/AvailableTemplates';
 import CustomTemplates from './ManageTemplatesDialog/CustomTemplates';
 import CreateTemplateForm from './ManageTemplatesDialog/CreateTemplateForm';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TemplateSelectionSheetProps {
   isOpen: boolean;
@@ -32,6 +34,7 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
   const [activeTab, setActiveTab] = useState("built-in");
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const isMobile = useIsMobile();
   
   // Load custom templates from local storage
   useEffect(() => {
@@ -58,15 +61,9 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   }, [isOpen]);
 
   const handleSelectTemplate = (template: HabitTemplate) => {
-    console.log("Selected template for configuration:", template.name);
-    const newTemplate: ActiveTemplate = {
-      templateId: template.id,
-      habits: template.defaultHabits,
-      activeDays: template.defaultDays || [],
-      customized: false
-    };
-    setConfiguringTemplate(newTemplate);
-    setConfigDialogOpen(true);
+    // Directly add the template without opening configuration dialog
+    onSelectTemplate(template.id);
+    toast.success(`Added template: ${template.name}`);
   };
 
   const handleUpdateDays = (days: DayOfWeek[]) => {
@@ -131,7 +128,10 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-[400px] sm:w-[540px] p-0">
+        <SheetContent 
+          side="right" 
+          className={`${isMobile ? 'w-[100vw]' : 'w-[400px] sm:w-[540px]'} p-0`}
+        >
           <div className="flex flex-col h-full">
             <div className="p-6 pb-0">
               <SheetHeader>
