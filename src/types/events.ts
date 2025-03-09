@@ -13,6 +13,9 @@ export interface TimerEventPayloads {
   'habit:custom-template-create': any;
   'habit:custom-template-delete': { templateId: string };
   'habit:template-order-update': any[];
+  'habit:journal-deleted': {
+    habitId: string;
+  };
   'task:create': any;
   'task:update': any;
   'task:delete': any;

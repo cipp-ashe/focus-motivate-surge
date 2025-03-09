@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { HabitProgress } from '@/components/habits/types';
+import { relationshipManager } from '@/lib/relationshipManager';
 
 const PROGRESS_STORAGE_KEY = 'habit-progress';
 
@@ -28,14 +29,35 @@ export const useHabitProgress = () => {
 
   const getTodayProgress = (habitId: string, templateId: string): HabitProgress => {
     const today = new Date().toISOString().split('T')[0];
-    return (
-      progress[templateId]?.[habitId]?.[today] || {
-        value: false,
-        streak: 0,
+    
+    // First check localStorage progress
+    const storedProgress = progress[templateId]?.[habitId]?.[today];
+    
+    if (storedProgress) {
+      return storedProgress;
+    }
+    
+    // If not found in localStorage, check for relationships with notes as a fallback
+    // This helps with syncing between notes and habits
+    const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+    
+    if (relatedNotes.length > 0) {
+      // If there are related notes, this habit should be marked as completed
+      return {
+        value: true,
+        streak: 1, // Assume at least streak of 1
         date: today,
-        completed: false,
-      }
-    );
+        completed: true,
+      };
+    }
+    
+    // Default return if nothing is found
+    return {
+      value: false,
+      streak: 0,
+      date: today,
+      completed: false,
+    };
   };
 
   const getWeeklyProgress = (habitId: string, templateId: string): HabitProgress[] => {

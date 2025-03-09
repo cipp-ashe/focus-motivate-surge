@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { Note, Tag } from '@/types/notes';
 import { eventBus } from '@/lib/eventBus';
+import { relationshipManager } from '@/lib/relationshipManager';
 
 // Add a title field to the Note interface
 interface NoteState {
@@ -114,6 +115,18 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
         // Also save to localStorage
         const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
         localStorage.setItem('notes', JSON.stringify([newNote, ...existingNotes]));
+
+        // Create a relationship between the habit and the note for bidirectional tracking
+        if (habitData.habitId) {
+          relationshipManager.createRelationship(
+            habitData.habitId, 
+            'habit', 
+            newNote.id, 
+            'note', 
+            'habit-journal'
+          );
+          console.log(`Created relationship between habit ${habitData.habitId} and note ${newNote.id}`);
+        }
       }),
     ];
 
@@ -181,10 +194,25 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
     deleteNote: (noteId) => {
       dispatch({ type: 'DELETE_NOTE', payload: noteId });
       
+      // Before deleting, check if this note is related to any habits
+      const relatedHabits = relationshipManager.getRelatedEntities(noteId, 'note', 'habit');
+      
       // Delete from localStorage too
       const notes = JSON.parse(localStorage.getItem('notes') || '[]');
       const filteredNotes = notes.filter((note: Note) => note.id !== noteId);
       localStorage.setItem('notes', JSON.stringify(filteredNotes));
+      
+      // Delete any relationships
+      relatedHabits.forEach(entity => {
+        relationshipManager.deleteRelationship(entity.id, noteId);
+        
+        // Emit an event to update the habit completion status
+        eventBus.emit('habit:journal-deleted', {
+          habitId: entity.id,
+        });
+        
+        console.log(`Relationship deleted between habit ${entity.id} and note ${noteId}`);
+      });
       
       toast.success('Note deleted 🗑️');
     },
