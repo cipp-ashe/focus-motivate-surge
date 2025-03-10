@@ -31,12 +31,14 @@ export const useTaskEvents = () => {
       const currentTasks = taskStorage.loadTasks();
       console.log(`Current tasks in storage after add: ${currentTasks.length}`);
       
-      eventBus.emit('task:create', task);
-      toast.success('Task added 📝');
+      eventBus.emit('task:created', task); // Emit a separate event for task creation completion
       
       // Force UI update
       setTimeout(() => forceTaskUpdate(), 50);
+      return true;
     }
+    
+    return false;
   }, []);
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {

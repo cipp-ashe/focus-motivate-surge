@@ -16,6 +16,7 @@ import {
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
+  onTasksAdd?: (tasks: Task[]) => void;
 }
 
 const generateId = () => {
@@ -28,7 +29,7 @@ const generateId = () => {
 
 const DEFAULT_DURATION = 1500; // 25 minutes in seconds
 
-export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
+export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
   const [newTaskName, setNewTaskName] = useState("");
   const [isBulkAdd, setIsBulkAdd] = useState(false);
 
@@ -37,29 +38,29 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
     if (!newTaskName.trim()) return;
 
     if (isBulkAdd) {
-      const tasks = newTaskName.split('\n').filter(task => task.trim());
-      console.log(`TaskInput: Creating ${tasks.length} tasks from bulk add`);
+      const taskLines = newTaskName.split('\n').filter(task => task.trim());
+      console.log(`TaskInput: Creating ${taskLines.length} tasks from bulk add`);
       
-      tasks.forEach((taskLine, index) => {
-        if (taskLine.trim()) {
-          const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
-          const task: Task = {
-            id: generateId(),
-            name: taskName,
-            completed: false,
-            duration: durationStr 
-              ? Math.min(Math.max(parseInt(durationStr), 1), 60) * 60 
-              : DEFAULT_DURATION,
-            createdAt: new Date().toISOString(),
-          };
-          
-          // Small delay for each task to prevent race conditions
-          setTimeout(() => {
-            onTaskAdd(task);
-            console.log(`TaskInput: Created bulk task ${index + 1}/${tasks.length}:`, task);
-          }, index * 50);
-        }
+      const tasks: Task[] = taskLines.map(taskLine => {
+        const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
+        return {
+          id: generateId(),
+          name: taskName,
+          completed: false,
+          duration: durationStr 
+            ? Math.min(Math.max(parseInt(durationStr), 1), 60) * 60 
+            : DEFAULT_DURATION,
+          createdAt: new Date().toISOString(),
+        };
       });
+      
+      // Use the new batch add method if available
+      if (onTasksAdd) {
+        onTasksAdd(tasks);
+      } else {
+        // Fallback to adding one by one
+        tasks.forEach(task => onTaskAdd(task));
+      }
     } else {
       // Create a single task
       const task: Task = {
@@ -80,19 +81,19 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
   const handleTasksImport = (importedTasks: Omit<Task, 'id' | 'createdAt'>[]) => {
     console.log(`TaskInput: Importing ${importedTasks.length} tasks`);
     
-    importedTasks.forEach((taskData, index) => {
-      const task: Task = {
-        ...taskData,
-        id: generateId(),
-        createdAt: new Date().toISOString(),
-      };
-      
-      // Small delay for each task to prevent race conditions
-      setTimeout(() => {
-        onTaskAdd(task);
-        console.log(`TaskInput: Imported task ${index + 1}/${importedTasks.length}:`, task);
-      }, index * 50);
-    });
+    const tasks: Task[] = importedTasks.map(taskData => ({
+      ...taskData,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+    }));
+    
+    // Use the new batch add method if available
+    if (onTasksAdd && tasks.length > 1) {
+      onTasksAdd(tasks);
+    } else {
+      // Fallback to adding one by one
+      tasks.forEach(task => onTaskAdd(task));
+    }
   };
 
   const handleClear = () => {

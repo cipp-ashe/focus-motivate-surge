@@ -5,6 +5,7 @@ import { TaskRow } from "./TaskRow";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { eventBus } from "@/lib/eventBus";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -66,29 +67,31 @@ export const TaskTable = ({
   }, [tasks]);
 
   return (
-    <div className="w-full space-y-2 p-4 overflow-visible">
-      <div className="grid gap-2 w-full max-h-[70vh] overflow-y-auto pr-1">
-        {tasks.length > 0 ? (
-          tasks.map((task) => (
-            <TaskRow
-              key={task.id}
-              task={task}
-              isSelected={selectedTasks.includes(task.id)}
-              editingTaskId={editingTaskId}
-              onTaskClick={() => handleTaskClick(task)}
-              onTaskDelete={() => handleTaskDelete(task.id)}
-              onDurationChange={handleDurationChange}
-              onDurationClick={handleDurationClick}
-              onInputBlur={handleInputBlur}
-            />
-          ))
-        ) : (
-          <div className="text-center text-muted-foreground py-4">No tasks available</div>
-        )}
-      </div>
+    <div className="w-full p-4 flex flex-col h-full">
+      <ScrollArea className="flex-1 w-full pr-2">
+        <div className="space-y-2">
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                isSelected={selectedTasks.includes(task.id)}
+                editingTaskId={editingTaskId}
+                onTaskClick={() => handleTaskClick(task)}
+                onTaskDelete={() => handleTaskDelete(task.id)}
+                onDurationChange={handleDurationChange}
+                onDurationClick={handleDurationClick}
+                onInputBlur={handleInputBlur}
+              />
+            ))
+          ) : (
+            <div className="text-center text-muted-foreground py-4">No tasks available</div>
+          )}
+        </div>
+      </ScrollArea>
       
       {tasks.length > 1 && (
-        <div className="flex justify-center pt-4">
+        <div className="flex justify-center pt-4 flex-none">
           <Button
             variant="ghost"
             size="sm"

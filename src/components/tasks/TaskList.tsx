@@ -35,23 +35,25 @@ export const TaskList: React.FC<TaskListProps> = ({
         onValueChange={setActiveTab}
         value={activeTab}
       >
-        <TabsList className="grid grid-cols-2 mb-2">
-          <TabsTrigger value="active" data-test="active-tasks-tab">
-            Active Tasks ({tasks.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed" data-test="completed-tasks-tab">
-            Completed ({completedTasks.length})
-          </TabsTrigger>
-        </TabsList>
+        <div className="px-4 pt-2">
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger value="active" data-test="active-tasks-tab">
+              Active Tasks ({tasks.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed" data-test="completed-tasks-tab">
+              Completed ({completedTasks.length})
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="active" className="flex-grow overflow-hidden">
+        <TabsContent value="active" className="flex-grow overflow-hidden mt-0 p-0">
           <TaskTable
             tasks={tasks}
             selectedTasks={selectedTasks}
           />
         </TabsContent>
 
-        <TabsContent value="completed" className="flex-grow overflow-hidden">
+        <TabsContent value="completed" className="flex-grow overflow-hidden mt-0 p-0">
           <CompletedTasks
             tasks={completedTasks}
             onTasksClear={handleClearCompletedTasks}
