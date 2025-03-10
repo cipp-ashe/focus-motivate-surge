@@ -10,22 +10,24 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { isDark } = useTheme();
+  const { isDark, mounted } = useTheme();
   
   // Only hide header on the main dashboard page
   const showHeader = location.pathname !== '/';
   
   // Apply theme class to document when component mounts
   useEffect(() => {
+    if (!mounted) return;
+    
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [isDark]);
+  }, [isDark, mounted]);
 
   return (
-    <div className="min-h-screen bg-background dark:bg-gray-900">
+    <div className="min-h-screen bg-background dark:bg-gray-900 transition-colors duration-300">
       {showHeader && <Header />}
       <main className="container mx-auto max-w-5xl">
         {children}

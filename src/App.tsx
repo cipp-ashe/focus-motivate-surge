@@ -22,11 +22,13 @@ function App() {
   return (
     <div className="App">
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="dark">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
           <BrowserRouter>
             <TaskProvider>
               <AppLayout>
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<div className="flex items-center justify-center h-screen w-full">
+                  <div className="text-primary animate-pulse">Loading...</div>
+                </div>}>
                   <Routes>
                     <Route path="/" element={<IndexPage />} />
                     <Route path="/timer" element={<TimerPage />} />
@@ -39,7 +41,7 @@ function App() {
             </TaskProvider>
           </BrowserRouter>
         </ThemeProvider>
-        <Toaster />
+        <Toaster theme="dark" />
       </QueryClientProvider>
     </div>
   );
