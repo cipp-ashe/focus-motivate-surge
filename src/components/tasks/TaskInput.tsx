@@ -37,6 +37,7 @@ export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
     if (!newTaskName.trim() || isProcessing) return;
     
     setIsProcessing(true);
+    console.log("TaskInput: Processing form submission");
     
     try {
       if (isBulkAdd) {
@@ -58,17 +59,20 @@ export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
         
         // Add each task to storage first to ensure persistence
         tasks.forEach(task => {
+          console.log(`TaskInput: Adding task to storage: ${task.id}`, task);
           taskStorage.addTask(task);
         });
         
         // Use the batch add method if available
         if (onTasksAdd) {
+          console.log("TaskInput: Using batch add method");
           onTasksAdd(tasks);
         } else {
           // Add tasks with staggered timing
+          console.log("TaskInput: Using individual task creation with staggered timing");
           tasks.forEach((task, index) => {
             setTimeout(() => {
-              // Emit event directly for better reliability
+              console.log(`TaskInput: Emitting task:create for task ${index+1}/${tasks.length}:`, task);
               eventBus.emit('task:create', task);
             }, index * 100); // Add 100ms between tasks
           });
@@ -76,6 +80,7 @@ export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
           // Force update after all tasks should have been added
           setTimeout(() => {
             toast.success(`Added ${tasks.length} tasks`);
+            console.log(`TaskInput: Triggering force-task-update after adding ${tasks.length} tasks`);
             window.dispatchEvent(new CustomEvent('force-task-update'));
           }, tasks.length * 100 + 300);
         }
@@ -89,18 +94,27 @@ export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
           createdAt: new Date().toISOString(),
         };
         
+        console.log("TaskInput: Creating single task:", task);
+        
         // Add to storage first to ensure persistence
         taskStorage.addTask(task);
         
         // Then use callback for single task
+        console.log("TaskInput: Calling onTaskAdd callback with task:", task);
         onTaskAdd(task);
+        
+        // Emit the event directly as well to ensure all listeners get it
+        console.log("TaskInput: Emitting task:create event with task:", task);
+        eventBus.emit('task:create', task);
+        
+        // Show success toast
+        toast.success(`Added task: ${task.name}`);
         
         // Force a UI update
         setTimeout(() => {
+          console.log("TaskInput: Triggering force-task-update for single task");
           window.dispatchEvent(new CustomEvent('force-task-update'));
         }, 100);
-        
-        console.log("TaskInput: Created single task:", task);
       }
     } catch (error) {
       console.error("Error creating tasks:", error);

@@ -58,7 +58,7 @@ export const useTaskEvents = () => {
       };
       
       // Update in storage
-      taskStorage.updateTask(updatedTask);
+      taskStorage.updateTask(updatedTask.id, updatedTask); // Fix: Passing taskId and updates separately
       
       // Emit task update event
       eventBus.emit('task:update', { taskId, updates: updatedTask });

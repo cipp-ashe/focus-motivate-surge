@@ -18,26 +18,90 @@ const TaskManager = () => {
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const taskQueueRef = useRef<Task[]>([]);
   const processingRef = useRef(false);
+  const [localTasks, setLocalTasks] = useState<Task[]>([]);
+  
+  // Initialize local tasks from context
+  useEffect(() => {
+    console.log("TaskManager - Received tasks from context:", tasks);
+    setLocalTasks(tasks);
+  }, [tasks]);
   
   // Debug: Log tasks whenever they change
   useEffect(() => {
-    console.log("TaskManager - Current tasks:", tasks);
+    console.log("TaskManager - Current tasks:", localTasks);
     
     // Set maximum loading time to prevent infinite loading state
-    if (isLoading && tasks.length > 0) {
+    if (isLoading && localTasks.length > 0) {
       setIsLoading(false);
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = null;
       }
     }
-  }, [tasks, isLoading]);
+  }, [localTasks, isLoading]);
+
+  // Listen for task-related events
+  useEffect(() => {
+    console.log("TaskManager - Setting up event listeners");
+    
+    const handleTaskCreate = (task: Task) => {
+      console.log("TaskManager - Task created event received:", task);
+      setLocalTasks(prev => {
+        // Avoid adding duplicate tasks
+        if (prev.some(t => t.id === task.id)) return prev;
+        return [...prev, task];
+      });
+    };
+    
+    const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
+      console.log("TaskManager - Task update event received:", data);
+      setLocalTasks(prev => 
+        prev.map(t => t.id === data.taskId ? { ...t, ...data.updates } : t)
+      );
+    };
+    
+    const handleTaskDelete = (data: { taskId: string }) => {
+      console.log("TaskManager - Task delete event received:", data);
+      setLocalTasks(prev => 
+        prev.filter(t => t.id !== data.taskId)
+      );
+    };
+    
+    const handleForceUpdate = () => {
+      console.log("TaskManager - Force update event received");
+      // Force reload from storage to ensure we have the latest data
+      const storedTasks = taskStorage.loadTasks();
+      console.log("TaskManager - Reloaded tasks from storage:", storedTasks);
+      setLocalTasks(storedTasks);
+    };
+    
+    // Subscribe to events
+    const unsubCreate = eventBus.on('task:create', handleTaskCreate);
+    const unsubUpdate = eventBus.on('task:update', handleTaskUpdate);
+    const unsubDelete = eventBus.on('task:delete', handleTaskDelete);
+    window.addEventListener('force-task-update', handleForceUpdate);
+    
+    return () => {
+      // Unsubscribe from events
+      unsubCreate();
+      unsubUpdate();
+      unsubDelete();
+      window.removeEventListener('force-task-update', handleForceUpdate);
+    };
+  }, []);
 
   // Set up a loading timeout
   useEffect(() => {
     if (isLoading && !loadingTimeoutRef.current) {
       loadingTimeoutRef.current = setTimeout(() => {
+        console.log("TaskManager - Loading timeout reached, forcing state to loaded");
         setIsLoading(false);
+        
+        // Force an update from storage
+        const storedTasks = taskStorage.loadTasks();
+        console.log("TaskManager - Loaded tasks from storage after timeout:", storedTasks);
+        setLocalTasks(storedTasks);
+        
         loadingTimeoutRef.current = null;
       }, 1000);
     }
@@ -62,17 +126,15 @@ const TaskManager = () => {
       for (let i = 0; i < taskQueueRef.current.length; i++) {
         const task = taskQueueRef.current[i];
         
-        // Check if task already exists to prevent duplicates
-        const exists = taskStorage.taskExistsById(task.id);
-        if (!exists) {
-          console.log(`TaskManager - Creating task ${i + 1}/${taskQueueRef.current.length}:`, task);
-          eventBus.emit('task:create', task);
-          
-          // Add a small delay between task creations
-          await new Promise(resolve => setTimeout(resolve, 150));
-        } else {
-          console.log(`TaskManager - Task ${task.id} already exists, skipping`);
-        }
+        // Add to storage first
+        taskStorage.addTask(task);
+        
+        // Emit creation event
+        console.log(`TaskManager - Creating task ${i + 1}/${taskQueueRef.current.length}:`, task);
+        eventBus.emit('task:create', task);
+        
+        // Add a small delay between task creations
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
       
       // Clear queue and release processing lock
@@ -81,7 +143,7 @@ const TaskManager = () => {
       // Force a UI update after all tasks are processed
       setTimeout(() => {
         console.log("TaskManager - Force updating UI after queue processing");
-        window.dispatchEvent(new Event('force-task-update'));
+        window.dispatchEvent(new CustomEvent('force-task-update'));
         processingRef.current = false;
       }, 300);
     };
@@ -100,13 +162,18 @@ const TaskManager = () => {
     // Ensure loading state starts as true
     setIsLoading(true);
     
+    // Load initial tasks from storage
+    const storedTasks = taskStorage.loadTasks();
+    console.log("TaskManager - Initial load from storage:", storedTasks);
+    setLocalTasks(storedTasks);
+    
     // Check for pending habits on mount with a small delay
     const timeout = setTimeout(() => {
       eventBus.emit('habits:check-pending', {});
       
       // Force a UI update after a delay
       setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
+        window.dispatchEvent(new CustomEvent('force-task-update'));
         setIsLoading(false);
       }, 300);
     }, 100);
@@ -129,17 +196,40 @@ const TaskManager = () => {
   const handleTaskAdd = (task: Task) => {
     console.log("TaskManager - Adding task:", task);
     
-    // Add to processing queue instead of direct emission
+    // Add to storage first
+    taskStorage.addTask(task);
+    
+    // Add to local state immediately for responsive UI
+    setLocalTasks(prev => {
+      if (prev.some(t => t.id === task.id)) return prev;
+      return [...prev, task];
+    });
+    
+    // Add to processing queue for event emission
     taskQueueRef.current.push(task);
-    toast.info("Adding task...");
+    
+    // Show toast
+    toast.success(`Added task: ${task.name}`);
   };
 
   const handleTasksAdd = (tasks: Task[]) => {
     console.log(`TaskManager - Adding ${tasks.length} tasks`);
     
+    // Add all tasks to storage
+    tasks.forEach(task => taskStorage.addTask(task));
+    
+    // Add to local state immediately for responsive UI
+    setLocalTasks(prev => {
+      // Filter out duplicates
+      const newTasks = tasks.filter(task => !prev.some(t => t.id === task.id));
+      return [...prev, ...newTasks];
+    });
+    
     // Add all tasks to the queue
     taskQueueRef.current.push(...tasks);
-    toast.info(`Adding ${tasks.length} tasks...`);
+    
+    // Show toast
+    toast.success(`Added ${tasks.length} tasks`);
   };
 
   return (
@@ -152,7 +242,7 @@ const TaskManager = () => {
       </div>
       <div className="flex-1 overflow-hidden">
         <TaskList
-          tasks={tasks}
+          tasks={localTasks}
           selectedTasks={selectedTaskId ? [selectedTaskId] : []}
           onTaskClick={(taskId) => eventBus.emit('task:select', taskId)}
         />
