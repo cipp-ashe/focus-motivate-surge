@@ -2,9 +2,8 @@
 import React from 'react';
 import { Notes } from '@/components/notes/Notes';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Moon, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from "@/hooks/useTheme";
-import { Link } from 'react-router-dom';
 
 export default function NotesPage() {
   const { isDark, toggleTheme } = useTheme();
@@ -13,13 +12,6 @@ export default function NotesPage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto p-4">
         <div className="flex items-center gap-4 mb-6">
-          <Link 
-            to="/"
-            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
-            title="Back to Timer"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
             Notes
           </h1>

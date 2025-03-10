@@ -1,8 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
-import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { 
@@ -65,14 +63,7 @@ const HabitsPage = () => {
         {/* Debug logger - doesn't render anything */}
         <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
         
-        <div className="flex items-center gap-4 mb-5">
-          <Link 
-            to="/"
-            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
-            title="Back to Dashboard"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+        <div className="mb-5">
           <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
             Habit Tracker
           </h1>
