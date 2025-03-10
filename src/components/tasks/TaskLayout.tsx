@@ -8,12 +8,12 @@ export interface TaskLayoutProps {
 
 export const TaskLayout = ({ mainContent, asideContent }: TaskLayoutProps) => {
   return (
-    <div className="min-h-screen bg-background py-6 px-4 sm:px-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div className="bg-card/50 backdrop-blur-sm rounded-lg shadow-sm border border-border/20">
+    <div className="min-h-screen bg-background py-8 px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <div className="bg-card/60 backdrop-blur-sm rounded-xl shadow-lg border border-primary/10 transform transition-all duration-300 hover:shadow-primary/5">
           {asideContent}
         </div>
-        <div>
+        <div className="transform transition-all duration-300">
           {mainContent}
         </div>
       </div>

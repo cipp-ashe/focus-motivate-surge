@@ -44,25 +44,25 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <Card className="shadow-md border-border/20 overflow-hidden">
-      <CardHeader className="bg-card/70 border-b border-border/10 py-4">
+    <Card className="shadow-lg border-primary/10 overflow-hidden transition-all duration-300 hover:shadow-xl">
+      <CardHeader className="bg-card/80 border-b border-primary/5 py-4">
         <div className="flex-none">
           <TaskInput onTaskAdd={handleTaskAdd} />
         </div>
       </CardHeader>
 
-      <div className="px-6 py-4 border-b border-border/10 bg-card/50">
+      <div className="px-6 py-4 border-b border-primary/5 bg-gradient-to-r from-card/80 to-card/60">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-foreground">
-            <ListTodo className="h-4 w-4 text-purple-400" />
-            <span className="font-medium text-purple-400">Active Tasks</span>
+            <ListTodo className="h-4 w-4 text-primary" />
+            <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">Active Tasks</span>
           </div>
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
               size="sm"
               onClick={handleConfigureHabits}
-              className="flex items-center gap-2 border-purple-400/30 text-purple-400 hover:bg-purple-400/10"
+              className="flex items-center gap-2 border-primary/30 text-primary hover:bg-primary/10 transition-all duration-200"
             >
               <Settings2 className="h-3.5 w-3.5" />
               Configure Habits
@@ -71,7 +71,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
       </div>
 
-      <CardContent className="flex-1 overflow-y-auto p-0 bg-card/30">
+      <CardContent className="flex-1 overflow-y-auto p-0 bg-card/20 backdrop-blur-sm">
         {tasks.length > 0 ? (
           <TaskTable
             tasks={tasks}
@@ -82,10 +82,21 @@ export const TaskList: React.FC<TaskListProps> = ({
             onTasksClear={onTasksClear}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-40 text-center p-6 text-muted-foreground">
-            <ListTodo className="h-6 w-6 text-muted-foreground/50 mb-3" />
-            <p className="font-medium">No active tasks</p>
-            <p className="text-sm mt-2">Add a new task above to get started</p>
+          <div className="flex flex-col items-center justify-center h-48 text-center p-6 text-muted-foreground">
+            <ListTodo className="h-8 w-8 text-muted-foreground/30 mb-4" />
+            <p className="font-medium text-lg">No active tasks</p>
+            <p className="text-sm mt-2 max-w-md">Add a new task above to get started with your productivity journey</p>
+          </div>
+        )}
+        
+        {tasks.length > 1 && (
+          <div className="p-4 flex justify-center">
+            <button
+              onClick={onTasksClear}
+              className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-300 py-2 px-4 rounded-md hover:bg-destructive/5"
+            >
+              Clear All Tasks
+            </button>
           </div>
         )}
       </CardContent>

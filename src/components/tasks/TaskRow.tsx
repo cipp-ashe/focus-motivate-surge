@@ -1,3 +1,4 @@
+
 import { Task } from "@/types/tasks";
 import { useState, useEffect } from "react";
 import { TaskContent } from "./TaskContent";
@@ -111,11 +112,11 @@ export const TaskRow = ({
     <div
       className={`
         relative flex flex-col gap-2
-        p-4 rounded-lg border border-primary/20 bg-card/50 backdrop-blur-sm
-        cursor-pointer transition-all duration-200 group
+        p-4 rounded-lg border backdrop-blur-sm 
+        cursor-pointer transition-all duration-300 group
         ${isSelected 
-          ? 'bg-accent/10 border-primary/40' 
-          : 'hover:border-primary/30 hover:bg-accent/5'
+          ? 'bg-accent/20 border-primary/40 shadow-lg shadow-primary/5' 
+          : 'bg-card/40 border-primary/10 hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01]'
         }
       `}
       onClick={(e: React.MouseEvent<HTMLDivElement>) => onTaskClick(task, e)}

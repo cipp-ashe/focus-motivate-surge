@@ -55,7 +55,7 @@ export const ImportTasksButton = ({ onTasksImport }: ImportTasksButtonProps) => 
       <Button
         variant="outline"
         size="icon"
-        className="relative"
+        className="relative border-primary/20 hover:bg-primary/5 transition-all duration-200"
         type="button"
       >
         <Upload className="h-4 w-4" />
