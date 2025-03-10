@@ -22,6 +22,8 @@ export const useTaskEvents = (
   const [isInitializing, setIsInitializing] = useState(true);
   const [preventReentrantUpdate, setPreventReentrantUpdate] = useState(false);
   const [lastEventTime, setLastEventTime] = useState<Record<string, number>>({});
+  const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
+  const [forceUpdateTimeout, setForceUpdateTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // Force reload tasks from storage
   const forceTasksReload = useCallback(() => {
@@ -171,8 +173,6 @@ export const useTaskEvents = (
     ];
     
     // Handle force update events from window with debouncing
-    const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
-    
     const handleForceUpdate = () => {
       const now = Date.now();
       // Debounce force updates to prevent infinite loops
@@ -205,7 +205,7 @@ export const useTaskEvents = (
       window.removeEventListener('force-task-update', handleForceUpdate);
       verificationCleanup();
     };
-  }, [dispatch, forceTasksReload, items, shouldProcessEvent]);
+  }, [dispatch, forceTasksReload, items, shouldProcessEvent, lastForceUpdateTime]);
   
   // Provide the reload function
   return { forceTasksReload };

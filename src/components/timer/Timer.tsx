@@ -1,5 +1,5 @@
 
-import { useRef } from "react";
+import React, { useState } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { useTimerState } from "./state/TimerState";
@@ -30,7 +30,7 @@ export const Timer = ({
     isValid: Boolean(duration && taskName)
   });
 
-  const expandedViewRef = useRef<TimerExpandedViewRef>(null);
+  const [expandedViewRef, setExpandedViewRef] = useState<TimerExpandedViewRef | null>(null);
 
   try {
     const {
@@ -76,7 +76,7 @@ export const Timer = ({
       taskName,
       setInternalMinutes,
       setIsExpanded,
-      expandedViewRef,
+      expandedViewRef: expandedViewRef as TimerExpandedViewRef | null,
     });
 
     const {
@@ -162,7 +162,7 @@ export const Timer = ({
         testSound={testSound}
         isLoadingAudio={isLoadingAudio}
         updateMetrics={updateMetrics}
-        expandedViewRef={expandedViewRef}
+        expandedViewRef={(ref) => setExpandedViewRef(ref)}
         handleCloseTimer={handleCloseTimer}
         favorites={favorites}
         setFavorites={setFavorites}
