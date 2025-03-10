@@ -26,7 +26,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Upload, Send } from "lucide-react"
+import { CalendarIcon, Upload, Send, Plus, Tag, Zap } from "lucide-react"
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -39,6 +39,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { eventBus } from '@/lib/eventBus';
 import { TimerEventType } from '@/types/events';
+import { TaskTypeSelector } from './TaskTypeSelector';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
@@ -82,6 +83,8 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   
   // Tags
   const [tags, setTags] = useState<string[]>([]);
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTag, setNewTag] = useState('');
   
   // Task Relationships
   const [habitId, setHabitId] = useState<string | null>(null);
@@ -116,6 +119,15 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   
   const handleMultipleTasksInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMultipleTasksInput(e.target.value);
+  };
+  
+  // Tag Handlers
+  const handleAddTag = () => {
+    if (newTag.trim()) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag('');
+      setIsAddingTag(false);
+    }
   };
   
   // Task Creation Handlers
@@ -275,73 +287,200 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
     );
   }
   
-  // UI Rendering for full view
+  // UI Rendering for full view with improved styling
   return (
-    <div className="flex flex-col gap-2">
-      {/* Task Input */}
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-4 bg-background/80 p-4 rounded-xl shadow-sm border border-border/30">
+      {/* Main Task Input Row */}
+      <div className="flex gap-2">
         <Input
           type="text"
           placeholder="Enter task name"
           value={taskName}
           onChange={handleTaskNameChange}
           ref={inputRef}
-          className="flex-grow"
+          className="flex-grow bg-background/50 border-input/50 focus-visible:border-primary"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleAddTask();
             }
           }}
         />
-        <Select onValueChange={handleTaskTypeChange} defaultValue={taskType}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select task type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="regular">Regular</SelectItem>
-            <SelectItem value="timer">Timer</SelectItem>
-            <SelectItem value="screenshot">Screenshot</SelectItem>
-            <SelectItem value="habit">Habit</SelectItem>
-            <SelectItem value="journal">Journal</SelectItem>
-            <SelectItem value="checklist">Checklist</SelectItem>
-            <SelectItem value="voicenote">Voice Note</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button onClick={handleAddTask}>
-          <Send size={16} />
-          <span className="ml-1 sm:inline hidden">Add</span>
+        
+        <div className="flex-shrink-0 w-[140px]">
+          <TaskTypeSelector 
+            value={taskType} 
+            onChange={handleTaskTypeChange} 
+          />
+        </div>
+        
+        <Button 
+          onClick={handleAddTask}
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          size="icon"
+        >
+          <Send size={18} />
         </Button>
-      </div>
-      
-      {/* Multiple Tasks Input Toggle - replaced with icon button */}
-      <div className="flex justify-end">
+        
         <Button 
           variant="outline" 
           size="icon" 
           onClick={() => setIsAddingMultiple(!isAddingMultiple)}
           title="Bulk Import Tasks"
+          className="border-input/50 hover:bg-accent"
         >
-          <Upload size={16} />
+          <Upload size={18} />
         </Button>
       </div>
       
-      {/* Multiple Tasks Input */}
-      {isAddingMultiple && (
-        <div className="flex flex-col gap-2">
-          <Textarea
-            placeholder="Enter multiple tasks, each on a new line"
-            value={multipleTasksInput}
-            onChange={handleMultipleTasksInputChange}
-            className="flex-grow"
-          />
-          <Button onClick={handleAddMultipleTasks}>
-            <Send size={16} />
-            <span className="ml-1">Add Multiple Tasks</span>
+      {/* Tags Display Row */}
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {tags.map((tag, index) => (
+            <Badge 
+              key={index} 
+              variant="secondary"
+              className="text-xs flex items-center gap-1 bg-secondary/70"
+            >
+              {tag}
+              <button
+                className="ml-1 hover:text-destructive focus:outline-none"
+                onClick={() => setTags(tags.filter((_, i) => i !== index))}
+              >
+                ×
+              </button>
+            </Badge>
+          ))}
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 px-2 text-xs"
+            onClick={() => setIsAddingTag(true)}
+          >
+            <Plus size={12} className="mr-1" />
+            Add Tag
           </Button>
         </div>
       )}
       
-      {/* Habit Template Dialog */}
+      {/* Tag Input */}
+      {isAddingTag && (
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 relative">
+            <Tag size={14} className="absolute left-2 text-muted-foreground" />
+            <Input
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              placeholder="Enter tag"
+              className="pl-8 bg-background/50 border-input/50"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddTag();
+                if (e.key === 'Escape') setIsAddingTag(false);
+              }}
+              autoFocus
+            />
+          </div>
+          <Button 
+            size="sm" 
+            onClick={handleAddTag}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Add
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={() => setIsAddingTag(false)}
+            className="border-input/50"
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+      
+      {/* Multiple Tasks Input */}
+      {isAddingMultiple && (
+        <div className="flex flex-col gap-2 mt-2">
+          <Textarea
+            placeholder="Enter multiple tasks, each on a new line"
+            value={multipleTasksInput}
+            onChange={handleMultipleTasksInputChange}
+            className="flex-grow min-h-[100px] bg-background/50 border-input/50"
+          />
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsAddingMultiple(false)}
+              className="border-input/50"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddMultipleTasks}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Send size={16} className="mr-2" />
+              Add All Tasks
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {/* Task Settings Row */}
+      <div className="flex flex-wrap gap-2 items-center">
+        {/* Date Picker - Has today as default */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "flex items-center gap-2 bg-background/50 border-input/50",
+                !date && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="h-4 w-4 text-primary/70" />
+              {date ? format(date, "MMM d, yyyy") : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              disabled={(date) =>
+                date > new Date("2100-01-01") || date < new Date("1900-01-01")
+              }
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
+        
+        {/* Habit Relationship Selector */}
+        <Select 
+          onValueChange={(value) => handleHabitSelect(value ? value : null)} 
+          defaultValue={habitId || 'none'}
+        >
+          <SelectTrigger 
+            className="w-[180px] bg-background/50 border-input/50"
+          >
+            <SelectValue placeholder="Link to habit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none" className="flex items-center gap-2">
+              <span>No linked habit</span>
+            </SelectItem>
+            {tasks.filter(task => task.taskType === 'habit').map(habit => (
+              <SelectItem key={habit.id} value={habit.id} className="flex items-center gap-2">
+                <Zap className="h-3 w-3 text-green-400" />
+                <span>{habit.name}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {/* Hidden Dialog for Habit Templates */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -394,49 +533,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
           </div>
         </DialogContent>
       </Dialog>
-      
-      {/* Date Picker - Has today as default */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-[280px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Pick a date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="center">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={setDate}
-            disabled={(date) =>
-              date > new Date("2100-01-01") || date < new Date("1900-01-01")
-            }
-            initialFocus
-            className={cn("p-3 pointer-events-auto")}
-          />
-        </PopoverContent>
-      </Popover>
-      
-      {/* Task Relationships */}
-      <div className="flex items-center gap-2">
-        <Select onValueChange={(value) => handleHabitSelect(value ? value : null)} defaultValue={habitId || 'none'}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select habit" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {tasks.filter(task => task.taskType === 'habit').map(habit => (
-              <SelectItem key={habit.id} value={habit.id}>{habit.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
     </div>
   );
 };
