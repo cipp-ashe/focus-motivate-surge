@@ -23,12 +23,10 @@ export const TaskTable = ({
   onTasksClear,
 }: TaskTableProps) => {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [displayedTasks, setDisplayedTasks] = useState<Task[]>([]);
-
-  // Ensure we have the latest tasks
+  
+  // Log tasks whenever they change
   useEffect(() => {
-    console.log("TaskTable updating displayed tasks:", tasks);
-    setDisplayedTasks(tasks);
+    console.log("TaskTable received tasks:", tasks);
   }, [tasks]);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
@@ -55,9 +53,9 @@ export const TaskTable = ({
 
   return (
     <div className="w-full space-y-2 p-4 overflow-visible">
-      <div className="grid gap-2 w-full">
-        {displayedTasks.length > 0 ? (
-          displayedTasks.map((task) => (
+      <div className="grid gap-2 w-full max-h-[70vh] overflow-y-auto pr-1">
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
             <TaskRow
               key={task.id}
               task={task}
@@ -75,7 +73,7 @@ export const TaskTable = ({
         )}
       </div>
       
-      {displayedTasks.length > 1 && (
+      {tasks.length > 1 && (
         <div className="flex justify-center pt-4">
           <Button
             variant="ghost"
