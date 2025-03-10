@@ -1,4 +1,5 @@
-import type { StateContext, EntityRelationship } from '@/types/state';
+
+import type { StateContext, EntityRelationship } from '@/types/state/index';
 import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
 import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';

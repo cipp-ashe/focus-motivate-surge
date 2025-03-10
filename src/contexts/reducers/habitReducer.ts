@@ -1,5 +1,5 @@
 
-import type { StateContext } from '@/types/state';
+import type { StateContext } from '@/types/state/index';
 import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
 
 type HabitAction = 

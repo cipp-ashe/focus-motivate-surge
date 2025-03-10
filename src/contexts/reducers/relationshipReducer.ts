@@ -1,5 +1,5 @@
 
-import type { StateContext, EntityRelationship } from '@/types/state';
+import type { StateContext, EntityRelationship } from '@/types/state/index';
 
 type RelationshipAction = 
   | { type: 'ADD_RELATIONSHIP'; payload: EntityRelationship }
