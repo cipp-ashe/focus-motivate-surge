@@ -1,6 +1,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTagSystem } from '../useTagSystem';
+import { EntityType } from '@/types/core';
 
 describe('useTagSystem', () => {
   beforeEach(() => {
@@ -41,10 +42,10 @@ describe('useTagSystem', () => {
     const taskId = 'task-123';
 
     act(() => {
-      result.current.addTagToEntity('Work', taskId, 'task');
+      result.current.addTagToEntity('Work', taskId, EntityType.Task);
     });
 
-    const entityTags = result.current.getEntityTags(taskId, 'task');
+    const entityTags = result.current.getEntityTags(taskId, EntityType.Task);
     expect(entityTags).toHaveLength(1);
     expect(entityTags[0].name).toBe('Work');
   });

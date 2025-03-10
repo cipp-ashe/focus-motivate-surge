@@ -34,3 +34,26 @@ export interface TagRelation {
   createdAt: string;
   updatedAt?: string;
 }
+
+// Add the initializeDataStore function
+export const initializeDataStore = (): boolean => {
+  try {
+    // Set schema version
+    localStorage.setItem('schema-version', '1.0');
+    
+    // Initialize entity relations if not exists
+    if (!localStorage.getItem('entity-relations')) {
+      localStorage.setItem('entity-relations', JSON.stringify([]));
+    }
+    
+    // Initialize tag relations if not exists
+    if (!localStorage.getItem('tag-relations')) {
+      localStorage.setItem('tag-relations', JSON.stringify([]));
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize data store:', error);
+    return false;
+  }
+};

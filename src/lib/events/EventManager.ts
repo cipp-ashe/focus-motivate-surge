@@ -1,4 +1,3 @@
-
 import { Task } from '@/types/tasks';
 import { TimerStateMetrics } from '@/types/metrics';
 
@@ -71,8 +70,16 @@ export type SystemEventPayload = {
     templateId?: string;
     content?: string;
   };
+  'note:create-from-voice': {
+    voiceNoteId: string;
+    title: string;
+    content: string;
+  };
   'note:delete': any;
   'note:deleted': {
+    noteId: string;
+  };
+  'note:view': {
     noteId: string;
   };
   'tag:link': any;

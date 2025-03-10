@@ -1,10 +1,10 @@
-
 import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { Note, Tag } from '@/types/notes';
 import { eventBus } from '@/lib/eventBus';
 import { relationshipManager } from '@/lib/relationshipManager';
+import { EntityType } from '@/types/core';
 
 // Add a title field to the Note interface
 interface NoteState {
@@ -127,9 +127,9 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
         if (habitData.habitId) {
           relationshipManager.createRelationship(
             habitData.habitId, 
-            'habit', 
+            EntityType.Habit, 
             newNote.id, 
-            'note', 
+            EntityType.Note, 
             'habit-journal'
           );
           console.log(`Created relationship between habit ${habitData.habitId} and note ${newNote.id}`);
@@ -165,9 +165,9 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
         if (voiceNoteData.voiceNoteId) {
           relationshipManager.createRelationship(
             voiceNoteData.voiceNoteId, 
-            'voicenote', 
+            EntityType.VoiceNote, 
             newNote.id, 
-            'note', 
+            EntityType.Note, 
             'voice-note-transcription'
           );
           console.log(`Created relationship between voice note ${voiceNoteData.voiceNoteId} and note ${newNote.id}`);

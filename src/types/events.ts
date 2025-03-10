@@ -46,6 +46,11 @@ export interface TimerEventPayloads {
     templateId?: string; // Optional templateId
     content?: string;    // Optional content from the journal
   };
+  'note:create-from-voice': {
+    voiceNoteId: string;
+    title: string;
+    content: string;
+  };
   'note:view': {
     noteId: string;
   };
