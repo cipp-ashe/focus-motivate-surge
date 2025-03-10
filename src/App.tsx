@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { TaskProvider } from './contexts/tasks/TaskContext';
 import { AppLayout } from './components/AppLayout';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from 'next-themes';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -21,21 +22,23 @@ function App() {
   return (
     <div className="App">
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <TaskProvider>
-            <AppLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Routes>
-                  <Route path="/" element={<IndexPage />} />
-                  <Route path="/timer" element={<TimerPage />} />
-                  <Route path="/notes" element={<NotesPage />} />
-                  <Route path="/habits" element={<HabitsPage />} />
-                  <Route path="/tasks" element={<TaskPage />} />
-                </Routes>
-              </Suspense>
-            </AppLayout>
-          </TaskProvider>
-        </BrowserRouter>
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <BrowserRouter>
+            <TaskProvider>
+              <AppLayout>
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Routes>
+                    <Route path="/" element={<IndexPage />} />
+                    <Route path="/timer" element={<TimerPage />} />
+                    <Route path="/notes" element={<NotesPage />} />
+                    <Route path="/habits" element={<HabitsPage />} />
+                    <Route path="/tasks" element={<TaskPage />} />
+                  </Routes>
+                </Suspense>
+              </AppLayout>
+            </TaskProvider>
+          </BrowserRouter>
+        </ThemeProvider>
         <Toaster />
       </QueryClientProvider>
     </div>
