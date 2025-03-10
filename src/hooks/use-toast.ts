@@ -1,5 +1,11 @@
 
-import { type ToastActionElement, ToastProps } from "@/components/ui/toast"
+import { type ToastProps } from "@/components/ui/toast"
+
+// Define ToastActionElement type that was missing
+export type ToastActionElement = React.ReactElement<{
+  altText: string;
+  onClick: () => void;
+}>;
 
 // Re-export the toast from sonner
 export { toast } from "sonner"
