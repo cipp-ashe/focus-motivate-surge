@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Task, Tag } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -26,7 +26,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Upload, Send, Plus, Tag, Zap } from "lucide-react"
+import { CalendarIcon, Upload, Send, Plus, Tag as TagIcon, Zap } from "lucide-react"
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -44,7 +44,7 @@ import { TaskTypeSelector } from './TaskTypeSelector';
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
-  defaultTaskType?: 'timer' | 'screenshot' | 'habit' | 'journal' | 'checklist' | 'regular' | 'voicenote';
+  defaultTaskType?: TaskType;
   simplifiedView?: boolean;
 }
 
@@ -60,7 +60,7 @@ interface HabitTemplate {
 
 export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, defaultTaskType, simplifiedView }) => {
   const [taskName, setTaskName] = useState('');
-  const [taskType, setTaskType] = useState<Task['taskType']>(defaultTaskType || 'regular');
+  const [taskType, setTaskType] = useState<TaskType>(defaultTaskType || 'regular');
   const [isAddingMultiple, setIsAddingMultiple] = useState(false);
   const [multipleTasksInput, setMultipleTasksInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -114,7 +114,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   };
   
   const handleTaskTypeChange = (value: string) => {
-    setTaskType(value as Task['taskType']);
+    setTaskType(value as TaskType);
   };
   
   const handleMultipleTasksInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -367,7 +367,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
       {isAddingTag && (
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 relative">
-            <Tag size={14} className="absolute left-2 text-muted-foreground" />
+            <TagIcon size={14} className="absolute left-2 text-muted-foreground" />
             <Input
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
