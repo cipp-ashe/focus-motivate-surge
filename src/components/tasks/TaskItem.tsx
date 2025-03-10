@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Task, Tag } from '@/types/tasks';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { Timer, Image, FileText, Calendar, BookOpen, CheckSquare, Mic, Plus } from 'lucide-react';
 import { TaskTags } from './TaskTags';
 import { Button } from '@/components/ui/button';
@@ -79,6 +79,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
   const taskDetails = getTaskDetails();
   const isFromHabit = !!task.relationships?.habitId;
   const createdDate = new Date(task.createdAt);
+  
+  // Format the task's scheduled date if it exists
+  const formattedScheduledDate = task.relationships?.date 
+    ? format(new Date(task.relationships.date), "MMM d, yyyy")
+    : null;
 
   return (
     <div
@@ -103,6 +108,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
           {isFromHabit && (
             <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-green-100 text-green-800">
               habit
+            </span>
+          )}
+          {formattedScheduledDate && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+              {formattedScheduledDate}
             </span>
           )}
         </div>

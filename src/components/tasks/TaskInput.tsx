@@ -77,7 +77,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   const [templateId, setTemplateId] = useState(uuidv4());
   const [isNewTemplate, setIsNewTemplate] = useState(true);
   
-  // Habit Schedule
+  // Habit Schedule - Default to today
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   
   // Tags
@@ -341,7 +341,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
         </div>
       )}
       
-      {/* Habit Template Dialog - kept but without the visible button */}
+      {/* Habit Template Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -395,7 +395,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
         </DialogContent>
       </Dialog>
       
-      {/* Habit Schedule */}
+      {/* Date Picker - Has today as default */}
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -415,9 +415,10 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
             selected={date}
             onSelect={setDate}
             disabled={(date) =>
-              date > new Date() || date < new Date("1900-01-01")
+              date > new Date("2100-01-01") || date < new Date("1900-01-01")
             }
             initialFocus
+            className={cn("p-3 pointer-events-auto")}
           />
         </PopoverContent>
       </Popover>
