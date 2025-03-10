@@ -2,7 +2,7 @@
 import * as React from "react"
 import { Dialog as BaseDialog, DialogContent, DialogOverlay, DialogPortal } from "../ui/dialog"
 import { cn } from "@/lib/utils"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/ui/useIsMobile"
 
 const TimerCompletionDialog = BaseDialog
 
@@ -18,8 +18,8 @@ const TimerCompletionDialogContent = React.forwardRef<
       <DialogContent
         ref={ref}
         className={cn(
-          "z-[150] w-[95vw] max-w-lg sm:w-full",
-          isMobile && "mt-16 mx-auto",
+          "z-[150] max-w-lg",
+          isMobile ? "w-[90vw] mt-16 mx-auto rounded-lg p-4" : "w-[95vw] sm:w-full",
           className
         )}
         {...props}

@@ -8,6 +8,7 @@ import { TaskEventHandler } from './TaskEventHandler';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useLocation } from 'react-router-dom';
 import { useTimerTasksManager } from '@/hooks/tasks/useTimerTasksManager';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
@@ -19,6 +20,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   const location = useLocation();
   const timerTasksManager = useTimerTasksManager();
   const isMountedRef = useRef(true);
+  const isMobile = useIsMobile();
   
   // Auto-detect timer view if not explicitly provided
   const isTimerPage = isTimerView ?? location.pathname.includes('/timer');
@@ -170,23 +172,28 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
     }
   }, [isTimerPage]);
 
+  // Add mobile-specific classes
+  const containerClasses = isMobile ? "pb-16" : "";
+
   return (
-    <TaskLoader onTasksLoaded={setLocalTasks}>
-      <TaskEventHandler
-        tasks={localTasks}
-        onTaskCreate={handleTaskCreate}
-        onTaskUpdate={handleTaskUpdate}
-        onTaskDelete={handleTaskDelete}
-        onForceUpdate={handleForceUpdate}
-      />
-      <TaskManagerContent 
-        tasks={localTasks}
-        selectedTaskId={selectedTaskId}
-        onTaskAdd={handleTaskAdd}
-        onTasksAdd={handleTasksAdd}
-        isTimerView={isTimerPage}
-      />
-    </TaskLoader>
+    <div className={containerClasses}>
+      <TaskLoader onTasksLoaded={setLocalTasks}>
+        <TaskEventHandler
+          tasks={localTasks}
+          onTaskCreate={handleTaskCreate}
+          onTaskUpdate={handleTaskUpdate}
+          onTaskDelete={handleTaskDelete}
+          onForceUpdate={handleForceUpdate}
+        />
+        <TaskManagerContent 
+          tasks={localTasks}
+          selectedTaskId={selectedTaskId}
+          onTaskAdd={handleTaskAdd}
+          onTasksAdd={handleTasksAdd}
+          isTimerView={isTimerPage}
+        />
+      </TaskLoader>
+    </div>
   );
 };
 

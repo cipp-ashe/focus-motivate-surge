@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { useEvent } from '@/hooks/useEvent';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface TaskEventHandlerProps {
   tasks: Task[];
@@ -22,6 +23,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   const processingRef = useRef(false);
   const taskQueueRef = useRef<Task[]>([]);
   const isMountedRef = useRef(true);
+  const isMobile = useIsMobile();
   
   // Set up event handlers with the useEvent hook
   useEvent('task:create', onTaskCreate);
@@ -55,6 +57,10 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       // Only process if component is still mounted
       if (!isMountedRef.current) return;
       
+      // Use shorter delays on mobile to improve responsiveness
+      const delay = isMobile ? 50 : 150;
+      const finalDelay = isMobile ? 150 : 300;
+      
       for (let i = 0; i < taskQueueRef.current.length; i++) {
         if (!isMountedRef.current) break;
         
@@ -64,7 +70,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
         eventManager.emit('task:create', task);
         
         // Add a small delay between task creations
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
       
       // Only continue if component is still mounted
@@ -79,13 +85,13 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
           window.dispatchEvent(new CustomEvent('force-task-update'));
           processingRef.current = false;
         }
-      }, 300);
+      }, finalDelay);
       
       return () => clearTimeout(timeoutId);
     };
     
     // Start processing with a small delay
-    const timeoutId = setTimeout(processQueue, 50);
+    const timeoutId = setTimeout(processQueue, isMobile ? 25 : 50);
     
     // Clean up timeout if component unmounts
     return () => {

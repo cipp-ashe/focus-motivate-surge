@@ -6,6 +6,7 @@ import { CompletedTasks } from './CompletedTasks';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface TaskListProps {
   tasks: Task[];
@@ -24,6 +25,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   const [activeTab, setActiveTab] = useState('active');
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
   const isMountedRef = useRef(true);
+  const isMobile = useIsMobile();
   
   // Keep local tasks in sync with props - with proper dependencies
   useEffect(() => {
@@ -81,6 +83,15 @@ export const TaskList: React.FC<TaskListProps> = ({
     );
   }
 
+  // Handle mobile-specific styling
+  const tabListClass = isMobile
+    ? "grid grid-cols-2 w-full text-sm"
+    : "grid grid-cols-2 w-full";
+
+  const tabContentClass = isMobile
+    ? "flex-grow overflow-hidden mt-0 p-0 pb-14"
+    : "flex-grow overflow-hidden mt-0 p-0";
+
   return (
     <div className="w-full h-full flex flex-col">
       <Tabs 
@@ -89,8 +100,8 @@ export const TaskList: React.FC<TaskListProps> = ({
         onValueChange={setActiveTab}
         value={activeTab}
       >
-        <div className="px-4 pt-2">
-          <TabsList className="grid grid-cols-2 w-full">
+        <div className={isMobile ? "px-2 pt-1" : "px-4 pt-2"}>
+          <TabsList className={tabListClass}>
             <TabsTrigger value="active" data-test="active-tasks-tab">
               Active Tasks ({localTasks.length})
             </TabsTrigger>
@@ -100,7 +111,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           </TabsList>
         </div>
 
-        <TabsContent value="active" className="flex-grow overflow-hidden mt-0 p-0">
+        <TabsContent value="active" className={tabContentClass}>
           <ScrollArea className="h-full">
             <TaskTable
               tasks={localTasks}
@@ -109,7 +120,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="completed" className="flex-grow overflow-hidden mt-0 p-0">
+        <TabsContent value="completed" className={tabContentClass}>
           <CompletedTasks
             tasks={completedTasks}
             onTasksClear={handleClearCompletedTasks}

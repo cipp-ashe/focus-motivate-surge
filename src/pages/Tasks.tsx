@@ -1,10 +1,13 @@
+
 import React, { useEffect, useRef } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 const TaskPage = () => {
   // Keep track of mounted state to prevent callbacks on unmounted component
   const isMounted = useRef(true);
+  const isMobile = useIsMobile();
   
   // Set up event listeners for task actions with proper cleanup
   useEffect(() => {
@@ -56,8 +59,8 @@ const TaskPage = () => {
   }, []); // Empty dependency array ensures this only runs once
 
   return (
-    <div className="container mx-auto py-4 px-4">
-      <h1 className="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+    <div className="container mx-auto py-2 px-2 sm:py-4 sm:px-4">
+      <h1 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
         Task Manager
       </h1>
       <TaskManager />
