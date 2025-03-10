@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
-import { TimerState, TimerStateMetrics } from '@/types/metrics';
-import { TimerAction } from '@/types/timer';
 
-interface TimerProps {
+import { useState, useEffect, useCallback } from 'react';
+import { TimerStateMetrics } from '@/types/metrics';
+import { TimerState, TimerAction } from '@/types/timer';
+
+interface UseTimerProps {
   initialMinutes: number;
+  onTimeUp?: () => void;
 }
 
-type Dispatch<A> = (action: A) => void;
-
-export const useTimer = (initialMinutes: number) => {
+export const useTimer = ({ initialMinutes, onTimeUp }: UseTimerProps) => {
   const [state, setState] = useState<TimerState>({
     timeLeft: initialMinutes * 60,
     isRunning: false,
@@ -28,7 +28,7 @@ export const useTimer = (initialMinutes: number) => {
       netEffectiveTime: 0,
       efficiencyRatio: 0,
       completionStatus: 'Completed On Time',
-      favoriteQuotes: [], // Fix: Changed from number to string[]
+      favoriteQuotes: [] as string[],
       isPaused: false
     },
   });
@@ -51,10 +51,11 @@ export const useTimer = (initialMinutes: number) => {
       }, 1000);
     } else if (state.timeLeft === 0 && state.isRunning) {
       setState(prevState => ({ ...prevState, isRunning: false, showCompletion: true }));
+      if (onTimeUp) onTimeUp();
     }
 
     return () => clearInterval(intervalId);
-  }, [state.isRunning, state.timeLeft]);
+  }, [state.isRunning, state.timeLeft, onTimeUp]);
 
   const dispatch = useCallback((action: TimerAction) => {
     setState(prevState => {
@@ -148,5 +149,13 @@ export const useTimer = (initialMinutes: number) => {
     });
   }, []);
 
-  return { state, dispatch };
+  return { 
+    state, 
+    dispatch,
+    // Adding these properties for compatibility with existing code
+    timeLeft: state.timeLeft,
+    minutes: Math.ceil(state.timeLeft / 60),
+    isRunning: state.isRunning,
+    metrics: state.metrics
+  };
 };

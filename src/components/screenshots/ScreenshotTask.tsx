@@ -1,97 +1,121 @@
 
 import { useState } from "react";
 import { Task } from "@/types/tasks";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, X, Maximize, Minimize, ExternalLink } from "lucide-react";
-import { eventBus } from "@/lib/eventBus";
+import { Eye, Trash, Calendar, Tag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { TimerMetrics } from "@/types/metrics";
 
 interface ScreenshotTaskProps {
   task: Task;
-  onComplete?: () => void;
 }
 
-export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task, onComplete }) => {
-  const [expanded, setExpanded] = useState(false);
-  
-  const handleComplete = () => {
-    eventBus.emit('task:complete', { 
-      taskId: task.id,
-      metrics: {
-        completionDate: new Date().toISOString()
-      }
-    });
-    if (onComplete) onComplete();
+export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const formatTaskDate = (dateString?: string) => {
+    if (!dateString) return "Unknown";
+    try {
+      return format(new Date(dateString), "MMM d, yyyy");
+    } catch (e) {
+      return "Invalid date";
+    }
   };
 
-  const handleDelete = () => {
-    eventBus.emit('task:delete', { taskId: task.id });
-  };
+  // Format the task's metrics for display if present
+  const metrics = task.metrics as TimerMetrics;
+  const completionDate = task.completedAt || metrics?.completionDate;
 
   return (
-    <Card className="overflow-hidden">
-      <div className="p-4 border-b">
-        <div className="flex justify-between items-center">
-          <h3 className="font-medium truncate">{task.name}</h3>
-          <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setExpanded(!expanded)}
-            >
-              {expanded ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-red-500 hover:text-red-700"
-              onClick={handleDelete}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-green-500 hover:text-green-700"
-              onClick={handleComplete}
-            >
-              <Check className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+    <Card className="overflow-hidden transition-all duration-200 h-full">
+      <CardHeader className="p-4 pb-0">
+        <CardTitle className="text-base font-medium line-clamp-1">
+          {task.name}
+        </CardTitle>
+        <CardDescription className="line-clamp-1">
+          {task.description || "No description"}
+        </CardDescription>
+      </CardHeader>
       
-      {task.imageUrl && (
-        <div className={`relative ${expanded ? 'h-96' : 'h-48'} transition-all duration-300`}>
-          <img 
-            src={task.imageUrl} 
-            alt={task.name}
-            className="w-full h-full object-contain"
-          />
-          <div className="absolute bottom-2 right-2">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => window.open(task.imageUrl, '_blank')}
-              className="flex items-center gap-1"
-            >
-              <ExternalLink className="h-3 w-3" />
-              <span className="text-xs">View Full</span>
-            </Button>
-          </div>
-        </div>
-      )}
-      
-      {task.description && (
-        <div className="p-4 bg-muted/30">
-          <p className="text-sm">{task.description}</p>
-          {task.capturedText && (
-            <div className="mt-2 p-2 border border-border rounded text-xs text-muted-foreground">
-              <p className="font-mono">{task.capturedText}</p>
+      <CardContent className="p-4 pt-3">
+        <div className="relative aspect-video bg-muted rounded-md overflow-hidden mb-3">
+          {task.imageUrl ? (
+            <img
+              src={task.imageUrl}
+              alt={task.name}
+              className={`w-full h-full object-contain transition-all duration-300 ${
+                isExpanded ? "cursor-zoom-out" : "cursor-zoom-in"
+              }`}
+              onClick={() => setIsExpanded(!isExpanded)}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              No image
             </div>
           )}
         </div>
-      )}
+        
+        {isExpanded && task.capturedText && (
+          <div className="mt-3 mb-3 text-sm">
+            <h4 className="font-medium mb-1">Captured Text:</h4>
+            <p className="text-muted-foreground text-xs whitespace-pre-line">
+              {task.capturedText}
+            </p>
+          </div>
+        )}
+        
+        <div className="flex flex-wrap gap-1 mt-2">
+          <Badge variant="outline" className="text-xs flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {formatTaskDate(task.createdAt)}
+          </Badge>
+          
+          {completionDate && (
+            <Badge variant="outline" className="text-xs bg-green-50 flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              Completed: {formatTaskDate(completionDate)}
+            </Badge>
+          )}
+          
+          {task.tags && task.tags.length > 0 && (
+            <Badge variant="outline" className="text-xs flex items-center gap-1">
+              <Tag className="h-3 w-3" />
+              {task.tags[0].name}
+              {task.tags.length > 1 && `+${task.tags.length - 1}`}
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0 flex justify-between">
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs h-8"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <Eye className="h-3 w-3 mr-1" />
+          {isExpanded ? "Less" : "More"}
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs h-8 text-destructive hover:bg-destructive/10"
+        >
+          <Trash className="h-3 w-3 mr-1" />
+          Delete
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

@@ -14,6 +14,7 @@ export interface TimerMetrics {
   completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
   isPaused: boolean;
   pausedTimeLeft: number | null;
+  completionDate?: string; // Added to match usage in ScreenshotTask
 }
 
 export interface MetricsDisplayProps {

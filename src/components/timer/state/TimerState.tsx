@@ -3,6 +3,7 @@ import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { SoundOption, TimerProps } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { useTimer } from "@/hooks/timer/useTimer";
+import { useTimerActions } from "@/hooks/timer/useTimerActions";
 import { useAudio } from "@/hooks/useAudio";
 import { toast } from "sonner";
 import { TIMER_CONSTANTS, SOUND_OPTIONS } from "@/types/timer";
@@ -34,55 +35,56 @@ export const useTimerState = ({
     setShowConfirmation(true);
   }, []);
 
+  const { state, dispatch, timeLeft, minutes, isRunning, metrics } = useTimer({
+    initialMinutes: Math.floor(durationInSeconds / 60),
+    onTimeUp: handleTimeUp
+  });
+
   const {
-    timeLeft,
-    minutes,
-    isRunning,
-    metrics,
-    start: timerStart,
-    pause: timerPause,
-    reset: timerReset,
-    addTime: timerAddTime,
-    setMinutes: timerSetMinutes,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    extendTimer,
     completeTimer: timerComplete,
     updateMetrics: timerUpdateMetrics,
-  } = useTimer({
-    initialDuration: durationInSeconds,
-    onTimeUp: handleTimeUp,
-    onDurationChange,
-  });
+  } = useTimerActions(state, dispatch);
 
   // Event handlers
   const start = useCallback(() => {
-    timerStart();
+    startTimer();
     eventBus.emit('timer:start', { 
       taskName, 
       duration: durationInSeconds,
       currentTime: timeLeft 
     });
-  }, [timerStart, taskName, durationInSeconds, timeLeft]);
+  }, [startTimer, taskName, durationInSeconds, timeLeft]);
 
   const pause = useCallback(() => {
-    timerPause();
+    pauseTimer();
     eventBus.emit('timer:pause', { 
       taskName, 
       timeLeft,
       metrics 
     });
-  }, [timerPause, taskName, timeLeft, metrics]);
+  }, [pauseTimer, taskName, timeLeft, metrics]);
 
   const reset = useCallback(() => {
-    timerReset();
+    resetTimer();
     eventBus.emit('timer:reset', { 
       taskName, 
       duration: durationInSeconds 
     });
-  }, [timerReset, taskName, durationInSeconds]);
+  }, [resetTimer, taskName, durationInSeconds]);
 
   const addTime = useCallback((minutes: number) => {
-    timerAddTime(minutes);
+    extendTimer(minutes);
     if (onAddTime) onAddTime();
-  }, [timerAddTime, onAddTime]);
+  }, [extendTimer, onAddTime]);
+
+  const setMinutes = useCallback((mins: number) => {
+    setInternalMinutes(mins);
+    if (onDurationChange) onDurationChange(mins);
+  }, [setInternalMinutes, onDurationChange]);
 
   const completeTimer = useCallback(async () => {
     await timerComplete();
@@ -151,7 +153,7 @@ export const useTimerState = ({
     pause,
     reset,
     addTime,
-    setMinutes: timerSetMinutes,
+    setMinutes,
     completeTimer,
     updateMetrics,
 

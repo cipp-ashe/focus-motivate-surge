@@ -1,3 +1,4 @@
+
 import { useCallback, Dispatch } from 'react';
 import { TimerState, TimerAction } from '@/types/timer';
 import { TimerStateMetrics } from '@/types/metrics';
@@ -8,22 +9,33 @@ export const useTimerActions = (state: TimerState, dispatch: Dispatch<TimerActio
     if (!state.isRunning) {
       dispatch({ type: 'START' });
       dispatch({ type: 'SET_START_TIME', payload: new Date() });
-      eventBus.emit('timer:start', {});
+      eventBus.emit('timer:start', {
+        taskName: 'Task', // Default value
+        duration: state.timeLeft,
+        currentTime: state.timeLeft
+      });
     }
-  }, [state.isRunning, dispatch]);
+  }, [state.isRunning, dispatch, state.timeLeft]);
 
   const pauseTimer = useCallback(() => {
     if (state.isRunning && !state.isPaused) {
       dispatch({ type: 'PAUSE' });
       dispatch({ type: 'SET_LAST_PAUSE_TIMESTAMP', payload: new Date() });
-      eventBus.emit('timer:pause', {});
+      eventBus.emit('timer:pause', {
+        taskName: 'Task', // Default value
+        timeLeft: state.timeLeft,
+        metrics: state.metrics
+      });
     }
-  }, [state.isRunning, state.isPaused, dispatch]);
+  }, [state.isRunning, state.isPaused, dispatch, state.timeLeft, state.metrics]);
 
   const resetTimer = useCallback(() => {
     dispatch({ type: 'RESET' });
-    eventBus.emit('timer:reset', {});
-  }, [dispatch]);
+    eventBus.emit('timer:reset', {
+      taskName: 'Task', // Default value
+      duration: state.metrics.expectedTime
+    });
+  }, [dispatch, state.metrics.expectedTime]);
 
   const extendTimer = useCallback((minutes: number) => {
     dispatch({ type: 'EXTEND', payload: minutes * 60 });
@@ -32,12 +44,18 @@ export const useTimerActions = (state: TimerState, dispatch: Dispatch<TimerActio
 
   const updateMetrics = useCallback((updates: Partial<TimerStateMetrics>) => {
     dispatch({ type: 'UPDATE_METRICS', payload: updates });
-    eventBus.emit('timer:metrics-update', updates);
+    eventBus.emit('timer:metrics-update', {
+      taskName: 'Task', // Default value
+      metrics: updates
+    });
   }, [dispatch]);
 
   const completeTimer = useCallback(() => {
     dispatch({ type: 'COMPLETE' });
-    eventBus.emit('timer:complete', {});
+    eventBus.emit('timer:complete', {
+      taskName: 'Task', // Default value
+      metrics: state.metrics
+    });
     
     const endTime = new Date();
     const actualDuration = (endTime.getTime() - (state.metrics.startTime?.getTime() || endTime.getTime())) / 1000;

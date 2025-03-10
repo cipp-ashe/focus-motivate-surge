@@ -3,14 +3,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useTimerActions } from '../timer/useTimerActions';
 import { TimerStateMetrics } from '@/types/metrics';
+import { TimerState } from '@/types/timer';
 
 describe('useTimerActions', () => {
-  const mockUpdateTimeLeft = vi.fn();
-  const mockUpdateMinutes = vi.fn();
-  const mockSetIsRunning = vi.fn();
-  const mockUpdateMetrics = vi.fn();
-  const mockOnDurationChange = vi.fn();
-
   const mockMetrics: TimerStateMetrics = {
     startTime: null,
     endTime: null,
@@ -28,82 +23,75 @@ describe('useTimerActions', () => {
     pausedTimeLeft: null
   };
 
-  const mockProps = {
+  const mockState: TimerState = {
     timeLeft: 300,
-    minutes: 5,
-    taskName: 'Test Task',
-    metrics: mockMetrics,
-    updateTimeLeft: mockUpdateTimeLeft,
-    updateMinutes: mockUpdateMinutes,
-    setIsRunning: mockSetIsRunning,
-    updateMetrics: mockUpdateMetrics,
-    onDurationChange: mockOnDurationChange,
+    isRunning: false,
+    isPaused: false,
+    showCompletion: false,
+    completionCelebrated: false,
+    metrics: mockMetrics
   };
+
+  const mockDispatch = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should handle setMinutes correctly', () => {
-    const { result } = renderHook(() => useTimerActions(mockProps));
+  it('should handle startTimer correctly', () => {
+    const { result } = renderHook(() => useTimerActions(mockState, mockDispatch));
     
-    result.current.setMinutes(10);
+    result.current.startTimer();
     
-    expect(mockUpdateMinutes).toHaveBeenCalledWith(10);
-    expect(mockUpdateTimeLeft).toHaveBeenCalledWith(600);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith({
-      expectedTime: 600
-    });
-    expect(mockOnDurationChange).toHaveBeenCalledWith(10);
-  });
-
-  it('should handle start action', () => {
-    const { result } = renderHook(() => useTimerActions(mockProps));
-    
-    result.current.start();
-    
-    expect(mockSetIsRunning).toHaveBeenCalledWith(true);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith({
-      startTime: expect.any(Date),
-      isPaused: false,
-      pausedTimeLeft: null
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'START' });
+    expect(mockDispatch).toHaveBeenCalledWith({ 
+      type: 'SET_START_TIME', 
+      payload: expect.any(Date) 
     });
   });
 
-  it('should handle pause action', () => {
-    const { result } = renderHook(() => useTimerActions(mockProps));
+  it('should handle pauseTimer correctly', () => {
+    const runningState = { ...mockState, isRunning: true };
+    const { result } = renderHook(() => useTimerActions(runningState, mockDispatch));
     
-    result.current.pause();
+    result.current.pauseTimer();
     
-    expect(mockSetIsRunning).toHaveBeenCalledWith(false);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith({
-      isPaused: true,
-      lastPauseTimestamp: expect.any(Date),
-      pauseCount: expect.any(Number),
-      pausedTimeLeft: 300
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'PAUSE' });
+    expect(mockDispatch).toHaveBeenCalledWith({ 
+      type: 'SET_LAST_PAUSE_TIMESTAMP', 
+      payload: expect.any(Date) 
     });
   });
 
-  it('should handle reset action', () => {
-    const { result } = renderHook(() => useTimerActions(mockProps));
+  it('should not pause if already paused', () => {
+    const pausedState = { ...mockState, isRunning: true, isPaused: true };
+    const { result } = renderHook(() => useTimerActions(pausedState, mockDispatch));
     
-    result.current.reset();
+    result.current.pauseTimer();
     
-    expect(mockSetIsRunning).toHaveBeenCalledWith(false);
-    expect(mockUpdateTimeLeft).toHaveBeenCalledWith(300);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith(expect.any(Object));
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
-  it('should handle addTime action', () => {
-    const { result } = renderHook(() => useTimerActions(mockProps));
+  it('should handle resetTimer correctly', () => {
+    const { result } = renderHook(() => useTimerActions(mockState, mockDispatch));
     
-    result.current.addTime(5);
+    result.current.resetTimer();
     
-    expect(mockUpdateTimeLeft).toHaveBeenCalledWith(600);
-    expect(mockUpdateMinutes).toHaveBeenCalledWith(10);
-    expect(mockUpdateMetrics).toHaveBeenCalledWith({
-      extensionTime: 300,
-      expectedTime: 600,
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'RESET' });
+  });
+
+  it('should handle extendTimer correctly', () => {
+    const { result } = renderHook(() => useTimerActions(mockState, mockDispatch));
+    
+    result.current.extendTimer(5);
+    
+    expect(mockDispatch).toHaveBeenCalledWith({ 
+      type: 'EXTEND', 
+      payload: 300 
+    });
+    expect(mockDispatch).toHaveBeenCalledWith({ 
+      type: 'SET_EXTENSION_TIME', 
+      payload: 300 
     });
   });
 });
