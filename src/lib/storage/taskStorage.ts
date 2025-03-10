@@ -15,7 +15,9 @@ export const taskStorage = {
   loadTasks: (): Task[] => {
     try {
       const tasksStr = localStorage.getItem(ACTIVE_TASKS_KEY);
-      return tasksStr ? JSON.parse(tasksStr) : [];
+      const tasks = tasksStr ? JSON.parse(tasksStr) : [];
+      console.log(`taskStorage: Loaded ${tasks.length} tasks from storage`);
+      return tasks;
     } catch (error) {
       console.error('Error loading tasks from storage:', error);
       return [];
@@ -40,6 +42,7 @@ export const taskStorage = {
    */
   saveTasks: (tasks: Task[]): boolean => {
     try {
+      console.log(`taskStorage: Saving ${tasks.length} tasks to storage`);
       localStorage.setItem(ACTIVE_TASKS_KEY, JSON.stringify(tasks));
       return true;
     } catch (error) {
@@ -67,7 +70,9 @@ export const taskStorage = {
   taskExistsById: (taskId: string): boolean => {
     try {
       const tasks = taskStorage.loadTasks();
-      return tasks.some((task: Task) => task.id === taskId);
+      const exists = tasks.some((task: Task) => task.id === taskId);
+      console.log(`taskStorage: Task ${taskId} exists in storage: ${exists}`);
+      return exists;
     } catch (error) {
       console.error('Error checking if task exists in storage:', error);
       return false;
@@ -123,6 +128,7 @@ export const taskStorage = {
       // Add task and save
       tasks.push(task);
       localStorage.setItem(ACTIVE_TASKS_KEY, JSON.stringify(tasks));
+      console.log(`Task ${task.id} added to storage, new count: ${tasks.length}`);
       
       return true;
     } catch (error) {
@@ -152,6 +158,7 @@ export const taskStorage = {
       
       // Save updated tasks
       localStorage.setItem(ACTIVE_TASKS_KEY, JSON.stringify(tasks));
+      console.log(`Task ${taskId} updated in storage`);
       
       return true;
     } catch (error) {
@@ -169,7 +176,9 @@ export const taskStorage = {
       const tasks = taskStorage.loadTasks();
       
       // Check if task exists
-      if (!tasks.some((task: Task) => task.id === taskId)) {
+      const taskExists = tasks.some((task: Task) => task.id === taskId);
+      
+      if (!taskExists) {
         console.log(`Task with ID ${taskId} not found in storage for removal`);
         return false;
       }
@@ -179,6 +188,15 @@ export const taskStorage = {
       
       // Save updated tasks
       localStorage.setItem(ACTIVE_TASKS_KEY, JSON.stringify(updatedTasks));
+      console.log(`Task ${taskId} removed from storage, new count: ${updatedTasks.length}`);
+      
+      // Also check and remove from completed tasks if present
+      const completedTasks = taskStorage.loadCompletedTasks();
+      if (completedTasks.some((task: Task) => task.id === taskId)) {
+        const updatedCompleted = completedTasks.filter((task: Task) => task.id !== taskId);
+        localStorage.setItem(COMPLETED_TASKS_KEY, JSON.stringify(updatedCompleted));
+        console.log(`Task ${taskId} also removed from completed tasks`);
+      }
       
       return true;
     } catch (error) {
@@ -221,6 +239,7 @@ export const taskStorage = {
       const completedTasks = taskStorage.loadCompletedTasks();
       completedTasks.push(completedTask);
       localStorage.setItem(COMPLETED_TASKS_KEY, JSON.stringify(completedTasks));
+      console.log(`Task ${taskId} marked as completed and moved to completed tasks`);
       
       return true;
     } catch (error) {
@@ -280,6 +299,21 @@ export const taskStorage = {
     } catch (error) {
       console.error('Error finding missing tasks:', error);
       return [];
+    }
+  },
+  
+  /**
+   * Clear all tasks from storage (for debugging and testing)
+   */
+  clearAllTasks: (): boolean => {
+    try {
+      localStorage.removeItem(ACTIVE_TASKS_KEY);
+      localStorage.removeItem(COMPLETED_TASKS_KEY);
+      console.log("All tasks cleared from storage");
+      return true;
+    } catch (error) {
+      console.error('Error clearing all tasks from storage:', error);
+      return false;
     }
   }
 };

@@ -51,16 +51,24 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
       };
       
     case 'DELETE_TASK': {
-      const isInItems = state.items.some(task => task.id === action.payload.taskId);
-      const isInCompleted = state.completed.some(task => task.id === action.payload.taskId);
+      const taskId = action.payload.taskId;
+      console.log(`TaskContext: Processing deletion for task ${taskId}`);
+      
+      const isInItems = state.items.some(task => task.id === taskId);
+      const isInCompleted = state.completed.some(task => task.id === taskId);
 
-      console.log(`TaskContext: Deleting task ${action.payload.taskId}, exists in items: ${isInItems}, exists in completed: ${isInCompleted}`);
+      console.log(`TaskContext: Deleting task ${taskId}, exists in items: ${isInItems}, exists in completed: ${isInCompleted}`);
+
+      if (!isInItems && !isInCompleted) {
+        console.log(`TaskContext: Task ${taskId} not found in state, no changes needed`);
+        return state;
+      }
 
       return {
         ...state,
-        items: isInItems ? state.items.filter(task => task.id !== action.payload.taskId) : state.items,
-        completed: isInCompleted ? state.completed.filter(task => task.id !== action.payload.taskId) : state.completed,
-        selected: state.selected === action.payload.taskId ? null : state.selected,
+        items: isInItems ? state.items.filter(task => task.id !== taskId) : state.items,
+        completed: isInCompleted ? state.completed.filter(task => task.id !== taskId) : state.completed,
+        selected: state.selected === taskId ? null : state.selected,
       };
     }
     

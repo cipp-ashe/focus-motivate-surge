@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Task } from "@/types/tasks";
 import { TaskRow } from "./TaskRow";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,13 @@ export const TaskTable = ({
   onTasksClear,
 }: TaskTableProps) => {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [displayedTasks, setDisplayedTasks] = useState<Task[]>([]);
+
+  // Ensure we have the latest tasks
+  useEffect(() => {
+    console.log("TaskTable updating displayed tasks:", tasks);
+    setDisplayedTasks(tasks);
+  }, [tasks]);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
     const duration = parseInt(newDuration);
@@ -41,21 +48,23 @@ export const TaskTable = ({
     setEditingTaskId(null);
   }, []);
 
-  // Debug to check if tasks are being received
-  console.log("TaskTable received tasks:", tasks);
+  const handleTaskDelete = useCallback((taskId: string) => {
+    console.log("TaskTable: Deleting task", taskId);
+    onTaskDelete(taskId);
+  }, [onTaskDelete]);
 
   return (
     <div className="w-full space-y-2 p-4 overflow-visible">
       <div className="grid gap-2 w-full">
-        {tasks.length > 0 ? (
-          tasks.map((task) => (
+        {displayedTasks.length > 0 ? (
+          displayedTasks.map((task) => (
             <TaskRow
               key={task.id}
               task={task}
               isSelected={selectedTasks.includes(task.id)}
               editingTaskId={editingTaskId}
               onTaskClick={() => onTaskClick(task)}
-              onTaskDelete={() => onTaskDelete(task.id)}
+              onTaskDelete={() => handleTaskDelete(task.id)}
               onDurationChange={handleDurationChange}
               onDurationClick={handleDurationClick}
               onInputBlur={handleInputBlur}
@@ -66,7 +75,7 @@ export const TaskTable = ({
         )}
       </div>
       
-      {tasks.length > 1 && (
+      {displayedTasks.length > 1 && (
         <div className="flex justify-center pt-4">
           <Button
             variant="ghost"

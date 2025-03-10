@@ -10,7 +10,6 @@ import { taskStorage } from '@/lib/storage/taskStorage';
  */
 export const useTaskEvents = () => {
   const [processing, setProcessing] = useState(false);
-  const [forceUpdateTimeout, setForceUpdateTimeout] = useState<NodeJS.Timeout | null>(null);
   const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
   
   const createTask = useCallback((task: Task) => {
@@ -54,8 +53,9 @@ export const useTaskEvents = () => {
   const deleteTask = useCallback((taskId: string, reason: 'manual' | 'completed' | 'template-removed' = 'manual') => {
     console.log("useTaskEvents: Deleting task", taskId, "reason:", reason);
     
-    // Remove from storage first
+    // Remove from storage first to prevent race conditions
     const removed = taskStorage.removeTask(taskId);
+    console.log(`Task ${taskId} removed from storage:`, removed);
     
     // Emit event for state updates even if not found in storage
     // This ensures any in-memory references are also cleaned up
@@ -66,6 +66,9 @@ export const useTaskEvents = () => {
     } else if (removed && reason === 'template-removed') {
       toast.info('Task removed with habit template');
     }
+    
+    // Force UI update after deletion
+    setTimeout(() => forceTaskUpdate(), 50);
   }, []);
 
   const completeTask = useCallback((taskId: string, metrics: any) => {
@@ -89,9 +92,9 @@ export const useTaskEvents = () => {
   }, []);
 
   const forceTaskUpdate = useCallback(() => {
-    // Prevent multiple rapid calls with time-based debouncing
+    // Prevent multiple rapid calls
     const now = Date.now();
-    if (now - lastForceUpdateTime < 1000) {
+    if (now - lastForceUpdateTime < 500) {
       console.log("useTaskEvents: Skipping force update, too soon since last update", 
                   now - lastForceUpdateTime, "ms");
       return;
@@ -108,27 +111,16 @@ export const useTaskEvents = () => {
     setProcessing(true);
     console.log("useTaskEvents: Forcing task update");
     
-    // Clear any existing timeout
-    if (forceUpdateTimeout) {
-      clearTimeout(forceUpdateTimeout);
-      setForceUpdateTimeout(null);
-    }
-    
     // Dispatch event to trigger reloading with delay
-    const timeout = setTimeout(() => {
+    setTimeout(() => {
       window.dispatchEvent(new Event('force-task-update'));
       
       // Reset processing flag after a delay
-      const resetTimeout = setTimeout(() => {
+      setTimeout(() => {
         setProcessing(false);
-        setForceUpdateTimeout(null);
       }, 300);
-      
-      setForceUpdateTimeout(resetTimeout);
     }, 50);
-    
-    setForceUpdateTimeout(timeout);
-  }, [processing, forceUpdateTimeout, lastForceUpdateTime]);
+  }, [processing, lastForceUpdateTime]);
 
   const forceTagsUpdate = useCallback(() => {
     // Add debouncing to tags update too
