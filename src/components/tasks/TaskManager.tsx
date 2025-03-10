@@ -93,7 +93,7 @@ const TaskManager = () => {
     <TaskList
       tasks={tasks}
       selectedTasks={selectedTaskId ? [selectedTaskId] : []}
-      onTaskClick={(task) => handleTaskClick(task.id)}
+      onTaskClick={handleTaskClick}
     />
   );
 };

@@ -55,7 +55,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         <TabsContent value="completed" className="flex-grow overflow-hidden">
           <CompletedTasks
             tasks={completedTasks}
-            onClear={handleClearCompletedTasks}
+            onTasksClear={handleClearCompletedTasks}
           />
         </TabsContent>
       </Tabs>
