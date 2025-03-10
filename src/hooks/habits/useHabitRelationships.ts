@@ -5,6 +5,13 @@ import { HabitDetail } from '@/components/habits/types';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
+// Define the event payload type
+interface JournalOpenEventPayload {
+  habitId: string;
+  habitName: string;
+  templateId: string;
+}
+
 /**
  * Hook to manage relationships between habits and other entities like tasks and journal entries
  */
@@ -47,11 +54,13 @@ export const useHabitRelationships = () => {
     }
     
     // Fix error: Add templateId to the journal:open event payload
-    eventBus.emit('journal:open', {
+    const payload: JournalOpenEventPayload = {
       habitId: habit.id,
       habitName: habit.name,
       templateId // Add templateId to the payload
-    });
+    };
+    
+    eventBus.emit('journal:open', payload);
     
     return true;
   }, []);

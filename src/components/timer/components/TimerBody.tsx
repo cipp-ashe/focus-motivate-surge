@@ -42,8 +42,9 @@ export const TimerBody: React.FC<TimerBodyProps> = ({
   setFavorites,
 }) => {
   const handleLike = () => {
+    const currentFavorites = Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [];
     updateMetrics({ 
-      favoriteQuotes: (metrics.favoriteQuotes || 0) + 1 
+      favoriteQuotes: [...currentFavorites, "New quote"] 
     });
   };
 

@@ -138,7 +138,7 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
       </div>
       
       {/* Quotes Counter */}
-      {metrics.favoriteQuotes > 0 && (
+      {Array.isArray(metrics.favoriteQuotes) && metrics.favoriteQuotes.length > 0 && (
         <div className="flex items-center gap-3 p-3 rounded-lg bg-card/50">
           <div className={cn(
             "p-2.5 rounded-full transition-colors",
@@ -148,7 +148,7 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
           </div>
           <div className="flex flex-col">
             <span className="text-foreground text-sm">
-              {metrics.favoriteQuotes} quote{metrics.favoriteQuotes !== 1 ? 's' : ''} saved
+              {metrics.favoriteQuotes.length} quote{metrics.favoriteQuotes.length !== 1 ? 's' : ''} saved
             </span>
             <span className="text-xs text-muted-foreground">
               Keep collecting inspiration!

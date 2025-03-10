@@ -10,7 +10,7 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
     pauseCount: 0,
     expectedTime: initialDurationSeconds,
     actualDuration: 0,
-    favoriteQuotes: 0,
+    favoriteQuotes: [] as string[],
     pausedTime: 0,
     lastPauseTimestamp: null,
     extensionTime: 0,

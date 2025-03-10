@@ -97,10 +97,10 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
           metrics={metrics}
           onClose={() => eventBus.emit('timer:collapse', { taskName, saveNotes: true })}
           onLike={() => {
-            const updates: Partial<TimerStateMetrics> = { 
-              favoriteQuotes: (metrics.favoriteQuotes || 0) + 1 
-            };
-            updateMetrics(updates);
+            const currentFavorites = Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [];
+            updateMetrics({ 
+              favoriteQuotes: [...currentFavorites, "New quote"]
+            });
           }}
           favorites={favorites}
           setFavorites={setFavorites}

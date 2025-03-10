@@ -54,7 +54,11 @@ export const formatDailySummary = (
       netEffectiveTime: formatDuration(task.metrics.netEffectiveTime),
       efficiency: task.metrics.efficiencyRatio,
       pauseCount: task.metrics.pauseCount,
-      favoriteQuotes: task.metrics.favoriteQuotes ? Array.isArray(task.metrics.favoriteQuotes) ? task.metrics.favoriteQuotes : [] : [],
+      favoriteQuotes: task.metrics.favoriteQuotes ? 
+        (Array.isArray(task.metrics.favoriteQuotes) ? 
+          task.metrics.favoriteQuotes.map(quote => 
+            typeof quote === 'string' ? { text: quote, author: '', categories: [] } : quote
+          ) : []) : [],
     } : null
   }));
 

@@ -27,7 +27,7 @@ describe('TimerBody Component', () => {
         pauseCount: 0,
         expectedTime: 300,
         actualDuration: 0,
-        favoriteQuotes: 0,
+        favoriteQuotes: [] as string[],
         pausedTime: 0,
         lastPauseTimestamp: null,
         extensionTime: 0,
@@ -46,7 +46,7 @@ describe('TimerBody Component', () => {
       pauseCount: 0,
       expectedTime: 300,
       actualDuration: 0,
-      favoriteQuotes: 0,
+      favoriteQuotes: [] as string[],
       pausedTime: 0,
       lastPauseTimestamp: null,
       extensionTime: 0,
@@ -120,4 +120,3 @@ describe('TimerBody Component', () => {
     expect(mockProps.setSelectedSound).toHaveBeenCalled();
   });
 });
-
