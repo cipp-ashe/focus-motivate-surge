@@ -1,41 +1,37 @@
 
-import { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Task } from "@/types/tasks";
 import { TaskRow } from "./TaskRow";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
+import { eventBus } from "@/lib/eventBus";
 
 interface TaskTableProps {
   tasks: Task[];
   selectedTasks: string[];
   onTaskClick: (task: Task) => void;
-  onTaskDelete: (taskId: string) => void;
-  onTasksUpdate: (taskId: string, updates: Partial<Task>) => void;
-  onTasksClear: () => void;
 }
 
 export const TaskTable = ({
   tasks,
   selectedTasks,
   onTaskClick,
-  onTaskDelete,
-  onTasksUpdate,
-  onTasksClear,
 }: TaskTableProps) => {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   
   // Log tasks whenever they change
   useEffect(() => {
-    console.log("TaskTable received tasks:", tasks);
+    console.log("TaskTable received tasks:", tasks.length, "tasks:", tasks);
   }, [tasks]);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
     const duration = parseInt(newDuration);
     if (isNaN(duration)) return;
     
-    onTasksUpdate(taskId, { duration });
+    // Use event bus directly for update
+    eventBus.emit('task:update', { taskId, updates: { duration } });
     setEditingTaskId(null);
-  }, [onTasksUpdate]);
+  }, []);
 
   const handleDurationClick = useCallback((e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => {
     e.stopPropagation();
@@ -48,8 +44,17 @@ export const TaskTable = ({
 
   const handleTaskDelete = useCallback((taskId: string) => {
     console.log("TaskTable: Deleting task", taskId);
-    onTaskDelete(taskId);
-  }, [onTaskDelete]);
+    // Use event bus directly for deletion
+    eventBus.emit('task:delete', { taskId, reason: 'manual' });
+  }, []);
+
+  const handleClearAllTasks = useCallback(() => {
+    console.log("TaskTable: Clearing all tasks");
+    // Clear tasks one by one using the event bus
+    tasks.forEach(task => {
+      eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
+    });
+  }, [tasks]);
 
   return (
     <div className="w-full space-y-2 p-4 overflow-visible">
@@ -78,7 +83,7 @@ export const TaskTable = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onTasksClear}
+            onClick={handleClearAllTasks}
             className="text-muted-foreground hover:text-destructive transition-colors"
           >
             <Trash className="h-4 w-4 mr-2" />

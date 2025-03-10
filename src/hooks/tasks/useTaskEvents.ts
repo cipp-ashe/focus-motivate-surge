@@ -15,11 +15,11 @@ export const useTaskEvents = () => {
   const createTask = useCallback((task: Task) => {
     console.log("useTaskEvents: Creating task", task);
     
-    // First, verify the task doesn't already exist
+    // First verify the task doesn't already exist in storage
     const exists = taskStorage.taskExistsById(task.id);
     
     if (exists) {
-      console.log(`Task ${task.id} already exists, skipping creation`);
+      console.log(`Task ${task.id} already exists in storage, skipping creation`);
       return;
     }
     
@@ -27,11 +27,11 @@ export const useTaskEvents = () => {
     const added = taskStorage.addTask(task);
     
     if (added) {
-      // Then emit event for state updates with direct object reference
+      // Then emit event for state updates
       eventBus.emit('task:create', task);
       toast.success('Task added 📝');
       
-      // Force task update to ensure it appears in UI - but with delay
+      // Force task update to ensure it appears in UI
       setTimeout(() => forceTaskUpdate(), 50);
     }
   }, []);
@@ -111,15 +111,13 @@ export const useTaskEvents = () => {
     setProcessing(true);
     console.log("useTaskEvents: Forcing task update");
     
-    // Dispatch event to trigger reloading with delay
+    // Dispatch event to trigger reloading
+    window.dispatchEvent(new Event('force-task-update'));
+    
+    // Reset processing flag after a delay
     setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-      
-      // Reset processing flag after a delay
-      setTimeout(() => {
-        setProcessing(false);
-      }, 300);
-    }, 50);
+      setProcessing(false);
+    }, 300);
   }, [processing, lastForceUpdateTime]);
 
   const forceTagsUpdate = useCallback(() => {
