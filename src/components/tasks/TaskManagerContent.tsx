@@ -99,50 +99,50 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="all" className="h-full flex flex-col">
           <div className="w-full border-b border-border/10 overflow-x-auto">
-            <TabsList className={`${isMobile ? 'flex justify-start w-auto min-w-full px-1 py-1' : 'w-full justify-start'}`}>
-              <TabsTrigger value="all" className="flex items-center gap-1">
+            <TabsList className={`${isMobile ? 'flex w-full justify-between px-1 py-1' : 'w-full justify-start'}`}>
+              <TabsTrigger value="all" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <FileText className="h-4 w-4" />
                 {!isMobile && <span>All ({allTasks.length})</span>}
                 {isMobile && <span className="sr-only">All tasks</span>}
                 {isMobile && <span className="text-xs">{allTasks.length}</span>}
               </TabsTrigger>
-              <TabsTrigger value="timer" className="flex items-center gap-1">
+              <TabsTrigger value="timer" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <Timer className="h-4 w-4 text-purple-400" />
                 {!isMobile && <span>Timer ({timerTasks.length})</span>}
                 {isMobile && <span className="sr-only">Timer tasks</span>}
                 {isMobile && <span className="text-xs">{timerTasks.length}</span>}
               </TabsTrigger>
-              <TabsTrigger value="screenshot" className="flex items-center gap-1">
+              <TabsTrigger value="screenshot" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <Image className="h-4 w-4 text-blue-400" />
                 {!isMobile && <span>Screenshots ({screenshotTasks.length})</span>}
                 {isMobile && <span className="sr-only">Screenshot tasks</span>}
                 {isMobile && <span className="text-xs">{screenshotTasks.length}</span>}
               </TabsTrigger>
-              <TabsTrigger value="habit" className="flex items-center gap-1">
+              <TabsTrigger value="habit" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <Calendar className="h-4 w-4 text-green-400" />
                 {!isMobile && <span>Habits ({habitTasks.length})</span>}
                 {isMobile && <span className="sr-only">Habit tasks</span>}
                 {isMobile && <span className="text-xs">{habitTasks.length}</span>}
               </TabsTrigger>
-              <TabsTrigger value="journal" className="flex items-center gap-1">
+              <TabsTrigger value="journal" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <BookOpen className="h-4 w-4 text-amber-400" />
                 {!isMobile && <span>Journal ({journalTasks.length})</span>}
                 {isMobile && <span className="sr-only">Journal tasks</span>}
                 {isMobile && <span className="text-xs">{journalTasks.length}</span>}
               </TabsTrigger>
-              <TabsTrigger value="checklist" className="flex items-center gap-1">
+              <TabsTrigger value="checklist" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <CheckSquare className="h-4 w-4 text-cyan-400" />
                 {!isMobile && <span>Checklists ({checklistTasks.length})</span>}
                 {isMobile && <span className="sr-only">Checklist tasks</span>}
                 {isMobile && <span className="text-xs">{checklistTasks.length}</span>}
               </TabsTrigger>
-              <TabsTrigger value="voicenote" className="flex items-center gap-1">
+              <TabsTrigger value="voicenote" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <Mic className="h-4 w-4 text-rose-400" />
                 {!isMobile && <span>Voice Notes ({voiceNoteTasks.length})</span>}
                 {isMobile && <span className="sr-only">Voice note tasks</span>}
                 {isMobile && <span className="text-xs">{voiceNoteTasks.length}</span>}
               </TabsTrigger>
-              <TabsTrigger value="regular" className="flex items-center gap-1">
+              <TabsTrigger value="regular" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''}`}>
                 <FileText className="h-4 w-4 text-primary" />
                 {!isMobile && <span>Regular ({regularTasks.length})</span>}
                 {isMobile && <span className="sr-only">Regular tasks</span>}
