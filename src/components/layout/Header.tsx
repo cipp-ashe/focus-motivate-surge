@@ -22,25 +22,25 @@ export const Header = () => {
           </Link>
         </div>
         
-        <nav className={`flex ${isMobile ? 'space-x-4' : 'space-x-6'}`}>
-          <Link to="/" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/')}`}>
-            <HomeIcon className="h-4 w-4" />
+        <nav className={`flex ${isMobile ? 'space-x-6' : 'space-x-6'}`}>
+          <Link to="/" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/')}`} aria-label="Home">
+            <HomeIcon className="h-5 w-5" />
             {!isMobile && <span>Home</span>}
           </Link>
-          <Link to="/tasks" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/tasks')}`}>
-            <ListTodo className="h-4 w-4" />
+          <Link to="/tasks" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/tasks')}`} aria-label="Tasks">
+            <ListTodo className="h-5 w-5" />
             {!isMobile && <span>Tasks</span>}
           </Link>
-          <Link to="/timer" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/timer')}`}>
-            <Clock className="h-4 w-4" />
+          <Link to="/timer" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/timer')}`} aria-label="Timer">
+            <Clock className="h-5 w-5" />
             {!isMobile && <span>Timer</span>}
           </Link>
-          <Link to="/notes" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/notes')}`}>
-            <Notebook className="h-4 w-4" />
+          <Link to="/notes" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/notes')}`} aria-label="Notes">
+            <Notebook className="h-5 w-5" />
             {!isMobile && <span>Notes</span>}
           </Link>
-          <Link to="/habits" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/habits')}`}>
-            <ActivitySquare className="h-4 w-4" />
+          <Link to="/habits" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/habits')}`} aria-label="Habits">
+            <ActivitySquare className="h-5 w-5" />
             {!isMobile && <span>Habits</span>}
           </Link>
         </nav>

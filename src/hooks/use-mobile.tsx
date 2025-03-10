@@ -1,6 +1,7 @@
 
 // Re-export the unified hook from its new location
-export { useIsMobile } from './ui/useIsMobile';
+import { useIsMobile } from './ui/useIsMobile';
 
-// Maintain backward compatibility
+// Export both for backward compatibility
+export { useIsMobile };
 export const useMobile = () => useIsMobile();

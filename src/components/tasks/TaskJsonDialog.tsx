@@ -1,10 +1,9 @@
-
 import type { Task } from "@/types/tasks";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/ui/useIsMobile";
 
 interface TaskJsonDialogProps {
   tasks: Task[];

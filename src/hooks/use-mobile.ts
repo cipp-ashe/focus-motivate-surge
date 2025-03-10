@@ -6,3 +6,6 @@ import { useIsMobile } from './ui/useIsMobile';
 export function useMobile() {
   return useIsMobile();
 }
+
+// Make sure we export the proper function directly
+export { useIsMobile };

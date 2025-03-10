@@ -10,7 +10,7 @@ export const SecurityControlsButton: React.FC = () => {
   
   return (
     <Button variant="outline" asChild>
-      <Link to="/security-controls" className="flex items-center gap-2">
+      <Link to="/security-controls" className="flex items-center gap-2" aria-label="Security Controls">
         <Shield className="h-4 w-4" />
         {!isMobile && <span>Security Controls</span>}
       </Link>
