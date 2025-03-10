@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages';
@@ -19,7 +20,11 @@ function App() {
             <Route path="/timer" element={<Timer />} />
             <Route path="/notes" element={<Notes />} />
             <Route path="/habits" element={<Habits />} />
-            <Route path="/tasks" element={<React.lazy(() => import('./pages/TaskPage'))} />
+            <Route path="/tasks" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                {React.lazy(() => import('./pages/TaskPage'))}
+              </Suspense>
+            } />
           </Routes>
         </TaskProvider>
       </BrowserRouter>
