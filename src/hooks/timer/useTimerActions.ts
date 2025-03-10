@@ -1,171 +1,68 @@
-
-import { useCallback } from 'react';
-import { toast } from "sonner";
-import { TimerMetrics } from '@/types/metrics';
+import { useCallback, Dispatch } from 'react';
+import { TimerState, TimerAction } from '@/types/timer';
+import { TimerStateMetrics } from '@/types/metrics';
 import { eventBus } from '@/lib/eventBus';
 
-interface UseTimerActionsProps {
-  timeLeft: number;
-  minutes: number;
-  taskName: string;
-  updateTimeLeft: (time: number) => void;
-  updateMinutes: (minutes: number) => void;
-  setIsRunning: (running: boolean) => void;
-  updateMetrics: (updates: Partial<TimerMetrics> | ((prev: TimerMetrics) => Partial<TimerMetrics>)) => void;
-  metrics: TimerMetrics;
-  onDurationChange?: (minutes: number) => void;
-}
-
-export const useTimerActions = ({
-  timeLeft,
-  minutes,
-  taskName,
-  updateTimeLeft,
-  updateMinutes,
-  setIsRunning,
-  updateMetrics,
-  metrics,
-  onDurationChange,
-}: UseTimerActionsProps) => {
-  const setMinutes = useCallback((newMinutes: number) => {
-    const clampedMinutes = Math.max(1, Math.min(60, newMinutes));
-    const newSeconds = clampedMinutes * 60;
-    
-    console.log('Timer Action - Setting minutes:', {
-      newMinutes,
-      clampedMinutes,
-      newSeconds,
-      currentTimeLeft: timeLeft,
-      currentMinutes: minutes
-    });
-    
-    updateMinutes(clampedMinutes);
-    updateTimeLeft(newSeconds);
-    
-    const metricUpdates: Partial<TimerMetrics> = {
-      expectedTime: newSeconds,
-      startTime: null,
-      endTime: null,
-      pauseCount: 0,
-      actualDuration: 0,
-      isPaused: false,
-      pausedTimeLeft: null
-    };
-    
-    updateMetrics(metricUpdates);
-    eventBus.emit('timer:metrics-update', { 
-      taskName,
-      metrics: metricUpdates 
-    });
-    
-    if (onDurationChange) {
-      onDurationChange(clampedMinutes);
+export const useTimerActions = (state: TimerState, dispatch: Dispatch<TimerAction>) => {
+  const startTimer = useCallback(() => {
+    if (!state.isRunning) {
+      dispatch({ type: 'START' });
+      dispatch({ type: 'SET_START_TIME', payload: new Date() });
+      eventBus.emit('timer:start', {});
     }
-  }, [updateMinutes, updateTimeLeft, updateMetrics, onDurationChange, timeLeft, minutes, taskName]);
+  }, [state.isRunning, dispatch]);
 
-  const start = useCallback(() => {
-    setIsRunning(true);
-    const metricUpdates: Partial<TimerMetrics> = {
-      startTime: new Date(),
-      isPaused: false,
-      pausedTimeLeft: null
-    };
-    updateMetrics(metricUpdates);
-    eventBus.emit('timer:start', { taskName, duration: timeLeft });
-    eventBus.emit('timer:metrics-update', { 
-      taskName,
-      metrics: metricUpdates 
-    });
-    toast.success("Timer started ⏱️🚀");
-  }, [setIsRunning, updateMetrics, timeLeft, taskName]);
+  const pauseTimer = useCallback(() => {
+    if (state.isRunning && !state.isPaused) {
+      dispatch({ type: 'PAUSE' });
+      dispatch({ type: 'SET_LAST_PAUSE_TIMESTAMP', payload: new Date() });
+      eventBus.emit('timer:pause', {});
+    }
+  }, [state.isRunning, state.isPaused, dispatch]);
 
-  const pause = useCallback(() => {
-    setIsRunning(false);
-    const now = new Date();
-    
-    updateMetrics((currentMetrics: TimerMetrics) => ({
-      lastPauseTimestamp: now,
-      isPaused: true,
-      pausedTimeLeft: timeLeft,
-      pauseCount: (currentMetrics.pauseCount || 0) + 1
-    }));
-    
-    eventBus.emit('timer:pause', { 
-      taskName, 
-      timeLeft, 
-      metrics 
-    });
-    toast.info("Timer paused ⏸️");
-  }, [setIsRunning, updateMetrics, timeLeft, metrics, taskName]);
+  const resetTimer = useCallback(() => {
+    dispatch({ type: 'RESET' });
+    eventBus.emit('timer:reset', {});
+  }, [dispatch]);
 
-  const reset = useCallback(() => {
-    const newSeconds = minutes * 60;
-    setIsRunning(false);
-    updateTimeLeft(newSeconds);
-    
-    const metricUpdates: Partial<TimerMetrics> = {
-      startTime: null,
-      endTime: null,
-      pauseCount: 0,
-      expectedTime: newSeconds,
-      actualDuration: 0,
-      favoriteQuotes: 0,
-      pausedTime: 0,
-      lastPauseTimestamp: null,
-      extensionTime: 0,
-      netEffectiveTime: 0,
-      efficiencyRatio: 0,
-      completionStatus: 'Completed On Time',
-      isPaused: false,
-      pausedTimeLeft: null
-    };
-    
-    updateMetrics(metricUpdates);
-    eventBus.emit('timer:metrics-update', { 
-      taskName,
-      metrics: metricUpdates 
-    });
-  }, [minutes, setIsRunning, updateTimeLeft, updateMetrics, taskName]);
+  const extendTimer = useCallback((minutes: number) => {
+    dispatch({ type: 'EXTEND', payload: minutes * 60 });
+    dispatch({ type: 'SET_EXTENSION_TIME', payload: minutes * 60 });
+  }, [dispatch]);
 
-  const addTime = useCallback((additionalMinutes: number) => {
-    const additionalSeconds = additionalMinutes * 60;
-    const newTimeLeft = timeLeft + additionalSeconds;
-    const newMinutes = minutes + additionalMinutes;
-    
-    updateTimeLeft(newTimeLeft);
-    updateMinutes(newMinutes);
-    
-    const metricUpdates: Partial<TimerMetrics> = {
-      extensionTime: (metrics.extensionTime || 0) + additionalSeconds,
-      expectedTime: newTimeLeft
-    };
-    
-    updateMetrics(metricUpdates);
-    eventBus.emit('timer:metrics-update', { 
-      taskName,
-      metrics: metricUpdates 
-    });
-    toast.success(`+${additionalMinutes}m added ⌛💪`);
-  }, [timeLeft, minutes, updateTimeLeft, updateMinutes, updateMetrics, taskName, metrics]);
+  const updateMetrics = useCallback((updates: Partial<TimerStateMetrics>) => {
+    dispatch({ type: 'UPDATE_METRICS', payload: updates });
+    eventBus.emit('timer:metrics-update', updates);
+  }, [dispatch]);
 
   const completeTimer = useCallback(() => {
-    const now = new Date();
-    const updatedMetrics: TimerMetrics = {
-      ...metrics,
-      endTime: now,
-      actualDuration: metrics.startTime ? 
-        Math.floor((now.getTime() - metrics.startTime.getTime()) / 1000) : 0
+    dispatch({ type: 'COMPLETE' });
+    eventBus.emit('timer:complete', {});
+    
+    const endTime = new Date();
+    const actualDuration = (endTime.getTime() - (state.metrics.startTime?.getTime() || endTime.getTime())) / 1000;
+    const netEffectiveTime = actualDuration - state.metrics.pausedTime;
+    const efficiencyRatio = state.metrics.expectedTime ? Math.min((netEffectiveTime / state.metrics.expectedTime) * 100, 200) : 0;
+    
+    const updatedMetrics: TimerStateMetrics = {
+      ...state.metrics,
+      endTime,
+      actualDuration,
+      netEffectiveTime,
+      efficiencyRatio,
+      completionStatus: 'Completed On Time',
+      favoriteQuotes: [], // Fix: Changed from number to string[]
     };
+    
     updateMetrics(updatedMetrics);
-    eventBus.emit('timer:complete', { taskName, metrics: updatedMetrics });
-  }, [metrics, updateMetrics, taskName]);
+  }, [state.metrics, dispatch, updateMetrics]);
 
   return {
-    setMinutes,
-    start,
-    pause,
-    reset,
-    addTime,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    extendTimer,
+    updateMetrics,
     completeTimer,
   };
 };

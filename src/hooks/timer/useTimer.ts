@@ -1,157 +1,152 @@
+import { useState, useEffect, useCallback } from 'react';
+import { TimerState, TimerStateMetrics } from '@/types/metrics';
+import { TimerAction } from '@/types/timer';
 
-import { useEffect, useRef, useCallback } from 'react';
-import { UseTimerOptions } from './types';
-import { useTimerState } from './useTimerState';
-import { useTimerActions } from './useTimerActions';
+interface TimerProps {
+  initialMinutes: number;
+}
 
-export const useTimer = ({
-  initialDuration,
-  onTimeUp,
-  onDurationChange,
-}: UseTimerOptions) => {
-  const {
-    timeLeft,
-    minutes,
-    isRunning,
-    metrics,
-    updateTimeLeft,
-    updateMinutes,
-    setIsRunning,
-    updateMetrics,
-    isMountedRef,
-  } = useTimerState(initialDuration);
+type Dispatch<A> = (action: A) => void;
 
-  const intervalRef = useRef<NodeJS.Timeout>();
-
-  const actions = useTimerActions({
-    timeLeft,
-    minutes,
-    taskName: '',
-    metrics,
-    updateTimeLeft,
-    updateMinutes,
-    setIsRunning,
-    updateMetrics,
-    onDurationChange,
+export const useTimer = (initialMinutes: number) => {
+  const [state, setState] = useState<TimerState>({
+    timeLeft: initialMinutes * 60,
+    isRunning: false,
+    isPaused: false,
+    showCompletion: false,
+    completionCelebrated: false,
+    metrics: {
+      startTime: null,
+      endTime: null,
+      pauseCount: 0,
+      pausedTime: 0,
+      expectedTime: initialMinutes * 60,
+      actualDuration: 0,
+      pausedTimeLeft: null,
+      lastPauseTimestamp: null,
+      extensionTime: 0,
+      netEffectiveTime: 0,
+      efficiencyRatio: 0,
+      completionStatus: 'Completed On Time',
+      favoriteQuotes: [], // Fix: Changed from number to string[]
+      isPaused: false
+    },
   });
 
-  const { 
-    setMinutes, 
-    start, 
-    pause, 
-    reset, 
-    addTime, 
-    completeTimer 
-  } = actions;
-
-  // Handle duration changes and initialization
   useEffect(() => {
-    if (!isMountedRef.current) return;
+    let intervalId: NodeJS.Timeout;
 
-    const validDuration = Math.max(60, initialDuration);
-    
-    // Only update if not running and not paused, and time has actually changed
-    if (!isRunning && !metrics.isPaused && timeLeft !== validDuration) {
-      console.log('Timer - Initial duration changed:', {
-        initialDuration,
-        validDuration,
-        currentTimeLeft: timeLeft,
-        currentMinutes: minutes
-      });
-      
-      updateTimeLeft(validDuration);
-      updateMinutes(Math.floor(validDuration / 60));
-      
-      if (!metrics.startTime) {
-        updateMetrics({
-          expectedTime: validDuration,
-          startTime: null,
-          endTime: null,
-          pauseCount: 0,
-          actualDuration: 0,
-          favoriteQuotes: 0,
-          pausedTime: 0,
-          lastPauseTimestamp: null,
-          extensionTime: 0,
-          netEffectiveTime: 0,
-          efficiencyRatio: 0,
-          completionStatus: 'Completed On Time',
-          isPaused: false,
-          pausedTimeLeft: null
-        });
-      }
-    }
-  }, [initialDuration, updateTimeLeft, updateMinutes, updateMetrics, timeLeft, minutes, metrics.startTime, isRunning, metrics.isPaused]);
-
-  // Handle timer countdown
-  useEffect(() => {
-    // Don't start if not running or time is up
-    if (!isRunning || timeLeft <= 0) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = undefined;
-      }
-      return;
+    if (state.isRunning && state.timeLeft > 0) {
+      intervalId = setInterval(() => {
+        setState(prevState => ({
+          ...prevState,
+          timeLeft: prevState.timeLeft - 1,
+          metrics: {
+            ...prevState.metrics,
+            actualDuration: prevState.metrics.actualDuration + 1,
+            netEffectiveTime: prevState.metrics.netEffectiveTime + 1,
+            efficiencyRatio: prevState.metrics.expectedTime === 0 ? 0 : Math.min((prevState.metrics.netEffectiveTime / prevState.metrics.expectedTime) * 100, 200),
+          }
+        }));
+      }, 1000);
+    } else if (state.timeLeft === 0 && state.isRunning) {
+      setState(prevState => ({ ...prevState, isRunning: false, showCompletion: true }));
     }
 
-    console.log('Timer - Starting countdown:', {
-      timeLeft,
-      minutes,
-      isRunning
+    return () => clearInterval(intervalId);
+  }, [state.isRunning, state.timeLeft]);
+
+  const dispatch = useCallback((action: TimerAction) => {
+    setState(prevState => {
+      switch (action.type) {
+        case 'INIT':
+          return {
+            ...prevState,
+            timeLeft: action.payload.duration,
+            metrics: {
+              ...prevState.metrics,
+              expectedTime: action.payload.duration,
+            },
+          };
+        case 'START':
+          return {
+            ...prevState,
+            isRunning: true,
+            isPaused: false,
+            metrics: {
+              ...prevState.metrics,
+              startTime: prevState.metrics.startTime || new Date().toISOString(),
+            },
+          };
+        case 'PAUSE':
+          return {
+            ...prevState,
+            isRunning: false,
+            isPaused: true,
+            metrics: {
+              ...prevState.metrics,
+              pauseCount: prevState.metrics.pauseCount + 1,
+              lastPauseTimestamp: new Date().toISOString(),
+              pausedTimeLeft: prevState.timeLeft,
+              isPaused: true
+            },
+          };
+        case 'RESET':
+          return {
+            ...prevState,
+            timeLeft: prevState.metrics.expectedTime,
+            isRunning: false,
+            isPaused: false,
+            showCompletion: false,
+            completionCelebrated: false,
+            metrics: {
+              ...prevState.metrics,
+              startTime: null,
+              endTime: null,
+              pauseCount: 0,
+              pausedTime: 0,
+              expectedTime: prevState.metrics.expectedTime,
+              actualDuration: 0,
+              pausedTimeLeft: null,
+              lastPauseTimestamp: null,
+              extensionTime: 0,
+              netEffectiveTime: 0,
+              efficiencyRatio: 0,
+              completionStatus: 'Completed On Time',
+              favoriteQuotes: [],
+              isPaused: false
+            },
+          };
+        case 'COMPLETE':
+          return {
+            ...prevState,
+            isRunning: false,
+            showCompletion: true,
+            metrics: {
+              ...prevState.metrics,
+              endTime: new Date().toISOString(),
+            },
+          };
+        case 'CELEBRATE':
+          return { ...prevState, completionCelebrated: true };
+        case 'UPDATE_METRICS':
+          return {
+            ...prevState,
+            metrics: {
+              ...prevState.metrics,
+              ...action.payload,
+            },
+          };
+        case 'DECREMENT_TIME':
+          return {
+            ...prevState,
+            timeLeft: prevState.timeLeft - 1,
+          };
+        default:
+          return prevState;
+      }
     });
-    
-    intervalRef.current = setInterval(() => {
-      if (!isMountedRef.current) {
-        clearInterval(intervalRef.current);
-        return;
-      }
-
-      updateTimeLeft((currentTime) => {
-        const newTime = currentTime - 1;
-        console.log('Timer tick:', { currentTime, newTime });
-        
-        if (newTime <= 0) {
-          clearInterval(intervalRef.current);
-          setIsRunning(false);
-          completeTimer();
-          onTimeUp?.();
-          return 0;
-        }
-        return newTime;
-      });
-    }, 1000);
-
-    // Cleanup interval
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = undefined;
-      }
-    };
-  }, [isRunning, timeLeft, onTimeUp, completeTimer, updateTimeLeft, setIsRunning, isMountedRef, minutes]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = undefined;
-      }
-    };
   }, []);
 
-  return {
-    timeLeft,
-    minutes,
-    isRunning,
-    metrics,
-    updateMetrics,
-    start,
-    pause,
-    reset,
-    addTime,
-    setMinutes,
-    completeTimer,
-  };
+  return { state, dispatch };
 };

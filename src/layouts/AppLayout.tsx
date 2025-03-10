@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, CalendarCheck, Timer, BookHeart, ScrollText } from 'lucide-react';
+import { Home, CalendarCheck, Timer, BookHeart, ScrollText, Image } from 'lucide-react';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -29,6 +29,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <Link to="/notes" className="p-2 hover:bg-accent rounded-md transition-colors" title="Notes">
               <ScrollText className="w-5 h-5 text-muted-foreground hover:text-foreground" />
             </Link>
+            <Link to="/screenshots" className="p-2 hover:bg-accent rounded-md transition-colors" title="Screenshots">
+              <Image className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
           </div>
         </nav>
         
@@ -54,6 +57,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <Link to="/notes" className="p-2 flex flex-col items-center">
               <ScrollText className="w-5 h-5 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Notes</span>
+            </Link>
+            <Link to="/screenshots" className="p-2 flex flex-col items-center">
+              <Image className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Screenshots</span>
             </Link>
           </div>
         </div>

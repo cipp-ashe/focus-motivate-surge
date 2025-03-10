@@ -1,6 +1,6 @@
 
 // Task type enum for type checking
-export type TaskType = 'habit' | 'timer' | 'regular';
+export type TaskType = 'habit' | 'timer' | 'regular' | 'screenshot';
 
 export interface TaskMetrics {
   timeSpent?: number;
@@ -38,6 +38,10 @@ export interface Task {
   };
   metrics?: TaskMetrics;
   tags?: Tag[];
+  imageUrl?: string;
+  imageType?: 'screenshot' | 'image' | null;
+  fileName?: string;
+  capturedText?: string;
 }
 
 export const STORAGE_KEYS = {

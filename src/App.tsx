@@ -10,6 +10,7 @@ import TaskPage from '@/pages/Tasks';
 import TimerPage from '@/pages/Timer';
 import HabitsPage from '@/pages/Habits';
 import NotesPage from '@/pages/Notes';
+import ScreenshotsPage from '@/pages/Screenshots';
 
 // Add the HabitProvider import
 import { HabitProvider } from './contexts/habits/HabitContext';
@@ -35,6 +36,7 @@ function App() {
                         <Route path="/timer" element={<TimerPage />} />
                         <Route path="/habits" element={<HabitsPage />} />
                         <Route path="/notes" element={<NotesPage />} />
+                        <Route path="/screenshots" element={<ScreenshotsPage />} />
                       </Routes>
                     </main>
                   </Suspense>
