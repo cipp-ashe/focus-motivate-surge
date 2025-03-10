@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface TaskLoaderProps {
   onTasksLoaded: (tasks: Task[]) => void;
@@ -34,7 +34,7 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     
     // Check for pending habits on mount with a small delay
     const timeout = setTimeout(() => {
-      eventBus.emit('habits:check-pending', {});
+      eventManager.emit('habits:check-pending', {});
       
       // Force a UI update after a delay
       setTimeout(() => {

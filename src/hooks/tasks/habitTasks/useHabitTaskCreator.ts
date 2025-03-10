@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { toast } from 'sonner';
@@ -35,7 +35,7 @@ export const useHabitTaskCreator = () => {
         window.dispatchEvent(new Event('force-task-update'));
         
         // This is critical - we need to emit the task:select event to make it visible in timer page
-        eventBus.emit('task:select', existingTask.id);
+        eventManager.emit('task:select', existingTask.id);
         
         return existingTask.id;
       }
@@ -64,10 +64,10 @@ export const useHabitTaskCreator = () => {
       taskStorage.addTask(task);
       
       // Emit event to create task
-      eventBus.emit('task:create', task);
+      eventManager.emit('task:create', task);
       
       // Select the task immediately to make it visible on timer page
-      eventBus.emit('task:select', taskId);
+      eventManager.emit('task:select', taskId);
       
       // Force UI update after a short delay
       setTimeout(() => {

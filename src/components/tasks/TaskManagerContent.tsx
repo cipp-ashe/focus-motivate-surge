@@ -5,7 +5,7 @@ import { TaskInput } from './TaskInput';
 import { Task } from '@/types/tasks';
 import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface TaskManagerContentProps {
   tasks: Task[];
@@ -58,7 +58,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
         <TaskList
           tasks={tasks}
           selectedTasks={selectedTaskId ? [selectedTaskId] : []}
-          onTaskClick={(taskId) => eventBus.emit('task:select', taskId)}
+          onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
         />
       </div>
     </div>

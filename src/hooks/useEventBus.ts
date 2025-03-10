@@ -1,11 +1,12 @@
 
 import { useEffect } from 'react';
-import { eventBus } from '@/lib/eventBus';
-import { TimerEventType, TimerEventPayloads } from '@/types/events';
+import { eventManager as eventBus } from '@/lib/events/EventManager';
+import { EventType, EventPayload } from '@/lib/events/EventManager';
 
-export function useEventBus<T extends TimerEventType>(
+// For backward compatibility
+export function useEventBus<T extends EventType>(
   eventName: T,
-  callback: (payload: TimerEventPayloads[T]) => void,
+  callback: (payload: EventPayload[T]) => void,
   deps: React.DependencyList = []
 ) {
   useEffect(() => {

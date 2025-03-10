@@ -1,7 +1,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
+import { useEvent, useEvents } from '@/hooks/useEvent';
 
 interface TaskEventHandlerProps {
   tasks: Task[];
@@ -21,44 +22,24 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   const processingRef = useRef(false);
   const taskQueueRef = useRef<Task[]>([]);
   
-  // Listen for task-related events
+  // Set up event handlers with the new system
+  useEvent('task:create', onTaskCreate);
+  useEvent('task:update', onTaskUpdate);
+  useEvent('task:delete', onTaskDelete);
+  
+  // Handle force update events
   useEffect(() => {
-    console.log("TaskEventHandler - Setting up event listeners");
-    
-    const handleTaskCreate = (task: Task) => {
-      console.log("TaskEventHandler - Task created event received:", task);
-      onTaskCreate(task);
-    };
-    
-    const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
-      console.log("TaskEventHandler - Task update event received:", data);
-      onTaskUpdate(data);
-    };
-    
-    const handleTaskDelete = (data: { taskId: string }) => {
-      console.log("TaskEventHandler - Task delete event received:", data);
-      onTaskDelete(data);
-    };
-    
     const handleForceUpdate = () => {
       console.log("TaskEventHandler - Force update event received");
       onForceUpdate();
     };
     
-    // Subscribe to events
-    const unsubCreate = eventBus.on('task:create', handleTaskCreate);
-    const unsubUpdate = eventBus.on('task:update', handleTaskUpdate);
-    const unsubDelete = eventBus.on('task:delete', handleTaskDelete);
     window.addEventListener('force-task-update', handleForceUpdate);
     
     return () => {
-      // Unsubscribe from events
-      unsubCreate();
-      unsubUpdate();
-      unsubDelete();
       window.removeEventListener('force-task-update', handleForceUpdate);
     };
-  }, [onTaskCreate, onTaskUpdate, onTaskDelete, onForceUpdate]);
+  }, [onForceUpdate]);
   
   // Process task queue with staggered timing to prevent race conditions
   useEffect(() => {
@@ -74,7 +55,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
         
         // Emit creation event
         console.log(`TaskEventHandler - Creating task ${i + 1}/${taskQueueRef.current.length}:`, task);
-        eventBus.emit('task:create', task);
+        eventManager.emit('task:create', task);
         
         // Add a small delay between task creations
         await new Promise(resolve => setTimeout(resolve, 150));

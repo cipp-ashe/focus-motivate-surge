@@ -1,10 +1,11 @@
 
 import { useCallback, useRef, useEffect } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
 import { useHabitTaskCreator } from './useHabitTaskCreator';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { toast } from 'sonner';
+import { useEvent } from '@/hooks/useEvent';
 
 /**
  * Hook for processing habit tasks with improved localStorage synchronization,
@@ -16,26 +17,28 @@ export const useHabitTaskProcessor = () => {
   const processingTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
   const pendingTasksRef = useRef<Task[]>([]);
   
-  // Set up event listeners
+  // Set up event listeners with the new event system
   useEffect(() => {
     console.log("useHabitTaskProcessor: Setting up event listeners");
     
-    // Listen for habit schedule events
-    const unsubSchedule = eventBus.on('habit:schedule', (event) => {
-      handleHabitSchedule(event);
-    });
-    
-    // Listen for habit check pending events
-    const unsubCheckPending = eventBus.on('habits:check-pending', () => {
-      processPendingTasks();
-    });
-    
     // Clean up
     return () => {
-      unsubSchedule();
-      unsubCheckPending();
+      // Clear any processing timeouts
+      Object.values(processingTimeoutsRef.current).forEach(timeout => {
+        clearTimeout(timeout);
+      });
     };
   }, []);
+  
+  // Handle habit schedule events
+  useEvent('habit:schedule', (event) => {
+    handleHabitSchedule(event);
+  });
+  
+  // Handle check pending events
+  useEvent('habits:check-pending', () => {
+    processPendingTasks();
+  });
   
   // Process a single habit task event with debouncing and improved error handling
   const processHabitTask = useCallback((event: {
@@ -78,7 +81,7 @@ export const useHabitTaskProcessor = () => {
         console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
         
         // Add task to UI if it exists in storage but not in memory
-        eventBus.emit('task:create', existingTask);
+        eventManager.emit('task:create', existingTask);
         
         // Force task update
         setTimeout(() => {
@@ -187,7 +190,7 @@ export const useHabitTaskProcessor = () => {
         // Emit task:create events for each habit task to ensure they're in memory
         habitTasks.forEach(task => {
           console.log(`Ensuring habit task ${task.id} is loaded in memory`);
-          eventBus.emit('task:create', task);
+          eventManager.emit('task:create', task);
         });
         
         // Force multiple task updates with staggered timing for reliability
