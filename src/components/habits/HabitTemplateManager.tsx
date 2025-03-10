@@ -78,8 +78,10 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     if (template) {
       console.log("Adding template:", template);
       
-      // Emit template-add event to context
+      // Emit template-add event to context - WITH suppressToast flag to prevent duplicate toasts
       eventManager.emit('habit:template-add', templateId);
+      
+      // Single toast notification from this component only
       toast.success(`Added template: ${template.name}`);
       
       // Close sheet with slight delay for visual feedback
@@ -89,7 +91,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
         // Allow new additions after a shorter delay
         cooldownTimerRef.current = setTimeout(() => {
           isAddingRef.current = false;
-        }, 300); // Reduced from 1000ms to 300ms for better UX
+        }, 300);
       }, 300);
     }
   };

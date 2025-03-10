@@ -9,8 +9,10 @@ import {
   ToastAction as RadixToastAction 
 } from "@radix-ui/react-toast";
 
-import { useToast } from "@/hooks/use-toast";
+// Re-export the Sonner toast directly
+export { toast } from "sonner";
 
+// Re-export Radix UI components for backward compatibility
 export const ToastProvider = RadixToastProvider;
 export const ToastViewport = RadixToastViewport;
 export const Toast = RadixToast;
@@ -18,8 +20,9 @@ export const ToastTitle = RadixToastTitle;
 export const ToastDescription = RadixToastDescription;
 export const ToastClose = RadixToastClose;
 export const ToastAction = RadixToastAction;
-export { useToast };
-export { toast } from "@/hooks/use-toast";
+
+// Re-export the useToast hook
+export { useToast } from "@/hooks/use-toast";
 
 export interface ToastProps {
   title?: string;

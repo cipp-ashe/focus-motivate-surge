@@ -22,7 +22,7 @@ export const useTemplateEventHandlers = (
       );
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
-      // Only show toast if not already part of another operation
+      // Only show toast if not suppressed
       if (!template.suppressToast) {
         toast.success('Template updated successfully');
       }
@@ -84,12 +84,20 @@ export const useTemplateEventHandlers = (
   };
 
   // Handle custom template deletion
-  const handleCustomTemplateDelete = ({ templateId }: { templateId: string }) => {
+  const handleCustomTemplateDelete = ({ templateId, suppressToast }: { 
+    templateId: string,
+    suppressToast?: boolean 
+  }) => {
     console.log("Event received: habit:custom-template-delete", templateId);
     dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: templateId });
     // Fixed: Use templateId instead of id
     const updatedTemplates = templates.filter(t => t.templateId !== templateId);
     localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
+    
+    // Only show toast if not suppressed
+    if (!suppressToast) {
+      toast.success('Custom template deleted');
+    }
   };
 
   return {

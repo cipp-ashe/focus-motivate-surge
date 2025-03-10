@@ -37,6 +37,7 @@ export const useTemplateManagement = () => {
           description: template.description,
         };
         
+        // Single toast here - only one source of truth for user feedback
         toast.success('Template added successfully');
         
         // Emit event for template addition with suppressToast to avoid duplicates
@@ -52,6 +53,7 @@ export const useTemplateManagement = () => {
         return prev;
       }
       
+      // Single toast here
       toast.success('Template added successfully');
       
       // Emit event for template addition with suppressToast
@@ -82,6 +84,9 @@ export const useTemplateManagement = () => {
       
       return updated;
     });
+    
+    // Single toast here
+    toast.success('Template updated successfully');
   }, []);
 
   const removeTemplate = useCallback((templateId: string) => {
@@ -92,6 +97,7 @@ export const useTemplateManagement = () => {
     // Emit event for template deletion with suppressToast
     eventBus.emit('habit:template-delete', { templateId, suppressToast: true });
     
+    // Single toast here
     toast.success('Template removed');
   }, []);
 
@@ -118,6 +124,9 @@ export const useTemplateManagement = () => {
       
       return updated;
     });
+    
+    // Single toast here
+    toast.success('Template days updated successfully');
   }, []);
 
   return {

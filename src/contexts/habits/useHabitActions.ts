@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
 import { HabitContextActions, HabitState } from './types';
@@ -23,8 +24,8 @@ export const createHabitActions = (
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
       // Emit event for other components to react
+      // IMPORTANT: Set suppressToast to true to prevent duplicate toasts
       eventBus.emit('habit:template-update', { ...newTemplate, suppressToast: true });
-      toast.success('Template added successfully');
       
       // Trigger a global UI update
       setTimeout(() => {
@@ -51,7 +52,6 @@ export const createHabitActions = (
     
     removeTemplate: (templateId) => {
       // We no longer show the toast here as HabitTracker will handle it
-      // as the originating action
       console.log('HabitActions: Received removeTemplate call', templateId);
       
       // Update the internal state first
@@ -100,8 +100,8 @@ export const createHabitActions = (
       const updatedTemplates = [...state.customTemplates, newTemplate];
       localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
       
-      // Emit event for custom template creation
-      eventBus.emit('habit:custom-template-create', newTemplate);
+      // Emit event for custom template creation with suppressToast
+      eventBus.emit('habit:custom-template-create', { ...newTemplate, suppressToast: true });
       toast.success('Custom template added successfully');
       
       // Dispatch event to notify other components
@@ -115,7 +115,7 @@ export const createHabitActions = (
       localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
       
       // Emit event for custom template deletion
-      eventBus.emit('habit:custom-template-delete', { templateId });
+      eventBus.emit('habit:custom-template-delete', { templateId, suppressToast: true });
       toast.success('Custom template removed successfully');
       
       // Dispatch event to notify other components

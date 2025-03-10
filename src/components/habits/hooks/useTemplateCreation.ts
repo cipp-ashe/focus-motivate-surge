@@ -69,8 +69,8 @@ export const useTemplateCreation = (
       const updatedTemplates = [...existingTemplates, customTemplate];
       localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
 
-      // Emit event for custom template creation
-      eventBus.emit('habit:custom-template-create', customTemplate);
+      // Emit event for custom template creation with suppressToast
+      eventBus.emit('habit:custom-template-create', { ...customTemplate, suppressToast: true });
 
       // Add the template to active templates
       const activeTemplate: ActiveTemplate = { 
@@ -88,8 +88,8 @@ export const useTemplateCreation = (
       toast.success('Template created and added successfully');
       handleCloseTemplate();
       
-      // Ensure templates are updated in UI
-      eventBus.emit('habit:template-update', activeTemplate);
+      // Ensure templates are updated in UI with suppressToast
+      eventBus.emit('habit:template-update', { ...activeTemplate, suppressToast: true });
       window.dispatchEvent(new Event('templatesUpdated'));
       window.dispatchEvent(new Event('force-habits-update'));
     } else {
