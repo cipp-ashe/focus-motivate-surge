@@ -90,9 +90,32 @@ export const useTaskEvents = () => {
     });
   }, []);
   
+  // Function to update tags (fix for the error)
+  const forceTagsUpdate = useCallback(() => {
+    console.log('TaskEvents: Force updating tags list');
+    
+    // Dispatch custom event to signal tags update
+    window.dispatchEvent(new Event('force-tags-update'));
+    
+    // Also emit event via event bus
+    eventBus.emit('tags:force-update', {
+      timestamp: new Date().toISOString()
+    });
+  }, []);
+  
+  // Function to check pending habits (fix for the error)
+  const checkPendingHabits = useCallback(() => {
+    console.log('TaskEvents: Checking for pending habits');
+    
+    // Emit event to check pending habits
+    eventBus.emit('habits:check-pending', {});
+  }, []);
+  
   return {
     deleteTask,
     toggleTaskCompletion,
     forceTaskUpdate,
+    forceTagsUpdate,
+    checkPendingHabits
   };
 };
