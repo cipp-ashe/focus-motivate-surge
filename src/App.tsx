@@ -1,10 +1,11 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/theme-provider"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
 
-import AppLayout from '@/layouts/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 import IndexPage from '@/pages/Index';
 import TaskPage from '@/pages/Tasks';
 import TimerPage from '@/pages/Timer';
@@ -21,6 +22,10 @@ import { NoteProvider } from './contexts/notes/NoteContext';
 
 function App() {
   const queryClient = new QueryClient();
+
+  useEffect(() => {
+    console.log("App component mounted");
+  }, []);
 
   return (
     <div className="app bg-background text-foreground">
@@ -54,6 +59,7 @@ function App() {
           </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>
+      <Toaster position="bottom-right" />
     </div>
   );
 }
