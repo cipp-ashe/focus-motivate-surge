@@ -1,6 +1,6 @@
 
 import { useEffect, useCallback } from 'react';
-import { eventManager, EventType, EventPayload, EventHandler } from '@/lib/events/EventManager';
+import { eventManager, EventType, EventHandler } from '@/lib/events/EventManager';
 
 // Hook for subscribing to events
 export function useEvent<T extends EventType>(
@@ -19,7 +19,7 @@ export function useEvent<T extends EventType>(
 
 // Hook for emitting events
 export function useEventEmitter() {
-  const emit = useCallback(<T extends EventType>(eventType: T, payload: EventPayload[T]) => {
+  const emit = useCallback(<T extends EventType>(eventType: T, payload: any) => {
     eventManager.emit(eventType, payload);
   }, []);
   
@@ -43,7 +43,7 @@ export function useEvents<T extends EventType>(
     };
   }, deps);
   
-  const emit = useCallback(<E extends EventType>(eventType: E, payload: EventPayload[E]) => {
+  const emit = useCallback(<E extends EventType>(eventType: E, payload: any) => {
     eventManager.emit(eventType, payload);
   }, []);
   

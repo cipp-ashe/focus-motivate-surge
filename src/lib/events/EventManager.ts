@@ -1,18 +1,31 @@
 
-import { TimerEventType, TimerEventCallback, TimerEventPayloads } from '@/types/events';
+import { TimerEventType, TimerEventPayloads } from '@/types/events';
+import { TagEventType } from './types';
 
-type EventType = TimerEventType;
-type EventPayload = TimerEventPayloads;
-export type EventHandler<T extends EventType> = (payload: EventPayload[T]) => void;
+// Combine all event types
+export type EventType = TimerEventType | TagEventType;
+
+export interface EventPayloads extends TimerEventPayloads {
+  // Tag events
+  'tag:select': string;
+  'tag:remove': any;
+  'tags:force-update': {
+    timestamp: string;
+  };
+  'tag:create': any;
+  'tag:delete': any;
+}
+
+export type EventHandler<T extends EventType> = (payload: T extends keyof EventPayloads ? EventPayloads[T] : any) => void;
 
 class EventManager {
-  private listeners: { [K in EventType]?: ((payload: EventPayload[K]) => void)[] } = {};
+  private listeners: { [key: string]: EventHandler<any>[] } = {};
 
   on<T extends EventType>(event: T, callback: EventHandler<T>): () => void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
-    this.listeners[event]?.push(callback);
+    this.listeners[event]?.push(callback as EventHandler<any>);
     return () => {
       this.off(event, callback);
     };
@@ -23,7 +36,7 @@ class EventManager {
     this.listeners[event] = this.listeners[event]?.filter(cb => cb !== callback);
   }
 
-  emit<T extends EventType>(event: T, payload: EventPayload[T]): void {
+  emit<T extends EventType>(event: T, payload: T extends keyof EventPayloads ? EventPayloads[T] : any): void {
     this.listeners[event]?.forEach(callback => {
       callback(payload);
     });
@@ -45,15 +58,9 @@ class EventManager {
    * WARNING: This is for internal testing only. Do not use this in production.
    * @param event 
    */
-  __test_getListeners<T extends EventType>(event: T): ((payload: EventPayload[T]) => void)[] | undefined {
-    return this.listeners[event];
+  __test_getListeners<T extends EventType>(event: T): EventHandler<T>[] | undefined {
+    return this.listeners[event] as EventHandler<T>[] | undefined;
   }
 }
 
 export const eventManager = new EventManager();
-
-export type {
-  EventType,
-  EventPayload,
-  EventHandler
-};
