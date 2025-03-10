@@ -125,10 +125,12 @@ export const TaskContent = ({
         </div>
       </div>
 
-      <TaskTags 
-        task={task}
-        preventPropagation={preventPropagation}
-      />
+      {task.tags && (
+        <TaskTags 
+          tags={task.tags}
+          preventPropagation={preventPropagation}
+        />
+      )}
     </div>
   );
 };

@@ -14,6 +14,13 @@ export interface Task {
     date?: string;
   };
   metrics?: TaskMetrics;
+  tags?: Tag[];
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color?: string;
 }
 
 export interface TaskMetrics {

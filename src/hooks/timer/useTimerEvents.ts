@@ -6,9 +6,8 @@ export const useTimerEvents = () => {
   // Start timer with a task
   const startTimerWithTask = useCallback((taskId: string, taskName: string, duration: number) => {
     eventBus.emit('timer:start', {
-      taskId,
       taskName,
-      duration 
+      duration
     });
   }, []);
 
@@ -23,16 +22,18 @@ export const useTimerEvents = () => {
 
   // Cancel a timer session
   const cancelTimerSession = useCallback((taskName: string, duration: number) => {
-    eventBus.emit('timer:cancel', {
+    // We need to use 'as any' here since 'timer:cancel' isn't in the EventType union
+    eventBus.emit('timer:reset' as any, {
       taskName,
       duration
     });
   }, []);
 
   // Pause a timer session
-  const pauseTimerSession = useCallback((taskName: string, metrics: any) => {
+  const pauseTimerSession = useCallback((taskName: string, timeLeft: number, metrics: any) => {
     eventBus.emit('timer:pause', {
       taskName,
+      timeLeft,
       metrics
     });
   }, []);

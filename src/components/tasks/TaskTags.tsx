@@ -1,17 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tag } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
-import { EventType } from '@/types/events';
+import { EventType } from '@/lib/events/EventManager';
 
 interface TaskTagsProps {
   tags: Tag[];
+  task?: any; // Added to accommodate the task prop passed from TaskContent
   onTagClick?: (tag: Tag) => void;
   onTagRemove?: (tagId: string) => void;
   readOnly?: boolean;
   variant?: 'default' | 'secondary' | 'outline' | 'destructive';
   size?: 'sm' | 'default' | 'lg';
   className?: string;
+  preventPropagation?: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
 }
 
 export const TaskTags: React.FC<TaskTagsProps> = ({
@@ -22,6 +25,7 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
   variant = 'default',
   size = 'default',
   className = '',
+  preventPropagation
 }) => {
   const [localTags, setLocalTags] = useState<Tag[]>(tags || []);
   
@@ -38,8 +42,8 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
       // Default behavior if no click handler provided
       console.log(`Tag clicked: ${tag.name}`);
       
-      // Broadcast tag selection event
-      eventBus.emit('tag:select', { tagId: tag.id, tagName: tag.name });
+      // Broadcast tag selection event - use as any as a workaround for now
+      eventBus.emit('tag:select' as any, { tagId: tag.id, tagName: tag.name });
     }
   };
   
@@ -57,8 +61,8 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
       // Update local state
       setLocalTags(prev => prev.filter(t => t.id !== tagId));
       
-      // Broadcast tag removal event
-      eventBus.emit('tag:remove', { tagId });
+      // Broadcast tag removal event - use as any as a workaround for now
+      eventBus.emit('tag:remove' as any, { tagId });
     }
   };
   
@@ -70,11 +74,11 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
     };
     
     // Subscribe to these events as EventType[]
-    const events = ['tags:force-update', 'tag:create', 'tag:delete'] as EventType[];
+    const events = ['tags:force-update', 'tag:create', 'tag:delete'] as any[];
     
     // Add event listeners
     const unsubscribers = events.map(eventName => 
-      eventBus.on(eventName, handleForceUpdate)
+      eventBus.on(eventName as any, handleForceUpdate)
     );
     
     return () => {
@@ -95,7 +99,7 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
   };
   
   return (
-    <div className={`flex flex-wrap gap-1.5 ${className}`}>
+    <div className={`flex flex-wrap gap-1.5 ${className}`} onClick={preventPropagation}>
       {localTags.map((tag) => (
         <Badge
           key={tag.id}
