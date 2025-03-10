@@ -24,7 +24,7 @@ export const createHabitActions = (
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
       // Emit event for other components to react
-      eventBus.emit('habit:template-update', newTemplate);
+      eventBus.emit('habit:template-update', { ...newTemplate, suppressToast: true });
       toast.success('Template added successfully');
       
       // Trigger a global UI update
@@ -45,7 +45,7 @@ export const createHabitActions = (
       // Emit event for template update
       const updatedTemplate = updatedTemplates.find(t => t.templateId === templateId);
       if (updatedTemplate) {
-        eventBus.emit('habit:template-update', updatedTemplate);
+        eventBus.emit('habit:template-update', { ...updatedTemplate, suppressToast: true });
       }
       toast.success('Template updated successfully');
     },
@@ -55,8 +55,8 @@ export const createHabitActions = (
       const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
-      // Emit event for template deletion
-      eventBus.emit('habit:template-delete', { templateId });
+      // Emit event for template deletion with toast suppression
+      eventBus.emit('habit:template-delete', { templateId, suppressToast: true });
       toast.success('Template removed successfully');
     },
     
@@ -80,7 +80,7 @@ export const createHabitActions = (
       // Emit event for template days update
       const updatedTemplate = updatedTemplates.find(t => t.templateId === templateId);
       if (updatedTemplate) {
-        eventBus.emit('habit:template-update', updatedTemplate);
+        eventBus.emit('habit:template-update', { ...updatedTemplate, suppressToast: true });
       }
       toast.success('Template days updated successfully');
     },

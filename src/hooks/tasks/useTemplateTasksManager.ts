@@ -8,8 +8,8 @@ export const useTemplateTasksManager = (tasks: Task[]) => {
   const { deleteTask, forceTaskUpdate } = useTaskEvents();
 
   // Handle template deletion - clean up associated tasks
-  const handleTemplateDelete = useCallback((event: { templateId: string }) => {
-    const { templateId } = event;
+  const handleTemplateDelete = useCallback((event: { templateId: string, suppressToast?: boolean }) => {
+    const { templateId, suppressToast } = event;
     console.log(`TemplateTasksManager: Received template deletion event for ${templateId}`);
     
     // Find all tasks related to this template
@@ -27,7 +27,8 @@ export const useTemplateTasksManager = (tasks: Task[]) => {
     // Delete each task associated with the deleted template
     tasksToRemove.forEach(task => {
       console.log(`Removing task ${task.id} associated with deleted template ${templateId}`);
-      deleteTask(task.id, 'template-removed');
+      // Pass suppressToast parameter through to avoid duplicate toasts
+      deleteTask(task.id, 'template-removed', suppressToast);
     });
     
     // Force a UI update after deleting tasks
