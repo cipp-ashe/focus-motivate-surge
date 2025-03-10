@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { VoiceNote, VoiceNoteContextType } from '@/types/voiceNotes';
 import { toast } from 'sonner';
 import { useNoteActions } from '@/contexts/notes/NoteContext';
 import { EntityType } from '@/types/core';
+import { RelationType } from '@/types/state';
 import { relationshipManager } from '@/lib/relationshipManager';
 
 const VoiceNotesContext = createContext<VoiceNoteContextType | undefined>(undefined);
@@ -89,7 +89,7 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           EntityType.VoiceNote,
           noteActions.lastCreatedNoteId,
           EntityType.Note,
-          'source'
+          'source' as RelationType
         );
       }
       

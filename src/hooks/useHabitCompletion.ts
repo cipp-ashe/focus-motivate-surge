@@ -1,10 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
 import { HabitDetail } from '@/components/habits/types';
 import { relationshipManager } from '@/lib/relationshipManager';
 import { eventBus } from '@/lib/eventBus';
 import { toast } from 'sonner';
+import { EntityType } from '@/types/core';
+import { RelationType } from '@/types/state';
 
 export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]) => {
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);
@@ -21,7 +22,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
       const templateId = template.templateId;
       todaysHabits.forEach(habit => {
         // Check if this habit has a related note (journal entry)
-        const relatedNotes = relationshipManager.getRelatedEntities(habit.id, 'habit', 'note');
+        const relatedNotes = relationshipManager.getRelatedEntities(habit.id, EntityType.Habit, EntityType.Note);
         const hasJournalEntry = relatedNotes.length > 0;
         
         // If there's a journal entry OR the progress shows completed, mark it as completed
@@ -55,7 +56,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
     
     const handleTaskComplete = ({ taskId }: { taskId: string }) => {
       // Get the task relationships
-      const relationships = relationshipManager.getRelationships(taskId, 'task');
+      const relationships = relationshipManager.getRelationships(taskId, EntityType.Task);
       
       // Find habit relationships
       const habitRelationship = relationships.find(r => 
@@ -105,7 +106,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
     }
 
     // Check if there's an existing journal entry
-    const relatedNotes = relationshipManager.getRelatedEntities(habit.id, 'habit', 'note');
+    const relatedNotes = relationshipManager.getRelatedEntities(habit.id, EntityType.Habit, EntityType.Note);
     const hasJournalEntry = relatedNotes.length > 0;
 
     // Track locally for UI updates
@@ -177,10 +178,10 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
     // Create relationship
     eventBus.emit('relationship:create', {
       sourceId: habit.id,
-      sourceType: 'habit',
+      sourceType: EntityType.Habit,
       targetId: taskId,
-      targetType: 'task',
-      relationType: 'habit-task'
+      targetType: EntityType.Task,
+      relationType: 'habit-task' as RelationType
     });
     
     // Select the task and start the timer

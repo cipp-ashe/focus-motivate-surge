@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { HabitProgress } from '@/components/habits/types';
 import { relationshipManager } from '@/lib/relationshipManager';
+import { EntityType } from '@/types/core';
 
 const PROGRESS_STORAGE_KEY = 'habit-progress';
 
@@ -32,7 +33,7 @@ export const useHabitProgress = () => {
     
     // CRITICAL: First check if there are relationships with notes for this habit
     // This ensures note relationships take precedence over stored progress
-    const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+    const relatedNotes = relationshipManager.getRelatedEntities(habitId, EntityType.Habit, EntityType.Note);
     console.log(`Checking habit ${habitId} related notes:`, relatedNotes);
     const hasJournalEntry = relatedNotes.length > 0;
     
@@ -127,7 +128,7 @@ export const useHabitProgress = () => {
       Object.keys(progress).forEach(templateId => {
         Object.keys(progress[templateId] || {}).forEach(habitId => {
           const today = new Date().toISOString().split('T')[0];
-          const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+          const relatedNotes = relationshipManager.getRelatedEntities(habitId, EntityType.Habit, EntityType.Note);
           const hasJournalEntry = relatedNotes.length > 0;
           
           // If there's a journal entry but progress shows incomplete, update it
@@ -200,7 +201,7 @@ export const useHabitProgress = () => {
       const dateStr = date.toISOString().split('T')[0];
 
       // For each day, check if there are related notes directly
-      const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+      const relatedNotes = relationshipManager.getRelatedEntities(habitId, EntityType.Habit, EntityType.Note);
       const hasJournalEntry = relatedNotes.length > 0;
       
       // Get the stored progress data

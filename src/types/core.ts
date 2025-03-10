@@ -5,7 +5,8 @@ export enum EntityType {
   Note = 'note',
   Template = 'template',
   Tag = 'tag',
-  VoiceNote = 'voicenote'
+  VoiceNote = 'voicenote',
+  Quote = 'quote'
 }
 
 export interface Relationship {

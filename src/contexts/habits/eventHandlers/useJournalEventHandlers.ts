@@ -1,7 +1,7 @@
-
 import { eventBus } from '@/lib/eventBus';
 import { relationshipManager } from '@/lib/relationshipManager';
 import { ActiveTemplate } from '@/components/habits/types';
+import { EntityType } from '@/types/core';
 
 export const useJournalEventHandlers = (
   templates: ActiveTemplate[], 
@@ -65,7 +65,7 @@ export const useJournalEventHandlers = (
     console.log("Event received: habit:journal-deleted", { habitId });
     
     // Check if there are any remaining notes for this habit
-    const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+    const relatedNotes = relationshipManager.getRelatedEntities(habitId, EntityType.Habit, EntityType.Note);
     
     // If there are no more notes, mark the habit as uncompleted
     if (relatedNotes.length === 0) {

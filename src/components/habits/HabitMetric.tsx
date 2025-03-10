@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -9,6 +10,7 @@ import { eventBus } from '@/lib/eventBus';
 import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
 import JournalModal from './journal/JournalModal';
 import { relationshipManager } from '@/lib/relationshipManager';
+import { EntityType } from '@/types/core';
 
 interface ProgressResult {
   value: boolean | number;
@@ -37,7 +39,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   useEffect(() => {
     const checkForExistingEntry = () => {
       // Find any related notes for this habit
-      const relatedEntities = relationshipManager.getRelatedEntities(habit.id, 'habit', 'note');
+      const relatedEntities = relationshipManager.getRelatedEntities(habit.id, EntityType.Habit, EntityType.Note);
       
       if (relatedEntities.length > 0) {
         // We have a relationship, but verify the note still exists

@@ -5,6 +5,7 @@ import type { Note, Tag } from '@/types/notes';
 import { eventBus } from '@/lib/eventBus';
 import { relationshipManager } from '@/lib/relationshipManager';
 import { EntityType } from '@/types/core';
+import { RelationType } from '@/types/state';
 
 // Add a title field to the Note interface
 interface NoteState {
@@ -168,7 +169,7 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
             EntityType.VoiceNote, 
             newNote.id, 
             EntityType.Note, 
-            'voice-note-transcription'
+            'voice-note-transcription' as RelationType
           );
           console.log(`Created relationship between voice note ${voiceNoteData.voiceNoteId} and note ${newNote.id}`);
         }
@@ -248,7 +249,7 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
       dispatch({ type: 'DELETE_NOTE', payload: noteId });
       
       // Before deleting, check if this note is related to any habits
-      const relatedHabits = relationshipManager.getRelatedEntities(noteId, 'note', 'habit');
+      const relatedHabits = relationshipManager.getRelatedEntities(noteId, EntityType.Note, EntityType.Habit);
       
       // Delete from localStorage too
       const notes = JSON.parse(localStorage.getItem('notes') || '[]');

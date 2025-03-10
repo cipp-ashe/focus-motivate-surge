@@ -10,6 +10,7 @@ import { eventBus } from "@/lib/eventBus";
 import { Minimize2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { relationshipManager } from "@/lib/relationshipManager";
+import { EntityType } from '@/types/core';
 
 // Add quotes specific to different journal types
 const journalQuotes: Record<string, Quote[]> = {
@@ -172,7 +173,7 @@ const JournalModal: React.FC<JournalModalProps> = ({
   useEffect(() => {
     if (open) {
       // Find any related notes for this habit
-      const relatedEntities = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+      const relatedEntities = relationshipManager.getRelatedEntities(habitId, EntityType.Habit, EntityType.Note);
       
       if (relatedEntities.length > 0) {
         // We have a related note, find it in our notes collection

@@ -1,10 +1,10 @@
-
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { ActiveTemplate, HabitTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { relationshipManager } from '@/lib/relationshipManager';
+import { EntityType } from '@/types/core';
 
 // Define the HabitState interface directly here to avoid the ./types import error
 interface HabitState {
@@ -253,7 +253,7 @@ export const useHabitEvents = (
         console.log("Event received: habit:journal-deleted", { habitId });
         
         // Check if there are any remaining notes for this habit
-        const relatedNotes = relationshipManager.getRelatedEntities(habitId, 'habit', 'note');
+        const relatedNotes = relationshipManager.getRelatedEntities(habitId, EntityType.Habit, EntityType.Note);
         
         // If there are no more notes, mark the habit as uncompleted
         if (relatedNotes.length === 0) {
