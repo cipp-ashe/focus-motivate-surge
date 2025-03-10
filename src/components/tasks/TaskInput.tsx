@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, Tag } from '@/types/tasks';
@@ -21,12 +22,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Upload, Send } from "lucide-react"
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -82,8 +82,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   
   // Tags
   const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
-  const [availableTags, setAvailableTags] = useState(['Work', 'Personal', 'Health', 'Finance']);
   
   // Task Relationships
   const [habitId, setHabitId] = useState<string | null>(null);
@@ -182,18 +180,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
     setIsAddingMultiple(false);
     setTags([]);
     setHabitId(null);
-  };
-  
-  // Tag Handlers
-  const handleTagAdd = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag('');
-    }
-  };
-  
-  const handleTagRemove = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
   };
   
   // Habit Template Handlers
@@ -301,6 +287,11 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
           onChange={handleTaskNameChange}
           ref={inputRef}
           className="flex-grow"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleAddTask();
+            }
+          }}
         />
         <Select onValueChange={handleTaskTypeChange} defaultValue={taskType}>
           <SelectTrigger className="w-[180px]">
@@ -316,13 +307,23 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
             <SelectItem value="voicenote">Voice Note</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={handleAddTask}>Add Task</Button>
+        <Button onClick={handleAddTask}>
+          <Send size={16} />
+          <span className="ml-1 sm:inline hidden">Add</span>
+        </Button>
       </div>
       
-      {/* Multiple Tasks Input Toggle */}
-      <Button variant="outline" size="sm" onClick={() => setIsAddingMultiple(!isAddingMultiple)}>
-        {isAddingMultiple ? 'Hide Multiple Tasks Input' : 'Add Multiple Tasks'}
-      </Button>
+      {/* Multiple Tasks Input Toggle - replaced with icon button */}
+      <div className="flex justify-end">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={() => setIsAddingMultiple(!isAddingMultiple)}
+          title="Bulk Import Tasks"
+        >
+          <Upload size={16} />
+        </Button>
+      </div>
       
       {/* Multiple Tasks Input */}
       {isAddingMultiple && (
@@ -333,33 +334,12 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
             onChange={handleMultipleTasksInputChange}
             className="flex-grow"
           />
-          <Button onClick={handleAddMultipleTasks}>Add Multiple Tasks</Button>
+          <Button onClick={handleAddMultipleTasks}>
+            <Send size={16} />
+            <span className="ml-1">Add Multiple Tasks</span>
+          </Button>
         </div>
       )}
-      
-      {/* Tags Input */}
-      <div className="flex items-center gap-2">
-        <Input
-          type="text"
-          placeholder="Enter tag name"
-          value={newTag}
-          onChange={(e) => setNewTag(e.target.value)}
-          className="flex-grow"
-        />
-        <Button onClick={handleTagAdd}>Add Tag</Button>
-      </div>
-      
-      {/* Tags Display */}
-      <div className="flex items-center gap-2">
-        {tags.map(tag => (
-          <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-            {tag}
-            <button onClick={() => handleTagRemove(tag)} className="hover:text-destructive">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="M6 6 18 18"/></svg>
-            </button>
-          </Badge>
-        ))}
-      </div>
       
       {/* Habit Template Dialog - kept but without the visible button */}
       <Dialog open={open} onOpenChange={setOpen}>
