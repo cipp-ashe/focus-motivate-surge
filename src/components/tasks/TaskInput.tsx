@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, Tag } from '@/types/tasks';
@@ -263,7 +262,12 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   
   // Task Relationship Handlers
   const handleHabitSelect = (habitId: string | null) => {
-    setHabitId(habitId);
+    // If the value is "none", set habitId to null
+    if (habitId === "none") {
+      setHabitId(null);
+    } else {
+      setHabitId(habitId);
+    }
   };
   
   // UI Rendering for simplified view (Timer page)
@@ -443,12 +447,12 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
       
       {/* Task Relationships */}
       <div className="flex items-center gap-2">
-        <Select onValueChange={(value) => handleHabitSelect(value ? value : null)} defaultValue={habitId || ''}>
+        <Select onValueChange={(value) => handleHabitSelect(value ? value : null)} defaultValue={habitId || 'none'}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select habit" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none">None</SelectItem>
             {tasks.filter(task => task.taskType === 'habit').map(habit => (
               <SelectItem key={habit.id} value={habit.id}>{habit.name}</SelectItem>
             ))}
