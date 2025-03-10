@@ -44,7 +44,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="w-full shadow-sm">
       <CardHeader className="pb-2 pt-4">
         <div className="flex-none">
           <TaskInput onTaskAdd={handleTaskAdd} />

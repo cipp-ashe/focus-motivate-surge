@@ -11,7 +11,7 @@ export const AppLayout = () => {
   return (
     <div className="min-h-screen bg-background dark:bg-gray-900">
       {showHeader && <Header />}
-      <main className="h-full">
+      <main className="container mx-auto max-w-5xl">
         <Outlet />
       </main>
     </div>

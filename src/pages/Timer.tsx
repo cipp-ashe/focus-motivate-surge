@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import TaskManager from '@/components/tasks/TaskManager';
@@ -64,6 +65,7 @@ const TimerPage = () => {
     <HabitsPanelProvider>
       <TimerErrorBoundary>
         <TaskLayout
+          asideContent={<TaskManager />}
           mainContent={
             <TimerSection
               selectedTask={selectedTask}
@@ -82,7 +84,6 @@ const TimerPage = () => {
               setFavorites={setFavorites}
             />
           }
-          asideContent={<TaskManager />}
         />
       </TimerErrorBoundary>
     </HabitsPanelProvider>
