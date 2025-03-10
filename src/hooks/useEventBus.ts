@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { eventManager, EventType, EventPayload } from '@/lib/events/EventManager';
+import { eventManager, EventType, EventPayload, EventHandler } from '@/lib/events/EventManager';
 
 /**
  * DEPRECATED: Use the useEvent hook from @/hooks/useEvent instead
@@ -8,7 +8,7 @@ import { eventManager, EventType, EventPayload } from '@/lib/events/EventManager
  */
 export function useEventBus<T extends EventType>(
   eventName: T,
-  callback: (payload: EventPayload[T]) => void,
+  callback: EventHandler<T>,
   deps: React.DependencyList = []
 ) {
   useEffect(() => {

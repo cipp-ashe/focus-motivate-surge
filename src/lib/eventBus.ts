@@ -8,4 +8,10 @@ console.warn(
   "Please update your imports to use @/lib/events/EventManager directly."
 );
 
-export const eventBus = eventManager;
+// Create a proxy to forward all calls to eventManager
+export const eventBus = new Proxy(eventManager, {
+  get(target, prop) {
+    // Forward all property accesses to the target
+    return target[prop];
+  }
+});

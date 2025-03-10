@@ -1,25 +1,44 @@
+
 import { TimerEventType, TimerEventCallback, TimerEventPayloads } from '@/types/events';
 
 type EventType = TimerEventType;
 type EventPayload = TimerEventPayloads;
+export type EventHandler<T extends EventType> = (payload: EventPayload[T]) => void;
 
 class EventManager {
   private listeners: { [K in EventType]?: ((payload: EventPayload[K]) => void)[] } = {};
 
-  on<T extends EventType>(event: T, callback: TimerEventCallback<T>): () => void {
+  on<T extends EventType>(event: T, callback: EventHandler<T>): () => void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
     this.listeners[event]?.push(callback);
     return () => {
-      this.listeners[event] = this.listeners[event]?.filter(cb => cb !== callback);
+      this.off(event, callback);
     };
+  }
+
+  off<T extends EventType>(event: T, callback: EventHandler<T>): void {
+    if (!this.listeners[event]) return;
+    this.listeners[event] = this.listeners[event]?.filter(cb => cb !== callback);
   }
 
   emit<T extends EventType>(event: T, payload: EventPayload[T]): void {
     this.listeners[event]?.forEach(callback => {
       callback(payload);
     });
+  }
+
+  /**
+   * Clear all event listeners
+   * @param event Optional event type to clear only specific event listeners
+   */
+  clear(event?: EventType): void {
+    if (event) {
+      delete this.listeners[event];
+    } else {
+      this.listeners = {};
+    }
   }
 
   /**
@@ -35,5 +54,6 @@ export const eventManager = new EventManager();
 
 export type {
   EventType,
-  EventPayload
+  EventPayload,
+  EventHandler
 };

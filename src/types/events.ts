@@ -1,5 +1,6 @@
 
 export interface TimerEventPayloads {
+  // Habit events
   'habit:schedule': {
     habitId: string;
     templateId: string;
@@ -8,15 +9,26 @@ export interface TimerEventPayloads {
     date: string;
   };
   'habit:template-update': any;
-  'habit:template-delete': { templateId: string };
+  'habit:template-delete': { 
+    templateId: string;
+    suppressToast?: boolean;
+    isOriginatingAction?: boolean;
+  };
   'habit:template-add': string;
   'habit:custom-template-create': any;
   'habit:custom-template-delete': { templateId: string };
   'habit:template-order-update': any[];
   'habit:journal-deleted': {
     habitId: string;
-    templateId?: string; // Optional templateId to make it more robust
+    templateId?: string;
   };
+  'habit:journal-complete': any;
+  'habit:progress-update': any;
+  'habit:task-deleted': any;
+  'habits:check-pending': any;
+  'habits:processed': any;
+  
+  // Task events
   'task:create': any;
   'task:update': any;
   'task:delete': any;
@@ -25,6 +37,11 @@ export interface TimerEventPayloads {
     taskId: string;
     metrics?: any;
   };
+  'tasks:force-update': {
+    timestamp: string;
+  };
+  
+  // Timer events
   'timer:init': { taskName: string; duration: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
@@ -34,17 +51,23 @@ export interface TimerEventPayloads {
   'timer:complete': any;
   'timer:metrics-update': any;
   'timer:state-update': any;
+  'timer:tick': { timeLeft: number };
+  'timer:resume': any;
+  
+  // Relationship events
   'relationship:create': any;
   'relationship:delete': any;
   'relationship:update': any;
   'relationship:batch-update': any;
+  
+  // Note events
   'note:create': any;
   'note:create-from-habit': {
     habitId: string;
     habitName: string;
     description: string;
-    templateId?: string; // Optional templateId
-    content?: string;    // Optional content from the journal
+    templateId?: string;
+    content?: string;
   };
   'note:create-from-voice': {
     voiceNoteId: string;
@@ -54,12 +77,39 @@ export interface TimerEventPayloads {
   'note:view': {
     noteId: string;
   };
-  'tag:link': any;
-  'tag:unlink': any;
-  'quote:link-task': any;
   'note:deleted': {
     noteId: string;
   };
+  
+  // Tag events
+  'tag:link': any;
+  'tag:unlink': any;
+  'tags:force-update': {
+    timestamp: string;
+  };
+  'tag:select': string;
+  'tag:remove': any;
+  'tag:create': any;
+  'tag:delete': any;
+  
+  // Quote events
+  'quote:link-task': any;
+  
+  // Journal events
+  'journal:open': {
+    habitId: string;
+    habitName: string;
+  };
+  
+  // Navigation events
+  'nav:route-change': {
+    from: string;
+    to: string;
+  };
+  
+  // App events
+  'app:initialization-complete': any;
+  'page:timer-ready': any;
 }
 
 export type TimerEventType = keyof TimerEventPayloads;

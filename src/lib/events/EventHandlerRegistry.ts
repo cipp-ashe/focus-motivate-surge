@@ -1,5 +1,5 @@
 
-import { eventManager, EventType, EventPayload } from './EventManager';
+import { eventManager, EventType, EventPayload, EventHandler } from './EventManager';
 
 /**
  * Registry for managing and prioritizing event handlers
@@ -13,7 +13,7 @@ export class EventHandlerRegistry {
    */
   register<T extends EventType>(
     eventType: T, 
-    handler: (payload: EventPayload[T]) => void, 
+    handler: EventHandler<T>, 
     priority: number = 0
   ): () => void {
     if (!this.registry.has(eventType)) {
