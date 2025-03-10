@@ -8,7 +8,6 @@ import { eventBus } from '@/lib/eventBus';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
-  const { handleTimerStart } = useTimerEvents();
   const { getEntityTags } = useTagSystem();
   const initialCheckDoneRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,14 +70,6 @@ const TaskManager = () => {
     };
   }, []);
 
-  const handleTaskClick = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      handleTimerStart(task.name, task.duration || 1500);
-      eventBus.emit('task:select', taskId);
-    }
-  };
-
   // Add a loading state to prevent white screen
   if (isLoading) {
     return (
@@ -93,7 +84,7 @@ const TaskManager = () => {
     <TaskList
       tasks={tasks}
       selectedTasks={selectedTaskId ? [selectedTaskId] : []}
-      onTaskClick={handleTaskClick}
+      onTaskClick={() => {}} // This is now unused as we're using event bus directly
     />
   );
 };

@@ -69,17 +69,6 @@ const TimerPage = () => {
           mainContent={
             <TimerSection
               selectedTask={selectedTask}
-              onTaskComplete={(metrics) => {
-                eventBus.emit('task:complete', { taskId: selectedTaskId, metrics });
-              }}
-              onDurationChange={(seconds) => {
-                if (selectedTaskId) {
-                  eventBus.emit('task:update', {
-                    taskId: selectedTaskId,
-                    updates: { duration: seconds }
-                  });
-                }
-              }}
               favorites={favorites}
               setFavorites={setFavorites}
             />

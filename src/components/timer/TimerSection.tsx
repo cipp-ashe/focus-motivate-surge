@@ -6,19 +6,16 @@ import { TimerStateMetrics } from "@/types/metrics";
 import { Timer as TimerIcon, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { eventBus } from "@/lib/eventBus";
 
 interface TimerSectionProps {
   selectedTask: Task | null;
-  onTaskComplete: (metrics: TimerStateMetrics) => void;
-  onDurationChange: (seconds: number) => void;
   favorites: Quote[];
   setFavorites: (favorites: Quote[]) => void;
 }
 
 export const TimerSection = ({
   selectedTask,
-  onTaskComplete,
-  onDurationChange,
   favorites,
   setFavorites,
 }: TimerSectionProps) => {
@@ -47,6 +44,18 @@ export const TimerSection = ({
   }
 
   const durationInSeconds = selectedTask.duration || 1500;
+  
+  const handleTaskComplete = (metrics: TimerStateMetrics) => {
+    eventBus.emit('task:complete', { taskId: selectedTask.id, metrics });
+  };
+  
+  const handleDurationChange = (minutes: number) => {
+    const seconds = minutes * 60;
+    eventBus.emit('task:update', { 
+      taskId: selectedTask.id, 
+      updates: { duration: seconds } 
+    });
+  };
 
   return (
     <Card className="shadow-md border-border/20 overflow-hidden">
@@ -54,14 +63,11 @@ export const TimerSection = ({
         key={`timer-${selectedTask.id}-${durationInSeconds}`}
         duration={durationInSeconds}
         taskName={selectedTask.name}
-        onComplete={onTaskComplete}
+        onComplete={handleTaskComplete}
         onAddTime={() => {
           console.log("Time added to task:", selectedTask.name);
         }}
-        onDurationChange={(minutes) => {
-          const seconds = minutes * 60;
-          onDurationChange(seconds);
-        }}
+        onDurationChange={handleDurationChange}
         favorites={favorites}
         setFavorites={setFavorites}
       />

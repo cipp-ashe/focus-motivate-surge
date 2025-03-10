@@ -48,7 +48,6 @@ export const TaskList: React.FC<TaskListProps> = ({
           <TaskTable
             tasks={tasks}
             selectedTasks={selectedTasks}
-            onTaskClick={(task) => onTaskClick(task.id)}
           />
         </TabsContent>
 

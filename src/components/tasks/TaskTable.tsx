@@ -9,13 +9,11 @@ import { eventBus } from "@/lib/eventBus";
 interface TaskTableProps {
   tasks: Task[];
   selectedTasks: string[];
-  onTaskClick: (task: Task) => void;
 }
 
 export const TaskTable = ({
   tasks,
   selectedTasks,
-  onTaskClick,
 }: TaskTableProps) => {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   
@@ -23,6 +21,17 @@ export const TaskTable = ({
   useEffect(() => {
     console.log("TaskTable received tasks:", tasks.length, "tasks:", tasks);
   }, [tasks]);
+
+  const handleTaskClick = useCallback((task: Task) => {
+    console.log("TaskTable: Task clicked", task.id);
+    eventBus.emit('task:select', task.id);
+    
+    // Also emit timer start event with task info
+    eventBus.emit('timer:start', { 
+      taskName: task.name, 
+      duration: task.duration || 1500 
+    });
+  }, []);
 
   const handleDurationChange = useCallback((taskId: string, newDuration: string) => {
     const duration = parseInt(newDuration);
@@ -66,7 +75,7 @@ export const TaskTable = ({
               task={task}
               isSelected={selectedTasks.includes(task.id)}
               editingTaskId={editingTaskId}
-              onTaskClick={() => onTaskClick(task)}
+              onTaskClick={() => handleTaskClick(task)}
               onTaskDelete={() => handleTaskDelete(task.id)}
               onDurationChange={handleDurationChange}
               onDurationClick={handleDurationClick}
