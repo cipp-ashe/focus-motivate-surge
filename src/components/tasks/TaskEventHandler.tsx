@@ -27,10 +27,9 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   useEvent('task:update', onTaskUpdate);
   useEvent('task:delete', onTaskDelete);
   
-  // Handle force update events
+  // Handle force update events - with proper cleanup
   useEffect(() => {
     const handleForceUpdate = () => {
-      console.log("TaskEventHandler - Force update event received");
       onForceUpdate();
     };
     
@@ -42,19 +41,17 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   }, [onForceUpdate]);
   
   // Process task queue with staggered timing to prevent race conditions
+  // Make sure this doesn't run on every render
   useEffect(() => {
     if (processingRef.current || taskQueueRef.current.length === 0) return;
     
     processingRef.current = true;
     
-    const processQueue = async () => {
-      console.log(`TaskEventHandler - Processing queue with ${taskQueueRef.current.length} tasks`);
-      
+    const processQueue = async () => {      
       for (let i = 0; i < taskQueueRef.current.length; i++) {
         const task = taskQueueRef.current[i];
         
         // Emit creation event
-        console.log(`TaskEventHandler - Creating task ${i + 1}/${taskQueueRef.current.length}:`, task);
         eventManager.emit('task:create', task);
         
         // Add a small delay between task creations
@@ -66,15 +63,17 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       
       // Force a UI update after all tasks are processed
       setTimeout(() => {
-        console.log("TaskEventHandler - Force updating UI after queue processing");
         window.dispatchEvent(new CustomEvent('force-task-update'));
         processingRef.current = false;
       }, 300);
     };
     
     // Start processing with a small delay
-    setTimeout(processQueue, 50);
-  }, [taskQueueRef.current.length]);
+    const timeoutId = setTimeout(processQueue, 50);
+    
+    // Clean up timeout if component unmounts
+    return () => clearTimeout(timeoutId);
+  }, []); // Only run this once on mount
   
   // This component doesn't render anything
   return null;

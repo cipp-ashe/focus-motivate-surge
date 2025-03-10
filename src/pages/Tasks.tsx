@@ -4,9 +4,8 @@ import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
 
 const TaskPage = () => {
-  // Set up event listeners for task actions
+  // Set up event listeners for task actions with proper cleanup
   useEffect(() => {
-    // For image view
     const handleShowImage = (event: Event) => {
       const customEvent = event as CustomEvent;
       const { imageUrl, taskName } = customEvent.detail;
@@ -14,10 +13,8 @@ const TaskPage = () => {
       toast.info(`Viewing image for: ${taskName}`, {
         description: "Image viewer functionality is not yet implemented"
       });
-      console.log('Show image event received:', imageUrl, taskName);
     };
     
-    // For checklist view
     const handleOpenChecklist = (event: Event) => {
       const customEvent = event as CustomEvent;
       const { taskId, taskName, items } = customEvent.detail;
@@ -25,10 +22,8 @@ const TaskPage = () => {
       toast.info(`Checklist for: ${taskName}`, {
         description: `${items.length} items to complete`
       });
-      console.log('Open checklist event received:', taskId, items);
     };
     
-    // For voice recorder
     const handleOpenVoiceRecorder = (event: Event) => {
       const customEvent = event as CustomEvent;
       const { taskId, taskName } = customEvent.detail;
@@ -36,7 +31,6 @@ const TaskPage = () => {
       toast.info(`Recording for: ${taskName}`, {
         description: "Voice recorder functionality is not yet implemented"
       });
-      console.log('Open voice recorder event received:', taskId, taskName);
     };
     
     // Add event listeners
@@ -50,7 +44,7 @@ const TaskPage = () => {
       window.removeEventListener('open-checklist', handleOpenChecklist);
       window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder);
     };
-  }, []);
+  }, []); // Empty dependency array ensures this only runs once
 
   return (
     <div className="container mx-auto py-4 px-4">

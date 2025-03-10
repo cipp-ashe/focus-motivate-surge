@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task, TaskType } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { TaskLoader } from './TaskLoader';
 import { TaskEventHandler } from './TaskEventHandler';
@@ -23,35 +22,25 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   // Auto-detect timer view if not explicitly provided
   const isTimerPage = isTimerView ?? location.pathname.includes('/timer');
   
-  // Initialize local tasks from context
+  // Initialize local tasks from context - with dependencies properly declared
   useEffect(() => {
-    console.log("TaskManager - Received tasks from context:", tasks);
-    
     // If in timer view, filter only timer tasks
     if (isTimerPage) {
       const timerTasks = tasks.filter(task => task.taskType === 'timer');
-      console.log("TaskManager - Filtered timer tasks:", timerTasks);
       setLocalTasks(timerTasks);
     } else {
       setLocalTasks(tasks);
     }
-  }, [tasks, isTimerPage]);
+  }, [tasks, isTimerPage]); // Only re-run when tasks or isTimerPage changes
   
-  // Debug: Log tasks whenever they change
-  useEffect(() => {
-    console.log("TaskManager - Current tasks:", localTasks);
-  }, [localTasks]);
-
-  // Listen for force updates with the new event system
+  // Listen for force updates with the new event system - with proper cleanup
   useEffect(() => {
     const handleForceUpdate = () => {
       // Force reload from storage to ensure we have the latest data
       const storedTasks = taskStorage.loadTasks();
-      console.log("TaskManager - Force update triggered, reloaded tasks:", storedTasks);
       
       if (isTimerPage) {
         const timerTasks = storedTasks.filter(task => task.taskType === 'timer');
-        console.log("TaskManager - Filtered timer tasks after force update:", timerTasks);
         setLocalTasks(timerTasks);
       } else {
         setLocalTasks(storedTasks);
@@ -63,7 +52,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
     return () => {
       window.removeEventListener('force-task-update', handleForceUpdate);
     };
-  }, [isTimerPage]);
+  }, [isTimerPage]); // Only re-run when isTimerPage changes
 
   const handleTaskCreate = (task: Task) => {
     if (isTimerPage && task.taskType !== 'timer') {
@@ -92,11 +81,9 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   const handleForceUpdate = () => {
     // Force reload from storage to ensure we have the latest data
     const storedTasks = taskStorage.loadTasks();
-    console.log("TaskManager - Reloaded tasks from storage:", storedTasks);
     
     if (isTimerPage) {
       const timerTasks = storedTasks.filter(task => task.taskType === 'timer');
-      console.log("TaskManager - Filtered timer tasks after reload:", timerTasks);
       setLocalTasks(timerTasks);
     } else {
       setLocalTasks(storedTasks);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,49 +10,44 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface TaskListProps {
   tasks: Task[];
   selectedTasks: string[];
-  onTaskClick: (taskId: string) => void;
+  onTaskClick?: (taskId: string) => void;
   simplifiedView?: boolean;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
   tasks,
   selectedTasks,
-  onTaskClick,
+  onTaskClick = () => {},
   simplifiedView = false,
 }) => {
   const { completed: completedTasks } = useTaskContext();
   const [activeTab, setActiveTab] = useState('active');
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
   
-  // Keep local tasks in sync with props
+  // Keep local tasks in sync with props - with proper dependencies
   useEffect(() => {
-    console.log("TaskList received tasks:", tasks.length, "tasks:", tasks);
     setLocalTasks(tasks);
   }, [tasks]);
   
-  // Listen for force updates
+  // Listen for force updates - with proper cleanup
   useEffect(() => {
     const handleForceUpdate = () => {
-      console.log("TaskList: Detected force-task-update event, refreshing UI");
       // Force component update by setting state
       setLocalTasks(prev => [...prev]);
     };
     
-    window.addEventListener('force-task-update', handleForceUpdate);
-    
-    // Listen for habit events that should trigger task list refresh
     const handleHabitsProcessed = () => {
-      console.log("TaskList: Detected habits:processed event, refreshing UI");
       setLocalTasks(prev => [...prev]);
     };
     
-    eventBus.on('habits:processed', handleHabitsProcessed);
+    window.addEventListener('force-task-update', handleForceUpdate);
+    const unsubscribeHabits = eventBus.on('habits:processed', handleHabitsProcessed);
     
     return () => {
       window.removeEventListener('force-task-update', handleForceUpdate);
-      eventBus.off('habits:processed', handleHabitsProcessed);
+      unsubscribeHabits();
     };
-  }, []);
+  }, []); // Run only once on mount
 
   const handleClearCompletedTasks = () => {
     completedTasks.forEach(task => {
