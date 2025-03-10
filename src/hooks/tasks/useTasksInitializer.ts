@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { useTaskEvents } from './useTaskEvents';
 
 /**
@@ -37,7 +37,7 @@ export const useTasksInitializer = () => {
             setPageLoaded(true);
             
             // Step 5: Notify that initialization is complete
-            eventBus.emit('app:initialization-complete', {
+            eventManager.emit('app:initialization-complete', {
               component: 'tasks',
               timestamp: new Date().toISOString()
             });
@@ -58,7 +58,8 @@ export const useTasksInitializer = () => {
     const lastProcessTime = useRef(0);
     const navigationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     
-    const handleNavigation = () => {
+    // Listen for navigation events through the event manager
+    const unsubscribe = eventManager.on('nav:route-change', () => {
       const now = Date.now();
       // Only process navigation events if it's been more than 500ms since the last one
       if (now - lastProcessTime.current > 500) {
@@ -76,12 +77,31 @@ export const useTasksInitializer = () => {
           lastProcessTime.current = Date.now();
         }, 200);
       }
+    });
+    
+    // Also listen for window popstate events for browser navigation
+    const handleWindowNavigation = () => {
+      const now = Date.now();
+      if (now - lastProcessTime.current > 500) {
+        console.log("useTasksInitializer: Browser navigation detected");
+        
+        if (navigationTimeoutRef.current) {
+          clearTimeout(navigationTimeoutRef.current);
+        }
+        
+        navigationTimeoutRef.current = setTimeout(() => {
+          forceTaskUpdate();
+          setTimeout(() => forceTagsUpdate(), 100);
+          lastProcessTime.current = Date.now();
+        }, 200);
+      }
     };
     
-    window.addEventListener('popstate', handleNavigation);
+    window.addEventListener('popstate', handleWindowNavigation);
     
     return () => {
-      window.removeEventListener('popstate', handleNavigation);
+      unsubscribe();
+      window.removeEventListener('popstate', handleWindowNavigation);
       if (navigationTimeoutRef.current) {
         clearTimeout(navigationTimeoutRef.current);
       }

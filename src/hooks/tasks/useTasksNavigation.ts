@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTaskEvents } from './useTaskEvents';
+import { eventManager } from '@/lib/events/EventManager';
 
 export const useTasksNavigation = () => {
   const location = useLocation();
@@ -44,10 +45,23 @@ export const useTasksNavigation = () => {
           if (location.pathname === '/' || location.pathname === '/timer') {
             setTimeout(() => {
               checkPendingHabits();
+              
+              // Step 4: Emit a navigation event to inform other components
+              eventManager.emit('nav:route-change', {
+                from: '',
+                to: location.pathname
+              });
+              
               processingRef.current = false;
               lastProcessTimeRef.current = Date.now();
             }, 100);
           } else {
+            // Emit navigation event even if not checking habits
+            eventManager.emit('nav:route-change', {
+              from: '',
+              to: location.pathname
+            });
+            
             processingRef.current = false;
             lastProcessTimeRef.current = Date.now();
           }

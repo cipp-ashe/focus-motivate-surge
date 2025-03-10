@@ -1,8 +1,9 @@
 
 import { useEffect } from 'react';
-import { eventManager as eventBus } from '@/lib/events/EventManager';
+import { eventManager } from '@/lib/events/EventManager';
 import { EventType, EventPayload } from '@/lib/events/EventManager';
 
+// DEPRECATED: Use useEvent from @/hooks/useEvent instead
 // For backward compatibility
 export function useEventBus<T extends EventType>(
   eventName: T,
@@ -11,7 +12,7 @@ export function useEventBus<T extends EventType>(
 ) {
   useEffect(() => {
     // Subscribe to the event
-    const unsubscribe = eventBus.on(eventName, callback);
+    const unsubscribe = eventManager.on(eventName, callback);
     
     // Unsubscribe when the component unmounts
     return unsubscribe;

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Task, TaskMetrics } from '@/types/tasks';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { TimerStateMetrics } from '@/types/metrics';
 import { EventHandler } from '@/lib/events/EventManager';
 
@@ -112,11 +112,11 @@ export const useTaskStorage = () => {
     };
 
     // Subscribe to events and store unsubscribe functions
-    const unsubCreate = eventBus.on('task:create', handleTaskCreate);
-    const unsubUpdate = eventBus.on('task:update', handleTaskUpdate);
-    const unsubDelete = eventBus.on('task:delete', handleTaskDelete);
-    const unsubSelect = eventBus.on('task:select', handleTaskSelect);
-    const unsubComplete = eventBus.on('task:complete', handleTaskComplete);
+    const unsubCreate = eventManager.on('task:create', handleTaskCreate);
+    const unsubUpdate = eventManager.on('task:update', handleTaskUpdate);
+    const unsubDelete = eventManager.on('task:delete', handleTaskDelete);
+    const unsubSelect = eventManager.on('task:select', handleTaskSelect);
+    const unsubComplete = eventManager.on('task:complete', handleTaskComplete);
 
     // Cleanup subscriptions
     return () => {

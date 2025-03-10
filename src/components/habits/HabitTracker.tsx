@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
 import { HabitTemplateManager, HabitDebugLogger, ActiveTemplateList } from '@/components/habits';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { useHabitProgress } from '@/hooks/habits/useHabitProgress';
+import { useEvent } from '@/hooks/useEvent';
 
 const HabitTracker = () => {
   const { templates } = useHabitState();
@@ -27,31 +29,28 @@ const HabitTracker = () => {
     window.addEventListener('templatesUpdated', handleTemplatesUpdated);
     window.addEventListener('force-habits-update', handleForceHabitsUpdate);
     
-    // Listen for template changes via event bus
-    const unsubscribe = [
-      eventBus.on('habit:template-update', () => {
-        console.log("HabitTracker: Detected template update via event bus");
-        setForceUpdate(prev => prev + 1);
-        
-        // Force habit processing to create tasks
-        setTimeout(() => {
-          eventBus.emit('habits:processed', {});
-        }, 100);
-      }),
-      
-      eventBus.on('habit:template-delete', () => {
-        console.log("HabitTracker: Detected template delete via event bus");
-        setForceUpdate(prev => prev + 1);
-      })
-    ];
-    
     // Clean up listeners
     return () => {
       window.removeEventListener('templatesUpdated', handleTemplatesUpdated);
       window.removeEventListener('force-habits-update', handleForceHabitsUpdate);
-      unsubscribe.forEach(unsub => unsub());
     };
   }, []);
+
+  // Use the useEvent hook for template events
+  useEvent('habit:template-update', () => {
+    console.log("HabitTracker: Detected template update via event manager");
+    setForceUpdate(prev => prev + 1);
+    
+    // Force habit processing to create tasks
+    setTimeout(() => {
+      eventManager.emit('habits:processed', {});
+    }, 100);
+  });
+  
+  useEvent('habit:template-delete', () => {
+    console.log("HabitTracker: Detected template delete via event manager");
+    setForceUpdate(prev => prev + 1);
+  });
 
   // Handler for removing templates - now updated to be the originating action
   const handleRemoveTemplate = (templateId: string) => {
@@ -59,7 +58,7 @@ const HabitTracker = () => {
     
     // First emit event to remove any tasks associated with this template
     // Mark as originating action so only this handler shows a toast
-    eventBus.emit('habit:template-delete', { 
+    eventManager.emit('habit:template-delete', { 
       templateId, 
       suppressToast: true, // Suppress toast in task handler
       isOriginatingAction: true // Mark as originating action
@@ -80,7 +79,7 @@ const HabitTracker = () => {
     // If a habit is completed, trigger habit processing to ensure tasks are updated
     if (value) {
       setTimeout(() => {
-        eventBus.emit('habits:processed', {});
+        eventManager.emit('habits:processed', {});
       }, 100);
     }
   };

@@ -1,11 +1,11 @@
 
 import { useCallback } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 export const useTimerEvents = () => {
   // Start timer with a task
   const startTimerWithTask = useCallback((taskId: string, taskName: string, duration: number) => {
-    eventBus.emit('timer:start', {
+    eventManager.emit('timer:start', {
       taskName,
       duration
     });
@@ -13,7 +13,7 @@ export const useTimerEvents = () => {
 
   // Complete a timer session
   const completeTimerSession = useCallback((taskName: string, timeLeft: number, metrics: any) => {
-    eventBus.emit('timer:complete', {
+    eventManager.emit('timer:complete', {
       taskName, 
       metrics
     });
@@ -22,7 +22,7 @@ export const useTimerEvents = () => {
   // Cancel a timer session
   const cancelTimerSession = useCallback((taskName: string, duration: number) => {
     // We need to use 'as any' here since 'timer:reset' is what we need to use instead of 'timer:cancel'
-    eventBus.emit('timer:reset' as any, {
+    eventManager.emit('timer:reset' as any, {
       taskName,
       duration
     });
@@ -30,7 +30,7 @@ export const useTimerEvents = () => {
 
   // Pause a timer session
   const pauseTimerSession = useCallback((taskName: string, timeLeft: number, metrics: any) => {
-    eventBus.emit('timer:pause', {
+    eventManager.emit('timer:pause', {
       taskName,
       timeLeft,
       metrics

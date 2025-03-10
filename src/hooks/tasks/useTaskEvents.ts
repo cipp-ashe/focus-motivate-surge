@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { Task } from '@/types/tasks';
@@ -24,7 +24,7 @@ export const useTaskEvents = () => {
       taskStorage.removeTask(taskId);
       
       // Then emit delete event
-      eventBus.emit('task:delete', { taskId, reason });
+      eventManager.emit('task:delete', { taskId, reason });
       
       // Show success toast (only if not suppressed)
       if (!suppressToast) {
@@ -62,7 +62,7 @@ export const useTaskEvents = () => {
       taskStorage.updateTask(updatedTask.id, updatedTask);
       
       // Emit task update event
-      eventBus.emit('task:update', { taskId, updates: updatedTask });
+      eventManager.emit('task:update', { taskId, updates: updatedTask });
       
       // Show toast based on completion state
       if (updatedTask.completed) {
@@ -86,8 +86,8 @@ export const useTaskEvents = () => {
     const event = new CustomEvent('force-task-update');
     window.dispatchEvent(event);
     
-    // Also emit event via event bus
-    eventBus.emit('tasks:force-update', {
+    // Also emit event via event manager
+    eventManager.emit('tasks:force-update', {
       timestamp: new Date().toISOString()
     });
   }, []);
@@ -100,8 +100,8 @@ export const useTaskEvents = () => {
     const event = new CustomEvent('force-tags-update');
     window.dispatchEvent(event);
     
-    // Also emit event via event bus
-    eventBus.emit('tags:force-update', {
+    // Also emit event via event manager
+    eventManager.emit('tags:force-update', {
       timestamp: new Date().toISOString()
     });
   }, []);
@@ -111,7 +111,7 @@ export const useTaskEvents = () => {
     console.log('TaskEvents: Checking for pending habits');
     
     // Emit event to check pending habits
-    eventBus.emit('habits:check-pending', {});
+    eventManager.emit('habits:check-pending', {});
   }, []);
   
   return {

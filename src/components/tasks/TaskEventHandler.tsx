@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { useEvent, useEvents } from '@/hooks/useEvent';
+import { useEvent } from '@/hooks/useEvent';
 
 interface TaskEventHandlerProps {
   tasks: Task[];
@@ -22,7 +22,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   const processingRef = useRef(false);
   const taskQueueRef = useRef<Task[]>([]);
   
-  // Set up event handlers with the new system
+  // Set up event handlers with the useEvent hook
   useEvent('task:create', onTaskCreate);
   useEvent('task:update', onTaskUpdate);
   useEvent('task:delete', onTaskDelete);

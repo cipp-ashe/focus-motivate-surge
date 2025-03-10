@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { TemplateSelectionSheet } from '@/components/habits';
 import { habitTemplates } from '@/utils/habitTemplates';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { ActiveTemplate } from './types';
 
 interface HabitTemplateManagerProps {
@@ -78,7 +79,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       console.log("Adding template:", template);
       
       // Emit template-add event to context
-      eventBus.emit('habit:template-add', templateId);
+      eventManager.emit('habit:template-add', templateId);
       toast.success(`Added template: ${template.name}`);
       
       // Close sheet with slight delay for visual feedback
