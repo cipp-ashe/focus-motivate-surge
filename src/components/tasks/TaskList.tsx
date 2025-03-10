@@ -21,6 +21,11 @@ export const TaskList: React.FC<TaskListProps> = ({
   const { completed: completedTasks } = useTaskContext();
   const [activeTab, setActiveTab] = useState('active');
 
+  // Debug: Log tasks whenever they change
+  React.useEffect(() => {
+    console.log("TaskList received tasks:", tasks.length, "tasks:", tasks);
+  }, [tasks]);
+
   const handleClearCompletedTasks = () => {
     completedTasks.forEach(task => {
       eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' });
