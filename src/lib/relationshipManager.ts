@@ -1,7 +1,17 @@
 
 import { eventBus } from './eventBus';
-import type { EntityType, EntityRelationship, RelationType } from '@/types/state';
+import { EntityType } from '@/types/core';
+import type { RelationType } from '@/types/state';
 import type { ActiveTemplate } from '@/components/habits/types';
+
+// Define EntityRelationship interface using the EntityType from core.ts
+interface EntityRelationship {
+  sourceId: string;
+  sourceType: EntityType;
+  targetId: string;
+  targetType: EntityType;
+  relationType: RelationType;
+}
 
 class RelationshipManager {
   private static instance: RelationshipManager;
@@ -30,7 +40,7 @@ class RelationshipManager {
     // Handle tag relationships
     eventBus.on('tag:link', ({ tagId, entityId, entityType }) => {
       if (entityType) {
-        this.createRelationship(tagId, 'tag', entityId, entityType, 'tag-entity');
+        this.createRelationship(tagId, 'tag' as EntityType, entityId, entityType, 'tag-entity');
       }
     });
     
@@ -40,13 +50,13 @@ class RelationshipManager {
     
     // Handle quote relationships
     eventBus.on('quote:link-task', ({ quoteId, taskId }) => {
-      this.createRelationship(quoteId, 'quote', taskId, 'task', 'quote-task');
+      this.createRelationship(quoteId, 'quote' as EntityType, taskId, 'task' as EntityType, 'quote-task');
     });
     
     // Handle habit template relationships
     eventBus.on('habit:template-update', (template: ActiveTemplate) => {
       if (template.relationships?.habitId) {
-        this.createRelationship(template.templateId, 'template', template.relationships.habitId, 'habit', 'template-habit');
+        this.createRelationship(template.templateId, 'template' as EntityType, template.relationships.habitId, 'habit' as EntityType, 'template-habit');
       }
     });
   }
