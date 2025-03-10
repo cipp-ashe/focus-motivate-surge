@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -59,6 +60,20 @@ export const TaskList: React.FC<TaskListProps> = ({
       eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' });
     });
   };
+
+  // If using simplified view (for Timer page), just show the task table without tabs
+  if (simplifiedView) {
+    return (
+      <div className="w-full h-full flex flex-col">
+        <ScrollArea className="h-full">
+          <TaskTable
+            tasks={localTasks}
+            selectedTasks={selectedTasks}
+          />
+        </ScrollArea>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col">

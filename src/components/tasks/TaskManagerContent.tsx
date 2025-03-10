@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TaskList } from './TaskList';
 import { TaskInput } from './TaskInput';
@@ -6,7 +7,7 @@ import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Timer, Image, Calendar, FileText, CheckSquare, BookOpen, Mic } from 'lucide-react';
+import { Timer, Image, Calendar, BookOpen, CheckSquare, Mic, FileText } from 'lucide-react';
 
 interface TaskManagerContentProps {
   tasks: Task[];
@@ -178,17 +179,17 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
             />
           </TabsContent>
           
-          <TabsContent value="regular" className="flex-1 overflow-auto p-0 m-0">
+          <TabsContent value="voicenote" className="flex-1 overflow-auto p-0 m-0">
             <TaskList
-              tasks={regularTasks}
+              tasks={voiceNoteTasks}
               selectedTasks={selectedTaskId ? [selectedTaskId] : []}
               onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
             />
           </TabsContent>
-
-          <TabsContent value="voicenote" className="flex-1 overflow-auto p-0 m-0">
+          
+          <TabsContent value="regular" className="flex-1 overflow-auto p-0 m-0">
             <TaskList
-              tasks={voiceNoteTasks}
+              tasks={regularTasks}
               selectedTasks={selectedTaskId ? [selectedTaskId] : []}
               onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
             />

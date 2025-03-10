@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, Tag } from '@/types/tasks';
@@ -35,15 +36,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/toast'; // Fixed import
+import { useToast } from '@/hooks/use-toast';
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
-import { eventManager } from '@/lib/events/EventManager';
+import { eventBus } from '@/lib/eventBus';
 import { TimerEventType } from '@/types/events';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
-  defaultTaskType?: 'timer' | 'screenshot' | 'habit' | 'journal' | 'checklist' | 'regular';
+  defaultTaskType?: 'timer' | 'screenshot' | 'habit' | 'journal' | 'checklist' | 'regular' | 'voicenote';
   simplifiedView?: boolean;
 }
 
@@ -87,7 +88,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   
   // Task Relationships
   const [habitId, setHabitId] = useState<string | null>(null);
-  const [checklistId, setChecklistId] = useState<string | null>(null);
   
   // Task Context
   const { items: tasks } = useTaskContext();
@@ -124,9 +124,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   // Task Creation Handlers
   const handleAddTask = () => {
     if (!taskName.trim()) {
-      toast({
-        title: "Error",
-        description: "Task name cannot be empty.",
+      toast.error("Task name cannot be empty.", {
         duration: 3000,
       });
       return;
@@ -157,11 +155,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   
   const handleAddMultipleTasks = () => {
     if (!multipleTasksInput.trim()) {
-      toast({
-        title: "Error",
-        description: "Multiple tasks input cannot be empty.",
+      toast.error("Multiple tasks input cannot be empty.", {
         duration: 3000,
-      })
+      });
       return;
     }
     
@@ -171,8 +167,8 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
       name: name.trim(),
       taskType: taskType || 'regular',
       completed: false,
-      createdAt: new Date().toISOString(), // Fixed: Convert Date to string
-      tags: tags.map(tag => ({ id: uuidv4(), name: tag })), // Fixed: Convert string[] to Tag[]
+      createdAt: new Date().toISOString(),
+      tags: tags.map(tag => ({ id: uuidv4(), name: tag })),
       relationships: {
         habitId: habitId || undefined,
         date: date ? date.toISOString() : undefined
@@ -187,7 +183,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
     setIsAddingMultiple(false);
     setTags([]);
     setHabitId(null);
-    setChecklistId(null);
   };
   
   // Tag Handlers
@@ -236,17 +231,13 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
     };
     
     if (isNewTemplate) {
-      eventManager.emit('habit:template-add' as TimerEventType, newTemplate);
-      toast({
-        title: "Success",
-        description: "Habit template created.",
+      eventBus.emit('habit:template-add' as TimerEventType, newTemplate);
+      toast.success("Habit template created.", {
         duration: 3000,
       });
     } else {
-      eventManager.emit('habit:template-update' as TimerEventType, newTemplate);
-      toast({
-        title: "Success",
-        description: "Habit template updated.",
+      eventBus.emit('habit:template-update' as TimerEventType, newTemplate);
+      toast.success("Habit template updated.", {
         duration: 3000,
       });
     }
@@ -257,11 +248,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   const handleTemplateDelete = () => {
     if (selectedTemplate) {
       console.log('Deleting template:', selectedTemplate);
-      eventManager.emit('habit:template-delete', { templateId: selectedTemplate.id });
+      eventBus.emit('habit:template-delete' as TimerEventType, { templateId: selectedTemplate.id });
       setOpen(false);
-      toast({
-        title: "Success",
-        description: "Habit template deleted.",
+      toast.success("Habit template deleted.", {
         duration: 3000,
       });
     }
@@ -277,11 +266,26 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
     setHabitId(habitId);
   };
   
-  const handleChecklistSelect = (checklistId: string | null) => {
-    setChecklistId(checklistId);
-  };
+  // UI Rendering for simplified view (Timer page)
+  if (simplifiedView) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Input
+            type="text"
+            placeholder="Add a timer task"
+            value={taskName}
+            onChange={handleTaskNameChange}
+            ref={inputRef}
+            className="flex-grow"
+          />
+          <Button onClick={handleAddTask}>Add Timer</Button>
+        </div>
+      </div>
+    );
+  }
   
-  // UI Rendering
+  // UI Rendering for full view
   return (
     <div className="flex flex-col gap-2">
       {/* Task Input */}
@@ -305,6 +309,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
             <SelectItem value="habit">Habit</SelectItem>
             <SelectItem value="journal">Journal</SelectItem>
             <SelectItem value="checklist">Checklist</SelectItem>
+            <SelectItem value="voicenote">Voice Note</SelectItem>
           </SelectContent>
         </Select>
         <Button onClick={handleAddTask}>Add Task</Button>
