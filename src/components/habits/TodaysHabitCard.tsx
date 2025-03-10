@@ -43,13 +43,18 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
       console.log(`Found existing task for habit ${habit.name}:`, relatedTask);
       // Start the timer for this task
       eventBus.emit('task:select', relatedTask.id);
+      
       // Send timer start event with task duration
       eventBus.emit('timer:start', { 
         taskName: relatedTask.name, 
         duration: relatedTask.duration || 1500 
       });
+      
       // Expand timer view
       eventBus.emit('timer:expand', { taskName: relatedTask.name });
+      
+      // Navigate to timer page
+      window.location.href = '/timer';
     } else {
       console.log(`No existing task found for habit ${habit.name}, creating new task`);
       // Create a task for this habit and start timer
@@ -64,6 +69,11 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
       // Force update task list
       setTimeout(() => {
         window.dispatchEvent(new Event('force-task-update'));
+        
+        // Navigate to timer page after a short delay
+        setTimeout(() => {
+          window.location.href = '/timer';
+        }, 300);
       }, 300);
     }
   };

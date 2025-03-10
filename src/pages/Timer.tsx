@@ -15,6 +15,7 @@ const TimerPage = () => {
   const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
   const [favorites, setFavorites] = useState<Quote[]>([]);
   const [habitCheckDone, setHabitCheckDone] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
   
   // Track when TimerPage is mounted and ready - only run once
   useEffect(() => {
@@ -47,6 +48,7 @@ const TimerPage = () => {
           [200, 500, 1000].forEach(delay => {
             setTimeout(() => {
               window.dispatchEvent(new Event('force-task-update'));
+              setForceUpdate(prev => prev + 1); // Trigger a re-render
             }, delay);
           });
           
@@ -69,16 +71,30 @@ const TimerPage = () => {
       console.log("Tasks exist in storage but not loaded in state yet");
       // Force update to sync memory with storage
       window.dispatchEvent(new Event('force-task-update'));
+      setForceUpdate(prev => prev + 1); // Trigger a re-render
     }
   }, [tasks]);
+
+  // Listen for force-task-update events
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      setForceUpdate(prev => prev + 1); // Trigger a re-render
+    };
+    
+    window.addEventListener('force-task-update', handleForceUpdate);
+    return () => {
+      window.removeEventListener('force-task-update', handleForceUpdate);
+    };
+  }, []);
 
   return (
     <HabitsPanelProvider>
       <TimerErrorBoundary>
         <TaskLayout
-          asideContent={<TaskManager />}
+          asideContent={<TaskManager key={`task-manager-${forceUpdate}`} />}
           mainContent={
             <TimerSection
+              key={`timer-section-${selectedTaskId}-${forceUpdate}`}
               selectedTask={selectedTask}
               favorites={favorites}
               setFavorites={setFavorites}

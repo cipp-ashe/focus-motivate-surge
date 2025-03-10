@@ -33,7 +33,9 @@ export const useHabitTaskCreator = () => {
         
         // Force a UI update for the existing task
         window.dispatchEvent(new Event('force-task-update'));
-        eventBus.emit('task:create', existingTask);
+        
+        // This is critical - we need to emit the task:select event to make it visible in timer page
+        eventBus.emit('task:select', existingTask.id);
         
         return existingTask.id;
       }
@@ -63,6 +65,9 @@ export const useHabitTaskCreator = () => {
       
       // Emit event to create task
       eventBus.emit('task:create', task);
+      
+      // Select the task immediately to make it visible on timer page
+      eventBus.emit('task:select', taskId);
       
       // Force UI update after a short delay
       setTimeout(() => {
