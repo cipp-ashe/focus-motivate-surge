@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,8 +39,17 @@ export const TaskList: React.FC<TaskListProps> = ({
     
     window.addEventListener('force-task-update', handleForceUpdate);
     
+    // Listen for habit events that should trigger task list refresh
+    const handleHabitsProcessed = () => {
+      console.log("TaskList: Detected habits:processed event, refreshing UI");
+      setLocalTasks(prev => [...prev]);
+    };
+    
+    eventBus.on('habits:processed', handleHabitsProcessed);
+    
     return () => {
       window.removeEventListener('force-task-update', handleForceUpdate);
+      eventBus.off('habits:processed', handleHabitsProcessed);
     };
   }, []);
 

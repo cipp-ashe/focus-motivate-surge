@@ -28,6 +28,9 @@ const TimerPage = () => {
     if (!habitCheckDone) {
       setHabitCheckDone(true);
       
+      // Force UI update to ensure all tasks are loaded
+      window.dispatchEvent(new Event('force-task-update'));
+      
       // Check for pending habits
       setTimeout(() => {
         console.log(`Checking for pending habits from TimerPage (one-time check)`);
@@ -40,26 +43,34 @@ const TimerPage = () => {
         if (habitTasks.length > 0) {
           console.log(`Found ${habitTasks.length} habit tasks in localStorage`);
           
-          // Only force update if there are tasks in storage that aren't in memory
-          if (tasks.length === 0 || habitTasks.some((storageTask) => 
-              !tasks.some(memTask => memTask.id === storageTask.id))) {
-            
-            window.dispatchEvent(new Event('force-task-update'));
-            
-            toast.info(`Found ${habitTasks.length} scheduled tasks`, {
-              description: "Loading your habit tasks..."
-            });
-          } else {
-            console.log(`All habit tasks are properly loaded`);
-          }
+          // Force multiple updates to ensure tasks are loaded
+          [200, 500, 1000].forEach(delay => {
+            setTimeout(() => {
+              window.dispatchEvent(new Event('force-task-update'));
+            }, delay);
+          });
+          
+          toast.info(`Found ${habitTasks.length} habit tasks`, {
+            description: "Loading your scheduled tasks..."
+          });
         } else {
           console.log('No habit tasks found in localStorage');
           // Signal that we've processed habits
           eventBus.emit('habits:processed', {});
         }
-      }, 500);
+      }, 300);
     }
   }, [tasks, habitCheckDone]);
+
+  // Display loading state if no tasks are loaded but localStorage has tasks
+  useEffect(() => {
+    const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+    if (storedTasks.length > 0 && tasks.length === 0) {
+      console.log("Tasks exist in storage but not loaded in state yet");
+      // Force update to sync memory with storage
+      window.dispatchEvent(new Event('force-task-update'));
+    }
+  }, [tasks]);
 
   return (
     <HabitsPanelProvider>

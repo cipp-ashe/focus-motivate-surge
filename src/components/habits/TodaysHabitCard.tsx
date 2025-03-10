@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HabitDetail } from './types';
@@ -7,6 +8,7 @@ import { Timer, BookText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { eventBus } from '@/lib/eventBus';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { toast } from 'sonner';
 
 interface TodaysHabitCardProps {
   habits: HabitDetail[];
@@ -38,6 +40,7 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
     );
     
     if (relatedTask) {
+      console.log(`Found existing task for habit ${habit.name}:`, relatedTask);
       // Start the timer for this task
       eventBus.emit('task:select', relatedTask.id);
       // Send timer start event with task duration
@@ -48,8 +51,20 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
       // Expand timer view
       eventBus.emit('timer:expand', { taskName: relatedTask.name });
     } else {
+      console.log(`No existing task found for habit ${habit.name}, creating new task`);
       // Create a task for this habit and start timer
       onAddHabitToTasks(habit);
+      
+      // Display toast feedback to user
+      toast.info(`Creating task for habit: ${habit.name}`, {
+        description: "Please wait a moment for the timer to start",
+        duration: 3000
+      });
+      
+      // Force update task list
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 300);
     }
   };
 
