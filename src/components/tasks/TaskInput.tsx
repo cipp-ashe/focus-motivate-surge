@@ -14,6 +14,7 @@ import {
 } from "../ui/dropdown-menu";
 import { eventBus } from "@/lib/eventBus";
 import { toast } from "sonner";
+import { taskStorage } from "@/lib/storage/taskStorage";
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
@@ -55,6 +56,11 @@ export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
           };
         });
         
+        // Add each task to storage first to ensure persistence
+        tasks.forEach(task => {
+          taskStorage.addTask(task);
+        });
+        
         // Use the batch add method if available
         if (onTasksAdd) {
           onTasksAdd(tasks);
@@ -70,7 +76,7 @@ export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
           // Force update after all tasks should have been added
           setTimeout(() => {
             toast.success(`Added ${tasks.length} tasks`);
-            window.dispatchEvent(new Event('force-task-update'));
+            window.dispatchEvent(new CustomEvent('force-task-update'));
           }, tasks.length * 100 + 300);
         }
       } else {
@@ -83,8 +89,17 @@ export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
           createdAt: new Date().toISOString(),
         };
         
-        // Use callback for single task
+        // Add to storage first to ensure persistence
+        taskStorage.addTask(task);
+        
+        // Then use callback for single task
         onTaskAdd(task);
+        
+        // Force a UI update
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('force-task-update'));
+        }, 100);
+        
         console.log("TaskInput: Created single task:", task);
       }
     } catch (error) {

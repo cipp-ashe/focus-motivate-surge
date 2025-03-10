@@ -82,7 +82,9 @@ export const useTaskEvents = () => {
     console.log('TaskEvents: Force updating task list (debounced)');
     
     // Dispatch custom event to signal task list update
-    window.dispatchEvent(new Event('force-task-update'));
+    // Fix: CustomEvent should be used instead of Event when we need to pass data
+    const event = new CustomEvent('force-task-update');
+    window.dispatchEvent(event);
     
     // Also emit event via event bus
     eventBus.emit('tasks:force-update', {
@@ -95,7 +97,8 @@ export const useTaskEvents = () => {
     console.log('TaskEvents: Force updating tags list');
     
     // Dispatch custom event to signal tags update
-    window.dispatchEvent(new Event('force-tags-update'));
+    const event = new CustomEvent('force-tags-update');
+    window.dispatchEvent(event);
     
     // Also emit event via event bus
     eventBus.emit('tags:force-update', {
