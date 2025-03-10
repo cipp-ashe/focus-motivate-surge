@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { TaskInput } from './TaskInput';
@@ -31,11 +31,22 @@ export const TaskList: React.FC<TaskListProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Debug: Log tasks whenever the component renders
+  useEffect(() => {
+    console.log("TaskList rendering with tasks:", tasks);
+  }, [tasks]);
+
   const handleTaskAdd = (task: Task) => {
-    // Prevent duplicate task creation
+    // Log task creation attempt
+    console.log("Attempting to add task:", task);
+    
+    // Check if it would be a duplicate
     if (tasks.some(t => t.name === task.name && !t.completed)) {
+      console.log("Skipping duplicate task:", task.name);
       return;
     }
+    
+    // Emit the event to create the task
     eventBus.emit('task:create', task);
   };
 

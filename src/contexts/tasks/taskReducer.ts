@@ -14,6 +14,7 @@ type TaskAction =
 export const taskReducer = (state: TaskContextState, action: TaskAction): TaskContextState => {
   switch (action.type) {
     case 'LOAD_TASKS':
+      console.log("taskReducer: Loading tasks:", action.payload.tasks);
       return {
         ...state,
         items: action.payload.tasks,

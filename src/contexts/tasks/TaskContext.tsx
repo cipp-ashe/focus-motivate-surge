@@ -15,6 +15,11 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   // Initialize with data from localStorage
   const [state, dispatch] = useReducer(taskReducer, taskState.getInitialState());
   
+  // Debug: Log state on changes
+  useEffect(() => {
+    console.log("TaskContext state updated:", state);
+  }, [state]);
+  
   // Set up event handling
   const { forceTasksReload } = useTaskEvents(state.items, state.completed, dispatch);
   
@@ -30,6 +35,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     queryFn: async () => {
       try {
         const result = taskState.loadFromStorage();
+        console.log("TaskContext initial load:", result);
         dispatch({ type: 'LOAD_TASKS', payload: result });
         
         // Force task update after initial load with staggered timing

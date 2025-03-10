@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
@@ -25,6 +26,11 @@ const TaskManager = () => {
   // Initialize task schedulers and get the check function
   const { checkForMissingHabitTasks } = useHabitTaskScheduler(tasks);
   useTemplateTasksManager(tasks);
+
+  // Debug: Log tasks whenever they change
+  useEffect(() => {
+    console.log("TaskManager - Current tasks:", tasks);
+  }, [tasks]);
 
   // Force tag update when task list changes and ensure loading state is properly handled
   useEffect(() => {

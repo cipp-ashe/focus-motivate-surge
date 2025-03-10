@@ -41,22 +41,29 @@ export const TaskTable = ({
     setEditingTaskId(null);
   }, []);
 
+  // Debug to check if tasks are being received
+  console.log("TaskTable received tasks:", tasks);
+
   return (
     <div className="w-full space-y-2 p-4">
       <div className="grid gap-2 w-full">
-        {tasks.map((task) => (
-          <TaskRow
-            key={task.id}
-            task={task}
-            isSelected={selectedTasks.includes(task.id)}
-            editingTaskId={editingTaskId}
-            onTaskClick={(task) => onTaskClick(task)}
-            onTaskDelete={() => onTaskDelete(task.id)}
-            onDurationChange={handleDurationChange}
-            onDurationClick={handleDurationClick}
-            onInputBlur={handleInputBlur}
-          />
-        ))}
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
+            <TaskRow
+              key={task.id}
+              task={task}
+              isSelected={selectedTasks.includes(task.id)}
+              editingTaskId={editingTaskId}
+              onTaskClick={() => onTaskClick(task)}
+              onTaskDelete={() => onTaskDelete(task.id)}
+              onDurationChange={handleDurationChange}
+              onDurationClick={handleDurationClick}
+              onInputBlur={handleInputBlur}
+            />
+          ))
+        ) : (
+          <div className="text-center text-muted-foreground py-4">No tasks available</div>
+        )}
       </div>
       
       {tasks.length > 1 && (

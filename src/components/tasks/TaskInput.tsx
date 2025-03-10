@@ -51,6 +51,8 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
             createdAt: new Date().toISOString(),
           };
           onTaskAdd(task);
+          // Log to confirm task creation
+          console.log("Created task:", task);
         }
       });
     } else {
@@ -62,6 +64,8 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         createdAt: new Date().toISOString(),
       };
       onTaskAdd(task);
+      // Log to confirm task creation
+      console.log("Created task:", task);
     }
     setNewTaskName("");
   };
