@@ -45,7 +45,7 @@ export const TaskTable = ({
   console.log("TaskTable received tasks:", tasks);
 
   return (
-    <div className="w-full space-y-2 p-4">
+    <div className="w-full space-y-2 p-4 overflow-visible">
       <div className="grid gap-2 w-full">
         {tasks.length > 0 ? (
           tasks.map((task) => (
