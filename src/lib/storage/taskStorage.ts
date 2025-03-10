@@ -42,7 +42,7 @@ export const taskStorage = {
    */
   saveTasks: (tasks: Task[]): boolean => {
     try {
-      console.log(`taskStorage: Saving ${tasks.length} tasks to storage`);
+      console.log(`taskStorage: Saving ${tasks.length} tasks to storage:`, tasks);
       localStorage.setItem(ACTIVE_TASKS_KEY, JSON.stringify(tasks));
       return true;
     } catch (error) {

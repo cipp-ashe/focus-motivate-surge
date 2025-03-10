@@ -27,6 +27,10 @@ export const useTaskEvents = () => {
     const added = taskStorage.addTask(task);
     
     if (added) {
+      // Load current tasks to make sure we're working with latest data
+      const currentTasks = taskStorage.loadTasks();
+      console.log(`Current tasks in storage after add: ${currentTasks.length}`);
+      
       eventBus.emit('task:create', task);
       toast.success('Task added 📝');
       
@@ -111,7 +115,7 @@ export const useTaskEvents = () => {
     }, 300);
   }, [processing, lastForceUpdateTime]);
 
-  // Add the missing functions that are being called in useTasksInitializer and useTasksNavigation
+  // Add the required functions for useTasksInitializer and useTasksNavigation
   const forceTagsUpdate = useCallback(() => {
     console.log("useTaskEvents: Forcing tags update");
     // Dispatch a custom event for tag updates

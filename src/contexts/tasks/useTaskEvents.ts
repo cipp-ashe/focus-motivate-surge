@@ -1,4 +1,3 @@
-
 import { useEffect, useCallback, useState } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
@@ -43,6 +42,7 @@ export const useTaskEvents = (
       setPreventReentrantUpdate(true);
       
       const { tasks, completed } = taskState.loadFromStorage();
+      console.log(`TaskEvents: Loaded ${tasks.length} tasks from storage during force reload`);
       
       // Process any pending task updates
       if (pendingTaskUpdates.length > 0) {
@@ -96,9 +96,9 @@ export const useTaskEvents = (
       eventBus.on('task:create', (task: Task) => {
         console.log("TaskEvents: Creating task", task.id, task.name);
         
-        // First, verify the task doesn't already exist
-        const exists = items.some(t => t.id === task.id);
-        if (exists) {
+        // First, verify the task doesn't already exist in the current state
+        const existsInState = items.some(t => t.id === task.id);
+        if (existsInState) {
           console.log(`TaskEvents: Task ${task.id} already exists in state, skipping`);
           return;
         }
@@ -106,6 +106,9 @@ export const useTaskEvents = (
         // Add to pending updates and dispatch
         setPendingTaskUpdates(prev => [...prev, task]);
         dispatch({ type: 'ADD_TASK', payload: task });
+        
+        // Log the current task count
+        console.log(`TaskEvents: Tasks in state after adding task: ${items.length + 1}`);
       }),
       
       // Handle task completion
@@ -163,7 +166,7 @@ export const useTaskEvents = (
     // Handle force update events from window with debouncing
     const handleForceUpdate = () => {
       const now = Date.now();
-      if (now - lastForceUpdateTime > 800) {
+      if (now - lastForceUpdateTime > 500) {
         setLastForceUpdateTime(now);
         console.log("TaskEvents: Force updating task list (debounced)");
         forceTasksReload();
@@ -179,6 +182,7 @@ export const useTaskEvents = (
       () => items,
       (missingTasks) => {
         if (missingTasks.length > 0) {
+          console.log(`TaskEvents: Adding ${missingTasks.length} missing tasks from verification`);
           missingTasks.forEach(task => {
             dispatch({ type: 'ADD_TASK', payload: task });
           });

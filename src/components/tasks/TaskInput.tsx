@@ -38,7 +38,9 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
 
     if (isBulkAdd) {
       const tasks = newTaskName.split('\n').filter(task => task.trim());
-      tasks.forEach(taskLine => {
+      console.log(`TaskInput: Creating ${tasks.length} tasks from bulk add`);
+      
+      tasks.forEach((taskLine, index) => {
         if (taskLine.trim()) {
           const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
           const task: Task = {
@@ -50,12 +52,16 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
               : DEFAULT_DURATION,
             createdAt: new Date().toISOString(),
           };
-          onTaskAdd(task);
-          // Log to confirm task creation
-          console.log("Created task:", task);
+          
+          // Small delay for each task to prevent race conditions
+          setTimeout(() => {
+            onTaskAdd(task);
+            console.log(`TaskInput: Created bulk task ${index + 1}/${tasks.length}:`, task);
+          }, index * 50);
         }
       });
     } else {
+      // Create a single task
       const task: Task = {
         id: generateId(),
         name: newTaskName.trim(),
@@ -64,20 +70,28 @@ export const TaskInput = ({ onTaskAdd }: TaskInputProps) => {
         createdAt: new Date().toISOString(),
       };
       onTaskAdd(task);
-      // Log to confirm task creation
-      console.log("Created task:", task);
+      console.log("TaskInput: Created single task:", task);
     }
+    
+    // Clear the input
     setNewTaskName("");
   };
 
   const handleTasksImport = (importedTasks: Omit<Task, 'id' | 'createdAt'>[]) => {
-    importedTasks.forEach(taskData => {
+    console.log(`TaskInput: Importing ${importedTasks.length} tasks`);
+    
+    importedTasks.forEach((taskData, index) => {
       const task: Task = {
         ...taskData,
         id: generateId(),
         createdAt: new Date().toISOString(),
       };
-      onTaskAdd(task);
+      
+      // Small delay for each task to prevent race conditions
+      setTimeout(() => {
+        onTaskAdd(task);
+        console.log(`TaskInput: Imported task ${index + 1}/${importedTasks.length}:`, task);
+      }, index * 50);
     });
   };
 

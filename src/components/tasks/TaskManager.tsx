@@ -5,6 +5,7 @@ import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { useTagSystem } from '@/hooks/useTagSystem';
 import { eventBus } from '@/lib/eventBus';
 import { TaskInput } from './TaskInput';
+import { taskStorage } from '@/lib/storage/taskStorage';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
@@ -82,7 +83,14 @@ const TaskManager = () => {
 
   const handleTaskAdd = (task) => {
     console.log("TaskManager - Adding task:", task);
+    
+    // Direct emit through the event bus
     eventBus.emit('task:create', task);
+    
+    // Force a UI update after a short delay to ensure the new task is displayed
+    setTimeout(() => {
+      window.dispatchEvent(new Event('force-task-update'));
+    }, 100);
   };
 
   return (
