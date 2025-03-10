@@ -14,6 +14,8 @@ import { useTimerEventListeners } from "./hooks/useTimerEventListeners";
 import { useAutoComplete } from "./hooks/useAutoComplete";
 import { TimerRenderer } from "./views/TimerRenderer";
 import { toast } from "sonner";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Timer as TimerIcon } from "lucide-react";
 
 export const Timer = ({
   duration,
@@ -142,45 +144,71 @@ export const Timer = ({
 
     // Show completion view if timer is complete
     if (showCompletion && completionMetrics) {
-      return <CompletionView metrics={completionMetrics} onComplete={handleCloseCompletion} />;
+      return (
+        <Card className="shadow-md border-border/20 overflow-hidden">
+          <CardHeader className="bg-card/70 border-b border-border/10 py-4">
+            <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
+              <TimerIcon className="h-5 w-5 text-purple-400" />
+              Timer Complete
+            </CardTitle>
+          </CardHeader>
+          <CompletionView metrics={completionMetrics} onComplete={handleCloseCompletion} />
+        </Card>
+      );
     }
 
     const timerCircleProps = getTimerCircleProps();
     const timerControlsProps = getTimerControlsProps();
 
     return (
-      <TimerRenderer
-        isExpanded={isExpanded}
-        taskName={taskName}
-        timerCircleProps={timerCircleProps}
-        timerControlsProps={timerControlsProps}
-        metrics={metrics}
-        showCompletion={showCompletion}
-        internalMinutes={internalMinutes}
-        setInternalMinutes={setInternalMinutes}
-        selectedSound={selectedSound}
-        setSelectedSound={setSelectedSound}
-        testSound={testSound}
-        isLoadingAudio={isLoadingAudio}
-        updateMetrics={updateMetrics}
-        expandedViewRef={expandedViewRef}
-        handleCloseTimer={handleCloseTimer}
-        favorites={favorites}
-        setFavorites={setFavorites}
-        showConfirmation={showConfirmation}
-        setShowConfirmation={setShowConfirmation}
-        handleAddTimeAndContinue={handleAddTimeAndContinue}
-        handleComplete={handleComplete}
-      />
+      <>
+        <CardHeader className="bg-card/70 border-b border-border/10 py-4">
+          <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
+            <TimerIcon className="h-5 w-5 text-purple-400" />
+            Timer
+          </CardTitle>
+        </CardHeader>
+        <TimerRenderer
+          isExpanded={isExpanded}
+          taskName={taskName}
+          timerCircleProps={timerCircleProps}
+          timerControlsProps={timerControlsProps}
+          metrics={metrics}
+          showCompletion={showCompletion}
+          internalMinutes={internalMinutes}
+          setInternalMinutes={setInternalMinutes}
+          selectedSound={selectedSound}
+          setSelectedSound={setSelectedSound}
+          testSound={testSound}
+          isLoadingAudio={isLoadingAudio}
+          updateMetrics={updateMetrics}
+          expandedViewRef={expandedViewRef}
+          handleCloseTimer={handleCloseTimer}
+          favorites={favorites}
+          setFavorites={setFavorites}
+          showConfirmation={showConfirmation}
+          setShowConfirmation={setShowConfirmation}
+          handleAddTimeAndContinue={handleAddTimeAndContinue}
+          handleComplete={handleComplete}
+        />
+      </>
     );
     
   } catch (error) {
     console.error("Error in Timer component:", error);
     toast.error("Could not initialize timer");
     return (
-      <div className="p-6 text-center">
-        <p className="text-destructive">There was an error loading the timer.</p>
-      </div>
+      <>
+        <CardHeader className="bg-card/70 border-b border-border/10 py-4">
+          <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
+            <TimerIcon className="h-5 w-5 text-purple-400" />
+            Timer Error
+          </CardTitle>
+        </CardHeader>
+        <div className="p-8 text-center">
+          <p className="text-destructive">There was an error loading the timer.</p>
+        </div>
+      </>
     );
   }
 };

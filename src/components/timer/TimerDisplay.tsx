@@ -1,3 +1,4 @@
+
 import { memo } from "react";
 import { TimerCircle } from "../timer/TimerCircle";
 import { TimerCircleProps } from "@/types/timer";
@@ -23,7 +24,7 @@ export const TimerDisplay = memo(({
 
   return (
     <div 
-      className={`focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isRunning ? 'cursor-pointer' : ''}`}
+      className={`focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 p-6 rounded-full bg-card/50 shadow-lg ${isRunning ? 'cursor-pointer hover:shadow-xl transition-shadow' : ''}`}
       onClick={handleClick}
       onTouchEnd={handleClick}
       role="button"

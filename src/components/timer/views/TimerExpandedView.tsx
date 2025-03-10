@@ -63,22 +63,25 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
       />
       
       {/* Content */}
-      <div className="relative h-full overflow-y-auto">
-        <div className="container mx-auto p-6 flex flex-col gap-6 min-h-screen max-w-[1400px]">
-          <QuoteDisplay 
-            showAsOverlay
-            currentTask={taskName}
-            onLike={onLike}
-            favorites={favorites}
-            setFavorites={setFavorites}
-          />
+      <div className="relative h-full overflow-y-auto py-10">
+        <div className="container mx-auto px-6 flex flex-col gap-8 max-w-6xl">
+          {/* Quotes Display */}
+          <div className="relative z-10 mb-4">
+            <QuoteDisplay 
+              showAsOverlay
+              currentTask={taskName}
+              onLike={onLike}
+              favorites={favorites}
+              setFavorites={setFavorites}
+            />
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-8">
             {/* Timer Section */}
-            <Card className="bg-card/90 backdrop-blur-md shadow-lg p-8 border-primary/20">
-              <div className="flex flex-col items-center gap-8">
+            <Card className="bg-card/90 backdrop-blur-md shadow-xl border-primary/20 overflow-hidden">
+              <div className="p-10 flex flex-col items-center gap-10">
                 <div className="text-center w-full">
-                  <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 tracking-tight">
+                  <h1 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 tracking-tight">
                     {taskName}
                   </h1>
                 </div>
@@ -98,8 +101,11 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
             </Card>
 
             {/* Metrics Section */}
-            <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20">
-              <div className="p-6 h-full">
+            <Card className="bg-card/90 backdrop-blur-md shadow-xl border-primary/20 overflow-hidden">
+              <div className="p-8 h-full">
+                <h2 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                  Session Metrics
+                </h2>
                 <TimerMetricsDisplay
                   metrics={metrics}
                   isRunning={timerCircleProps.isRunning}
@@ -109,12 +115,12 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
           </div>
 
           {/* Notes Section */}
-          <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1 min-h-[300px]">
-            <div className="p-6 h-full flex flex-col">
-              <h2 className="text-lg font-semibold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+          <Card className="bg-card/90 backdrop-blur-md shadow-xl border-primary/20 flex-1 min-h-[300px]">
+            <div className="p-8 h-full flex flex-col">
+              <h2 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                 Quick Notes
               </h2>
-              <div className="flex-1">
+              <div className="flex-1 bg-card/30 rounded-lg p-4">
                 <NotesEditor ref={ref} />
               </div>
             </div>
@@ -122,11 +128,11 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
 
           <Button
             onClick={onClose}
-            className="fixed top-4 right-4 p-2 rounded-full bg-background/80 hover:bg-background/90 transition-colors"
+            className="fixed top-6 right-6 p-3 rounded-full bg-background/80 hover:bg-background/90 transition-colors shadow-md"
             variant="ghost"
             size="icon"
           >
-            <Minimize2 className="h-4 w-4" />
+            <Minimize2 className="h-5 w-5" />
             <span className="sr-only">Collapse timer view</span>
           </Button>
         </div>
@@ -136,4 +142,3 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
 }));
 
 TimerExpandedView.displayName = 'TimerExpandedView';
-

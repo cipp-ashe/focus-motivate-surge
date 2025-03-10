@@ -18,7 +18,7 @@ export const TimerControls = memo(({
   pauseTimeLeft = 0,
 }: TimerControlsProps) => {
   const iconSize = size === "large" ? "h-5 w-5" : "h-4 w-4";
-  const buttonSize = size === "large" ? "px-5 py-3" : "px-4 py-2";
+  const buttonSize = size === "large" ? "px-6 py-3 text-lg" : "px-5 py-2.5";
 
   const formatPauseTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -29,14 +29,14 @@ export const TimerControls = memo(({
   console.log('TimerControls rendering:', { isRunning, isPaused, showAddTime });
 
   return (
-    <div className="space-y-2 flex flex-col items-center w-full">
+    <div className="space-y-4 flex flex-col items-center w-full">
       <div className="w-full flex justify-center">
         <Button
           onClick={() => {
             console.log('Timer control button clicked:', { isRunning, isPaused });
             if (onToggle) onToggle();
           }}
-          className={`bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${buttonSize} w-full relative z-50`}
+          className={`bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${buttonSize} w-full relative z-10 shadow-md hover:shadow-lg transition-all`}
           {...toggleButtonA11yProps}
         >
           {isRunning ? (
@@ -58,11 +58,11 @@ export const TimerControls = memo(({
         </Button>
       </div>
       {(isRunning || isPaused) && (
-        <div className="w-full flex gap-2">
+        <div className="w-full flex gap-3">
           <Button
             onClick={onComplete}
             variant="outline"
-            className={`border-primary/20 hover:bg-primary/20 ${buttonSize} flex-1`}
+            className={`border-primary/20 hover:bg-primary/10 ${buttonSize} flex-1 shadow-sm transition-all font-medium`}
             {...completeButtonA11yProps}
           >
             <Check className={`mr-2 ${iconSize}`} />
@@ -72,7 +72,7 @@ export const TimerControls = memo(({
             <Button
               onClick={onAddTime}
               variant="outline"
-              className={`border-primary/20 hover:bg-primary/20 ${buttonSize} flex-1`}
+              className={`border-primary/20 hover:bg-primary/10 ${buttonSize} flex-1 shadow-sm transition-all font-medium`}
               {...addTimeButtonA11yProps}
             >
               <Plus className={`mr-2 ${iconSize}`} />

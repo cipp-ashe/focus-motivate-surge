@@ -59,7 +59,7 @@ export const TimerCompactView = memo(({
   setFavorites,
 }: TimerCompactViewProps) => {
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="p-8 space-y-8 animate-fade-in bg-card/70">
       <TimerHeader taskName={taskName} />
 
       <div className={cn(
@@ -67,8 +67,8 @@ export const TimerCompactView = memo(({
         timerCircleProps.isRunning ? 'h-0 opacity-0 overflow-hidden' : 'h-auto opacity-100'
       )}>
         <div className="grid gap-6 sm:grid-cols-2 items-start">
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-foreground/70">Duration</h3>
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground/80">Duration</h3>
             <MinutesInput
               minutes={Math.floor(timerCircleProps.minutes)}
               onMinutesChange={onMinutesChange}
@@ -77,8 +77,8 @@ export const TimerCompactView = memo(({
             />
           </div>
 
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-foreground/70">Sound</h3>
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-foreground/80">Sound</h3>
             <SoundSelector
               selectedSound={selectedSound}
               onSoundChange={onSoundChange}
@@ -89,7 +89,7 @@ export const TimerCompactView = memo(({
         </div>
       </div>
 
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center py-4">
         <TimerDisplay
           circleProps={timerCircleProps}
           size="normal"
@@ -98,19 +98,25 @@ export const TimerCompactView = memo(({
         />
       </div>
 
-      <TimerControls {...timerControlsProps} />
+      <div className="max-w-md mx-auto w-full">
+        <TimerControls {...timerControlsProps} />
+      </div>
 
-      <TimerMetricsDisplay
-        metrics={metrics}
-        isRunning={timerCircleProps.isRunning}
-      />
+      <div className="bg-card/30 rounded-lg p-4">
+        <TimerMetricsDisplay
+          metrics={metrics}
+          isRunning={timerCircleProps.isRunning}
+        />
+      </div>
 
-      <QuoteDisplay
-        currentTask={taskName}
-        onLike={onLike}
-        favorites={favorites}
-        setFavorites={setFavorites}
-      />
+      <div className="pt-4 border-t border-border/10">
+        <QuoteDisplay
+          currentTask={taskName}
+          onLike={onLike}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      </div>
     </div>
   );
 });

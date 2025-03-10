@@ -23,19 +23,19 @@ export const TimerSection = ({
 }: TimerSectionProps) => {
   if (!selectedTask) {
     return (
-      <Card className="w-full shadow-sm mt-4">
-        <CardHeader className="border-b border-border/10 pb-2">
+      <Card className="shadow-md border-border/20 overflow-hidden">
+        <CardHeader className="bg-card/70 border-b border-border/10 py-4">
           <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
             <TimerIcon className="h-5 w-5 text-purple-400" />
             Timer
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-6 flex flex-col items-center justify-center py-16">
-          <div className="text-center p-6 max-w-md flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center mb-8">
-              <TimerIcon className="h-8 w-8 text-muted-foreground/40" />
+        <CardContent className="bg-card/50 py-16">
+          <div className="text-center max-w-md mx-auto flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center mb-8">
+              <TimerIcon className="h-10 w-10 text-muted-foreground/40" />
             </div>
-            <h3 className="text-xl text-muted-foreground font-medium mb-2">Select a task to start the timer</h3>
+            <h3 className="text-xl text-muted-foreground font-medium mb-3">Select a task to start the timer</h3>
             <p className="text-sm text-muted-foreground/70">
               Choose a task from the list above
             </p>
@@ -48,7 +48,7 @@ export const TimerSection = ({
   const durationInSeconds = selectedTask.duration || 1500;
 
   return (
-    <Card className="w-full shadow-sm mt-4">
+    <Card className="shadow-md border-border/20 overflow-hidden">
       <Timer
         key={`timer-${selectedTask.id}-${durationInSeconds}`}
         duration={durationInSeconds}

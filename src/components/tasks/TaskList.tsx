@@ -44,14 +44,14 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <Card className="w-full shadow-sm">
-      <CardHeader className="pb-2 pt-4">
+    <Card className="shadow-md border-border/20 overflow-hidden">
+      <CardHeader className="bg-card/70 border-b border-border/10 py-4">
         <div className="flex-none">
           <TaskInput onTaskAdd={handleTaskAdd} />
         </div>
       </CardHeader>
 
-      <div className="px-4 py-3 border-t border-b border-border/10">
+      <div className="px-6 py-4 border-b border-border/10 bg-card/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-foreground">
             <ListTodo className="h-4 w-4 text-purple-400" />
@@ -71,7 +71,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
       </div>
 
-      <CardContent className="flex-1 overflow-y-auto p-0">
+      <CardContent className="flex-1 overflow-y-auto p-0 bg-card/30">
         {tasks.length > 0 ? (
           <TaskTable
             tasks={tasks}
@@ -82,10 +82,10 @@ export const TaskList: React.FC<TaskListProps> = ({
             onTasksClear={onTasksClear}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-32 text-center p-4 text-muted-foreground">
-            <ListTodo className="h-6 w-6 text-muted-foreground/50 mb-2" />
-            <p>No active tasks</p>
-            <p className="text-sm mt-1">Add a new task above to get started</p>
+          <div className="flex flex-col items-center justify-center h-40 text-center p-6 text-muted-foreground">
+            <ListTodo className="h-6 w-6 text-muted-foreground/50 mb-3" />
+            <p className="font-medium">No active tasks</p>
+            <p className="text-sm mt-2">Add a new task above to get started</p>
           </div>
         )}
       </CardContent>

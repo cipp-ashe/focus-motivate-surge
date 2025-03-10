@@ -1,18 +1,13 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0.5rem;
+  padding: 0;
   text-align: center;
   min-height: 100vh;
   height: 100%;
   position: relative;
   overflow-y: auto;
-}
-
-@media (min-width: 640px) {
-  #root {
-    padding: 1rem;
-  }
 }
 
 /* Themed Scrollbars */
@@ -22,7 +17,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(124, 58, 237, 0.05);
   border-radius: 4px;
 }
 
@@ -79,16 +74,66 @@
   color: #888;
 }
 
-/* Fixed card sizes for expanded view */
-.expanded-timer-card {
-  min-width: 90%;
-  max-width: 800px;
-  min-height: auto;
-  margin: 0 auto;
+/* Timer styling */
+.timer-circle {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: all 0.3s ease;
 }
 
-@media (min-width: 640px) {
-  .expanded-timer-card {
-    min-height: 550px;
+.timer-circle.active {
+  filter: drop-shadow(0 0 10px hsl(var(--primary)));
+}
+
+.task-list-item {
+  @apply transform transition-all duration-200 hover:scale-102 hover:translate-x-1;
+}
+
+/* Task animations */
+.completed-task-enter {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.completed-task-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Responsive layout adjustments */
+@media (min-width: 768px) {
+  .responsive-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
   }
+}
+
+/* Enhanced shadows */
+.shadow-glass {
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* Quote display animations */
+.quote-container {
+  transition: opacity 2s ease-in-out;
+}
+
+.quote-card {
+  transition: opacity 2s ease-in-out;
+}
+
+.timer-expand-enter {
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+.timer-expand-enter-active {
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.3s, opacity 0.3s;
 }

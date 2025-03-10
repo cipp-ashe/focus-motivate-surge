@@ -1,3 +1,4 @@
+
 import { memo, useEffect, useRef } from "react";
 import { TimerCircleProps } from "../../types/timer";
 
@@ -88,8 +89,8 @@ export const TimerCircle = memo(({
   }, []);
 
   const sizeClasses = size === 'large' 
-    ? 'w-48 h-48 sm:w-56 sm:h-56' 
-    : 'w-48 h-48';
+    ? 'w-64 h-64 sm:w-72 sm:h-72' 
+    : 'w-52 h-52 sm:w-56 sm:h-56';
 
   return (
     <div 
@@ -103,7 +104,7 @@ export const TimerCircle = memo(({
         aria-hidden="true"
       >
         <circle
-          className="text-muted/10 stroke-current"
+          className="text-muted/20 stroke-current"
           strokeWidth="4"
           fill="transparent"
           r="45"
@@ -115,9 +116,9 @@ export const TimerCircle = memo(({
           className={`stroke-current ${
             isRunning
               ? 'text-primary filter drop-shadow-lg'
-              : 'text-primary/50'
+              : 'text-primary/60'
           }`}
-          strokeWidth="4"
+          strokeWidth="5"
           fill="transparent"
           r="45"
           cx="50"
@@ -132,7 +133,7 @@ export const TimerCircle = memo(({
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span 
           ref={textRef}
-          className={`font-mono font-bold ${size === 'large' ? 'text-4xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}
+          className={`font-mono font-bold ${size === 'large' ? 'text-5xl sm:text-6xl' : 'text-3xl sm:text-4xl'}`}
           style={prefersReducedMotion ? { transition: 'none' } : undefined}
         >
           {formatTime(timeLeft)}
