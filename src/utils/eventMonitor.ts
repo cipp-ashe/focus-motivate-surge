@@ -1,5 +1,4 @@
-
-import { eventManager, EventType, EventPayload } from '@/lib/events/EventManager';
+import { eventManager, EventType, EventPayloads } from '@/lib/events/EventManager';
 
 type EventRecord = {
   timestamp: number;
@@ -28,7 +27,7 @@ export class EventMonitor {
     this.eventLog = [];
     
     // Subscribe to all events using a wildcard approach
-    const monitorEvent = <T extends EventType>(type: T, payload: EventPayload[T]) => {
+    const monitorEvent = <T extends EventType>(type: T, payload: EventPayloads[T]) => {
       this.recordEvent(type, payload);
     };
     
@@ -70,7 +69,7 @@ export class EventMonitor {
   /**
    * Record an event
    */
-  private recordEvent<T extends EventType>(eventType: T, payload: EventPayload[T]): void {
+  private recordEvent<T extends EventType>(eventType: T, payload: EventPayloads[T]): void {
     this.eventLog.push({
       timestamp: Date.now(),
       eventType: eventType as string,

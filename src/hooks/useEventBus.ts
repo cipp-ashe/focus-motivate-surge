@@ -1,6 +1,5 @@
-
 import { useEffect } from 'react';
-import { eventManager, EventType, EventPayload, EventHandler } from '@/lib/events/EventManager';
+import { eventManager, EventType, EventPayloads, EventHandler } from '@/lib/events/EventManager';
 
 /**
  * DEPRECATED: Use the useEvent hook from @/hooks/useEvent instead
