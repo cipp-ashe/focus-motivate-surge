@@ -45,9 +45,9 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <Card className="shadow-lg border-primary/10 overflow-hidden transition-all duration-300 hover:shadow-xl">
+    <Card className="w-full shadow-lg border-primary/10 overflow-hidden transition-all duration-300 hover:shadow-xl">
       <CardHeader className="bg-card/80 border-b border-primary/5 py-4">
-        <div className="flex-none">
+        <div className="w-full">
           <TaskInput onTaskAdd={handleTaskAdd} />
         </div>
       </CardHeader>
@@ -73,7 +73,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           </div>
         </div>
 
-        <div className="bg-card/20 backdrop-blur-sm">
+        <div className="bg-card/20 backdrop-blur-sm w-full">
           {tasks.length > 0 ? (
             <TaskTable
               tasks={tasks}

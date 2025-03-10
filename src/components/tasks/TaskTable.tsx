@@ -42,20 +42,22 @@ export const TaskTable = ({
   }, []);
 
   return (
-    <div className="space-y-2 p-4">
-      {tasks.map((task) => (
-        <TaskRow
-          key={task.id}
-          task={task}
-          isSelected={selectedTasks.includes(task.id)}
-          editingTaskId={editingTaskId}
-          onTaskClick={(task) => onTaskClick(task)}
-          onTaskDelete={() => onTaskDelete(task.id)}
-          onDurationChange={handleDurationChange}
-          onDurationClick={handleDurationClick}
-          onInputBlur={handleInputBlur}
-        />
-      ))}
+    <div className="w-full space-y-2 p-4">
+      <div className="grid gap-2 w-full">
+        {tasks.map((task) => (
+          <TaskRow
+            key={task.id}
+            task={task}
+            isSelected={selectedTasks.includes(task.id)}
+            editingTaskId={editingTaskId}
+            onTaskClick={(task) => onTaskClick(task)}
+            onTaskDelete={() => onTaskDelete(task.id)}
+            onDurationChange={handleDurationChange}
+            onDurationClick={handleDurationClick}
+            onInputBlur={handleInputBlur}
+          />
+        ))}
+      </div>
       
       {tasks.length > 1 && (
         <div className="flex justify-center pt-4">
