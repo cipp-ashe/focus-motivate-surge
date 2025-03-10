@@ -15,7 +15,7 @@ export const useTaskEvents = () => {
   const createTask = useCallback((task: Task) => {
     console.log("useTaskEvents: Creating task", task);
     
-    // First verify the task doesn't already exist in storage
+    // Using direct storage method to avoid race conditions
     const exists = taskStorage.taskExistsById(task.id);
     
     if (exists) {
@@ -23,15 +23,14 @@ export const useTaskEvents = () => {
       return;
     }
     
-    // Add task to storage directly for immediate persistence
+    // Add task to storage and emit event
     const added = taskStorage.addTask(task);
     
     if (added) {
-      // Then emit event for state updates
       eventBus.emit('task:create', task);
       toast.success('Task added 📝');
       
-      // Force task update to ensure it appears in UI
+      // Force UI update
       setTimeout(() => forceTaskUpdate(), 50);
     }
   }, []);
@@ -39,11 +38,10 @@ export const useTaskEvents = () => {
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     console.log("useTaskEvents: Updating task", taskId, updates);
     
-    // Update storage first
+    // Update storage and emit event
     const updated = taskStorage.updateTask(taskId, updates);
     
     if (updated) {
-      // Then emit event for state updates
       eventBus.emit('task:update', { taskId, updates });
     } else {
       console.log(`Task ${taskId} not found for update`);
@@ -53,36 +51,30 @@ export const useTaskEvents = () => {
   const deleteTask = useCallback((taskId: string, reason: 'manual' | 'completed' | 'template-removed' = 'manual') => {
     console.log("useTaskEvents: Deleting task", taskId, "reason:", reason);
     
-    // Remove from storage first to prevent race conditions
+    // Remove from storage and emit event
     const removed = taskStorage.removeTask(taskId);
-    console.log(`Task ${taskId} removed from storage:`, removed);
     
-    // Emit event for state updates even if not found in storage
-    // This ensures any in-memory references are also cleaned up
-    eventBus.emit('task:delete', { taskId, reason });
-    
-    if (removed && reason === 'manual') {
-      toast.success('Task deleted 🗑️');
-    } else if (removed && reason === 'template-removed') {
-      toast.info('Task removed with habit template');
+    if (removed) {
+      eventBus.emit('task:delete', { taskId, reason });
+      
+      if (reason === 'manual') {
+        toast.success('Task deleted 🗑️');
+      }
     }
     
-    // Force UI update after deletion
+    // Force UI update
     setTimeout(() => forceTaskUpdate(), 50);
   }, []);
 
   const completeTask = useCallback((taskId: string, metrics: any) => {
     console.log("useTaskEvents: Completing task", taskId);
     
-    // Complete task in storage first
+    // Complete in storage and emit event
     const completed = taskStorage.completeTask(taskId, metrics);
     
     if (completed) {
-      // Then emit event for state updates
       eventBus.emit('task:complete', { taskId, metrics });
       toast.success('Task completed 🎯');
-    } else {
-      console.log(`Task ${taskId} not found for completion`);
     }
   }, []);
 
@@ -92,51 +84,32 @@ export const useTaskEvents = () => {
   }, []);
 
   const forceTaskUpdate = useCallback(() => {
-    // Prevent multiple rapid calls
+    // Debounce updates
     const now = Date.now();
     if (now - lastForceUpdateTime < 500) {
-      console.log("useTaskEvents: Skipping force update, too soon since last update", 
+      console.log("useTaskEvents: Skipping force update, too recent", 
                   now - lastForceUpdateTime, "ms");
       return;
     }
     
     setLastForceUpdateTime(now);
     
-    // Prevent simultaneous processing
     if (processing) {
-      console.log("useTaskEvents: Task update already in progress, skipping");
+      console.log("useTaskEvents: Task update already in progress");
       return;
     }
     
     setProcessing(true);
     console.log("useTaskEvents: Forcing task update");
     
-    // Dispatch event to trigger reloading
+    // Dispatch event
     window.dispatchEvent(new Event('force-task-update'));
     
-    // Reset processing flag after a delay
+    // Reset processing flag
     setTimeout(() => {
       setProcessing(false);
     }, 300);
   }, [processing, lastForceUpdateTime]);
-
-  const forceTagsUpdate = useCallback(() => {
-    // Add debouncing to tags update too
-    const now = Date.now();
-    if (now - lastForceUpdateTime < 800) {
-      console.log("useTaskEvents: Skipping tags update, too soon since last update");
-      return;
-    }
-    
-    setLastForceUpdateTime(now);
-    console.log("useTaskEvents: Forcing tags update");
-    window.dispatchEvent(new Event('force-tags-update'));
-  }, [lastForceUpdateTime]);
-
-  const checkPendingHabits = useCallback(() => {
-    console.log("useTaskEvents: Checking pending habits");
-    eventBus.emit('habits:check-pending', {});
-  }, []);
 
   return {
     createTask,
@@ -144,8 +117,6 @@ export const useTaskEvents = () => {
     deleteTask,
     completeTask,
     selectTask,
-    forceTaskUpdate,
-    forceTagsUpdate,
-    checkPendingHabits
+    forceTaskUpdate
   };
 };

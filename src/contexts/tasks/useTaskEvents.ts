@@ -15,26 +15,23 @@ export const useTaskEvents = (
   completed: Task[],
   dispatch: React.Dispatch<any>
 ) => {
-  // Use useState instead of useRef for state that needs to persist between renders
-  // but doesn't need to trigger re-renders when it changes
-  const [lastTaskLoadTime, setLastTaskLoadTime] = useState(Date.now());
-  const [pendingTaskUpdates, setPendingTaskUpdates] = useState<Task[]>([]);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [preventReentrantUpdate, setPreventReentrantUpdate] = useState(false);
+  // Use useState for state that needs to persist between renders
   const [lastEventTime, setLastEventTime] = useState<Record<string, number>>({});
   const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
-  const [forceUpdateTimeout, setForceUpdateTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [preventReentrantUpdate, setPreventReentrantUpdate] = useState(false);
+  const [pendingTaskUpdates, setPendingTaskUpdates] = useState<Task[]>([]);
+  const [isInitializing, setIsInitializing] = useState(true);
   
   // Force reload tasks from storage
   const forceTasksReload = useCallback(() => {
     try {
-      // Prevent reentrant calls - if we're already in a reload, don't start another
+      // Prevent reentrant calls
       if (preventReentrantUpdate) {
         console.log("TaskEvents: Preventing reentrant force reload");
         return;
       }
       
-      // Debounce force reloads heavily
+      // Debounce force reloads
       const now = Date.now();
       const lastReloadTime = lastEventTime['forceReload'] || 0;
       if (now - lastReloadTime < 800) {
@@ -68,7 +65,7 @@ export const useTaskEvents = (
       dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
       setIsInitializing(false);
       
-      // Release the lock after a small delay to prevent rapid successive calls
+      // Release the lock after a small delay
       setTimeout(() => {
         setPreventReentrantUpdate(false);
       }, 300);
@@ -99,18 +96,15 @@ export const useTaskEvents = (
       eventBus.on('task:create', (task: Task) => {
         console.log("TaskEvents: Creating task", task.id, task.name);
         
-        if (!shouldProcessEvent(`task:create:${task.id}`, 500)) return;
-        
         // First, verify the task doesn't already exist
-        if (taskState.taskExists(items, task)) {
-          console.log(`TaskEvents: Task already exists, skipping: ${task.id}`);
+        const exists = items.some(t => t.id === task.id);
+        if (exists) {
+          console.log(`TaskEvents: Task ${task.id} already exists in state, skipping`);
           return;
         }
         
-        // Add to pending updates
+        // Add to pending updates and dispatch
         setPendingTaskUpdates(prev => [...prev, task]);
-        
-        // Add to state
         dispatch({ type: 'ADD_TASK', payload: task });
       }),
       
@@ -141,20 +135,14 @@ export const useTaskEvents = (
       // Handle template deletion
       eventBus.on('habit:template-delete', ({ templateId }) => {
         console.log("TaskEvents: Received template delete event for", templateId);
-        
-        // Delete tasks from storage first
-        taskStorage.deleteTasksByTemplate(templateId);
-        
-        // Then update state
         dispatch({ type: 'DELETE_TASKS_BY_TEMPLATE', payload: { templateId } });
       }),
       
       // Handle habit checking with improved verification
       eventBus.on('habits:check-pending', () => {
-        console.log("TaskEvents: Checking for pending habits");
-        
         if (!shouldProcessEvent('habits:check-pending', 1000)) return;
         
+        console.log("TaskEvents: Checking for pending habits");
         eventBus.emit('habits:processed', {});
         
         // Check for tasks in storage that aren't in memory
@@ -175,7 +163,6 @@ export const useTaskEvents = (
     // Handle force update events from window with debouncing
     const handleForceUpdate = () => {
       const now = Date.now();
-      // Debounce force updates to prevent infinite loops
       if (now - lastForceUpdateTime > 800) {
         setLastForceUpdateTime(now);
         console.log("TaskEvents: Force updating task list (debounced)");
@@ -187,7 +174,7 @@ export const useTaskEvents = (
     
     window.addEventListener('force-task-update', handleForceUpdate);
     
-    // Set up verification cleanup function
+    // Setup verification cleanup
     const verificationCleanup = taskVerification.setupPeriodicVerification(
       () => items,
       (missingTasks) => {
@@ -197,7 +184,7 @@ export const useTaskEvents = (
           });
         }
       },
-      60000 // Check every minute instead of every 30 seconds to reduce overhead
+      60000 // Check every minute
     );
     
     return () => {

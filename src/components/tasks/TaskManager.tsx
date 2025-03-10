@@ -81,6 +81,7 @@ const TaskManager = () => {
   }
 
   const handleTaskAdd = (task) => {
+    console.log("TaskManager - Adding task:", task);
     eventBus.emit('task:create', task);
   };
 
