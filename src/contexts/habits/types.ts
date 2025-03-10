@@ -23,6 +23,8 @@ export interface HabitContextActions {
   updateTemplateDays: (templateId: string, days: DayOfWeek[]) => void;
   addCustomTemplate: (template: Omit<HabitTemplate, 'id'>) => void;
   removeCustomTemplate: (templateId: string) => void;
+  reorderTemplates: (templates: ActiveTemplate[]) => void; // Added this line to match the implementation
+  findTemplateById: (templateId: string) => ActiveTemplate | undefined; // Added this missing function
   reloadTemplates: () => void;
 }
 

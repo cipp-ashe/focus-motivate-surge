@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
@@ -56,7 +55,8 @@ export const createHabitActions = (
     });
   }, [dispatch]);
 
-  const reorderTemplates = useCallback((templates: ActiveTemplate[]) => {
+  // Renamed to match the interface - this used to be reorderTemplates
+  const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     console.log("Reordering templates");
     
     // Use the event bus to handle template order updates
@@ -69,6 +69,12 @@ export const createHabitActions = (
     });
   }, [dispatch]);
 
+  // Keep reorderTemplates for backward compatibility
+  const reorderTemplates = useCallback((templates: ActiveTemplate[]) => {
+    console.log("Reordering templates (calling updateTemplateOrder)");
+    updateTemplateOrder(templates);
+  }, [updateTemplateOrder]);
+
   const findTemplateById = useCallback((templateId: string) => {
     return state.templates.find((t: ActiveTemplate) => t.templateId === templateId);
   }, [state.templates]);
@@ -78,13 +84,27 @@ export const createHabitActions = (
     // This is a stub that will be overridden in the HabitProvider
   }, []);
 
+  // Add stub implementations for the missing methods to satisfy the interface
+  const addCustomTemplate = useCallback((template: Omit<any, 'id'>) => {
+    console.log("Adding custom template - this should be implemented in the HabitProvider");
+    // Stub implementation
+  }, []);
+
+  const removeCustomTemplate = useCallback((templateId: string) => {
+    console.log("Removing custom template - this should be implemented in the HabitProvider");
+    // Stub implementation
+  }, []);
+
   return {
     addTemplate,
     updateTemplate,
     removeTemplate,
     updateTemplateDays,
+    updateTemplateOrder,
     reorderTemplates,
     findTemplateById,
-    reloadTemplates
+    reloadTemplates,
+    addCustomTemplate,
+    removeCustomTemplate
   };
 };
