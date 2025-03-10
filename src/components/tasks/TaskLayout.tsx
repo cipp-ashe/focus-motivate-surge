@@ -8,11 +8,11 @@ export interface TaskLayoutProps {
 
 export const TaskLayout = ({ mainContent, asideContent }: TaskLayoutProps) => {
   return (
-    <div className="flex flex-col md:flex-row h-full max-h-full overflow-hidden">
-      <div className="flex-1 overflow-auto p-4">
+    <div className="min-h-screen flex flex-col md:flex-row gap-4 p-4 bg-background">
+      <div className="flex-1 min-w-0">
         {mainContent}
       </div>
-      <aside className="md:w-96 h-full overflow-auto border-l border-border">
+      <aside className="w-full md:w-96 md:min-w-96 flex-shrink-0">
         {asideContent}
       </aside>
     </div>

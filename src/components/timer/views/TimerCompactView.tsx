@@ -1,3 +1,4 @@
+
 import { memo } from "react";
 import { Card } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
@@ -88,12 +89,14 @@ export const TimerCompactView = memo(({
         </div>
       </div>
 
-      <TimerDisplay
-        circleProps={timerCircleProps}
-        size="normal"
-        onClick={onExpand}
-        isRunning={timerCircleProps.isRunning}
-      />
+      <div className="flex items-center justify-center">
+        <TimerDisplay
+          circleProps={timerCircleProps}
+          size="normal"
+          onClick={onExpand}
+          isRunning={timerCircleProps.isRunning}
+        />
+      </div>
 
       <TimerControls {...timerControlsProps} />
 

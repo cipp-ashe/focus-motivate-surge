@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import TaskManager from '@/components/tasks/TaskManager';
@@ -66,24 +65,22 @@ const TimerPage = () => {
       <TimerErrorBoundary>
         <TaskLayout
           mainContent={
-            <div className="flex flex-col h-full space-y-4">
-              <TimerSection
-                selectedTask={selectedTask}
-                onTaskComplete={(metrics) => {
-                  eventBus.emit('task:complete', { taskId: selectedTaskId, metrics });
-                }}
-                onDurationChange={(seconds) => {
-                  if (selectedTaskId) {
-                    eventBus.emit('task:update', {
-                      taskId: selectedTaskId,
-                      updates: { duration: seconds }
-                    });
-                  }
-                }}
-                favorites={favorites}
-                setFavorites={setFavorites}
-              />
-            </div>
+            <TimerSection
+              selectedTask={selectedTask}
+              onTaskComplete={(metrics) => {
+                eventBus.emit('task:complete', { taskId: selectedTaskId, metrics });
+              }}
+              onDurationChange={(seconds) => {
+                if (selectedTaskId) {
+                  eventBus.emit('task:update', {
+                    taskId: selectedTaskId,
+                    updates: { duration: seconds }
+                  });
+                }
+              }}
+              favorites={favorites}
+              setFavorites={setFavorites}
+            />
           }
           asideContent={<TaskManager />}
         />

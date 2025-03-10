@@ -7,6 +7,7 @@ import { TaskTable } from './TaskTable';
 import { ListTodo, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 interface TaskListProps {
   tasks: Task[];
@@ -43,32 +44,34 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-none">
-        <TaskInput onTaskAdd={handleTaskAdd} />
-      </div>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="pb-2 pt-4">
+        <div className="flex-none">
+          <TaskInput onTaskAdd={handleTaskAdd} />
+        </div>
+      </CardHeader>
 
-      <div className="flex-none px-4 py-3 border-b border-border/50">
+      <div className="px-4 py-3 border-t border-b border-border/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-foreground">
-            <ListTodo className="h-4 w-4 text-primary" />
-            <span className="font-medium">Active Tasks</span>
+            <ListTodo className="h-4 w-4 text-purple-400" />
+            <span className="font-medium text-purple-400">Active Tasks</span>
           </div>
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
               size="sm"
               onClick={handleConfigureHabits}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-purple-400/30 text-purple-400 hover:bg-purple-400/10"
             >
-              <Settings2 className="h-4 w-4" />
+              <Settings2 className="h-3.5 w-3.5" />
               Configure Habits
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-2">
+      <CardContent className="flex-1 overflow-y-auto p-0">
         {tasks.length > 0 ? (
           <TaskTable
             tasks={tasks}
@@ -85,7 +88,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             <p className="text-sm mt-1">Add a new task above to get started</p>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

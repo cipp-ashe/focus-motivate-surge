@@ -23,22 +23,22 @@ export const TimerSection = ({
 }: TimerSectionProps) => {
   if (!selectedTask) {
     return (
-      <Card className="w-full shadow-sm mb-4">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <TimerIcon className="h-5 w-5 text-primary" />
+      <Card className="w-full shadow-sm h-full">
+        <CardHeader className="border-b border-border/10 pb-2">
+          <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
+            <TimerIcon className="h-5 w-5 text-purple-400" />
             Timer
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex items-center justify-center min-h-[300px] bg-muted/10 rounded-md border border-border/50">
-            <div className="text-center p-6">
-              <TimerIcon className="h-16 w-16 text-muted-foreground/50 mx-auto mb-6" />
-              <p className="text-lg text-muted-foreground font-medium">Select a task to start the timer</p>
-              <p className="text-sm text-muted-foreground/70 mt-3 max-w-md mx-auto">
-                Choose a task from the list on the right to begin your focused work session
-              </p>
+        <CardContent className="pt-6 flex flex-col items-center justify-center h-[calc(100%-4rem)]">
+          <div className="text-center p-6 max-w-md flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full border-2 border-muted-foreground/20 flex items-center justify-center mb-8">
+              <TimerIcon className="h-8 w-8 text-muted-foreground/40" />
             </div>
+            <h3 className="text-xl text-muted-foreground font-medium mb-2">Select a task to start the timer</h3>
+            <p className="text-sm text-muted-foreground/70">
+              Choose a task from the list on the right
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -48,7 +48,7 @@ export const TimerSection = ({
   const durationInSeconds = selectedTask.duration || 1500;
 
   return (
-    <Card className="w-full shadow-sm mb-4">
+    <Card className="w-full shadow-sm h-full">
       <Timer
         key={`timer-${selectedTask.id}-${durationInSeconds}`}
         duration={durationInSeconds}
