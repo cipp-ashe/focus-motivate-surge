@@ -91,7 +91,7 @@ const TimerPage = () => {
     <HabitsPanelProvider>
       <TimerErrorBoundary>
         <TaskLayout
-          asideContent={<TaskManager key={`task-manager-${forceUpdate}`} />}
+          asideContent={<TaskManager key={`task-manager-${forceUpdate}`} isTimerView />}
           mainContent={
             <TimerSection
               key={`timer-section-${selectedTaskId}-${forceUpdate}`}

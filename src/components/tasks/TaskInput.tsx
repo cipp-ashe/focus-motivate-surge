@@ -1,392 +1,458 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Task, TaskType, ChecklistItem } from '@/types/tasks';
+import { Task } from '@/types/tasks';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { TaskTypeSelector } from './TaskTypeSelector';
-import { Plus, Trash2, Upload, Mic, Info } from 'lucide-react';
+import { toast } from 'sonner';
+import { useEventBus } from '@/hooks/useEventBus';
+import { useEvent } from '@/hooks/useEvent';
+import { useTaskManager } from '@/hooks/tasks/useTaskManager';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import VoiceRecorder from '@/components/voiceNotes/VoiceRecorder';
-import { useVoiceNotes } from '@/contexts/voiceNotes/VoiceNotesContext';
-import { toast } from 'sonner';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from "@/components/ui/calendar"
+import { CalendarIcon } from "lucide-react"
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
+  defaultTaskType?: 'timer' | 'screenshot' | 'habit' | 'journal' | 'checklist' | 'regular';
+  simplifiedView?: boolean;
 }
 
-export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) => {
+export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, defaultTaskType, simplifiedView }) => {
   const [taskName, setTaskName] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
-  const [taskType, setTaskType] = useState<TaskType>('regular');
-  const [duration, setDuration] = useState(25); // Default 25 minutes
-  const [journalEntry, setJournalEntry] = useState('');
-  const [voiceNoteText, setVoiceNoteText] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([
-    { id: uuidv4(), text: '', completed: false }
-  ]);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const { addNote } = useVoiceNotes();
-
+  const [taskType, setTaskType] = useState<Task['taskType']>(defaultTaskType || 'regular');
+  const [isAddingMultiple, setIsAddingMultiple] = useState(false);
+  const [multipleTasksInput, setMultipleTasksInput] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  const { forceTaskUpdate } = useTaskEvents();
+  
+  // Habit Template
+  const [open, setOpen] = React.useState(false)
+  const [selectedTemplate, setSelectedTemplate] = React.useState<any>("")
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
+  const [templateSchedule, setTemplateSchedule] = useState('');
+  const [templateTags, setTemplateTags] = useState<string[]>([]);
+  const [templateActive, setTemplateActive] = useState(true);
+  const [templateId, setTemplateId] = useState(uuidv4());
+  const [isNewTemplate, setIsNewTemplate] = useState(true);
+  
+  // Habit Schedule
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  
+  // Tags
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
+  const [availableTags, setAvailableTags] = useState(['Work', 'Personal', 'Health', 'Finance']);
+  
+  // Task Relationships
+  const [habitId, setHabitId] = useState<string | null>(null);
+  const [checklistId, setChecklistId] = useState<string | null>(null);
+  
+  // Task Context
+  const { items: tasks } = useTaskContext();
+  
+  // Task Manager
+  const { createTask, updateTask, deleteTask } = useTaskManager();
+  
+  // Event Handlers
+  useEvent('task:create', (task: Task) => {
+    console.log('Task created:', task);
+  });
+  
+  useEvent('task:update', (data: { taskId: string; updates: Partial<Task> }) => {
+    console.log('Task updated:', data);
+  });
+  
+  useEvent('task:delete', (data: { taskId: string }) => {
+    console.log('Task deleted:', data);
+  });
+  
+  // Task Input Handlers
+  const handleTaskNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTaskName(e.target.value);
+  };
+  
+  const handleTaskTypeChange = (value: string) => {
+    setTaskType(value as Task['taskType']);
+  };
+  
+  const handleMultipleTasksInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMultipleTasksInput(e.target.value);
+  };
+  
+  // Task Creation Handlers
   const handleAddTask = () => {
-    if (!taskName.trim()) return;
-
-    // Validate specific task type requirements
-    if (taskType === 'screenshot' && !selectedImage) {
-      toast.error("Please upload a screenshot image");
+    if (!taskName.trim()) {
+      toast({
+        title: "Error",
+        description: "Task name cannot be empty.",
+        duration: 3000,
+      })
       return;
     }
-
-    if (taskType === 'voicenote' && !voiceNoteText.trim()) {
-      toast.error("Please record or type a voice note");
-      return;
-    }
-
+    
     const newTask: Task = {
       id: uuidv4(),
-      name: taskName.trim(),
-      description: taskDescription.trim() || undefined,
-      taskType: taskType,
+      name: taskName,
+      taskType: taskType || 'regular',
       completed: false,
-      createdAt: new Date().toISOString(),
-      // Add specific properties based on task type
-      ...(taskType === 'timer' ? { 
-        duration: duration * 60  // Convert minutes to seconds
-      } : {}),
-      ...(taskType === 'journal' ? { 
-        journalEntry: journalEntry.trim() 
-      } : {}),
-      ...(taskType === 'checklist' ? { 
-        checklistItems: checklistItems.filter(item => item.text.trim())
-      } : {}),
-      ...(taskType === 'voicenote' ? {
-        voiceNoteText: voiceNoteText.trim()
-      } : {}),
-      ...(taskType === 'screenshot' && selectedImage ? {
-        imageType: 'image',
-        fileName: selectedImage.name
-      } : {})
-    };
-
-    onTaskAdd(newTask);
-    
-    // Add to voice notes if it's a voice note task
-    if (taskType === 'voicenote' && voiceNoteText.trim()) {
-      addNote(voiceNoteText.trim());
-    }
-
-    // Handle image upload if it's a screenshot task
-    if (taskType === 'screenshot' && selectedImage) {
-      handleImageUpload(newTask.id, selectedImage);
-    }
-    
-    resetForm();
-  };
-
-  const handleImageUpload = (taskId: string, image: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      // In a real app, you might upload to a server here
-      // For now, we'll store it in localStorage as base64
-      if (typeof reader.result === 'string') {
-        localStorage.setItem(`screenshot_${taskId}`, reader.result);
-        toast.success('Screenshot saved with task');
+      createdAt: new Date(),
+      tags: tags,
+      relationships: {
+        habitId: habitId,
+        checklistId: checklistId,
       }
     };
-    reader.readAsDataURL(image);
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedImage(file);
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const resetForm = () => {
+    
+    // Call the onTaskAdd prop to add the task to the parent component's state
+    onTaskAdd(newTask);
+    
+    // Clear the input field
     setTaskName('');
-    setTaskDescription('');
-    setTaskType('regular');
-    setDuration(25);
-    setJournalEntry('');
-    setVoiceNoteText('');
-    setChecklistItems([{ id: uuidv4(), text: '', completed: false }]);
-    setIsRecording(false);
-    setSelectedImage(null);
-    setImagePreview(null);
-  };
-
-  const addChecklistItem = () => {
-    setChecklistItems([...checklistItems, { id: uuidv4(), text: '', completed: false }]);
-  };
-
-  const updateChecklistItem = (id: string, text: string) => {
-    setChecklistItems(items => 
-      items.map(item => item.id === id ? { ...item, text } : item)
-    );
-  };
-
-  const removeChecklistItem = (id: string) => {
-    if (checklistItems.length <= 1) return;
-    setChecklistItems(items => items.filter(item => item.id !== id));
-  };
-
-  // Handler for voice note recording completion
-  const handleVoiceRecordingComplete = (text: string) => {
-    setVoiceNoteText(text);
-    setIsRecording(false);
-  };
-
-  // Get task type help text
-  const getTaskTypeHelpText = () => {
-    switch(taskType) {
-      case 'timer':
-        return "A task with a timer to track your focused work time";
-      case 'screenshot':
-        return "Upload a screenshot to create a visual record";
-      case 'habit':
-        return "A recurring task to build a habit";
-      case 'journal':
-        return "Write a journal entry to record your thoughts";
-      case 'checklist':
-        return "Create a list of subtasks to complete";
-      case 'voicenote':
-        return "Record or type a voice note as a reminder";
-      default:
-        return "A standard task without special features";
+    setTags([]);
+    setHabitId(null);
+    setChecklistId(null);
+    
+    // Focus back to the input
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   };
-
+  
+  const handleAddMultipleTasks = () => {
+    if (!multipleTasksInput.trim()) {
+      toast({
+        title: "Error",
+        description: "Multiple tasks input cannot be empty.",
+        duration: 3000,
+      })
+      return;
+    }
+    
+    const taskNames = multipleTasksInput.split('\n').filter(name => name.trim() !== '');
+    const newTasks = taskNames.map(name => ({
+      id: uuidv4(),
+      name: name.trim(),
+      taskType: taskType || 'regular',
+      completed: false,
+      createdAt: new Date(),
+      tags: tags,
+      relationships: {
+        habitId: habitId,
+        checklistId: checklistId,
+      }
+    }));
+    
+    // Call the onTasksAdd prop to add the tasks to the parent component's state
+    onTasksAdd(newTasks);
+    
+    // Clear the input field
+    setMultipleTasksInput('');
+    setIsAddingMultiple(false);
+    setTags([]);
+    setHabitId(null);
+    setChecklistId(null);
+  };
+  
+  // Tag Handlers
+  const handleTagAdd = () => {
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag('');
+    }
+  };
+  
+  const handleTagRemove = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+  
+  // Habit Template Handlers
+  const handleTemplateSelect = (template: any) => {
+    setSelectedTemplate(template);
+    setTemplateName(template.name);
+    setTemplateDescription(template.description);
+    setTemplateSchedule(template.schedule);
+    setTemplateTags(template.tags);
+    setTemplateActive(template.active);
+    setTemplateId(template.id);
+    setIsNewTemplate(false);
+  };
+  
+  const handleTemplateCreate = () => {
+    setTemplateName('');
+    setTemplateDescription('');
+    setTemplateSchedule('');
+    setTemplateTags([]);
+    setTemplateActive(true);
+    setTemplateId(uuidv4());
+    setIsNewTemplate(true);
+    setOpen(true);
+  };
+  
+  const handleTemplateSave = () => {
+    const newTemplate = {
+      id: templateId,
+      name: templateName,
+      description: templateDescription,
+      schedule: templateSchedule,
+      tags: templateTags,
+      active: templateActive,
+    };
+    
+    if (isNewTemplate) {
+      // Logic to add new template
+      console.log('Creating new template:', newTemplate);
+      eventManager.emit('habit:template-add', newTemplate);
+      toast({
+        title: "Success",
+        description: "Habit template created.",
+        duration: 3000,
+      })
+    } else {
+      // Logic to update existing template
+      console.log('Updating template:', newTemplate);
+      eventManager.emit('habit:template-update', newTemplate);
+      toast({
+        title: "Success",
+        description: "Habit template updated.",
+        duration: 3000,
+      })
+    }
+    
+    setOpen(false);
+  };
+  
+  const handleTemplateDelete = () => {
+    console.log('Deleting template:', selectedTemplate);
+    eventManager.emit('habit:template-delete', { templateId: selectedTemplate.id });
+    setOpen(false);
+    toast({
+      title: "Success",
+      description: "Habit template deleted.",
+      duration: 3000,
+    })
+  };
+  
+  // Habit Schedule Handlers
+  const handleDateSelect = (date: Date | undefined) => {
+    setDate(date);
+  };
+  
+  // Task Relationship Handlers
+  const handleHabitSelect = (habitId: string | null) => {
+    setHabitId(habitId);
+  };
+  
+  const handleChecklistSelect = (checklistId: string | null) => {
+    setChecklistId(checklistId);
+  };
+  
+  // UI Rendering
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="task-name">Task Name</Label>
-          <Input
-            id="task-name"
-            placeholder="Enter task name"
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-          />
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="task-description">Description (Optional)</Label>
-          <Textarea
-            id="task-description"
-            placeholder="Add details about this task"
-            value={taskDescription}
-            onChange={(e) => setTaskDescription(e.target.value)}
-            rows={2}
-          />
-        </div>
-        
-        <div className="grid gap-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="task-type">Task Type</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-5 w-5">
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{getTaskTypeHelpText()}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <TaskTypeSelector 
-            value={taskType} 
-            onChange={setTaskType} 
-          />
-        </div>
-        
-        {taskType === 'timer' && (
-          <div className="grid gap-2">
-            <Label htmlFor="task-duration">Duration (minutes)</Label>
-            <Input
-              id="task-duration"
-              type="number"
-              min={1}
-              max={120}
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-            />
-          </div>
-        )}
-        
-        {taskType === 'journal' && (
-          <div className="grid gap-2">
-            <Label htmlFor="journal-entry">Journal Entry</Label>
-            <Textarea
-              id="journal-entry"
-              placeholder="Write your journal entry here..."
-              value={journalEntry}
-              onChange={(e) => setJournalEntry(e.target.value)}
-              rows={4}
-            />
-          </div>
-        )}
-        
-        {taskType === 'screenshot' && (
-          <div className="grid gap-2">
-            <Label htmlFor="screenshot-upload">Upload Screenshot</Label>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <Input
-                  id="screenshot-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById('screenshot-upload')?.click()}
-                  className="w-full"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {selectedImage ? 'Change Image' : 'Upload Image'}
-                </Button>
-              </div>
-              
-              {imagePreview && (
-                <div className="relative mt-2">
-                  <img 
-                    src={imagePreview} 
-                    alt="Screenshot preview" 
-                    className="max-h-40 rounded-md object-contain mx-auto border border-border"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="absolute top-1 right-1"
-                    onClick={() => {
-                      setSelectedImage(null);
-                      setImagePreview(null);
-                    }}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-              
-              {!selectedImage && (
-                <p className="text-sm text-muted-foreground">
-                  Upload a screenshot to create a visual task. You can attach notes to this image later.
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {taskType === 'voicenote' && (
-          <div className="grid gap-2">
-            <Label htmlFor="voice-note">Voice Note</Label>
-            {isRecording ? (
-              <div className="p-4 border border-border rounded-md">
-                <VoiceRecorder 
-                  onComplete={handleVoiceRecordingComplete} 
-                  compact={true}
-                />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <Textarea
-                  id="voice-note"
-                  placeholder="Type your voice note or click 'Record Voice Note' to speak"
-                  value={voiceNoteText}
-                  onChange={(e) => setVoiceNoteText(e.target.value)}
-                  rows={4}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsRecording(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Mic className="h-4 w-4" />
-                  Record Voice Note
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {taskType === 'checklist' && (
-          <div className="grid gap-2">
-            <div className="flex justify-between items-center">
-              <Label>Checklist Items</Label>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                onClick={addChecklistItem}
-                className="flex items-center gap-1"
-              >
-                <Plus className="h-3 w-3" /> Add Item
-              </Button>
-            </div>
-            <div className="space-y-2 mt-1">
-              {checklistItems.map((item, index) => (
-                <div key={item.id} className="flex items-center gap-2">
-                  <Input
-                    placeholder={`Item ${index + 1}`}
-                    value={item.text}
-                    onChange={(e) => updateChecklistItem(item.id, e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeChecklistItem(item.id)}
-                    disabled={checklistItems.length <= 1}
-                  >
-                    <Trash2 className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+    <div className="flex flex-col gap-2">
+      {/* Task Input */}
+      <div className="flex items-center gap-2">
+        <Input
+          type="text"
+          placeholder="Enter task name"
+          value={taskName}
+          onChange={handleTaskNameChange}
+          ref={inputRef}
+          className="flex-grow"
+        />
+        <Select onValueChange={handleTaskTypeChange} defaultValue={taskType}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select task type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="regular">Regular</SelectItem>
+            <SelectItem value="timer">Timer</SelectItem>
+            <SelectItem value="screenshot">Screenshot</SelectItem>
+            <SelectItem value="habit">Habit</SelectItem>
+            <SelectItem value="journal">Journal</SelectItem>
+            <SelectItem value="checklist">Checklist</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={handleAddTask}>Add Task</Button>
       </div>
       
-      <Button 
-        onClick={handleAddTask} 
-        disabled={!taskName.trim() || (taskType === 'screenshot' && !selectedImage) || (taskType === 'voicenote' && !voiceNoteText.trim())}
-        className="w-full"
-      >
-        Add Task
+      {/* Multiple Tasks Input Toggle */}
+      <Button variant="outline" size="sm" onClick={() => setIsAddingMultiple(!isAddingMultiple)}>
+        {isAddingMultiple ? 'Hide Multiple Tasks Input' : 'Add Multiple Tasks'}
       </Button>
+      
+      {/* Multiple Tasks Input */}
+      {isAddingMultiple && (
+        <div className="flex flex-col gap-2">
+          <Textarea
+            placeholder="Enter multiple tasks, each on a new line"
+            value={multipleTasksInput}
+            onChange={handleMultipleTasksInputChange}
+            className="flex-grow"
+          />
+          <Button onClick={handleAddMultipleTasks}>Add Multiple Tasks</Button>
+        </div>
+      )}
+      
+      {/* Tags Input */}
+      <div className="flex items-center gap-2">
+        <Input
+          type="text"
+          placeholder="Enter tag name"
+          value={newTag}
+          onChange={(e) => setNewTag(e.target.value)}
+          className="flex-grow"
+        />
+        <Button onClick={handleTagAdd}>Add Tag</Button>
+      </div>
+      
+      {/* Tags Display */}
+      <div className="flex items-center gap-2">
+        {tags.map(tag => (
+          <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+            {tag}
+            <button onClick={() => handleTagRemove(tag)} className="hover:text-destructive">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="M6 6 18 18"/></svg>
+            </button>
+          </Badge>
+        ))}
+      </div>
+      
+      {/* Habit Template */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline">Open Habit Template</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Habit Template</DialogTitle>
+            <DialogDescription>
+              Create or update a habit template.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input id="name" value={templateName} className="col-span-3" onChange={(e) => setTemplateName(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Textarea id="description" value={templateDescription} className="col-span-3" onChange={(e) => setTemplateDescription(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="schedule" className="text-right">
+                Schedule
+              </Label>
+              <Input id="schedule" value={templateSchedule} className="col-span-3" onChange={(e) => setTemplateSchedule(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tags" className="text-right">
+                Tags
+              </Label>
+              <Input id="tags" value={templateTags.join(',')} className="col-span-3" onChange={(e) => setTemplateTags(e.target.value.split(','))} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="active" className="text-right">
+                Active
+              </Label>
+              <Checkbox id="active" checked={templateActive} onCheckedChange={(checked) => setTemplateActive(checked || false)} />
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <Button variant="destructive" onClick={handleTemplateDelete}>Delete</Button>
+            <Button type="submit" onClick={handleTemplateSave}>
+              Save changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Habit Schedule */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-[280px] justify-start text-left font-normal",
+              !date && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {date ? format(date, "PPP") : <span>Pick a date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="center">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={setDate}
+            disabled={(date) =>
+              date > new Date() || date < new Date("1900-01-01")
+            }
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+      
+      {/* Task Relationships */}
+      <div className="flex items-center gap-2">
+        <Select onValueChange={handleHabitSelect} defaultValue={habitId || ''}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select habit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">None</SelectItem>
+            {tasks.filter(task => task.taskType === 'habit').map(habit => (
+              <SelectItem key={habit.id} value={habit.id}>{habit.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select onValueChange={handleChecklistSelect} defaultValue={checklistId || ''}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select checklist" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">None</SelectItem>
+            {tasks.filter(task => task.taskType === 'checklist').map(checklist => (
+              <SelectItem key={checklist.id} value={checklist.id}>{checklist.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 };

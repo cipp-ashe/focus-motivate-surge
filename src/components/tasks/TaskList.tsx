@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,12 +11,14 @@ interface TaskListProps {
   tasks: Task[];
   selectedTasks: string[];
   onTaskClick: (taskId: string) => void;
+  simplifiedView?: boolean;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
   tasks,
   selectedTasks,
   onTaskClick,
+  simplifiedView = false,
 }) => {
   const { completed: completedTasks } = useTaskContext();
   const [activeTab, setActiveTab] = useState('active');

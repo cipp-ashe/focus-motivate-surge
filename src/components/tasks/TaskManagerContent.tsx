@@ -14,13 +14,15 @@ interface TaskManagerContentProps {
   selectedTaskId: string | null;
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
+  isTimerView?: boolean;
 }
 
 export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   tasks,
   selectedTaskId,
   onTaskAdd,
-  onTasksAdd
+  onTasksAdd,
+  isTimerView = false
 }) => {
   const handleTaskAdd = (task: Task) => {
     console.log("TaskManagerContent - Adding task:", task);
@@ -56,6 +58,30 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   const checklistTasks = tasks.filter(task => task.taskType === 'checklist');
   const regularTasks = tasks.filter(task => !task.taskType || task.taskType === 'regular');
   const allTasks = tasks;
+
+  // For timer view, we show a simplified interface with only timer tasks
+  if (isTimerView) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="p-4 border-b border-border/10">
+          <TaskInput 
+            onTaskAdd={handleTaskAdd} 
+            onTasksAdd={handleTasksAdd}
+            defaultTaskType="timer"
+            simplifiedView
+          />
+        </div>
+        <div className="flex-1 overflow-auto">
+          <TaskList
+            tasks={timerTasks}
+            selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+            onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
+            simplifiedView
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -160,3 +186,4 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     </div>
   );
 };
+

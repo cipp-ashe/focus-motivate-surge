@@ -7,10 +7,19 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { TaskLoader } from './TaskLoader';
 import { TaskEventHandler } from './TaskEventHandler';
 import { TaskManagerContent } from './TaskManagerContent';
+import { useLocation } from 'react-router-dom';
 
-const TaskManager = () => {
+interface TaskManagerProps {
+  isTimerView?: boolean;
+}
+
+const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
+  const location = useLocation();
+  
+  // Auto-detect timer view if not explicitly provided
+  const isTimerPage = isTimerView ?? location.pathname.includes('/timer');
   
   // Initialize local tasks from context
   useEffect(() => {
@@ -81,6 +90,7 @@ const TaskManager = () => {
         selectedTaskId={selectedTaskId}
         onTaskAdd={handleTaskAdd}
         onTasksAdd={handleTasksAdd}
+        isTimerView={isTimerPage}
       />
     </TaskLoader>
   );
