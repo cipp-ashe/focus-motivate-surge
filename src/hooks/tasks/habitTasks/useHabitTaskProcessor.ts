@@ -1,4 +1,3 @@
-
 import { useCallback, useRef, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
@@ -84,7 +83,7 @@ export const useHabitTaskProcessor = () => {
         if (!existingTask.taskType) {
           const updatedTask = {
             ...existingTask,
-            taskType: 'habit'
+            taskType: 'habit' as const // Specify the literal type
           };
           
           // Save the updated task

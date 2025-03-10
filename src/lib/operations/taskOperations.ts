@@ -234,7 +234,7 @@ export const taskOperations = {
         description: `Habit task for ${date}`,
         completed: false,
         duration,
-        taskType: 'habit', // Explicitly mark as habit task
+        taskType: 'habit' as const, // Explicitly mark as habit task with const assertion
         relationships: {
           habitId,
           templateId,

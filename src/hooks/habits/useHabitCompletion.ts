@@ -26,7 +26,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
           eventBus.emit('journal:open', { 
             habitId: habit.id, 
             habitName: habit.name,
-            templateId
+            templateId // Make sure this property is included in the event object
           });
           // Don't mark as completed yet - will be completed when journal entry is saved
           return prev;
