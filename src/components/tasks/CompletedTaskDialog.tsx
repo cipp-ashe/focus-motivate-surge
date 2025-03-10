@@ -1,13 +1,21 @@
 
 import React from 'react';
-import { Task } from '@/types/tasks';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Calendar, BookOpen, Image, Timer, Pencil, FileText } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Task, TaskMetrics } from '@/types/tasks';
+import { formatDistanceToNow } from 'date-fns';
+import { ClockIcon, BookOpen, Image, CheckSquare, Calendar, FileText } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
+import { TaskMetricsRow } from './TaskMetricsRow';
+import { ScrollArea } from '../ui/scroll-area';
 import { relationshipManager } from '@/lib/relationshipManager';
-import { useNoteState } from '@/contexts/notes/NoteContext';
-import { formatTime } from '@/utils/timeUtils';
 
 interface CompletedTaskDialogProps {
   task: Task | null;
@@ -15,37 +23,30 @@ interface CompletedTaskDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
-  task,
-  open,
-  onOpenChange,
-}) => {
-  const noteState = useNoteState();
-
+export function CompletedTaskDialog({ 
+  task, 
+  open, 
+  onOpenChange 
+}: CompletedTaskDialogProps) {
   if (!task) return null;
 
-  // Find associated journal entry if exists
-  const relatedEntities = relationshipManager.getRelatedEntities(task.id, 'task', 'note');
-  const associatedNotes = relatedEntities.length > 0 
-    ? relatedEntities.map(rel => noteState.items.find(note => note.id === rel.id)).filter(Boolean)
-    : [];
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Unknown date';
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-
-  // Get appropriate icon based on task type
+  const metrics = task.metrics || {};
+  const completedDate = task.completedAt ? new Date(task.completedAt) : null;
+  const relatedNotes = relationshipManager.getRelatedEntities(task.id, 'task', 'note');
+  
+  // Helper function to get task type icon
   const getTaskTypeIcon = () => {
-    switch(task.taskType) {
+    switch (task.taskType) {
       case 'timer':
-        return <Timer className="h-4 w-4 text-purple-400" />;
+        return <ClockIcon className="h-4 w-4 text-purple-400" />;
       case 'screenshot':
         return <Image className="h-4 w-4 text-blue-400" />;
       case 'habit':
         return <Calendar className="h-4 w-4 text-green-400" />;
-      case 'regular':
+      case 'journal':
+        return <BookOpen className="h-4 w-4 text-amber-400" />;
+      case 'checklist':
+        return <CheckSquare className="h-4 w-4 text-cyan-400" />;
       default:
         return <FileText className="h-4 w-4 text-primary" />;
     }
@@ -53,114 +54,153 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-2">
             {getTaskTypeIcon()}
-            <DialogTitle className="text-xl font-bold">{task.name}</DialogTitle>
+            <DialogTitle className="text-lg">{task.name}</DialogTitle>
           </div>
-          <DialogDescription className="text-sm">
-            <div className="flex items-center gap-2 mt-1">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>Completed on {formatDate(task.completedAt)}</span>
-            </div>
+          <DialogDescription className="flex justify-between items-center">
+            <span>
+              {completedDate ? (
+                <>Completed {formatDistanceToNow(completedDate, { addSuffix: true })}</>
+              ) : (
+                <>Created {formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}</>
+              )}
+            </span>
             {task.taskType && (
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs px-2 py-0.5 rounded-full bg-muted">
-                  {task.taskType.charAt(0).toUpperCase() + task.taskType.slice(1)} Task
-                </span>
-              </div>
+              <Badge variant="outline" className={cn(
+                "ml-2",
+                task.taskType === 'timer' && "bg-purple-100 text-purple-800",
+                task.taskType === 'screenshot' && "bg-blue-100 text-blue-800",
+                task.taskType === 'habit' && "bg-green-100 text-green-800",
+                task.taskType === 'journal' && "bg-amber-100 text-amber-800",
+                task.taskType === 'checklist' && "bg-cyan-100 text-cyan-800",
+                !task.taskType && "bg-gray-100 text-gray-800"
+              )}>
+                {task.taskType || 'regular'}
+              </Badge>
             )}
           </DialogDescription>
         </DialogHeader>
-
-        {task.description && (
-          <div className="space-y-2">
-            <h3 className="font-medium text-sm">Description</h3>
-            <p className="text-sm text-muted-foreground">{task.description}</p>
-          </div>
-        )}
-
-        {task.metrics && task.taskType === 'timer' && (
-          <div className="space-y-3">
-            <h3 className="font-medium text-sm">Timer Metrics</h3>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              {task.metrics.expectedTime && (
-                <div>
-                  <p className="text-xs text-muted-foreground">Expected Time</p>
-                  <p>{task.metrics.expectedTime} min</p>
+        
+        <ScrollArea className="flex-1 pr-4">
+          <div className="space-y-4">
+            {task.description && (
+              <div>
+                <h4 className="text-sm font-medium mb-1">Description</h4>
+                <p className="text-sm text-muted-foreground">{task.description}</p>
+              </div>
+            )}
+            
+            {/* Display metrics based on task type */}
+            {task.taskType === 'timer' && (
+              <div className="bg-slate-50 p-3 rounded-md shadow-sm">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
+                  <ClockIcon className="h-3 w-3" /> Timer Metrics
+                </h4>
+                <div className="space-y-1 text-sm">
+                  <TaskMetricsRow 
+                    label="Expected Time" 
+                    value={metrics.expectedTime ? `${Math.floor(metrics.expectedTime / 60)}m` : 'N/A'} 
+                  />
+                  <TaskMetricsRow 
+                    label="Actual Time" 
+                    value={metrics.actualTime ? `${Math.floor(metrics.actualTime / 60)}m` : 'N/A'} 
+                  />
+                  <TaskMetricsRow 
+                    label="Pauses" 
+                    value={metrics.pauseCount?.toString() || '0'} 
+                  />
+                  <TaskMetricsRow 
+                    label="Efficiency" 
+                    value={metrics.efficiencyRatio ? `${(metrics.efficiencyRatio * 100).toFixed(0)}%` : 'N/A'} 
+                  />
                 </div>
-              )}
-              {task.metrics.actualDuration !== undefined && (
-                <div>
-                  <p className="text-xs text-muted-foreground">Actual Time</p>
-                  <p>{task.metrics.actualDuration} min</p>
+              </div>
+            )}
+            
+            {/* Display journal content if available */}
+            {task.taskType === 'journal' && task.journalEntry && (
+              <div className="bg-amber-50 p-3 rounded-md shadow-sm">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
+                  <BookOpen className="h-3 w-3" /> Journal Entry
+                </h4>
+                <p className="text-sm whitespace-pre-line">{task.journalEntry}</p>
+              </div>
+            )}
+            
+            {/* Display checklist items if available */}
+            {task.taskType === 'checklist' && task.checklistItems && task.checklistItems.length > 0 && (
+              <div className="bg-cyan-50 p-3 rounded-md shadow-sm">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
+                  <CheckSquare className="h-3 w-3" /> Checklist Items
+                </h4>
+                <ul className="space-y-1">
+                  {task.checklistItems.map(item => (
+                    <li key={item.id} className="flex items-center gap-2 text-sm">
+                      <div className={cn(
+                        "h-3 w-3 rounded-sm border",
+                        item.completed ? "bg-primary border-primary" : "border-gray-300"
+                      )} />
+                      <span className={item.completed ? "line-through text-muted-foreground" : ""}>
+                        {item.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Display screenshot/image if available */}
+            {task.taskType === 'screenshot' && task.imageUrl && (
+              <div className="bg-blue-50 p-3 rounded-md shadow-sm">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
+                  <Image className="h-3 w-3" /> Screenshot
+                </h4>
+                <div className="border rounded-md overflow-hidden">
+                  <img 
+                    src={task.imageUrl} 
+                    alt={task.name} 
+                    className="w-full object-contain max-h-60"
+                  />
                 </div>
-              )}
-              {task.metrics.pauseCount !== undefined && (
-                <div>
-                  <p className="text-xs text-muted-foreground">Breaks Taken</p>
-                  <p>{task.metrics.pauseCount}</p>
-                </div>
-              )}
-              {task.metrics.efficiencyRatio !== undefined && (
-                <div>
-                  <p className="text-xs text-muted-foreground">Efficiency</p>
-                  <p>{task.metrics.efficiencyRatio.toFixed(1)}%</p>
-                </div>
-              )}
-              {task.metrics.completionStatus && (
-                <div>
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <p>{task.metrics.completionStatus}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {associatedNotes.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="font-medium text-sm">Associated Journal Entries</h3>
-            <div className="space-y-2">
-              {associatedNotes.map(note => (
-                <div key={note!.id} className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-                  <BookOpen className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
-                  <div>
-                    <p className="font-medium text-sm">{note?.title || 'Untitled Note'}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {note!.content.substring(0, 100)}...
+                {task.capturedText && (
+                  <div className="mt-2">
+                    <h5 className="text-xs font-medium mb-1">Captured Text</h5>
+                    <p className="text-xs text-muted-foreground whitespace-pre-line">
+                      {task.capturedText}
                     </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {task.imageUrl && (
-          <div className="space-y-2">
-            <h3 className="font-medium text-sm">Attached Image</h3>
-            <div className="overflow-hidden rounded-md border">
-              <img 
-                src={task.imageUrl} 
-                alt={task.name} 
-                className="w-full object-cover h-40" 
-              />
-            </div>
-            {task.capturedText && (
-              <div className="text-xs text-muted-foreground mt-1">
-                <p className="font-medium">Captured Text:</p>
-                <p className="mt-1">{task.capturedText}</p>
+                )}
+              </div>
+            )}
+            
+            {/* Display related notes if any */}
+            {relatedNotes.length > 0 && (
+              <div className="bg-slate-50 p-3 rounded-md shadow-sm">
+                <h4 className="text-sm font-medium mb-2">Related Notes</h4>
+                <ul className="space-y-1">
+                  {relatedNotes.map(note => (
+                    <li key={note.id} className="text-sm">
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-blue-600 hover:text-blue-800"
+                        onClick={() => {
+                          // Navigate to the note
+                          window.location.href = `/notes/${note.id}`;
+                        }}
+                      >
+                        {note.content?.substring(0, 30) || 'Untitled Note'}...
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
-        )}
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-        </DialogFooter>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
-};
+}

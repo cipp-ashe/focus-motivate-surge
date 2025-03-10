@@ -9,10 +9,10 @@ export interface TaskMetrics {
   completionDate?: string;
   streak?: number;
   
-  // Add missing properties referenced in other components
+  // Timer task specific metrics
   expectedTime?: number;
   actualDuration?: number;
-  favoriteQuotes?: string[]; // Changed from number to string[] to match TimerMetrics
+  favoriteQuotes?: string[];
   pausedTime?: number;
   extensionTime?: number;
   netEffectiveTime?: number;
@@ -32,17 +32,23 @@ export interface Task {
   clearReason?: 'manual' | 'completed';
   taskType?: TaskType; // Using the TaskType enum
   relationships?: {
-    habitId?: string;
-    templateId?: string;
-    date?: string;
+    habitId?: string;    // If this task was created from a habit
+    templateId?: string; // The template that contains the habit
+    date?: string;       // The date this habit task is for
   };
   metrics?: TaskMetrics;
   tags?: Tag[];
+  
+  // Screenshot task specific fields
   imageUrl?: string;
   imageType?: 'screenshot' | 'image' | null;
   fileName?: string;
   capturedText?: string;
+  
+  // Journal task specific field
   journalEntry?: string;
+  
+  // Checklist task specific field
   checklistItems?: ChecklistItem[];
 }
 
