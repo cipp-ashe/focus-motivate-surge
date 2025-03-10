@@ -6,7 +6,7 @@ import HabitMetric from './HabitMetric';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Timer, BookText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { toast } from 'sonner';
 
@@ -42,16 +42,17 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
     if (relatedTask) {
       console.log(`Found existing task for habit ${habit.name}:`, relatedTask);
       // Start the timer for this task
-      eventBus.emit('task:select', relatedTask.id);
+      eventManager.emit('task:select', relatedTask.id);
       
       // Send timer start event with task duration
-      eventBus.emit('timer:start', { 
+      eventManager.emit('timer:start', { 
         taskName: relatedTask.name, 
-        duration: relatedTask.duration || 1500 
+        duration: relatedTask.duration || 1500,
+        currentTime: Date.now()
       });
       
       // Expand timer view
-      eventBus.emit('timer:expand', { taskName: relatedTask.name });
+      eventManager.emit('timer:expand', { taskName: relatedTask.name });
       
       // Navigate to timer page
       window.location.href = '/timer';
@@ -133,7 +134,7 @@ const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
                     size="sm"
                     className="h-8 px-3 rounded-md border-primary/50"
                     onClick={() => {
-                      eventBus.emit('journal:open', { habitId: habit.id, habitName: habit.name });
+                      eventManager.emit('journal:open', { habitId: habit.id, habitName: habit.name });
                     }}
                   >
                     <BookText className="h-4 w-4 mr-1" /> Write

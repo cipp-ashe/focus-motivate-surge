@@ -34,13 +34,18 @@ export type HabitEventPayload = {
     habitId: string;
     templateId?: string;
   };
+  'habit:journal-complete': any;
+  'habit:progress-update': any;
+  'habit:deleted': any;
+  'habit:journal-create': any;
+  'habit:task-deleted': any;
   'habits:check-pending': any;
   'habits:processed': any;
 };
 
 export type TimerEventPayload = {
   'timer:init': { taskName: string; duration: number };
-  'timer:start': { taskName: string; duration: number; currentTime: number };
+  'timer:start': { taskName: string; duration: number; currentTime?: number };
   'timer:pause': { taskName: string; timeLeft: number; metrics: any };
   'timer:reset': { taskName: string; duration: number };
   'timer:complete': { taskName: string; metrics: any };
@@ -48,12 +53,35 @@ export type TimerEventPayload = {
   'timer:collapse': { taskName: string; saveNotes: boolean };
   'timer:metrics-update': { taskName: string; metrics: any };
   'timer:state-update': { taskName: string; timeLeft: number; isRunning: boolean; metrics: any };
+  'timer:tick': any;
+  'timer:resume': any;
 };
 
 export type SystemEventPayload = {
   'page:timer-ready': { timestamp: string };
   'tags:force-update': { timestamp: string };
   'nav:route-change': { from: string; to: string };
+  'app:initialization-complete': any;
+  'journal:open': { habitId: string; habitName: string };
+  'note:create': any;
+  'note:create-from-habit': {
+    habitId: string;
+    habitName: string;
+    description: string;
+    templateId?: string;
+    content?: string;
+  };
+  'note:delete': any;
+  'note:deleted': {
+    noteId: string;
+  };
+  'tag:link': any;
+  'tag:unlink': any;
+  'quote:link-task': any;
+  'relationship:create': any;
+  'relationship:delete': any;
+  'relationship:update': any;
+  'relationship:batch-update': any;
 };
 
 // Combine all event types

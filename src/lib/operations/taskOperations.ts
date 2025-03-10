@@ -1,4 +1,3 @@
-
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
@@ -164,8 +163,16 @@ export const taskOperations = {
       const completedTask = { ...task, completed: true };
       taskStorage.updateTask(taskId, completedTask);
       
-      // Move to completed tasks
-      taskStorage.moveToCompleted(taskId, metrics);
+      // Save completion metrics (this replaces moveToCompleted since we don't have that method)
+      if (metrics) {
+        // Store the completed task with its metrics in localStorage
+        const completedTasks = JSON.parse(localStorage.getItem('completed_tasks') || '[]');
+        completedTasks.push({...completedTask, completedAt: new Date().toISOString(), metrics});
+        localStorage.setItem('completed_tasks', JSON.stringify(completedTasks));
+        
+        // Remove from active tasks after storing in completed
+        taskStorage.removeTask(taskId);
+      }
       
       // Emit task complete event
       eventManager.emit('task:complete', { taskId, metrics });

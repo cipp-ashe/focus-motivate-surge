@@ -1,14 +1,17 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Index from './pages';
-import Timer from './pages/timer';
-import Notes from './pages/notes';
-import Habits from './pages/habits';
 import './App.css';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'sonner';
 import { TaskProvider } from './contexts/tasks/TaskContext';
+import { AppLayout } from './components/AppLayout';
+
+// Lazy load page components
+const IndexPage = lazy(() => import('./pages/Index'));
+const TimerPage = lazy(() => import('./pages/Timer'));
+const NotesPage = lazy(() => import('./pages/Notes'));
+const HabitsPage = lazy(() => import('./pages/Habits'));
+const TaskPage = lazy(() => import('./pages/TaskPage'));
 
 function App() {
   return (
@@ -16,19 +19,35 @@ function App() {
       <BrowserRouter>
         <TaskProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/timer" element={<Timer />} />
-            <Route path="/notes" element={<Notes />} />
-            <Route path="/habits" element={<Habits />} />
+            <Route path="/" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <IndexPage />
+              </Suspense>
+            } />
+            <Route path="/timer" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <TimerPage />
+              </Suspense>
+            } />
+            <Route path="/notes" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <NotesPage />
+              </Suspense>
+            } />
+            <Route path="/habits" element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <HabitsPage />
+              </Suspense>
+            } />
             <Route path="/tasks" element={
               <Suspense fallback={<div>Loading...</div>}>
-                {React.lazy(() => import('./pages/TaskPage'))}
+                <TaskPage />
               </Suspense>
             } />
           </Routes>
         </TaskProvider>
       </BrowserRouter>
-      <ToastContainer />
+      <Toaster />
     </div>
   );
 }
