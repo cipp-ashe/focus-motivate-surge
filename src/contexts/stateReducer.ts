@@ -1,9 +1,7 @@
-
-import type { StateContext } from '@/types/state';
+import type { StateContext, EntityRelationship } from '@/types/state';
 import type { Task } from '@/types/tasks';
 import type { Note } from '@/types/notes';
 import type { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
-import type { EntityRelationship } from '@/types/state';
 import { taskReducer } from './reducers/taskReducer';
 import { habitReducer } from './reducers/habitReducer';
 import { noteReducer } from './reducers/noteReducer';

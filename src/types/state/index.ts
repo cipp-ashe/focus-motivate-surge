@@ -2,9 +2,18 @@
 import type { Task, TaskMetrics } from '../tasks';
 import type { Note } from '../notes';
 import type { HabitDetail, ActiveTemplate, DayOfWeek } from '@/components/habits/types';
+import { EntityType } from '../core';
 
-export type EntityType = 'task' | 'habit' | 'note' | 'template' | 'tag' | 'quote';
-export type RelationType = 'habit-task' | 'task-note' | 'habit-note' | 'tag-entity' | 'quote-task' | 'template-habit' | 'habit-journal';
+export type RelationType = 
+  | 'habit-task' 
+  | 'task-note' 
+  | 'habit-note' 
+  | 'tag-entity' 
+  | 'quote-task' 
+  | 'template-habit' 
+  | 'habit-journal' 
+  | 'voice-note-transcription'
+  | 'source';
 
 export interface EntityRelationship {
   sourceId: string;
