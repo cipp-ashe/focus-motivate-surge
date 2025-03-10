@@ -12,7 +12,7 @@ export const useTaskEvents = () => {
     window.dispatchEvent(new Event('force-task-update'));
     
     // Also emit via event bus for components using that system
-    eventBus.emit('task:reload', {});
+    eventBus.emit('task:reload' as any, {});
     
     // And via event manager
     eventManager.emit('task:reload' as TimerEventType, {});

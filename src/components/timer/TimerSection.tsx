@@ -7,6 +7,8 @@ import { Timer as TimerIcon, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { eventBus } from "@/lib/eventBus";
+import { useEvent } from "@/hooks/useEvent";
+import { useEffect, useState } from "react";
 
 interface TimerSectionProps {
   selectedTask: Task | null;
@@ -19,7 +21,23 @@ export const TimerSection = ({
   favorites,
   setFavorites,
 }: TimerSectionProps) => {
-  if (!selectedTask) {
+  const [currentTask, setCurrentTask] = useState<Task | null>(selectedTask);
+
+  // Listen for timer:set-task events to update the current task
+  useEvent('timer:set-task', (task: Task) => {
+    console.log("TimerSection: Received timer:set-task event", task);
+    setCurrentTask(task);
+  });
+
+  // Update current task when selectedTask changes
+  useEffect(() => {
+    if (selectedTask && (!currentTask || selectedTask.id !== currentTask.id)) {
+      console.log("TimerSection: Selected task changed", selectedTask);
+      setCurrentTask(selectedTask);
+    }
+  }, [selectedTask, currentTask]);
+
+  if (!currentTask) {
     return (
       <Card className="shadow-md border-border/20 overflow-hidden">
         <CardHeader className="bg-card/70 border-b border-border/10 py-4">
@@ -43,16 +61,16 @@ export const TimerSection = ({
     );
   }
 
-  const durationInSeconds = selectedTask.duration || 1500;
+  const durationInSeconds = currentTask.duration || 1500;
   
   const handleTaskComplete = (metrics: TimerStateMetrics) => {
-    eventBus.emit('task:complete', { taskId: selectedTask.id, metrics });
+    eventBus.emit('task:complete', { taskId: currentTask.id, metrics });
   };
   
   const handleDurationChange = (minutes: number) => {
     const seconds = minutes * 60;
     eventBus.emit('task:update', { 
-      taskId: selectedTask.id, 
+      taskId: currentTask.id, 
       updates: { duration: seconds } 
     });
   };
@@ -60,12 +78,12 @@ export const TimerSection = ({
   return (
     <Card className="shadow-md border-border/20 overflow-hidden">
       <Timer
-        key={`timer-${selectedTask.id}-${durationInSeconds}`}
+        key={`timer-${currentTask.id}-${durationInSeconds}`}
         duration={durationInSeconds}
-        taskName={selectedTask.name}
+        taskName={currentTask.name}
         onComplete={handleTaskComplete}
         onAddTime={() => {
-          console.log("Time added to task:", selectedTask.name);
+          console.log("Time added to task:", currentTask.name);
         }}
         onDurationChange={handleDurationChange}
         favorites={favorites}

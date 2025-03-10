@@ -9,7 +9,7 @@ import {
   ToastAction as RadixToastAction 
 } from "@radix-ui/react-toast";
 
-import { useToast, ToastActionElement } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export const ToastProvider = RadixToastProvider;
 export const ToastViewport = RadixToastViewport;
@@ -19,10 +19,13 @@ export const ToastDescription = RadixToastDescription;
 export const ToastClose = RadixToastClose;
 export const ToastAction = RadixToastAction;
 export { useToast };
+export { toast } from "@/hooks/use-toast";
 
 export interface ToastProps {
   title?: string;
   description?: string;
-  action?: ToastActionElement;
+  action?: React.ReactElement<{
+    onPress: () => void
+  }>;
   duration?: number;
 }

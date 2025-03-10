@@ -13,7 +13,8 @@ export function useEvent<T = any>(
 ) {
   useEffect(() => {
     // Subscribe to the event
-    const unsubscribe = eventBus.on(eventType, handler);
+    // Use type assertion to handle potential type mismatches
+    const unsubscribe = eventBus.on(eventType as any, handler);
     
     // Cleanup subscription on unmount
     return () => {

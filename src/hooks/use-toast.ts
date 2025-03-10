@@ -1,6 +1,18 @@
 
 import * as React from "react"
-import { ToastActionElement, ToastProps } from "@/components/ui/toast"
+
+// Define the ToastActionElement type within this file since it's not exported from toast.tsx
+export type ToastActionElement = React.ReactElement<{
+  onPress: () => void
+}>
+
+export type ToastProps = {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+  duration?: number
+}
 
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000
@@ -90,7 +102,6 @@ const reducer = (state: State, action: Action): State => {
           t.id === toastId || toastId === undefined
             ? {
                 ...t,
-                open: false,
               }
             : t
         ),
@@ -127,37 +138,56 @@ function dispatch(action: Action) {
 
 export type Toast = Omit<ToasterToast, "id">
 
-export function toast(props: Toast) {
-  const id = genId()
-
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
-    },
-  })
-
-  return {
-    id,
-    dismiss,
-    update,
-  }
+interface ToastOptions extends Toast {
+  duration?: number
 }
 
-toast.dismiss = (toastId?: string) => {
-  dispatch({ type: "DISMISS_TOAST", toastId })
+// Add the missing methods to toast
+export const toast = {
+  // Toast function implementation
+  custom: (props: ToastOptions) => {
+    const id = genId()
+
+    const update = (props: ToasterToast) =>
+      dispatch({
+        type: "UPDATE_TOAST",
+        toast: { ...props, id },
+      })
+    const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
+    dispatch({
+      type: "ADD_TOAST",
+      toast: {
+        ...props,
+        id,
+      },
+    })
+
+    return {
+      id,
+      dismiss,
+      update,
+    }
+  },
+  // Add success and error methods
+  success: (title: string, opts?: { description?: string; duration?: number }) => {
+    return toast.custom({
+      title,
+      description: opts?.description,
+      duration: opts?.duration,
+    })
+  },
+  error: (title: string, opts?: { description?: string; duration?: number }) => {
+    return toast.custom({
+      title,
+      description: opts?.description,
+      duration: opts?.duration,
+    })
+  },
+  // Define dismiss method
+  dismiss: (toastId?: string) => {
+    dispatch({ type: "DISMISS_TOAST", toastId })
+  }
 }
 
 export function useToast() {
@@ -179,7 +209,3 @@ export function useToast() {
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
-
-export type ToastActionElement = React.ReactElement<{
-  onPress: () => void
-}>

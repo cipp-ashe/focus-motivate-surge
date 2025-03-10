@@ -7,17 +7,45 @@ import { Quote } from "@/types/timer";
 import { eventBus } from '@/lib/eventBus';
 import { TimerErrorBoundary } from '@/components/timer/TimerErrorBoundary';
 import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { TimerSection } from '@/components/timer/TimerSection';
+import { useEvent } from '@/hooks/useEvent';
+import { Task } from '@/types/tasks';
 
 const TimerPage = () => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
-  const selectedTask = tasks.find(task => task.id === selectedTaskId) || null;
+  const [selectedTask, setSelectedTask] = useState<Task | null>(
+    tasks.find(task => task.id === selectedTaskId) || null
+  );
   const [favorites, setFavorites] = useState<Quote[]>([]);
   const [habitCheckDone, setHabitCheckDone] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(0);
   
-  // Track when TimerPage is mounted and ready - only run once
+  // Update selected task when the context changes
+  useEffect(() => {
+    const task = tasks.find(task => task.id === selectedTaskId);
+    if (task) {
+      console.log("TimerPage: Selected task from context:", task);
+      setSelectedTask(task);
+    }
+  }, [tasks, selectedTaskId]);
+  
+  // Listen for task:select events directly
+  useEvent('task:select', (taskId: string) => {
+    console.log("TimerPage: Received task:select event for", taskId);
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      setSelectedTask(task);
+    }
+  });
+  
+  // Listen for timer:set-task events 
+  useEvent('timer:set-task', (task: Task) => {
+    console.log("TimerPage: Received timer:set-task event", task);
+    setSelectedTask(task);
+  });
+  
+  // Track when TimerPage is mounted and ready
   useEffect(() => {
     console.log("TimerPage mounted and ready");
     
@@ -52,7 +80,7 @@ const TimerPage = () => {
             }, delay);
           });
           
-          toast.info(`Found ${habitTasks.length} habit tasks`, {
+          toast.success(`Found ${habitTasks.length} habit tasks`, {
             description: "Loading your scheduled tasks..."
           });
         } else {
@@ -63,17 +91,6 @@ const TimerPage = () => {
       }, 300);
     }
   }, [tasks, habitCheckDone]);
-
-  // Display loading state if no tasks are loaded but localStorage has tasks
-  useEffect(() => {
-    const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-    if (storedTasks.length > 0 && tasks.length === 0) {
-      console.log("Tasks exist in storage but not loaded in state yet");
-      // Force update to sync memory with storage
-      window.dispatchEvent(new Event('force-task-update'));
-      setForceUpdate(prev => prev + 1); // Trigger a re-render
-    }
-  }, [tasks]);
 
   // Listen for force-task-update events
   useEffect(() => {
@@ -94,7 +111,7 @@ const TimerPage = () => {
           asideContent={<TaskManager key={`task-manager-${forceUpdate}`} isTimerView />}
           mainContent={
             <TimerSection
-              key={`timer-section-${selectedTaskId}-${forceUpdate}`}
+              key={`timer-section-${selectedTask?.id || 'none'}-${forceUpdate}`}
               selectedTask={selectedTask}
               favorites={favorites}
               setFavorites={setFavorites}

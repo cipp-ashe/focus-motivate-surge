@@ -8,6 +8,7 @@ import { TaskLoader } from './TaskLoader';
 import { TaskEventHandler } from './TaskEventHandler';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useLocation } from 'react-router-dom';
+import { useTimerTasksManager } from '@/hooks/tasks/useTimerTasksManager';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
@@ -17,6 +18,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
   const location = useLocation();
+  const timerTasksManager = useTimerTasksManager();
   
   // Auto-detect timer view if not explicitly provided
   const isTimerPage = isTimerView ?? location.pathname.includes('/timer');
@@ -39,6 +41,29 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   useEffect(() => {
     console.log("TaskManager - Current tasks:", localTasks);
   }, [localTasks]);
+
+  // Listen for force updates with the new event system
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      // Force reload from storage to ensure we have the latest data
+      const storedTasks = taskStorage.loadTasks();
+      console.log("TaskManager - Force update triggered, reloaded tasks:", storedTasks);
+      
+      if (isTimerPage) {
+        const timerTasks = storedTasks.filter(task => task.taskType === 'timer');
+        console.log("TaskManager - Filtered timer tasks after force update:", timerTasks);
+        setLocalTasks(timerTasks);
+      } else {
+        setLocalTasks(storedTasks);
+      }
+    };
+    
+    window.addEventListener('force-task-update', handleForceUpdate);
+    
+    return () => {
+      window.removeEventListener('force-task-update', handleForceUpdate);
+    };
+  }, [isTimerPage]);
 
   const handleTaskCreate = (task: Task) => {
     if (isTimerPage && task.taskType !== 'timer') {
@@ -79,9 +104,11 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   };
   
   const handleTaskAdd = (task: Task) => {
-    // In timer view, only add timer tasks
-    if (isTimerPage && task.taskType !== 'timer') {
-      return;
+    // In timer view, only add timer tasks or auto-convert to timer task
+    if (isTimerPage) {
+      if (task.taskType !== 'timer') {
+        task.taskType = 'timer';
+      }
     }
     
     // Add to local state immediately for responsive UI
@@ -92,10 +119,13 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   };
 
   const handleTasksAdd = (tasks: Task[]) => {
-    // In timer view, only add timer tasks
-    const tasksToAdd = isTimerPage 
-      ? tasks.filter(task => task.taskType === 'timer')
-      : tasks;
+    // In timer view, only add timer tasks or auto-convert to timer tasks
+    const tasksToAdd = tasks.map(task => {
+      if (isTimerPage && task.taskType !== 'timer') {
+        return { ...task, taskType: 'timer' };
+      }
+      return task;
+    });
     
     if (tasksToAdd.length === 0) return;
     
