@@ -1,4 +1,5 @@
-import { useCallback, useRef } from 'react';
+
+import { useCallback, useRef, useEffect } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { useHabitTaskCreator } from './useHabitTaskCreator';
@@ -13,6 +14,28 @@ export const useHabitTaskProcessor = () => {
   const { createHabitTask } = useHabitTaskCreator();
   const processingRef = useRef<Record<string, boolean>>({});
   const processingTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const pendingTasksRef = useRef<Task[]>([]);
+  
+  // Set up event listeners
+  useEffect(() => {
+    console.log("useHabitTaskProcessor: Setting up event listeners");
+    
+    // Listen for habit schedule events
+    const unsubSchedule = eventBus.on('habit:schedule', (event) => {
+      handleHabitSchedule(event);
+    });
+    
+    // Listen for habit check pending events
+    const unsubCheckPending = eventBus.on('habits:check-pending', () => {
+      processPendingTasks();
+    });
+    
+    // Clean up
+    return () => {
+      unsubSchedule();
+      unsubCheckPending();
+    };
+  }, []);
   
   // Process a single habit task event with debouncing and improved error handling
   const processHabitTask = useCallback((event: {
@@ -48,26 +71,16 @@ export const useHabitTaskProcessor = () => {
     processingRef.current[processingKey] = true;
     
     try {
-      // Check if task already exists using new storage service
+      // Check if task already exists using storage service
       const existingTask = taskStorage.taskExists(event.habitId, event.date);
       
       if (existingTask) {
         console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
         
-        // Ensure task is loaded into memory state if it exists in storage but not in memory
-        const tasksInMemory = JSON.parse(localStorage.getItem('tasks-in-memory') || '[]');
-        const isInMemory = tasksInMemory.includes(existingTask.id);
+        // Add task to UI if it exists in storage but not in memory
+        eventBus.emit('task:create', existingTask);
         
-        if (!isInMemory) {
-          console.log(`Task ${existingTask.id} exists in storage but not in memory, emitting task:create event`);
-          eventBus.emit('task:create', existingTask);
-          
-          // Add to memory tracking
-          tasksInMemory.push(existingTask.id);
-          localStorage.setItem('tasks-in-memory', JSON.stringify(tasksInMemory));
-        }
-        
-        // Always force a task update to ensure UI is in sync
+        // Force task update
         setTimeout(() => {
           window.dispatchEvent(new Event('force-task-update'));
         }, 100);
@@ -82,14 +95,16 @@ export const useHabitTaskProcessor = () => {
         );
         
         if (newTaskId) {
-          // Add to memory tracking
-          const tasksInMemory = JSON.parse(localStorage.getItem('tasks-in-memory') || '[]');
-          tasksInMemory.push(newTaskId);
-          localStorage.setItem('tasks-in-memory', JSON.stringify(tasksInMemory));
-          
           console.log(`Successfully created task ${newTaskId} for habit ${event.habitId}`);
           toast.success(`Created habit task: ${event.name}`, {
             description: "Your habit task has been scheduled."
+          });
+          
+          // Force task updates with staggered timing
+          [100, 300, 600].forEach(delay => {
+            setTimeout(() => {
+              window.dispatchEvent(new Event('force-task-update'));
+            }, delay);
           });
         }
       }
@@ -155,24 +170,6 @@ export const useHabitTaskProcessor = () => {
     
     // Pass straight to processor with data validation complete
     processHabitTask(event);
-    
-    // For critical habit scheduling events, set up a retry mechanism
-    // to ensure the task is eventually created even if there are temporary issues
-    const retryTimes = [500, 1000, 2000]; // Exponential backoff
-    
-    retryTimes.forEach(delay => {
-      setTimeout(() => {
-        // Before retrying, check if the task exists now
-        const existingTask = taskStorage.taskExists(event.habitId, event.date);
-        
-        if (!existingTask) {
-          console.log(`Retry ${delay}ms: Task still not found for habit ${event.habitId}, retrying creation`);
-          processHabitTask(event);
-        } else {
-          console.log(`Retry ${delay}ms: Task now exists for habit ${event.habitId}, no need to retry`);
-        }
-      }, delay);
-    });
   }, [processHabitTask]);
   
   // Process any pending tasks (useful after navigation or initial load)
@@ -187,33 +184,23 @@ export const useHabitTaskProcessor = () => {
       if (habitTasks.length > 0) {
         console.log(`Found ${habitTasks.length} habit tasks in localStorage, ensuring they're loaded in memory`);
         
-        // Keep track of tasks in memory
-        const tasksInMemory = JSON.parse(localStorage.getItem('tasks-in-memory') || '[]');
-        let updatedMemoryList = false;
-        
-        // Check each habit task
+        // Emit task:create events for each habit task to ensure they're in memory
         habitTasks.forEach(task => {
-          if (!tasksInMemory.includes(task.id)) {
-            console.log(`Task ${task.id} for habit ${task.relationships?.habitId} not tracked in memory, emitting task:create`);
-            eventBus.emit('task:create', task);
-            tasksInMemory.push(task.id);
-            updatedMemoryList = true;
-          }
+          console.log(`Ensuring habit task ${task.id} is loaded in memory`);
+          eventBus.emit('task:create', task);
         });
         
-        // Update memory tracking if changed
-        if (updatedMemoryList) {
-          localStorage.setItem('tasks-in-memory', JSON.stringify(tasksInMemory));
-        }
-        
-        // Force multiple task updates with staggered timing for maximum reliability
+        // Force multiple task updates with staggered timing for reliability
         [100, 300, 600].forEach(delay => {
           setTimeout(() => {
             window.dispatchEvent(new Event('force-task-update'));
           }, delay);
         });
+        
+        return true;
       } else {
         console.log('No habit tasks found in localStorage');
+        return false;
       }
     } catch (error) {
       console.error('Error processing pending tasks:', error);
@@ -222,6 +209,8 @@ export const useHabitTaskProcessor = () => {
       setTimeout(() => {
         window.dispatchEvent(new Event('force-task-update'));
       }, 500);
+      
+      return false;
     }
   }, []);
   

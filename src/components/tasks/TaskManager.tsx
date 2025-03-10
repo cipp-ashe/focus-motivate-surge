@@ -8,6 +8,7 @@ import { TaskInput } from './TaskInput';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { Task } from '@/types/tasks';
 import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
@@ -15,6 +16,8 @@ const TaskManager = () => {
   const initialCheckDoneRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const taskQueueRef = useRef<Task[]>([]);
+  const processingRef = useRef(false);
   
   // Debug: Log tasks whenever they change
   useEffect(() => {
@@ -46,6 +49,46 @@ const TaskManager = () => {
       }
     };
   }, [isLoading]);
+  
+  // Process task queue with staggered timing to prevent race conditions
+  useEffect(() => {
+    if (processingRef.current || taskQueueRef.current.length === 0) return;
+    
+    processingRef.current = true;
+    
+    const processQueue = async () => {
+      console.log(`TaskManager - Processing queue with ${taskQueueRef.current.length} tasks`);
+      
+      for (let i = 0; i < taskQueueRef.current.length; i++) {
+        const task = taskQueueRef.current[i];
+        
+        // Check if task already exists to prevent duplicates
+        const exists = taskStorage.taskExistsById(task.id);
+        if (!exists) {
+          console.log(`TaskManager - Creating task ${i + 1}/${taskQueueRef.current.length}:`, task);
+          eventBus.emit('task:create', task);
+          
+          // Add a small delay between task creations
+          await new Promise(resolve => setTimeout(resolve, 150));
+        } else {
+          console.log(`TaskManager - Task ${task.id} already exists, skipping`);
+        }
+      }
+      
+      // Clear queue and release processing lock
+      taskQueueRef.current = [];
+      
+      // Force a UI update after all tasks are processed
+      setTimeout(() => {
+        console.log("TaskManager - Force updating UI after queue processing");
+        window.dispatchEvent(new Event('force-task-update'));
+        processingRef.current = false;
+      }, 300);
+    };
+    
+    // Start processing with a small delay
+    setTimeout(processQueue, 50);
+  }, [taskQueueRef.current.length]);
   
   // Check for pending habits only once when TaskManager first mounts
   useEffect(() => {
@@ -86,32 +129,17 @@ const TaskManager = () => {
   const handleTaskAdd = (task: Task) => {
     console.log("TaskManager - Adding task:", task);
     
-    // Use event bus to create the task
-    eventBus.emit('task:create', task);
+    // Add to processing queue instead of direct emission
+    taskQueueRef.current.push(task);
     toast.info("Adding task...");
-    
-    // Force UI update after a delay
-    setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-    }, 200);
   };
 
   const handleTasksAdd = (tasks: Task[]) => {
     console.log(`TaskManager - Adding ${tasks.length} tasks`);
     
-    // Add tasks with staggered timing to prevent race conditions
-    tasks.forEach((task, index) => {
-      setTimeout(() => {
-        eventBus.emit('task:create', task);
-      }, index * 100); // 100ms delay between each task creation
-    });
-    
+    // Add all tasks to the queue
+    taskQueueRef.current.push(...tasks);
     toast.info(`Adding ${tasks.length} tasks...`);
-    
-    // Force UI update after all tasks should be added
-    setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-    }, tasks.length * 100 + 200);
   };
 
   return (

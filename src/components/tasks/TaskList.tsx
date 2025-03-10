@@ -1,11 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaskTable } from './TaskTable';
 import { CompletedTasks } from './CompletedTasks';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TaskListProps {
   tasks: Task[];
@@ -20,11 +20,28 @@ export const TaskList: React.FC<TaskListProps> = ({
 }) => {
   const { completed: completedTasks } = useTaskContext();
   const [activeTab, setActiveTab] = useState('active');
-
-  // Debug: Log tasks whenever they change
-  React.useEffect(() => {
+  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+  
+  // Keep local tasks in sync with props
+  useEffect(() => {
     console.log("TaskList received tasks:", tasks.length, "tasks:", tasks);
+    setLocalTasks(tasks);
   }, [tasks]);
+  
+  // Listen for force updates
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      console.log("TaskList: Detected force-task-update event, refreshing UI");
+      // Force component update by setting state
+      setLocalTasks(prev => [...prev]);
+    };
+    
+    window.addEventListener('force-task-update', handleForceUpdate);
+    
+    return () => {
+      window.removeEventListener('force-task-update', handleForceUpdate);
+    };
+  }, []);
 
   const handleClearCompletedTasks = () => {
     completedTasks.forEach(task => {
@@ -43,7 +60,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         <div className="px-4 pt-2">
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="active" data-test="active-tasks-tab">
-              Active Tasks ({tasks.length})
+              Active Tasks ({localTasks.length})
             </TabsTrigger>
             <TabsTrigger value="completed" data-test="completed-tasks-tab">
               Completed ({completedTasks.length})
@@ -52,10 +69,12 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
 
         <TabsContent value="active" className="flex-grow overflow-hidden mt-0 p-0">
-          <TaskTable
-            tasks={tasks}
-            selectedTasks={selectedTasks}
-          />
+          <ScrollArea className="h-full">
+            <TaskTable
+              tasks={localTasks}
+              selectedTasks={selectedTasks}
+            />
+          </ScrollArea>
         </TabsContent>
 
         <TabsContent value="completed" className="flex-grow overflow-hidden mt-0 p-0">

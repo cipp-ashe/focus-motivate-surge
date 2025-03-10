@@ -112,7 +112,7 @@ export const TaskRow = ({
   return (
     <Card
       className={`
-        relative cursor-pointer transition-all duration-300 group
+        relative cursor-pointer transition-all duration-300 group overflow-visible
         ${isSelected 
           ? 'bg-accent/20 border-primary/40 shadow-lg shadow-primary/5' 
           : 'bg-card/40 border-primary/10 hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01]'
