@@ -30,6 +30,7 @@ export const Timer = ({
     isValid: Boolean(duration && taskName)
   });
 
+  // Use useState for the ref to solve the React hook violation
   const [expandedViewRef, setExpandedViewRef] = useState<TimerExpandedViewRef | null>(null);
 
   try {
@@ -76,7 +77,7 @@ export const Timer = ({
       taskName,
       setInternalMinutes,
       setIsExpanded,
-      expandedViewRef: expandedViewRef as TimerExpandedViewRef | null,
+      expandedViewRef,
     });
 
     const {
@@ -162,7 +163,7 @@ export const Timer = ({
         testSound={testSound}
         isLoadingAudio={isLoadingAudio}
         updateMetrics={updateMetrics}
-        expandedViewRef={(ref) => setExpandedViewRef(ref)}
+        expandedViewRef={setExpandedViewRef}
         handleCloseTimer={handleCloseTimer}
         favorites={favorites}
         setFavorites={setFavorites}
