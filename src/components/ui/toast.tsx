@@ -1,6 +1,12 @@
 
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose, ToastAction } from "@/components/ui/toast"
-import { useToast } from "@radix-ui/react-toast"
+import { ToastProvider as RadixToastProvider, ToastViewport as RadixToastViewport, Toast as RadixToast, ToastTitle as RadixToastTitle, ToastDescription as RadixToastDescription, ToastClose as RadixToastClose, ToastAction as RadixToastAction } from "@radix-ui/react-toast"
+import { useToast as useRadixToast } from "@/hooks/use-toast"
 
-export { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose, ToastAction }
-export { useToast }
+export const ToastProvider = RadixToastProvider
+export const ToastViewport = RadixToastViewport
+export const Toast = RadixToast
+export const ToastTitle = RadixToastTitle
+export const ToastDescription = RadixToastDescription
+export const ToastClose = RadixToastClose
+export const ToastAction = RadixToastAction
+export const useToast = useRadixToast

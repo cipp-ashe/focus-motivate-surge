@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TaskList } from './TaskList';
 import { TaskInput } from './TaskInput';
@@ -7,7 +6,7 @@ import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Timer, Image, Calendar, FileText, CheckSquare, BookOpen } from 'lucide-react';
+import { Timer, Image, Calendar, FileText, CheckSquare, BookOpen, Mic } from 'lucide-react';
 
 interface TaskManagerContentProps {
   tasks: Task[];
@@ -56,6 +55,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   const habitTasks = tasks.filter(task => task.taskType === 'habit');
   const journalTasks = tasks.filter(task => task.taskType === 'journal');
   const checklistTasks = tasks.filter(task => task.taskType === 'checklist');
+  const voiceNoteTasks = tasks.filter(task => task.taskType === 'voicenote');
   const regularTasks = tasks.filter(task => !task.taskType || task.taskType === 'regular');
   const allTasks = tasks;
 
@@ -93,8 +93,8 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
       </div>
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="all" className="h-full flex flex-col">
-          <div className="border-b border-border/10 px-4">
-            <TabsList className="my-2">
+          <div className="w-full border-b border-border/10">
+            <TabsList className="w-full justify-start">
               <TabsTrigger value="all" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
                 <span>All ({allTasks.length})</span>
@@ -118,6 +118,10 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
               <TabsTrigger value="checklist" className="flex items-center gap-1">
                 <CheckSquare className="h-4 w-4 text-cyan-400" />
                 <span>Checklists ({checklistTasks.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="voicenote" className="flex items-center gap-1">
+                <Mic className="h-4 w-4 text-rose-400" />
+                <span>Voice Notes ({voiceNoteTasks.length})</span>
               </TabsTrigger>
               <TabsTrigger value="regular" className="flex items-center gap-1">
                 <FileText className="h-4 w-4 text-primary" />
@@ -181,9 +185,16 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
               onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
             />
           </TabsContent>
+
+          <TabsContent value="voicenote" className="flex-1 overflow-auto p-0 m-0">
+            <TaskList
+              tasks={voiceNoteTasks}
+              selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+              onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
+            />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
   );
 };
-
