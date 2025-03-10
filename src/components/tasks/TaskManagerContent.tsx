@@ -102,35 +102,51 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
             <TabsList className={`${isMobile ? 'flex justify-start w-auto min-w-full px-1 py-1' : 'w-full justify-start'}`}>
               <TabsTrigger value="all" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
-                <span>{isMobile ? `All (${allTasks.length})` : `All (${allTasks.length})`}</span>
+                {!isMobile && <span>All ({allTasks.length})</span>}
+                {isMobile && <span className="sr-only">All tasks</span>}
+                {isMobile && <span className="text-xs">{allTasks.length}</span>}
               </TabsTrigger>
               <TabsTrigger value="timer" className="flex items-center gap-1">
                 <Timer className="h-4 w-4 text-purple-400" />
-                <span>{isMobile ? `Timer (${timerTasks.length})` : `Timer (${timerTasks.length})`}</span>
+                {!isMobile && <span>Timer ({timerTasks.length})</span>}
+                {isMobile && <span className="sr-only">Timer tasks</span>}
+                {isMobile && <span className="text-xs">{timerTasks.length}</span>}
               </TabsTrigger>
               <TabsTrigger value="screenshot" className="flex items-center gap-1">
                 <Image className="h-4 w-4 text-blue-400" />
-                <span>{isMobile ? `Img (${screenshotTasks.length})` : `Screenshots (${screenshotTasks.length})`}</span>
+                {!isMobile && <span>Screenshots ({screenshotTasks.length})</span>}
+                {isMobile && <span className="sr-only">Screenshot tasks</span>}
+                {isMobile && <span className="text-xs">{screenshotTasks.length}</span>}
               </TabsTrigger>
               <TabsTrigger value="habit" className="flex items-center gap-1">
                 <Calendar className="h-4 w-4 text-green-400" />
-                <span>{isMobile ? `Habit (${habitTasks.length})` : `Habits (${habitTasks.length})`}</span>
+                {!isMobile && <span>Habits ({habitTasks.length})</span>}
+                {isMobile && <span className="sr-only">Habit tasks</span>}
+                {isMobile && <span className="text-xs">{habitTasks.length}</span>}
               </TabsTrigger>
               <TabsTrigger value="journal" className="flex items-center gap-1">
                 <BookOpen className="h-4 w-4 text-amber-400" />
-                <span>{isMobile ? `Jrnl (${journalTasks.length})` : `Journal (${journalTasks.length})`}</span>
+                {!isMobile && <span>Journal ({journalTasks.length})</span>}
+                {isMobile && <span className="sr-only">Journal tasks</span>}
+                {isMobile && <span className="text-xs">{journalTasks.length}</span>}
               </TabsTrigger>
               <TabsTrigger value="checklist" className="flex items-center gap-1">
                 <CheckSquare className="h-4 w-4 text-cyan-400" />
-                <span>{isMobile ? `Chk (${checklistTasks.length})` : `Checklists (${checklistTasks.length})`}</span>
+                {!isMobile && <span>Checklists ({checklistTasks.length})</span>}
+                {isMobile && <span className="sr-only">Checklist tasks</span>}
+                {isMobile && <span className="text-xs">{checklistTasks.length}</span>}
               </TabsTrigger>
               <TabsTrigger value="voicenote" className="flex items-center gap-1">
                 <Mic className="h-4 w-4 text-rose-400" />
-                <span>{isMobile ? `Voice (${voiceNoteTasks.length})` : `Voice Notes (${voiceNoteTasks.length})`}</span>
+                {!isMobile && <span>Voice Notes ({voiceNoteTasks.length})</span>}
+                {isMobile && <span className="sr-only">Voice note tasks</span>}
+                {isMobile && <span className="text-xs">{voiceNoteTasks.length}</span>}
               </TabsTrigger>
               <TabsTrigger value="regular" className="flex items-center gap-1">
                 <FileText className="h-4 w-4 text-primary" />
-                <span>{isMobile ? `Reg (${regularTasks.length})` : `Regular (${regularTasks.length})`}</span>
+                {!isMobile && <span>Regular ({regularTasks.length})</span>}
+                {isMobile && <span className="sr-only">Regular tasks</span>}
+                {isMobile && <span className="text-xs">{regularTasks.length}</span>}
               </TabsTrigger>
             </TabsList>
           </div>
