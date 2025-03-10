@@ -11,7 +11,12 @@ export const Timer: React.FC<TimerProps> = ({ taskId, onComplete }) => {
   // Basic timer implementation
   return (
     <div>
-      <button onClick={() => onComplete(taskId)}>Complete Task</button>
+      <button 
+        className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
+        onClick={() => onComplete(taskId)}
+      >
+        Complete Task
+      </button>
     </div>
   );
 };

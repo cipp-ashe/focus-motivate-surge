@@ -33,10 +33,16 @@ export const useHabitTaskCreator = () => {
       if (existingTask) {
         console.log(`Task already exists for habit ${habitId} on ${date}:`, existingTask);
         
-        // No need to create a new task, just ensure it's in memory
+        // Ensure it's loaded into memory
         setTimeout(() => {
+          // Add directly to memory if not present
+          const tasksInMemory = JSON.parse(localStorage.getItem('tasks-in-memory') || '[]');
+          if (!tasksInMemory.includes(existingTask.id)) {
+            console.log(`Task ${existingTask.id} exists in storage but not in memory, adding directly`);
+            createTask(existingTask);
+          }
+          
           window.dispatchEvent(new Event('force-task-update'));
-          forceTaskUpdate();
         }, 100);
         
         return existingTask.id;
@@ -66,6 +72,19 @@ export const useHabitTaskCreator = () => {
       
       console.log(`Created task object for habit ${habitId} with ID ${taskId}:`, task);
       
+      // Save directly to storage first to ensure persistence
+      const savedToStorage = taskStorage.addTask(task);
+      if (!savedToStorage) {
+        console.log(`Task ${taskId} failed to save to storage, may already exist`);
+        
+        // Check if we have another task for this habit and date
+        const existingCheck = taskStorage.taskExists(habitId, date);
+        if (existingCheck) {
+          console.log(`Found alternative task for habit ${habitId} on ${date}:`, existingCheck);
+          return existingCheck.id;
+        }
+      }
+      
       // Add task directly to state through the createTask function instead of just emitting an event
       // This ensures the task is immediately available in the UI
       createTask(task);
@@ -73,8 +92,8 @@ export const useHabitTaskCreator = () => {
       // Add the Habit tag
       addTagToEntity('Habit', taskId, 'task');
       
-      // Add template tag if available (format for readability)
-      if (safeTemplateId) {
+      // Add template tag if available
+      if (safeTemplateId && safeTemplateId !== 'custom') {
         // Format template name correctly with first letter capitalized
         let templateName = '';
         
@@ -105,16 +124,20 @@ export const useHabitTaskCreator = () => {
         relationType: 'habit-task'
       });
       
-      // Log and show notification
+      // Track the task in memory
+      const tasksInMemory = JSON.parse(localStorage.getItem('tasks-in-memory') || '[]');
+      if (!tasksInMemory.includes(taskId)) {
+        tasksInMemory.push(taskId);
+        localStorage.setItem('tasks-in-memory', JSON.stringify(tasksInMemory));
+      }
+      
+      // Log success
       console.log(`Task created successfully for habit ${habitId}: ${taskId}`);
       
-      // Multiple force updates with progressive timeouts for maximum reliability
-      [100, 300, 600].forEach(delay => {
-        setTimeout(() => {
-          window.dispatchEvent(new Event('force-task-update'));
-          forceTaskUpdate();
-        }, delay);
-      });
+      // Force update with delay to ensure UI updates
+      setTimeout(() => {
+        forceTaskUpdate();
+      }, 100);
       
       return taskId;
     } catch (error) {
