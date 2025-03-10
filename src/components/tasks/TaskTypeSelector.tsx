@@ -52,7 +52,7 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
         <SelectItem value="screenshot">
           <div className="flex items-center gap-2">
             <Image className="h-4 w-4 text-blue-400" />
-            <span>Screenshot Task</span>
+            <span>Screenshot/Image Task</span>
           </div>
         </SelectItem>
         <SelectItem value="habit">
