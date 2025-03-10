@@ -90,7 +90,7 @@ export const useTaskEvents = () => {
     });
   }, []);
   
-  // Function to update tags (fix for the error)
+  // Function to update tags 
   const forceTagsUpdate = useCallback(() => {
     console.log('TaskEvents: Force updating tags list');
     
@@ -103,7 +103,7 @@ export const useTaskEvents = () => {
     });
   }, []);
   
-  // Function to check pending habits (fix for the error)
+  // Function to check pending habits
   const checkPendingHabits = useCallback(() => {
     console.log('TaskEvents: Checking for pending habits');
     
