@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaskTable } from './TaskTable';
@@ -23,6 +23,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   const { completed: completedTasks } = useTaskContext();
   const [activeTab, setActiveTab] = useState('active');
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+  const isMountedRef = useRef(true);
   
   // Keep local tasks in sync with props - with proper dependencies
   useEffect(() => {
@@ -32,12 +33,16 @@ export const TaskList: React.FC<TaskListProps> = ({
   // Listen for force updates - with proper cleanup
   useEffect(() => {
     const handleForceUpdate = () => {
-      // Force component update by setting state
-      setLocalTasks(prev => [...prev]);
+      // Only update if still mounted
+      if (isMountedRef.current) {
+        setLocalTasks(prev => [...prev]);
+      }
     };
     
     const handleHabitsProcessed = () => {
-      setLocalTasks(prev => [...prev]);
+      if (isMountedRef.current) {
+        setLocalTasks(prev => [...prev]);
+      }
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
@@ -49,11 +54,18 @@ export const TaskList: React.FC<TaskListProps> = ({
     };
   }, []); // Run only once on mount
 
-  const handleClearCompletedTasks = () => {
+  // Set mounted flag cleanup
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const handleClearCompletedTasks = useCallback(() => {
     completedTasks.forEach(task => {
       eventBus.emit('task:delete', { taskId: task.id, reason: 'completed' });
     });
-  };
+  }, [completedTasks]);
 
   // If using simplified view (for Timer page), just show the task table without tabs
   if (simplifiedView) {

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task, TaskType } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
@@ -18,6 +18,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
   const location = useLocation();
   const timerTasksManager = useTimerTasksManager();
+  const isMountedRef = useRef(true);
   
   // Auto-detect timer view if not explicitly provided
   const isTimerPage = isTimerView ?? location.pathname.includes('/timer');
@@ -36,6 +37,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   // Listen for force updates with the new event system - with proper cleanup
   useEffect(() => {
     const handleForceUpdate = () => {
+      if (!isMountedRef.current) return;
+      
       // Force reload from storage to ensure we have the latest data
       const storedTasks = taskStorage.loadTasks();
       
@@ -54,7 +57,16 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
     };
   }, [isTimerPage]); // Only re-run when isTimerPage changes
 
-  const handleTaskCreate = (task: Task) => {
+  // Set mounted flag cleanup
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const handleTaskCreate = useCallback((task: Task) => {
+    if (!isMountedRef.current) return;
+    
     if (isTimerPage && task.taskType !== 'timer') {
       return; // Only add timer tasks in timer view
     }
@@ -64,21 +76,27 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
       if (prev.some(t => t.id === task.id)) return prev;
       return [...prev, task];
     });
-  };
+  }, [isTimerPage]);
   
-  const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
+  const handleTaskUpdate = useCallback((data: { taskId: string, updates: Partial<Task> }) => {
+    if (!isMountedRef.current) return;
+    
     setLocalTasks(prev => 
       prev.map(t => t.id === data.taskId ? { ...t, ...data.updates } : t)
     );
-  };
+  }, []);
   
-  const handleTaskDelete = (data: { taskId: string }) => {
+  const handleTaskDelete = useCallback((data: { taskId: string }) => {
+    if (!isMountedRef.current) return;
+    
     setLocalTasks(prev => 
       prev.filter(t => t.id !== data.taskId)
     );
-  };
+  }, []);
   
-  const handleForceUpdate = () => {
+  const handleForceUpdate = useCallback(() => {
+    if (!isMountedRef.current) return;
+    
     // Force reload from storage to ensure we have the latest data
     const storedTasks = taskStorage.loadTasks();
     
@@ -88,9 +106,11 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
     } else {
       setLocalTasks(storedTasks);
     }
-  };
+  }, [isTimerPage]);
   
-  const handleTaskAdd = (task: Task) => {
+  const handleTaskAdd = useCallback((task: Task) => {
+    if (!isMountedRef.current) return;
+    
     // In timer view, only add timer tasks or auto-convert to timer task
     if (isTimerPage) {
       if (task.taskType !== 'timer') {
@@ -115,9 +135,11 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
         return [...prev, task];
       });
     }
-  };
+  }, [isTimerPage]);
 
-  const handleTasksAdd = (tasks: Task[]) => {
+  const handleTasksAdd = useCallback((tasks: Task[]) => {
+    if (!isMountedRef.current) return;
+    
     // In timer view, only add timer tasks or auto-convert to timer tasks
     if (isTimerPage) {
       const tasksToAdd = tasks.map(task => {
@@ -146,7 +168,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
         return [...prev, ...newTasks];
       });
     }
-  };
+  }, [isTimerPage]);
 
   return (
     <TaskLoader onTasksLoaded={setLocalTasks}>

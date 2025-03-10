@@ -1,12 +1,16 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
 
 const TaskPage = () => {
+  // Keep track of mounted state to prevent callbacks on unmounted component
+  const isMounted = useRef(true);
+  
   // Set up event listeners for task actions with proper cleanup
   useEffect(() => {
     const handleShowImage = (event: Event) => {
+      if (!isMounted.current) return;
+      
       const customEvent = event as CustomEvent;
       const { imageUrl, taskName } = customEvent.detail;
       
@@ -16,6 +20,8 @@ const TaskPage = () => {
     };
     
     const handleOpenChecklist = (event: Event) => {
+      if (!isMounted.current) return;
+      
       const customEvent = event as CustomEvent;
       const { taskId, taskName, items } = customEvent.detail;
       
@@ -25,6 +31,8 @@ const TaskPage = () => {
     };
     
     const handleOpenVoiceRecorder = (event: Event) => {
+      if (!isMounted.current) return;
+      
       const customEvent = event as CustomEvent;
       const { taskId, taskName } = customEvent.detail;
       
@@ -40,6 +48,7 @@ const TaskPage = () => {
     
     // Cleanup
     return () => {
+      isMounted.current = false;
       window.removeEventListener('show-image', handleShowImage);
       window.removeEventListener('open-checklist', handleOpenChecklist);
       window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder);

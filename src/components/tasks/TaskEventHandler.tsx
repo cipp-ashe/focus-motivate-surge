@@ -21,6 +21,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   // Process task queue with staggered timing to prevent race conditions
   const processingRef = useRef(false);
   const taskQueueRef = useRef<Task[]>([]);
+  const isMountedRef = useRef(true);
   
   // Set up event handlers with the useEvent hook
   useEvent('task:create', onTaskCreate);
@@ -30,7 +31,9 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   // Handle force update events - with proper cleanup
   useEffect(() => {
     const handleForceUpdate = () => {
-      onForceUpdate();
+      if (isMountedRef.current) {
+        onForceUpdate();
+      }
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
@@ -41,14 +44,20 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   }, [onForceUpdate]);
   
   // Process task queue with staggered timing to prevent race conditions
-  // Make sure this doesn't run on every render
+  // Make sure this doesn't run on every render and has proper cleanup
   useEffect(() => {
+    // Avoid processing if already in progress or queue is empty
     if (processingRef.current || taskQueueRef.current.length === 0) return;
     
     processingRef.current = true;
     
     const processQueue = async () => {      
+      // Only process if component is still mounted
+      if (!isMountedRef.current) return;
+      
       for (let i = 0; i < taskQueueRef.current.length; i++) {
+        if (!isMountedRef.current) break;
+        
         const task = taskQueueRef.current[i];
         
         // Emit creation event
@@ -58,22 +67,38 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
         await new Promise(resolve => setTimeout(resolve, 150));
       }
       
+      // Only continue if component is still mounted
+      if (!isMountedRef.current) return;
+      
       // Clear queue and release processing lock
       taskQueueRef.current = [];
       
       // Force a UI update after all tasks are processed
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('force-task-update'));
-        processingRef.current = false;
+      let timeoutId = setTimeout(() => {
+        if (isMountedRef.current) {
+          window.dispatchEvent(new CustomEvent('force-task-update'));
+          processingRef.current = false;
+        }
       }, 300);
+      
+      return () => clearTimeout(timeoutId);
     };
     
     // Start processing with a small delay
     const timeoutId = setTimeout(processQueue, 50);
     
     // Clean up timeout if component unmounts
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, []); // Only run this once on mount
+  
+  // Set up cleanup for mounted ref
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
   
   // This component doesn't render anything
   return null;
