@@ -1,4 +1,3 @@
-
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
@@ -185,6 +184,57 @@ export const taskOperations = {
     } catch (error) {
       console.error('Error completing task:', error);
       toast.error('Failed to complete task');
+    }
+  },
+  
+  /**
+   * Create a new task based on a completed task
+   * @param completedTask The completed task to use as a template
+   * @returns The newly created task
+   */
+  createFromCompleted(
+    completedTask: Task,
+    options: {
+      suppressToast?: boolean;
+      selectAfterCreate?: boolean;
+    } = {}
+  ): Task {
+    console.log(`TaskOperations: Creating new task from completed task "${completedTask.name}"`);
+    
+    try {
+      // Create a new task with similar properties but uncompleted
+      const newTask: Task = this.createTask({
+        name: completedTask.name,
+        description: completedTask.description || '',
+        completed: false,
+        taskType: completedTask.taskType || 'regular',
+        duration: completedTask.duration || 0,
+        createdAt: new Date().toISOString(),
+        // Copy relationships if they exist (except date for habit tasks)
+        relationships: completedTask.relationships ? {
+          ...completedTask.relationships,
+          // Remove date for habit tasks to avoid conflicts
+          date: undefined
+        } : undefined,
+        // Copy relevant fields based on task type
+        ...(completedTask.taskType === 'checklist' && completedTask.checklistItems ? {
+          checklistItems: completedTask.checklistItems.map(item => ({
+            ...item,
+            completed: false // Reset completion status
+          }))
+        } : {}),
+        ...(completedTask.taskType === 'journal' ? {
+          journalEntry: '' // Reset journal entry
+        } : {})
+      }, {
+        suppressToast: options.suppressToast,
+        selectAfterCreate: options.selectAfterCreate
+      });
+      
+      return newTask;
+    } catch (error) {
+      console.error('Error creating task from completed task:', error);
+      throw error;
     }
   },
   

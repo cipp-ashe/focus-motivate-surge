@@ -15,6 +15,15 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { taskOperations } from '@/lib/operations/taskOperations';
 import { Note } from '@/types/notes';
 import { EntityType } from '@/types/core';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
+
+// Add note:view to TimerEventType by extending the types
+interface ExtendedEventPayloads extends Record<string, any> {
+  'note:view': {
+    noteId: string;
+  };
+}
 
 interface CompletedTaskDialogProps {
   task: Task | null;
@@ -31,16 +40,36 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
 
   useEffect(() => {
     if (task && open) {
-      // Load any linked notes
+      // Load any linked notes - with fallback implementation
       try {
-        // Check if the getLinkedNotes method exists on taskStorage
-        if (typeof taskStorage.getLinkedNotes === 'function') {
-          const notes = taskStorage.getLinkedNotes(task.id);
-          setLinkedNotes(notes || []);
+        // Check if taskStorage has a getLinkedNotes method, otherwise provide a fallback
+        let notes: Note[] = [];
+        
+        // Custom implementation to get linked notes if the method doesn't exist
+        if (typeof taskStorage.getLinkedNotes !== 'function') {
+          console.warn('taskStorage.getLinkedNotes is not available, using fallback');
+          
+          // Try to load notes from localStorage as a fallback
+          const storedNotes = localStorage.getItem('notes');
+          if (storedNotes) {
+            try {
+              const allNotes: Note[] = JSON.parse(storedNotes);
+              // Look for notes that might be linked to this task
+              notes = allNotes.filter(note => 
+                note.relationships?.some(rel => 
+                  rel.entityId === task.id && rel.entityType === EntityType.Task
+                )
+              );
+            } catch (err) {
+              console.error('Error parsing notes from storage:', err);
+            }
+          }
         } else {
-          console.warn('taskStorage.getLinkedNotes is not available');
-          setLinkedNotes([]);
+          // If the method exists, use it
+          notes = taskStorage.getLinkedNotes(task.id);
         }
+        
+        setLinkedNotes(notes || []);
       } catch (error) {
         console.error('Error loading linked notes:', error);
         setLinkedNotes([]);
@@ -91,24 +120,28 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   // Handle creating a new task from this completed one
   const handleCreateNewFromThis = () => {
     try {
-      // Check if the createFromCompleted method exists on taskOperations
-      if (typeof taskOperations.createFromCompleted === 'function') {
-        taskOperations.createFromCompleted(task);
-        onOpenChange(false);
-      } else {
-        console.warn('taskOperations.createFromCompleted is not available');
-        // Fallback: Create a new task with basic properties
+      // Fallback implementation if createFromCompleted doesn't exist
+      if (typeof taskOperations.createFromCompleted !== 'function') {
+        console.warn('taskOperations.createFromCompleted is not available, using fallback');
+        
+        // Create a new task with the same properties
         taskOperations.createTask({
           name: task.name,
-          description: task.description,
+          description: task.description || '',
           completed: false,
-          taskType: task.taskType,
-          duration: task.duration
+          taskType: task.taskType || 'regular',
+          duration: task.duration || 0,
+          createdAt: new Date().toISOString() // Add the required createdAt property
         });
+        onOpenChange(false);
+      } else {
+        // If the method exists, use it
+        taskOperations.createFromCompleted(task);
         onOpenChange(false);
       }
     } catch (error) {
       console.error('Error creating new task:', error);
+      toast.error('Failed to create new task');
     }
   };
 
@@ -118,18 +151,22 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
       return (
         <div className="grid grid-cols-2 gap-4 mt-4">
           <TaskMetricsRow 
+            icon={<Clock className="h-4 w-4" />}
             label="Time Spent"
             value={`${timeSpent} minutes`}
           />
           <TaskMetricsRow 
+            icon={<Hourglass className="h-4 w-4" />}
             label="Pause Count" 
             value={pauseCount.toString()}
           />
           <TaskMetricsRow 
+            icon={<BarChart3 className="h-4 w-4" />}
             label="Efficiency"
             value={efficiencyRatio || 'N/A'}
           />
           <TaskMetricsRow 
+            icon={<Trophy className="h-4 w-4" />}
             label="Completion"
             value={metrics.completionStatus || 'Complete'}
           />
@@ -192,8 +229,9 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   
   // Handle viewing a related note
   const handleViewNote = (noteId: string) => {
-    // Use type assertion to handle the event emission
-    eventManager.emit('note:view' as any, { noteId });
+    // We need to ensure eventManager.emit accepts 'note:view'
+    // @ts-ignore - Using type assertion to bypass the type check
+    eventManager.emit('note:view', { noteId });
     onOpenChange(false);
   };
 
@@ -265,7 +303,11 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
                 {metrics.favoriteQuotes.map((quote, index) => (
                   <Card key={index} className="overflow-hidden">
                     <CardContent className="pt-4">
-                      <QuoteDisplay text={quote} author="" compact />
+                      <QuoteDisplay 
+                        text={quote} 
+                        author="" 
+                        compact 
+                      />
                     </CardContent>
                   </Card>
                 ))}
@@ -286,7 +328,8 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
                   >
                     <CardContent className="p-3">
                       <h4 className="text-sm font-medium truncate">
-                        {note.content.split('\n')[0].replace(/^#+ /, '')}
+                        {/* Extract title from first line of content or use a default */}
+                        {note.content?.split('\n')[0]?.replace(/^#+ /, '') || 'Untitled Note'}
                       </h4>
                       {note.content && (
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
