@@ -41,6 +41,13 @@ const TaskManager = () => {
       tasksExistRef.current = true;
       console.log(`TaskManager: Task list updated with ${tasks.length} tasks`);
       
+      // Clear memory tracking on load
+      if (!localStorage.getItem('tasks-in-memory')) {
+        const taskIds = tasks.map(t => t.id);
+        localStorage.setItem('tasks-in-memory', JSON.stringify(taskIds));
+        console.log(`TaskManager: Initialized memory tracking with ${taskIds.length} tasks`);
+      }
+      
       // Only update tags once per 800ms to prevent event flood
       const now = Date.now();
       if (now - forceUpdateTimeRef.current > 800) {
@@ -115,6 +122,30 @@ const TaskManager = () => {
         
         // After verification is complete, force a UI update
         setTimeout(() => {
+          // Log all habit tasks in localStorage for debugging
+          const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+          const habitTasks = storedTasks.filter((task: any) => task.relationships?.habitId);
+          
+          if (habitTasks.length > 0) {
+            console.log(`TaskManager: Found ${habitTasks.length} habit tasks in storage:`, 
+              habitTasks.map((t: any) => ({
+                id: t.id,
+                name: t.name,
+                habitId: t.relationships?.habitId,
+                date: t.relationships?.date
+              }))
+            );
+            
+            // Add these tasks to memory tracking
+            const tasksInMemory = JSON.parse(localStorage.getItem('tasks-in-memory') || '[]');
+            const newTaskIds = habitTasks.map((t: any) => t.id);
+            const updatedMemoryList = [...new Set([...tasksInMemory, ...newTaskIds])];
+            localStorage.setItem('tasks-in-memory', JSON.stringify(updatedMemoryList));
+            
+            // Force one more task update
+            forceTaskUpdate();
+          }
+          
           setIsLoading(false);
         }, 100);
       }, 200);
@@ -123,7 +154,7 @@ const TaskManager = () => {
     return () => {
       clearTimeout(timeout);
     };
-  }, [checkPendingHabits, checkForMissingHabitTasks]);
+  }, [checkPendingHabits, checkForMissingHabitTasks, forceTaskUpdate]);
 
   const handleTaskClick = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
@@ -155,6 +186,9 @@ const TaskManager = () => {
     );
   }
 
+  // Log task details for debugging
+  console.log(`TaskManager rendering: ${tasks.length} tasks, selected: ${selectedTaskId || 'none'}`);
+  
   // No tasks view
   if (tasks.length === 0) {
     return (
@@ -166,6 +200,13 @@ const TaskManager = () => {
             const now = Date.now();
             if (now - forceUpdateTimeRef.current > 1000) {
               forceUpdateTimeRef.current = now;
+              // Check localStorage directly
+              const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+              if (storedTasks.length > 0) {
+                toast.info(`${storedTasks.length} tasks found in storage`, {
+                  description: "Attempting to load tasks from storage..."
+                });
+              }
               checkPendingHabits();
               forceTaskUpdate();
             }

@@ -19,6 +19,7 @@ const TimerPage = () => {
   const initCompletedRef = useRef(false);
   const [forceUpdateCount, setForceUpdateCount] = useState(0);
   const updateTriggeredTimeRef = useRef(0);
+  const lastForceUpdateTimeRef = useRef(0);
   
   // Track when TimerPage is mounted and ready - only run once
   useEffect(() => {
@@ -113,9 +114,10 @@ const TimerPage = () => {
     const handleForceUpdate = () => {
       const now = Date.now();
       // Limit updates to no more than once every 800ms to avoid infinite loops
-      if (now - lastUpdateTime.current > 800) {
+      if (now - lastUpdateTime.current > 800 && now - lastForceUpdateTimeRef.current > 800) {
         console.log('TimerPage: Received force-task-update event (debounced)');
         lastUpdateTime.current = now;
+        lastForceUpdateTimeRef.current = now;
         // Use state update to trigger a controlled re-render
         setForceUpdateCount(prev => prev + 1);
       } else {
@@ -139,7 +141,7 @@ const TimerPage = () => {
       <TimerErrorBoundary>
         <TaskLayout
           key={renderKey}
-          main={<TimerSection
+          mainContent={<TimerSection
             selectedTask={selectedTask}
             onTaskComplete={(metrics) => {
               eventBus.emit('task:complete', { taskId: selectedTaskId, metrics });
@@ -155,7 +157,7 @@ const TimerPage = () => {
             favorites={favorites}
             setFavorites={setFavorites}
           />}
-          aside={<TaskManager />}
+          asideContent={<TaskManager />}
         />
       </TimerErrorBoundary>
     </HabitsPanelProvider>

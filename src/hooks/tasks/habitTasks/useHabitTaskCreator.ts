@@ -24,7 +24,7 @@ export const useHabitTaskCreator = () => {
     duration: number, 
     date: string
   ) => {
-    console.log(`Creating new task for habit ${habitId}:`, { name, duration, date });
+    console.log(`Creating new task for habit ${habitId}:`, { name, duration, date, templateId });
     
     try {
       // First check if this task already exists
@@ -48,6 +48,9 @@ export const useHabitTaskCreator = () => {
       // Ensure we're storing the duration in seconds
       const durationInSeconds = typeof duration === 'number' ? duration : 1500;
       
+      // Ensure templateId is valid
+      const safeTemplateId = templateId || 'custom';
+      
       const task: Task = {
         id: taskId,
         name,
@@ -56,10 +59,12 @@ export const useHabitTaskCreator = () => {
         createdAt: new Date().toISOString(),
         relationships: {
           habitId,
-          templateId,
+          templateId: safeTemplateId,
           date
         }
       };
+      
+      console.log(`Created task object for habit ${habitId} with ID ${taskId}:`, task);
       
       // Add task directly to state through the createTask function instead of just emitting an event
       // This ensures the task is immediately available in the UI
@@ -69,19 +74,19 @@ export const useHabitTaskCreator = () => {
       addTagToEntity('Habit', taskId, 'task');
       
       // Add template tag if available (format for readability)
-      if (templateId) {
+      if (safeTemplateId) {
         // Format template name correctly with first letter capitalized
         let templateName = '';
         
-        if (templateId.includes('-')) {
+        if (safeTemplateId.includes('-')) {
           // Handle kebab-case: "morning-routine" -> "Morning Routine"
-          templateName = templateId
+          templateName = safeTemplateId
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
         } else {
           // Handle camelCase: "morningRoutine" -> "Morning Routine"
-          templateName = templateId
+          templateName = safeTemplateId
             .replace(/([A-Z])/g, ' $1')
             .replace(/^./, str => str.toUpperCase())
             .trim();
@@ -100,10 +105,8 @@ export const useHabitTaskCreator = () => {
         relationType: 'habit-task'
       });
       
-      // Show notification
-      toast.success(`Created habit task: ${name}`, {
-        description: `The ${name} task has been added to your list.`
-      });
+      // Log and show notification
+      console.log(`Task created successfully for habit ${habitId}: ${taskId}`);
       
       // Multiple force updates with progressive timeouts for maximum reliability
       [100, 300, 600].forEach(delay => {
