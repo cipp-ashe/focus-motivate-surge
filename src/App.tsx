@@ -1,47 +1,47 @@
-
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import './App.css';
-import { Toaster } from 'sonner';
-import { TaskProvider } from './contexts/tasks/TaskContext';
-import { AppLayout } from './components/AppLayout';
+import { ThemeProvider } from "@/components/theme-provider"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
 
-// Create a client
-const queryClient = new QueryClient();
+import AppLayout from '@/layouts/AppLayout';
+import IndexPage from '@/pages/Index';
+import TaskPage from '@/pages/Tasks';
+import TimerPage from '@/pages/Timer';
+import HabitsPage from '@/pages/Habits';
+import NotesPage from '@/pages/Notes';
 
-// Lazy load page components
-const IndexPage = lazy(() => import('./pages/Index'));
-const TimerPage = lazy(() => import('./pages/Timer'));
-const NotesPage = lazy(() => import('./pages/Notes'));
-const HabitsPage = lazy(() => import('./pages/Habits'));
-const TaskPage = lazy(() => import('./pages/TaskPage'));
+// Add the HabitProvider import
+import { HabitProvider } from './contexts/habits/HabitContext';
+import { TaskProvider } from './contexts/tasks/TaskContext';
 
 function App() {
+  const queryClient = new QueryClient();
+
   return (
-    <div className="App">
+    <div className="app bg-background text-foreground">
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true} forcedTheme="dark">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <BrowserRouter>
-            <TaskProvider>
-              <AppLayout>
-                <Suspense fallback={<div className="flex items-center justify-center h-screen w-full">
-                  <div className="text-primary animate-pulse">Loading...</div>
-                </div>}>
-                  <Routes>
-                    <Route path="/" element={<IndexPage />} />
-                    <Route path="/timer" element={<TimerPage />} />
-                    <Route path="/notes" element={<NotesPage />} />
-                    <Route path="/habits" element={<HabitsPage />} />
-                    <Route path="/tasks" element={<TaskPage />} />
-                  </Routes>
-                </Suspense>
-              </AppLayout>
-            </TaskProvider>
+            {/* Add HabitProvider here, wrapping the TaskProvider */}
+            <HabitProvider>
+              <TaskProvider>
+                <AppLayout>
+                  <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+                    <main className="min-h-[100vh]">
+                      <Routes>
+                        <Route path="/" element={<IndexPage />} />
+                        <Route path="/tasks" element={<TaskPage />} />
+                        <Route path="/timer" element={<TimerPage />} />
+                        <Route path="/habits" element={<HabitsPage />} />
+                        <Route path="/notes" element={<NotesPage />} />
+                      </Routes>
+                    </main>
+                  </Suspense>
+                </AppLayout>
+              </TaskProvider>
+            </HabitProvider>
           </BrowserRouter>
         </ThemeProvider>
-        <Toaster theme="dark" />
       </QueryClientProvider>
     </div>
   );

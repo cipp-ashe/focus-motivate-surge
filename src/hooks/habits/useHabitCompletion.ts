@@ -23,11 +23,14 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
         
         // If it's a journal habit, we need to open the journal modal
         if (habit.metrics?.type === 'journal') {
-          eventBus.emit('journal:open', { 
+          // Define the event object with explicit type that includes templateId
+          const journalEvent: { habitId: string; habitName: string; templateId?: string } = {
             habitId: habit.id, 
             habitName: habit.name,
-            templateId // Make sure this property is included in the event object
-          });
+            templateId // Include templateId in event
+          };
+          
+          eventBus.emit('journal:open', journalEvent);
           // Don't mark as completed yet - will be completed when journal entry is saved
           return prev;
         }

@@ -1,4 +1,17 @@
 
+import type { Tag } from './tags';
+
+// Task type enum for type checking
+export type TaskType = 'habit' | 'timer' | 'regular';
+
+export interface TaskMetrics {
+  timeSpent?: number;
+  timeElapsed?: number;
+  pauseCount?: number;
+  completionDate?: string;
+  streak?: number;
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -8,6 +21,7 @@ export interface Task {
   createdAt: string;
   completedAt?: string;
   clearReason?: 'manual' | 'completed';
+  taskType?: TaskType; // Using the TaskType enum
   relationships?: {
     habitId?: string;
     templateId?: string;
@@ -15,32 +29,9 @@ export interface Task {
   };
   metrics?: TaskMetrics;
   tags?: Tag[];
-  taskType?: 'habit' | 'timer' | 'regular'; // Adding task type field
 }
 
-export interface Tag {
-  id: string;
-  name: string;
-  color?: string;
-}
-
-export interface TaskMetrics {
-  actualTime?: number;
-  estimatedTime?: number;
-  interruptions?: number;
-  expectedTime?: number;
-  actualDuration?: number;
-  pauseCount?: number;
-  favoriteQuotes?: number;
-  pausedTime?: number;
-  extensionTime?: number;
-  netEffectiveTime?: number;
-  efficiencyRatio?: number;
-  completionStatus?: string;
-}
-
-export interface TaskState {
-  items: Task[];
-  completed: Task[];
-  selected: string | null;
-}
+export const STORAGE_KEYS = {
+  TASKS: 'tasks',
+  COMPLETED_TASKS: 'completed_tasks',
+};
