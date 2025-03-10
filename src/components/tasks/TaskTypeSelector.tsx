@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Timer, Image, Calendar, FileText } from 'lucide-react';
+import { Timer, Image, Calendar, FileText, CheckSquare, BookOpen } from 'lucide-react';
 
 interface TaskTypeSelectorProps {
   value: TaskType;
@@ -51,6 +51,18 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-green-400" />
             <span>Habit Task</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="journal">
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-amber-400" />
+            <span>Journal Entry</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="checklist">
+          <div className="flex items-center gap-2">
+            <CheckSquare className="h-4 w-4 text-cyan-400" />
+            <span>Checklist</span>
           </div>
         </SelectItem>
       </SelectContent>

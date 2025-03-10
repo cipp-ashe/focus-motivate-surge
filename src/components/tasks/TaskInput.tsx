@@ -7,6 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { TaskTypeSelector } from './TaskTypeSelector';
+import { Timer, Image, Calendar, FileText } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;

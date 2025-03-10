@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Timer, Image, Calendar, FileText } from 'lucide-react';
+import { Timer, Image, Calendar, FileText, CheckSquare, BookOpen } from 'lucide-react';
 
 interface TaskManagerContentProps {
   tasks: Task[];
@@ -52,6 +52,8 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   const timerTasks = tasks.filter(task => task.taskType === 'timer');
   const screenshotTasks = tasks.filter(task => task.taskType === 'screenshot');
   const habitTasks = tasks.filter(task => task.taskType === 'habit');
+  const journalTasks = tasks.filter(task => task.taskType === 'journal');
+  const checklistTasks = tasks.filter(task => task.taskType === 'checklist');
   const regularTasks = tasks.filter(task => !task.taskType || task.taskType === 'regular');
   const allTasks = tasks;
 
@@ -82,6 +84,14 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
               <TabsTrigger value="habit" className="flex items-center gap-1">
                 <Calendar className="h-4 w-4 text-green-400" />
                 <span>Habits ({habitTasks.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="journal" className="flex items-center gap-1">
+                <BookOpen className="h-4 w-4 text-amber-400" />
+                <span>Journal ({journalTasks.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="checklist" className="flex items-center gap-1">
+                <CheckSquare className="h-4 w-4 text-cyan-400" />
+                <span>Checklists ({checklistTasks.length})</span>
               </TabsTrigger>
               <TabsTrigger value="regular" className="flex items-center gap-1">
                 <FileText className="h-4 w-4 text-primary" />
@@ -117,6 +127,22 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
           <TabsContent value="habit" className="flex-1 overflow-auto p-0 m-0">
             <TaskList
               tasks={habitTasks}
+              selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+              onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
+            />
+          </TabsContent>
+          
+          <TabsContent value="journal" className="flex-1 overflow-auto p-0 m-0">
+            <TaskList
+              tasks={journalTasks}
+              selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+              onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
+            />
+          </TabsContent>
+          
+          <TabsContent value="checklist" className="flex-1 overflow-auto p-0 m-0">
+            <TaskList
+              tasks={checklistTasks}
               selectedTasks={selectedTaskId ? [selectedTaskId] : []}
               onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
             />

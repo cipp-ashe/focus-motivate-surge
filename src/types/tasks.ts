@@ -1,6 +1,6 @@
 
 // Task type enum for type checking
-export type TaskType = 'habit' | 'timer' | 'regular' | 'screenshot';
+export type TaskType = 'habit' | 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist';
 
 export interface TaskMetrics {
   timeSpent?: number;
@@ -42,6 +42,8 @@ export interface Task {
   imageType?: 'screenshot' | 'image' | null;
   fileName?: string;
   capturedText?: string;
+  journalEntry?: string;
+  checklistItems?: ChecklistItem[];
 }
 
 export const STORAGE_KEYS = {
@@ -54,6 +56,13 @@ export interface Tag {
   id: string;
   name: string;
   color?: string;
+}
+
+// Add ChecklistItem interface for checklist tasks
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
 }
 
 // Add TaskState export to fix the error in TaskContext.tsx
