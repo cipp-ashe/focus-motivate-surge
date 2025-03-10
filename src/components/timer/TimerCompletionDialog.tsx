@@ -19,7 +19,7 @@ const TimerCompletionDialogContent = React.forwardRef<
         ref={ref}
         className={cn(
           "z-[150] max-w-lg",
-          isMobile ? "w-[90vw] mt-16 mx-auto rounded-lg p-4" : "w-[95vw] sm:w-full",
+          isMobile ? "w-[95vw] mt-8 mx-auto rounded-lg p-3" : "w-[95vw] sm:w-full",
           className
         )}
         {...props}

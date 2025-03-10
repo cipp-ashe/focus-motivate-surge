@@ -1,24 +1,8 @@
 
-import { useState, useEffect } from 'react';
+// This file is deprecated and just re-exports from the new location
+export { useIsMobile } from './ui/useIsMobile';
 
-export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Check if screen width is less than 768px (standard tablet breakpoint)
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Initial check
-    checkMobile();
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkMobile);
-
-    // Clean up event listener on component unmount
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  return isMobile;
+// For backward compatibility
+export function useMobile() {
+  return useIsMobile();
 }

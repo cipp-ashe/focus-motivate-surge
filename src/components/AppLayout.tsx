@@ -3,6 +3,7 @@ import React, { ReactNode, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Header } from './layout/Header';
 import { useTheme } from '@/hooks/useTheme';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface AppLayoutProps {
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
   const { isDark, mounted } = useTheme();
+  const isMobile = useIsMobile();
   
   // Add debug logging
   console.log("AppLayout rendering with path:", location.pathname);
@@ -37,7 +39,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-background dark:bg-gray-900 transition-colors duration-300">
       {showHeader && <Header />}
-      <main className="container mx-auto max-w-5xl p-4">
+      <main className={`container mx-auto ${isMobile ? 'max-w-full p-2' : 'max-w-5xl p-4'}`}>
         {children}
       </main>
     </div>

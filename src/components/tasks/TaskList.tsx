@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -83,13 +84,13 @@ export const TaskList: React.FC<TaskListProps> = ({
     );
   }
 
-  // Handle mobile-specific styling
+  // Mobile-specific styling
   const tabListClass = isMobile
-    ? "grid grid-cols-2 w-full text-sm"
-    : "grid grid-cols-2 w-full";
+    ? "grid grid-cols-2 w-full text-xs"
+    : "grid grid-cols-2 w-full text-sm";
 
   const tabContentClass = isMobile
-    ? "flex-grow overflow-hidden mt-0 p-0 pb-14"
+    ? "flex-grow overflow-hidden mt-0 p-0 pb-16"
     : "flex-grow overflow-hidden mt-0 p-0";
 
   return (
@@ -100,7 +101,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         onValueChange={setActiveTab}
         value={activeTab}
       >
-        <div className={isMobile ? "px-2 pt-1" : "px-4 pt-2"}>
+        <div className={isMobile ? "px-1 pt-1" : "px-4 pt-2"}>
           <TabsList className={tabListClass}>
             <TabsTrigger value="active" data-test="active-tasks-tab">
               Active Tasks ({localTasks.length})

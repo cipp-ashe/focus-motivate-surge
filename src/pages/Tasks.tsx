@@ -59,8 +59,8 @@ const TaskPage = () => {
   }, []); // Empty dependency array ensures this only runs once
 
   return (
-    <div className="container mx-auto py-2 px-2 sm:py-4 sm:px-4">
-      <h1 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+    <div className={`container mx-auto ${isMobile ? 'p-1' : 'py-2 px-2 sm:py-4 sm:px-4'}`}>
+      <h1 className={`${isMobile ? 'text-lg mb-1' : 'text-xl sm:text-2xl mb-2 sm:mb-4'} font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500`}>
         Task Manager
       </h1>
       <TaskManager />
