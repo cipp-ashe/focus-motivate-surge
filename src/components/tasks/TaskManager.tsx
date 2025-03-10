@@ -1,10 +1,10 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { TaskList } from './TaskList';
-import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { useTagSystem } from '@/hooks/useTagSystem';
 import { eventBus } from '@/lib/eventBus';
+import { TaskInput } from './TaskInput';
 
 const TaskManager = () => {
   const { items: tasks, selected: selectedTaskId, completed: completedTasks } = useTaskContext();
@@ -80,12 +80,23 @@ const TaskManager = () => {
     );
   }
 
+  const handleTaskAdd = (task) => {
+    eventBus.emit('task:create', task);
+  };
+
   return (
-    <TaskList
-      tasks={tasks}
-      selectedTasks={selectedTaskId ? [selectedTaskId] : []}
-      onTaskClick={() => {}} // This is now unused as we're using event bus directly
-    />
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b border-border/10">
+        <TaskInput onTaskAdd={handleTaskAdd} />
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <TaskList
+          tasks={tasks}
+          selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+          onTaskClick={() => {}} // This is now unused as we're using event bus directly
+        />
+      </div>
+    </div>
   );
 };
 
