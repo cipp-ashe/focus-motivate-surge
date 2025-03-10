@@ -1,125 +1,149 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search } from "lucide-react";
+import React, { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+import { Search } from 'lucide-react';
 
-// Data for ISO/IEC 27001:2022 controls
-const securityControls = [
-  // 5 Organizational controls
-  { section: "5.1", name: "Policies for information security", description: "Information security policy and topic-specific policies shall be defined, approved by management, published, communicated to and acknowledged by relevant personnel and relevant interested parties, and reviewed at planned intervals and if significant changes occur.", category: "Organizational" },
-  { section: "5.2", name: "Information security roles and responsibilities", description: "Information security roles and responsibilities shall be defined and allocated according to the organization needs.", category: "Organizational" },
-  { section: "5.3", name: "Segregation of duties", description: "Conflicting duties and conflicting areas of responsibility shall be segregated.", category: "Organizational" },
-  { section: "5.4", name: "Management responsibilities", description: "Management shall require all personnel to apply information security in accordance with the established information security policy, topic-specific policies and procedures of the organization.", category: "Organizational" },
-  { section: "5.5", name: "Contact with authorities", description: "The organization shall establish and maintain contact with relevant authorities.", category: "Organizational" },
-  { section: "5.6", name: "Contact with special interest groups", description: "The organization shall establish and maintain contact with special interest groups or other specialist security forums and professional associations.", category: "Organizational" },
-  { section: "5.7", name: "Threat intelligence", description: "Information relating to information security threats shall be collected and analysed to produce threat intelligence.", category: "Organizational" },
-  { section: "5.8", name: "Information security in project management", description: "Information security shall be integrated into project management.", category: "Organizational" },
-  { section: "5.9", name: "Inventory of information and other associated assets", description: "An inventory of information and other associated assets, including owners, shall be developed and maintained.", category: "Organizational" },
-  { section: "5.10", name: "Acceptable use of information and other associated assets", description: "Rules for the acceptable use and procedures for handling information and other associated assets shall be identified, documented and implemented.", category: "Organizational" },
-  { section: "5.11", name: "Return of assets", description: "Personnel and other interested parties as appropriate shall return all the organization's assets in their possession upon change or termination of their employment, contract or agreement.", category: "Organizational" },
-  { section: "5.12", name: "Classification of information", description: "Information shall be classified according to the information security needs of the organization based on confidentiality, integrity, availability and relevant interested party requirements.", category: "Organizational" },
+interface SecurityControl {
+  id: string;
+  section: string;
+  category: string;
+  title: string;
+  description: string;
+}
+
+// ISO 27001:2022 security controls
+const securityControls: SecurityControl[] = [
+  // Organizational controls
+  { id: '5.1', section: '5', category: 'Organizational', title: 'Policies for information security', description: 'Information security policy and topic-specific policies shall be defined, approved by management, published, communicated to and acknowledged by relevant personnel and relevant interested parties, and reviewed at planned intervals and if significant changes occur.' },
+  { id: '5.2', section: '5', category: 'Organizational', title: 'Information security roles and responsibilities', description: 'Information security roles and responsibilities shall be defined and allocated according to the organization needs.' },
+  { id: '5.3', section: '5', category: 'Organizational', title: 'Segregation of duties', description: 'Conflicting duties and conflicting areas of responsibility shall be segregated.' },
+  { id: '5.4', section: '5', category: 'Organizational', title: 'Management responsibilities', description: 'Management shall require all personnel to apply information security in accordance with the established information security policy, topic-specific policies and procedures of the organization.' },
+  { id: '5.5', section: '5', category: 'Organizational', title: 'Contact with authorities', description: 'The organization shall establish and maintain contact with relevant authorities.' },
+  { id: '5.6', section: '5', category: 'Organizational', title: 'Contact with special interest groups', description: 'The organization shall establish and maintain contact with special interest groups or other specialist security forums and professional associations.' },
+  { id: '5.7', section: '5', category: 'Organizational', title: 'Threat intelligence', description: 'Information relating to information security threats shall be collected and analysed to produce threat intelligence.' },
+  { id: '5.8', section: '5', category: 'Organizational', title: 'Information security in project management', description: 'Information security shall be integrated into project management.' },
+  { id: '5.9', section: '5', category: 'Organizational', title: 'Inventory of information and other associated assets', description: 'An inventory of information and other associated assets, including owners, shall be developed and maintained.' },
+  { id: '5.10', section: '5', category: 'Organizational', title: 'Acceptable use of information and other associated assets', description: 'Rules for the acceptable use and procedures for handling information and other associated assets shall be identified, documented and implemented.' },
+  { id: '5.11', section: '5', category: 'Organizational', title: 'Return of assets', description: 'Personnel and other interested parties as appropriate shall return all the organization\'s assets in their possession upon change or termination of their employment, contract or agreement.' },
+  
+  // Add more organizational controls
+  { id: '5.12', section: '5', category: 'Organizational', title: 'Classification of information', description: 'Information shall be classified according to the information security needs of the organization based on confidentiality, integrity, availability and relevant interested party requirements.' },
   
   // People controls
-  { section: "6.1", name: "Screening", description: "Background verification checks on all candidates to become personnel shall be carried out prior to joining the organization and on an ongoing basis taking into consideration applicable laws, regulations and ethics and be proportional to the business requirements, the classification of the information to be accessed and the perceived risks.", category: "People" },
-  { section: "6.2", name: "Terms and conditions of employment", description: "The employment contractual agreements shall state the personnel's and the organization's responsibilities for information security.", category: "People" },
-  { section: "6.3", name: "Information security awareness, education and training", description: "Personnel of the organization and relevant interested parties shall receive appropriate information security awareness, education and training and regular updates of the organization's information security policy, topic-specific policies and procedures, as relevant for their job function.", category: "People" },
-  { section: "6.4", name: "Disciplinary process", description: "A disciplinary process shall be formalized and communicated to take actions against personnel and other relevant interested parties who have committed an information security policy violation.", category: "People" },
-  { section: "6.5", name: "Responsibilities after termination or change of employment", description: "Information security responsibilities and duties that remain valid after termination or change of employment shall be defined, enforced and communicated to relevant personnel and other interested parties.", category: "People" },
+  { id: '6.1', section: '6', category: 'People', title: 'Screening', description: 'Background verification checks on all candidates to become personnel shall be carried out prior to joining the organization and on an ongoing basis taking into consideration applicable laws, regulations and ethics and be proportional to the business requirements, the classification of the information to be accessed and the perceived risks.' },
+  { id: '6.2', section: '6', category: 'People', title: 'Terms and conditions of employment', description: 'The employment contractual agreements shall state the personnel\'s and the organization\'s responsibilities for information security.' },
+  { id: '6.3', section: '6', category: 'People', title: 'Information security awareness, education and training', description: 'Personnel of the organization and relevant interested parties shall receive appropriate information security awareness, education and training and regular updates of the organization\'s information security policy, topic-specific policies and procedures, as relevant for their job function.' },
   
   // Physical controls
-  { section: "7.1", name: "Physical security perimeters", description: "Security perimeters shall be defined and used to protect areas that contain information and other associated assets.", category: "Physical" },
-  { section: "7.2", name: "Physical entry", description: "Secure areas shall be protected by appropriate entry controls and access points.", category: "Physical" },
-  { section: "7.3", name: "Securing offices, rooms and facilities", description: "Physical security for offices, rooms and facilities shall be designed and implemented.", category: "Physical" },
+  { id: '7.1', section: '7', category: 'Physical', title: 'Physical security perimeters', description: 'Security perimeters shall be defined and used to protect areas that contain information and other associated assets.' },
+  { id: '7.2', section: '7', category: 'Physical', title: 'Physical entry', description: 'Secure areas shall be protected by appropriate entry controls and access points.' },
+  { id: '7.3', section: '7', category: 'Physical', title: 'Securing offices, rooms and facilities', description: 'Physical security for offices, rooms and facilities shall be designed and implemented.' },
   
   // Technological controls
-  { section: "8.1", name: "User end point devices", description: "Information stored on, processed by or accessible via user end point devices shall be protected.", category: "Technological" },
-  { section: "8.2", name: "Privileged access rights", description: "The allocation and use of privileged access rights shall be restricted and managed.", category: "Technological" },
-  { section: "8.3", name: "Information access restriction", description: "Access to information and other associated assets shall be restricted in accordance with the established topic-specific policy on access control.", category: "Technological" },
-  { section: "8.4", name: "Access to source code", description: "Read and write access to source code, development tools and software libraries shall be appropriately managed.", category: "Technological" },
-  { section: "8.5", name: "Secure authentication", description: "Secure authentication technologies and procedures shall be implemented based on information access restrictions and the topic-specific policy on access control.", category: "Technological" },
-  { section: "8.6", name: "Capacity management", description: "The use of resources shall be monitored and adjusted in line with current and expected capacity requirements.", category: "Technological" },
-  { section: "8.7", name: "Protection against malware", description: "Protection against malware shall be implemented and supported by appropriate user awareness.", category: "Technological" },
-  // Add all the security controls here
+  { id: '8.1', section: '8', category: 'Technological', title: 'User end point devices', description: 'Information stored on, processed by or accessible via user end point devices shall be protected.' },
+  { id: '8.2', section: '8', category: 'Technological', title: 'Privileged access rights', description: 'The allocation and use of privileged access rights shall be restricted and managed.' },
+  { id: '8.3', section: '8', category: 'Technological', title: 'Information access restriction', description: 'Access to information and other associated assets shall be restricted in accordance with the established topic-specific policy on access control.' },
+  { id: '8.4', section: '8', category: 'Technological', title: 'Access to source code', description: 'Read and write access to source code, development tools and software libraries shall be appropriately managed.' },
+  { id: '8.5', section: '8', category: 'Technological', title: 'Secure authentication', description: 'Secure authentication technologies and procedures shall be implemented based on information access restrictions and the topic-specific policy on access control.' },
+  { id: '8.24', section: '8', category: 'Technological', title: 'Use of cryptography', description: 'Rules for the effective use of cryptography, including cryptographic key management, shall be defined and implemented.' },
+  { id: '8.25', section: '8', category: 'Technological', title: 'Secure development life cycle', description: 'Rules for the secure development of software and systems shall be established and applied.' },
 ];
 
 export const SecurityControlsReference: React.FC = () => {
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [activeTab, setActiveTab] = React.useState("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   
-  const filteredControls = securityControls.filter(control => {
-    const matchesSearch = searchTerm === "" || 
-      control.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      control.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      control.section.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    const matchesCategory = activeTab === "all" || 
-      control.category.toLowerCase() === activeTab.toLowerCase();
-      
-    return matchesSearch && matchesCategory;
-  });
-  
+  const filteredControls = useMemo(() => {
+    return securityControls.filter(control => {
+      const matchesSearch = 
+        control.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        control.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        control.id.toLowerCase().includes(searchQuery.toLowerCase());
+        
+      const matchesCategory = 
+        activeTab === 'all' || 
+        control.category.toLowerCase() === activeTab.toLowerCase();
+        
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, activeTab]);
+
   return (
-    <Card className="shadow-md border-border/20 w-full">
-      <CardHeader className="bg-card/70 border-b border-border/10 py-4">
-        <CardTitle className="text-lg font-medium">
-          ISO/IEC 27001:2022 Security Controls Reference
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="p-4 pt-6">
-        <div className="flex items-center mb-6 relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search security controls..."
-            className="pl-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+    <div className="space-y-6">
+      <div className="flex flex-col space-y-4">
+        <h1 className="text-3xl font-bold">ISO 27001:2022 Security Controls Reference</h1>
+        <p className="text-muted-foreground">
+          A reference guide to the security controls specified in ISO/IEC 27001:2022 Annex A.
+        </p>
+        
+        <div className="relative w-full max-w-lg">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search controls..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
           />
         </div>
+      </div>
+
+      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="all">All Controls</TabsTrigger>
+          <TabsTrigger value="Organizational">Organizational</TabsTrigger>
+          <TabsTrigger value="People">People</TabsTrigger>
+          <TabsTrigger value="Physical">Physical</TabsTrigger>
+          <TabsTrigger value="Technological">Technological</TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="all">All Controls</TabsTrigger>
-            <TabsTrigger value="Organizational">Organizational</TabsTrigger>
-            <TabsTrigger value="People">People</TabsTrigger>
-            <TabsTrigger value="Physical">Physical</TabsTrigger>
-            <TabsTrigger value="Technological">Technological</TabsTrigger>
-          </TabsList>
-          
-          <ScrollArea className="h-[600px]">
+        <TabsContent value={activeTab} className="mt-0">
+          <div className="rounded-md border">
             <Table>
+              <TableCaption>
+                ISO/IEC 27001:2022 Information Security Controls
+              </TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-20">Section</TableHead>
-                  <TableHead className="w-1/3">Control</TableHead>
+                  <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead className="w-[250px]">Control</TableHead>
                   <TableHead>Description</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredControls.map((control) => (
-                  <TableRow key={control.section}>
-                    <TableCell className="font-medium">{control.section}</TableCell>
-                    <TableCell>{control.name}</TableCell>
-                    <TableCell className="text-sm">{control.description}</TableCell>
+                  <TableRow key={control.id}>
+                    <TableCell className="font-medium">{control.id}</TableCell>
+                    <TableCell>{control.title}</TableCell>
+                    <TableCell>{control.description}</TableCell>
                   </TableRow>
                 ))}
                 {filteredControls.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
-                      No security controls found for your search criteria.
+                    <TableCell colSpan={3} className="text-center py-4">
+                      No controls found matching your search criteria.
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
-          </ScrollArea>
-        </Tabs>
-      </CardContent>
-    </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };

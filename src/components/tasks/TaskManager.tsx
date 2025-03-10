@@ -24,8 +24,16 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   // Initialize local tasks from context
   useEffect(() => {
     console.log("TaskManager - Received tasks from context:", tasks);
-    setLocalTasks(tasks);
-  }, [tasks]);
+    
+    // If in timer view, filter only timer tasks
+    if (isTimerPage) {
+      const timerTasks = tasks.filter(task => task.taskType === 'timer');
+      console.log("TaskManager - Filtered timer tasks:", timerTasks);
+      setLocalTasks(timerTasks);
+    } else {
+      setLocalTasks(tasks);
+    }
+  }, [tasks, isTimerPage]);
   
   // Debug: Log tasks whenever they change
   useEffect(() => {
@@ -33,6 +41,10 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   }, [localTasks]);
 
   const handleTaskCreate = (task: Task) => {
+    if (isTimerPage && task.taskType !== 'timer') {
+      return; // Only add timer tasks in timer view
+    }
+    
     setLocalTasks(prev => {
       // Avoid adding duplicate tasks
       if (prev.some(t => t.id === task.id)) return prev;
@@ -56,10 +68,22 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
     // Force reload from storage to ensure we have the latest data
     const storedTasks = taskStorage.loadTasks();
     console.log("TaskManager - Reloaded tasks from storage:", storedTasks);
-    setLocalTasks(storedTasks);
+    
+    if (isTimerPage) {
+      const timerTasks = storedTasks.filter(task => task.taskType === 'timer');
+      console.log("TaskManager - Filtered timer tasks after reload:", timerTasks);
+      setLocalTasks(timerTasks);
+    } else {
+      setLocalTasks(storedTasks);
+    }
   };
   
   const handleTaskAdd = (task: Task) => {
+    // In timer view, only add timer tasks
+    if (isTimerPage && task.taskType !== 'timer') {
+      return;
+    }
+    
     // Add to local state immediately for responsive UI
     setLocalTasks(prev => {
       if (prev.some(t => t.id === task.id)) return prev;
@@ -68,10 +92,17 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
   };
 
   const handleTasksAdd = (tasks: Task[]) => {
+    // In timer view, only add timer tasks
+    const tasksToAdd = isTimerPage 
+      ? tasks.filter(task => task.taskType === 'timer')
+      : tasks;
+    
+    if (tasksToAdd.length === 0) return;
+    
     // Add to local state immediately for responsive UI
     setLocalTasks(prev => {
       // Filter out duplicates
-      const newTasks = tasks.filter(task => !prev.some(t => t.id === task.id));
+      const newTasks = tasksToAdd.filter(task => !prev.some(t => t.id === task.id));
       return [...prev, ...newTasks];
     });
   };

@@ -5,7 +5,7 @@ import { eventManager } from '@/lib/events/EventManager';
 import { TimerEventType } from '@/types/events';
 
 export const useTasksNavigation = () => {
-  const { forceTaskUpdate, forceTagsUpdate, checkPendingHabits } = useTaskEvents();
+  const { forceTaskUpdate } = useTaskEvents();
   
   const navigateToTask = useCallback((taskId: string) => {
     eventManager.emit('task:select' as TimerEventType, taskId);
@@ -19,8 +19,6 @@ export const useTasksNavigation = () => {
   return {
     navigateToTask,
     navigateToHabit,
-    forceTaskUpdate, 
-    forceTagsUpdate,
-    checkPendingHabits
+    forceTaskUpdate
   };
 };

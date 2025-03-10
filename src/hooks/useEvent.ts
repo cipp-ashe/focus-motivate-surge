@@ -1,51 +1,23 @@
 
-import { useEffect, useCallback } from 'react';
-import { eventManager, EventType, EventHandler } from '@/lib/events/EventManager';
+import { useEffect } from 'react';
+import { eventBus } from '@/lib/eventBus';
 
-// Hook for subscribing to events
-export function useEvent<T extends EventType>(
-  eventType: T,
-  handler: EventHandler<T>,
-  deps: React.DependencyList = []
+/**
+ * Hook to subscribe to events from the event bus with proper cleanup
+ * @param eventType The event type to listen for
+ * @param handler The handler function to be called when the event is fired
+ */
+export function useEvent<T = any>(
+  eventType: string, 
+  handler: (data: T) => void
 ) {
   useEffect(() => {
     // Subscribe to the event
-    const unsubscribe = eventManager.on(eventType, handler);
+    const unsubscribe = eventBus.on(eventType, handler);
     
-    // Unsubscribe when the component unmounts
-    return unsubscribe;
-  }, [eventType, handler, ...deps]);
-}
-
-// Hook for emitting events
-export function useEventEmitter() {
-  const emit = useCallback(<T extends EventType>(eventType: T, payload: any) => {
-    eventManager.emit(eventType, payload);
-  }, []);
-  
-  return { emit };
-}
-
-// Combined hook
-export function useEvents<T extends EventType>(
-  events: { [K in T]: EventHandler<K> },
-  deps: React.DependencyList = []
-) {
-  useEffect(() => {
-    // Subscribe to all events
-    const unsubscribers = Object.entries(events).map(([eventType, handler]) => {
-      return eventManager.on(eventType as T, handler as EventHandler<any>);
-    });
-    
-    // Unsubscribe from all events when the component unmounts
+    // Cleanup subscription on unmount
     return () => {
-      unsubscribers.forEach(unsubscribe => unsubscribe());
+      unsubscribe();
     };
-  }, deps);
-  
-  const emit = useCallback(<E extends EventType>(eventType: E, payload: any) => {
-    eventManager.emit(eventType, payload);
-  }, []);
-  
-  return { emit };
+  }, [eventType, handler]);
 }

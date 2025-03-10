@@ -1,34 +1,24 @@
 
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { TimerEventType } from '@/types/events';
 
 export const useTaskEvents = () => {
-  const forceTaskUpdate = () => {
+  const forceTaskUpdate = useCallback(() => {
+    console.log("TaskEvents: Force updating task list (debounced)");
+    
+    // Force update via event
     window.dispatchEvent(new Event('force-task-update'));
-    eventBus.emit('tasks:force-update' as TimerEventType, { timestamp: new Date().toISOString() });
-  };
-
-  const forceTagsUpdate = () => {
-    eventBus.emit('tags:force-update' as TimerEventType, { timestamp: new Date().toISOString() });
-  };
-
-  const checkPendingHabits = () => {
-    eventBus.emit('habits:check-pending' as TimerEventType, null);
-  };
-
-  useEffect(() => {
-    const handleHabitProcessed = () => {
-      console.log("useTaskEvents: Habit processed, forcing task update");
-      forceTaskUpdate();
-    };
     
-    eventBus.on('habits:processed' as TimerEventType, handleHabitProcessed);
+    // Also emit via event bus for components using that system
+    eventBus.emit('task:reload', {});
     
-    return () => {
-      eventBus.off('habits:processed' as TimerEventType, handleHabitProcessed);
-    };
+    // And via event manager
+    eventManager.emit('task:reload' as TimerEventType, {});
   }, []);
-
-  return { forceTaskUpdate, forceTagsUpdate, checkPendingHabits };
+  
+  return {
+    forceTaskUpdate
+  };
 };
