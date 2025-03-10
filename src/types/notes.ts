@@ -7,7 +7,7 @@ export interface Note {
   content: string;
   createdAt: string;
   updatedAt: string;
-  tags?: string[];
+  tags?: Tag[];
   color?: string;
   archived?: boolean;
   pinned?: boolean;
@@ -17,8 +17,31 @@ export interface Note {
   }[];
 }
 
+export interface Tag {
+  name: string;
+  color: TagColor;
+}
+
+export type TagColor = 
+  | 'default' 
+  | 'red' 
+  | 'orange' 
+  | 'yellow' 
+  | 'green' 
+  | 'blue' 
+  | 'purple' 
+  | 'pink';
+
+export function isValidTagColor(color: string): color is TagColor {
+  return ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'].includes(color);
+}
+
 export interface NotesState {
   notes: Note[];
   selectedNoteId: string | null;
   filterTag: string | null;
+}
+
+export interface NotesProps {
+  hideNotes?: boolean;
 }

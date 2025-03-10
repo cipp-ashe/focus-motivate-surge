@@ -1,3 +1,4 @@
+
 import React, { useCallback, forwardRef, ForwardedRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -63,8 +64,10 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         // Create new note
         const newNote: Note = {
           id: crypto.randomUUID(),
+          title: 'New Note', // Add a default title
           content: externalContent.trim(),
           createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           tags: []
         };
         updatedNotes = [newNote, ...currentNotes];

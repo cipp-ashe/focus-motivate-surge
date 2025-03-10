@@ -1,4 +1,3 @@
-
 // Task type enum for type checking
 export type TaskType = 'habit' | 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote';
 

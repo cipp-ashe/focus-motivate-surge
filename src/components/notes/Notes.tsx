@@ -2,7 +2,7 @@
 import React from 'react';
 import { NotesEditor } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
-import type { NotesProps } from '@/types/notes';
+import { NotesProps } from '@/types/notes';
 
 export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
   return (

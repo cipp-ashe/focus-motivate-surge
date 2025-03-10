@@ -168,7 +168,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) =
             {isRecording ? (
               <div className="p-4 border border-border rounded-md">
                 <VoiceRecorder 
-                  onComplete={(text) => handleVoiceRecordingComplete(text)} 
+                  onComplete={handleVoiceRecordingComplete} 
                   compact={true}
                 />
               </div>

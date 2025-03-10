@@ -1,4 +1,5 @@
-import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+
+import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { Note, Tag } from '@/types/notes';
@@ -11,8 +12,9 @@ interface NoteState {
   selected: string | null;
 }
 
-interface NoteInput extends Omit<Note, 'id' | 'createdAt'> {
+interface NoteInput extends Omit<Partial<Note>, 'id' | 'createdAt'> {
   title?: string; // Optional title for better UX
+  content: string;
 }
 
 interface NoteContextActions {
@@ -20,6 +22,7 @@ interface NoteContextActions {
   updateNote: (noteId: string, updates: Partial<Note>) => void;
   deleteNote: (noteId: string) => void;
   selectNote: (noteId: string | null) => void;
+  lastCreatedNoteId?: string;
 }
 
 const NoteContext = createContext<NoteState | undefined>(undefined);
@@ -69,6 +72,8 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
     }
   }, initialState);
 
+  const lastCreatedNoteIdRef = useRef<string | undefined>(undefined);
+
   // Load initial data
   useQuery({
     queryKey: ['notes'],
@@ -103,13 +108,16 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
         
         const newNote: Note = {
           id: crypto.randomUUID(),
+          title: habitData.habitName || 'Journal Entry',
           content: habitData.content || `## ${habitData.habitName}\n\n${habitData.description}\n\n`,
           createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           tags
         };
         
         // Save to state via dispatch
         dispatch({ type: 'ADD_NOTE', payload: newNote });
+        lastCreatedNoteIdRef.current = newNote.id;
         
         // Also save to localStorage
         const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
@@ -125,6 +133,44 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
             'habit-journal'
           );
           console.log(`Created relationship between habit ${habitData.habitId} and note ${newNote.id}`);
+        }
+      }),
+
+      eventBus.on('note:create-from-voice', (voiceNoteData) => {
+        console.log('Creating note from voice note:', voiceNoteData);
+        
+        // Create tags for the voice note entry
+        const tags: Tag[] = [
+          { name: 'voice-note', color: 'blue' }
+        ];
+        
+        const newNote: Note = {
+          id: crypto.randomUUID(),
+          title: voiceNoteData.title || 'Voice Note',
+          content: voiceNoteData.content || '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags
+        };
+        
+        // Save to state via dispatch
+        dispatch({ type: 'ADD_NOTE', payload: newNote });
+        lastCreatedNoteIdRef.current = newNote.id;
+        
+        // Also save to localStorage
+        const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+        localStorage.setItem('notes', JSON.stringify([newNote, ...existingNotes]));
+
+        // Create a relationship if we have a voice note ID
+        if (voiceNoteData.voiceNoteId) {
+          relationshipManager.createRelationship(
+            voiceNoteData.voiceNoteId, 
+            'voicenote', 
+            newNote.id, 
+            'note', 
+            'voice-note-transcription'
+          );
+          console.log(`Created relationship between voice note ${voiceNoteData.voiceNoteId} and note ${newNote.id}`);
         }
       }),
     ];
@@ -154,23 +200,25 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
     addNote: (noteInput) => {
       // Handle the title field - add it to content if provided
       let content = noteInput.content;
+      const title = noteInput.title || "New Note";
       
-      if (noteInput.title) {
-        // If content doesn't start with a heading, add the title as a heading
-        if (!content.trim().startsWith('#')) {
-          content = `# ${noteInput.title}\n\n${content}`;
-        }
-      }
-      
+      // Create the new note
       const newNote: Note = {
+        id: crypto.randomUUID(),
+        title,
         content,
         tags: noteInput.tags || [],
-        id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        color: noteInput.color,
+        archived: noteInput.archived || false,
+        pinned: noteInput.pinned || false,
+        relationships: noteInput.relationships || []
       };
       
       // Save to state
       dispatch({ type: 'ADD_NOTE', payload: newNote });
+      lastCreatedNoteIdRef.current = newNote.id;
       
       // Also save to localStorage
       const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
@@ -180,12 +228,18 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
     },
     
     updateNote: (noteId, updates) => {
-      dispatch({ type: 'UPDATE_NOTE', payload: { noteId, updates } });
+      // Make sure updatedAt is set
+      const updatedNote = {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      
+      dispatch({ type: 'UPDATE_NOTE', payload: { noteId, updates: updatedNote } });
       
       // Update in localStorage too
       const notes = JSON.parse(localStorage.getItem('notes') || '[]');
       const updatedNotes = notes.map((note: Note) => 
-        note.id === noteId ? { ...note, ...updates } : note
+        note.id === noteId ? { ...note, ...updatedNote } : note
       );
       localStorage.setItem('notes', JSON.stringify(updatedNotes));
     },
@@ -210,6 +264,10 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
     selectNote: (noteId) => {
       dispatch({ type: 'SELECT_NOTE', payload: noteId });
     },
+    
+    get lastCreatedNoteId() {
+      return lastCreatedNoteIdRef.current;
+    }
   };
 
   return (

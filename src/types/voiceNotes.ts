@@ -22,4 +22,5 @@ export interface VoiceNoteContextType {
   deleteNote: (id: string) => void;
   toggleNoteComplete: (id: string) => void;
   updateNoteText: (id: string, text: string) => void;
+  createNoteFromVoiceNote?: (voiceNoteId: string) => void;
 }
