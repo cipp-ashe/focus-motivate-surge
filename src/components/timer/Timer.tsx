@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./views/TimerExpandedView";
 import { useTimerState } from "./state/TimerState";
@@ -30,8 +30,8 @@ export const Timer = ({
     isValid: Boolean(duration && taskName)
   });
 
-  // Use useState for the ref to solve the React hook violation
-  const [expandedViewRef, setExpandedViewRef] = useState<TimerExpandedViewRef | null>(null);
+  // Use useRef to create a proper ref object for the expanded view
+  const expandedViewRef = useRef<TimerExpandedViewRef | null>(null);
 
   try {
     const {
@@ -163,7 +163,7 @@ export const Timer = ({
         testSound={testSound}
         isLoadingAudio={isLoadingAudio}
         updateMetrics={updateMetrics}
-        expandedViewRef={setExpandedViewRef}
+        expandedViewRef={expandedViewRef}
         handleCloseTimer={handleCloseTimer}
         favorites={favorites}
         setFavorites={setFavorites}

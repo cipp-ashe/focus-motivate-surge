@@ -4,6 +4,7 @@ import { Task } from "@/types/tasks";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { Timer as TimerIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TimerSectionProps {
   selectedTask: Task | null;
@@ -22,19 +23,32 @@ export const TimerSection = ({
 }: TimerSectionProps) => {
   if (!selectedTask) {
     return (
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <TimerIcon className="h-4 w-4" />
-          <p className="text-sm font-medium">Select a task to start the timer</p>
-        </div>
-      </div>
+      <Card className="w-full shadow-sm mb-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <TimerIcon className="h-5 w-5 text-primary" />
+            Timer
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="flex items-center justify-center h-[200px] bg-muted/20 rounded-md">
+            <div className="text-center p-6">
+              <TimerIcon className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-muted-foreground font-medium">Select a task to start the timer</p>
+              <p className="text-sm text-muted-foreground/70 mt-2">
+                Choose a task from the list on the right
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   const durationInSeconds = selectedTask.duration || 1500;
 
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+    <Card className="w-full shadow-sm mb-4">
       <Timer
         key={`timer-${selectedTask.id}-${durationInSeconds}`}
         duration={durationInSeconds}
@@ -50,6 +64,6 @@ export const TimerSection = ({
         favorites={favorites}
         setFavorites={setFavorites}
       />
-    </div>
+    </Card>
   );
 };
