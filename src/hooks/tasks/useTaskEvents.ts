@@ -111,12 +111,26 @@ export const useTaskEvents = () => {
     }, 300);
   }, [processing, lastForceUpdateTime]);
 
+  // Add the missing functions that are being called in useTasksInitializer and useTasksNavigation
+  const forceTagsUpdate = useCallback(() => {
+    console.log("useTaskEvents: Forcing tags update");
+    // Dispatch a custom event for tag updates
+    window.dispatchEvent(new Event('force-tags-update'));
+  }, []);
+
+  const checkPendingHabits = useCallback(() => {
+    console.log("useTaskEvents: Checking pending habits");
+    eventBus.emit('habits:check-pending', {});
+  }, []);
+
   return {
     createTask,
     updateTask,
     deleteTask,
     completeTask,
     selectTask,
-    forceTaskUpdate
+    forceTaskUpdate,
+    forceTagsUpdate,
+    checkPendingHabits
   };
 };
