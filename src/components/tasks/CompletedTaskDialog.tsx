@@ -4,7 +4,7 @@ import { Task } from '@/types/tasks';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, BookOpen, Image } from 'lucide-react';
+import { Calendar, BookOpen, Image, Timer, Pencil, FileText } from 'lucide-react';
 import { relationshipManager } from '@/lib/relationshipManager';
 import { useNoteState } from '@/contexts/notes/NoteContext';
 import { formatTime } from '@/utils/timeUtils';
@@ -36,16 +36,41 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
     return date.toLocaleString();
   };
 
+  // Get appropriate icon based on task type
+  const getTaskTypeIcon = () => {
+    switch(task.taskType) {
+      case 'timer':
+        return <Timer className="h-4 w-4 text-purple-400" />;
+      case 'screenshot':
+        return <Image className="h-4 w-4 text-blue-400" />;
+      case 'habit':
+        return <Calendar className="h-4 w-4 text-green-400" />;
+      case 'regular':
+      default:
+        return <FileText className="h-4 w-4 text-primary" />;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{task.name}</DialogTitle>
+          <div className="flex items-center gap-2">
+            {getTaskTypeIcon()}
+            <DialogTitle className="text-xl font-bold">{task.name}</DialogTitle>
+          </div>
           <DialogDescription className="text-sm">
             <div className="flex items-center gap-2 mt-1">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>Completed on {formatDate(task.completedAt)}</span>
             </div>
+            {task.taskType && (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-muted">
+                  {task.taskType.charAt(0).toUpperCase() + task.taskType.slice(1)} Task
+                </span>
+              </div>
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -56,9 +81,9 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
           </div>
         )}
 
-        {task.metrics && (
+        {task.metrics && task.taskType === 'timer' && (
           <div className="space-y-3">
-            <h3 className="font-medium text-sm">Task Metrics</h3>
+            <h3 className="font-medium text-sm">Timer Metrics</h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {task.metrics.expectedTime && (
                 <div>
@@ -102,7 +127,7 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
                 <div key={note!.id} className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
                   <BookOpen className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
                   <div>
-                    <p className="font-medium text-sm">{note!.title || 'Untitled Note'}</p>
+                    <p className="font-medium text-sm">{note?.title || 'Untitled Note'}</p>
                     <p className="text-xs text-muted-foreground truncate">
                       {note!.content.substring(0, 100)}...
                     </p>

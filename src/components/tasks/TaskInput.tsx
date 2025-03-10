@@ -1,239 +1,99 @@
 
-import { useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Plus, List, X, Send } from "lucide-react";
-import type { Task } from "@/types/tasks";
-import { ImportTasksButton } from "./ImportTasksButton";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { eventBus } from "@/lib/eventBus";
-import { toast } from "sonner";
-import { taskStorage } from "@/lib/storage/taskStorage";
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Task, TaskType } from '@/types/tasks';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { TaskTypeSelector } from './TaskTypeSelector';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
-  onTasksAdd?: (tasks: Task[]) => void;
+  onTasksAdd: (tasks: Task[]) => void;
 }
 
-const generateId = () => {
-  return crypto.randomUUID();
-};
+export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) => {
+  const [taskName, setTaskName] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
+  const [taskType, setTaskType] = useState<TaskType>('regular');
+  const [duration, setDuration] = useState(25); // Default 25 minutes
 
-const DEFAULT_DURATION = 1500; // 25 minutes in seconds
+  const handleAddTask = () => {
+    if (!taskName.trim()) return;
 
-export const TaskInput = ({ onTaskAdd, onTasksAdd }: TaskInputProps) => {
-  const [newTaskName, setNewTaskName] = useState("");
-  const [isBulkAdd, setIsBulkAdd] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+    const newTask: Task = {
+      id: uuidv4(),
+      name: taskName.trim(),
+      description: taskDescription.trim() || undefined,
+      taskType: taskType,
+      completed: false,
+      createdAt: new Date().toISOString(),
+      // Only add duration for timer tasks
+      ...(taskType === 'timer' ? { duration: duration * 60 } : {})
+    };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskName.trim() || isProcessing) return;
-    
-    setIsProcessing(true);
-    console.log("TaskInput: Processing form submission");
-    
-    try {
-      if (isBulkAdd) {
-        const taskLines = newTaskName.split('\n').filter(task => task.trim());
-        console.log(`TaskInput: Creating ${taskLines.length} tasks from bulk add`);
-        
-        const tasks: Task[] = taskLines.map(taskLine => {
-          const [taskName, durationStr] = taskLine.split(',').map(s => s.trim());
-          return {
-            id: generateId(),
-            name: taskName,
-            completed: false,
-            duration: durationStr 
-              ? Math.min(Math.max(parseInt(durationStr), 1), 60) * 60 
-              : DEFAULT_DURATION,
-            createdAt: new Date().toISOString(),
-          };
-        });
-        
-        // Add each task to storage first to ensure persistence
-        tasks.forEach(task => {
-          console.log(`TaskInput: Adding task to storage: ${task.id}`, task);
-          taskStorage.addTask(task);
-        });
-        
-        // Use the batch add method if available
-        if (onTasksAdd) {
-          console.log("TaskInput: Using batch add method");
-          onTasksAdd(tasks);
-        } else {
-          // Add tasks with staggered timing
-          console.log("TaskInput: Using individual task creation with staggered timing");
-          tasks.forEach((task, index) => {
-            setTimeout(() => {
-              console.log(`TaskInput: Emitting task:create for task ${index+1}/${tasks.length}:`, task);
-              eventBus.emit('task:create', task);
-            }, index * 100); // Add 100ms between tasks
-          });
-          
-          // Force update after all tasks should have been added
-          setTimeout(() => {
-            toast.success(`Added ${tasks.length} tasks`);
-            console.log(`TaskInput: Triggering force-task-update after adding ${tasks.length} tasks`);
-            window.dispatchEvent(new CustomEvent('force-task-update'));
-          }, tasks.length * 100 + 300);
-        }
-      } else {
-        // Create a single task
-        const task: Task = {
-          id: generateId(),
-          name: newTaskName.trim(),
-          completed: false,
-          duration: DEFAULT_DURATION,
-          createdAt: new Date().toISOString(),
-        };
-        
-        console.log("TaskInput: Creating single task:", task);
-        
-        // Add to storage first to ensure persistence
-        taskStorage.addTask(task);
-        
-        // Then use callback for single task
-        console.log("TaskInput: Calling onTaskAdd callback with task:", task);
-        onTaskAdd(task);
-        
-        // Emit the event directly as well to ensure all listeners get it
-        console.log("TaskInput: Emitting task:create event with task:", task);
-        eventBus.emit('task:create', task);
-        
-        // Show success toast
-        toast.success(`Added task: ${task.name}`);
-        
-        // Force a UI update
-        setTimeout(() => {
-          console.log("TaskInput: Triggering force-task-update for single task");
-          window.dispatchEvent(new CustomEvent('force-task-update'));
-        }, 100);
-      }
-    } catch (error) {
-      console.error("Error creating tasks:", error);
-      toast.error("Failed to create tasks");
-    } finally {
-      // Reset state
-      setNewTaskName("");
-      setIsProcessing(false);
-    }
+    onTaskAdd(newTask);
+    resetForm();
   };
 
-  const handleTasksImport = (importedTasks: Omit<Task, 'id' | 'createdAt'>[]) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-    
-    try {
-      console.log(`TaskInput: Importing ${importedTasks.length} tasks`);
-      
-      const tasks: Task[] = importedTasks.map(taskData => ({
-        ...taskData,
-        id: generateId(),
-        createdAt: new Date().toISOString(),
-      }));
-      
-      // Use the batch add method if available
-      if (onTasksAdd && tasks.length > 1) {
-        onTasksAdd(tasks);
-      } else {
-        // Add tasks with staggered timing
-        tasks.forEach((task, index) => {
-          setTimeout(() => {
-            // Emit event directly
-            eventBus.emit('task:create', task);
-          }, index * 100);
-        });
-        
-        // Force update after all tasks should have been added
-        setTimeout(() => {
-          toast.success(`Imported ${tasks.length} tasks`);
-          window.dispatchEvent(new Event('force-task-update'));
-        }, tasks.length * 100 + 300);
-      }
-    } catch (error) {
-      console.error("Error importing tasks:", error);
-      toast.error("Failed to import tasks");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleClear = () => {
-    setNewTaskName("");
+  const resetForm = () => {
+    setTaskName('');
+    setTaskDescription('');
+    setTaskType('regular');
+    setDuration(25);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <div className="flex items-start gap-2">
-        <div className="flex-1 relative">
-          {isBulkAdd ? (
-            <Textarea
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              placeholder="Add multiple tasks (one per line)...&#10;Task name, duration (optional)&#10;Example:&#10;Read book, 30&#10;Write code"
-              className="min-h-[100px] resize-y pr-8 bg-card/50 border-primary/10 focus:border-primary/20 shadow-sm"
-              disabled={isProcessing}
-            />
-          ) : (
+    <div className="space-y-4">
+      <div className="grid gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="task-name">Task Name</Label>
+          <Input
+            id="task-name"
+            placeholder="Enter task name"
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+          />
+        </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="task-description">Description (Optional)</Label>
+          <Textarea
+            id="task-description"
+            placeholder="Add details about this task"
+            value={taskDescription}
+            onChange={(e) => setTaskDescription(e.target.value)}
+            rows={2}
+          />
+        </div>
+        
+        <div className="grid gap-2">
+          <Label htmlFor="task-type">Task Type</Label>
+          <TaskTypeSelector 
+            value={taskType} 
+            onChange={setTaskType} 
+          />
+        </div>
+        
+        {taskType === 'timer' && (
+          <div className="grid gap-2">
+            <Label htmlFor="task-duration">Duration (minutes)</Label>
             <Input
-              type="text"
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              placeholder="Add a new task..."
-              className="pr-8 bg-card/50 border-primary/10 focus:border-primary/20 shadow-sm h-12"
-              disabled={isProcessing}
+              id="task-duration"
+              type="number"
+              min={1}
+              max={120}
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
             />
-          )}
-          {newTaskName && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none transition-colors duration-200"
-              disabled={isProcessing}
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <ImportTasksButton onTasksImport={handleTasksImport} />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button type="button" variant="outline" size="icon" className="border-primary/20 hover:bg-primary/5" disabled={isProcessing}>
-                <List className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card/90 backdrop-blur-lg border-primary/10">
-              <DropdownMenuItem onClick={() => setIsBulkAdd(false)}>
-                Single Task Mode
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsBulkAdd(true)}>
-                Bulk Add Mode
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button 
-            type="submit" 
-            variant="default" 
-            size="icon" 
-            disabled={!newTaskName.trim() || isProcessing}
-            className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-600 transition-all duration-300"
-          >
-            {isProcessing ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+          </div>
+        )}
       </div>
-    </form>
+      
+      <Button onClick={handleAddTask} disabled={!taskName.trim()}>
+        Add Task
+      </Button>
+    </div>
   );
 };

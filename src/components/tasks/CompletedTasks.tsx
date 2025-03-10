@@ -8,11 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Award } from "lucide-react";
+import { Award, Timer, Image, Calendar, FileText } from "lucide-react";
 import { TaskMetricsRow } from "./TaskMetricsRow";
 import { toast } from "sonner";
 import React, { useState } from 'react';
 import { CompletedTaskDialog } from "./CompletedTaskDialog";
+import { Badge } from "@/components/ui/badge";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -37,6 +38,21 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     setDialogOpen(true);
   };
 
+  // Get task type icon
+  const getTaskTypeIcon = (taskType?: string) => {
+    switch(taskType) {
+      case 'timer':
+        return <Timer className="h-4 w-4 text-purple-400" />;
+      case 'screenshot':
+        return <Image className="h-4 w-4 text-blue-400" />;
+      case 'habit':
+        return <Calendar className="h-4 w-4 text-green-400" />;
+      case 'regular':
+      default:
+        return <FileText className="h-4 w-4 text-primary" />;
+    }
+  };
+
   return (
     <div className="w-full border-t border-border/50">
       <div className="flex-none px-4 py-3">
@@ -53,8 +69,8 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
               <TableHeader>
                 <TableRow className="hover:bg-transparent border-b border-border/50">
                   <TableHead className="text-muted-foreground">Task</TableHead>
+                  <TableHead className="text-muted-foreground">Type</TableHead>
                   <TableHead className="text-muted-foreground">Time</TableHead>
-                  <TableHead className="text-muted-foreground">Status</TableHead>
                   <TableHead className="text-muted-foreground">Details</TableHead>
                 </TableRow>
               </TableHeader>
@@ -65,20 +81,31 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                       className="group border-b border-border/50 cursor-pointer hover:bg-muted/40 transition-colors"
                       onClick={() => handleTaskClick(task)}
                     >
-                      <TableCell className="line-through text-muted-foreground">{task.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {task.metrics ? `${task.metrics.expectedTime}m` : "-"}
+                      <TableCell className="line-through text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          {getTaskTypeIcon(task.taskType)}
+                          {task.name}
+                        </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {task.metrics?.completionStatus || "-"}
+                        {task.taskType ? (
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {task.taskType}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs">regular</Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {task.metrics && typeof task.metrics.efficiencyRatio !== 'undefined' 
+                        {task.metrics && task.metrics.expectedTime ? `${task.metrics.expectedTime}m` : "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {task.taskType === 'timer' && task.metrics && typeof task.metrics.efficiencyRatio !== 'undefined' 
                           ? `${task.metrics.efficiencyRatio.toFixed(1)}%` 
-                          : "-"}
+                          : (task.taskType === 'screenshot' && task.imageUrl ? "Has image" : "-")}
                       </TableCell>
                     </TableRow>
-                    {task.metrics && (
+                    {task.taskType === 'timer' && task.metrics && (
                       <TaskMetricsRow task={task} />
                     )}
                   </React.Fragment>
