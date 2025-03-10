@@ -3,8 +3,9 @@ import { Timer } from "./Timer";
 import { Task } from "@/types/tasks";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
-import { Timer as TimerIcon } from "lucide-react";
+import { Timer as TimerIcon, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface TimerSectionProps {
   selectedTask: Task | null;

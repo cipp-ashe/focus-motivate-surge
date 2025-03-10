@@ -3,6 +3,8 @@ import { Task } from "@/types/tasks";
 import { Sparkles, X, Clock } from "lucide-react";
 import { TaskTags } from "./TaskTags";
 import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
 
 interface TaskContentProps {
@@ -75,7 +77,7 @@ export const TaskContent = ({
   const durationInMinutes = Math.round((task.duration || 1500) / 60);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 p-4">
       <div className="flex items-center justify-between w-full gap-3">
         <div className="flex items-center gap-3 flex-1">
           <div className="rounded-full bg-primary/10 p-1.5">
@@ -84,7 +86,7 @@ export const TaskContent = ({
           <span className="text-foreground line-clamp-1 flex-1 font-medium">{task.name}</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-md">
+          <Badge variant="outline" className="flex items-center gap-1 bg-primary/5 hover:bg-primary/10">
             <Clock className="h-3.5 w-3.5 text-primary opacity-70" />
             {editingTaskId === task.id ? (
               <Input
@@ -110,14 +112,16 @@ export const TaskContent = ({
               </span>
             )}
             <span className="text-primary/70 text-sm">m</span>
-          </div>
-          <button
+          </Badge>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onDelete}
             onTouchStart={onDelete}
-            className="text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation bg-background/40 p-1.5 rounded-full hover:bg-destructive/10"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation hover:bg-destructive/10"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       </div>
 

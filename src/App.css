@@ -60,20 +60,6 @@
   }
 }
 
-.card {
-  padding: 1em;
-}
-
-@media (min-width: 640px) {
-  .card {
-    padding: 2em;
-  }
-}
-
-.read-the-docs {
-  color: #888;
-}
-
 /* Timer styling */
 .timer-circle {
   transform: rotate(-90deg);
@@ -168,4 +154,50 @@
 /* Enhanced card styling */
 .card-hover-effect {
   @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/5;
+}
+
+/* Custom focus styles */
+.focus-ring:focus {
+  @apply outline-none ring-2 ring-primary/40 ring-offset-2;
+}
+
+/* Form element styling */
+.input-bordered {
+  @apply border border-primary/20 focus:border-primary/30 focus:ring-1 focus:ring-primary/20;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-in-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Better mobile touch targets */
+@media (max-width: 640px) {
+  .touch-target {
+    @apply min-h-12 min-w-12 flex items-center justify-center;
+  }
 }

@@ -2,6 +2,8 @@
 import { useState, useCallback } from "react";
 import { Task } from "@/types/tasks";
 import { TaskRow } from "./TaskRow";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 
 interface TaskTableProps {
   tasks: Task[];
@@ -40,7 +42,7 @@ export const TaskTable = ({
   }, []);
 
   return (
-    <div className="mt-4 space-y-2">
+    <div className="space-y-2 p-4">
       {tasks.map((task) => (
         <TaskRow
           key={task.id}
@@ -56,12 +58,17 @@ export const TaskTable = ({
       ))}
       
       {tasks.length > 1 && (
-        <button
-          onClick={onTasksClear}
-          className="text-sm text-muted-foreground hover:text-destructive transition-colors duration-200 mt-2"
-        >
-          Clear All
-        </button>
+        <div className="flex justify-center pt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onTasksClear}
+            className="text-muted-foreground hover:text-destructive transition-colors"
+          >
+            <Trash className="h-4 w-4 mr-2" />
+            Clear All Tasks
+          </Button>
+        </div>
       )}
     </div>
   );

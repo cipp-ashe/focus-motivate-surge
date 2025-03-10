@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import type { Task } from "@/types/tasks";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface ImportTasksButtonProps {
   onTasksImport: (tasks: Omit<Task, 'id' | 'createdAt'>[]) => void;
@@ -52,14 +58,23 @@ export const ImportTasksButton = ({ onTasksImport }: ImportTasksButtonProps) => 
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         aria-label="Import tasks from file"
       />
-      <Button
-        variant="outline"
-        size="icon"
-        className="relative border-primary/20 hover:bg-primary/5 transition-all duration-200"
-        type="button"
-      >
-        <Upload className="h-4 w-4" />
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="relative border-primary/20 hover:bg-primary/5 transition-all duration-200"
+              type="button"
+            >
+              <Upload className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Import tasks from JSON file</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 };

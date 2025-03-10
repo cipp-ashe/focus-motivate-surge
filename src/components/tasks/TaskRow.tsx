@@ -3,6 +3,7 @@ import { Task } from "@/types/tasks";
 import { useState, useEffect } from "react";
 import { TaskContent } from "./TaskContent";
 import { eventBus } from "@/lib/eventBus";
+import { Card } from "@/components/ui/card";
 
 interface TaskRowProps {
   task: Task;
@@ -109,11 +110,9 @@ export const TaskRow = ({
   };
 
   return (
-    <div
+    <Card
       className={`
-        relative flex flex-col gap-2
-        p-4 rounded-lg border backdrop-blur-sm 
-        cursor-pointer transition-all duration-300 group
+        relative cursor-pointer transition-all duration-300 group
         ${isSelected 
           ? 'bg-accent/20 border-primary/40 shadow-lg shadow-primary/5' 
           : 'bg-card/40 border-primary/10 hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01]'
@@ -132,7 +131,7 @@ export const TaskRow = ({
         onKeyDown={handleKeyDown}
         preventPropagation={preventPropagation}
       />
-    </div>
+    </Card>
   );
 };
 
