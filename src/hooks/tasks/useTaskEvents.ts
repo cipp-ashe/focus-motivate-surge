@@ -8,7 +8,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 export const useTaskEvents = () => {
   // Handle task deletion logic with toast notification
   const deleteTask = useCallback((taskId: string, reason: string = 'user-action', suppressToast?: boolean) => {
-    console.log(`TaskEvents: Deleting task ${taskId} (reason: ${reason})`);
+    console.log(`TaskEvents: Deleting task ${taskId} (reason: ${reason})`, {suppressToast});
     
     try {
       // Get task before we delete it

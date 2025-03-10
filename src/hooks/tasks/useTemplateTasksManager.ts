@@ -14,7 +14,7 @@ export const useTemplateTasksManager = (tasks: Task[]) => {
     isOriginatingAction?: boolean 
   }) => {
     const { templateId, suppressToast } = event;
-    console.log(`TemplateTasksManager: Received template deletion event for ${templateId}`);
+    console.log(`TemplateTasksManager: Received template deletion event for ${templateId}`, {suppressToast});
     
     // Find all tasks related to this template
     const tasksToRemove = tasks.filter(task => 

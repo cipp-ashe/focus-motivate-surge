@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
 import { HabitContextActions, HabitState } from './types';
@@ -51,8 +50,9 @@ export const createHabitActions = (
     },
     
     removeTemplate: (templateId) => {
-      // We'll show the toast here as this is the direct user action
-      toast.success('Template deleted successfully');
+      // We no longer show the toast here as HabitTracker will handle it
+      // as the originating action
+      console.log('HabitActions: Received removeTemplate call', templateId);
       
       // Update the internal state first
       dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
@@ -61,12 +61,7 @@ export const createHabitActions = (
       const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
-      // Emit event for template deletion with toast suppression and mark as originating action
-      eventBus.emit('habit:template-delete', { 
-        templateId, 
-        suppressToast: true,
-        isOriginatingAction: false
-      });
+      // We no longer emit the event here as HabitTracker handles it
     },
     
     updateTemplateOrder: (templates) => {

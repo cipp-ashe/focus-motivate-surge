@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
 import { HabitTemplateManager, HabitDebugLogger, ActiveTemplateList } from '@/components/habits';
@@ -54,20 +53,17 @@ const HabitTracker = () => {
     };
   }, []);
 
-  // Handler for removing templates - now updated to centralize toast notification
+  // Handler for removing templates - now updated to be the originating action
   const handleRemoveTemplate = (templateId: string) => {
-    console.log(`HabitTracker: Removing template ${templateId} and its associated tasks`);
+    console.log(`HabitTracker: Initiating template deletion for ${templateId}`);
     
     // First emit event to remove any tasks associated with this template
-    // We've already handled toast suppression in other places
+    // Mark as originating action so only this handler shows a toast
     eventBus.emit('habit:template-delete', { 
       templateId, 
-      suppressToast: true, 
-      isOriginatingAction: false 
+      suppressToast: true, // Suppress toast in task handler
+      isOriginatingAction: true // Mark as originating action
     });
-    
-    // Then remove the template from state - the toast happens here in removeTemplate
-    removeTemplate(templateId);
     
     // Force an update of the task list
     setTimeout(() => {

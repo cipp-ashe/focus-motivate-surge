@@ -1,4 +1,3 @@
-
 import { Task, TaskMetrics } from '@/types/tasks';
 
 // Export constants for testing
@@ -315,5 +314,26 @@ export const taskStorage = {
       console.error('Error clearing all tasks from storage:', error);
       return false;
     }
-  }
+  },
+  
+  /**
+   * Get task by ID
+   */
+  getTaskById: (taskId: string): Task | null => {
+    try {
+      const tasks = taskStorage.loadTasks();
+      const task = tasks.find((t: Task) => t.id === taskId);
+      
+      if (!task) {
+        // Check completed tasks as well
+        const completedTasks = taskStorage.loadCompletedTasks();
+        return completedTasks.find((t: Task) => t.id === taskId) || null;
+      }
+      
+      return task;
+    } catch (error) {
+      console.error('Error getting task by ID from storage:', error);
+      return null;
+    }
+  },
 };
