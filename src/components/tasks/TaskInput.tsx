@@ -361,11 +361,8 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
         ))}
       </div>
       
-      {/* Habit Template */}
+      {/* Habit Template Dialog - kept but without the visible button */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline">Open Habit Template</Button>
-        </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Habit Template</DialogTitle>
