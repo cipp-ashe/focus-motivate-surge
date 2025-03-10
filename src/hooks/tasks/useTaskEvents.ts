@@ -1,12 +1,20 @@
 
 import { useEffect } from 'react';
 import { eventBus } from '@/lib/eventBus';
-import { Task } from '@/types/tasks';
+import { TimerEventType } from '@/types/events';
 
 export const useTaskEvents = () => {
   const forceTaskUpdate = () => {
     window.dispatchEvent(new Event('force-task-update'));
-    eventBus.emit('task:reload', { type: 'force-update' });
+    eventBus.emit('tasks:force-update' as TimerEventType, { timestamp: new Date().toISOString() });
+  };
+
+  const forceTagsUpdate = () => {
+    eventBus.emit('tags:force-update' as TimerEventType, { timestamp: new Date().toISOString() });
+  };
+
+  const checkPendingHabits = () => {
+    eventBus.emit('habits:check-pending' as TimerEventType, null);
   };
 
   useEffect(() => {
@@ -15,12 +23,12 @@ export const useTaskEvents = () => {
       forceTaskUpdate();
     };
     
-    eventBus.on('habits:processed', handleHabitProcessed);
+    eventBus.on('habits:processed' as TimerEventType, handleHabitProcessed);
     
     return () => {
-      eventBus.off('habits:processed', handleHabitProcessed);
+      eventBus.off('habits:processed' as TimerEventType, handleHabitProcessed);
     };
   }, []);
 
-  return { forceTaskUpdate };
+  return { forceTaskUpdate, forceTagsUpdate, checkPendingHabits };
 };

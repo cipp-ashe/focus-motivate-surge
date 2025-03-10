@@ -2,8 +2,9 @@
 import { useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
-import { taskStorage } from '@/lib/storage/taskStorage';
+import { activeTasksStorage } from '@/lib/storage/task/activeTasksStorage';
 import { v4 as uuidv4 } from 'uuid';
+import { TimerEventType } from '@/types/events';
 
 export const useTaskManager = () => {
   const createTask = useCallback((task: Omit<Task, 'id' | 'createdAt'>) => {
@@ -14,17 +15,17 @@ export const useTaskManager = () => {
     };
     
     // Add to storage
-    taskStorage.addTask(newTask);
+    activeTasksStorage.addTask(newTask);
     
     // Emit event
-    eventBus.emit('task:create', newTask);
+    eventBus.emit('task:create' as TimerEventType, newTask);
     
     return newTask;
   }, []);
   
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     // Load task
-    const tasks = taskStorage.loadTasks();
+    const tasks = activeTasksStorage.loadTasks();
     const task = tasks.find(t => t.id === taskId);
     
     if (!task) {
@@ -36,20 +37,20 @@ export const useTaskManager = () => {
     const updatedTask = { ...task, ...updates };
     
     // Save to storage
-    taskStorage.updateTask(updatedTask);
+    activeTasksStorage.updateTask(taskId, updatedTask);
     
     // Emit event
-    eventBus.emit('task:update', { taskId, updates });
+    eventBus.emit('task:update' as TimerEventType, { taskId, updates });
     
     return updatedTask;
   }, []);
   
-  const deleteTask = useCallback((taskId: string, reason?: string) => {
+  const deleteTask = useCallback((taskId: string, reason?: string, suppressToast?: boolean) => {
     // Remove from storage
-    taskStorage.deleteTask(taskId);
+    activeTasksStorage.removeTask(taskId);
     
     // Emit event
-    eventBus.emit('task:delete', { taskId, reason });
+    eventBus.emit('task:delete' as TimerEventType, { taskId, reason, suppressToast });
   }, []);
   
   return { createTask, updateTask, deleteTask };

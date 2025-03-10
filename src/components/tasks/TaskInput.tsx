@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Task, Tag } from '@/types/tasks';
@@ -39,6 +38,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast'; // Fixed import
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { eventManager } from '@/lib/events/EventManager';
+import { TimerEventType } from '@/types/events';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
@@ -47,6 +47,7 @@ interface TaskInputProps {
   simplifiedView?: boolean;
 }
 
+// Add HabitTemplate type
 interface HabitTemplate {
   id: string;
   name: string;
@@ -127,7 +128,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
         title: "Error",
         description: "Task name cannot be empty.",
         duration: 3000,
-      })
+      });
       return;
     }
     
@@ -136,24 +137,19 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
       name: taskName,
       taskType: taskType || 'regular',
       completed: false,
-      createdAt: new Date().toISOString(), // Fixed: Convert Date to string
-      tags: tags.map(tag => ({ id: uuidv4(), name: tag })), // Fixed: Convert string[] to Tag[]
+      createdAt: new Date().toISOString(),
+      tags: tags.map(tag => ({ id: uuidv4(), name: tag })),
       relationships: {
         habitId: habitId || undefined,
         date: date ? date.toISOString() : undefined
       }
     };
     
-    // Call the onTaskAdd prop to add the task to the parent component's state
     onTaskAdd(newTask);
-    
-    // Clear the input field
     setTaskName('');
     setTags([]);
     setHabitId(null);
-    setChecklistId(null);
     
-    // Focus back to the input
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -240,23 +236,19 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
     };
     
     if (isNewTemplate) {
-      // Logic to add new template
-      console.log('Creating new template:', newTemplate);
-      eventManager.emit('habit:template-add', newTemplate);
+      eventManager.emit('habit:template-add' as TimerEventType, newTemplate);
       toast({
         title: "Success",
         description: "Habit template created.",
         duration: 3000,
-      })
+      });
     } else {
-      // Logic to update existing template
-      console.log('Updating template:', newTemplate);
-      eventManager.emit('habit:template-update', newTemplate);
+      eventManager.emit('habit:template-update' as TimerEventType, newTemplate);
       toast({
         title: "Success",
         description: "Habit template updated.",
         duration: 3000,
-      })
+      });
     }
     
     setOpen(false);
