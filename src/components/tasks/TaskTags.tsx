@@ -1,182 +1,125 @@
-
-import React, { useState, useEffect, useRef } from "react";
-import { NoteTags } from "../notes/components/NoteTags";
-import { Tag } from "@/types/core";
-import { Task } from "@/types/tasks";
-import { useTagSystem } from "@/hooks/useTagSystem";
-import { toast } from "sonner";
-import { eventBus } from "@/lib/eventBus";
-import { EventType } from "@/lib/events/EventManager";
+import React, { useState, useEffect } from 'react';
+import { Badge } from "@/components/ui/badge";
+import { Tag } from '@/types/tasks';
+import { eventBus } from '@/lib/eventBus';
+import { EventType } from '@/types/events';
 
 interface TaskTagsProps {
-  task: Task;
-  preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
+  tags: Tag[];
+  onTagClick?: (tag: Tag) => void;
+  onTagRemove?: (tagId: string) => void;
+  readOnly?: boolean;
+  variant?: 'default' | 'secondary' | 'outline' | 'destructive';
+  size?: 'sm' | 'default' | 'lg';
+  className?: string;
 }
 
-export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
-  const { getEntityTags, addTagToEntity, removeTagFromEntity, updateTagColor } = useTagSystem();
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [forceUpdate, setForceUpdate] = useState(0);
-  const lastUpdateTimeRef = useRef(0);
-  const isInitialMountRef = useRef(true);
-
-  // Update tags more efficiently with debouncing
+export const TaskTags: React.FC<TaskTagsProps> = ({
+  tags,
+  onTagClick,
+  onTagRemove,
+  readOnly = false,
+  variant = 'default',
+  size = 'default',
+  className = '',
+}) => {
+  const [localTags, setLocalTags] = useState<Tag[]>(tags || []);
+  
+  // Keep tags in sync with props
   useEffect(() => {
-    const updateTags = () => {
-      if (!task?.id) return;
+    setLocalTags(tags || []);
+  }, [tags]);
+  
+  // Handle tag click
+  const handleTagClick = (tag: Tag) => {
+    if (onTagClick) {
+      onTagClick(tag);
+    } else {
+      // Default behavior if no click handler provided
+      console.log(`Tag clicked: ${tag.name}`);
       
-      const now = Date.now();
-      // Debounce updates to prevent excessive re-renders
-      if (!isInitialMountRef.current && now - lastUpdateTimeRef.current < 800) {
-        console.log(`Skipping tags update for task ${task.id}, too frequent`);
-        return;
-      }
-      
-      lastUpdateTimeRef.current = now;
-      isInitialMountRef.current = false;
-      
-      console.log(`Updating tags for task ${task.id}`);
-      const currentTags = getEntityTags(task.id, 'task');
-      // Deduplicate tags by name
-      const uniqueTags = currentTags.reduce((acc: Tag[], current) => {
-        const exists = acc.find(tag => tag.name === current.name);
-        if (!exists) {
-          acc.push(current);
-        }
-        return acc;
-      }, []);
-      setTags(uniqueTags);
-    };
-
-    // Initial tag loading
-    updateTags();
-    
-    // Set up fewer event listeners to reduce the update frequency
-    const domEvents = ['tagsUpdated', 'force-tags-update'];
-    const busEvents = ['task:create', 'task:update', 'task:delete', 'habit:template-delete'] as EventType[];
-    
-    const domHandlers = domEvents.map(eventName => {
-      const handler = () => {
-        const now = Date.now();
-        if (now - lastUpdateTimeRef.current < 800) return;
-        
-        console.log(`TaskTags: Detected ${eventName} event, updating tags for ${task.id}`);
-        setTimeout(updateTags, 50);
-      };
-      
-      window.addEventListener(eventName, handler);
-      return { eventName, handler };
-    });
-    
-    const unsubscribers = busEvents.map(eventName => {
-      return eventBus.on(eventName, () => {
-        const now = Date.now();
-        if (now - lastUpdateTimeRef.current < 800) return;
-        
-        console.log(`TaskTags: Detected ${eventName} event, updating tags for ${task.id}`);
-        setTimeout(updateTags, 50);
-      });
-    });
-    
-    // Instead of updating every 2 seconds, update only every 5 seconds maximum
-    const intervalId = setInterval(() => {
-      const now = Date.now();
-      if (now - lastUpdateTimeRef.current >= 5000) {
-        setForceUpdate(prev => prev + 1);
-      }
-    }, 5000);
-    
-    // Trigger a tags update whenever forceUpdate changes, but with debouncing
-    if (forceUpdate > 0 && !isInitialMountRef.current) {
-      const now = Date.now();
-      if (now - lastUpdateTimeRef.current >= 2000) {
-        updateTags();
-      }
+      // Broadcast tag selection event
+      eventBus.emit('tag:select', { tagId: tag.id, tagName: tag.name });
     }
+  };
+  
+  // Handle tag removal
+  const handleTagRemove = (e: React.MouseEvent, tagId: string) => {
+    e.stopPropagation();
+    if (readOnly) return;
+    
+    if (onTagRemove) {
+      onTagRemove(tagId);
+    } else {
+      // Default behavior if no remove handler provided
+      console.log(`Tag removal requested: ${tagId}`);
+      
+      // Update local state
+      setLocalTags(prev => prev.filter(t => t.id !== tagId));
+      
+      // Broadcast tag removal event
+      eventBus.emit('tag:remove', { tagId });
+    }
+  };
+  
+  // Handle tag system events
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      // Refresh from localStorage or other source if needed
+      console.log('TaskTags - Force update event received');
+    };
+    
+    // Subscribe to these events as EventType[]
+    const events = ['tags:force-update', 'tag:create', 'tag:delete'] as EventType[];
+    
+    // Add event listeners
+    const unsubscribers = events.map(eventName => 
+      eventBus.on(eventName, handleForceUpdate)
+    );
     
     return () => {
-      // Clean up dom event listeners
-      domHandlers.forEach(({ eventName, handler }) => {
-        window.removeEventListener(eventName, handler);
-      });
-      
-      // Clean up event bus listeners
+      // Clean up all event subscriptions
       unsubscribers.forEach(unsub => unsub());
-      
-      // Clear interval
-      clearInterval(intervalId);
     };
-  }, [task.id, getEntityTags, forceUpdate]);
+  }, []);
 
-  // Use effect specifically for task changes
-  useEffect(() => {
-    if (task?.id) {
-      console.log(`Task changed, updating tags for task ${task.id}`);
-      const currentTags = getEntityTags(task.id, 'task');
-      setTags(currentTags);
-      
-      // Dispatch event after a small delay to ensure all related data is loaded
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-tags-update'));
-      }, 100);
-    }
-  }, [task, getEntityTags]);
+  if (!localTags || localTags.length === 0) {
+    return null;
+  }
 
-  const handleAddTag = (tagName: string) => {
-    // Check if tag already exists before adding
-    const existingTag = tags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
-    if (!existingTag) {
-      addTagToEntity(tagName, task.id, 'task');
-      
-      // Force immediate UI update
-      setTimeout(() => {
-        window.dispatchEvent(new Event('tagsUpdated'));
-      }, 50);
-    }
+  // Define size classes
+  const sizeClasses = {
+    sm: 'text-xs px-2 py-0.5',
+    default: 'text-xs px-2.5 py-0.5',
+    lg: 'text-sm px-3 py-1',
   };
-
-  const handleRemoveTag = (tagName: string) => {
-    if (tagName === 'Habit') {
-      toast.error("Cannot remove Habit tag");
-      return;
-    }
-    removeTagFromEntity(tagName, task.id, 'task');
-    
-    // Force immediate UI update
-    setTimeout(() => {
-      window.dispatchEvent(new Event('tagsUpdated'));
-    }, 50);
-  };
-
-  const handleTagClick = (tag: Tag) => {
-    if (tag.name === 'Habit') return;
-    
-    const colors: Tag['color'][] = ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'];
-    const currentIndex = colors.indexOf(tag.color);
-    const nextColor = colors[(currentIndex + 1) % colors.length];
-    
-    updateTagColor(tag.name, nextColor);
-    
-    // Force immediate UI update
-    setTimeout(() => {
-      window.dispatchEvent(new Event('tagsUpdated'));
-    }, 50);
-  };
-
-  if (!tags || tags.length === 0) return null;
-
+  
   return (
-    <div 
-      className="flex items-center flex-wrap gap-1"
-      onClick={preventPropagation}
-      onTouchStart={preventPropagation}
-    >
-      <NoteTags
-        tags={tags}
-        onAddTag={handleAddTag}
-        onRemoveTag={handleRemoveTag}
-        onTagClick={handleTagClick}
-      />
+    <div className={`flex flex-wrap gap-1.5 ${className}`}>
+      {localTags.map((tag) => (
+        <Badge
+          key={tag.id}
+          variant={variant}
+          className={`
+            cursor-pointer
+            transition-all
+            hover:opacity-90
+            ${sizeClasses[size]}
+            ${tag.color ? `bg-${tag.color}-500 hover:bg-${tag.color}-600` : ''}
+          `}
+          onClick={() => handleTagClick(tag)}
+        >
+          {tag.name}
+          {!readOnly && (
+            <span
+              className="ml-1.5 inline-flex items-center justify-center text-xs font-medium opacity-70 hover:opacity-100"
+              onClick={(e) => handleTagRemove(e, tag.id)}
+            >
+              ×
+            </span>
+          )}
+        </Badge>
+      ))}
     </div>
   );
 };

@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { taskReducer } from './taskReducer';
 import { taskState } from './taskState';
@@ -29,35 +28,29 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   // Set up navigation handling
   useTaskNavigation(forceTasksReload);
   
-  // Load initial data
-  useQuery({
-    queryKey: ['tasks'],
-    queryFn: async () => {
-      try {
-        const result = taskState.loadFromStorage();
-        console.log("TaskContext initial load:", result);
-        dispatch({ type: 'LOAD_TASKS', payload: result });
+  // Load initial data on mount
+  useEffect(() => {
+    try {
+      const result = taskState.loadFromStorage();
+      console.log("TaskContext initial load:", result);
+      dispatch({ type: 'LOAD_TASKS', payload: result });
+      
+      // Force task update after initial load with staggered timing
+      // to ensure all components have properly mounted
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
         
-        // Force task update after initial load with staggered timing
-        // to ensure all components have properly mounted
+        // Check for pending habits
         setTimeout(() => {
+          console.log("TaskContext: Initial load complete, checking for pending habits");
           window.dispatchEvent(new Event('force-task-update'));
-          
-          // Check for pending habits
-          setTimeout(() => {
-            console.log("TaskContext: Initial load complete, checking for pending habits");
-            window.dispatchEvent(new Event('force-task-update'));
-          }, 250);
-        }, 100);
-        
-        return result;
-      } catch (error) {
-        console.error('Error in initial task loading:', error);
-        toast.error('Failed to load tasks');
-        return { tasks: [], completed: [] };
-      }
+        }, 250);
+      }, 100);
+    } catch (error) {
+      console.error('Error in initial task loading:', error);
+      toast.error('Failed to load tasks');
     }
-  });
+  }, []);
 
   // Progressive verification system to ensure data integrity
   useEffect(() => {

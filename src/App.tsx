@@ -5,6 +5,10 @@ import './App.css';
 import { Toaster } from 'sonner';
 import { TaskProvider } from './contexts/tasks/TaskContext';
 import { AppLayout } from './components/AppLayout';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a client
+const queryClient = new QueryClient();
 
 // Lazy load page components
 const IndexPage = lazy(() => import('./pages/Index'));
@@ -16,40 +20,24 @@ const TaskPage = lazy(() => import('./pages/TaskPage'));
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <TaskProvider>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <IndexPage />
-                </Suspense>
-              } />
-              <Route path="/timer" element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <TimerPage />
-                </Suspense>
-              } />
-              <Route path="/notes" element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <NotesPage />
-                </Suspense>
-              } />
-              <Route path="/habits" element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <HabitsPage />
-                </Suspense>
-              } />
-              <Route path="/tasks" element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <TaskPage />
-                </Suspense>
-              } />
-            </Routes>
-          </AppLayout>
-        </TaskProvider>
-      </BrowserRouter>
-      <Toaster />
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <TaskProvider>
+            <AppLayout>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Routes>
+                  <Route path="/" element={<IndexPage />} />
+                  <Route path="/timer" element={<TimerPage />} />
+                  <Route path="/notes" element={<NotesPage />} />
+                  <Route path="/habits" element={<HabitsPage />} />
+                  <Route path="/tasks" element={<TaskPage />} />
+                </Routes>
+              </Suspense>
+            </AppLayout>
+          </TaskProvider>
+        </BrowserRouter>
+        <Toaster />
+      </QueryClientProvider>
     </div>
   );
 }

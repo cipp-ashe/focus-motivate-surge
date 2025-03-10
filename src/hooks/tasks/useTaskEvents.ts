@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
+import { Task } from '@/types/tasks';
 
 // This is a hook that subscribes to task-related events
 export const useTaskEvents = () => {
@@ -58,7 +59,7 @@ export const useTaskEvents = () => {
       };
       
       // Update in storage
-      taskStorage.updateTask(updatedTask.id, updatedTask); // Fix: Passing taskId and updates separately
+      taskStorage.updateTask(updatedTask.id, updatedTask);
       
       // Emit task update event
       eventBus.emit('task:update', { taskId, updates: updatedTask });
@@ -82,7 +83,6 @@ export const useTaskEvents = () => {
     console.log('TaskEvents: Force updating task list (debounced)');
     
     // Dispatch custom event to signal task list update
-    // Fix: CustomEvent should be used instead of Event when we need to pass data
     const event = new CustomEvent('force-task-update');
     window.dispatchEvent(event);
     
