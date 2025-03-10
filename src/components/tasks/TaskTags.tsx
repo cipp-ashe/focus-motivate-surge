@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { NoteTags } from "../notes/components/NoteTags";
 import { Tag } from "@/types/core";
