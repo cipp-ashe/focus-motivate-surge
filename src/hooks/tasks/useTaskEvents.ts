@@ -12,7 +12,7 @@ export const useTaskEvents = () => {
     
     try {
       // Get task before we delete it
-      const task = taskStorage.getTask(taskId);
+      const task = taskStorage.getTaskById(taskId);
       
       if (!task) {
         console.warn(`Task not found for deletion: ${taskId}`);
@@ -23,7 +23,7 @@ export const useTaskEvents = () => {
       taskStorage.removeTask(taskId);
       
       // Then emit delete event
-      eventBus.emit('task:delete', taskId);
+      eventBus.emit('task:delete', { taskId, reason });
       
       // Show success toast (only if not suppressed)
       if (!suppressToast) {
@@ -44,7 +44,7 @@ export const useTaskEvents = () => {
     console.log(`TaskEvents: Toggling completion for task ${taskId}`);
     
     try {
-      const task = taskStorage.getTask(taskId);
+      const task = taskStorage.getTaskById(taskId);
       
       if (!task) {
         console.warn(`Task not found for toggling: ${taskId}`);
@@ -61,7 +61,7 @@ export const useTaskEvents = () => {
       taskStorage.updateTask(updatedTask);
       
       // Emit task update event
-      eventBus.emit('task:update', updatedTask);
+      eventBus.emit('task:update', { taskId, updates: updatedTask });
       
       // Show toast based on completion state
       if (updatedTask.completed) {

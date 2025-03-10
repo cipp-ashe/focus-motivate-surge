@@ -51,13 +51,22 @@ export const createHabitActions = (
     },
     
     removeTemplate: (templateId) => {
+      // We'll show the toast here as this is the direct user action
+      toast.success('Template deleted successfully');
+      
+      // Update the internal state first
       dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+      
+      // Update localStorage
       const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
-      // Emit event for template deletion with toast suppression
-      eventBus.emit('habit:template-delete', { templateId, suppressToast: true });
-      toast.success('Template removed successfully');
+      // Emit event for template deletion with toast suppression and mark as originating action
+      eventBus.emit('habit:template-delete', { 
+        templateId, 
+        suppressToast: true,
+        isOriginatingAction: false
+      });
     },
     
     updateTemplateOrder: (templates) => {

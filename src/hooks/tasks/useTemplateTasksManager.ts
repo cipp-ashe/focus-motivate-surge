@@ -8,7 +8,11 @@ export const useTemplateTasksManager = (tasks: Task[]) => {
   const { deleteTask, forceTaskUpdate } = useTaskEvents();
 
   // Handle template deletion - clean up associated tasks
-  const handleTemplateDelete = useCallback((event: { templateId: string, suppressToast?: boolean }) => {
+  const handleTemplateDelete = useCallback((event: { 
+    templateId: string, 
+    suppressToast?: boolean,
+    isOriginatingAction?: boolean 
+  }) => {
     const { templateId, suppressToast } = event;
     console.log(`TemplateTasksManager: Received template deletion event for ${templateId}`);
     

@@ -43,15 +43,23 @@ export const useTemplateEventHandlers = (
     }
   };
 
-  // Handle template delete
-  const handleTemplateDelete = ({ templateId, suppressToast }: { templateId: string, suppressToast?: boolean }) => {
-    console.log("Event received: habit:template-delete", templateId, suppressToast);
+  // Handle template delete - modified to respect suppressToast
+  const handleTemplateDelete = ({ templateId, suppressToast, isOriginatingAction }: { 
+    templateId: string, 
+    suppressToast?: boolean,
+    isOriginatingAction?: boolean 
+  }) => {
+    console.log("Event received: habit:template-delete", templateId, suppressToast, isOriginatingAction);
+    
+    // Update state via reducer
     dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+    
+    // Update localStorage
     const updatedTemplates = templates.filter(t => t.templateId !== templateId);
     localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
     
-    // Only show toast if not suppressed
-    if (!suppressToast) {
+    // Only show toast if this is the originating action and not suppressed
+    if (isOriginatingAction && !suppressToast) {
       toast.success('Template deleted successfully');
     }
   };

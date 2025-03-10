@@ -54,15 +54,19 @@ const HabitTracker = () => {
     };
   }, []);
 
-  // Handler for removing templates
+  // Handler for removing templates - now updated to centralize toast notification
   const handleRemoveTemplate = (templateId: string) => {
     console.log(`HabitTracker: Removing template ${templateId} and its associated tasks`);
     
     // First emit event to remove any tasks associated with this template
-    // We'll pass suppressToast: true so we don't get duplicate toasts
-    eventBus.emit('habit:template-delete', { templateId, suppressToast: true });
+    // We've already handled toast suppression in other places
+    eventBus.emit('habit:template-delete', { 
+      templateId, 
+      suppressToast: true, 
+      isOriginatingAction: false 
+    });
     
-    // Then remove the template from state - there's already a toast here
+    // Then remove the template from state - the toast happens here in removeTemplate
     removeTemplate(templateId);
     
     // Force an update of the task list
