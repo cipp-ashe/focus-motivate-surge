@@ -67,7 +67,9 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
                         {task.metrics?.completionStatus || "-"}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {task.metrics ? `${task.metrics.efficiencyRatio.toFixed(1)}%` : "-"}
+                        {task.metrics && typeof task.metrics.efficiencyRatio !== 'undefined' 
+                          ? `${task.metrics.efficiencyRatio.toFixed(1)}%` 
+                          : "-"}
                       </TableCell>
                     </TableRow>
                     {task.metrics && (
