@@ -12,7 +12,7 @@ export interface TaskMetrics {
   // Add missing properties referenced in other components
   expectedTime?: number;
   actualDuration?: number;
-  favoriteQuotes?: string[];
+  favoriteQuotes?: string[]; // Changed from number to string[] to match TimerMetrics
   pausedTime?: number;
   extensionTime?: number;
   netEffectiveTime?: number;
@@ -50,4 +50,12 @@ export interface Tag {
   id: string;
   name: string;
   color?: string;
+}
+
+// Add TaskState export to fix the error in TaskContext.tsx
+export interface TaskState {
+  items: Task[];
+  completed: Task[];
+  cleared: Task[];
+  selected: string | null;
 }

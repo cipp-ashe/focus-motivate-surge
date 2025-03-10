@@ -5,7 +5,7 @@ export interface TimerMetrics {
   pauseCount: number;
   expectedTime: number;  // Renamed from originalDuration for clarity
   actualDuration: number;
-  favoriteQuotes: number;
+  favoriteQuotes: string[]; // Changed from number to string[] to match TaskMetrics
   pausedTime: number;
   lastPauseTimestamp: Date | null;
   extensionTime: number;

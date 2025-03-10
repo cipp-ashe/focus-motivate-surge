@@ -1,14 +1,8 @@
 
-// Re-export all hook categories
-export * from './data';
-export * from './habits';
-export * from './tasks';
-export * from './timer';
-export * from './ui';
+// Re-export hooks for easier imports
+import { useIsMobile } from './use-mobile';
 
-// For backward compatibility - these should eventually be moved
-// to their proper modules and removed from here
-export { useTheme } from './useTheme';
-export { useEventBus } from './useEventBus';
-export { useMinutesHandlers } from './useMinutesHandlers';
-export { useIsMobile, useMobile } from './use-mobile';
+// Fix the export name to useIsMobile instead of useMobile
+export {
+  useIsMobile
+};

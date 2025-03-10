@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { Task, TaskMetrics } from '@/types/tasks';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
+import { TimerStateMetrics } from '@/types/metrics';
+import { EventHandler } from '@/lib/events/EventManager';
 
 const TASKS_STORAGE_KEY = 'taskList';
 const COMPLETED_TASKS_STORAGE_KEY = 'completedTasks';
@@ -80,14 +82,26 @@ export const useTaskStorage = () => {
       setSelected(taskId);
     };
 
-    const handleTaskComplete = ({ taskId, metrics }: { taskId: string; metrics?: TaskMetrics }) => {
+    // Fix the type mismatch by adapting the function signature
+    // to match the expected EventHandler<"task:complete"> type
+    const handleTaskComplete: EventHandler<"task:complete"> = (payload) => {
+      const { taskId, metrics } = payload;
       const task = items.find(t => t.id === taskId);
       if (!task) return;
+
+      // Convert TimerMetrics to TaskMetrics if needed
+      const taskMetrics: TaskMetrics = metrics ? {
+        ...metrics,
+        // Ensure favoriteQuotes is a string array
+        favoriteQuotes: Array.isArray(metrics.favoriteQuotes) 
+          ? metrics.favoriteQuotes 
+          : (metrics.favoriteQuotes ? [`${metrics.favoriteQuotes}`] : [])
+      } : {};
 
       const completedTask: Task = {
         ...task,
         completed: true,
-        metrics,
+        metrics: taskMetrics,
         clearReason: 'completed'
       };
 

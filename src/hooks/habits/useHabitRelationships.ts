@@ -13,7 +13,8 @@ export const useHabitRelationships = () => {
    * Create a task from a habit
    */
   const createTaskFromHabit = useCallback((habit: HabitDetail, templateId: string) => {
-    if (!habit.metrics?.type === 'timer') {
+    // Fix comparison error: check if habit metrics type is not 'timer'
+    if (habit.metrics?.type !== 'timer') {
       console.warn('Cannot create a task for non-timer habit');
       return null;
     }
@@ -45,11 +46,11 @@ export const useHabitRelationships = () => {
       return null;
     }
     
-    // Open the journal modal
+    // Fix error: Add templateId to the journal:open event payload
     eventBus.emit('journal:open', {
       habitId: habit.id,
       habitName: habit.name,
-      templateId
+      templateId // Add templateId to the payload
     });
     
     return true;
