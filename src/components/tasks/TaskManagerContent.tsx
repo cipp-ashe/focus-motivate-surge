@@ -8,6 +8,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Timer, Image, Calendar, BookOpen, CheckSquare, Mic, FileText } from 'lucide-react';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface TaskManagerContentProps {
   tasks: Task[];
@@ -24,6 +25,8 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   onTasksAdd,
   isTimerView = false
 }) => {
+  const isMobile = useIsMobile();
+  
   const handleTaskAdd = (task: Task) => {
     console.log("TaskManagerContent - Adding task:", task);
     
@@ -84,9 +87,10 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     );
   }
 
+  // Mobile-optimized tabs for task types
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border/10">
+      <div className={`${isMobile ? 'p-2' : 'p-4'} border-b border-border/10`}>
         <TaskInput 
           onTaskAdd={handleTaskAdd} 
           onTasksAdd={handleTasksAdd}
@@ -94,39 +98,39 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
       </div>
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="all" className="h-full flex flex-col">
-          <div className="w-full border-b border-border/10">
-            <TabsList className="w-full justify-start">
+          <div className="w-full border-b border-border/10 overflow-x-auto">
+            <TabsList className={`${isMobile ? 'flex justify-start w-auto min-w-full px-1 py-1' : 'w-full justify-start'}`}>
               <TabsTrigger value="all" className="flex items-center gap-1">
                 <FileText className="h-4 w-4" />
-                <span>All ({allTasks.length})</span>
+                <span>{isMobile ? `All (${allTasks.length})` : `All (${allTasks.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="timer" className="flex items-center gap-1">
                 <Timer className="h-4 w-4 text-purple-400" />
-                <span>Timer ({timerTasks.length})</span>
+                <span>{isMobile ? `Timer (${timerTasks.length})` : `Timer (${timerTasks.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="screenshot" className="flex items-center gap-1">
                 <Image className="h-4 w-4 text-blue-400" />
-                <span>Screenshots ({screenshotTasks.length})</span>
+                <span>{isMobile ? `Img (${screenshotTasks.length})` : `Screenshots (${screenshotTasks.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="habit" className="flex items-center gap-1">
                 <Calendar className="h-4 w-4 text-green-400" />
-                <span>Habits ({habitTasks.length})</span>
+                <span>{isMobile ? `Habit (${habitTasks.length})` : `Habits (${habitTasks.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="journal" className="flex items-center gap-1">
                 <BookOpen className="h-4 w-4 text-amber-400" />
-                <span>Journal ({journalTasks.length})</span>
+                <span>{isMobile ? `Jrnl (${journalTasks.length})` : `Journal (${journalTasks.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="checklist" className="flex items-center gap-1">
                 <CheckSquare className="h-4 w-4 text-cyan-400" />
-                <span>Checklists ({checklistTasks.length})</span>
+                <span>{isMobile ? `Chk (${checklistTasks.length})` : `Checklists (${checklistTasks.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="voicenote" className="flex items-center gap-1">
                 <Mic className="h-4 w-4 text-rose-400" />
-                <span>Voice Notes ({voiceNoteTasks.length})</span>
+                <span>{isMobile ? `Voice (${voiceNoteTasks.length})` : `Voice Notes (${voiceNoteTasks.length})`}</span>
               </TabsTrigger>
               <TabsTrigger value="regular" className="flex items-center gap-1">
                 <FileText className="h-4 w-4 text-primary" />
-                <span>Regular ({regularTasks.length})</span>
+                <span>{isMobile ? `Reg (${regularTasks.length})` : `Regular (${regularTasks.length})`}</span>
               </TabsTrigger>
             </TabsList>
           </div>
