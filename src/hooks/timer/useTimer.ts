@@ -3,7 +3,24 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
 import { TimerState, TimerAction } from '@/types/timer';
 
-export const useTimer = (initialDuration: number = 1500) => {
+interface UseTimerOptions {
+  initialMinutes?: number;
+  onTimeUp?: () => void;
+}
+
+export const useTimer = (options: UseTimerOptions | number = 25) => {
+  // Convert options to standardized format
+  const initialOptions: UseTimerOptions = typeof options === 'number' 
+    ? { initialMinutes: options } 
+    : options;
+  
+  // Extract values with defaults
+  const initialMinutes = initialOptions.initialMinutes ?? 25;
+  const onTimeUp = initialOptions.onTimeUp;
+  
+  // Convert minutes to seconds for internal use
+  const initialDuration = initialMinutes * 60;
+
   const [state, setState] = useState<TimerState>({
     timeLeft: initialDuration,
     isRunning: false,
@@ -24,7 +41,8 @@ export const useTimer = (initialDuration: number = 1500) => {
       efficiencyRatio: 0,
       completionStatus: 'Completed On Time',
       isPaused: false,
-      pausedTimeLeft: null
+      pausedTimeLeft: null,
+      completionDate: undefined
     }
   });
 
@@ -155,6 +173,10 @@ export const useTimer = (initialDuration: number = 1500) => {
               intervalRef.current = null;
             }
             
+            if (onTimeUp) {
+              onTimeUp();
+            }
+            
             return {
               ...prevState,
               timeLeft: 0,
@@ -200,7 +222,7 @@ export const useTimer = (initialDuration: number = 1500) => {
           return prevState;
       }
     });
-  }, []);
+  }, [onTimeUp]);
 
   // Timer control methods
   const startTimer = useCallback(() => {

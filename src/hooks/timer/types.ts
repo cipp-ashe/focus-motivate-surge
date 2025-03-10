@@ -2,7 +2,7 @@
 import { TimerMetrics } from '@/types/metrics';
 
 export interface UseTimerOptions {
-  initialDuration: number;
+  initialMinutes?: number;
   onTimeUp?: () => void;
   onDurationChange?: (minutes: number) => void;
 }
@@ -22,10 +22,10 @@ export interface UseTimerReturn {
 }
 
 export interface UseTimerActionsReturn {
-  setMinutes: (newMinutes: number) => void;
-  start: () => void;
-  pause: () => void;
-  reset: () => void;
-  addTime: (additionalMinutes: number) => void;
+  startTimer: () => void;
+  pauseTimer: () => void;
+  resetTimer: () => void;
+  extendTimer: (additionalMinutes: number) => void;
   completeTimer: () => void;
+  updateMetrics: (updates: Partial<TimerMetrics>) => void;
 }
