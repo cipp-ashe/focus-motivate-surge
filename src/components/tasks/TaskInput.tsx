@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Task } from '@/types/tasks';
+import { Task, Tag } from '@/types/tasks';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -35,7 +36,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/toast'; // Fixed import
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { eventManager } from '@/lib/events/EventManager';
 
@@ -44,6 +45,15 @@ interface TaskInputProps {
   onTasksAdd: (tasks: Task[]) => void;
   defaultTaskType?: 'timer' | 'screenshot' | 'habit' | 'journal' | 'checklist' | 'regular';
   simplifiedView?: boolean;
+}
+
+interface HabitTemplate {
+  id: string;
+  name: string;
+  description: string;
+  schedule: string;
+  tags: string[];
+  active: boolean;
 }
 
 export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, defaultTaskType, simplifiedView }) => {
@@ -57,7 +67,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   
   // Habit Template
   const [open, setOpen] = React.useState(false)
-  const [selectedTemplate, setSelectedTemplate] = React.useState<any>("")
+  const [selectedTemplate, setSelectedTemplate] = React.useState<HabitTemplate | null>(null)
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
   const [templateSchedule, setTemplateSchedule] = useState('');
@@ -126,11 +136,11 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
       name: taskName,
       taskType: taskType || 'regular',
       completed: false,
-      createdAt: new Date(),
-      tags: tags,
+      createdAt: new Date().toISOString(), // Fixed: Convert Date to string
+      tags: tags.map(tag => ({ id: uuidv4(), name: tag })), // Fixed: Convert string[] to Tag[]
       relationships: {
-        habitId: habitId,
-        checklistId: checklistId,
+        habitId: habitId || undefined,
+        date: date ? date.toISOString() : undefined
       }
     };
     
@@ -160,16 +170,16 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
     }
     
     const taskNames = multipleTasksInput.split('\n').filter(name => name.trim() !== '');
-    const newTasks = taskNames.map(name => ({
+    const newTasks: Task[] = taskNames.map(name => ({
       id: uuidv4(),
       name: name.trim(),
       taskType: taskType || 'regular',
       completed: false,
-      createdAt: new Date(),
-      tags: tags,
+      createdAt: new Date().toISOString(), // Fixed: Convert Date to string
+      tags: tags.map(tag => ({ id: uuidv4(), name: tag })), // Fixed: Convert string[] to Tag[]
       relationships: {
-        habitId: habitId,
-        checklistId: checklistId,
+        habitId: habitId || undefined,
+        date: date ? date.toISOString() : undefined
       }
     }));
     
@@ -197,7 +207,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   };
   
   // Habit Template Handlers
-  const handleTemplateSelect = (template: any) => {
+  const handleTemplateSelect = (template: HabitTemplate) => {
     setSelectedTemplate(template);
     setTemplateName(template.name);
     setTemplateDescription(template.description);
@@ -220,7 +230,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   };
   
   const handleTemplateSave = () => {
-    const newTemplate = {
+    const newTemplate: HabitTemplate = {
       id: templateId,
       name: templateName,
       description: templateDescription,
@@ -253,14 +263,16 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
   };
   
   const handleTemplateDelete = () => {
-    console.log('Deleting template:', selectedTemplate);
-    eventManager.emit('habit:template-delete', { templateId: selectedTemplate.id });
-    setOpen(false);
-    toast({
-      title: "Success",
-      description: "Habit template deleted.",
-      duration: 3000,
-    })
+    if (selectedTemplate) {
+      console.log('Deleting template:', selectedTemplate);
+      eventManager.emit('habit:template-delete', { templateId: selectedTemplate.id });
+      setOpen(false);
+      toast({
+        title: "Success",
+        description: "Habit template deleted.",
+        duration: 3000,
+      });
+    }
   };
   
   // Habit Schedule Handlers
@@ -389,7 +401,11 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
               <Label htmlFor="active" className="text-right">
                 Active
               </Label>
-              <Checkbox id="active" checked={templateActive} onCheckedChange={(checked) => setTemplateActive(checked || false)} />
+              <Checkbox 
+                id="active" 
+                checked={templateActive} 
+                onCheckedChange={(checked) => setTemplateActive(checked === true)}
+              />
             </div>
           </div>
           <div className="flex justify-between">
@@ -430,7 +446,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
       
       {/* Task Relationships */}
       <div className="flex items-center gap-2">
-        <Select onValueChange={handleHabitSelect} defaultValue={habitId || ''}>
+        <Select onValueChange={(value) => handleHabitSelect(value ? value : null)} defaultValue={habitId || ''}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select habit" />
           </SelectTrigger>
@@ -438,17 +454,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd, def
             <SelectItem value="">None</SelectItem>
             {tasks.filter(task => task.taskType === 'habit').map(habit => (
               <SelectItem key={habit.id} value={habit.id}>{habit.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select onValueChange={handleChecklistSelect} defaultValue={checklistId || ''}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select checklist" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">None</SelectItem>
-            {tasks.filter(task => task.taskType === 'checklist').map(checklist => (
-              <SelectItem key={checklist.id} value={checklist.id}>{checklist.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
