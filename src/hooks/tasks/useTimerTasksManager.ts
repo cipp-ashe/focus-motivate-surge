@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
 import { TimerEventType } from '@/types/events';
@@ -24,10 +24,12 @@ export const useTimerTasksManager = () => {
     
     if (task) {
       if (task.taskType !== 'timer') {
+        console.log("TimerTasksManager: Converting task to timer task:", task.name);
+        
         // Convert the task to a timer task if it's not already
         eventBus.emit('task:update', {
           taskId,
-          updates: { taskType: 'timer' }
+          updates: { taskType: 'timer' as TaskType }
         });
         
         toast.success('Task converted to timer task');
@@ -35,14 +37,25 @@ export const useTimerTasksManager = () => {
       
       // Let the timer component know to start the timer with this task
       eventManager.emit('timer:set-task' as TimerEventType, task);
+      
+      // Also dispatch a regular DOM event as a fallback
+      window.dispatchEvent(new CustomEvent('timer:set-task', { detail: task }));
+    } else {
+      console.warn(`TimerTasksManager: Task not found: ${taskId}`);
+      toast.error(`Task not found: ${taskId}`);
     }
   });
   
   // Function to update a task's duration
   const updateTaskDuration = useCallback((taskId: string, durationInSeconds: number) => {
+    console.log(`TimerTasksManager: Updating task duration: ${taskId}, ${durationInSeconds}s`);
+    
     eventBus.emit('task:update', {
       taskId,
-      updates: { duration: durationInSeconds }
+      updates: { 
+        duration: durationInSeconds,
+        taskType: 'timer' as TaskType 
+      }
     });
     
     // Force update to reflect the changes

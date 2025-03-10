@@ -11,6 +11,8 @@ import { toast } from '@/hooks/use-toast';
 import { TimerSection } from '@/components/timer/TimerSection';
 import { useEvent } from '@/hooks/useEvent';
 import { Task } from '@/types/tasks';
+import { useTimerTasksManager } from '@/hooks/tasks/useTimerTasksManager';
+import { useTimerDebug } from '@/hooks/useTimerDebug';
 
 const TimerPage = () => {
   const { items: tasks, selected: selectedTaskId } = useTaskContext();
@@ -20,6 +22,21 @@ const TimerPage = () => {
   const [favorites, setFavorites] = useState<Quote[]>([]);
   const [habitCheckDone, setHabitCheckDone] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(0);
+  
+  // Enable debug mode
+  useTimerDebug(true);
+  
+  // Get timer tasks manager functions
+  const timerTasksManager = useTimerTasksManager();
+  
+  // Debug: Log initial state
+  useEffect(() => {
+    console.log("TimerPage mounted with:", {
+      tasks: tasks.length,
+      selectedTaskId,
+      initialSelectedTask: selectedTask
+    });
+  }, []);
   
   // Update selected task when the context changes
   useEffect(() => {
@@ -33,9 +50,41 @@ const TimerPage = () => {
   // Listen for task:select events directly
   useEvent('task:select', (taskId: string) => {
     console.log("TimerPage: Received task:select event for", taskId);
+    
+    // Lookup the task from the context tasks array
     const task = tasks.find(t => t.id === taskId);
     if (task) {
+      console.log("TimerPage: Found task in context:", task);
       setSelectedTask(task);
+      
+      // If it's not already a timer task, convert it
+      if (task.taskType !== 'timer') {
+        timerTasksManager.updateTaskDuration(task.id, task.duration || 1500);
+      }
+    } else {
+      console.log("TimerPage: Task not found in context, checking localStorage");
+      
+      // Try to find the task in localStorage
+      try {
+        const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+        const storedTask = storedTasks.find((t: Task) => t.id === taskId);
+        
+        if (storedTask) {
+          console.log("TimerPage: Found task in localStorage:", storedTask);
+          // Force a task update through the timer tasks manager
+          if (storedTask.taskType !== 'timer') {
+            timerTasksManager.updateTaskDuration(storedTask.id, storedTask.duration || 1500);
+            setTimeout(() => {
+              timerTasksManager.forceTaskUpdate();
+            }, 100);
+          }
+          setSelectedTask(storedTask);
+        } else {
+          console.warn("TimerPage: Task not found in localStorage either:", taskId);
+        }
+      } catch (e) {
+        console.error("TimerPage: Error processing task:select from localStorage", e);
+      }
     }
   });
   
@@ -90,19 +139,35 @@ const TimerPage = () => {
         }
       }, 300);
     }
-  }, [tasks, habitCheckDone]);
+  }, [tasks, habitCheckDone, timerTasksManager]);
 
   // Listen for force-task-update events
   useEffect(() => {
     const handleForceUpdate = () => {
+      console.log("TimerPage: Force update detected, incrementing update counter");
       setForceUpdate(prev => prev + 1); // Trigger a re-render
+      
+      // Reload selected task if it exists
+      if (selectedTask) {
+        try {
+          const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+          const updatedTask = storedTasks.find((t: Task) => t.id === selectedTask.id);
+          
+          if (updatedTask) {
+            console.log("TimerPage: Updating selected task after force update", updatedTask);
+            setSelectedTask(updatedTask);
+          }
+        } catch (e) {
+          console.error("TimerPage: Error updating selected task after force update", e);
+        }
+      }
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
     return () => {
       window.removeEventListener('force-task-update', handleForceUpdate);
     };
-  }, []);
+  }, [selectedTask]);
 
   return (
     <HabitsPanelProvider>

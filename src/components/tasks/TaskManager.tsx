@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { TaskLoader } from './TaskLoader';
@@ -107,34 +107,58 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView }) => {
     // In timer view, only add timer tasks or auto-convert to timer task
     if (isTimerPage) {
       if (task.taskType !== 'timer') {
-        task.taskType = 'timer';
+        const updatedTask: Task = {
+          ...task,
+          taskType: 'timer' as TaskType
+        };
+        setLocalTasks(prev => {
+          if (prev.some(t => t.id === updatedTask.id)) return prev;
+          return [...prev, updatedTask];
+        });
+      } else {
+        setLocalTasks(prev => {
+          if (prev.some(t => t.id === task.id)) return prev;
+          return [...prev, task];
+        });
       }
+    } else {
+      // Add to local state immediately for responsive UI
+      setLocalTasks(prev => {
+        if (prev.some(t => t.id === task.id)) return prev;
+        return [...prev, task];
+      });
     }
-    
-    // Add to local state immediately for responsive UI
-    setLocalTasks(prev => {
-      if (prev.some(t => t.id === task.id)) return prev;
-      return [...prev, task];
-    });
   };
 
   const handleTasksAdd = (tasks: Task[]) => {
     // In timer view, only add timer tasks or auto-convert to timer tasks
-    const tasksToAdd = tasks.map(task => {
-      if (isTimerPage && task.taskType !== 'timer') {
-        return { ...task, taskType: 'timer' };
-      }
-      return task;
-    });
-    
-    if (tasksToAdd.length === 0) return;
-    
-    // Add to local state immediately for responsive UI
-    setLocalTasks(prev => {
-      // Filter out duplicates
-      const newTasks = tasksToAdd.filter(task => !prev.some(t => t.id === task.id));
-      return [...prev, ...newTasks];
-    });
+    if (isTimerPage) {
+      const tasksToAdd = tasks.map(task => {
+        if (task.taskType !== 'timer') {
+          return {
+            ...task,
+            taskType: 'timer' as TaskType
+          };
+        }
+        return task;
+      });
+      
+      if (tasksToAdd.length === 0) return;
+      
+      // Add to local state immediately for responsive UI
+      setLocalTasks(prev => {
+        // Filter out duplicates
+        const newTasks = tasksToAdd.filter(task => !prev.some(t => t.id === task.id));
+        return [...prev, ...newTasks];
+      });
+    } else {
+      // Normal view, add all tasks
+      setLocalTasks(prev => {
+        // Filter out duplicates
+        const newTasks = tasks.filter(task => !prev.some(t => t.id === task.id));
+        return [...prev, ...newTasks];
+      });
+    }
   };
 
   return (
