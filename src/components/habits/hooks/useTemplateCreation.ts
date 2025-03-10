@@ -82,18 +82,18 @@ export const useTemplateCreation = (
         description: 'Custom template' // Include the description
       };
       
-      // Add template to active templates
+      // Add template to active templates - show toast here only
       addTemplate(activeTemplate);
-      
       toast.success('Template created and added successfully');
+      
       handleCloseTemplate();
       
-      // Ensure templates are updated in UI with suppressToast
+      // Emit the event with suppressToast to prevent duplicate toasts
       eventBus.emit('habit:template-update', { ...activeTemplate, suppressToast: true });
       window.dispatchEvent(new Event('templatesUpdated'));
       window.dispatchEvent(new Event('force-habits-update'));
     } else {
-      // Update existing template
+      // Update existing template - only show toast here
       updateTemplate(selectedTemplate.templateId, selectedTemplate);
       toast.success('Template updated successfully');
       handleCloseTemplate();

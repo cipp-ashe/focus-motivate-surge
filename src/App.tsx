@@ -59,7 +59,18 @@ function App() {
           </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>
-      <Toaster position="bottom-right" />
+      <Toaster 
+        position="bottom-right" 
+        toastOptions={{
+          className: "bg-background border border-border text-foreground",
+          descriptionClassName: "text-muted-foreground",
+          style: {
+            border: '1px solid var(--border)',
+            backgroundColor: 'var(--background)',
+            color: 'var(--foreground)'
+          }
+        }}
+      />
     </div>
   );
 }

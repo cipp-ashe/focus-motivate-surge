@@ -1,125 +1,90 @@
 
-import { toast } from 'sonner';
-import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
-import { HabitContextActions, HabitState } from './types';
+import { useCallback } from 'react';
+import { DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
+import { HabitContextActions } from './types';
 
 export const createHabitActions = (
-  state: HabitState,
+  state: any,
   dispatch: React.Dispatch<any>
-): Omit<HabitContextActions, 'reloadTemplates'> => {
+): HabitContextActions => {
+  const addTemplate = useCallback((template: ActiveTemplate) => {
+    console.log("Adding template:", template);
+    dispatch({ type: 'ADD_TEMPLATE', payload: template });
+  }, [dispatch]);
+
+  const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
+    console.log("Updating template:", templateId, updates);
+    
+    // Emit event to update template
+    eventBus.emit('habit:template-update', { 
+      templateId, 
+      ...updates 
+    });
+    
+    // Update state through reducer
+    dispatch({ 
+      type: 'UPDATE_TEMPLATE', 
+      payload: { templateId, updates } 
+    });
+  }, [dispatch]);
+
+  const removeTemplate = useCallback((templateId: string) => {
+    console.log("Removing template:", templateId);
+    
+    // Use the event bus to handle the deletion
+    // This is the originating action, so we set isOriginatingAction to true
+    eventBus.emit('habit:template-delete', { 
+      templateId, 
+      isOriginatingAction: true 
+    });
+  }, []);
+
+  const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
+    console.log("Updating template days:", templateId, days);
+    
+    // Emit event to update template days via the event bus
+    eventBus.emit('habit:template-update', { 
+      templateId, 
+      activeDays: days 
+    });
+    
+    // Update state through reducer
+    dispatch({ 
+      type: 'UPDATE_TEMPLATE_DAYS', 
+      payload: { templateId, days } 
+    });
+  }, [dispatch]);
+
+  const reorderTemplates = useCallback((templates: ActiveTemplate[]) => {
+    console.log("Reordering templates");
+    
+    // Use the event bus to handle template order updates
+    eventBus.emit('habit:template-order-update', templates);
+    
+    // Also update state through reducer
+    dispatch({ 
+      type: 'UPDATE_TEMPLATE_ORDER', 
+      payload: templates 
+    });
+  }, [dispatch]);
+
+  const findTemplateById = useCallback((templateId: string) => {
+    return state.templates.find((t: ActiveTemplate) => t.templateId === templateId);
+  }, [state.templates]);
+
+  const reloadTemplates = useCallback(() => {
+    console.log("Reloading templates - this should be implemented in the HabitProvider");
+    // This is a stub that will be overridden in the HabitProvider
+  }, []);
+
   return {
-    addTemplate: (template) => {
-      // Generate a UUID if no templateId exists
-      const templateId = 'templateId' in template ? template.templateId : crypto.randomUUID();
-      
-      const newTemplate = {
-        ...template,
-        templateId: templateId,
-        customized: false,
-      };
-      
-      dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
-      const updatedTemplates = [...state.templates, newTemplate];
-      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
-      
-      // Emit event for other components to react
-      // IMPORTANT: Set suppressToast to true to prevent duplicate toasts
-      eventBus.emit('habit:template-update', { ...newTemplate, suppressToast: true });
-      
-      // Trigger a global UI update
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-habits-update'));
-      }, 100);
-    },
-    
-    updateTemplate: (templateId, updates) => {
-      dispatch({ type: 'UPDATE_TEMPLATE', payload: { templateId, updates } });
-      const updatedTemplates = state.templates.map(template =>
-        template.templateId === templateId
-          ? { ...template, ...updates, customized: true }
-          : template
-      );
-      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
-      
-      // Emit event for template update
-      const updatedTemplate = updatedTemplates.find(t => t.templateId === templateId);
-      if (updatedTemplate) {
-        eventBus.emit('habit:template-update', { ...updatedTemplate, suppressToast: true });
-      }
-      toast.success('Template updated successfully');
-    },
-    
-    removeTemplate: (templateId) => {
-      // We no longer show the toast here as HabitTracker will handle it
-      console.log('HabitActions: Received removeTemplate call', templateId);
-      
-      // Update the internal state first
-      dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
-      
-      // Update localStorage
-      const updatedTemplates = state.templates.filter(t => t.templateId !== templateId);
-      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
-      
-      // We no longer emit the event here as HabitTracker handles it
-    },
-    
-    updateTemplateOrder: (templates) => {
-      dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
-      localStorage.setItem('habit-templates', JSON.stringify(templates));
-      
-      // Notify via event bus about order change
-      eventBus.emit('habit:template-order-update', templates);
-    },
-    
-    updateTemplateDays: (templateId, days) => {
-      dispatch({ type: 'UPDATE_TEMPLATE_DAYS', payload: { templateId, days } });
-      const updatedTemplates = state.templates.map(template =>
-        template.templateId === templateId
-          ? { ...template, activeDays: days, customized: true }
-          : template
-      );
-      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
-      
-      // Emit event for template days update
-      const updatedTemplate = updatedTemplates.find(t => t.templateId === templateId);
-      if (updatedTemplate) {
-        eventBus.emit('habit:template-update', { ...updatedTemplate, suppressToast: true });
-      }
-      toast.success('Template days updated successfully');
-    },
-    
-    addCustomTemplate: (template) => {
-      const newTemplate: HabitTemplate = {
-        ...template,
-        id: `custom-${Date.now()}`,
-      };
-      
-      dispatch({ type: 'ADD_CUSTOM_TEMPLATE', payload: newTemplate });
-      
-      const updatedTemplates = [...state.customTemplates, newTemplate];
-      localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
-      
-      // Emit event for custom template creation with suppressToast
-      eventBus.emit('habit:custom-template-create', { ...newTemplate, suppressToast: true });
-      toast.success('Custom template added successfully');
-      
-      // Dispatch event to notify other components
-      window.dispatchEvent(new Event('templatesUpdated'));
-    },
-    
-    removeCustomTemplate: (templateId) => {
-      dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: templateId });
-      
-      const updatedTemplates = state.customTemplates.filter(t => t.id !== templateId);
-      localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
-      
-      // Emit event for custom template deletion
-      eventBus.emit('habit:custom-template-delete', { templateId, suppressToast: true });
-      toast.success('Custom template removed successfully');
-      
-      // Dispatch event to notify other components
-      window.dispatchEvent(new Event('templatesUpdated'));
-    }
+    addTemplate,
+    updateTemplate,
+    removeTemplate,
+    updateTemplateDays,
+    reorderTemplates,
+    findTemplateById,
+    reloadTemplates
   };
 };

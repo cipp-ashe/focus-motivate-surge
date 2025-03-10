@@ -23,7 +23,7 @@ export const useTemplateEventHandlers = (
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
       // Only show toast if not suppressed
-      if (!template.suppressToast) {
+      if (template.suppressToast !== true) {
         toast.success('Template updated successfully');
       }
     } else {
@@ -37,38 +37,41 @@ export const useTemplateEventHandlers = (
       const updatedTemplates = [...templates, newTemplate];
       localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
       
-      if (!template.suppressToast) {
+      if (template.suppressToast !== true) {
         toast.success('Template added successfully');
       }
     }
   };
 
   // Handle template delete - modified to handle originating action
-  const handleTemplateDelete = ({ templateId, suppressToast, isOriginatingAction }: { 
-    templateId: string, 
-    suppressToast?: boolean,
-    isOriginatingAction?: boolean 
+  const handleTemplateDelete = (data: { 
+    templateId: string; 
+    suppressToast?: boolean;
+    isOriginatingAction?: boolean;
   }) => {
-    console.log("Event received: habit:template-delete", templateId, {suppressToast, isOriginatingAction});
+    console.log("Event received: habit:template-delete", data.templateId, {
+      suppressToast: data.suppressToast, 
+      isOriginatingAction: data.isOriginatingAction
+    });
     
     // Update state via reducer
-    dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+    dispatch({ type: 'REMOVE_TEMPLATE', payload: data.templateId });
     
     // Update localStorage
-    const updatedTemplates = templates.filter(t => t.templateId !== templateId);
+    const updatedTemplates = templates.filter(t => t.templateId !== data.templateId);
     localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
     
     // Only show toast if this is the originating action and not suppressed
-    if (isOriginatingAction && !suppressToast) {
+    if (data.isOriginatingAction && data.suppressToast !== true) {
       toast.success('Template deleted successfully');
     }
     
     // Always emit follow-up event for task cleanup with toast suppressed
     // This ensures tasks are deleted but no additional toast appears
-    if (isOriginatingAction) {
+    if (data.isOriginatingAction) {
       setTimeout(() => {
         eventBus.emit('habit:template-delete', { 
-          templateId, 
+          templateId: data.templateId, 
           suppressToast: true, 
           isOriginatingAction: false 
         });
@@ -84,18 +87,19 @@ export const useTemplateEventHandlers = (
   };
 
   // Handle custom template deletion
-  const handleCustomTemplateDelete = ({ templateId, suppressToast }: { 
-    templateId: string,
-    suppressToast?: boolean 
+  const handleCustomTemplateDelete = (data: { 
+    templateId: string;
+    suppressToast?: boolean;
   }) => {
-    console.log("Event received: habit:custom-template-delete", templateId);
-    dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: templateId });
+    console.log("Event received: habit:custom-template-delete", data.templateId);
+    dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: data.templateId });
+    
     // Fixed: Use templateId instead of id
-    const updatedTemplates = templates.filter(t => t.templateId !== templateId);
+    const updatedTemplates = templates.filter(t => t.templateId !== data.templateId);
     localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
     
     // Only show toast if not suppressed
-    if (!suppressToast) {
+    if (data.suppressToast !== true) {
       toast.success('Custom template deleted');
     }
   };
