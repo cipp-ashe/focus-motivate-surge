@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { HabitState } from './types';
 import { useTemplateQueueHandler } from './eventHandlers/useTemplateQueueHandler';
 import { useJournalEventHandlers } from './eventHandlers/useJournalEventHandlers';
@@ -42,11 +42,11 @@ export const useHabitEvents = (
     
     // Subscribe to template events
     const unsubscribers = [
-      eventBus.on('habit:template-update', handleTemplateUpdate),
-      eventBus.on('habit:template-delete', handleTemplateDelete),
+      eventManager.on('habit:template-update', handleTemplateUpdate),
+      eventManager.on('habit:template-delete', handleTemplateDelete),
       
       // Listen for template add events with improved queue processing
-      eventBus.on('habit:template-add', (templateId: string) => {
+      eventManager.on('habit:template-add', (templateId: string) => {
         console.log("Event received: habit:template-add", templateId);
         
         // Clear any existing timeout for this template
@@ -76,14 +76,14 @@ export const useHabitEvents = (
         }
       }),
       
-      eventBus.on('habit:template-order-update', handleTemplateOrderUpdate),
-      eventBus.on('habit:custom-template-delete', handleCustomTemplateDelete),
+      eventManager.on('habit:template-order-update', handleTemplateOrderUpdate),
+      eventManager.on('habit:custom-template-delete', handleCustomTemplateDelete),
       
       // Listen for journal creation events to potentially mark habits as complete
-      eventBus.on('note:create-from-habit', handleJournalCreation),
+      eventManager.on('note:create-from-habit', handleJournalCreation),
       
       // Listen for journal deletion events
-      eventBus.on('habit:journal-deleted', handleJournalDeletion),
+      eventManager.on('habit:journal-deleted', handleJournalDeletion),
       
       // Listen for custom template updates via localStorage
       window.addEventListener('templatesUpdated', () => {

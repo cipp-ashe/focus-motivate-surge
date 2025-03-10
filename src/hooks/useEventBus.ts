@@ -1,16 +1,23 @@
 
 import { useEffect } from 'react';
-import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayload } from '@/lib/events/EventManager';
+import { eventManager, EventType, EventPayload } from '@/lib/events/EventManager';
 
-// DEPRECATED: Use useEvent from @/hooks/useEvent instead
-// For backward compatibility
+/**
+ * DEPRECATED: Use the useEvent hook from @/hooks/useEvent instead
+ * This hook exists only for backward compatibility
+ */
 export function useEventBus<T extends EventType>(
   eventName: T,
   callback: (payload: EventPayload[T]) => void,
   deps: React.DependencyList = []
 ) {
   useEffect(() => {
+    // Log deprecation warning
+    console.warn(
+      "WARNING: useEventBus is deprecated. " +
+      "Please update your code to use useEvent from @/hooks/useEvent instead."
+    );
+    
     // Subscribe to the event
     const unsubscribe = eventManager.on(eventName, callback);
     

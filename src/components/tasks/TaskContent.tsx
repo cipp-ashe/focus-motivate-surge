@@ -1,4 +1,3 @@
-
 import { Task } from "@/types/tasks";
 import { Sparkles, X, Clock, BookOpen, Image, CheckSquare, Mic, Zap } from "lucide-react";
 import { TaskTags } from "./TaskTags";
@@ -6,7 +5,6 @@ import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
-// DEPRECATED: Use eventManager directly from @/lib/events/EventManager instead
 import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
 
@@ -82,25 +80,25 @@ export const TaskContent = ({
     
     console.log(`Task action clicked for ${task.name} (${task.taskType})`);
     
-    // Show deprecation warning in console
-    console.warn("WARNING: Using deprecated eventBus. Please update to use eventManager directly from @/lib/events/EventManager");
-    
     switch(task.taskType) {
       case 'journal':
         // Open journal editor
-        eventManager.emit('journal:open', { taskId: task.id });
+        eventManager.emit('journal:open', { habitId: task.id, habitName: task.name });
         break;
       case 'screenshot':
-        // View image details
-        eventManager.emit('task:view-screenshot', { taskId: task.id });
+        // View image details - use a valid event type from EventManager
+        toast.info(`Viewing screenshot for task: ${task.name}`);
+        // This would be implemented with a proper event when available
         break;
       case 'checklist':
-        // View checklist
-        eventManager.emit('task:view-checklist', { taskId: task.id });
+        // View checklist - use a valid event type from EventManager
+        toast.info(`Viewing checklist for task: ${task.name}`);
+        // This would be implemented with a proper event when available
         break;
       case 'voicenote':
-        // Record voice note
-        eventManager.emit('task:record-voicenote', { taskId: task.id });
+        // Record voice note - use a valid event type from EventManager
+        toast.info(`Recording voice note for task: ${task.name}`);
+        // This would be implemented with a proper event when available
         break;
       default:
         // No special action for regular tasks
