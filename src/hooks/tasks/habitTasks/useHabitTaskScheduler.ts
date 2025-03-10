@@ -1,8 +1,9 @@
 
 import { useEffect, useCallback, useRef } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { taskOperations } from '@/lib/operations/taskOperations';
 import { HabitTaskEvent, HabitTaskSchedulerReturn } from './types';
+import { useEvent } from '@/hooks/useEvent';
 
 /**
  * Hook for scheduling habit tasks with proper error handling
@@ -48,19 +49,13 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
     }
   }, []);
   
-  // Set up event listener
-  useEffect(() => {
-    const unsubscribe = eventBus.on('habit:schedule', handleHabitSchedule);
-    
-    return () => {
-      unsubscribe();
-    };
-  }, [handleHabitSchedule]);
+  // Set up event listeners with the new system
+  useEvent('habit:schedule', handleHabitSchedule);
   
   // Check for missing habit tasks
   const checkForMissingHabitTasks = useCallback(() => {
     // Emit event to check pending habit tasks
-    eventBus.emit('habits:check-pending', {});
+    eventManager.emit('habits:check-pending', {});
     
     // Force task update
     setTimeout(() => {
