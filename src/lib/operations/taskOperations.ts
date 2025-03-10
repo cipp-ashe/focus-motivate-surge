@@ -1,3 +1,4 @@
+
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
@@ -227,12 +228,13 @@ export const taskOperations = {
         return existingTask.id;
       }
       
-      // Create new task
+      // Create new task with taskType specified
       const task = this.createTask({
         name,
         description: `Habit task for ${date}`,
         completed: false,
         duration,
+        taskType: 'habit', // Explicitly mark as habit task
         relationships: {
           habitId,
           templateId,

@@ -15,6 +15,7 @@ export interface Task {
   };
   metrics?: TaskMetrics;
   tags?: Tag[];
+  taskType?: 'habit' | 'timer' | 'regular'; // Adding task type field
 }
 
 export interface Tag {

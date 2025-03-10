@@ -80,8 +80,22 @@ export const useHabitTaskProcessor = () => {
       if (existingTask) {
         console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
         
-        // Add task to UI if it exists in storage but not in memory
-        eventManager.emit('task:create', existingTask);
+        // Ensure task has the proper taskType
+        if (!existingTask.taskType) {
+          const updatedTask = {
+            ...existingTask,
+            taskType: 'habit'
+          };
+          
+          // Save the updated task
+          taskStorage.updateTask(existingTask.id, updatedTask);
+          
+          // Add task to UI if it exists in storage but not in memory
+          eventManager.emit('task:create', updatedTask);
+        } else {
+          // Add task to UI if it exists in storage but not in memory
+          eventManager.emit('task:create', existingTask);
+        }
         
         // Force task update
         setTimeout(() => {

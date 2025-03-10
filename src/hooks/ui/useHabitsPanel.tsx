@@ -1,49 +1,27 @@
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface HabitsPanelContextType {
-  isOpen: boolean;
-  toggle: () => void;
-  open: () => void;
-  close: () => void;
-}
+type HabitsPanelContextType = {
+  activePanel: string;
+  setActivePanel: (panel: string) => void;
+};
 
 const HabitsPanelContext = createContext<HabitsPanelContextType | undefined>(undefined);
 
-export function HabitsPanelProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggle = useCallback(() => {
-    console.log("Toggling habits panel, current state:", !isOpen);
-    setIsOpen(prev => !prev);
-  }, [isOpen]);
+export const HabitsPanelProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [activePanel, setActivePanel] = useState<string>('templates');
   
-  const open = useCallback(() => {
-    console.log("Opening habits panel");
-    setIsOpen(true);
-  }, []);
-  
-  const close = useCallback(() => {
-    console.log("Closing habits panel");
-    setIsOpen(false);
-  }, []);
-
   return (
-    <HabitsPanelContext.Provider value={{ 
-      isOpen, 
-      toggle, 
-      open, 
-      close
-    }}>
+    <HabitsPanelContext.Provider value={{ activePanel, setActivePanel }}>
       {children}
     </HabitsPanelContext.Provider>
   );
-}
+};
 
-export function useHabitsPanel() {
+export const useHabitsPanel = () => {
   const context = useContext(HabitsPanelContext);
   if (context === undefined) {
     throw new Error('useHabitsPanel must be used within a HabitsPanelProvider');
   }
   return context;
-}
+};
