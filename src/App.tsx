@@ -18,33 +18,35 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <TaskProvider>
-          <Routes>
-            <Route path="/" element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <IndexPage />
-              </Suspense>
-            } />
-            <Route path="/timer" element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <TimerPage />
-              </Suspense>
-            } />
-            <Route path="/notes" element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <NotesPage />
-              </Suspense>
-            } />
-            <Route path="/habits" element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <HabitsPage />
-              </Suspense>
-            } />
-            <Route path="/tasks" element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <TaskPage />
-              </Suspense>
-            } />
-          </Routes>
+          <AppLayout>
+            <Routes>
+              <Route path="/" element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <IndexPage />
+                </Suspense>
+              } />
+              <Route path="/timer" element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <TimerPage />
+                </Suspense>
+              } />
+              <Route path="/notes" element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <NotesPage />
+                </Suspense>
+              } />
+              <Route path="/habits" element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <HabitsPage />
+                </Suspense>
+              } />
+              <Route path="/tasks" element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <TaskPage />
+                </Suspense>
+              } />
+            </Routes>
+          </AppLayout>
         </TaskProvider>
       </BrowserRouter>
       <Toaster />

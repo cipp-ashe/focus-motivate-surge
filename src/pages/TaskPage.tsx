@@ -5,6 +5,8 @@ import { TaskInput } from '@/components/tasks/TaskInput';
 import { TaskTable } from '@/components/tasks/TaskTable';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventBus } from '@/lib/eventBus';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const TaskPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -84,21 +86,35 @@ const TaskPage = () => {
   };
   
   return (
-    <div className="flex flex-col h-full">
-      <h1 className="text-2xl font-bold p-4">Task Manager (Simple)</h1>
+    <div className="container mx-auto py-6">
+      <h1 className="text-3xl font-bold mb-6">Task Manager</h1>
       
-      <div className="p-4 border-b border-border/10">
-        <TaskInput 
-          onTaskAdd={handleTaskAdd} 
-          onTasksAdd={handleTasksAdd}
-        />
-      </div>
-      
-      <div className="flex-1 overflow-hidden">
-        <TaskTable
-          tasks={tasks}
-          selectedTasks={selectedTaskId ? [selectedTaskId] : []}
-        />
+      <div className="grid grid-cols-1 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Add Task</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TaskInput 
+              onTaskAdd={handleTaskAdd} 
+              onTasksAdd={handleTasksAdd}
+            />
+          </CardContent>
+        </Card>
+        
+        <Card className="h-[60vh]">
+          <CardHeader>
+            <CardTitle>Your Tasks</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[calc(60vh-4rem)] p-0">
+            <ScrollArea className="h-full">
+              <TaskTable
+                tasks={tasks}
+                selectedTasks={selectedTaskId ? [selectedTaskId] : []}
+              />
+            </ScrollArea>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
