@@ -22,7 +22,7 @@ function App() {
   return (
     <div className="App">
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true} forcedTheme="dark">
           <BrowserRouter>
             <TaskProvider>
               <AppLayout>

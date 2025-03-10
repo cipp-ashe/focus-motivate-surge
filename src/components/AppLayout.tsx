@@ -15,13 +15,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   // Only hide header on the main dashboard page
   const showHeader = location.pathname !== '/';
   
-  // Apply theme class to document when component mounts
+  // Apply theme class to document when component mounts and whenever isDark changes
   useEffect(() => {
     if (!mounted) return;
     
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
+    // Force dark theme application
+    document.documentElement.classList.add('dark');
+    
+    // Still respect the user's preference if they manually toggle
+    if (!isDark) {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark, mounted]);

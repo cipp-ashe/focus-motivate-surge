@@ -4,7 +4,7 @@ import { useTheme as useNextTheme } from 'next-themes';
 
 export const useTheme = () => {
   const { theme, setTheme } = useNextTheme();
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true); // Default to dark
   const [mounted, setMounted] = useState(false);
   
   // Handle mounting to prevent hydration mismatch
@@ -16,14 +16,24 @@ export const useTheme = () => {
   useEffect(() => {
     if (!mounted) return;
     
-    // Check if theme exists in localStorage
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Force dark theme by default
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+    setTheme('dark');
+    setIsDark(true);
     
-    // Set initial theme state
-    const initialIsDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-    setIsDark(initialIsDark);
-    setTheme(initialIsDark ? 'dark' : 'light');
+    // Listen for system preference changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (localStorage.getItem('theme') !== 'light') {
+        setIsDark(true);
+        document.documentElement.classList.add('dark');
+        setTheme('dark');
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, [setTheme, mounted]);
 
   // Update document class and localStorage when theme changes
