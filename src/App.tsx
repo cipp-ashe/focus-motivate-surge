@@ -17,6 +17,7 @@ import VoiceNotesPage from '@/pages/VoiceNotes';
 import { HabitProvider } from './contexts/habits/HabitContext';
 import { TaskProvider } from './contexts/tasks/TaskContext';
 import { VoiceNotesProvider } from './contexts/voiceNotes/VoiceNotesContext';
+import { NoteProvider } from './contexts/notes/NoteContext';
 
 function App() {
   const queryClient = new QueryClient();
@@ -26,28 +27,30 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <BrowserRouter>
-            {/* Add VoiceNotesProvider wrapping the other providers */}
-            <VoiceNotesProvider>
-              <HabitProvider>
-                <TaskProvider>
-                  <AppLayout>
-                    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
-                      <main className="min-h-[100vh]">
-                        <Routes>
-                          <Route path="/" element={<IndexPage />} />
-                          <Route path="/tasks" element={<TaskPage />} />
-                          <Route path="/timer" element={<TimerPage />} />
-                          <Route path="/habits" element={<HabitsPage />} />
-                          <Route path="/notes" element={<NotesPage />} />
-                          <Route path="/screenshots" element={<ScreenshotsPage />} />
-                          <Route path="/voice-notes" element={<VoiceNotesPage />} />
-                        </Routes>
-                      </main>
-                    </Suspense>
-                  </AppLayout>
-                </TaskProvider>
-              </HabitProvider>
-            </VoiceNotesProvider>
+            {/* Rearranged provider order to ensure NoteProvider wraps VoiceNotesProvider */}
+            <NoteProvider>
+              <VoiceNotesProvider>
+                <HabitProvider>
+                  <TaskProvider>
+                    <AppLayout>
+                      <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+                        <main className="min-h-[100vh]">
+                          <Routes>
+                            <Route path="/" element={<IndexPage />} />
+                            <Route path="/tasks" element={<TaskPage />} />
+                            <Route path="/timer" element={<TimerPage />} />
+                            <Route path="/habits" element={<HabitsPage />} />
+                            <Route path="/notes" element={<NotesPage />} />
+                            <Route path="/screenshots" element={<ScreenshotsPage />} />
+                            <Route path="/voice-notes" element={<VoiceNotesPage />} />
+                          </Routes>
+                        </main>
+                      </Suspense>
+                    </AppLayout>
+                  </TaskProvider>
+                </HabitProvider>
+              </VoiceNotesProvider>
+            </NoteProvider>
           </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>
