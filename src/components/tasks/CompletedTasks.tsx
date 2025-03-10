@@ -11,7 +11,8 @@ import {
 import { Award } from "lucide-react";
 import { TaskMetricsRow } from "./TaskMetricsRow";
 import { toast } from "sonner";
-import React from 'react';
+import React, { useState } from 'react';
+import { CompletedTaskDialog } from "./CompletedTaskDialog";
 
 interface CompletedTasksProps {
   tasks: Task[];
@@ -19,6 +20,9 @@ interface CompletedTasksProps {
 }
 
 export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => {
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const handleClearClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent accordion toggle
     onTasksClear();
@@ -26,6 +30,11 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
     toast.success("Completed tasks cleared!", {
       description: "Keep up the great work! 🎯"
     });
+  };
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setDialogOpen(true);
   };
 
   return (
@@ -52,7 +61,10 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
               <TableBody>
                 {tasks.map((task) => (
                   <React.Fragment key={task.id}>
-                    <TableRow className="group border-b border-border/50">
+                    <TableRow 
+                      className="group border-b border-border/50 cursor-pointer hover:bg-muted/40 transition-colors"
+                      onClick={() => handleTaskClick(task)}
+                    >
                       <TableCell className="line-through text-muted-foreground">{task.name}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {task.metrics ? `${task.metrics.expectedTime}m` : "-"}
@@ -91,6 +103,12 @@ export const CompletedTasks = ({ tasks, onTasksClear }: CompletedTasksProps) => 
           <p className="text-sm">Complete a task to see it here</p>
         </div>
       )}
+
+      <CompletedTaskDialog 
+        task={selectedTask} 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen} 
+      />
     </div>
   );
 };
