@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { taskState } from './taskState';
@@ -15,78 +15,80 @@ export const useTaskEvents = (
   completed: Task[],
   dispatch: React.Dispatch<any>
 ) => {
-  const lastTaskLoadTimeRef = useRef(Date.now());
-  const pendingTaskUpdatesRef = useRef<Task[]>([]);
-  const isInitializingRef = useRef(true);
-  const preventReentrantUpdateRef = useRef(false);
-  const lastEventTime = useRef<Record<string, number>>({});
+  // Use useState instead of useRef for state that needs to persist between renders
+  // but doesn't need to trigger re-renders when it changes
+  const [lastTaskLoadTime, setLastTaskLoadTime] = useState(Date.now());
+  const [pendingTaskUpdates, setPendingTaskUpdates] = useState<Task[]>([]);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [preventReentrantUpdate, setPreventReentrantUpdate] = useState(false);
+  const [lastEventTime, setLastEventTime] = useState<Record<string, number>>({});
   
   // Force reload tasks from storage
   const forceTasksReload = useCallback(() => {
     try {
       // Prevent reentrant calls - if we're already in a reload, don't start another
-      if (preventReentrantUpdateRef.current) {
+      if (preventReentrantUpdate) {
         console.log("TaskEvents: Preventing reentrant force reload");
         return;
       }
       
       // Debounce force reloads heavily
       const now = Date.now();
-      const lastReloadTime = lastEventTime.current['forceReload'] || 0;
+      const lastReloadTime = lastEventTime['forceReload'] || 0;
       if (now - lastReloadTime < 800) {
         console.log("TaskEvents: Skipping rapid reload, last reload was", now - lastReloadTime, "ms ago");
         return;
       }
       
-      lastEventTime.current['forceReload'] = now;
-      preventReentrantUpdateRef.current = true;
+      setLastEventTime(prev => ({ ...prev, forceReload: now }));
+      setPreventReentrantUpdate(true);
       
       const { tasks, completed } = taskState.loadFromStorage();
       
       // Process any pending task updates
-      if (pendingTaskUpdatesRef.current.length > 0) {
-        console.log(`TaskEvents: Adding ${pendingTaskUpdatesRef.current.length} pending tasks to loaded tasks`);
+      if (pendingTaskUpdates.length > 0) {
+        console.log(`TaskEvents: Adding ${pendingTaskUpdates.length} pending tasks to loaded tasks`);
         
         // Merge pending tasks, avoiding duplicates
-        pendingTaskUpdatesRef.current.forEach(pendingTask => {
+        pendingTaskUpdates.forEach(pendingTask => {
           if (!tasks.some((t: Task) => t.id === pendingTask.id)) {
             tasks.push(pendingTask);
           }
         });
         
         // Clear pending tasks
-        pendingTaskUpdatesRef.current = [];
+        setPendingTaskUpdates([]);
         
         // Update storage with merged tasks
         taskStorage.saveTasks(tasks);
       }
       
       dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
-      isInitializingRef.current = false;
+      setIsInitializing(false);
       
       // Release the lock after a small delay to prevent rapid successive calls
       setTimeout(() => {
-        preventReentrantUpdateRef.current = false;
+        setPreventReentrantUpdate(false);
       }, 300);
     } catch (error) {
       console.error('TaskEvents: Error forcing tasks reload:', error);
-      preventReentrantUpdateRef.current = false;
+      setPreventReentrantUpdate(false);
     }
-  }, [dispatch]);
+  }, [dispatch, pendingTaskUpdates, preventReentrantUpdate, lastEventTime]);
   
   // Helper function to debounce events
   const shouldProcessEvent = useCallback((eventType: string, minDelay: number = 300): boolean => {
     const now = Date.now();
-    const lastTime = lastEventTime.current[eventType] || 0;
+    const lastTime = lastEventTime[eventType] || 0;
     
     if (now - lastTime < minDelay) {
       console.log(`TaskEvents: Skipping ${eventType}, too frequent (${now - lastTime}ms)`);
       return false;
     }
     
-    lastEventTime.current[eventType] = now;
+    setLastEventTime(prev => ({ ...prev, [eventType]: now }));
     return true;
-  }, []);
+  }, [lastEventTime]);
   
   // Set up event listeners
   useEffect(() => {
@@ -104,7 +106,7 @@ export const useTaskEvents = (
         }
         
         // Add to pending updates
-        pendingTaskUpdatesRef.current.push(task);
+        setPendingTaskUpdates(prev => [...prev, task]);
         
         // Add to state
         dispatch({ type: 'ADD_TASK', payload: task });
@@ -169,13 +171,13 @@ export const useTaskEvents = (
     ];
     
     // Handle force update events from window with debouncing
-    const lastForceUpdateTime = useRef(0);
+    const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
     
     const handleForceUpdate = () => {
       const now = Date.now();
       // Debounce force updates to prevent infinite loops
-      if (now - lastForceUpdateTime.current > 800) {
-        lastForceUpdateTime.current = now;
+      if (now - lastForceUpdateTime > 800) {
+        setLastForceUpdateTime(now);
         console.log("TaskEvents: Force updating task list (debounced)");
         forceTasksReload();
       } else {
@@ -185,7 +187,7 @@ export const useTaskEvents = (
     
     window.addEventListener('force-task-update', handleForceUpdate);
     
-    // Set up periodic verification for task consistency with reduced frequency
+    // Set up verification cleanup function
     const verificationCleanup = taskVerification.setupPeriodicVerification(
       () => items,
       (missingTasks) => {

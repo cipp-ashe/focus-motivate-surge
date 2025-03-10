@@ -1,5 +1,5 @@
 
-import { useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { toast } from 'sonner';
@@ -9,9 +9,9 @@ import { taskStorage } from '@/lib/storage/taskStorage';
  * Hook to emit task-related events with optimized coordination and storage sync
  */
 export const useTaskEvents = () => {
-  const processingRef = useRef(false);
-  const forceUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastForceUpdateTimeRef = useRef(0);
+  const [processing, setProcessing] = useState(false);
+  const [forceUpdateTimeout, setForceUpdateTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
   
   const createTask = useCallback((task: Task) => {
     console.log("useTaskEvents: Creating task", task);
@@ -91,52 +91,57 @@ export const useTaskEvents = () => {
   const forceTaskUpdate = useCallback(() => {
     // Prevent multiple rapid calls with time-based debouncing
     const now = Date.now();
-    if (now - lastForceUpdateTimeRef.current < 1000) {
+    if (now - lastForceUpdateTime < 1000) {
       console.log("useTaskEvents: Skipping force update, too soon since last update", 
-                  now - lastForceUpdateTimeRef.current, "ms");
+                  now - lastForceUpdateTime, "ms");
       return;
     }
     
-    lastForceUpdateTimeRef.current = now;
+    setLastForceUpdateTime(now);
     
     // Prevent simultaneous processing
-    if (processingRef.current) {
+    if (processing) {
       console.log("useTaskEvents: Task update already in progress, skipping");
       return;
     }
     
-    processingRef.current = true;
+    setProcessing(true);
     console.log("useTaskEvents: Forcing task update");
     
     // Clear any existing timeout
-    if (forceUpdateTimeoutRef.current) {
-      clearTimeout(forceUpdateTimeoutRef.current);
-      forceUpdateTimeoutRef.current = null;
+    if (forceUpdateTimeout) {
+      clearTimeout(forceUpdateTimeout);
+      setForceUpdateTimeout(null);
     }
     
     // Dispatch event to trigger reloading with delay
-    forceUpdateTimeoutRef.current = setTimeout(() => {
+    const timeout = setTimeout(() => {
       window.dispatchEvent(new Event('force-task-update'));
       
       // Reset processing flag after a delay
-      forceUpdateTimeoutRef.current = setTimeout(() => {
-        processingRef.current = false;
-        forceUpdateTimeoutRef.current = null;
+      const resetTimeout = setTimeout(() => {
+        setProcessing(false);
+        setForceUpdateTimeout(null);
       }, 300);
+      
+      setForceUpdateTimeout(resetTimeout);
     }, 50);
-  }, []);
+    
+    setForceUpdateTimeout(timeout);
+  }, [processing, forceUpdateTimeout, lastForceUpdateTime]);
 
   const forceTagsUpdate = useCallback(() => {
     // Add debouncing to tags update too
     const now = Date.now();
-    if (now - lastForceUpdateTimeRef.current < 800) {
+    if (now - lastForceUpdateTime < 800) {
       console.log("useTaskEvents: Skipping tags update, too soon since last update");
       return;
     }
     
+    setLastForceUpdateTime(now);
     console.log("useTaskEvents: Forcing tags update");
     window.dispatchEvent(new Event('force-tags-update'));
-  }, []);
+  }, [lastForceUpdateTime]);
 
   const checkPendingHabits = useCallback(() => {
     console.log("useTaskEvents: Checking pending habits");
