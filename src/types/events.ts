@@ -46,6 +46,9 @@ export interface TimerEventPayloads {
     templateId?: string; // Optional templateId
     content?: string;    // Optional content from the journal
   };
+  'note:view': {
+    noteId: string;
+  };
   'tag:link': any;
   'tag:unlink': any;
   'quote:link-task': any;

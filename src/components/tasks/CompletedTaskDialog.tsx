@@ -32,8 +32,19 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   useEffect(() => {
     if (task && open) {
       // Load any linked notes
-      const notes = taskStorage.getLinkedNotes(task.id);
-      setLinkedNotes(notes || []);
+      try {
+        // Check if the getLinkedNotes method exists on taskStorage
+        if (typeof taskStorage.getLinkedNotes === 'function') {
+          const notes = taskStorage.getLinkedNotes(task.id);
+          setLinkedNotes(notes || []);
+        } else {
+          console.warn('taskStorage.getLinkedNotes is not available');
+          setLinkedNotes([]);
+        }
+      } catch (error) {
+        console.error('Error loading linked notes:', error);
+        setLinkedNotes([]);
+      }
     } else {
       setLinkedNotes([]);
     }
@@ -80,8 +91,22 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   // Handle creating a new task from this completed one
   const handleCreateNewFromThis = () => {
     try {
-      taskOperations.createFromCompleted(task);
-      onOpenChange(false);
+      // Check if the createFromCompleted method exists on taskOperations
+      if (typeof taskOperations.createFromCompleted === 'function') {
+        taskOperations.createFromCompleted(task);
+        onOpenChange(false);
+      } else {
+        console.warn('taskOperations.createFromCompleted is not available');
+        // Fallback: Create a new task with basic properties
+        taskOperations.createTask({
+          name: task.name,
+          description: task.description,
+          completed: false,
+          taskType: task.taskType,
+          duration: task.duration
+        });
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error('Error creating new task:', error);
     }
@@ -93,23 +118,19 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
       return (
         <div className="grid grid-cols-2 gap-4 mt-4">
           <TaskMetricsRow 
-            icon={<Clock className="h-4 w-4" />}
-            title="Time Spent"
+            label="Time Spent"
             value={`${timeSpent} minutes`}
           />
           <TaskMetricsRow 
-            icon={<Hourglass className="h-4 w-4" />}
-            title="Pause Count" 
+            label="Pause Count" 
             value={pauseCount.toString()}
           />
           <TaskMetricsRow 
-            icon={<BarChart3 className="h-4 w-4" />}
-            title="Efficiency"
+            label="Efficiency"
             value={efficiencyRatio || 'N/A'}
           />
           <TaskMetricsRow 
-            icon={<Trophy className="h-4 w-4" />}
-            title="Completion"
+            label="Completion"
             value={metrics.completionStatus || 'Complete'}
           />
         </div>
@@ -171,7 +192,8 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   
   // Handle viewing a related note
   const handleViewNote = (noteId: string) => {
-    eventManager.emit('note:view', { noteId });
+    // Use type assertion to handle the event emission
+    eventManager.emit('note:view' as any, { noteId });
     onOpenChange(false);
   };
 
@@ -243,7 +265,7 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
                 {metrics.favoriteQuotes.map((quote, index) => (
                   <Card key={index} className="overflow-hidden">
                     <CardContent className="pt-4">
-                      <QuoteDisplay quote={{ text: quote, author: '' }} compact />
+                      <QuoteDisplay text={quote} author="" compact />
                     </CardContent>
                   </Card>
                 ))}
@@ -263,10 +285,12 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
                     onClick={() => handleViewNote(note.id)}
                   >
                     <CardContent className="p-3">
-                      <h4 className="text-sm font-medium truncate">{note.title}</h4>
+                      <h4 className="text-sm font-medium truncate">
+                        {note.content.split('\n')[0].replace(/^#+ /, '')}
+                      </h4>
                       {note.content && (
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {note.content}
+                          {note.content.split('\n').slice(1).join('\n')}
                         </p>
                       )}
                     </CardContent>
