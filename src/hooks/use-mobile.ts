@@ -1,5 +1,24 @@
 
-// This file is for backward compatibility with imports like @/hooks/use-mobile
-// We re-export the hooks from their new location
-export { useIsMobile } from './ui/useIsMobile';
-export { useMobile } from './ui/useMobile';
+import { useState, useEffect } from 'react';
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check if screen width is less than 768px (standard tablet breakpoint)
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+
+    // Clean up event listener on component unmount
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return isMobile;
+}

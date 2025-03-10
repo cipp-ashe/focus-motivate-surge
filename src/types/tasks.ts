@@ -1,6 +1,4 @@
 
-import type { Tag } from './tags';
-
 // Task type enum for type checking
 export type TaskType = 'habit' | 'timer' | 'regular';
 
@@ -10,6 +8,17 @@ export interface TaskMetrics {
   pauseCount?: number;
   completionDate?: string;
   streak?: number;
+  
+  // Add missing properties referenced in other components
+  expectedTime?: number;
+  actualDuration?: number;
+  favoriteQuotes?: string[];
+  pausedTime?: number;
+  extensionTime?: number;
+  netEffectiveTime?: number;
+  efficiencyRatio?: number;
+  completionStatus?: string;
+  actualTime?: number;
 }
 
 export interface Task {
@@ -35,3 +44,10 @@ export const STORAGE_KEYS = {
   TASKS: 'tasks',
   COMPLETED_TASKS: 'completed_tasks',
 };
+
+// Define Tag here since it appears to be missing or not exported properly
+export interface Tag {
+  id: string;
+  name: string;
+  color?: string;
+}
