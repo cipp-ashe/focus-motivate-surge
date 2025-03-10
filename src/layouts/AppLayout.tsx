@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, CalendarCheck, Timer, BookHeart, ScrollText, Image } from 'lucide-react';
+import { Home, CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic } from 'lucide-react';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -32,6 +32,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <Link to="/screenshots" className="p-2 hover:bg-accent rounded-md transition-colors" title="Screenshots">
               <Image className="w-5 h-5 text-muted-foreground hover:text-foreground" />
             </Link>
+            <Link to="/voice-notes" className="p-2 hover:bg-accent rounded-md transition-colors" title="Voice Notes">
+              <Mic className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
           </div>
         </nav>
         
@@ -58,9 +61,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <ScrollText className="w-5 h-5 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Notes</span>
             </Link>
-            <Link to="/screenshots" className="p-2 flex flex-col items-center">
-              <Image className="w-5 h-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Screenshots</span>
+            <Link to="/voice-notes" className="p-2 flex flex-col items-center">
+              <Mic className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Voice</span>
             </Link>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { Task } from '@/types/tasks';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
-import { Timer, Image, FileText, Calendar, BookOpen, CheckSquare } from 'lucide-react';
+import { Timer, Image, FileText, Calendar, BookOpen, CheckSquare, Mic } from 'lucide-react';
 
 interface TaskItemProps {
   task: Task;
@@ -26,6 +26,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
         return <BookOpen className="h-4 w-4 text-amber-400" />;
       case 'checklist':
         return <CheckSquare className="h-4 w-4 text-cyan-400" />;
+      case 'voicenote':
+        return <Mic className="h-4 w-4 text-rose-400" />;
       default:
         return <FileText className="h-4 w-4 text-primary" />;
     }
@@ -44,6 +46,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
         if (!task.checklistItems || task.checklistItems.length === 0) return null;
         const completed = task.checklistItems.filter(item => item.completed).length;
         return `${completed}/${task.checklistItems.length} items completed`;
+      case 'voicenote':
+        return task.voiceNoteText ? `${task.voiceNoteText.substring(0, 40)}...` : 'Voice note';
       default:
         return task.description ? task.description.substring(0, 40) : null;
     }

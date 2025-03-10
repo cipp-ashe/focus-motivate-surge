@@ -1,6 +1,6 @@
 
 // Task type enum for type checking
-export type TaskType = 'habit' | 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist';
+export type TaskType = 'habit' | 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote';
 
 export interface TaskMetrics {
   timeSpent?: number;
@@ -50,6 +50,11 @@ export interface Task {
   
   // Checklist task specific field
   checklistItems?: ChecklistItem[];
+  
+  // Voice note task specific field
+  voiceNoteText?: string;
+  voiceNoteUrl?: string;
+  voiceNoteDuration?: number;
 }
 
 export const STORAGE_KEYS = {

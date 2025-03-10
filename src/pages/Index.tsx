@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import VoiceNotesDashboardCard from '@/components/voiceNotes/VoiceNotesDashboardCard';
 
 const IndexPage = () => {
   return <div className="container mx-auto py-8 px-4">
@@ -31,6 +32,15 @@ const IndexPage = () => {
           <h2 className="text-xl font-semibold mb-2">Screenshots</h2>
           <p className="text-muted-foreground">Capture and organize screenshots</p>
         </Link>
+
+        <Link to="/voice-notes" className="p-6 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors">
+          <h2 className="text-xl font-semibold mb-2">Voice Notes</h2>
+          <p className="text-muted-foreground">Record and transcribe voice notes</p>
+        </Link>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <VoiceNotesDashboardCard />
       </div>
     </div>;
 };

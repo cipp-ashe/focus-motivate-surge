@@ -15,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import VoiceRecorder from '@/components/voiceNotes/VoiceRecorder';
+import { useVoiceNotes } from '@/contexts/voiceNotes/VoiceNotesContext';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
@@ -27,9 +29,12 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) =
   const [taskType, setTaskType] = useState<TaskType>('regular');
   const [duration, setDuration] = useState(25); // Default 25 minutes
   const [journalEntry, setJournalEntry] = useState('');
+  const [voiceNoteText, setVoiceNoteText] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([
     { id: uuidv4(), text: '', completed: false }
   ]);
+  const { addNote } = useVoiceNotes();
 
   const handleAddTask = () => {
     if (!taskName.trim()) return;
@@ -50,10 +55,19 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) =
       } : {}),
       ...(taskType === 'checklist' ? { 
         checklistItems: checklistItems.filter(item => item.text.trim())
+      } : {}),
+      ...(taskType === 'voicenote' ? {
+        voiceNoteText: voiceNoteText.trim()
       } : {})
     };
 
     onTaskAdd(newTask);
+    
+    // Add to voice notes if it's a voice note task
+    if (taskType === 'voicenote' && voiceNoteText.trim()) {
+      addNote(voiceNoteText.trim());
+    }
+    
     resetForm();
   };
 
@@ -63,7 +77,9 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) =
     setTaskType('regular');
     setDuration(25);
     setJournalEntry('');
+    setVoiceNoteText('');
     setChecklistItems([{ id: uuidv4(), text: '', completed: false }]);
+    setIsRecording(false);
   };
 
   const addChecklistItem = () => {
@@ -79,6 +95,12 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) =
   const removeChecklistItem = (id: string) => {
     if (checklistItems.length <= 1) return;
     setChecklistItems(items => items.filter(item => item.id !== id));
+  };
+
+  // Handler for voice note recording completion
+  const handleVoiceRecordingComplete = (text: string) => {
+    setVoiceNoteText(text);
+    setIsRecording(false);
   };
 
   return (
@@ -137,6 +159,37 @@ export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) =
               onChange={(e) => setJournalEntry(e.target.value)}
               rows={4}
             />
+          </div>
+        )}
+        
+        {taskType === 'voicenote' && (
+          <div className="grid gap-2">
+            <Label htmlFor="voice-note">Voice Note</Label>
+            {isRecording ? (
+              <div className="p-4 border border-border rounded-md">
+                <VoiceRecorder 
+                  onComplete={(text) => handleVoiceRecordingComplete(text)} 
+                  compact={true}
+                />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <Textarea
+                  id="voice-note"
+                  placeholder="Transcribed text will appear here..."
+                  value={voiceNoteText}
+                  onChange={(e) => setVoiceNoteText(e.target.value)}
+                  rows={4}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsRecording(true)}
+                >
+                  Record Voice Note
+                </Button>
+              </div>
+            )}
           </div>
         )}
         
