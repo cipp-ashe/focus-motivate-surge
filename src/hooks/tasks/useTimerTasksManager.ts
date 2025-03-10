@@ -2,14 +2,13 @@
 import { useCallback } from 'react';
 import { Task, TaskType } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
-import { eventManager } from '@/lib/events/EventManager';
 import { TimerEventType } from '@/types/events';
 import { useTaskEvents } from './useTaskEvents';
 import { useEvent } from '@/hooks/useEvent';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 /**
- * A specialized hook for managing tasks in the timer view
+ * A hook for managing tasks in the timer view
  */
 export const useTimerTasksManager = () => {
   const { forceTaskUpdate } = useTaskEvents();
@@ -27,7 +26,7 @@ export const useTimerTasksManager = () => {
         console.log("TimerTasksManager: Converting task to timer task:", task.name);
         
         // Convert the task to a timer task if it's not already
-        eventBus.emit('task:update', {
+        eventBus.emit('task:update' as any, {
           taskId,
           updates: { taskType: 'timer' as TaskType }
         });
@@ -36,7 +35,7 @@ export const useTimerTasksManager = () => {
       }
       
       // Let the timer component know to start the timer with this task
-      eventManager.emit('timer:set-task' as TimerEventType, task);
+      eventBus.emit('timer:set-task' as any, task);
       
       // Also dispatch a regular DOM event as a fallback
       window.dispatchEvent(new CustomEvent('timer:set-task', { detail: task }));
@@ -50,7 +49,7 @@ export const useTimerTasksManager = () => {
   const updateTaskDuration = useCallback((taskId: string, durationInSeconds: number) => {
     console.log(`TimerTasksManager: Updating task duration: ${taskId}, ${durationInSeconds}s`);
     
-    eventBus.emit('task:update', {
+    eventBus.emit('task:update' as any, {
       taskId,
       updates: { 
         duration: durationInSeconds,

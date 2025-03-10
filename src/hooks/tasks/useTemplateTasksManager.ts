@@ -1,26 +1,21 @@
 
-import { useCallback } from 'react';
-import { useTaskEvents } from './useTaskEvents';
-import { useTaskManager } from './useTaskManager';
+import { useTaskActions } from './useTaskActions';
 
 export const useTemplateTasksManager = () => {
-  const { forceTaskUpdate, forceTagsUpdate, checkPendingHabits } = useTaskEvents();
-  const { deleteTask } = useTaskManager();
+  const { forceTagsUpdate, checkPendingHabits } = useTaskActions();
   
-  const deleteTasksByTemplateId = useCallback((templateId: string) => {
-    // This would need to find all tasks related to this template and delete them
-    console.log('Deleting tasks for template:', templateId);
+  // Template tasks management logic
+  const processTemplates = () => {
+    console.log("Processing templates");
     
-    // After deleting, force an update
-    forceTaskUpdate();
+    // Force update tags after processing
+    forceTagsUpdate();
     
-    return true;
-  }, [forceTaskUpdate, deleteTask]);
+    // Check for pending habits
+    checkPendingHabits();
+  };
   
   return {
-    deleteTasksByTemplateId,
-    forceTaskUpdate,
-    forceTagsUpdate,
-    checkPendingHabits
+    processTemplates
   };
 };

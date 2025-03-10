@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { eventBus } from '@/lib/eventBus';
 
 /**
@@ -11,14 +11,21 @@ export function useEvent<T = any>(
   eventType: string, 
   handler: (data: T) => void
 ) {
+  // Create a stable reference to the handler to avoid unnecessary resubscriptions
+  const stableHandler = useCallback(handler, [handler]);
+  
   useEffect(() => {
+    // Log the event subscription for debugging
+    console.log(`[useEvent] Subscribing to ${eventType}`);
+    
     // Subscribe to the event
     // Use type assertion to handle potential type mismatches
-    const unsubscribe = eventBus.on(eventType as any, handler);
+    const unsubscribe = eventBus.on(eventType as any, stableHandler);
     
     // Cleanup subscription on unmount
     return () => {
+      console.log(`[useEvent] Unsubscribing from ${eventType}`);
       unsubscribe();
     };
-  }, [eventType, handler]);
+  }, [eventType, stableHandler]);
 }

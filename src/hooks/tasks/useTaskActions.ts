@@ -3,13 +3,13 @@ import { useTaskEvents } from './useTaskEvents';
 import { eventBus } from '@/lib/eventBus';
 
 /**
- * A compatibility hook that provides task-related utilities to other hooks
- * with the expected method signatures from legacy code.
+ * A hook that provides task-related action methods
+ * with backward compatibility for legacy code.
  */
-export const useTasksTasks = () => {
+export const useTaskActions = () => {
   const { forceTaskUpdate } = useTaskEvents();
   
-  // Implement the missing methods that are causing build errors
+  // Implement methods with clear, action-oriented names
   const forceTagsUpdate = () => {
     console.log("forceTagsUpdate called, forwarding to forceTaskUpdate");
     forceTaskUpdate();
@@ -31,3 +31,6 @@ export const useTasksTasks = () => {
     checkPendingHabits
   };
 };
+
+// Re-export the old name for backward compatibility
+export { useTaskActions as useTasksTasks };

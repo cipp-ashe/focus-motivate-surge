@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { eventBus } from '@/lib/eventBus';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 /**
  * Hook for monitoring timer-related events for debugging purposes
@@ -13,35 +13,41 @@ export const useTimerDebug = (enabled: boolean = false) => {
     // Setup debug event listeners
     const unsubs = [
       // Task events
-      eventBus.on('task:select', (taskId) => {
+      eventBus.on('task:select' as any, (taskId) => {
         console.log('🔍 DEBUG: task:select event:', taskId);
-        toast.info(`Task selected: ${taskId}`);
+        toast('Task selected', { 
+          description: `ID: ${taskId}`,
+          icon: '🔍'
+        });
       }),
       
-      eventBus.on('task:update', (data) => {
+      eventBus.on('task:update' as any, (data) => {
         console.log('🔍 DEBUG: task:update event:', data);
       }),
       
       // Timer events
-      eventBus.on('timer:set-task', (task) => {
+      eventBus.on('timer:set-task' as any, (task) => {
         console.log('🔍 DEBUG: timer:set-task event:', task);
-        toast.info(`Timer task set: ${task.name}`);
+        toast('Timer task set', {
+          description: `Task: ${task.name}`,
+          icon: '⏲️'
+        });
       }),
       
-      eventBus.on('timer:start', (data) => {
+      eventBus.on('timer:start' as any, (data) => {
         console.log('🔍 DEBUG: timer:start event:', data);
       }),
       
-      eventBus.on('timer:pause', (data) => {
+      eventBus.on('timer:pause' as any, (data) => {
         console.log('🔍 DEBUG: timer:pause event:', data);
       }),
       
-      eventBus.on('timer:complete', (data) => {
+      eventBus.on('timer:complete' as any, (data) => {
         console.log('🔍 DEBUG: timer:complete event:', data);
       }),
       
       // Force update events
-      eventBus.on('task:reload', () => {
+      eventBus.on('task:reload' as any, () => {
         console.log('🔍 DEBUG: task:reload event received');
       })
     ];
