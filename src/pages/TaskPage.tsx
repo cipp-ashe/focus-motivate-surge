@@ -28,10 +28,10 @@ const TaskPage = () => {
     };
     
     // Listen for task update events
-    const handleTaskUpdate = (task: Task) => {
-      console.log('TaskPage - Task updated event received:', task);
+    const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
+      console.log('TaskPage - Task updated event received:', data);
       setTasks(prev => 
-        prev.map(t => t.id === task.id ? task : t)
+        prev.map(t => t.id === data.taskId ? { ...t, ...data.updates } : t)
       );
     };
     

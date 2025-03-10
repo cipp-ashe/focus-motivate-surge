@@ -23,19 +23,19 @@ export const useTimerEvents = () => {
     }, 50);
   }, []);
 
-  const handleTimerPause = useCallback(() => {
+  const handleTimerPause = useCallback((taskName: string, timeLeft: number, metrics: any) => {
     console.log('Pausing timer via event bus');
-    eventBus.emit('timer:pause', {});
+    eventBus.emit('timer:pause', { taskName, timeLeft, metrics });
   }, []);
 
-  const handleTimerReset = useCallback(() => {
+  const handleTimerReset = useCallback((taskName: string, duration: number) => {
     console.log('Resetting timer via event bus');
-    eventBus.emit('timer:reset', {});
+    eventBus.emit('timer:reset', { taskName, duration });
   }, []);
 
-  const handleTimerComplete = useCallback((metrics: any) => {
+  const handleTimerComplete = useCallback((taskName: string, metrics: any) => {
     console.log('Completing timer via event bus with metrics:', metrics);
-    eventBus.emit('timer:complete', { metrics });
+    eventBus.emit('timer:complete', { taskName, metrics });
   }, []);
 
   const handleTimerExpand = useCallback((taskName: string) => {

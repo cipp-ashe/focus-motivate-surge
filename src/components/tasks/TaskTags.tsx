@@ -6,6 +6,7 @@ import { Task } from "@/types/tasks";
 import { useTagSystem } from "@/hooks/useTagSystem";
 import { toast } from "sonner";
 import { eventBus } from "@/lib/eventBus";
+import { EventType } from "@/lib/events/EventManager";
 
 interface TaskTagsProps {
   task: Task;
@@ -52,7 +53,7 @@ export const TaskTags = ({ task, preventPropagation }: TaskTagsProps) => {
     
     // Set up fewer event listeners to reduce the update frequency
     const domEvents = ['tagsUpdated', 'force-tags-update'];
-    const busEvents = ['task:create', 'task:update', 'task:delete', 'habit:template-delete'];
+    const busEvents = ['task:create', 'task:update', 'task:delete', 'habit:template-delete'] as EventType[];
     
     const domHandlers = domEvents.map(eventName => {
       const handler = () => {
