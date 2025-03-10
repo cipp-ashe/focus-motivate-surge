@@ -1,3 +1,4 @@
+
 import { Task } from "@/types/tasks";
 import { Sparkles, X, Clock, BookOpen, Image, CheckSquare, Mic, Zap } from "lucide-react";
 import { TaskTags } from "./TaskTags";
@@ -81,28 +82,64 @@ export const TaskContent = ({
     console.log(`Task action clicked for ${task.name} (${task.taskType})`);
     
     switch(task.taskType) {
+      case 'timer':
+        // Start timer
+        eventManager.emit('timer:init', { 
+          taskName: task.name, 
+          duration: task.duration || 1500 
+        });
+        break;
       case 'journal':
         // Open journal editor
         eventManager.emit('journal:open', { habitId: task.id, habitName: task.name });
         break;
       case 'screenshot':
-        // View image details - use a valid event type from EventManager
-        toast.info(`Viewing screenshot for task: ${task.name}`);
-        // This would be implemented with a proper event when available
+        // Display the image in a modal or full screen view
+        if (task.imageUrl) {
+          // Create and dispatch a custom event to show the image
+          const showImageEvent = new CustomEvent('show-image', {
+            detail: { imageUrl: task.imageUrl, taskName: task.name }
+          });
+          window.dispatchEvent(showImageEvent);
+        } else {
+          toast.error(`No image found for task: ${task.name}`);
+        }
         break;
       case 'checklist':
-        // View checklist - use a valid event type from EventManager
-        toast.info(`Viewing checklist for task: ${task.name}`);
-        // This would be implemented with a proper event when available
+        // Open checklist view
+        if (task.checklistItems && task.checklistItems.length > 0) {
+          eventManager.emit('task:select', task.id);
+          
+          // Create and dispatch a custom event to open checklist view
+          const openChecklistEvent = new CustomEvent('open-checklist', {
+            detail: { taskId: task.id, taskName: task.name, items: task.checklistItems }
+          });
+          window.dispatchEvent(openChecklistEvent);
+        } else {
+          toast.error(`No checklist items found for: ${task.name}`);
+        }
         break;
       case 'voicenote':
-        // Record voice note - use a valid event type from EventManager
-        toast.info(`Recording voice note for task: ${task.name}`);
-        // This would be implemented with a proper event when available
+        // Open voice recorder component
+        const openVoiceRecorderEvent = new CustomEvent('open-voice-recorder', {
+          detail: { taskId: task.id, taskName: task.name }
+        });
+        window.dispatchEvent(openVoiceRecorderEvent);
+        break;
+      case 'habit':
+        // Handle habit view - possibly navigate to habits view
+        eventManager.emit('task:select', task.id);
+        if (task.relationships?.habitId) {
+          // Navigate to the related habit
+          window.location.href = `/habits?habitId=${task.relationships.habitId}`;
+        } else {
+          toast.info(`Viewing habit task: ${task.name}`);
+        }
         break;
       default:
-        // No special action for regular tasks
-        toast.info(`Action for ${task.taskType} task type not yet implemented`);
+        // For regular tasks - mark as complete
+        eventManager.emit('task:complete', { taskId: task.id });
+        toast.success(`Completed task: ${task.name}`);
         break;
     }
   };
@@ -202,18 +239,47 @@ export const TaskContent = ({
       );
     }
     
-    // For habit tasks, show a badge indicating it's a habit
-    if (task.taskType === 'habit' || task.relationships?.habitId) {
+    if (task.taskType === 'regular') {
       return (
-        <Badge variant="outline" className="flex items-center gap-1 bg-green-50 text-green-700 border-green-200">
-          <Zap className="h-3.5 w-3.5 text-green-500" />
-          <span>Habit</span>
-        </Badge>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleTaskAction}
+          className="h-7 px-2 flex items-center gap-1 text-xs"
+        >
+          <CheckSquare className="h-3.5 w-3.5 text-green-500" />
+          <span>Complete</span>
+        </Button>
       );
     }
     
-    // No special action for regular tasks
-    return null;
+    // For habit tasks, show a badge indicating it's a habit
+    if (task.taskType === 'habit' || task.relationships?.habitId) {
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleTaskAction}
+          className="h-7 px-2 flex items-center gap-1 text-xs"
+        >
+          <Zap className="h-3.5 w-3.5 text-green-500" />
+          <span>View Habit</span>
+        </Button>
+      );
+    }
+    
+    // Default action button for any other task type
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleTaskAction}
+        className="h-7 px-2 flex items-center gap-1 text-xs"
+      >
+        <CheckSquare className="h-3.5 w-3.5 text-primary" />
+        <span>Complete</span>
+      </Button>
+    );
   };
 
   // Get icon based on task type
