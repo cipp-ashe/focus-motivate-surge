@@ -65,7 +65,6 @@ const TimerPage = () => {
     <HabitsPanelProvider>
       <TimerErrorBoundary>
         <TaskLayout
-          asideContent={<TaskManager />}
           mainContent={
             <div className="flex flex-col h-full space-y-4">
               <TimerSection
@@ -86,6 +85,7 @@ const TimerPage = () => {
               />
             </div>
           }
+          asideContent={<TaskManager />}
         />
       </TimerErrorBoundary>
     </HabitsPanelProvider>

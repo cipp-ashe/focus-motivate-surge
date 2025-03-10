@@ -12,9 +12,9 @@ export const TaskLayout = ({ mainContent, asideContent }: TaskLayoutProps) => {
       <div className="flex-1 overflow-auto p-4">
         {mainContent}
       </div>
-      <div className="md:w-96 h-full overflow-auto border-l border-border">
+      <aside className="md:w-96 h-full overflow-auto border-l border-border">
         {asideContent}
-      </div>
+      </aside>
     </div>
   );
 };

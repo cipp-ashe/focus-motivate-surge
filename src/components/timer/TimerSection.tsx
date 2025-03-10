@@ -31,12 +31,12 @@ export const TimerSection = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="flex items-center justify-center h-[200px] bg-muted/20 rounded-md">
+          <div className="flex items-center justify-center min-h-[300px] bg-muted/10 rounded-md border border-border/50">
             <div className="text-center p-6">
-              <TimerIcon className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground font-medium">Select a task to start the timer</p>
-              <p className="text-sm text-muted-foreground/70 mt-2">
-                Choose a task from the list on the right
+              <TimerIcon className="h-16 w-16 text-muted-foreground/50 mx-auto mb-6" />
+              <p className="text-lg text-muted-foreground font-medium">Select a task to start the timer</p>
+              <p className="text-sm text-muted-foreground/70 mt-3 max-w-md mx-auto">
+                Choose a task from the list on the right to begin your focused work session
               </p>
             </div>
           </div>

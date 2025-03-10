@@ -68,7 +68,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-4 py-2">
         {tasks.length > 0 ? (
           <TaskTable
             tasks={tasks}
@@ -79,12 +79,10 @@ export const TaskList: React.FC<TaskListProps> = ({
             onTasksClear={onTasksClear}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground space-y-4">
-            <ListTodo className="h-8 w-8 text-muted-foreground/50" />
-            <div className="space-y-2">
-              <p>No active tasks</p>
-              <p className="text-sm">Add a new task above to get started</p>
-            </div>
+          <div className="flex flex-col items-center justify-center h-32 text-center p-4 text-muted-foreground">
+            <ListTodo className="h-6 w-6 text-muted-foreground/50 mb-2" />
+            <p>No active tasks</p>
+            <p className="text-sm mt-1">Add a new task above to get started</p>
           </div>
         )}
       </div>

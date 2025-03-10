@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { TaskList } from './TaskList';
 import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
@@ -186,38 +185,8 @@ const TaskManager = () => {
     );
   }
 
-  // Log task details for debugging
-  console.log(`TaskManager rendering: ${tasks.length} tasks, selected: ${selectedTaskId || 'none'}`);
-  
-  // No tasks view
-  if (tasks.length === 0) {
-    return (
-      <div className="flex flex-col h-full items-center justify-center p-4">
-        <p className="text-muted-foreground">No tasks available</p>
-        <button 
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          onClick={() => {
-            const now = Date.now();
-            if (now - forceUpdateTimeRef.current > 1000) {
-              forceUpdateTimeRef.current = now;
-              // Check localStorage directly
-              const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-              if (storedTasks.length > 0) {
-                toast.info(`${storedTasks.length} tasks found in storage`, {
-                  description: "Attempting to load tasks from storage..."
-                });
-              }
-              checkPendingHabits();
-              forceTaskUpdate();
-            }
-          }}
-        >
-          Refresh Tasks
-        </button>
-      </div>
-    );
-  }
-
+  // Always return TaskList component, regardless of whether there are tasks or not
+  // The TaskList component handles the empty state internally
   return (
     <TaskList
       tasks={tasks}
