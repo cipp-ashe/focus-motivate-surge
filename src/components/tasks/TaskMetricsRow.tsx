@@ -1,110 +1,62 @@
 
-import { Clock, Pause, Quote, Timer, CheckCircle2, AlertTriangle } from "lucide-react";
-import { Task } from "@/types/tasks";
-import { TableCell, TableRow } from "../ui/table";
-import { Badge } from "../ui/badge";
-import { formatDuration } from "@/utils/taskFormatUtils";
+import React from 'react';
+import { Task } from '@/types/tasks';
+import { TableRow, TableCell } from '@/components/ui/table';
+import { formatTime } from '@/utils/timeUtils';
 
 interface TaskMetricsRowProps {
   task: Task;
 }
 
-const getCompletionStatusColor = (status: string) => {
-  switch (status) {
-    case 'Completed Early':
-      return 'text-green-500';
-    case 'Completed On Time':
-      return 'text-blue-500';
-    case 'Completed Late':
-      return 'text-yellow-500';
-    default:
-      return 'text-muted-foreground';
-  }
-};
-
-const getCompletionIcon = (status: string) => {
-  switch (status) {
-    case 'Completed Early':
-      return CheckCircle2;
-    case 'Completed On Time':
-      return Timer;
-    case 'Completed Late':
-      return AlertTriangle;
-    default:
-      return Timer;
-  }
-};
-
 export const TaskMetricsRow = ({ task }: TaskMetricsRowProps) => {
   if (!task.metrics) return null;
-
+  
   const {
     expectedTime,
     actualDuration,
     pauseCount,
-    favoriteQuotes,
-    pausedTime,
-    extensionTime,
-    netEffectiveTime,
     efficiencyRatio,
-    completionStatus,
+    completionStatus
   } = task.metrics;
 
-  const statusColor = getCompletionStatusColor(completionStatus);
-  const StatusIconComponent = getCompletionIcon(completionStatus);
-  
   return (
-    <TableRow className="bg-muted/30 border-l-2 border-l-primary/20">
-      <TableCell colSpan={4} className="py-2">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">Time Metrics</div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>Expected: {formatDuration(expectedTime)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>Actual: {formatDuration(actualDuration)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Timer className="h-4 w-4" />
-                <span>Net: {formatDuration(netEffectiveTime)}</span>
-              </div>
+    <TableRow className="group bg-muted/30 border-b border-border/50">
+      <TableCell colSpan={4} className="p-0">
+        <div className="p-3 text-sm grid grid-cols-2 md:grid-cols-4 gap-3">
+          {expectedTime && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Expected Time</p>
+              <p className="font-medium">{expectedTime} min</p>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">Status</div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <StatusIconComponent className={`h-4 w-4 ${statusColor}`} />
-                <span className={`text-sm ${statusColor}`}>{completionStatus}</span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                {efficiencyRatio.toFixed(1)}% efficiency
-              </Badge>
+          )}
+          
+          {typeof actualDuration !== 'undefined' && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Actual Time</p>
+              <p className="font-medium">{actualDuration} min</p>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-muted-foreground">Details</div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Pause className="h-4 w-4" />
-                <span>Pauses: {pauseCount} ({formatDuration(pausedTime)})</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Timer className="h-4 w-4" />
-                <span>Extensions: {formatDuration(extensionTime)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Quote className="h-4 w-4" />
-                <span>Quotes: {favoriteQuotes}</span>
-              </div>
+          )}
+          
+          {typeof pauseCount !== 'undefined' && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Breaks Taken</p>
+              <p className="font-medium">{pauseCount}</p>
             </div>
-          </div>
+          )}
+          
+          {typeof efficiencyRatio !== 'undefined' && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Efficiency</p>
+              <p className="font-medium">{efficiencyRatio.toFixed(1)}%</p>
+            </div>
+          )}
+          
+          {completionStatus && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">Status</p>
+              <p className="font-medium">{completionStatus}</p>
+            </div>
+          )}
         </div>
       </TableCell>
     </TableRow>
