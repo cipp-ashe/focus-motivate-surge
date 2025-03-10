@@ -15,14 +15,13 @@ export const useTimerEvents = () => {
   const completeTimerSession = useCallback((taskName: string, timeLeft: number, metrics: any) => {
     eventBus.emit('timer:complete', {
       taskName, 
-      timeLeft,
       metrics
     });
   }, []);
 
   // Cancel a timer session
   const cancelTimerSession = useCallback((taskName: string, duration: number) => {
-    // We need to use 'as any' here since 'timer:cancel' isn't in the EventType union
+    // We need to use 'as any' here since 'timer:reset' is what we need to use instead of 'timer:cancel'
     eventBus.emit('timer:reset' as any, {
       taskName,
       duration
