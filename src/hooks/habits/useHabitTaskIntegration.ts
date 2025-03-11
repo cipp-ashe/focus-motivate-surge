@@ -1,7 +1,7 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 import { eventBus } from '@/lib/eventBus';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 import { HabitDetail } from '@/components/habits/types';
 import { habitTaskOperations } from '@/lib/operations/tasks/habit';
 import { taskStorage } from '@/lib/storage/taskStorage';
@@ -46,7 +46,7 @@ export const useHabitTaskIntegration = () => {
       }
       
       // Determine the appropriate task type based on habit name and metric type
-      let taskType = 'regular';
+      let taskType: TaskType = 'regular';
       
       // Check if this is a journal by name
       const nameLower = event.name.toLowerCase();
