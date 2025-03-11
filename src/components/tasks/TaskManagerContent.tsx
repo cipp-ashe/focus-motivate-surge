@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { TaskTypeTab } from './tabs/TaskTypeTab';
 import { TaskTabsList } from './tabs/TaskTabsList';
 import { TimerView } from './TimerView';
+import { eventBus } from '@/lib/eventBus';
 
 interface TaskManagerContentProps {
   tasks: Task[];
@@ -42,6 +43,11 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     // Force refresh the UI
     setTimeout(() => {
       window.dispatchEvent(new Event('force-task-update'));
+      
+      // For timer view, also emit task:select event to automatically select the task
+      if (isTimerView) {
+        eventBus.emit('task:select', task.id);
+      }
     }, 100);
   };
 
@@ -60,6 +66,11 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     // Force refresh the UI
     setTimeout(() => {
       window.dispatchEvent(new Event('force-task-update'));
+      
+      // For timer view, also select the first task automatically
+      if (isTimerView && tasks.length > 0) {
+        eventBus.emit('task:select', tasks[0].id);
+      }
     }, 100);
   };
 

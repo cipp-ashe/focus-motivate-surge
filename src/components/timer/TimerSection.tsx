@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { eventBus } from "@/lib/eventBus";
 import { useEvent } from "@/hooks/useEvent";
 import { useEffect, useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface TimerSectionProps {
   selectedTask: Task | null;
