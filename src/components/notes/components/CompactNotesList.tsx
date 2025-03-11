@@ -4,7 +4,7 @@ import { Download, Trash2 } from 'lucide-react';
 import type { Note, Tag } from '@/types/notes';
 import { NoteCard } from './NoteCard';
 import { NotesDialog } from './NotesDialog';
-import { NotesPagination } from './components/NotesPagination';
+import { NotesPagination } from './NotesPagination';
 import { ActionButton } from '@/components/ui/action-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { downloadAllNotes } from '@/utils/downloadUtils';
