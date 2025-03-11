@@ -1,3 +1,4 @@
+
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -62,7 +63,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         return;
       }
 
-      // Otherwise, handle internally
+      // Get the current notes from storage
       const savedNotes = localStorage.getItem('notes');
       const currentNotes: Note[] = savedNotes ? JSON.parse(savedNotes) : [];
 
@@ -70,6 +71,9 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       let savedNote: Note;
       
       if (selectedNote) {
+        // Find the existing note
+        const noteIndex = currentNotes.findIndex(n => n.id === selectedNote.id);
+        
         // Update existing note
         savedNote = {
           ...selectedNote,
@@ -77,9 +81,14 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
           updatedAt: new Date().toISOString()
         };
         
-        updatedNotes = currentNotes.map(note =>
-          note.id === selectedNote.id ? savedNote : note
-        );
+        // Update the note at its current position in the array
+        if (noteIndex >= 0) {
+          updatedNotes = [...currentNotes];
+          updatedNotes[noteIndex] = savedNote;
+        } else {
+          // If note not found, add it to the beginning
+          updatedNotes = [savedNote, ...currentNotes];
+        }
         
         // Emit update event
         eventManager.emit('note:update', savedNote);
@@ -87,7 +96,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         // Create new note
         savedNote = {
           id: crypto.randomUUID(),
-          title: 'New Note', // Add a default title
+          title: 'New Note',
           content: content.trim(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -110,7 +119,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         onNoteSaved();
       }
       
-      // Reset internal content after saving
+      // Reset internal content only if not using external content
       if (!externalContent) {
         setInternalContent('');
       }
