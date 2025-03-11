@@ -50,11 +50,13 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   };
 
   const handleBlur = useCallback(() => {
+    // Skip autosave if this is coming from a toolbar action
     if (isToolbarAction) {
       setIsToolbarAction(false);
       return;
     }
 
+    // Only auto-save if there is content and it's different from the original
     if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
       handleSave();
     }
@@ -117,6 +119,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         setInternalContent('');
       }
       
+      // Only show the success toast for explicit (manual) saves, not auto-saves
       if (!isToolbarAction) {
         toast.success(selectedNote ? "Note updated ✨" : "Note saved ✨", {
           duration: 1500
@@ -136,6 +139,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   };
 
   const handleToolbarAction = (action: string) => {
+    // Set the flag to prevent auto-save on blur after toolbar actions
     setIsToolbarAction(true);
   };
 
