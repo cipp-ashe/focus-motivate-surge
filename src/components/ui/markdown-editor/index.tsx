@@ -47,8 +47,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     const end = textarea.selectionEnd;
     const selectedText = value.substring(start, end);
     
-    console.log('Selection:', { start, end, selectedText, fullText: value });
-    
+    // Here's the fix: use proper text insertion that preserves existing content
     const result = insertMarkdownText({
       type,
       selectedText,
@@ -57,9 +56,10 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       selectionEnd: end
     });
     
+    // Update content with our properly formatted text
     onChange(result.newContent);
     
-    // Set selection range after content update
+    // Position cursor or select placeholder text
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(
