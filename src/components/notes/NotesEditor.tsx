@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import type { Note } from '@/types/notes';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { ActionButton } from '@/components/ui/action-button';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface NotesEditorProps {
   selectedNote?: Note | null;
@@ -26,14 +27,11 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   isEditing,
   onSave: externalOnSave
 }, ref) => {
-  // Use internal state if no external content is provided
   const [internalContent, setInternalContent] = useState('');
   const [isToolbarAction, setIsToolbarAction] = useState(false);
   
-  // Determine which content to use (external or internal)
   const content = externalContent !== undefined ? externalContent : internalContent;
 
-  // Update internal content when selectedNote changes
   useEffect(() => {
     if (selectedNote && !externalContent) {
       setInternalContent(selectedNote.content);
@@ -44,22 +42,18 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     if (newContent === undefined) return;
     
     if (externalOnChange) {
-      // If external onChange handler is provided, use it
       externalOnChange(newContent);
     } else {
-      // Otherwise manage content internally
       setInternalContent(newContent);
     }
   };
 
   const handleBlur = useCallback(() => {
-    // Don't save if we're performing a toolbar action
     if (isToolbarAction) {
       setIsToolbarAction(false);
       return;
     }
 
-    // Auto-save on blur only if there's content and it's different from the original
     if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
       handleSave();
     }
@@ -69,13 +63,11 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     if (!content?.trim()) return;
 
     try {
-      // If external save handler provided, use it
       if (externalOnSave) {
         externalOnSave();
         return;
       }
 
-      // Get the current notes from storage
       const savedNotes = localStorage.getItem('notes');
       const currentNotes: Note[] = savedNotes ? JSON.parse(savedNotes) : [];
 
@@ -83,29 +75,23 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       let savedNote: Note;
       
       if (selectedNote) {
-        // Find the existing note
         const noteIndex = currentNotes.findIndex(n => n.id === selectedNote.id);
         
-        // Update existing note
         savedNote = {
           ...selectedNote,
           content: content.trim(),
           updatedAt: new Date().toISOString()
         };
         
-        // Update the note at its current position in the array
         if (noteIndex >= 0) {
           updatedNotes = [...currentNotes];
           updatedNotes[noteIndex] = savedNote;
         } else {
-          // If note not found, add it to the beginning
           updatedNotes = [savedNote, ...currentNotes];
         }
         
-        // Emit update event
         eventManager.emit('note:update', savedNote);
       } else {
-        // Create new note
         savedNote = {
           id: crypto.randomUUID(),
           title: 'New Note',
@@ -117,21 +103,16 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         
         updatedNotes = [savedNote, ...currentNotes];
         
-        // Emit create event
         eventManager.emit('note:create', savedNote);
       }
 
-      // Save to localStorage
       localStorage.setItem('notes', JSON.stringify(updatedNotes));
-
-      // Dispatch custom event for immediate update
       window.dispatchEvent(new Event('notesUpdated'));
 
       if (onNoteSaved) {
         onNoteSaved();
       }
       
-      // Reset internal content only if not using external content
       if (!externalContent) {
         setInternalContent('');
       }
@@ -156,7 +137,6 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     setIsToolbarAction(true);
   };
 
-  // Expose saveNotes method through ref
   React.useImperativeHandle(ref, () => ({
     saveNotes: handleSave
   }));
