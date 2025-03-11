@@ -22,7 +22,8 @@ export const useTimerTasksManager = () => {
     const task = taskList.find((t: Task) => t.id === taskId);
     
     if (task) {
-      if (task.taskType !== 'timer') {
+      // Don't convert checklist tasks to timer tasks
+      if (task.taskType !== 'timer' && task.taskType !== 'checklist') {
         console.log("TimerTasksManager: Converting task to timer task:", task.name);
         
         // Convert the task to a timer task if it's not already
@@ -34,11 +35,14 @@ export const useTimerTasksManager = () => {
         toast.success('Task converted to timer task');
       }
       
-      // Let the timer component know to start the timer with this task
-      eventBus.emit('timer:set-task' as any, task);
-      
-      // Also dispatch a regular DOM event as a fallback
-      window.dispatchEvent(new CustomEvent('timer:set-task', { detail: task }));
+      // Only trigger timer for timer tasks
+      if (task.taskType === 'timer') {
+        // Let the timer component know to start the timer with this task
+        eventBus.emit('timer:set-task' as any, task);
+        
+        // Also dispatch a regular DOM event as a fallback
+        window.dispatchEvent(new CustomEvent('timer:set-task', { detail: task }));
+      }
     } else {
       console.warn(`TimerTasksManager: Task not found: ${taskId}`);
       toast.error(`Task not found: ${taskId}`);
@@ -48,6 +52,16 @@ export const useTimerTasksManager = () => {
   // Function to update a task's duration
   const updateTaskDuration = useCallback((taskId: string, durationInSeconds: number) => {
     console.log(`TimerTasksManager: Updating task duration: ${taskId}, ${durationInSeconds}s`);
+    
+    // Find the task to check its type
+    const taskList = JSON.parse(localStorage.getItem('taskList') || '[]');
+    const task = taskList.find((t: Task) => t.id === taskId);
+    
+    // Don't convert checklist tasks to timer tasks
+    if (task && task.taskType === 'checklist') {
+      console.log("TimerTasksManager: Skipping conversion of checklist task to timer");
+      return;
+    }
     
     eventBus.emit('task:update' as any, {
       taskId,

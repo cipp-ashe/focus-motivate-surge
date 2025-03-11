@@ -106,8 +106,9 @@ export const TaskContent = ({
         }
         break;
       case 'checklist':
-        // Open checklist view
+        // Open checklist view - DON'T convert to timer
         if (task.checklistItems && task.checklistItems.length > 0) {
+          // Just emit task:select to select the task, without converting it
           eventManager.emit('task:select', task.id);
           
           // Create and dispatch a custom event to open checklist view
