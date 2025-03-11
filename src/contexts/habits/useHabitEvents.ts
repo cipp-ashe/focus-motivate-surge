@@ -13,7 +13,7 @@ export const useHabitEvents = () => {
 
   useEffect(() => {
     // Event handler for creating a note from a habit
-    eventManager.on('note:create-from-habit', ({ habitId, habitName, description, templateId, content }) => {
+    const unsubscribe = eventManager.on('note:create-from-habit', ({ habitId, habitName, description, templateId, content }) => {
       // Make sure habitId is required
       if (!habitId) {
         console.error('Missing habitId in note:create-from-habit event');
@@ -39,12 +39,14 @@ export const useHabitEvents = () => {
       };
 
       // Call the create note action
-      noteActions.create(noteData, handleCreate);
+      if (noteActions.create) {
+        noteActions.create(noteData, handleCreate);
+      }
     });
 
     // Clean up event listeners when the component unmounts
     return () => {
-      eventManager.off('note:create-from-habit');
+      unsubscribe();
     };
   }, [noteActions, habitState]);
 };

@@ -96,12 +96,17 @@ export const insertMarkdownText = (config: TextInsertionConfig): {
   const newContent = value.substring(0, selectionStart) + newText + value.substring(selectionEnd);
   
   // Calculate cursor positions for selection or moving cursor
-  let newSelectionStart = selectionStart;
-  let newSelectionEnd = selectionStart + newText.length;
+  let newSelectionStart = selectionStart + newText.length;
+  let newSelectionEnd = newSelectionStart;
   
+  // If there was selected text, we want to place the cursor after the formatted text
+  if (selectedText) {
+    newSelectionStart = selectionStart + newText.length;
+    newSelectionEnd = newSelectionStart;
+  } 
   // If there was no selected text and we inserted placeholder text, we want to
   // select the placeholder so the user can immediately type over it
-  if (!selectedText && placeholderText && newText.includes(placeholderText)) {
+  else if (placeholderText && newText.includes(placeholderText)) {
     const placeholderStart = newText.indexOf(placeholderText);
     if (placeholderStart !== -1) {
       newSelectionStart = selectionStart + placeholderStart;

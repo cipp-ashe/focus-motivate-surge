@@ -68,11 +68,12 @@ class EventManager {
   }
 
   on<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void) {
-    this.emitter.on(event, handler);
+    this.emitter.on(event, handler as any);
+    return () => this.off(event, handler);
   }
 
   off<K extends keyof Events>(event: K, handler?: (payload: Events[K]) => void) {
-    this.emitter.off(event, handler);
+    this.emitter.off(event, handler as any);
   }
 }
 
