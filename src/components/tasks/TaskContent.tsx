@@ -107,18 +107,19 @@ export const TaskContent = ({
         break;
       case 'checklist':
         // Open checklist view - DON'T convert to timer
-        if (task.checklistItems && task.checklistItems.length > 0) {
-          // Just emit task:select to select the task, without converting it
-          eventManager.emit('task:select', task.id);
-          
-          // Create and dispatch a custom event to open checklist view
-          const openChecklistEvent = new CustomEvent('open-checklist', {
-            detail: { taskId: task.id, taskName: task.name, items: task.checklistItems }
-          });
-          window.dispatchEvent(openChecklistEvent);
-        } else {
-          toast.error(`No checklist items found for: ${task.name}`);
-        }
+        // Just emit task:select to select the task, without converting it
+        eventManager.emit('task:select', task.id);
+        
+        // Create and dispatch a custom event to open checklist view
+        // Allow opening even if no items exist yet
+        const openChecklistEvent = new CustomEvent('open-checklist', {
+          detail: { 
+            taskId: task.id, 
+            taskName: task.name, 
+            items: task.checklistItems || [] 
+          }
+        });
+        window.dispatchEvent(openChecklistEvent);
         break;
       case 'voicenote':
         // Open voice recorder component
