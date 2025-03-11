@@ -1,4 +1,3 @@
-
 import { Task } from '@/types/tasks';
 import { constants } from './constants';
 import { utils } from './utils';
@@ -46,6 +45,45 @@ export const activeTasksStorage = {
     } catch (error) {
       console.error('Error checking if task exists in storage:', error);
       return false;
+    }
+  },
+  
+  /**
+   * Check if a task exists for a specific habit on a specific date
+   */
+  taskExists: (habitId: string, date: string): Task | null => {
+    try {
+      const tasks = activeTasksStorage.loadTasks();
+      console.log(`Checking for task with habitId=${habitId}, date=${date} among ${tasks.length} tasks`);
+      
+      // Check active tasks
+      const existingTask = tasks.find((task: Task) => 
+        task.relationships?.habitId === habitId && 
+        task.relationships?.date === date
+      );
+      
+      if (existingTask) {
+        console.log(`Found existing task ${existingTask.id} for habit ${habitId} on ${date}`);
+        return existingTask;
+      }
+      
+      // Also check completed tasks
+      const completedTasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
+      const completedTask = completedTasks.find((task: Task) => 
+        task.relationships?.habitId === habitId && 
+        task.relationships?.date === date
+      );
+      
+      if (completedTask) {
+        console.log(`Found completed task ${completedTask.id} for habit ${habitId} on ${date}`);
+        return completedTask;
+      }
+      
+      console.log(`No task found for habit ${habitId} on ${date}`);
+      return null;
+    } catch (error) {
+      console.error('Error checking if task exists for habit:', error);
+      return null;
     }
   },
   

@@ -30,6 +30,38 @@ const HabitTracker: React.FC = () => {
     setTemplateMap(map);
   }, []);
   
+  // Debug logging for templates
+  useEffect(() => {
+    console.log(`HabitTracker: Active templates count: ${templates.length}`);
+    templates.forEach((template, index) => {
+      console.log(`Template ${index + 1}: ${template.templateId} with ${template.habits?.length || 0} habits`);
+      
+      // Check if this template should be active today
+      const today = new Date().getDay();
+      const days: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const todayStr = days[today];
+      const isActiveToday = template.activeDays?.includes(todayStr);
+      
+      console.log(`  Active days: ${template.activeDays?.join(', ')}, active today: ${isActiveToday}`);
+    });
+    
+    // If templates change, trigger habit-task sync
+    syncHabitsWithTasks();
+    
+    // Force UI refresh with staggered timing
+    setTimeout(() => {
+      window.dispatchEvent(new Event('force-habits-update'));
+      
+      // Trigger task updates as well
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+        
+        // Check for pending habits
+        eventBus.emit('habits:check-pending', {});
+      }, 200);
+    }, 100);
+  }, [templates, syncHabitsWithTasks]);
+  
   // Event listeners for template management
   useEffect(() => {
     const handleTemplateAdd = (templateId: string) => {
@@ -58,7 +90,9 @@ const HabitTracker: React.FC = () => {
           templateId: template.id,
           habits: template.defaultHabits || [],
           activeDays: template.defaultDays as DayOfWeek[] || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-          customized: false
+          customized: false,
+          name: template.name,
+          description: template.description
         };
         
         console.log("Adding template:", activeTemplate);
@@ -89,6 +123,7 @@ const HabitTracker: React.FC = () => {
 
   // Handle template removal
   const handleRemoveTemplate = (templateId: string) => {
+    console.log(`Removing template: ${templateId}`);
     removeTemplate(templateId);
     toast.success('Template removed');
     

@@ -11,6 +11,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
  */
 export const useHabitTaskIntegration = () => {
   const processingHabitsRef = useRef<Set<string>>(new Set());
+  const syncCountRef = useRef(0);
   
   // Process habit schedule events
   const handleHabitSchedule = useCallback((event: {
@@ -19,15 +20,18 @@ export const useHabitTaskIntegration = () => {
     name: string;
     duration: number;
     date: string;
+    metricType?: string;
   }) => {
     // Skip if already processing this habit
     const habitKey = `${event.habitId}-${event.date}`;
     if (processingHabitsRef.current.has(habitKey)) {
+      console.log(`Already processing habit ${event.habitId} for ${event.date}, skipping`);
       return;
     }
     
     // Mark as processing
     processingHabitsRef.current.add(habitKey);
+    console.log(`Processing habit schedule: ${event.name} (${event.habitId}) from template ${event.templateId}`);
     
     try {
       // Check if task already exists
@@ -35,18 +39,34 @@ export const useHabitTaskIntegration = () => {
       
       if (existingTask) {
         console.log(`Task already exists for habit ${event.habitId} on ${event.date}`);
+        
+        // Make sure the task is in memory too by emitting an event
+        eventBus.emit('task:create', existingTask);
         return;
       }
       
-      // Create a new habit task
-      habitTaskOperations.createHabitTask(
+      // Create a new habit task with the appropriate task type
+      const taskType = event.metricType === 'timer' ? 'timer' : 'regular';
+      
+      console.log(`Creating new habit task for ${event.name} with type ${taskType}`);
+      const result = habitTaskOperations.createHabitTask(
         event.habitId,
         event.templateId,
         event.name,
         event.duration,
         event.date,
-        { suppressToast: false }
+        { 
+          suppressToast: false,
+          taskType: taskType
+        }
       );
+      
+      console.log(`Task creation result: ${result ? 'success' : 'failed'}`);
+      
+      // Force a UI update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 300);
       
     } finally {
       // Clear processing state after delay
@@ -60,18 +80,36 @@ export const useHabitTaskIntegration = () => {
   const syncHabitsWithTasks = useCallback(() => {
     // For each habit that should have a task today, ensure the task exists
     const today = new Date().toDateString();
+    const syncId = ++syncCountRef.current;
+    
+    console.log(`[Sync #${syncId}] Starting habit-task synchronization for ${today}`);
     
     // Emit events to check for pending habits
     eventBus.emit('habits:check-pending', {});
     
-    // Force UI update
+    // Load all tasks to check what exists
+    const allTasks = taskStorage.loadTasks();
+    const habitTasks = allTasks.filter(task => task.relationships?.habitId);
+    
+    console.log(`[Sync #${syncId}] Found ${habitTasks.length} habit tasks in storage`);
+    
+    // Load task list again after a delay for verification
     setTimeout(() => {
+      const verifyTasks = taskStorage.loadTasks();
+      const verifyHabitTasks = verifyTasks.filter(task => task.relationships?.habitId);
+      
+      console.log(`[Sync #${syncId}] Verification: Found ${verifyHabitTasks.length} habit tasks in storage`);
+      
+      // Force UI update
       window.dispatchEvent(new Event('force-task-update'));
-    }, 200);
+    }, 500);
+    
   }, []);
   
   // Set up event listeners
   useEffect(() => {
+    console.log("Setting up habit task integration");
+    
     // Listen for habit schedule events
     const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
     

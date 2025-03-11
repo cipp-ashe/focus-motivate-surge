@@ -40,6 +40,7 @@ export const useTodaysHabits = () => {
     
     try {
       if (!activeTemplates || activeTemplates.length === 0) {
+        console.log("No active templates found to process");
         setTodaysHabits([]);
         return;
       }
@@ -47,7 +48,7 @@ export const useTodaysHabits = () => {
       const today = timeUtils.getCurrentDayName();
       const currentDate = timeUtils.getCurrentDateString();
       
-      console.log(`useTodaysHabits - Processing habits for ${today}`);
+      console.log(`useTodaysHabits - Processing habits for ${today}, found ${activeTemplates.length} active templates`);
 
       // Keep track of processed template IDs to avoid duplicates
       processedTemplatesRef.current.clear();
@@ -59,14 +60,16 @@ export const useTodaysHabits = () => {
       activeTemplates.forEach(template => {
         // Skip if we've already processed this template
         if (processedTemplatesRef.current.has(template.templateId)) {
+          console.log(`Template ${template.templateId} already processed, skipping`);
           return;
         }
         
         processedTemplatesRef.current.add(template.templateId);
         
         const isActiveToday = template.activeDays?.includes(today);
+        console.log(`Template ${template.templateId} active today: ${isActiveToday}, has ${template.habits?.length || 0} habits`);
         
-        if (isActiveToday && template.habits) {
+        if (isActiveToday && template.habits && template.habits.length > 0) {
           template.habits.forEach(habit => {
             // Only add if we haven't processed this habit ID yet
             if (!processedIds.has(habit.id)) {
@@ -79,16 +82,35 @@ export const useTodaysHabits = () => {
                 }
               };
               habits.push(newHabit);
+              
+              // Immediately schedule this habit as a task
+              console.log(`Scheduling habit task for ${habit.name} from template ${template.templateId}`);
+              eventBus.emit('habit:schedule', {
+                habitId: habit.id,
+                templateId: template.templateId,
+                name: habit.name,
+                duration: habit.duration || 1500,
+                date: currentDate,
+                metricType: habit.metricType
+              });
             }
           });
         }
       });
       
+      console.log(`Processed ${habits.length} habits for today from ${processedTemplatesRef.current.size} templates`);
       setTodaysHabits(habits);
       setLastProcessedDate(currentDate);
       
       // Emit event that habits have been processed
       eventBus.emit('habits:processed', habits);
+      
+      // Force task updates with staggered timing
+      [100, 300, 600].forEach(delay => {
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+        }, delay);
+      });
       
     } finally {
       processingRef.current = false;
