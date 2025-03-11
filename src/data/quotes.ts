@@ -1,3 +1,4 @@
+
 import { Quote } from "../types/timer";
 
 export const quotes: Quote[] = [
@@ -39,5 +40,22 @@ export const quotes: Quote[] = [
   { text: "Curiosity is the compass that leads us to the undiscovered.", author: "Unknown", categories: ['learning', 'creativity'] },
   { text: "The best way to solve a problem is to understand it completely.", author: "Unknown", categories: ['learning', 'focus'] },
   { text: "Purpose is not something you find; it's something you create through your actions.", author: "Unknown", categories: ['motivation', 'growth'] },
-  { text: "Vision without strategy is a dream; vision with execution is a legacy.", author: "Unknown", categories: ['focus', 'persistence'] }
+  { text: "Vision without strategy is a dream; vision with execution is a legacy.", author: "Unknown", categories: ['focus', 'persistence'] },
+  
+  // Adding gratitude quotes
+  { text: "Gratitude turns what we have into enough.", author: "Melody Beattie", categories: ['gratitude', 'growth'] },
+  { text: "Gratitude is the healthiest of all human emotions.", author: "Zig Ziglar", categories: ['gratitude', 'motivation'] },
+  { text: "When I started counting my blessings, my whole life turned around.", author: "Willie Nelson", categories: ['gratitude', 'growth'] },
+  { text: "Gratitude is not only the greatest of virtues, but the parent of all others.", author: "Cicero", categories: ['gratitude', 'motivation'] },
+  { text: "The more grateful I am, the more beauty I see.", author: "Mary Davis", categories: ['gratitude', 'creativity'] },
+  
+  // Adding reflection quotes
+  { text: "The unexamined life is not worth living.", author: "Socrates", categories: ['reflection', 'learning'] },
+  { text: "Your vision will become clear only when you can look into your own heart.", author: "Carl Jung", categories: ['reflection', 'growth'] },
+  { text: "Life can only be understood backwards; but it must be lived forwards.", author: "Søren Kierkegaard", categories: ['reflection', 'learning'] },
+  
+  // Adding mindfulness quotes
+  { text: "The present moment is the only time over which we have dominion.", author: "Thích Nhất Hạnh", categories: ['mindfulness', 'focus'] },
+  { text: "Mindfulness isn't difficult. We just need to remember to do it.", author: "Sharon Salzberg", categories: ['mindfulness', 'focus'] },
+  { text: "The best way to capture moments is to pay attention. This is how we cultivate mindfulness.", author: "Jon Kabat-Zinn", categories: ['mindfulness', 'focus'] }
 ];
