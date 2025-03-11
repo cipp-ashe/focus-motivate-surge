@@ -7,7 +7,7 @@ import { Quote } from "@/types/timer";
 import { eventBus } from '@/lib/eventBus';
 import { TimerErrorBoundary } from '@/components/timer/TimerErrorBoundary';
 import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { TimerSection } from '@/components/timer/TimerSection';
 import { useEvent } from '@/hooks/useEvent';
 import { Task } from '@/types/tasks';
@@ -29,7 +29,7 @@ const TimerPage = () => {
   // Get timer tasks manager functions
   const timerTasksManager = useTimerTasksManager();
   
-  // Debug: Log initial state
+  // Debug: Log initial state - once only
   useEffect(() => {
     console.log("TimerPage mounted with:", {
       tasks: tasks.length,
@@ -47,7 +47,7 @@ const TimerPage = () => {
     }
   }, [tasks, selectedTaskId]);
   
-  // Listen for task:select events directly
+  // Centralize task selection logic in a single event handler
   useEvent('task:select', (taskId: string) => {
     console.log("TimerPage: Received task:select event for", taskId);
     
@@ -62,30 +62,7 @@ const TimerPage = () => {
         timerTasksManager.updateTaskDuration(task.id, task.duration || 1500);
       }
     } else {
-      console.log("TimerPage: Task not found in context, checking localStorage");
-      
-      // Try to find the task in localStorage
-      try {
-        const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-        const storedTask = storedTasks.find((t: Task) => t.id === taskId);
-        
-        if (storedTask) {
-          console.log("TimerPage: Found task in localStorage:", storedTask);
-          // Force a task update through the timer tasks manager
-          if (storedTask.taskType !== 'timer') {
-            timerTasksManager.updateTaskDuration(storedTask.id, storedTask.duration || 1500);
-            setTimeout(() => {
-              // Now we can call forceTaskUpdate without arguments since we made it optional
-              timerTasksManager.forceTaskUpdate();
-            }, 100);
-          }
-          setSelectedTask(storedTask);
-        } else {
-          console.warn("TimerPage: Task not found in localStorage either:", taskId);
-        }
-      } catch (e) {
-        console.error("TimerPage: Error processing task:select from localStorage", e);
-      }
+      console.log("TimerPage: Task not found in context");
     }
   });
   
@@ -95,7 +72,7 @@ const TimerPage = () => {
     setSelectedTask(task);
   });
   
-  // Track when TimerPage is mounted and ready
+  // Track when TimerPage is mounted and ready - once only
   useEffect(() => {
     console.log("TimerPage mounted and ready");
     
@@ -110,7 +87,7 @@ const TimerPage = () => {
       // Force UI update to ensure all tasks are loaded
       window.dispatchEvent(new Event('force-task-update'));
       
-      // Check for pending habits
+      // Check for pending habits - once only, not in an interval
       setTimeout(() => {
         console.log(`Checking for pending habits from TimerPage (one-time check)`);
         eventBus.emit('habits:check-pending', {});
@@ -122,13 +99,11 @@ const TimerPage = () => {
         if (habitTasks.length > 0) {
           console.log(`Found ${habitTasks.length} habit tasks in localStorage`);
           
-          // Force multiple updates to ensure tasks are loaded
-          [200, 500, 1000].forEach(delay => {
-            setTimeout(() => {
-              window.dispatchEvent(new Event('force-task-update'));
-              setForceUpdate(prev => prev + 1); // Trigger a re-render
-            }, delay);
-          });
+          // Force a single update to ensure tasks are loaded
+          setTimeout(() => {
+            window.dispatchEvent(new Event('force-task-update'));
+            setForceUpdate(prev => prev + 1); // Trigger a re-render
+          }, 500);
           
           toast.success(`Found ${habitTasks.length} habit tasks`, {
             description: "Loading your scheduled tasks..."
@@ -140,9 +115,9 @@ const TimerPage = () => {
         }
       }, 300);
     }
-  }, [tasks, habitCheckDone, timerTasksManager]);
+  }, [habitCheckDone]);
 
-  // Listen for force-task-update events
+  // Listen for force-task-update events - with cleanup
   useEffect(() => {
     const handleForceUpdate = () => {
       console.log("TimerPage: Force update detected, incrementing update counter");

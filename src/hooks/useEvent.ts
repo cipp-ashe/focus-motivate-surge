@@ -1,30 +1,30 @@
 
-import { useEffect, useCallback } from 'react';
-import { eventManager } from '@/lib/events/EventManager';
-import type { EventType } from '@/lib/events/EventManager';
+import { useEffect } from 'react';
+import { eventBus } from '@/lib/eventBus';
+import { TimerEventType, TimerEventPayloads } from '@/types/events';
 
 /**
- * Hook to subscribe to events from the event manager with proper cleanup
- * @param eventType The event type to listen for
- * @param handler The handler function to be called when the event is fired
+ * Hook to subscribe to a specific event and handle it
+ * 
+ * @param eventType - The event type to subscribe to
+ * @param callback - The callback to run when the event is emitted
  */
-export function useEvent<T = any>(
-  eventType: EventType, 
-  handler: (data: T) => void
+export function useEvent<T extends TimerEventType>(
+  eventType: T,
+  callback: (payload: TimerEventPayloads[T]) => void
 ) {
-  // Create a stable reference to the handler to avoid unnecessary resubscriptions
-  const stableHandler = useCallback(handler, [handler]);
-  
   useEffect(() => {
-    console.log(`[useEvent] Subscribing to ${eventType}`);
+    // Create a wrapper function that casts the payload to the correct type
+    const wrappedCallback = (payload: any) => {
+      callback(payload as TimerEventPayloads[T]);
+    };
     
-    // Subscribe directly to eventManager instead of eventBus
-    const unsubscribe = eventManager.on(eventType, stableHandler);
+    // Subscribe to the event
+    const unsubscribe = eventBus.on(eventType, wrappedCallback);
     
-    // Cleanup subscription on unmount
+    // Return cleanup function
     return () => {
-      console.log(`[useEvent] Unsubscribing from ${eventType}`);
       unsubscribe();
     };
-  }, [eventType, stableHandler]);
+  }, [eventType, callback]);
 }

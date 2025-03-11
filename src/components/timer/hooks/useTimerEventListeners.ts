@@ -1,62 +1,61 @@
 
-import { useEffect } from "react";
-import { eventBus } from "@/lib/eventBus";
-import { TimerExpandedViewRef } from "@/types/timer/views";
+import { useEffect, RefObject } from 'react';
+import { eventBus } from '@/lib/eventBus';
+import { TimerExpandedViewRef } from '@/types/timer';
+
+interface UseTimerEventListenersProps {
+  taskName: string;
+  setInternalMinutes: (minutes: number) => void;
+  setIsExpanded: (expanded: boolean) => void;
+  expandedViewRef: RefObject<TimerExpandedViewRef | null>;
+}
 
 export const useTimerEventListeners = ({
   taskName,
   setInternalMinutes,
   setIsExpanded,
   expandedViewRef,
-}: {
-  taskName: string;
-  setInternalMinutes: (minutes: number) => void;
-  setIsExpanded: (expanded: boolean) => void;
-  expandedViewRef: React.RefObject<TimerExpandedViewRef>;
-}) => {
-  // Listen for timer initialization events
+}: UseTimerEventListenersProps) => {
   useEffect(() => {
-    let isSubscribed = true;
-
-    const unsubscribe = eventBus.on('timer:init', ({ taskName: eventTaskName, duration: newDuration }) => {
-      if (!isSubscribed) return;
-      if (eventTaskName === taskName) {
-        console.log('Timer initialized with:', { taskName: eventTaskName, duration: newDuration });
-        setInternalMinutes(Math.floor(newDuration / 60));
+    // Only set up listeners if we have a task name
+    if (!taskName) return;
+    
+    console.log(`Setting up timer event listeners for task: ${taskName}`);
+    
+    // Handle timer initialization
+    const unsubInit = eventBus.on('timer:init', (payload) => {
+      if (payload.taskName === taskName) {
+        console.log(`Timer init for ${taskName} with duration: ${payload.duration}`);
+        const minutes = Math.floor(payload.duration / 60);
+        setInternalMinutes(minutes);
       }
     });
-
-    return () => {
-      isSubscribed = false;
-      unsubscribe();
-    };
-  }, [taskName, setInternalMinutes]);
-
-  // Listen for expand/collapse events
-  useEffect(() => {
-    let isSubscribed = true;
-
-    const unsubscribeExpand = eventBus.on('timer:expand', ({ taskName: eventTaskName }) => {
-      if (!isSubscribed) return;
-      if (eventTaskName === taskName) {
+    
+    // Handle timer expand
+    const unsubExpand = eventBus.on('timer:expand', (payload) => {
+      if (payload.taskName === taskName) {
+        console.log(`Expanding timer for ${taskName}`);
         setIsExpanded(true);
       }
     });
-
-    const unsubscribeCollapse = eventBus.on('timer:collapse', ({ taskName: eventTaskName, saveNotes }) => {
-      if (!isSubscribed) return;
-      if (eventTaskName === taskName) {
-        if (saveNotes && expandedViewRef.current?.saveNotes) {
+    
+    // Handle timer collapse
+    const unsubCollapse = eventBus.on('timer:collapse', (payload) => {
+      if (payload.taskName === taskName) {
+        console.log(`Collapsing timer for ${taskName}`);
+        setIsExpanded(false);
+        if (payload.saveNotes && expandedViewRef.current) {
           expandedViewRef.current.saveNotes();
         }
-        setIsExpanded(false);
       }
     });
-
+    
+    // Clean up all listeners when the component unmounts or taskName changes
     return () => {
-      isSubscribed = false;
-      unsubscribeExpand();
-      unsubscribeCollapse();
+      console.log(`Cleaning up timer event listeners for task: ${taskName}`);
+      unsubInit();
+      unsubExpand();
+      unsubCollapse();
     };
-  }, [taskName, setIsExpanded, expandedViewRef]);
+  }, [taskName, setInternalMinutes, setIsExpanded, expandedViewRef]);
 };
