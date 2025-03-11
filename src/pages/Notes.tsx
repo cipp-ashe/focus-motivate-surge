@@ -9,11 +9,9 @@ export default function NotesPage() {
   const { isDark, toggleTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Add logging and proper initialization
   useEffect(() => {
     console.log('NotesPage mounted');
     
-    // Make sure everything is loaded
     const timer = setTimeout(() => {
       console.log('NotesPage finished loading');
       setIsLoading(false);
