@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 import { downloadNoteAsMarkdown } from '@/utils/downloadUtils';
 import { NotesHeader } from './expanded/NotesHeader';
 import { NoteItem } from './expanded/NoteItem';

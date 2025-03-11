@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 import { NoteCard } from './NoteCard';
 import { NotesDialog } from './NotesDialog';
 import { NotesListHeader } from './NotesListHeader';

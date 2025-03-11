@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { NotesEditor, NotesEditorRef } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
 import { NotesProps } from '@/types/notes';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
 
 export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {

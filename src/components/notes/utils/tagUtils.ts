@@ -1,5 +1,5 @@
 
-import { TagColor } from '@/hooks/useNotes';
+import { TagColor } from '@/types/notes';
 
 export const TAG_COLORS: TagColor[] = [
   'default',

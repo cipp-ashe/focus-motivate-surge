@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Download, Trash2 } from 'lucide-react';
 import { ActionButton } from '@/components/ui/action-button';
 import { NotesPagination } from './NotesPagination';
 import { downloadAllNotes } from '@/utils/downloadUtils';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 
 interface NotesListHeaderProps {
   notes: Note[];

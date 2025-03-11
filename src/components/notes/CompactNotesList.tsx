@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Download, Trash2 } from 'lucide-react';
-import type { Note, Tag } from '@/hooks/useNotes';
+import type { Note, Tag } from '@/types/notes';
 import { NoteCard } from './components/NoteCard';
 import { NotesDialog } from './components/NotesDialog';
 import { NotesPagination } from './components/NotesPagination';

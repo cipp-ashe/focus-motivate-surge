@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { ActionButton } from '@/components/ui/action-button';
 import { cn } from '@/lib/utils';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 
 interface NoteActionsProps {
   note: Note;

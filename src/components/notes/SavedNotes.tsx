@@ -7,7 +7,8 @@ import { NotesDialog } from './components/NotesDialog';
 import { NotesPagination } from './components/NotesPagination';
 import { ActionButton } from '@/components/ui/action-button';
 import { downloadAllNotes } from '@/utils/downloadUtils';
-import { useNotes, type Note, type TagColor } from '@/hooks/useNotes';
+import { useNotes } from '@/hooks/useNotes';
+import type { Note, TagColor } from '@/types/notes';
 
 interface SavedNotesProps {
   onOpenEmailModal?: () => void;

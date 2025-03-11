@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
-import type { Note, Tag } from '@/hooks/useNotes';
+import { marked } from 'marked';
+import type { Note, Tag } from '@/types/notes';
 import { toast } from 'sonner';
 
 interface SaveFileParams {

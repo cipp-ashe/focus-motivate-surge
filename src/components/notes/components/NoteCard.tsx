@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { ActionButton } from '@/components/ui/action-button';
-import type { Note, TagColor } from '@/hooks/useNotes';
+import type { Note, TagColor } from '@/types/notes';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { NoteTags } from './NoteTags';

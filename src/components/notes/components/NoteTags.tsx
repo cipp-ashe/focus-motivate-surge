@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ActionButton } from '@/components/ui/action-button';
 import { X, Plus } from 'lucide-react';
-import { Tag, TagColor } from '@/hooks/useNotes';
+import type { Tag, TagColor } from '@/types/notes';
 import { getTagStyles } from '../utils/tagUtils';
 import { cn } from '@/lib/utils';
 

@@ -1,7 +1,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Note } from '@/types/notes';
+import { Note, Tag, TagColor, isValidTagColor } from '@/types/notes';
+
+export type { Note, Tag, TagColor };
+export { isValidTagColor };
 
 export const STORAGE_KEY = 'notes';
 
@@ -15,6 +18,9 @@ export const useNotes = () => {
       return [];
     }
   });
+
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [currentContent, setCurrentContent] = useState('');
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -85,5 +91,100 @@ export const useNotes = () => {
     }
   }, [notes]);
 
-  return { notes, saveNote, deleteNote };
+  const updateCurrentContent = useCallback((content: string) => {
+    setCurrentContent(content);
+  }, []);
+
+  const selectNoteForEdit = useCallback((note: Note) => {
+    setSelectedNote(note);
+    setCurrentContent(note.content);
+  }, []);
+
+  const clearSelectedNote = useCallback(() => {
+    setSelectedNote(null);
+    setCurrentContent('');
+  }, []);
+
+  const addNote = useCallback(() => {
+    if (!currentContent.trim()) return null;
+    
+    const newNote: Note = {
+      id: crypto.randomUUID(),
+      title: 'New Note',
+      content: currentContent.trim(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      tags: []
+    };
+    
+    saveNote(newNote);
+    setCurrentContent('');
+    return newNote;
+  }, [currentContent, saveNote]);
+
+  const updateNote = useCallback((noteId: string, content: string) => {
+    const noteToUpdate = notes.find(note => note.id === noteId);
+    if (!noteToUpdate) return false;
+    
+    const updatedNote = {
+      ...noteToUpdate,
+      content,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return saveNote(updatedNote);
+  }, [notes, saveNote]);
+
+  const addTagToNote = useCallback((noteId: string, tagName: string, colorName: string = 'default') => {
+    const color = isValidTagColor(colorName) ? colorName as TagColor : 'default';
+    const noteToUpdate = notes.find(note => note.id === noteId);
+    if (!noteToUpdate) return false;
+    
+    const newTag: Tag = { name: tagName.trim(), color };
+    const existingTagIndex = noteToUpdate.tags.findIndex(t => t.name === tagName);
+    
+    let updatedTags;
+    if (existingTagIndex >= 0) {
+      updatedTags = [...noteToUpdate.tags];
+      updatedTags[existingTagIndex] = newTag;
+    } else {
+      updatedTags = [...noteToUpdate.tags, newTag];
+    }
+    
+    const updatedNote = {
+      ...noteToUpdate,
+      tags: updatedTags,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return saveNote(updatedNote);
+  }, [notes, saveNote]);
+
+  const removeTagFromNote = useCallback((noteId: string, tagName: string) => {
+    const noteToUpdate = notes.find(note => note.id === noteId);
+    if (!noteToUpdate) return false;
+    
+    const updatedNote = {
+      ...noteToUpdate,
+      tags: noteToUpdate.tags.filter(t => t.name !== tagName),
+      updatedAt: new Date().toISOString()
+    };
+    
+    return saveNote(updatedNote);
+  }, [notes, saveNote]);
+
+  return { 
+    notes, 
+    saveNote, 
+    deleteNote,
+    selectedNote,
+    currentContent,
+    updateCurrentContent,
+    selectNoteForEdit,
+    clearSelectedNote,
+    addNote,
+    updateNote,
+    addTagToNote,
+    removeTagFromNote
+  };
 };

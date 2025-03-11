@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,7 @@ import {
   X, 
   Tag as TagIcon 
 } from 'lucide-react';
-import type { Note } from '@/hooks/useNotes';
+import type { Note } from '@/types/notes';
 
 interface NoteItemProps {
   note: Note;
