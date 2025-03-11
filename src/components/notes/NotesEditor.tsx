@@ -1,5 +1,5 @@
 
-import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect } from 'react';
+import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect, useRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '@/types/notes';
@@ -30,6 +30,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
 }, ref) => {
   const [internalContent, setInternalContent] = useState('');
   const [isToolbarAction, setIsToolbarAction] = useState(false);
+  const toolbarActionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const content = externalContent !== undefined ? externalContent : internalContent;
 
@@ -38,6 +39,15 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       setInternalContent(selectedNote.content);
     }
   }, [selectedNote, externalContent]);
+
+  // Clean up any pending timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (toolbarActionTimeoutRef.current) {
+        clearTimeout(toolbarActionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (newContent: string | undefined) => {
     if (newContent === undefined) return;
@@ -55,7 +65,6 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     // Skip autosave if this is coming from a toolbar action
     if (isToolbarAction) {
       console.log('Skipping autosave due to toolbar action');
-      setIsToolbarAction(false);
       return;
     }
 
@@ -146,6 +155,18 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     console.log('Toolbar action detected:', action);
     // Set the flag to prevent auto-save on blur after toolbar actions
     setIsToolbarAction(true);
+    
+    // Clear any existing timeout
+    if (toolbarActionTimeoutRef.current) {
+      clearTimeout(toolbarActionTimeoutRef.current);
+    }
+    
+    // Reset flag after a short delay to allow for the formatting operation to complete
+    // This prevents multiple toolbar actions from triggering auto-save
+    toolbarActionTimeoutRef.current = setTimeout(() => {
+      console.log('Resetting toolbar action flag');
+      setIsToolbarAction(false);
+    }, 1000);
   };
 
   React.useImperativeHandle(ref, () => ({

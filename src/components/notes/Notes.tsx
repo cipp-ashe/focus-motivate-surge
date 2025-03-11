@@ -9,6 +9,7 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
   const [noteContent, setNoteContent] = useState('');
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const editorRef = useRef<NotesEditorRef>(null);
+  const [isFormatting, setIsFormatting] = useState(false);
 
   // Make sure noteContent is a string
   const handleChange = (content: string | undefined) => {
@@ -23,8 +24,11 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
   };
 
   const handleNoteSaved = () => {
-    setSelectedNote(null);
-    setNoteContent('');
+    // Don't reset the editor if we're in the middle of a formatting operation
+    if (!isFormatting) {
+      setSelectedNote(null);
+      setNoteContent('');
+    }
   };
 
   return (
