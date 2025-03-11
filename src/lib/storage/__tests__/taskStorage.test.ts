@@ -1,5 +1,5 @@
 
-import { taskStorage } from '../task/index';
+import { taskStorage } from '../task';
 import { Task } from '@/types/tasks';
 import { constants } from '../task/constants';
 
