@@ -52,24 +52,29 @@ const HabitTracker = () => {
     setForceUpdate(prev => prev + 1);
   });
 
-  // Handler for removing templates - now updated to be the originating action
+  // Handler for removing templates - now updated to ensure proper template deletion
   const handleRemoveTemplate = (templateId: string) => {
     console.log(`HabitTracker: Initiating template deletion for ${templateId}`);
     
-    // First emit event to remove any tasks associated with this template
-    // Mark as originating action so only this handler shows a toast
-    eventManager.emit('habit:template-delete', { 
-      templateId, 
-      suppressToast: true, // Suppress toast in task handler
-      isOriginatingAction: true // Mark as originating action
-    });
-    
-    // Force an update of the task list
-    setTimeout(() => {
-      console.log('HabitTracker: Forcing global update after template removal');
-      window.dispatchEvent(new Event('force-task-update'));
-      window.dispatchEvent(new Event('force-habits-update'));
-    }, 50);
+    try {
+      // Call the removeTemplate action directly
+      removeTemplate(templateId);
+      
+      // Also emit the event to ensure all components are notified
+      eventManager.emit('habit:template-delete', { 
+        templateId, 
+        isOriginatingAction: true 
+      });
+      
+      // Force an update of the task list
+      setTimeout(() => {
+        console.log('HabitTracker: Forcing global update after template removal');
+        window.dispatchEvent(new Event('force-task-update'));
+        window.dispatchEvent(new Event('force-habits-update'));
+      }, 50);
+    } catch (error) {
+      console.error('Error removing template:', error);
+    }
   };
 
   // Handler for updating habits in templates

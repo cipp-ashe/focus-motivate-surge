@@ -26,8 +26,12 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     onSelect(template);
   };
   
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent selection when clicking delete
+    e.stopPropagation();
+    
     if (onDelete) {
+      console.log('Deleting template:', template.id);
       onDelete(template.id);
     }
   };

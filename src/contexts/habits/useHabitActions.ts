@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
@@ -31,13 +32,21 @@ export const createHabitActions = (
   const removeTemplate = useCallback((templateId: string) => {
     console.log("Removing template:", templateId);
     
-    // Use the event bus to handle the deletion
-    // This is the originating action, so we set isOriginatingAction to true
+    // First update the state directly using the reducer
+    dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+    
+    // Then use the event bus to notify other components
     eventBus.emit('habit:template-delete', { 
       templateId, 
       isOriginatingAction: true 
     });
-  }, []);
+    
+    // Update local storage directly to ensure persistence
+    const templates = state.templates.filter((t: ActiveTemplate) => t.templateId !== templateId);
+    localStorage.setItem('habit-templates', JSON.stringify(templates));
+    
+    console.log("Template removed, updated templates:", templates);
+  }, [dispatch, state.templates]);
 
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
     console.log("Updating template days:", templateId, days);
