@@ -16,7 +16,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
   
   // Set up event handlers - now without parameters
-  useHabitEvents();
+  const eventHandlers = useHabitEvents();
 
   // Load initial templates
   const { data, refetch } = useQuery({

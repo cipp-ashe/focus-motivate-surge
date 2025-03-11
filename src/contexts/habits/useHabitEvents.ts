@@ -1,63 +1,63 @@
 
 import { useEffect } from 'react';
-import { useNoteActions } from '../notes/NoteContext';
-import { useHabitState } from './HabitContext';
+import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
-import { Tag } from '@/types/notes';
-import { relationshipManager } from '@/lib/relationshipManager';
-import { EntityType } from '@/types/core';
+import { useHabitState } from './HabitContext';
+import { useNotes } from '@/hooks/data/useNotes';
+import { HabitTemplate } from '@/types/habits';
 
+/**
+ * Set up event listeners for habit-related events
+ */
 export const useHabitEvents = () => {
-  const noteActions = useNoteActions();
-  const habitState = useHabitState();
-
+  const state = useHabitState();
+  const { createNote } = useNotes();
+  
+  // Listen for journal open events and create a note from habit
   useEffect(() => {
-    // Event handler for creating a note from a habit
-    const unsubscribe = eventManager.on('note:create-from-habit', ({ habitId, habitName, description, templateId, content }) => {
-      // Make sure habitId is required
-      if (!habitId) {
-        console.error('Missing habitId in note:create-from-habit event');
-        return;
-      }
-
-      // Create tags for the journal entry
-      const tags: Tag[] = [
-        { name: 'journal', color: 'default' },
-        { name: 'habit', color: 'default' }
-      ];
-
-      // Create a new note with title, content, and tags
-      const noteData = {
-        title: `Journal Entry for ${habitName}`,
-        content: content || `Journal entry for habit: ${habitName}\n${description || ''}`,
-        tags
-      };
-
-      // Create relationship between the note and habit
-      const handleCreate = (noteId: string) => {
-        relationshipManager.createRelationship(
-          habitId, 
-          EntityType.Habit, 
-          noteId, 
-          EntityType.Note, 
-          'habit-journal'
-        );
-      };
-
-      // Call the create note action - use the addNote function from NoteContext
-      if (noteActions.addNote) {
-        noteActions.addNote(noteData);
+    const handleJournalOpen = (data: {
+      habitId: string;
+      habitName: string;
+      description?: string;
+      templateId?: string;
+    }) => {
+      // Create a note for the journal
+      try {
+        console.log("Creating note from habit journal:", data);
         
-        // Get the last created note ID from the context and create the relationship
-        if (noteActions.lastCreatedNoteId) {
-          handleCreate(noteActions.lastCreatedNoteId);
+        // Get template info if available
+        let template: HabitTemplate | undefined;
+        if (data.templateId) {
+          template = state.templates.find(t => t.id === data.templateId);
         }
+        
+        // Create the note
+        const noteContent = `# ${data.habitName} Journal\n\n${data.description || ''}\n\n`;
+        
+        // Create note from habit journal
+        if (createNote) {
+          createNote({
+            title: `${data.habitName} Journal`,
+            content: noteContent,
+            tags: ['habit', 'journal'],
+            relationships: {
+              habitId: data.habitId,
+              templateId: data.templateId
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error creating note from habit:", error);
       }
-    });
-
-    // Clean up event listeners when the component unmounts
+    };
+    
+    // Register event handlers
+    const unsubscribe = eventBus.on('journal:open', handleJournalOpen);
+    
     return () => {
       unsubscribe();
     };
-  }, [noteActions, habitState]);
+  }, [state.templates, createNote]);
+  
+  return {}; // Return an empty object as we're just setting up listeners
 };
