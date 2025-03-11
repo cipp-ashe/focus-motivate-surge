@@ -3,6 +3,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { createTaskOperations } from './create';
+import { TaskType } from '@/types/tasks';
 
 /**
  * Operations related specifically to habit tasks
@@ -27,6 +28,7 @@ export const habitTaskOperations = {
     options: {
       suppressToast?: boolean;
       selectAfterCreate?: boolean;
+      taskType?: TaskType;
     } = {}
   ): string | null {
     if (!habitId || !name || !date) {
@@ -48,13 +50,16 @@ export const habitTaskOperations = {
         return existingTask.id;
       }
       
-      // Create new task with taskType specified and include createdAt
+      // Determine appropriate task type
+      const taskType = options.taskType || 'habit';
+      
+      // Create new task with proper taskType and include createdAt
       const task = createTaskOperations.createTask({
         name,
         description: `Habit task for ${date}`,
         completed: false,
         duration,
-        taskType: 'habit' as const, // Explicitly mark as habit task with const assertion
+        taskType: taskType, // Use the specified task type
         createdAt: new Date().toISOString(), // Add the createdAt property
         relationships: {
           habitId,
@@ -65,6 +70,24 @@ export const habitTaskOperations = {
         suppressToast: options.suppressToast,
         selectAfterCreate: options.selectAfterCreate
       });
+      
+      // Add a 'habit' tag to the task for easy identification
+      if (task.id) {
+        eventManager.emit('tag:link', {
+          tagId: 'habit',
+          entityId: task.id,
+          entityType: 'task'
+        });
+        
+        // Also add template name as a tag if available
+        if (templateId) {
+          eventManager.emit('tag:link', {
+            tagId: templateId,
+            entityId: task.id,
+            entityType: 'task'
+          });
+        }
+      }
       
       return task.id;
     } catch (error) {

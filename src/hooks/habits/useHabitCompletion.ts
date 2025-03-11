@@ -47,18 +47,21 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
     
     // Determine which type of task to create based on habit metrics type
     if (habit.metrics?.type === 'timer') {
-      // Create a timer task
+      // Create a timer task with proper taskType
       const taskId = habitTaskOperations.createHabitTask(
         habit.id,
         templateId,
         habit.name,
         habit.metrics.target || 1500, // Default to 25 minutes if no target
         new Date().toDateString(),
-        { selectAfterCreate: true }
+        { 
+          selectAfterCreate: true,
+          taskType: 'timer' // Explicitly set task type to match habit type
+        }
       );
       
       if (taskId) {
-        toast.success(`Added habit "${habit.name}" to tasks`);
+        toast.success(`Added habit "${habit.name}" to timer tasks`);
       }
       return;
     } 
@@ -68,18 +71,23 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       return;
     }
     else {
-      // For other habit types, create a standard habit task
+      // For other habit types, create a task with the appropriate type
+      const taskType = habit.metrics?.type === 'boolean' ? 'regular' : habit.metrics?.type || 'regular';
+      
       const taskId = habitTaskOperations.createHabitTask(
         habit.id,
         templateId,
         habit.name,
         0, // No duration for non-timer habits
         new Date().toDateString(),
-        { selectAfterCreate: true }
+        { 
+          selectAfterCreate: true,
+          taskType: taskType as any // Cast to any to avoid type issues
+        }
       );
       
       if (taskId) {
-        toast.success(`Added habit "${habit.name}" to your task list`);
+        toast.success(`Added habit "${habit.name}" to your ${taskType} tasks`);
       }
     }
   }, [createJournalFromHabit]);

@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { eventManager } from '@/lib/events/EventManager';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { toast } from 'sonner';
 
@@ -18,7 +18,8 @@ export const useHabitTaskCreator = () => {
     templateId: string,
     name: string,
     duration: number,
-    date: string
+    date: string,
+    taskType: TaskType = 'regular'
   ): string | null => {
     if (!habitId || !name) {
       console.error('Invalid habit task parameters:', { habitId, name });
@@ -43,7 +44,7 @@ export const useHabitTaskCreator = () => {
       // Generate task ID
       const taskId = uuidv4();
       
-      // Create task object
+      // Create task object with appropriate task type
       const task: Task = {
         id: taskId,
         name: name,
@@ -51,6 +52,7 @@ export const useHabitTaskCreator = () => {
         completed: false,
         duration: duration,
         createdAt: new Date().toISOString(),
+        taskType: taskType, // Use the specified task type
         relationships: {
           habitId: habitId,
           templateId: templateId,
@@ -58,13 +60,29 @@ export const useHabitTaskCreator = () => {
         }
       };
       
-      console.log(`Creating habit task: ${taskId} for habit ${habitId}`, task);
+      console.log(`Creating habit task: ${taskId} for habit ${habitId} with type ${taskType}`, task);
       
       // Save to storage FIRST to ensure persistence
       taskStorage.addTask(task);
       
       // Emit event to create task
       eventManager.emit('task:create', task);
+      
+      // Add habit tag
+      eventManager.emit('tag:link', {
+        tagId: 'habit',
+        entityId: taskId,
+        entityType: 'task'
+      });
+      
+      // Also add template name as a tag if available
+      if (templateId) {
+        eventManager.emit('tag:link', {
+          tagId: templateId,
+          entityId: taskId,
+          entityType: 'task'
+        });
+      }
       
       // Select the task immediately to make it visible on timer page
       eventManager.emit('task:select', taskId);
@@ -75,7 +93,7 @@ export const useHabitTaskCreator = () => {
       }, 100);
       
       toast.success(`Added habit task: ${name}`, {
-        description: "Task added to your list"
+        description: `Task added to your ${taskType} list`
       });
       
       return taskId;

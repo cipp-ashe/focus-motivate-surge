@@ -1,6 +1,7 @@
+
 import { useCallback, useRef, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 import { useHabitTaskCreator } from './useHabitTaskCreator';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { toast } from 'sonner';
@@ -46,6 +47,8 @@ export const useHabitTaskProcessor = () => {
     name: string;
     duration: number;
     date: string;
+    taskType?: TaskType;
+    metricType?: string;
   }) => {
     console.log(`Processing habit task schedule:`, event);
     
@@ -77,13 +80,16 @@ export const useHabitTaskProcessor = () => {
       const existingTask = taskStorage.taskExists(event.habitId, event.date);
       
       if (existingTask) {
-        console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
+        console.log(`Task already exists for habit ${event.habitId} on ${date}, skipping creation`);
         
         // Ensure task has the proper taskType
-        if (!existingTask.taskType) {
+        if (!existingTask.taskType || existingTask.taskType === 'habit') {
+          // Determine proper task type from the metric type
+          const properTaskType = determineTaskType(event.taskType, event.metricType);
+          
           const updatedTask = {
             ...existingTask,
-            taskType: 'habit' as const // Specify the literal type
+            taskType: properTaskType
           };
           
           // Save the updated task
@@ -101,13 +107,17 @@ export const useHabitTaskProcessor = () => {
           window.dispatchEvent(new Event('force-task-update'));
         }, 100);
       } else {
+        // Determine proper task type from the metric type
+        const taskType = determineTaskType(event.taskType, event.metricType);
+        
         // Create the habit task using the creator hook
         const newTaskId = createHabitTask(
           event.habitId,
           event.templateId,
           event.name,
           event.duration,
-          event.date
+          event.date,
+          taskType
         );
         
         if (newTaskId) {
@@ -141,6 +151,25 @@ export const useHabitTaskProcessor = () => {
     }
   }, [createHabitTask]);
   
+  // Helper function to determine the appropriate task type
+  const determineTaskType = (taskType?: TaskType, metricType?: string): TaskType => {
+    if (taskType && taskType !== 'habit') {
+      return taskType;
+    }
+    
+    // Determine task type based on metric type
+    if (metricType === 'timer') {
+      return 'timer';
+    } else if (metricType === 'journal') {
+      return 'journal';
+    } else if (metricType === 'boolean') {
+      return 'regular';
+    }
+    
+    // Default fallback
+    return 'regular';
+  };
+  
   // Handle habit schedule events from the event bus with prioritization
   const handleHabitSchedule = useCallback((event: {
     habitId: string;
@@ -148,6 +177,7 @@ export const useHabitTaskProcessor = () => {
     name: string;
     duration: number;
     date: string;
+    metricType?: string;
   }) => {
     // Validate the event data
     if (!event.habitId || !event.name || !event.date) {
