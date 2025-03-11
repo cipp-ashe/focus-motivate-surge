@@ -1,8 +1,9 @@
+
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect, useRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '@/types/notes';
-import { MarkdownEditor } from '@/components/ui/markdown-editor';
+import { MarkdownEditor } from '@/components/ui/markdown-editor/index';
 import { ActionButton } from '@/components/ui/action-button';
 import { eventManager } from '@/lib/events/EventManager';
 import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';

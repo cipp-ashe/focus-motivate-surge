@@ -112,3 +112,5 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     </div>
   );
 };
+
+export default MarkdownEditor;

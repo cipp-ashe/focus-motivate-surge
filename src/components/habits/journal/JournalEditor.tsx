@@ -1,6 +1,6 @@
 
 import React, { useRef } from "react";
-import { MarkdownEditor } from "@/components/ui/markdown-editor";
+import { MarkdownEditor } from "@/components/ui/markdown-editor/index";
 
 interface JournalEditorProps {
   content: string;

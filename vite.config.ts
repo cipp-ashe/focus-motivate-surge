@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     strictPort: true,
     hmr: {
-      protocol: 'wss', // Using secure WebSockets
+      protocol: 'ws', // Changed from 'wss' to 'ws' for standard WebSockets
       timeout: 30000,
       clientPort: 8080
     },
