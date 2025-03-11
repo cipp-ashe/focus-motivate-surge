@@ -20,7 +20,6 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   });
 
-  const [lastCreatedNoteId, setLastCreatedNoteId] = useState<string | null>(null);
   const noteActions = useNoteActions();
 
   useEffect(() => {
@@ -74,24 +73,18 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     // Create a new note with the voice note content
     try {
-      const title = voiceNote.text.split('\n')[0].substring(0, 50) || 'Voice Note';
-      const content = voiceNote.text;
-      
-      // Add the note - the function doesn't accept an object per the NoteActions interface
+      // Add the note - the function doesn't accept any parameters
       const newNote = noteActions.addNote();
       
       if (newNote) {
         // If note was created successfully, update it with the voice note content
-        noteActions.updateNote(newNote.id, content);
-        
-        // Store the created note ID for relationship creation
-        const createdNoteId = newNote.id;
+        noteActions.updateNote(newNote.id, voiceNote.text);
         
         // Link the voice note and regular note
         relationshipManager.createRelationship(
           voiceNoteId,
           EntityType.VoiceNote,
-          createdNoteId,
+          newNote.id,
           EntityType.Note,
           'source' as RelationType
         );
