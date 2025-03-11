@@ -42,20 +42,24 @@ export const NoteContextProvider = ({ children }: { children: React.ReactNode })
     addNote: () => {
       const newNote = notes.addNote();
       if (newNote) {
-        // Emit event for note creation (already handled in useNotes' addNote function)
-        // But we could add additional event handling here if needed
+        // Event will be emitted by the useNotes hook
+        eventManager.emit('note:create', newNote);
       }
       return newNote;
     },
     updateNote: (noteId: string, content: string) => {
       const success = notes.updateNote(noteId, content);
-      // The note:update event is already emitted in the useNotes implementation
+      if (success) {
+        const updatedNote = notes.notes.find(note => note.id === noteId);
+        if (updatedNote) {
+          eventManager.emit('note:update', updatedNote);
+        }
+      }
       return success;
     },
     deleteNote: (noteId: string) => {
       const success = notes.deleteNote(noteId);
       if (success) {
-        // Emit additional events if needed after deletion
         eventManager.emit('note:deleted', { id: noteId });
       }
       return success;
