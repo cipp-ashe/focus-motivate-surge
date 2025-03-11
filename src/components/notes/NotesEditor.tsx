@@ -1,3 +1,4 @@
+
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect, useRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -150,14 +151,25 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     console.log('Toolbar action detected:', action);
     setIsToolbarAction(true);
     
+    // Emit the format event for note formatting
+    if (selectedNote) {
+      eventManager.emit('note:format', { noteId: selectedNote.id, action });
+    }
+    
     if (toolbarActionTimeoutRef.current) {
       clearTimeout(toolbarActionTimeoutRef.current);
     }
     
+    // Use a longer timeout to prevent auto-saving during formatting operations
     toolbarActionTimeoutRef.current = setTimeout(() => {
       console.log('Resetting toolbar action flag');
       setIsToolbarAction(false);
-    }, 2000);
+      
+      // Signal that formatting is complete
+      if (selectedNote) {
+        eventManager.emit('note:format-complete', { noteId: selectedNote.id });
+      }
+    }, 3000); // Extended to 3 seconds for better safety with complex formatting
   };
 
   React.useImperativeHandle(ref, () => ({

@@ -4,6 +4,7 @@ import { NotesEditor, NotesEditorRef } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
 import { NotesProps } from '@/types/notes';
 import type { Note } from '@/hooks/useNotes';
+import { eventManager } from '@/lib/events/EventManager';
 
 export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
   const [noteContent, setNoteContent] = useState('');
@@ -31,17 +32,30 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
     }
   };
 
-  // Listen for toolbar actions from the editor
-  const handleToolbarAction = () => {
-    console.log('Toolbar action detected in Notes component');
-    setIsFormatting(true);
-    
-    // Reset formatting flag after a delay
-    setTimeout(() => {
-      console.log('Resetting formatting flag in Notes component');
-      setIsFormatting(false);
-    }, 2500); // Slightly longer than the NotesEditor timeout
-  };
+  // Listen for formatting events
+  useEffect(() => {
+    const handleFormatStart = ({ noteId }: { noteId: string }) => {
+      if (selectedNote && selectedNote.id === noteId) {
+        console.log('Format operation started for note:', noteId);
+        setIsFormatting(true);
+      }
+    };
+
+    const handleFormatComplete = ({ noteId }: { noteId: string }) => {
+      if (selectedNote && selectedNote.id === noteId) {
+        console.log('Format operation completed for note:', noteId);
+        setIsFormatting(false);
+      }
+    };
+
+    const formatStartUnsubscribe = eventManager.on('note:format', handleFormatStart);
+    const formatCompleteUnsubscribe = eventManager.on('note:format-complete', handleFormatComplete);
+
+    return () => {
+      formatStartUnsubscribe();
+      formatCompleteUnsubscribe();
+    };
+  }, [selectedNote]);
 
   return (
     <div className="h-full flex flex-col">

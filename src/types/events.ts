@@ -65,6 +65,8 @@ export interface TimerEventPayloads {
   
   // Note events
   'note:create': any;
+  'note:update': any;
+  'note:delete': any;
   'note:create-from-habit': {
     habitId: string;
     habitName: string;
@@ -84,6 +86,14 @@ export interface TimerEventPayloads {
     id: string;
     noteId?: string;
   };
+  'note:format': { 
+    noteId: string; 
+    action: string 
+  };
+  'note:format-complete': { 
+    noteId: string 
+  };
+  'note:save': any;
   
   // Tag events
   'tag:link': any;
