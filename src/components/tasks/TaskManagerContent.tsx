@@ -63,19 +63,25 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     }, 100);
   };
 
-  // Filter tasks by type
+  // Filter tasks by type for display
   const timerTasks = tasks.filter(task => task.taskType === 'timer');
   const journalTasks = tasks.filter(task => task.taskType === 'journal');
   const checklistTasks = tasks.filter(task => task.taskType === 'checklist');
   const regularTasks = tasks.filter(task => !task.taskType || task.taskType === 'regular');
+  const screenshotTasks = tasks.filter(task => task.taskType === 'screenshot');
+  const habitTasks = tasks.filter(task => task.taskType === 'habit');
+  const voicenoteTasks = tasks.filter(task => task.taskType === 'voicenote');
   const allTasks = tasks;
 
   // Collect counts for the tab list
   const taskCounts = {
     all: allTasks.length,
     timer: timerTasks.length,
+    screenshot: screenshotTasks.length,
+    habit: habitTasks.length,
     journal: journalTasks.length,
     checklist: checklistTasks.length,
+    voicenote: voicenoteTasks.length,
     regular: regularTasks.length
   };
 
@@ -106,8 +112,11 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
 
           <TaskTypeTab value="all" tasks={allTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="timer" tasks={timerTasks} selectedTaskId={selectedTaskId} />
+          <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} />
+          <TaskTypeTab value="habit" tasks={habitTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="journal" tasks={journalTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="checklist" tasks={checklistTasks} selectedTaskId={selectedTaskId} />
+          <TaskTypeTab value="voicenote" tasks={voicenoteTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} />
         </Tabs>
       </div>
