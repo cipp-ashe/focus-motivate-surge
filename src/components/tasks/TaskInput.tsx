@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Task, TaskType } from '@/types/tasks';
 import { useToast } from '@/hooks/use-toast';
@@ -7,7 +8,6 @@ import { HabitTemplateDialog } from './inputs/HabitTemplateDialog';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { TaskInputRow } from './inputs/TaskInputRow';
-import { TaskSettingsRow } from './inputs/TaskSettingsRow';
 import { useTaskCreation } from './hooks/useTaskCreation';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 
@@ -37,8 +37,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({
     isAddingMultiple,
     multipleTasksInput,
     tags,
-    date,
-    habitId,
     handleTaskNameChange,
     handleTaskTypeChange,
     handleMultipleTasksInputChange,
@@ -46,8 +44,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({
     handleRemoveTag,
     handleAddTask,
     handleAddMultipleTasks,
-    setDate,
-    setHabitId,
     toggleMultipleInput
   } = useTaskCreation({ onTaskAdd, onTasksAdd, defaultTaskType });
   
@@ -109,15 +105,6 @@ export const TaskInput: React.FC<TaskInputProps> = ({
           onCancel={() => toggleMultipleInput()}
         />
       )}
-      
-      {/* Task Settings Row */}
-      <TaskSettingsRow
-        date={date}
-        onDateSelect={setDate}
-        habitId={habitId}
-        onHabitSelect={setHabitId}
-        habitTasks={tasks.filter(task => task.taskType === 'habit')}
-      />
       
       {/* Habit Template Dialog */}
       <HabitTemplateDialog

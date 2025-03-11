@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Upload, FileText, Timer, Image, BookOpen, CheckSquare, Mic, Zap } from "lucide-react";
+import { Send, Upload, FileText, Timer, BookOpen, CheckSquare } from "lucide-react";
 import { TaskType } from '@/types/tasks';
 
 interface TaskInputRowProps {
@@ -15,24 +15,19 @@ interface TaskInputRowProps {
   onToggleMultipleInput: () => void;
 }
 
+// Only include the allowed task types
 const taskTypeIcons = {
   regular: <FileText className="h-4 w-4 text-primary" />,
   timer: <Timer className="h-4 w-4 text-purple-400" />,
-  screenshot: <Image className="h-4 w-4 text-blue-400" />,
   journal: <BookOpen className="h-4 w-4 text-amber-400" />,
-  checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />,
-  voicenote: <Mic className="h-4 w-4 text-rose-400" />,
-  habit: <Zap className="h-4 w-4 text-green-400" />
+  checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />
 };
 
 const taskTypeLabels = {
   regular: 'Regular Task',
   timer: 'Focused Timer',
-  screenshot: 'Image Task',
   journal: 'Journal Entry',
-  checklist: 'Checklist',
-  voicenote: 'Voice Note',
-  habit: 'Habit'
+  checklist: 'Checklist'
 };
 
 export const TaskInputRow: React.FC<TaskInputRowProps> = ({
@@ -55,7 +50,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
               size="icon" 
               className="absolute left-2 hover:bg-transparent"
             >
-              {taskTypeIcons[taskType]}
+              {taskTypeIcons[taskType] || taskTypeIcons.regular}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-48 p-1">
@@ -66,7 +61,6 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
                   variant={type === taskType ? 'secondary' : 'ghost'}
                   className="w-full justify-start gap-2 px-2"
                   onClick={() => onTaskTypeChange(type)}
-                  disabled={type === 'habit'}
                 >
                   {icon}
                   <span className="text-sm">{taskTypeLabels[type as TaskType]}</span>

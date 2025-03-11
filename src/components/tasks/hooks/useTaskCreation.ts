@@ -22,8 +22,6 @@ export const useTaskCreation = ({
   const [isAddingMultiple, setIsAddingMultiple] = useState(false);
   const [multipleTasksInput, setMultipleTasksInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [habitId, setHabitId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleTaskNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,11 +59,7 @@ export const useTaskCreation = ({
       taskType: taskType || 'regular',
       completed: false,
       createdAt: new Date().toISOString(),
-      tags: tags.map(tag => ({ id: uuidv4(), name: tag })),
-      relationships: {
-        habitId: habitId || undefined,
-        date: date ? date.toISOString() : undefined
-      }
+      tags: tags.map(tag => ({ id: uuidv4(), name: tag }))
     };
     
     onTaskAdd(newTask);
@@ -87,11 +81,7 @@ export const useTaskCreation = ({
       taskType: taskType || 'regular',
       completed: false,
       createdAt: new Date().toISOString(),
-      tags: tags.map(tag => ({ id: uuidv4(), name: tag })),
-      relationships: {
-        habitId: habitId || undefined,
-        date: date ? date.toISOString() : undefined
-      }
+      tags: tags.map(tag => ({ id: uuidv4(), name: tag }))
     }));
     
     onTasksAdd(newTasks);
@@ -102,7 +92,6 @@ export const useTaskCreation = ({
   const resetForm = () => {
     setTaskName('');
     setTags([]);
-    setHabitId(null);
   };
 
   const toggleMultipleInput = () => {
@@ -115,8 +104,6 @@ export const useTaskCreation = ({
     isAddingMultiple,
     multipleTasksInput,
     tags,
-    date,
-    habitId,
     handleTaskNameChange,
     handleTaskTypeChange,
     handleMultipleTasksInputChange,
@@ -124,8 +111,6 @@ export const useTaskCreation = ({
     handleRemoveTag,
     handleAddTask,
     handleAddMultipleTasks,
-    setDate,
-    setHabitId,
     toggleMultipleInput
   };
 };
