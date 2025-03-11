@@ -1,177 +1,103 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HabitDetail } from './types';
-import HabitMetric from './HabitMetric';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Timer, BookText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { eventManager } from '@/lib/events/EventManager';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { toast } from 'sonner';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Clock, ClipboardList, BookOpen, Zap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface TodaysHabitCardProps {
-  habits: HabitDetail[];
-  completedHabits: string[];
-  onHabitComplete: (habit: HabitDetail, templateId?: string) => void;
-  onAddHabitToTasks: (habit: HabitDetail) => void;
-  templateId?: string;
+  habit: HabitDetail;
+  completed: boolean;
+  onComplete: (completed: boolean) => void;
+  onAddToTasks: () => void;
+  hasTask: boolean;
 }
 
-const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
-  habits,
-  completedHabits,
-  onHabitComplete,
-  onAddHabitToTasks,
-  templateId
+export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
+  habit,
+  completed,
+  onComplete,
+  onAddToTasks,
+  hasTask
 }) => {
-  const { items: tasks } = useTaskContext();
+  // Format duration for display (converts seconds to minutes)
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m`;
+  };
   
-  if (!habits || habits.length === 0) {
-    return null;
-  }
-
-  const handleStartTimer = (habit: HabitDetail) => {
-    // Find if there's a task for this habit today
-    const today = new Date().toDateString();
-    const relatedTask = tasks.find(task => 
-      task.relationships?.habitId === habit.id && 
-      task.relationships?.date === today
-    );
-    
-    if (relatedTask) {
-      console.log(`Found existing task for habit ${habit.name}:`, relatedTask);
-      // Start the timer for this task
-      eventManager.emit('task:select', relatedTask.id);
-      
-      // Send timer start event with task duration
-      eventManager.emit('timer:start', { 
-        taskName: relatedTask.name, 
-        duration: relatedTask.duration || 1500,
-        currentTime: Date.now()
-      });
-      
-      // Expand timer view
-      eventManager.emit('timer:expand', { taskName: relatedTask.name });
-      
-      // Navigate to timer page
-      window.location.href = '/timer';
-    } else {
-      console.log(`No existing task found for habit ${habit.name}, creating new task`);
-      // Create a task for this habit and start timer
-      onAddHabitToTasks(habit);
-      
-      // Display toast feedback to user
-      toast.info(`Creating task for habit: ${habit.name}`, {
-        description: "Please wait a moment for the timer to start",
-        duration: 3000
-      });
-      
-      // Force update task list
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-        
-        // Navigate to timer page after a short delay
-        setTimeout(() => {
-          window.location.href = '/timer';
-        }, 300);
-      }, 300);
+  // Get icon based on habit type
+  const getHabitIcon = () => {
+    switch (habit.metrics.type) {
+      case 'timer':
+        return <Clock className="h-5 w-5 text-blue-500" />;
+      case 'journal':
+        return <BookOpen className="h-5 w-5 text-green-500" />;
+      default:
+        return <Zap className="h-5 w-5 text-orange-500" />;
     }
   };
 
   return (
-    <Card className="shadow-md border-border">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold text-primary">Today's Habits</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {habits.map(habit => (
-            <div 
-              key={habit.id}
-              className="flex items-center justify-between py-2 border-b last:border-none"
-            >
-              <div className="flex items-center gap-3 flex-1">
-                <Checkbox
-                  id={`habit-${habit.id}`}
-                  checked={completedHabits.includes(habit.id)}
-                  onCheckedChange={() => onHabitComplete(habit, templateId)}
-                  className="h-5 w-5 border-primary"
-                />
-                <div>
-                  <label 
-                    htmlFor={`habit-${habit.id}`} 
-                    className={`font-medium cursor-pointer ${completedHabits.includes(habit.id) ? 'line-through text-muted-foreground' : ''}`}
-                  >
-                    {habit.name}
-                  </label>
-                  {habit.description && (
-                    <p className="text-sm text-muted-foreground">{habit.description}</p>
-                  )}
-                </div>
-              </div>
+    <div className={`p-4 border rounded-lg shadow-sm transition-colors ${completed ? 'bg-muted/50' : 'bg-card'}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3">
+          <Checkbox 
+            id={`habit-${habit.id}`}
+            checked={completed}
+            onCheckedChange={onComplete}
+            className="mt-1"
+          />
+          
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <label 
+                htmlFor={`habit-${habit.id}`}
+                className={`font-medium text-base cursor-pointer ${completed ? 'line-through text-muted-foreground' : ''}`}
+              >
+                {habit.name}
+              </label>
               
-              {/* Timer habit button */}
-              {habit.metrics.type === 'timer' && (
-                <div className="flex items-center gap-2 mr-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 rounded-full"
-                    onClick={() => handleStartTimer(habit)}
-                    title="Start Timer"
-                  >
-                    <Timer className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-              
-              {/* Journal habit button */}
-              {habit.metrics.type === 'journal' && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline" 
-                    size="sm"
-                    className="h-8 px-3 rounded-md border-primary/50"
-                    onClick={() => {
-                      eventManager.emit('journal:open', { habitId: habit.id, habitName: habit.name });
-                    }}
-                  >
-                    <BookText className="h-4 w-4 mr-1" /> Write
-                  </Button>
-                </div>
-              )}
-              
-              {/* Other habit types */}
-              {habit.metrics.type !== 'boolean' && 
-               habit.metrics.type !== 'timer' && 
-               habit.metrics.type !== 'journal' && (
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col items-end">
-                    <HabitMetric
-                      habit={habit}
-                      progress={{
-                        value: completedHabits.includes(habit.id),
-                        streak: 0
-                      }}
-                      onUpdate={(value) => {
-                        if (value) {
-                          onHabitComplete(habit, templateId);
-                        } else {
-                          onHabitComplete(habit, templateId);
-                        }
-                      }}
-                      templateId={templateId}
-                    />
-                  </div>
-                </div>
-              )}
+              <Badge variant="outline" className="flex items-center gap-1.5 text-xs font-normal">
+                {getHabitIcon()}
+                {habit.metrics.type === 'timer' && habit.metrics.target && formatDuration(habit.metrics.target)}
+                {!habit.metrics.target && habit.metrics.type}
+              </Badge>
             </div>
-          ))}
+            
+            {habit.description && (
+              <p className="text-sm text-muted-foreground mb-2">{habit.description}</p>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`flex items-center gap-1.5 ${hasTask ? 'text-muted-foreground' : ''}`}
+          onClick={onAddToTasks}
+          disabled={hasTask}
+        >
+          <ClipboardList className="h-4 w-4" />
+          <span>{hasTask ? 'Added' : 'Add to Tasks'}</span>
+        </Button>
+      </div>
+      
+      {habit.tips && habit.tips.length > 0 && (
+        <div className="mt-2 pl-10">
+          <details className="text-xs text-muted-foreground">
+            <summary className="cursor-pointer hover:text-foreground transition-colors">
+              Tips & Reminders
+            </summary>
+            <ul className="pl-4 mt-1 list-disc space-y-1">
+              {habit.tips.slice(0, 2).map((tip, index) => (
+                <li key={index}>{tip}</li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      )}
+    </div>
   );
 };
-
-export default TodaysHabitCard;

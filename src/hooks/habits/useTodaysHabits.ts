@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useHabitState } from '@/contexts/habits/HabitContext';
@@ -21,6 +20,7 @@ export const useTodaysHabits = () => {
   const [lastProcessedDate, setLastProcessedDate] = useState<string>('');
   const processingRef = useRef(false);
   const processQueueRef = useRef<NodeJS.Timeout | null>(null);
+  const processedTemplatesRef = useRef<Set<string>>(new Set());
 
   // Function to process habits - defined before use
   const processHabits = useCallback(() => {
@@ -49,11 +49,21 @@ export const useTodaysHabits = () => {
       
       console.log(`useTodaysHabits - Processing habits for ${today}`);
 
+      // Keep track of processed template IDs to avoid duplicates
+      processedTemplatesRef.current.clear();
+      
       // Collect habits from active templates that are scheduled for today
       const habits: HabitDetail[] = [];
       const processedIds = new Set<string>();
       
       activeTemplates.forEach(template => {
+        // Skip if we've already processed this template
+        if (processedTemplatesRef.current.has(template.templateId)) {
+          return;
+        }
+        
+        processedTemplatesRef.current.add(template.templateId);
+        
         const isActiveToday = template.activeDays?.includes(today);
         
         if (isActiveToday && template.habits) {
@@ -77,6 +87,9 @@ export const useTodaysHabits = () => {
       setTodaysHabits(habits);
       setLastProcessedDate(currentDate);
       
+      // Emit event that habits have been processed
+      eventBus.emit('habits:processed', habits);
+      
     } finally {
       processingRef.current = false;
     }
@@ -84,7 +97,23 @@ export const useTodaysHabits = () => {
 
   useEffect(() => {
     processHabits();
-  }, [processHabits]);
+    
+    // Set up an interval to check if the date has changed
+    const checkDateInterval = setInterval(() => {
+      const currentDate = timeUtils.getCurrentDateString();
+      if (currentDate !== lastProcessedDate) {
+        console.log('Date changed, reprocessing habits');
+        processHabits();
+      }
+    }, 60000); // Check every minute
+    
+    return () => {
+      clearInterval(checkDateInterval);
+      if (processQueueRef.current) {
+        clearTimeout(processQueueRef.current);
+      }
+    };
+  }, [processHabits, lastProcessedDate]);
 
   return { 
     todaysHabits,

@@ -1,67 +1,91 @@
 
 import { useState, useCallback } from 'react';
 import { HabitDetail } from '@/components/habits/types';
-import { eventBus } from '@/lib/eventBus';
+import { ActiveTemplate } from '@/components/habits/types';
 import { useHabitRelationships } from './useHabitRelationships';
+import { habitTaskOperations } from '@/lib/operations/tasks/habit';
+import { eventBus } from '@/lib/eventBus';
 import { toast } from 'sonner';
 
-/**
- * Hook to manage habit completion state and actions
- */
-export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]) => {
-  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
+export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: ActiveTemplate[]) => {
+  const [completedHabits, setCompletedHabits] = useState<Set<string>>(new Set());
   const { createTaskFromHabit, createJournalFromHabit } = useHabitRelationships();
   
-  // Handle habit completion toggle
-  const handleHabitComplete = useCallback((habit: HabitDetail, templateId?: string) => {
+  // Handle marking a habit as complete
+  const handleHabitComplete = useCallback((habitId: string, completed: boolean) => {
     setCompletedHabits(prev => {
-      if (prev.includes(habit.id)) {
-        // Uncomplete the habit
-        return prev.filter(id => id !== habit.id);
+      const updated = new Set(prev);
+      if (completed) {
+        updated.add(habitId);
       } else {
-        // Complete the habit
-        
-        // If it's a journal habit, we need to open the journal modal
-        if (habit.metrics?.type === 'journal') {
-          // Define the event object with explicit type that includes templateId
-          const journalEvent: { habitId: string; habitName: string; templateId?: string } = {
-            habitId: habit.id, 
-            habitName: habit.name,
-            templateId // Include templateId in event
-          };
-          
-          eventBus.emit('journal:open', journalEvent);
-          // Don't mark as completed yet - will be completed when journal entry is saved
-          return prev;
-        }
-        
-        // Mark as completed
-        toast.success(`Completed habit: ${habit.name}`);
-        return [...prev, habit.id];
+        updated.delete(habitId);
       }
+      return updated;
     });
-  }, []);
+    
+    // Find the habit and its template
+    const habit = todaysHabits.find(h => h.id === habitId);
+    if (!habit) return;
+    
+    const templateId = habit.relationships?.templateId || '';
+    
+    // Emit event for habit completion
+    eventBus.emit('habit:complete', {
+      habitId,
+      completed,
+      date: new Date().toDateString(),
+      templateId
+    });
+    
+    toast.success(`Habit ${completed ? 'completed' : 'uncompleted'}: ${habit.name}`);
+  }, [todaysHabits]);
   
   // Handle adding a habit to tasks
   const handleAddHabitToTasks = useCallback((habit: HabitDetail) => {
-    const templateId = habit.relationships?.templateId;
+    // Get template ID from habit relationship
+    const templateId = habit.relationships?.templateId || '';
     
+    // Determine which type of task to create based on habit metrics type
     if (habit.metrics?.type === 'timer') {
-      const taskId = createTaskFromHabit(habit, templateId || 'custom');
+      // Create a timer task
+      const taskId = habitTaskOperations.createHabitTask(
+        habit.id,
+        templateId,
+        habit.name,
+        habit.metrics.target || 1500, // Default to 25 minutes if no target
+        new Date().toDateString(),
+        { selectAfterCreate: true }
+      );
       
       if (taskId) {
-        // Force update task list
-        setTimeout(() => {
-          window.dispatchEvent(new Event('force-task-update'));
-        }, 100);
+        toast.success(`Added habit "${habit.name}" to tasks`);
       }
-    } else if (habit.metrics?.type === 'journal') {
-      createJournalFromHabit(habit, templateId || 'custom');
+      return;
+    } 
+    else if (habit.metrics?.type === 'journal') {
+      // Handle journal type habits
+      createJournalFromHabit(habit, templateId);
+      return;
     }
-  }, [createTaskFromHabit, createJournalFromHabit]);
+    else {
+      // For other habit types, create a standard habit task
+      const taskId = habitTaskOperations.createHabitTask(
+        habit.id,
+        templateId,
+        habit.name,
+        0, // No duration for non-timer habits
+        new Date().toDateString(),
+        { selectAfterCreate: true }
+      );
+      
+      if (taskId) {
+        toast.success(`Added habit "${habit.name}" to your task list`);
+      }
+    }
+  }, [createJournalFromHabit]);
   
   return {
-    completedHabits,
+    completedHabits: [...completedHabits],
     handleHabitComplete,
     handleAddHabitToTasks
   };

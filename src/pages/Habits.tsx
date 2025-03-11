@@ -24,13 +24,15 @@ const HabitsPage = () => {
     handleAddHabitToTasks 
   } = useHabitCompletion(todaysHabits, templates);
 
-  // Find template for today's habits
-  const todaysHabitsTemplateId = templates.find(t => 
-    t.habits.some(h => todaysHabits.some(th => th.id === h.id))
-  )?.templateId;
+  // Generate a stable key for the TodaysHabitsSection based on template IDs
+  const todaysHabitsSectionKey = templates
+    .map(t => t.templateId)
+    .sort()
+    .join('-');
   
   // Only refresh habits when templates change
   useEffect(() => {
+    console.log('Templates changed, refreshing habits');
     refreshHabits();
   }, [templates, refreshHabits]);
 
@@ -56,12 +58,12 @@ const HabitsPage = () => {
           {/* Today's Habits Card */}
           {todaysHabits && todaysHabits.length > 0 && (
             <TodaysHabitsSection
-              key={`habits-${templates.length}`}
+              key={`today-habits-${todaysHabitsSectionKey}`}
               todaysHabits={todaysHabits}
               completedHabits={completedHabits}
               onHabitComplete={handleHabitComplete}
               onAddHabitToTasks={handleAddHabitToTasks}
-              templateId={todaysHabitsTemplateId}
+              templateId={todaysHabits[0]?.relationships?.templateId}
             />
           )}
 

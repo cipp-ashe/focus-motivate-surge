@@ -7,6 +7,7 @@ import ActiveTemplateList from '@/components/habits/ActiveTemplateList';
 import HabitTemplateManager from '@/components/habits/HabitTemplateManager';
 import { DayOfWeek, ActiveTemplate, HabitTemplate } from './types';
 import { eventBus } from '@/lib/eventBus';
+import { useHabitTaskIntegration } from '@/hooks/habits/useHabitTaskIntegration';
 
 /**
  * Main component for habit tracking and template management
@@ -16,6 +17,9 @@ const HabitTracker: React.FC = () => {
   const { addTemplate, removeTemplate, updateTemplateDays } = useHabitActions();
   const [templateMap, setTemplateMap] = useState<Record<string, HabitTemplate>>({});
   const [processingTemplateId, setProcessingTemplateId] = useState<string | null>(null);
+  
+  // Use the habit-task integration hook
+  const { syncHabitsWithTasks } = useHabitTaskIntegration();
   
   // Build a map of template data for quick lookup
   useEffect(() => {
@@ -60,6 +64,11 @@ const HabitTracker: React.FC = () => {
         console.log("Adding template:", activeTemplate);
         addTemplate(activeTemplate);
         
+        // Sync habits with tasks after adding template
+        setTimeout(() => {
+          syncHabitsWithTasks();
+        }, 500);
+        
         // Clear processing flag after a delay
         setTimeout(() => {
           setProcessingTemplateId(null);
@@ -70,25 +79,21 @@ const HabitTracker: React.FC = () => {
       }
     };
     
-    const handleTemplateUpdate = (data: any) => {
-      console.log("HabitTracker: Detected template update via event manager");
-      // This event is handled by the HabitContext directly, no need to duplicate logic
-    };
-
     // Subscribe to events
     const unsubAdd = eventBus.on('habit:template-add', handleTemplateAdd);
-    const unsubUpdate = eventBus.on('habit:template-update', handleTemplateUpdate);
     
     return () => {
       unsubAdd();
-      unsubUpdate();
     };
-  }, [addTemplate, templates, templateMap, processingTemplateId]);
+  }, [addTemplate, templates, templateMap, processingTemplateId, syncHabitsWithTasks]);
 
   // Handle template removal
   const handleRemoveTemplate = (templateId: string) => {
     removeTemplate(templateId);
     toast.success('Template removed');
+    
+    // Also remove all tasks from this template
+    eventBus.emit('habit:template-delete', { templateId });
   };
 
   // Track habit progress (placeholder for now)
