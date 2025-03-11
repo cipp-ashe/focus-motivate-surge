@@ -54,10 +54,12 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
   handleAddTimeAndContinue,
   handleComplete,
 }) => {
+  // When expanded, hide the main timer view completely with CSS
+  // When collapsed, hide the expanded view completely
   return (
     <div className="relative">
-      {/* Main timer view (collapsed state) */}
-      <div className={`transition-opacity duration-300 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      {/* Main timer view (collapsed state) - hidden when expanded */}
+      <div className={`transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
         <MainTimerView
           isExpanded={isExpanded}
           setIsExpanded={() => eventBus.emit('timer:expand', { taskName })}
@@ -84,7 +86,7 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
         />
       </div>
 
-      {/* Expanded timer view (fullscreen state) */}
+      {/* Expanded timer view (fullscreen state) - only rendered when expanded */}
       {isExpanded && (
         <TimerExpandedView
           ref={expandedViewRef}
