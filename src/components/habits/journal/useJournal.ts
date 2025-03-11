@@ -70,10 +70,7 @@ export const useJournal = ({
     // Check if we're updating an existing note
     if (existingNote) {
       // Update the existing note
-      noteActions.updateNote(existingNote.id, {
-        content: content.trim(),
-        updatedAt: new Date().toISOString()
-      });
+      noteActions.updateNote(existingNote.id, content);
       
       toast.success(`Updated journal entry for: ${habitName}`, {
         description: "Your journal entry has been updated"
