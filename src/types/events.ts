@@ -1,3 +1,4 @@
+
 export interface TimerEventPayloads {
   // Habit events
   'habit:schedule': {
@@ -26,6 +27,10 @@ export interface TimerEventPayloads {
   'habit:progress-update': any;
   'habit:task-deleted': any;
   'habit:select': string;
+  'habit:dismissed': {
+    habitId: string;
+    date: string;
+  };
   'habits:check-pending': any;
   'habits:processed': any;
   

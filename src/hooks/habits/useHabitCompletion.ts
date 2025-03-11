@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { HabitDetail } from '@/components/habits/types';
 import { ActiveTemplate } from '@/components/habits/types';
@@ -8,7 +7,8 @@ import { eventBus } from '@/lib/eventBus';
 import { toast } from 'sonner';
 
 export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: ActiveTemplate[]) => {
-  const [completedHabits, setCompletedHabits] = useState<Set<string>>(new Set());
+  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
+  const [dismissedHabits, setDismissedHabits] = useState<string[]>([]);
   const { createTaskFromHabit, createJournalFromHabit } = useHabitRelationships();
   
   // Handle marking a habit as complete
@@ -20,7 +20,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       } else {
         updated.delete(habitId);
       }
-      return updated;
+      return [...updated];
     });
     
     // Find the habit and its template
@@ -131,7 +131,8 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
   }, [createJournalFromHabit]);
   
   return {
-    completedHabits: [...completedHabits],
+    completedHabits,
+    dismissedHabits,
     handleHabitComplete,
     handleAddHabitToTasks
   };

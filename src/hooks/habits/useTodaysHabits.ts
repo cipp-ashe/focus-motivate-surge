@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useHabitState } from '@/contexts/habits/HabitContext';
 import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 // Time utility functions
 const timeUtils = {
@@ -143,7 +144,7 @@ export const useTodaysHabits = () => {
         console.log(`Habit task dismissed, updating habit UI for habit ${habitId}`);
         
         // Emit event to mark the habit as completed but dismissed
-        eventBus.emit('habit:dismissed', { 
+        eventManager.emit('habit:dismissed', { 
           habitId, 
           date: date || new Date().toDateString() 
         });

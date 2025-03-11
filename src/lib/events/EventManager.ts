@@ -58,6 +58,10 @@ type Events = {
     date?: string;
     templateId?: string;
   };
+  'habit:dismissed': {
+    habitId: string;
+    date: string;
+  };
   'habit:schedule': any;
   'habit:template-add': any;
   'habit:template-update': any;

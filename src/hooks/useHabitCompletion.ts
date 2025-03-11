@@ -4,6 +4,7 @@ import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
 import { HabitDetail } from '@/components/habits/types';
 import { relationshipManager } from '@/lib/relationshipManager';
 import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { EntityType } from '@/types/core';
 import { RelationType } from '@/types/state';
@@ -130,7 +131,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
     
     const unsubJournal = eventBus.on('habit:journal-deleted', handleJournalDeleted);
     const unsubComplete = eventBus.on('task:complete', handleTaskComplete);
-    const unsubDismissed = eventBus.on('habit:dismissed', handleHabitDismissed);
+    const unsubDismissed = eventManager.on('habit:dismissed', handleHabitDismissed);
     
     return () => {
       unsubJournal();

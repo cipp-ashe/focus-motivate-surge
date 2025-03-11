@@ -12,7 +12,8 @@ export type HabitEventType =
   | 'habits:processed'
   | 'habit:journal-complete'
   | 'habit:progress-update'
-  | 'habit:task-deleted';
+  | 'habit:task-deleted'
+  | 'habit:dismissed';
 
 export type NavigationEventType = 
   | 'nav:route-change'
