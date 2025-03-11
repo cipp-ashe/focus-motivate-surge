@@ -81,7 +81,12 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
 
   if (!task) return null;
 
-  const completionDate = task.completedAt ? new Date(task.completedAt) : null;
+  // Fix for the "Not completed" issue - ensure we have a completedAt date
+  // If task is in the CompletedTaskDialog, it should be marked as completed
+  const completionDate = task.completedAt 
+    ? new Date(task.completedAt) 
+    : (task.completed ? new Date() : null);
+  
   const creationDate = new Date(task.createdAt);
   const metrics = task.metrics || {};
   const pauseCount = metrics.pauseCount || 0;
@@ -113,6 +118,7 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
       case 'screenshot': return 'Screenshot Task';
       case 'journal': return 'Journal Entry';
       case 'checklist': return 'Checklist';
+      case 'voicenote': return 'Voice Note';
       default: return 'Regular Task';
     }
   };
@@ -218,6 +224,19 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
             <div className="mt-2 text-sm text-muted-foreground">
               <p className="font-medium">Captured Text:</p>
               <p className="whitespace-pre-wrap">{task.capturedText}</p>
+            </div>
+          )}
+        </div>
+      );
+    } else if (task.taskType === 'voicenote' && task.voiceNoteUrl) {
+      return (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium mb-2">Voice Note</h3>
+          <audio src={task.voiceNoteUrl} controls className="w-full" />
+          {task.voiceNoteText && (
+            <div className="mt-2 text-sm text-muted-foreground">
+              <p className="font-medium">Transcription:</p>
+              <p className="whitespace-pre-wrap">{task.voiceNoteText}</p>
             </div>
           )}
         </div>
