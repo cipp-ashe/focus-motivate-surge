@@ -35,7 +35,12 @@ export const useHabitEvents = () => {
 
       // Create relationship between the note and habit
       const handleCreate = (noteId: string) => {
-        relationshipManager.createRelationship(habitId, EntityType.Habit, noteId, EntityType.Note);
+        relationshipManager.createRelationship(
+          habitId, 
+          EntityType.Habit, 
+          noteId, 
+          EntityType.Note
+        );
       };
 
       // Call the create note action

@@ -47,7 +47,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     const end = textarea.selectionEnd;
     const selectedText = value.substring(start, end);
     
-    console.log('Selection:', { start, end, selectedText });
+    console.log('Selection:', { start, end, selectedText, fullText: value });
     
     const result = insertMarkdownText({
       type,
