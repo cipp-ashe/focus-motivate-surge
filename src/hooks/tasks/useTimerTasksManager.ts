@@ -68,7 +68,24 @@ export const useTimerTasksManager = () => {
     }
   }, [items]);
   
+  // Update a task's duration when changed in the timer
+  const updateTaskDuration = useCallback((taskId: string, duration: number) => {
+    console.log('TimerTasksManager: Updating task duration:', { taskId, duration });
+    eventBus.emit('task:update', {
+      taskId,
+      updates: { duration }
+    });
+  }, []);
+  
+  // Force a task update when needed (e.g., after timer completion)
+  const forceTaskUpdate = useCallback((taskId: string) => {
+    console.log('TimerTasksManager: Forcing task update:', taskId);
+    eventBus.emit('task:reload', { taskId });
+  }, []);
+  
   return {
-    handleTaskSelect
+    handleTaskSelect,
+    updateTaskDuration,
+    forceTaskUpdate
   };
 };

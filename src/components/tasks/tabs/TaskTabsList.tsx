@@ -21,8 +21,8 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({ taskCounts }) => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="w-full border-b border-border/20 overflow-x-auto bg-background/60">
-      <TabsList className={`${isMobile ? 'flex w-full justify-between px-1 py-1' : 'w-full justify-start'} bg-background/10`}>
+    <div className="w-full border-b border-border/20 bg-background/60">
+      <TabsList className={`${isMobile ? 'flex w-full justify-between px-1 py-1 flex-wrap' : 'w-full justify-start grid grid-cols-4 md:grid-cols-8'} bg-background/10`}>
         <TabsTrigger value="all" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''} data-[state=active]:bg-primary/10 data-[state=active]:text-primary`}>
           <FileText className="h-4 w-4" />
           {!isMobile && <span>All ({taskCounts.all})</span>}
