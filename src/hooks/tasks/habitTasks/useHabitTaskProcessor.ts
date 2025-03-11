@@ -158,34 +158,37 @@ export const useHabitTaskProcessor = () => {
     return validTypes.includes(taskType as TaskType);
   };
   
-  // Helper function to determine the appropriate task type
+  // Helper function to determine the appropriate task type from habit metric type
   const determineTaskType = (taskType?: TaskType, metricType?: string): TaskType => {
     // If a specific task type is provided and it's valid, use it
     if (taskType && isValidTaskType(taskType)) {
       return taskType;
     }
     
-    // Enhanced log for debugging metric type conversion
     console.log(`Determining task type from metric type: ${metricType}`);
     
-    // Determine task type based on metric type
-    if (metricType === 'timer') {
-      return 'timer';
-    } else if (metricType === 'journal') {
-      return 'journal';
-    } else if (metricType === 'boolean' && metricType.includes('journal')) {
-      // Special case for habits that have boolean metric type but are for journals
-      return 'journal';
-    } else if (metricType === 'checklist' || metricType === 'todo') {
-      return 'checklist';
-    } else if (metricType === 'voicenote' || metricType === 'audio') {
-      return 'voicenote';
-    } else if (metricType === 'screenshot') {
-      return 'screenshot';
+    // Aligned mapping between metric types and task types
+    switch (metricType) {
+      case 'timer':
+        return 'timer';
+      case 'journal':
+        return 'journal';
+      case 'boolean':
+      case 'counter':
+      case 'rating':
+        // Map these to regular tasks
+        return 'regular';
+      case 'checklist':
+      case 'todo':
+        return 'checklist';
+      case 'voicenote':
+      case 'audio':
+        return 'voicenote';
+      case 'screenshot':
+        return 'screenshot';
+      default:
+        return 'regular';
     }
-    
-    // Default fallback
-    return 'regular';
   };
   
   // Handle habit schedule events from the event bus with prioritization

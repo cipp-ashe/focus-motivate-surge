@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useHabitState } from '@/contexts/habits/HabitContext';
@@ -88,13 +87,8 @@ export const useTodaysHabits = () => {
               const habitDuration = 1500;
               
               // Determine the metric type from the metrics field
-              let metricType = 'regular';
-              if (habit.metrics && habit.metrics.type) {
-                metricType = habit.metrics.type;
-                console.log(`Found metric type for ${habit.name}: ${metricType}`);
-              }
+              let metricType = habit.metrics.type || 'regular';
               
-              // Immediately schedule this habit as a task
               console.log(`Scheduling habit task for ${habit.name} from template ${template.templateId} with duration ${habitDuration}, metric type ${metricType}`);
               eventBus.emit('habit:schedule', {
                 habitId: habit.id,
