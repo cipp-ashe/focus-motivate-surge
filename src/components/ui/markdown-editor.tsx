@@ -11,6 +11,7 @@ interface MarkdownEditorProps {
   onBlur?: () => void;
   className?: string;
   placeholder?: string;
+  height?: string; // Add height prop
 }
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -18,7 +19,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   onChange,
   onBlur,
   className,
-  placeholder = 'Write your notes here...'
+  placeholder = 'Write your notes here...',
+  height = '100%' // Default height
 }) => {
   const [activeTab, setActiveTab] = useState<string>('write');
 
@@ -52,7 +54,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             textareaProps={{
               placeholder,
               style: {
-                height: '100%',
+                height: height, // Use the height prop here
                 background: 'transparent',
                 borderRadius: '0',
                 padding: '1rem'
