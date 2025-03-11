@@ -1,6 +1,7 @@
 
 import { Quote } from "@/types/timer/models";
 import { Tag } from "@/types/notes";
+import { quotes } from "@/data/quotes";
 
 // Journal type templates
 export interface JournalTemplate {
@@ -10,64 +11,21 @@ export interface JournalTemplate {
   initialContent: string;
 }
 
-// Add quotes specific to different journal types
-export const journalQuotes: Record<string, Quote[]> = {
-  gratitude: [
-    { 
-      text: "Gratitude turns what we have into enough.", 
-      author: "Melody Beattie", 
-      categories: ["motivation", "growth"] 
-    },
-    { 
-      text: "Gratitude is the healthiest of all human emotions.", 
-      author: "Zig Ziglar", 
-      categories: ["motivation"] 
-    },
-    { 
-      text: "When I started counting my blessings, my whole life turned around.", 
-      author: "Willie Nelson", 
-      categories: ["growth"] 
-    },
-    { 
-      text: "Gratitude is not only the greatest of virtues, but the parent of all others.", 
-      author: "Cicero", 
-      categories: ["motivation"] 
-    },
-    { 
-      text: "The more grateful I am, the more beauty I see.", 
-      author: "Mary Davis", 
-      categories: ["creativity"] 
-    }
-  ],
-  reflection: [
-    { 
-      text: "The unexamined life is not worth living.", 
-      author: "Socrates", 
-      categories: ["learning"] 
-    },
-    { 
-      text: "Your vision will become clear only when you can look into your own heart.", 
-      author: "Carl Jung", 
-      categories: ["growth"] 
-    },
-    { 
-      text: "Life can only be understood backwards; but it must be lived forwards.", 
-      author: "Søren Kierkegaard", 
-      categories: ["learning"] 
-    }
-  ],
-  mindfulness: [
-    { 
-      text: "The present moment is the only time over which we have dominion.", 
-      author: "Thích Nhất Hạnh", 
-      categories: ["focus"] 
-    },
-    { 
-      text: "Mindfulness isn't difficult. We just need to remember to do it.", 
-      author: "Sharon Salzberg", 
-      categories: ["focus"] 
-    }
-  ]
+// Use the central quotes collection and filter by relevant categories
+export const getJournalQuotes = (journalType: string): Quote[] => {
+  const categoryMap: Record<string, string[]> = {
+    gratitude: ['gratitude'],
+    reflection: ['reflection', 'learning'],
+    mindfulness: ['mindfulness', 'focus']
+  };
+  
+  const relevantCategories = categoryMap[journalType] || ['motivation', 'growth'];
+  
+  return quotes.filter(quote => 
+    quote.categories.some(category => 
+      relevantCategories.includes(category)
+    )
+  );
 };
 
 export const journalTemplates: Record<string, JournalTemplate> = {

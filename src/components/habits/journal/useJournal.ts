@@ -5,7 +5,7 @@ import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
 import { eventBus } from "@/lib/eventBus";
 import { toast } from "sonner";
 import { findExistingJournalNote, getJournalType, getTemplateForType } from "./utils";
-import { journalQuotes, getJournalTags } from "./constants";
+import { getJournalQuotes, getJournalTags } from "./constants";
 import { Quote } from "@/types/timer/models";
 
 interface UseJournalProps {
@@ -35,7 +35,7 @@ export const useJournal = ({
   // Determine journal type
   const journalType = getJournalType(habitName, description);
   const template = getTemplateForType(journalType);
-  const quotes = journalQuotes[journalType] || journalQuotes.gratitude;
+  const relevantQuotes = getJournalQuotes(journalType);
   
   // Initialize when opening
   useEffect(() => {
@@ -57,9 +57,9 @@ export const useJournal = ({
     setExistingNote(null);
     setContent(template.initialContent);
     
-    // Select random quote
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    setRandomQuote(quotes[randomIndex]);
+    // Select random quote from our filtered quotes
+    const randomIndex = Math.floor(Math.random() * relevantQuotes.length);
+    setRandomQuote(relevantQuotes[randomIndex] || null);
     
     // Select random prompt
     const promptIndex = Math.floor(Math.random() * template.prompts.length);
