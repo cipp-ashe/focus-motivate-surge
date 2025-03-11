@@ -59,7 +59,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     // Update content with our properly formatted text
     onChange(result.newContent);
     
-    // Position cursor or select placeholder text
+    // Position cursor after formatting
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(
@@ -87,8 +87,6 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             <MDEditor
               value={value}
               onChange={onChange}
-              onBlur={onBlur}
-              preview={preview}
               hideToolbar
               textareaProps={{
                 placeholder,

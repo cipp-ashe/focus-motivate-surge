@@ -82,7 +82,7 @@ export const insertMarkdownText = (config: TextInsertionConfig): {
   // Create the new content by replacing ONLY the selected text with formatted text
   const newContent = value.substring(0, selectionStart) + newText + value.substring(selectionEnd);
   
-  // Calculate cursor positions
+  // Calculate cursor positions to place cursor at the end of the inserted text
   const newSelectionStart = selectionStart + newText.length;
   const newSelectionEnd = newSelectionStart;
   

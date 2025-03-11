@@ -13,7 +13,7 @@ interface MarkdownToolbarProps {
 
 export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({ onActionClick }) => {
   return (
-    <div className="flex items-center p-1 gap-0.5 border-b border-border/10 overflow-x-auto scrollbar-none">
+    <div className="flex items-center p-1 gap-0.5 border-b border-border/10 overflow-x-auto scrollbar-none markdown-editor-toolbar">
       <div className="flex flex-wrap items-center">
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onActionClick('bold')}>
           <Bold className="h-4 w-4" />

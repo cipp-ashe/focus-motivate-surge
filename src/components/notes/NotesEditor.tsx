@@ -1,4 +1,3 @@
-
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -52,6 +51,17 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       setInternalContent(newContent);
     }
   };
+
+  const handleBlur = useCallback(() => {
+    // Auto-save on blur only if there's content and it's different from the original
+    // AND if toolbar formatting is not being applied (we'll save later)
+    if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
+      // Only save if we're not in the middle of applying formatting
+      if (!document.activeElement?.closest('.markdown-editor-toolbar')) {
+        handleSave();
+      }
+    }
+  }, [content, selectedNote]);
 
   const handleSave = useCallback(() => {
     if (!content?.trim()) return;
@@ -140,13 +150,6 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     }
   };
 
-  const handleBlur = useCallback(() => {
-    // Auto-save on blur if there's content and it's different from the original
-    if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
-      handleSave();
-    }
-  }, [content, handleSave, selectedNote]);
-
   // Expose saveNotes method through ref
   React.useImperativeHandle(ref, () => ({
     saveNotes: handleSave
@@ -166,8 +169,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         <MarkdownEditor
           value={content}
           onChange={handleChange}
-          onBlur={handleBlur}
-          className="h-full"
+          className="h-full markdown-editor"
           preview="edit"
         />
       </div>
