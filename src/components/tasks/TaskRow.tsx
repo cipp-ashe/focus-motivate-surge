@@ -128,6 +128,17 @@ export const TaskRow = ({
       return;
     }
     
+    // Special handling for journal and checklist tasks to prevent conversion to timer
+    if ((task.taskType === 'journal' || task.taskType === 'checklist') && !isSelected) {
+      console.log(`Clicked on a ${task.taskType} task, handling specially to prevent conversion`);
+      // Don't propagate to parent task manager for special task types
+      e.stopPropagation();
+      
+      // Select the task without triggering conversion
+      eventBus.emit('task:select', task.id);
+      return;
+    }
+    
     console.log('Clicked on TaskRow body, propagating to parent');
     onTaskClick(task, e);
   };

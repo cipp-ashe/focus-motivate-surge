@@ -1,4 +1,3 @@
-
 import { Task } from "@/types/tasks";
 import { Sparkles, X, Clock, BookOpen, Image, CheckSquare, Mic, Zap } from "lucide-react";
 import { TaskTags } from "./TaskTags";
@@ -93,9 +92,8 @@ export const TaskContent = ({
         break;
         
       case 'journal':
-        // Open journal editor - FIX: Don't dispatch task:select which triggers conversion to timer task
-        console.log("Dispatching journal:open event for", task.id, task.name);
-        eventManager.emit('journal:open', { habitId: task.id, habitName: task.name });
+        // Open journal editor - Don't emit task:select event at all for journal tasks
+        console.log("Dispatching custom open-journal event for", task.id, task.name);
         
         // Create a custom event to open the journal editor directly
         const openJournalEvent = new CustomEvent('open-journal', {
