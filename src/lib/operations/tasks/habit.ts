@@ -48,13 +48,14 @@ export const habitTaskOperations = {
         return existingTask.id;
       }
       
-      // Create new task with taskType specified
+      // Create new task with taskType specified and include createdAt
       const task = createTaskOperations.createTask({
         name,
         description: `Habit task for ${date}`,
         completed: false,
         duration,
         taskType: 'habit' as const, // Explicitly mark as habit task with const assertion
+        createdAt: new Date().toISOString(), // Add the createdAt property
         relationships: {
           habitId,
           templateId,
