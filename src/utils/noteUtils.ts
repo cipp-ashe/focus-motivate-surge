@@ -28,3 +28,13 @@ export const getExcerpt = (content: string, maxLength: number = 100): string => 
   if (content.length <= maxLength) return content;
   return content.substring(0, maxLength) + '...';
 };
+
+// Function to sanitize content for safe storage
+export const sanitizeContent = (content: string): string => {
+  if (!content) return '';
+  
+  // Basic sanitization - strip potentially unsafe HTML
+  return content
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .trim();
+};
