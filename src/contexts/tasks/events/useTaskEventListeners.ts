@@ -16,7 +16,7 @@ export const useTaskEventListeners = (
     handleTaskDelete: (data: { taskId: string, reason?: string }) => void;
     handleTaskUpdate: (data: { taskId: string, updates: any }) => void;
     handleTaskSelect: (taskId: string) => void;
-    handleTemplateDelete: (data: { templateId: string }) => void;
+    handleTemplateDelete: (data: { templateId: string, isOriginatingAction?: boolean }) => void;
     handleHabitCheck: () => void;
   },
   forceTasksReload: () => void,

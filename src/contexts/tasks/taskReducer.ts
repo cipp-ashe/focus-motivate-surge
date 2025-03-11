@@ -1,3 +1,4 @@
+
 import type { TaskContextState } from './types';
 import type { Task } from '@/types/tasks';
 
@@ -121,7 +122,7 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
       const templateId = action.payload.templateId;
       console.log(`TaskContext: Deleting all tasks for template ${templateId}`);
       
-      // Filter out tasks from this template
+      // Filter out tasks from this template - both active and completed/dismissed
       const updatedItems = state.items.filter(task => 
         task.relationships?.templateId !== templateId
       );

@@ -90,12 +90,21 @@ export const useTemplateManagement = () => {
   }, []);
 
   const removeTemplate = useCallback((templateId: string) => {
+    // Remove template from active templates
     setActiveTemplates(prev => 
       prev.filter(template => template.templateId !== templateId)
     );
     
-    // Emit event for template deletion with suppressToast
-    eventBus.emit('habit:template-delete', { templateId, suppressToast: true });
+    // Emit event for template deletion - ensure it's properly propagated
+    // This will trigger cleanup of both active and dismissed/completed tasks
+    eventBus.emit('habit:template-delete', { 
+      templateId, 
+      suppressToast: true,
+      isOriginatingAction: true // Flag to indicate this is the original deletion action
+    });
+    
+    // Also explicitly trigger a task cleanup to ensure dismissed tasks are removed
+    eventBus.emit('tasks:force-update', { timestamp: new Date().toISOString() });
     
     // Single toast here
     toast.success('Template removed');

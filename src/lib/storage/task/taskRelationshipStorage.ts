@@ -47,15 +47,16 @@ export const taskRelationshipStorage = {
         task.relationships?.templateId !== templateId
       );
       
-      // Check if any tasks were removed
-      if (remainingTasks.length === tasks.length) {
-        console.log(`No tasks found for template ${templateId}`);
-        return false;
-      }
+      // Track if any changes were made
+      let changesMade = remainingTasks.length !== tasks.length;
       
-      // Save remaining tasks
-      utils.saveToStorage(constants.ACTIVE_TASKS_KEY, remainingTasks);
-      console.log(`Deleted tasks for template ${templateId}`);
+      if (changesMade) {
+        // Save remaining tasks
+        utils.saveToStorage(constants.ACTIVE_TASKS_KEY, remainingTasks);
+        console.log(`Deleted ${tasks.length - remainingTasks.length} tasks for template ${templateId}`);
+      } else {
+        console.log(`No active tasks found for template ${templateId}`);
+      }
       
       // Also remove from completed tasks
       const completedTasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
@@ -65,10 +66,11 @@ export const taskRelationshipStorage = {
       
       if (remainingCompleted.length !== completedTasks.length) {
         utils.saveToStorage(constants.COMPLETED_TASKS_KEY, remainingCompleted);
-        console.log(`Also deleted completed tasks for template ${templateId}`);
+        console.log(`Deleted ${completedTasks.length - remainingCompleted.length} completed/dismissed tasks for template ${templateId}`);
+        changesMade = true;
       }
       
-      return true;
+      return changesMade;
     } catch (error) {
       console.error('Error deleting tasks by template:', error);
       return false;
