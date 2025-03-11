@@ -1,10 +1,11 @@
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { Task, TaskType } from '@/types/tasks';
 import { useHabitTaskCreator } from './useHabitTaskCreator';
-import { taskStorage } from '@/lib/storage/taskStorage';
-import { toast } from 'sonner';
+import { useTaskTypeProcessor } from './processors/useTaskTypeProcessor';
+import { useHabitEventProcessor } from './processors/useHabitEventProcessor';
+import { useTaskCreationProcessor } from './processors/useTaskCreationProcessor';
+import { usePendingTaskProcessor } from './processors/usePendingTaskProcessor';
 import { useEvent } from '@/hooks/useEvent';
 
 /**
@@ -13,21 +14,16 @@ import { useEvent } from '@/hooks/useEvent';
  */
 export const useHabitTaskProcessor = () => {
   const { createHabitTask } = useHabitTaskCreator();
-  const processingRef = useRef<Record<string, boolean>>({});
-  const processingTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
-  const pendingTasksRef = useRef<Task[]>([]);
+  const { determineTaskType } = useTaskTypeProcessor();
+  const { processHabitScheduleEvent } = useHabitEventProcessor();
+  const { processHabitTask } = useTaskCreationProcessor(createHabitTask);
+  const { processPendingTasks } = usePendingTaskProcessor();
   
   // Set up event listeners with the new event system
   useEffect(() => {
     console.log("useHabitTaskProcessor: Setting up event listeners");
     
-    // Clean up
-    return () => {
-      // Clear any processing timeouts
-      Object.values(processingTimeoutsRef.current).forEach(timeout => {
-        clearTimeout(timeout);
-      });
-    };
+    // No cleanup needed for event listeners as they're handled by useEvent
   }, []);
   
   // Handle habit schedule events
@@ -40,170 +36,6 @@ export const useHabitTaskProcessor = () => {
     processPendingTasks();
   });
   
-  // Process a single habit task event with debouncing and improved error handling
-  const processHabitTask = useCallback((event: {
-    habitId: string;
-    templateId: string;
-    name: string;
-    duration: number;
-    date: string;
-    taskType?: TaskType;
-    metricType?: string;
-  }) => {
-    console.log(`Processing habit task schedule:`, event);
-    
-    // Generate a unique processing key for this habit-date combination
-    const processingKey = `${event.habitId}-${event.date}`;
-    
-    // If we're already processing this exact habit-date combination, debounce
-    if (processingRef.current[processingKey]) {
-      console.log(`Already processing task for habit ${event.habitId} on ${event.date}, debouncing`);
-      
-      // Clear existing timeout if any
-      if (processingTimeoutsRef.current[processingKey]) {
-        clearTimeout(processingTimeoutsRef.current[processingKey]);
-      }
-      
-      // Set new timeout to retry after a delay
-      processingTimeoutsRef.current[processingKey] = setTimeout(() => {
-        processHabitTask(event);
-      }, 300);
-      
-      return;
-    }
-    
-    // Mark as processing to prevent duplicates
-    processingRef.current[processingKey] = true;
-    
-    try {
-      // Check if task already exists using storage service
-      const existingTask = taskStorage.taskExists(event.habitId, event.date);
-      
-      if (existingTask) {
-        console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
-        
-        // Ensure task has the proper taskType based on the metric type
-        const properTaskType = determineTaskType(event.taskType, event.metricType, event.name);
-        
-        // Only update if the task type needs to be changed
-        // Check if the task type is not a valid TaskType or doesn't match the proper type
-        if (!existingTask.taskType || !isValidTaskType(existingTask.taskType) || existingTask.taskType !== properTaskType) {
-          const updatedTask = {
-            ...existingTask,
-            taskType: properTaskType
-          };
-          
-          // Save the updated task
-          taskStorage.updateTask(existingTask.id, updatedTask);
-          
-          // Add task to UI if it exists in storage but not in memory
-          eventManager.emit('task:create', updatedTask);
-        } else {
-          // Add task to UI if it exists in storage but not in memory
-          eventManager.emit('task:create', existingTask);
-        }
-        
-        // Force task update
-        setTimeout(() => {
-          window.dispatchEvent(new Event('force-task-update'));
-        }, 100);
-      } else {
-        // Determine proper task type from the metric type AND habit name
-        const taskType = determineTaskType(event.taskType, event.metricType, event.name);
-        
-        // Create the habit task using the creator hook
-        const newTaskId = createHabitTask(
-          event.habitId,
-          event.templateId,
-          event.name,
-          event.duration,
-          event.date,
-          taskType
-        );
-        
-        if (newTaskId) {
-          console.log(`Successfully created task ${newTaskId} for habit ${event.habitId} with type ${taskType}`);
-          toast.success(`Created ${taskType} task: ${event.name}`, {
-            description: "Your habit task has been scheduled."
-          });
-          
-          // Force task updates with staggered timing
-          [100, 300, 600].forEach(delay => {
-            setTimeout(() => {
-              window.dispatchEvent(new Event('force-task-update'));
-            }, delay);
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error processing habit task:', error);
-      toast.error('Failed to create habit task', {
-        description: "There was an error scheduling your habit task. Please try again."
-      });
-    } finally {
-      // Clean up processing state after a delay
-      setTimeout(() => {
-        delete processingRef.current[processingKey];
-        if (processingTimeoutsRef.current[processingKey]) {
-          clearTimeout(processingTimeoutsRef.current[processingKey]);
-          delete processingTimeoutsRef.current[processingKey];
-        }
-      }, 500);
-    }
-  }, [createHabitTask]);
-  
-  // Helper function to check if a taskType is valid according to the TaskType enum
-  const isValidTaskType = (taskType: string): taskType is TaskType => {
-    const validTypes: TaskType[] = ['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote'];
-    return validTypes.includes(taskType as TaskType);
-  };
-  
-  // Helper function to determine the appropriate task type from habit metric type
-  // Now also considers the habit name for more accurate detection
-  const determineTaskType = (taskType?: TaskType, metricType?: string, habitName?: string): TaskType => {
-    // If a specific task type is provided and it's valid, use it
-    if (taskType && isValidTaskType(taskType)) {
-      return taskType;
-    }
-    
-    console.log(`Determining task type from metric type: ${metricType} and name: ${habitName}`);
-    
-    // First check if the habit name indicates a journal task
-    if (habitName) {
-      const nameLower = habitName.toLowerCase();
-      if (nameLower.includes('journal') || 
-          nameLower.includes('gratitude') || 
-          nameLower.includes('diary') ||
-          nameLower.includes('reflect')) {
-        console.log(`Detected journal task from name: ${habitName}`);
-        return 'journal';
-      }
-    }
-    
-    // Aligned mapping between metric types and task types
-    switch (metricType) {
-      case 'timer':
-        return 'timer';
-      case 'journal':
-        return 'journal';
-      case 'boolean':
-      case 'counter':
-      case 'rating':
-        // Map these to regular tasks
-        return 'regular';
-      case 'checklist':
-      case 'todo':
-        return 'checklist';
-      case 'voicenote':
-      case 'audio':
-        return 'voicenote';
-      case 'screenshot':
-        return 'screenshot';
-      default:
-        return 'regular';
-    }
-  };
-  
   // Handle habit schedule events from the event bus with prioritization
   const handleHabitSchedule = useCallback((event: {
     habitId: string;
@@ -213,101 +45,17 @@ export const useHabitTaskProcessor = () => {
     date: string;
     metricType?: string;
   }) => {
-    // Validate the event data
-    if (!event.habitId || !event.name || !event.date) {
-      console.error('Invalid habit schedule event:', event);
+    // Process and validate the event data
+    const validatedEvent = processHabitScheduleEvent(event);
+    
+    // If validation failed, skip processing
+    if (!validatedEvent) {
       return;
     }
     
-    // Add robust logging for debugging
-    console.log(`Handling habit schedule event for ${event.name} (${event.habitId}), templateId: ${event.templateId}, metricType: ${event.metricType}`);
-    
-    // Ensure date format is correct - expect string format like "Sun Mar 09 2025"
-    if (typeof event.date !== 'string' || event.date.split(' ').length !== 4) {
-      // Try to fix the date format if it's incorrect
-      const dateObj = new Date(event.date);
-      if (!isNaN(dateObj.getTime())) {
-        event.date = dateObj.toDateString();
-        console.log(`Corrected date format to: ${event.date}`);
-      } else {
-        console.error('Invalid date format in habit schedule event:', event.date);
-        toast.error('Failed to schedule habit: invalid date format');
-        return;
-      }
-    }
-    
-    // Ensure duration is valid
-    if (!event.duration || typeof event.duration !== 'number' || event.duration <= 0) {
-      event.duration = 1500; // Default to 25 minutes
-      console.log(`Using default duration (1500 seconds) for habit ${event.habitId}`);
-    }
-    
-    // Check template ID exists
-    if (!event.templateId) {
-      console.warn(`No templateId provided for habit ${event.habitId}, using 'custom' as default`);
-      event.templateId = 'custom';
-    }
-    
-    // Pass straight to processor with data validation complete
-    processHabitTask(event);
-  }, [processHabitTask]);
-  
-  // Process any pending tasks (useful after navigation or initial load)
-  const processPendingTasks = useCallback(() => {
-    console.log('Checking for any pending habit tasks...');
-    
-    try {
-      // Use the storage service to check for habit tasks
-      const allTasks = taskStorage.loadTasks();
-      const habitTasks = allTasks.filter((task: Task) => task.relationships?.habitId);
-      
-      if (habitTasks.length > 0) {
-        console.log(`Found ${habitTasks.length} habit tasks in localStorage, ensuring they're loaded in memory`);
-        
-        // Emit task:create events for each habit task to ensure they're in memory
-        habitTasks.forEach(task => {
-          console.log(`Ensuring habit task ${task.id} is loaded in memory`);
-          
-          // Check if task has valid type, convert if needed
-          if (!task.taskType || !isValidTaskType(task.taskType)) {
-            // Convert to appropriate type based on habit metrics
-            // For now, default to regular if we can't determine
-            if (task.name && task.name.toLowerCase().includes('journal')) {
-              task.taskType = 'journal';
-            } else {
-              task.taskType = 'regular';
-            }
-            
-            // Save the updated task type
-            taskStorage.updateTask(task.id, task);
-          }
-          
-          eventManager.emit('task:create', task);
-        });
-        
-        // Force multiple task updates with staggered timing for reliability
-        [100, 300, 600].forEach(delay => {
-          setTimeout(() => {
-            window.dispatchEvent(new Event('force-task-update'));
-          }, delay);
-        });
-        
-        return true;
-      } else {
-        console.log('No habit tasks found in localStorage');
-        return false;
-      }
-    } catch (error) {
-      console.error('Error processing pending tasks:', error);
-      
-      // Recovery mechanism - force an update anyway
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-      }, 500);
-      
-      return false;
-    }
-  }, []);
+    // Pass validated event to processor
+    processHabitTask(validatedEvent);
+  }, [processHabitScheduleEvent, processHabitTask]);
   
   return { 
     processHabitTask,
