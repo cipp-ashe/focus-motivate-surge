@@ -80,7 +80,7 @@ export const useHabitTaskProcessor = () => {
       const existingTask = taskStorage.taskExists(event.habitId, event.date);
       
       if (existingTask) {
-        console.log(`Task already exists for habit ${event.habitId} on ${date}, skipping creation`);
+        console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
         
         // Ensure task has the proper taskType
         if (!existingTask.taskType || existingTask.taskType === 'habit') {
