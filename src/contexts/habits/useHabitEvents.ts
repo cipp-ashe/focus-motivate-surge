@@ -4,7 +4,8 @@ import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
 import { useHabitState } from './HabitContext';
 import { useNotes } from '@/hooks/data/useNotes';
-import { HabitTemplate } from '@/components/habits/types';
+import { ActiveTemplate, HabitTemplate } from '@/components/habits/types';
+import { EntityType } from '@/types/core';
 
 /**
  * Set up event listeners for habit-related events
@@ -26,7 +27,7 @@ export const useHabitEvents = () => {
         console.log("Creating note from habit journal:", data);
         
         // Get template info if available
-        let template: HabitTemplate | undefined;
+        let template: ActiveTemplate | undefined;
         if (data.templateId) {
           template = state.templates.find(t => t.templateId === data.templateId);
         }
@@ -42,11 +43,16 @@ export const useHabitEvents = () => {
             content: noteContent,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            tags: ['habit', 'journal'],
-            relationships: {
-              habitId: data.habitId,
-              templateId: data.templateId
-            }
+            tags: [
+              { name: 'habit', color: 'default' },
+              { name: 'journal', color: 'default' }
+            ],
+            relationships: [
+              { 
+                entityId: data.habitId,
+                entityType: EntityType.Habit
+              }
+            ]
           });
         }
       } catch (error) {
