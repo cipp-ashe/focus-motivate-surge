@@ -1,303 +1,222 @@
-import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Note, TagColor } from '@/types/notes';
+import { v4 as uuidv4 } from 'uuid';
+import { noteStorage } from '@/lib/storage/noteStorage';
 import { toast } from 'sonner';
-import type { Note, Tag } from '@/types/notes';
-import { eventBus } from '@/lib/eventBus';
-import { relationshipManager } from '@/lib/relationshipManager';
-import { EntityType } from '@/types/core';
-import { RelationType } from '@/types/state';
 
-// Add a title field to the Note interface
-interface NoteState {
-  items: Note[];
-  selected: string | null;
+// Context interfaces
+interface NoteContextState {
+  notes: Note[];
+  selectedNote: Note | null;
+  currentContent: string;
+  updateCurrentContent: (content: string) => void;
+  selectNoteForEdit: (note: Note) => void;
+  clearSelectedNote: () => void;
+  addNote: () => Note | null;
+  updateNote: (noteId: string, content: string) => boolean;
+  deleteNote: (noteId: string) => boolean;
+  addTagToNote: (noteId: string, tagName: string, color?: TagColor) => boolean;
+  removeTagFromNote: (noteId: string, tagName: string) => boolean;
 }
 
-interface NoteInput extends Omit<Partial<Note>, 'id' | 'createdAt'> {
-  title?: string; // Optional title for better UX
-  content: string;
-}
+// Create context
+const NoteContext = createContext<NoteContextState | undefined>(undefined);
 
-interface NoteContextActions {
-  addNote: (note: NoteInput) => void;
-  updateNote: (noteId: string, updates: Partial<Note>) => void;
-  deleteNote: (noteId: string) => void;
-  selectNote: (noteId: string | null) => void;
-  lastCreatedNoteId?: string;
-}
+// Provider component
+export const NoteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // State
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [currentContent, setCurrentContent] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
 
-const NoteContext = createContext<NoteState | undefined>(undefined);
-const NoteActionsContext = createContext<NoteContextActions | undefined>(undefined);
-
-const initialState: NoteState = {
-  items: [],
-  selected: null,
-};
-
-export const NoteProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer((state: NoteState, action: any) => {
-    switch (action.type) {
-      case 'LOAD_NOTES':
-        return {
-          ...state,
-          items: action.payload,
-        };
-      case 'ADD_NOTE':
-        return {
-          ...state,
-          items: [...state.items, action.payload],
-          selected: action.payload.id,
-        };
-      case 'UPDATE_NOTE':
-        return {
-          ...state,
-          items: state.items.map(note =>
-            note.id === action.payload.noteId
-              ? { ...note, ...action.payload.updates }
-              : note
-          ),
-        };
-      case 'DELETE_NOTE':
-        return {
-          ...state,
-          items: state.items.filter(note => note.id !== action.payload),
-          selected: state.selected === action.payload ? null : state.selected,
-        };
-      case 'SELECT_NOTE':
-        return {
-          ...state,
-          selected: action.payload,
-        };
-      default:
-        return state;
-    }
-  }, initialState);
-
-  const lastCreatedNoteIdRef = useRef<string | undefined>(undefined);
-
-  // Load initial data
-  useQuery({
-    queryKey: ['notes'],
-    queryFn: async () => {
-      try {
-        const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-        dispatch({ type: 'LOAD_NOTES', payload: notes });
-        return notes;
-      } catch (error) {
-        console.error('Error loading notes:', error);
-        toast.error('Failed to load notes');
-        return [];
-      }
-    }
-  });
-
-  // Event bus subscriptions
+  // Load notes from storage
   useEffect(() => {
-    const unsubscribers = [
-      eventBus.on('note:create', (note) => {
-        dispatch({ type: 'ADD_NOTE', payload: note });
-      }),
-      
-      eventBus.on('note:create-from-habit', (habitData) => {
-        console.log('Creating note from habit:', habitData);
-        
-        // Create tags for the journal entry - just journal and the journal type
-        const tags: Tag[] = [
-          { name: 'journal', color: 'default' },
-          { name: getJournalType(habitData.habitName, habitData.description), color: 'default' }
-        ];
-        
-        const newNote: Note = {
-          id: crypto.randomUUID(),
-          title: habitData.habitName || 'Journal Entry',
-          content: habitData.content || `## ${habitData.habitName}\n\n${habitData.description}\n\n`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tags
-        };
-        
-        // Save to state via dispatch
-        dispatch({ type: 'ADD_NOTE', payload: newNote });
-        lastCreatedNoteIdRef.current = newNote.id;
-        
-        // Also save to localStorage
-        const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
-        localStorage.setItem('notes', JSON.stringify([newNote, ...existingNotes]));
+    console.log('NoteContext: Loading notes from storage');
+    const loadedNotes = noteStorage.loadNotes();
+    console.log(`NoteContext: Loaded ${loadedNotes.length} notes`);
+    setNotes(loadedNotes);
+    setIsInitialized(true);
 
-        // Create a relationship between the habit and the note for bidirectional tracking
-        if (habitData.habitId) {
-          relationshipManager.createRelationship(
-            habitData.habitId, 
-            EntityType.Habit, 
-            newNote.id, 
-            EntityType.Note, 
-            'habit-journal'
-          );
-          console.log(`Created relationship between habit ${habitData.habitId} and note ${newNote.id}`);
+    // Listen for storage changes from other components
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'notes') {
+        try {
+          const updatedNotes = e.newValue ? JSON.parse(e.newValue) : [];
+          setNotes(updatedNotes);
+        } catch (error) {
+          console.error('Error parsing notes from storage event:', error);
         }
-      }),
+      }
+    };
 
-      eventBus.on('note:create-from-voice', (voiceNoteData) => {
-        console.log('Creating note from voice note:', voiceNoteData);
-        
-        // Create tags for the voice note entry
-        const tags: Tag[] = [
-          { name: 'voice-note', color: 'blue' }
-        ];
-        
-        const newNote: Note = {
-          id: crypto.randomUUID(),
-          title: voiceNoteData.title || 'Voice Note',
-          content: voiceNoteData.content || '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tags
-        };
-        
-        // Save to state via dispatch
-        dispatch({ type: 'ADD_NOTE', payload: newNote });
-        lastCreatedNoteIdRef.current = newNote.id;
-        
-        // Also save to localStorage
-        const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
-        localStorage.setItem('notes', JSON.stringify([newNote, ...existingNotes]));
+    // Listen for custom events
+    const handleNotesUpdated = () => {
+      try {
+        console.log('NoteContext: Notes updated event received');
+        const loadedNotes = noteStorage.loadNotes();
+        console.log(`NoteContext: Reloaded ${loadedNotes.length} notes after update`);
+        setNotes(loadedNotes);
+      } catch (error) {
+        console.error('Error parsing notes from custom event:', error);
+      }
+    };
 
-        // Create a relationship if we have a voice note ID
-        if (voiceNoteData.voiceNoteId) {
-          relationshipManager.createRelationship(
-            voiceNoteData.voiceNoteId, 
-            EntityType.VoiceNote, 
-            newNote.id, 
-            EntityType.Note, 
-            'voice-note-transcription' as RelationType
-          );
-          console.log(`Created relationship between voice note ${voiceNoteData.voiceNoteId} and note ${newNote.id}`);
-        }
-      }),
-      
-      eventBus.on('note:deleted', ({ id }) => {
-        // Fix the property name to match what's expected
-        console.log('Note deleted event received', id);
-        // Forward with correct property name if needed
-      }),
-    ];
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('notesUpdated', handleNotesUpdated);
 
-    return () => unsubscribers.forEach(unsub => unsub());
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('notesUpdated', handleNotesUpdated);
+    };
   }, []);
 
-  // Helper function to determine journal type
-  const getJournalType = (habitName: string, description: string = ""): string => {
-    const lowerName = habitName.toLowerCase();
-    const lowerDesc = description.toLowerCase();
-    
-    if (lowerName.includes("gratitude") || lowerDesc.includes("gratitude")) {
-      return "gratitude";
-    } else if (lowerName.includes("reflect") || lowerDesc.includes("reflect")) {
-      return "reflection";
-    } else if (lowerName.includes("mindful") || lowerDesc.includes("mindful") || 
-               lowerName.includes("meditat") || lowerDesc.includes("meditat")) {
-      return "mindfulness";
-    }
-    
-    // Default to gratitude if no match
-    return "gratitude";
+  // Update current content
+  const updateCurrentContent = (content: string) => {
+    setCurrentContent(content);
   };
 
-  const actions: NoteContextActions = {
-    addNote: (noteInput) => {
-      // Handle the title field - add it to content if provided
-      let content = noteInput.content;
-      const title = noteInput.title || "New Note";
-      
-      // Create the new note
+  // Select note for editing
+  const selectNoteForEdit = (note: Note) => {
+    setSelectedNote(note);
+    setCurrentContent(note.content);
+  };
+
+  // Clear selected note
+  const clearSelectedNote = () => {
+    setSelectedNote(null);
+    setCurrentContent('');
+  };
+
+  // Add a new note
+  const addNote = (): Note | null => {
+    if (!currentContent.trim()) {
+      toast.error('Cannot save empty note');
+      return null;
+    }
+
+    try {
       const newNote: Note = {
-        id: crypto.randomUUID(),
-        title,
-        content,
-        tags: noteInput.tags || [],
+        id: uuidv4(),
+        content: currentContent,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        color: noteInput.color,
-        archived: noteInput.archived || false,
-        pinned: noteInput.pinned || false,
-        relationships: noteInput.relationships || []
+        tags: []
       };
+
+      const updatedNotes = [newNote, ...notes];
+      setNotes(updatedNotes);
+      noteStorage.saveNotes(updatedNotes);
+      setCurrentContent('');
       
-      // Save to state
-      dispatch({ type: 'ADD_NOTE', payload: newNote });
-      lastCreatedNoteIdRef.current = newNote.id;
-      
-      // Also save to localStorage
-      const existingNotes = JSON.parse(localStorage.getItem('notes') || '[]');
-      localStorage.setItem('notes', JSON.stringify([newNote, ...existingNotes]));
-      
-      toast.success('Note added ✨');
-    },
-    
-    updateNote: (noteId, updates) => {
-      // Make sure updatedAt is set
-      const updatedNote = {
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
-      
-      dispatch({ type: 'UPDATE_NOTE', payload: { noteId, updates: updatedNote } });
-      
-      // Update in localStorage too
-      const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-      const updatedNotes = notes.map((note: Note) => 
-        note.id === noteId ? { ...note, ...updatedNote } : note
-      );
-      localStorage.setItem('notes', JSON.stringify(updatedNotes));
-    },
-    
-    deleteNote: (noteId) => {
-      dispatch({ type: 'DELETE_NOTE', payload: noteId });
-      
-      // Before deleting, check if this note is related to any habits
-      const relatedHabits = relationshipManager.getRelatedEntities(noteId, EntityType.Note, EntityType.Habit);
-      
-      // Delete from localStorage too
-      const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-      const filteredNotes = notes.filter((note: Note) => note.id !== noteId);
-      localStorage.setItem('notes', JSON.stringify(filteredNotes));
-      
-      // Emit note:deleted event to notify other systems - FIX: Use 'id' instead of 'noteId'
-      eventBus.emit('note:deleted', { id: noteId });
-      
-      toast.success('Note deleted 🗑️');
-    },
-    
-    selectNote: (noteId) => {
-      dispatch({ type: 'SELECT_NOTE', payload: noteId });
-    },
-    
-    get lastCreatedNoteId() {
-      return lastCreatedNoteIdRef.current;
+      toast.success('Note created ✨');
+      return newNote;
+    } catch (error) {
+      console.error('Error adding note:', error);
+      toast.error('Failed to create note');
+      return null;
     }
+  };
+
+  // Update an existing note
+  const updateNote = (noteId: string, content: string): boolean => {
+    try {
+      const updatedNotes = notes.map(note => 
+        note.id === noteId 
+          ? { ...note, content, updatedAt: new Date().toISOString() } 
+          : note
+      );
+      
+      setNotes(updatedNotes);
+      noteStorage.saveNotes(updatedNotes);
+      
+      if (selectedNote?.id === noteId) {
+        clearSelectedNote();
+      }
+      
+      toast.success('Note updated ✨');
+      return true;
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast.error('Failed to update note');
+      return false;
+    }
+  };
+
+  // Delete a note
+  const deleteNote = (noteId: string): boolean => {
+    try {
+      const success = noteStorage.deleteNote(noteId);
+      
+      if (success) {
+        const updatedNotes = notes.filter(note => note.id !== noteId);
+        setNotes(updatedNotes);
+        
+        if (selectedNote?.id === noteId) {
+          clearSelectedNote();
+        }
+        
+        toast.success('Note deleted 🗑️');
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast.error('Failed to delete note');
+      return false;
+    }
+  };
+
+  // Add tag to note
+  const addTagToNote = (noteId: string, tagName: string, color: TagColor = 'default'): boolean => {
+    try {
+      return noteStorage.addTagToNote(noteId, tagName, color);
+    } catch (error) {
+      console.error('Error adding tag to note:', error);
+      toast.error('Failed to add tag');
+      return false;
+    }
+  };
+
+  // Remove tag from note
+  const removeTagFromNote = (noteId: string, tagName: string): boolean => {
+    try {
+      return noteStorage.removeTagFromNote(noteId, tagName);
+    } catch (error) {
+      console.error('Error removing tag from note:', error);
+      toast.error('Failed to remove tag');
+      return false;
+    }
+  };
+
+  // Create context value
+  const contextValue: NoteContextState = {
+    notes,
+    selectedNote,
+    currentContent,
+    updateCurrentContent,
+    selectNoteForEdit,
+    clearSelectedNote,
+    addNote,
+    updateNote,
+    deleteNote,
+    addTagToNote,
+    removeTagFromNote
   };
 
   return (
-    <NoteContext.Provider value={state}>
-      <NoteActionsContext.Provider value={actions}>
-        {children}
-      </NoteActionsContext.Provider>
+    <NoteContext.Provider value={contextValue}>
+      {children}
     </NoteContext.Provider>
   );
 };
 
-export const useNoteState = () => {
+// Custom hook to use the context
+export const useNoteContext = () => {
   const context = useContext(NoteContext);
   if (context === undefined) {
-    throw new Error('useNoteState must be used within a NoteProvider');
-  }
-  return context;
-};
-
-export const useNoteActions = () => {
-  const context = useContext(NoteActionsContext);
-  if (context === undefined) {
-    throw new Error('useNoteActions must be used within a NoteProvider');
+    throw new Error('useNoteContext must be used within a NoteProvider');
   }
   return context;
 };

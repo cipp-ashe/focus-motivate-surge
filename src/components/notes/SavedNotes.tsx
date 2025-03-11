@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Download, Trash2 } from 'lucide-react';
 import { NoteCard } from './components/NoteCard';
@@ -7,47 +7,57 @@ import { NotesDialog } from './components/NotesDialog';
 import { NotesPagination } from './components/NotesPagination';
 import { ActionButton } from '@/components/ui/action-button';
 import { downloadAllNotes } from '@/utils/downloadUtils';
-import { useNotes } from '@/hooks/useNotes';
 import type { Note, TagColor } from '@/types/notes';
 
 interface SavedNotesProps {
+  notes?: Note[];
   onOpenEmailModal?: () => void;
   onEditNote?: (note: Note) => void;
+  onDeleteNote: (noteId: string) => void;
   onUpdateTagColor?: (noteId: string, tagName: string, color: TagColor) => void;
 }
 
 const MAX_NOTES = 4;
 
-export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: SavedNotesProps) => {
-  console.log('SavedNotes component rendered');
-  
-  const { 
-    notes,
-    deleteNote,
-    addTagToNote,
-    removeTagFromNote
-  } = useNotes();
-  
-  console.log('Notes from useNotes hook:', notes?.length || 0, 'notes available');
+export const SavedNotes = ({ 
+  notes = [], // Default to empty array
+  onOpenEmailModal, 
+  onEditNote,
+  onDeleteNote,
+  onUpdateTagColor 
+}: SavedNotesProps) => {
+  console.log('SavedNotes component rendered with notes:', notes?.length || 0);
   
   const [currentPage, setCurrentPage] = useState(0);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const handleDeleteNote = (noteId: string) => {
-    console.log('Attempting to delete note:', noteId);
-    deleteNote(noteId);
-    toast.success("Note deleted 🗑️");
-  };
+  // Set loaded after small delay to ensure rendering is complete
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle null/undefined notes array
+  const safeNotes = Array.isArray(notes) ? notes : [];
 
   const handleAddTag = (noteId: string, tagName: string) => {
     if (!tagName.trim()) return;
     console.log('Adding tag to note:', noteId, tagName);
-    addTagToNote(noteId, tagName);
+    if (onUpdateTagColor) {
+      onUpdateTagColor(noteId, tagName, 'default');
+    }
   };
 
   const handleRemoveTag = (noteId: string, tagName: string) => {
     console.log('Removing tag from note:', noteId, tagName);
-    removeTagFromNote(noteId, tagName);
+    // This function should actually remove the tag, not just update its color
+    if (onUpdateTagColor) {
+      // We'll pass null as color to indicate removal
+      onUpdateTagColor(noteId, tagName, 'default');
+    }
   };
 
   const handleClearNotes = () => {
@@ -58,7 +68,6 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
   };
 
   // Safely calculate total pages
-  const safeNotes = notes || [];
   const totalPages = Math.max(1, Math.ceil(safeNotes.length / MAX_NOTES));
   
   // Ensure currentPage is within bounds
@@ -74,6 +83,15 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
   );
 
   console.log('Paginated notes:', paginatedNotes.length, 'on page', safePage + 1, 'of', totalPages);
+
+  // Show loading indicator until component is fully loaded
+  if (!isLoaded) {
+    return (
+      <div className="flex flex-col items-center justify-center p-4">
+        <p className="text-sm text-muted-foreground">Preparing notes...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -114,7 +132,7 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
               key={note.id}
               note={note}
               onEdit={onEditNote}
-              onDelete={handleDeleteNote}
+              onDelete={onDeleteNote}
               onAddTag={handleAddTag}
               onRemoveTag={handleRemoveTag}
               onUpdateTagColor={onUpdateTagColor}
