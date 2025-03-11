@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Clock, HomeIcon, ListTodo, Notebook, ActivitySquare } from 'lucide-react';
+import { Clock, HomeIcon, ListTodo, Notebook, ActivitySquare, Image, Mic } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 export const Header = () => {
@@ -22,7 +22,7 @@ export const Header = () => {
           </Link>
         </div>
         
-        <nav className={`flex ${isMobile ? 'space-x-6' : 'space-x-6'}`}>
+        <nav className={`flex ${isMobile ? 'space-x-4' : 'space-x-6'}`}>
           <Link to="/" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/')}`} aria-label="Home">
             <HomeIcon className="h-5 w-5" />
             {!isMobile && <span>Home</span>}
@@ -42,6 +42,14 @@ export const Header = () => {
           <Link to="/habits" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/habits')}`} aria-label="Habits">
             <ActivitySquare className="h-5 w-5" />
             {!isMobile && <span>Habits</span>}
+          </Link>
+          <Link to="/screenshots" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/screenshots')}`} aria-label="Screenshots">
+            <Image className="h-5 w-5" />
+            {!isMobile && <span>Screenshots</span>}
+          </Link>
+          <Link to="/voice-notes" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/voice-notes')}`} aria-label="Voice Notes">
+            <Mic className="h-5 w-5" />
+            {!isMobile && <span>Voice</span>}
           </Link>
         </nav>
       </div>
