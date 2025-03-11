@@ -10,6 +10,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 interface TodaysHabitsSectionProps {
   todaysHabits: HabitDetail[];
   completedHabits: string[];
+  dismissedHabits?: string[];
   onHabitComplete: (habitId: string, completed: boolean) => void;
   onAddHabitToTasks: (habit: HabitDetail) => void;
   templateId?: string;
@@ -18,6 +19,7 @@ interface TodaysHabitsSectionProps {
 export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
   todaysHabits,
   completedHabits,
+  dismissedHabits = [],
   onHabitComplete,
   onAddHabitToTasks,
   templateId
@@ -107,6 +109,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
                 key={habit.id}
                 habit={habit}
                 completed={completedHabits.includes(habit.id)}
+                dismissed={dismissedHabits.includes(habit.id)}
                 onComplete={(completed) => onHabitComplete(habit.id, completed)}
                 onAddToTasks={() => handleAddToTasks(habit)}
                 hasTask={habitTaskStatus[habit.id] || false}
@@ -120,6 +123,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
                 key={habit.id}
                 habit={habit}
                 completed={completedHabits.includes(habit.id)}
+                dismissed={dismissedHabits.includes(habit.id)}
                 onComplete={(completed) => onHabitComplete(habit.id, completed)}
                 onAddToTasks={() => handleAddToTasks(habit)}
                 hasTask={habitTaskStatus[habit.id] || false}
@@ -133,6 +137,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
                 key={habit.id}
                 habit={habit}
                 completed={completedHabits.includes(habit.id)}
+                dismissed={dismissedHabits.includes(habit.id)}
                 onComplete={(completed) => onHabitComplete(habit.id, completed)}
                 onAddToTasks={() => handleAddToTasks(habit)}
                 hasTask={habitTaskStatus[habit.id] || false}

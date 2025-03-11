@@ -107,7 +107,12 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
       const completedTask = {
         ...task,
         completed: true,
-        metrics: action.payload.metrics,
+        completedAt: new Date().toISOString(),
+        metrics: {
+          ...task.metrics,
+          ...action.payload.metrics,
+          completionDate: new Date().toISOString()
+        },
       };
 
       return {

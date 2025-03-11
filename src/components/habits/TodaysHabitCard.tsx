@@ -3,12 +3,13 @@ import React from 'react';
 import { HabitDetail } from './types';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Clock, ClipboardList, BookOpen, Zap } from "lucide-react";
+import { Clock, ClipboardList, BookOpen, Zap, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface TodaysHabitCardProps {
   habit: HabitDetail;
   completed: boolean;
+  dismissed?: boolean;
   onComplete: (completed: boolean) => void;
   onAddToTasks: () => void;
   hasTask: boolean;
@@ -17,6 +18,7 @@ interface TodaysHabitCardProps {
 export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
   habit,
   completed,
+  dismissed = false,
   onComplete,
   onAddToTasks,
   hasTask
@@ -59,11 +61,20 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
                 {habit.name}
               </label>
               
-              <Badge variant="outline" className="flex items-center gap-1.5 text-xs font-normal">
-                {getHabitIcon()}
-                {habit.metrics.type === 'timer' && habit.metrics.target && formatDuration(habit.metrics.target)}
-                {!habit.metrics.target && habit.metrics.type}
-              </Badge>
+              <div className="flex gap-1.5">
+                <Badge variant="outline" className="flex items-center gap-1.5 text-xs font-normal">
+                  {getHabitIcon()}
+                  {habit.metrics.type === 'timer' && habit.metrics.target && formatDuration(habit.metrics.target)}
+                  {!habit.metrics.target && habit.metrics.type}
+                </Badge>
+                
+                {dismissed && (
+                  <Badge variant="outline" className="flex items-center gap-1.5 text-xs font-normal bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200/30">
+                    <XCircle className="h-3 w-3" />
+                    Dismissed
+                  </Badge>
+                )}
+              </div>
             </div>
             
             {habit.description && (
@@ -77,7 +88,7 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
           size="sm"
           className={`flex items-center gap-1.5 ${hasTask ? 'text-muted-foreground' : ''}`}
           onClick={onAddToTasks}
-          disabled={hasTask}
+          disabled={hasTask || dismissed}
         >
           <ClipboardList className="h-4 w-4" />
           <span>{hasTask ? 'Added' : 'Add to Tasks'}</span>

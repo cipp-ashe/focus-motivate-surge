@@ -44,6 +44,15 @@ export const deleteTaskOperations = {
           date: task.relationships.date
         });
         
+        // Also dispatch a custom event that can be captured by the habits system
+        window.dispatchEvent(new CustomEvent('habit-task-dismissed', { 
+          detail: { 
+            habitId: task.relationships.habitId, 
+            taskId,
+            date: task.relationships.date 
+          }
+        }));
+        
         // Show toast for dismissal
         if (!options.suppressToast) {
           toast.success(`Dismissed task: ${task.name}`);

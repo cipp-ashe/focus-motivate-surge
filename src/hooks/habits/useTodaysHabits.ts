@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useHabitState } from '@/contexts/habits/HabitContext';
@@ -134,11 +135,29 @@ export const useTodaysHabits = () => {
       }
     }, 60000); // Check every minute
     
+    // Listen for task dismissal events to update habit status
+    const handleTaskDismissed = (event: CustomEvent) => {
+      const { habitId, date } = event.detail;
+      
+      if (habitId) {
+        console.log(`Habit task dismissed, updating habit UI for habit ${habitId}`);
+        
+        // Emit event to mark the habit as completed but dismissed
+        eventBus.emit('habit:dismissed', { 
+          habitId, 
+          date: date || new Date().toDateString() 
+        });
+      }
+    };
+    
+    window.addEventListener('habit-task-dismissed', handleTaskDismissed as EventListener);
+    
     return () => {
       clearInterval(checkDateInterval);
       if (processQueueRef.current) {
         clearTimeout(processQueueRef.current);
       }
+      window.removeEventListener('habit-task-dismissed', handleTaskDismissed as EventListener);
     };
   }, [processHabits, lastProcessedDate]);
 

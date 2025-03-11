@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
 import { HabitDetail } from '@/components/habits/types';
@@ -9,6 +10,7 @@ import { RelationType } from '@/types/state';
 
 export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]) => {
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);
+  const [dismissedHabits, setDismissedHabits] = useState<string[]>([]);
   const { updateProgress, getTodayProgress } = useHabitProgress();
 
   // Load completed habits from localStorage and relationships when habits change
@@ -17,6 +19,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
     
     // Find habits that are already completed today based on relationships OR progress
     const completed: string[] = [];
+    const dismissed: string[] = [];
     
     templates.forEach(template => {
       const templateId = template.templateId;
@@ -36,6 +39,12 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
           // If no journal entry, check the stored progress
           const progress = getTodayProgress(habit.id, templateId);
           if (progress.completed) {
+            // Check local storage for dismissed status
+            const isDismissed = localStorage.getItem(`dismissed-habit-${habit.id}-${new Date().toDateString()}`);
+            
+            if (isDismissed) {
+              dismissed.push(habit.id);
+            }
             completed.push(habit.id);
           }
         }
@@ -46,12 +55,18 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
       console.log("Found completed habits:", completed);
       setCompletedHabits(completed);
     }
+    
+    if (dismissed.length > 0) {
+      console.log("Found dismissed habits:", dismissed);
+      setDismissedHabits(dismissed);
+    }
   }, [todaysHabits, templates, getTodayProgress, updateProgress]);
 
   // Listen for events that could change completion status
   useEffect(() => {
     const handleJournalDeleted = ({ habitId }: { habitId: string }) => {
       setCompletedHabits(prev => prev.filter(id => id !== habitId));
+      setDismissedHabits(prev => prev.filter(id => id !== habitId));
     };
     
     const handleTaskComplete = ({ taskId }: { taskId: string }) => {
@@ -84,49 +99,93 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
       }
     };
     
+    // Listen for habit dismissed events
+    const handleHabitDismissed = (data: { habitId: string, date: string }) => {
+      const { habitId, date } = data;
+      
+      // Find the template for this habit
+      const template = templates.find(t => 
+        t.habits.some(h => h.id === habitId)
+      );
+      
+      if (!template) return;
+      
+      // Mark as completed in the progress tracker
+      updateProgress(habitId, template.templateId, true);
+      
+      // Store dismissal status in localStorage
+      localStorage.setItem(`dismissed-habit-${habitId}-${date}`, 'true');
+      
+      // Update state for UI
+      setCompletedHabits(prev => 
+        prev.includes(habitId) ? prev : [...prev, habitId]
+      );
+      
+      setDismissedHabits(prev => 
+        prev.includes(habitId) ? prev : [...prev, habitId]
+      );
+      
+      console.log(`Marked habit ${habitId} as dismissed for ${date}`);
+    };
+    
     const unsubJournal = eventBus.on('habit:journal-deleted', handleJournalDeleted);
     const unsubComplete = eventBus.on('task:complete', handleTaskComplete);
+    const unsubDismissed = eventBus.on('habit:dismissed', handleHabitDismissed);
     
     return () => {
       unsubJournal();
       unsubComplete();
+      unsubDismissed();
     };
   }, [templates, updateProgress]);
 
-  const handleHabitComplete = (habit: HabitDetail, templateId?: string) => {
-    // If no templateId provided, find the template that contains this habit
-    const actualTemplateId = templateId || templates.find(t => 
-      t.habits.some(h => h.id === habit.id)
-    )?.templateId;
+  const handleHabitComplete = (habitId: string, completed: boolean) => {
+    // Find the habit object
+    const habit = todaysHabits.find(h => h.id === habitId);
+    if (!habit) return;
     
-    if (!actualTemplateId) {
-      console.error("Could not find template for habit:", habit);
+    // Find the template for this habit
+    const template = templates.find(t => 
+      t.habits.some(h => h.id === habitId)
+    );
+    
+    if (!template) {
+      console.error("Could not find template for habit:", habitId);
       toast.error("Error marking habit as complete");
       return;
     }
 
+    // Check if this habit is dismissed
+    const isDismissed = dismissedHabits.includes(habitId);
+
+    // If trying to mark a dismissed habit as incomplete, we need to clear the dismissal first
+    if (isDismissed && !completed) {
+      setDismissedHabits(prev => prev.filter(id => id !== habitId));
+      localStorage.removeItem(`dismissed-habit-${habitId}-${new Date().toDateString()}`);
+    }
+
     // Check if there's an existing journal entry
-    const relatedNotes = relationshipManager.getRelatedEntities(habit.id, EntityType.Habit, EntityType.Note);
+    const relatedNotes = relationshipManager.getRelatedEntities(habitId, EntityType.Habit, EntityType.Note);
     const hasJournalEntry = relatedNotes.length > 0;
 
     // Track locally for UI updates
     setCompletedHabits(prev => {
-      if (prev.includes(habit.id)) {
+      if (prev.includes(habitId)) {
         // If already completed and it's not a journal habit, mark as incomplete
         if (!hasJournalEntry && habit.metrics.type !== 'journal') {
-          updateProgress(habit.id, actualTemplateId, false);
-          return prev.filter(id => id !== habit.id);
+          updateProgress(habitId, template.templateId, false);
+          return prev.filter(id => id !== habitId);
         } 
         // If it's a journal habit or has a journal entry, don't allow unchecking directly
         return prev;
       } else {
         // If not completed, mark as complete
-        updateProgress(habit.id, actualTemplateId, true);
-        return [...prev, habit.id];
+        updateProgress(habitId, template.templateId, true);
+        return [...prev, habitId];
       }
     });
     
-    console.log(`Marked habit ${habit.id} in template ${actualTemplateId} as complete`);
+    console.log(`Marked habit ${habitId} in template ${template.templateId} as ${completed ? 'complete' : 'incomplete'}`);
   };
 
   const handleAddHabitToTasks = (habit: HabitDetail) => {
@@ -203,6 +262,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
 
   return {
     completedHabits,
+    dismissedHabits,
     handleHabitComplete,
     handleAddHabitToTasks
   };

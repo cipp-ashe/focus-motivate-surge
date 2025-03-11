@@ -20,6 +20,7 @@ const HabitsPage = () => {
   // Use our custom hook for habit completion
   const { 
     completedHabits, 
+    dismissedHabits,
     handleHabitComplete, 
     handleAddHabitToTasks 
   } = useHabitCompletion(todaysHabits, templates);
@@ -61,6 +62,7 @@ const HabitsPage = () => {
               key={`today-habits-${todaysHabitsSectionKey}`}
               todaysHabits={todaysHabits}
               completedHabits={completedHabits}
+              dismissedHabits={dismissedHabits}
               onHabitComplete={handleHabitComplete}
               onAddHabitToTasks={handleAddHabitToTasks}
               templateId={todaysHabits[0]?.relationships?.templateId}
