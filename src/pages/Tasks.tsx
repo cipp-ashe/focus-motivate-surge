@@ -46,7 +46,7 @@ const TaskPage = () => {
       const customEvent = event as CustomEvent;
       const { taskId, taskName, items } = customEvent.detail;
       
-      console.log('Opening checklist:', taskId, taskName, items);
+      console.log('Tasks.tsx - Received open-checklist event:', { taskId, taskName, items });
       
       // Set current checklist task and open the sheet
       setCurrentChecklistTask({
@@ -68,6 +68,8 @@ const TaskPage = () => {
         description: "Voice recorder functionality is not yet implemented"
       });
     };
+    
+    console.log('Tasks.tsx - Setting up event listeners');
     
     // Add event listeners
     window.addEventListener('show-image', handleShowImage);
@@ -93,12 +95,14 @@ const TaskPage = () => {
       completed: false
     };
     
+    console.log('Adding new checklist item:', newItem);
     setChecklistItems([...checklistItems, newItem]);
     setNewItemText('');
   };
 
   // Toggle item completion status
   const toggleItemCompletion = (itemId: string) => {
+    console.log('Toggling item completion:', itemId);
     setChecklistItems(
       checklistItems.map(item => 
         item.id === itemId 
@@ -110,12 +114,18 @@ const TaskPage = () => {
 
   // Delete a checklist item
   const deleteItem = (itemId: string) => {
+    console.log('Deleting checklist item:', itemId);
     setChecklistItems(checklistItems.filter(item => item.id !== itemId));
   };
 
   // Save checklist items to the task
   const saveChecklist = () => {
     if (currentChecklistTask) {
+      console.log('Saving checklist items for task:', {
+        taskId: currentChecklistTask.taskId,
+        items: checklistItems
+      });
+      
       eventBus.emit('task:update', {
         taskId: currentChecklistTask.taskId,
         updates: { 
@@ -144,7 +154,13 @@ const TaskPage = () => {
       <TaskManager />
       
       {/* Checklist Sheet */}
-      <Sheet open={isChecklistOpen} onOpenChange={setIsChecklistOpen}>
+      <Sheet 
+        open={isChecklistOpen} 
+        onOpenChange={(open) => {
+          console.log('Sheet open state changed:', open);
+          setIsChecklistOpen(open);
+        }}
+      >
         <SheetContent className="w-full md:max-w-md overflow-y-auto">
           <SheetHeader className="mb-4">
             <SheetTitle>{currentChecklistTask?.taskName || 'Checklist'}</SheetTitle>

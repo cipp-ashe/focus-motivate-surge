@@ -43,6 +43,7 @@ export const TaskRow = ({
   }, [task.duration, task.id, isSelected]);
 
   const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
+    console.log('Preventing event propagation');
     e.stopPropagation();
   };
 
@@ -109,6 +110,18 @@ export const TaskRow = ({
     eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
   };
 
+  const handleTaskClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only let the parent handle the click if it's directly on the card
+    // We're intentionally allowing action buttons to handle their own clicks
+    if ((e.target as HTMLElement).closest('button')) {
+      console.log('Clicked on a button inside TaskRow, not propagating to parent');
+      return;
+    }
+    
+    console.log('Clicked on TaskRow, propagating to parent');
+    onTaskClick(task, e);
+  };
+
   return (
     <Card
       className={`
@@ -118,7 +131,7 @@ export const TaskRow = ({
           : 'bg-card/40 border-primary/10 hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01]'
         }
       `}
-      onClick={(e: React.MouseEvent<HTMLDivElement>) => onTaskClick(task, e)}
+      onClick={handleTaskClick}
     >
       <TaskContent
         task={task}

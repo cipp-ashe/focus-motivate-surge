@@ -1,3 +1,4 @@
+
 import { Task } from "@/types/tasks";
 import { Sparkles, X, Clock, BookOpen, Image, CheckSquare, Mic, Zap } from "lucide-react";
 import { TaskTags } from "./TaskTags";
@@ -77,24 +78,28 @@ export const TaskContent = ({
 
   // Handle task-specific actions
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    
     console.log(`Task action clicked for ${task.name} (${task.taskType})`);
+    e.stopPropagation();
     
     switch(task.taskType) {
       case 'timer':
         // Start timer
+        console.log("Dispatching timer:init event");
         eventManager.emit('timer:init', { 
           taskName: task.name, 
           duration: task.duration || 1500 
         });
         break;
+        
       case 'journal':
         // Open journal editor
+        console.log("Dispatching journal:open event");
         eventManager.emit('journal:open', { habitId: task.id, habitName: task.name });
         break;
+        
       case 'screenshot':
         // Display the image in a modal or full screen view
+        console.log("Handling screenshot view");
         if (task.imageUrl) {
           // Create and dispatch a custom event to show the image
           const showImageEvent = new CustomEvent('show-image', {
@@ -105,30 +110,38 @@ export const TaskContent = ({
           toast.error(`No image found for task: ${task.name}`);
         }
         break;
+        
       case 'checklist':
-        // Open checklist view - DON'T convert to timer
+        // Open checklist view
         console.log('Opening checklist for task:', task.id, task.name);
         
+        // Ensure we have a valid items array or an empty one
+        const itemsToPass = task.checklistItems || [];
+        console.log('Checklist items:', itemsToPass);
+        
         // Create and dispatch a custom event to open checklist view
-        // Allow opening even if no items exist yet
         const openChecklistEvent = new CustomEvent('open-checklist', {
           detail: { 
             taskId: task.id, 
             taskName: task.name, 
-            items: task.checklistItems || [] 
+            items: itemsToPass
           }
         });
         window.dispatchEvent(openChecklistEvent);
         break;
+        
       case 'voicenote':
         // Open voice recorder component
+        console.log("Dispatching open-voice-recorder event");
         const openVoiceRecorderEvent = new CustomEvent('open-voice-recorder', {
           detail: { taskId: task.id, taskName: task.name }
         });
         window.dispatchEvent(openVoiceRecorderEvent);
         break;
+        
       case 'habit':
         // Handle habit view - possibly navigate to habits view
+        console.log("Handling habit task view");
         eventManager.emit('task:select', task.id);
         if (task.relationships?.habitId) {
           // Navigate to the related habit
@@ -137,9 +150,11 @@ export const TaskContent = ({
           toast.info(`Viewing habit task: ${task.name}`);
         }
         break;
+        
       default:
         // For regular tasks - mark as complete
-        eventManager.emit('task:complete', { taskId: task.id });
+        console.log("Completing regular task");
+        eventBus.emit('task:complete', { taskId: task.id });
         toast.success(`Completed task: ${task.name}`);
         break;
     }
