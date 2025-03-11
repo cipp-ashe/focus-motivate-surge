@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNoteActions } from '../notes/NoteContext';
 import { useHabitState } from './HabitContext';
@@ -25,16 +26,20 @@ export const useHabitEvents = () => {
         { name: 'habit', color: 'default' }
       ];
 
-      // Create a new note
-      noteActions.createNote({
+      // Create a new note with title, content, and tags
+      const noteData = {
         title: `Journal Entry for ${habitName}`,
-        content: content || `Journal entry for habit: ${habitName}\n${description}`,
-        tags: tags,
-        onCreate: (note) => {
-          // Establish relationship between the habit and the new note
-          relationshipManager.createRelationship(habitId, EntityType.Habit, note.id, EntityType.Note);
-        }
-      });
+        content: content || `Journal entry for habit: ${habitName}\n${description || ''}`,
+        tags
+      };
+
+      // Create relationship between the note and habit
+      const handleCreate = (noteId: string) => {
+        relationshipManager.createRelationship(habitId, EntityType.Habit, noteId, EntityType.Note);
+      };
+
+      // Call the create note action
+      noteActions.create(noteData, handleCreate);
     });
 
     // Clean up event listeners when the component unmounts

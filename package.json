@@ -61,6 +61,7 @@
     "input-otp": "^1.1.0",
     "lucide-react": "^0.320.0",
     "marked": "^15.0.6",
+    "mitt": "^3.0.1",
     "next-themes": "^0.2.1",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",

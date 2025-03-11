@@ -21,61 +21,58 @@ export const formatMarkdownText = (type: string, selectedText: string = ''): {
   let newText = '';
   let placeholderText = '';
   
-  // Only use placeholders when there's no selected text
-  const textToUse = selectedText || '';
-  
   switch(type) {
     case 'bold':
       placeholderText = 'bold text';
-      newText = `**${textToUse || placeholderText}**`;
+      newText = `**${selectedText || placeholderText}**`;
       break;
     case 'italic':
       placeholderText = 'italic text';
-      newText = `*${textToUse || placeholderText}*`;
+      newText = `*${selectedText || placeholderText}*`;
       break;
     case 'heading1':
       placeholderText = 'Heading 1';
-      newText = `\n# ${textToUse || placeholderText}\n`;
+      newText = `\n# ${selectedText || placeholderText}\n`;
       break;
     case 'heading2':
       placeholderText = 'Heading 2';
-      newText = `\n## ${textToUse || placeholderText}\n`;
+      newText = `\n## ${selectedText || placeholderText}\n`;
       break;
     case 'heading3':
       placeholderText = 'Heading 3';
-      newText = `\n### ${textToUse || placeholderText}\n`;
+      newText = `\n### ${selectedText || placeholderText}\n`;
       break;
     case 'link':
       placeholderText = 'link text';
-      newText = `[${textToUse || placeholderText}](url)`;
+      newText = `[${selectedText || placeholderText}](url)`;
       break;
     case 'image':
       placeholderText = 'alt text';
-      newText = `![${textToUse || placeholderText}](image-url)`;
+      newText = `![${selectedText || placeholderText}](image-url)`;
       break;
     case 'bulletList':
       placeholderText = 'List item';
-      newText = `\n- ${textToUse || placeholderText}\n`;
+      newText = `\n- ${selectedText || placeholderText}\n`;
       break;
     case 'numberedList':
       placeholderText = 'List item';
-      newText = `\n1. ${textToUse || placeholderText}\n`;
+      newText = `\n1. ${selectedText || placeholderText}\n`;
       break;
     case 'quote':
       placeholderText = 'Quote';
-      newText = `\n> ${textToUse || placeholderText}\n`;
+      newText = `\n> ${selectedText || placeholderText}\n`;
       break;
     case 'code':
       placeholderText = 'code block';
-      newText = selectedText ? `\`\`\`\n${textToUse}\n\`\`\`` : "```\ncode block\n```";
+      newText = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`` : "```\ncode block\n```";
       break;
     case 'inlineCode':
       placeholderText = 'code';
-      newText = `\`${textToUse || placeholderText}\``;
+      newText = `\`${selectedText || placeholderText}\``;
       break;
     case 'strikethrough':
       placeholderText = 'strikethrough text';
-      newText = `~~${textToUse || placeholderText}~~`;
+      newText = `~~${selectedText || placeholderText}~~`;
       break;
     default:
       return { newText: selectedText, placeholderText: '' };

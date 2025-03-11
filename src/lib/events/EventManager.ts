@@ -1,6 +1,6 @@
+
 import mitt, { Emitter } from 'mitt';
 import { Note } from '@/types/notes';
-import { TimerEventPayloads } from '@/types/timer/events';
 
 type Events = {
   'timer:start': { taskName: string; duration: number };
@@ -29,7 +29,16 @@ type Events = {
   };
 };
 
-export interface EventPayloads extends Omit<TimerEventPayloads, 'note:create-from-habit'> {
+export interface EventPayloads {
+  'timer:start': { taskName: string; duration: number };
+  'timer:pause': { taskName: string };
+  'timer:resume': { taskName: string };
+  'timer:complete': { taskName: string };
+  'timer:reset': { taskName: string };
+  'timer:tick': { taskName: string; remaining: number };
+  'timer:init': { taskName: string; duration: number };
+  'timer:expand': { taskName: string };
+  'timer:collapse': { taskName: string; saveNotes: boolean };
   'note:create': Note;
   'note:update': Note;
   'note:delete': { id: string };
