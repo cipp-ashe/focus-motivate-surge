@@ -11,7 +11,7 @@ export interface MarkdownEditorProps {
   value: string;
   onChange?: (value: string | undefined) => void;
   onBlur?: () => void;
-  onToolbarAction?: (action: string) => void;  // Added this prop
+  onToolbarAction?: (action: string) => void;
   className?: string;
   placeholder?: string;
   height?: string;

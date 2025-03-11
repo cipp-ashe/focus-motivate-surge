@@ -31,6 +31,18 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
     }
   };
 
+  // Listen for toolbar actions from the editor
+  const handleToolbarAction = () => {
+    console.log('Toolbar action detected in Notes component');
+    setIsFormatting(true);
+    
+    // Reset formatting flag after a delay
+    setTimeout(() => {
+      console.log('Resetting formatting flag in Notes component');
+      setIsFormatting(false);
+    }, 2500); // Slightly longer than the NotesEditor timeout
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 min-h-0 mb-4">

@@ -161,12 +161,12 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       clearTimeout(toolbarActionTimeoutRef.current);
     }
     
-    // Reset flag after a short delay to allow for the formatting operation to complete
-    // This prevents multiple toolbar actions from triggering auto-save
+    // Reset flag after a longer delay to allow for the formatting operation to complete
+    // and prevent multiple toolbar actions from triggering auto-save
     toolbarActionTimeoutRef.current = setTimeout(() => {
       console.log('Resetting toolbar action flag');
       setIsToolbarAction(false);
-    }, 1000);
+    }, 2000); // Increased to 2 seconds for better safety
   };
 
   React.useImperativeHandle(ref, () => ({

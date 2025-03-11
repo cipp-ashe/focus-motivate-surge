@@ -1,3 +1,4 @@
+
 export interface TimerEventPayloads {
   // Habit events
   'habit:schedule': {
