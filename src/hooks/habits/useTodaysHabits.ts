@@ -84,9 +84,15 @@ export const useTodaysHabits = () => {
               };
               habits.push(newHabit);
               
-              // Get habit duration from settings or use default
-              const habitDuration = habit.settings?.duration || 1500;
-              const metricType = habit.settings?.metricType || habit.metricType || 'regular';
+              // Get habit duration (default to 1500 seconds = 25 minutes)
+              const habitDuration = 1500;
+              
+              // Determine the metric type from the metrics field
+              let metricType = 'regular';
+              if (habit.metrics && habit.metrics.type) {
+                metricType = habit.metrics.type;
+                console.log(`Found metric type for ${habit.name}: ${metricType}`);
+              }
               
               // Immediately schedule this habit as a task
               console.log(`Scheduling habit task for ${habit.name} from template ${template.templateId} with duration ${habitDuration}, metric type ${metricType}`);

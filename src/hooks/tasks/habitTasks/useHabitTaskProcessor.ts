@@ -165,10 +165,16 @@ export const useHabitTaskProcessor = () => {
       return taskType;
     }
     
+    // Enhanced log for debugging metric type conversion
+    console.log(`Determining task type from metric type: ${metricType}`);
+    
     // Determine task type based on metric type
     if (metricType === 'timer') {
       return 'timer';
     } else if (metricType === 'journal') {
+      return 'journal';
+    } else if (metricType === 'boolean' && metricType.includes('journal')) {
+      // Special case for habits that have boolean metric type but are for journals
       return 'journal';
     } else if (metricType === 'checklist' || metricType === 'todo') {
       return 'checklist';
@@ -198,7 +204,15 @@ export const useHabitTaskProcessor = () => {
     }
     
     // Add robust logging for debugging
-    console.log(`Handling habit schedule event for ${event.name} (${event.habitId}), templateId: ${event.templateId}`);
+    console.log(`Handling habit schedule event for ${event.name} (${event.habitId}), templateId: ${event.templateId}, metricType: ${event.metricType}`);
+    
+    // Special handling for journal type habits based on name
+    if (event.name.toLowerCase().includes('journal') || 
+        event.name.toLowerCase().includes('gratitude') || 
+        event.name.toLowerCase().includes('reflect')) {
+      console.log(`Detected journal-like habit: ${event.name}, forcing journal task type`);
+      event.metricType = 'journal';
+    }
     
     // Ensure date format is correct - expect string format like "Sun Mar 09 2025"
     if (typeof event.date !== 'string' || event.date.split(' ').length !== 4) {
