@@ -111,14 +111,22 @@ export const TaskRow = ({
   };
 
   const handleTaskClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only let the parent handle the click if it's directly on the card
-    // We're intentionally allowing action buttons to handle their own clicks
-    if ((e.target as HTMLElement).closest('button')) {
-      console.log('Clicked on a button inside TaskRow, not propagating to parent');
+    // Check if we clicked on a button or an input or any interactive element
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'BUTTON' || 
+      target.closest('button') || 
+      target.tagName === 'INPUT' || 
+      target.closest('input') ||
+      target.getAttribute('role') === 'button' ||
+      target.getAttribute('data-action') === 'true'
+    ) {
+      console.log('Clicked on an interactive element inside TaskRow, not propagating');
+      e.stopPropagation();
       return;
     }
     
-    console.log('Clicked on TaskRow, propagating to parent');
+    console.log('Clicked on TaskRow body, propagating to parent');
     onTaskClick(task, e);
   };
 

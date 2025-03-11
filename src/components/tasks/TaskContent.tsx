@@ -80,6 +80,7 @@ export const TaskContent = ({
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(`Task action clicked for ${task.name} (${task.taskType})`);
     e.stopPropagation();
+    e.preventDefault();
     
     switch(task.taskType) {
       case 'timer':
@@ -183,12 +184,14 @@ export const TaskContent = ({
               autoFocus
               onClick={preventPropagation}
               onTouchStart={preventPropagation}
+              data-action="true"
             />
           ) : (
             <span 
               className="w-8 text-right text-primary cursor-text"
               onClick={onDurationClick}
               onTouchStart={onDurationClick}
+              data-action="true"
             >
               {durationInMinutes}
             </span>
@@ -206,6 +209,7 @@ export const TaskContent = ({
           size="sm"
           onClick={handleTaskAction}
           className="h-7 px-2 flex items-center gap-1 text-xs"
+          data-action="true"
         >
           <BookOpen className="h-3.5 w-3.5 text-amber-400" />
           <span>Write</span>
@@ -220,6 +224,7 @@ export const TaskContent = ({
           size="sm"
           onClick={handleTaskAction}
           className="h-7 px-2 flex items-center gap-1 text-xs"
+          data-action="true"
         >
           <Image className="h-3.5 w-3.5 text-blue-400" />
           <span>View</span>
@@ -234,6 +239,7 @@ export const TaskContent = ({
           size="sm"
           onClick={handleTaskAction}
           className="h-7 px-2 flex items-center gap-1 text-xs"
+          data-action="true"
         >
           <CheckSquare className="h-3.5 w-3.5 text-cyan-400" />
           <span>Checklist</span>
@@ -248,6 +254,7 @@ export const TaskContent = ({
           size="sm"
           onClick={handleTaskAction}
           className="h-7 px-2 flex items-center gap-1 text-xs"
+          data-action="true"
         >
           <Mic className="h-3.5 w-3.5 text-rose-400" />
           <span>Record</span>
@@ -262,6 +269,7 @@ export const TaskContent = ({
           size="sm"
           onClick={handleTaskAction}
           className="h-7 px-2 flex items-center gap-1 text-xs"
+          data-action="true"
         >
           <CheckSquare className="h-3.5 w-3.5 text-green-500" />
           <span>Complete</span>
@@ -277,6 +285,7 @@ export const TaskContent = ({
           size="sm"
           onClick={handleTaskAction}
           className="h-7 px-2 flex items-center gap-1 text-xs"
+          data-action="true"
         >
           <Zap className="h-3.5 w-3.5 text-green-500" />
           <span>View Habit</span>
@@ -291,6 +300,7 @@ export const TaskContent = ({
         size="sm"
         onClick={handleTaskAction}
         className="h-7 px-2 flex items-center gap-1 text-xs"
+        data-action="true"
       >
         <CheckSquare className="h-3.5 w-3.5 text-primary" />
         <span>Complete</span>
@@ -335,6 +345,7 @@ export const TaskContent = ({
             onClick={onDelete}
             onTouchStart={onDelete}
             className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation hover:bg-destructive/10"
+            data-action="true"
           >
             <X className="h-3.5 w-3.5" />
           </Button>

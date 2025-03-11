@@ -56,6 +56,11 @@ const TaskPage = () => {
       });
       setChecklistItems(Array.isArray(items) ? items : []);
       setIsChecklistOpen(true);
+      
+      // Force sheet to open (workaround for any potential issues)
+      setTimeout(() => {
+        setIsChecklistOpen(true);
+      }, 10);
     };
     
     const handleOpenVoiceRecorder = (event: Event) => {
@@ -146,6 +151,16 @@ const TaskPage = () => {
     }
   };
 
+  // Log when sheet open state changes
+  const handleSheetOpenChange = (open: boolean) => {
+    console.log('Sheet open state changed:', open, 'current:', isChecklistOpen);
+    if (!open && isChecklistOpen) {
+      // We're closing the sheet - save the checklist
+      saveChecklist();
+    }
+    setIsChecklistOpen(open);
+  };
+
   return (
     <div className={`container mx-auto ${isMobile ? 'p-2' : 'py-3 px-4 sm:py-5 sm:px-6'} max-w-6xl`}>
       <h1 className={`${isMobile ? 'text-xl mb-2' : 'text-2xl sm:text-3xl mb-3 sm:mb-5'} font-bold text-primary`}>
@@ -156,12 +171,9 @@ const TaskPage = () => {
       {/* Checklist Sheet */}
       <Sheet 
         open={isChecklistOpen} 
-        onOpenChange={(open) => {
-          console.log('Sheet open state changed:', open);
-          setIsChecklistOpen(open);
-        }}
+        onOpenChange={handleSheetOpenChange}
       >
-        <SheetContent className="w-full md:max-w-md overflow-y-auto">
+        <SheetContent className="w-full md:max-w-md overflow-y-auto" side="right">
           <SheetHeader className="mb-4">
             <SheetTitle>{currentChecklistTask?.taskName || 'Checklist'}</SheetTitle>
           </SheetHeader>
@@ -176,7 +188,7 @@ const TaskPage = () => {
               onKeyDown={handleKeyPress}
               autoFocus
             />
-            <Button onClick={handleAddItem}>
+            <Button onClick={handleAddItem} type="button">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -216,7 +228,7 @@ const TaskPage = () => {
           
           {/* Save button */}
           <div className="mt-6">
-            <Button onClick={saveChecklist} className="w-full">
+            <Button onClick={saveChecklist} className="w-full" type="button">
               <Save className="h-4 w-4 mr-2" /> Save Checklist
             </Button>
           </div>
