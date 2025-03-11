@@ -10,11 +10,17 @@ interface JournalEditorProps {
 const JournalEditor: React.FC<JournalEditorProps> = ({ content, onChange }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
+  const handleChange = (value: string | undefined) => {
+    if (value !== undefined) {
+      onChange(value);
+    }
+  };
+
   return (
     <div className="flex-1" ref={editorRef}>
       <MarkdownEditor
         value={content}
-        onChange={onChange}
+        onChange={handleChange}
         height="100%"
         preview="edit"
       />

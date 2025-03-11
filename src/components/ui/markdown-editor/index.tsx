@@ -41,7 +41,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const insertMarkdown = (type: string) => {
     if (!onChange) return;
     
-    // Notify parent about toolbar action BEFORE making any changes
+    // Always notify parent about toolbar action first
     if (onToolbarAction) {
       onToolbarAction(type);
     }
@@ -63,6 +63,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     
     onChange(result.newContent);
     
+    // Restore cursor position after formatting
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(
@@ -83,7 +84,6 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         </div>
         
         <TabsContent value="write" className="flex-1 p-0 data-[state=active]:flex flex-col h-[calc(100%-44px)]">
-          {/* Toolbar */}
           <MarkdownToolbar onActionClick={insertMarkdown} />
           
           <div ref={editorRef} className="flex-1">
