@@ -240,8 +240,9 @@ export const useHabitTaskProcessor = () => {
         habitTasks.forEach(task => {
           console.log(`Ensuring habit task ${task.id} is loaded in memory`);
           
-          // If the task is still using the generic 'habit' type, convert it to a proper type
-          if (task.taskType === 'habit') {
+          // Check if task has valid type, convert if needed
+          if (!task.taskType || !['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote'].includes(task.taskType)) {
+            // If not a valid task type, convert to regular
             task.taskType = 'regular'; // Default to regular if we can't determine the type
           }
           
