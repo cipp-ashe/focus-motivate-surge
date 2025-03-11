@@ -37,6 +37,12 @@ export const NoteCard = ({
     }
   };
 
+  const handleNoteClick = () => {
+    if (onEdit) {
+      onEdit(note);
+    }
+  };
+
   return (
     <div 
       className={cn(
@@ -45,6 +51,7 @@ export const NoteCard = ({
         compact ? "text-sm" : "",
         "cursor-pointer"
       )}
+      onClick={handleNoteClick}
     >
       <div className="flex items-center justify-between gap-1 min-w-0">
         <div className="flex items-center gap-1 min-w-0 flex-1">
@@ -77,7 +84,10 @@ export const NoteCard = ({
             </div>
             <ActionButton
               icon={isExpanded ? ChevronUp : ChevronDown}
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the parent onClick
+                setIsExpanded(!isExpanded);
+              }}
               className={cn(
                 "p-0 opacity-0 group-hover:opacity-100",
                 compact ? "h-4 w-4" : "h-5 w-5"
