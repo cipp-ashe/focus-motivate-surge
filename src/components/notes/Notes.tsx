@@ -2,13 +2,26 @@
 import React, { useEffect, useState } from 'react';
 import { NotesEditor } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
-import { useNotes } from '@/hooks/useNotes';
-import { noteStorage } from '@/lib/storage/noteStorage';
 import { toast } from 'sonner';
+import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
+import { eventManager } from '@/lib/events/EventManager';
 
 export const Notes = () => {
   // Use state to track initialization
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Use the note context instead of using useNotes directly
+  const { 
+    updateCurrentContent, 
+    selectNoteForEdit, 
+    addNote, 
+    updateNote, 
+    deleteNote, 
+    addTagToNote, 
+    removeTagFromNote 
+  } = useNoteActions();
+  
+  const { items: notes, selected: selectedNote, content: currentContent } = useNoteState();
   
   // Add comprehensive logging to monitor component rendering and state
   useEffect(() => {
@@ -19,10 +32,6 @@ export const Notes = () => {
       const testKey = '_test_localStorage_';
       localStorage.setItem(testKey, 'test');
       localStorage.removeItem(testKey);
-      
-      // Force load notes from storage to ensure we have the latest data
-      const storedNotes = noteStorage.loadNotes();
-      console.log('Notes loaded from storage directly:', storedNotes?.length || 0);
       
       // Verify notes data format in localStorage
       const savedNotes = localStorage.getItem('notes');
@@ -49,20 +58,6 @@ export const Notes = () => {
     
     return () => console.log('Notes component unmounted');
   }, []);
-
-  // Safely use the useNotes hook
-  const { 
-    notes = [],
-    selectedNote,
-    currentContent = '',
-    updateCurrentContent,
-    selectNoteForEdit,
-    addNote,
-    updateNote,
-    deleteNote,
-    addTagToNote,
-    removeTagFromNote
-  } = useNotes();
 
   // Add detailed logging to debug state values
   useEffect(() => {
@@ -92,10 +87,12 @@ export const Notes = () => {
       if (selectedNote) {
         console.log('Updating existing note:', selectedNote.id);
         updateNote(selectedNote.id, currentContent);
+        // Event emitted by the updateNote action
         toast.success('Note updated successfully');
       } else {
         console.log('Creating new note');
         addNote();
+        // Event emitted by the addNote action
         toast.success('Note created successfully');
       }
     } catch (error) {
@@ -103,6 +100,21 @@ export const Notes = () => {
       toast.error('Failed to save note. Please try again.');
     }
   };
+
+  // Listen for journal-related events that should create notes
+  useEffect(() => {
+    const handleNoteFromHabit = (data: any) => {
+      console.log('Creating note from habit:', data);
+      // Implement creation of note from habit data
+      // This would typically set content and then call addNote
+    };
+    
+    eventManager.on('note:create-from-habit', handleNoteFromHabit);
+    
+    return () => {
+      eventManager.off('note:create-from-habit', handleNoteFromHabit);
+    };
+  }, [addNote, updateCurrentContent]);
 
   // Show loading state while initializing
   if (!isInitialized) {

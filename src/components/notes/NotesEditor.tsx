@@ -1,4 +1,3 @@
-
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect, useRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -6,6 +5,7 @@ import type { Note } from '@/types/notes';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { ActionButton } from '@/components/ui/action-button';
 import { eventManager } from '@/lib/events/EventManager';
+import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
 
 interface NotesEditorProps {
   selectedNote?: Note | null;
@@ -31,6 +31,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   const [internalContent, setInternalContent] = useState('');
   const [isToolbarAction, setIsToolbarAction] = useState(false);
   const toolbarActionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const noteActions = useNoteActions();
   
   const content = externalContent !== undefined ? externalContent : internalContent;
 
@@ -77,50 +78,30 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     if (!content?.trim()) return;
 
     try {
+      // If using external save handler, delegate to it
       if (externalOnSave) {
         externalOnSave();
         return;
       }
 
-      const savedNotes = localStorage.getItem('notes');
-      const currentNotes: Note[] = savedNotes ? JSON.parse(savedNotes) : [];
-
-      let updatedNotes: Note[];
-      let savedNote: Note;
-      
+      // Otherwise handle saving internally using the note actions from context
       if (selectedNote) {
-        const noteIndex = currentNotes.findIndex(n => n.id === selectedNote.id);
-        
-        savedNote = {
-          ...selectedNote,
-          content: content.trim(),
-          updatedAt: new Date().toISOString()
-        };
-        
-        if (noteIndex >= 0) {
-          updatedNotes = [...currentNotes];
-          updatedNotes[noteIndex] = savedNote;
-        } else {
-          updatedNotes = [savedNote, ...currentNotes];
+        // Update existing note
+        const success = noteActions.updateNote(selectedNote.id, content);
+        if (success) {
+          // Event is emitted by the updateNote action
+          if (!isToolbarAction) {
+            toast.success("Note updated ✨", { duration: 1500 });
+          }
         }
-        
-        eventManager.emit('note:update', savedNote);
       } else {
-        savedNote = {
-          id: crypto.randomUUID(),
-          title: 'New Note',
-          content: content.trim(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          tags: []
-        };
-        
-        updatedNotes = [savedNote, ...currentNotes];
-        eventManager.emit('note:create', savedNote);
+        // Add new note
+        // The event is emitted by the addNote action
+        const newNote = noteActions.addNote();
+        if (newNote && !isToolbarAction) {
+          toast.success("Note saved ✨", { duration: 1500 });
+        }
       }
-
-      localStorage.setItem('notes', JSON.stringify(updatedNotes));
-      window.dispatchEvent(new Event('notesUpdated'));
 
       if (onNoteSaved) {
         onNoteSaved();
@@ -129,17 +110,11 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       if (!externalContent) {
         setInternalContent('');
       }
-      
-      if (!isToolbarAction) {
-        toast.success(selectedNote ? "Note updated ✨" : "Note saved ✨", {
-          duration: 1500
-        });
-      }
     } catch (error) {
       console.error('Error saving note:', error);
       toast.error('Unable to save note');
     }
-  }, [content, externalOnSave, onNoteSaved, selectedNote, externalContent, isToolbarAction]);
+  }, [content, externalOnSave, onNoteSaved, selectedNote, externalContent, isToolbarAction, noteActions]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {

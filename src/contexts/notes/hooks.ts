@@ -2,6 +2,7 @@
 import { useContext, createContext } from 'react';
 import { useNotes } from '@/hooks/useNotes';
 import { Note, Tag, TagColor } from '@/types/notes';
+import { eventManager } from '@/lib/events/EventManager';
 
 // Define the types for actions and state
 export interface NoteActions {
@@ -29,13 +30,36 @@ const NoteStateContext = createContext<NoteState | undefined>(undefined);
 export const NoteContextProvider = ({ children }: { children: React.ReactNode }) => {
   const notes = useNotes();
   
+  // Implement actions that utilize the event manager where appropriate
   const actions: NoteActions = {
     updateCurrentContent: notes.updateCurrentContent,
-    selectNoteForEdit: notes.selectNoteForEdit,
+    selectNoteForEdit: (note: Note) => {
+      notes.selectNoteForEdit(note);
+      // Emit event when a note is selected for viewing/editing
+      eventManager.emit('note:view', { noteId: note.id });
+    },
     clearSelectedNote: notes.clearSelectedNote,
-    addNote: notes.addNote,
-    updateNote: notes.updateNote,
-    deleteNote: notes.deleteNote,
+    addNote: () => {
+      const newNote = notes.addNote();
+      if (newNote) {
+        // Emit event for note creation (already handled in useNotes' addNote function)
+        // But we could add additional event handling here if needed
+      }
+      return newNote;
+    },
+    updateNote: (noteId: string, content: string) => {
+      const success = notes.updateNote(noteId, content);
+      // The note:update event is already emitted in the useNotes implementation
+      return success;
+    },
+    deleteNote: (noteId: string) => {
+      const success = notes.deleteNote(noteId);
+      if (success) {
+        // Emit additional events if needed after deletion
+        eventManager.emit('note:deleted', { id: noteId });
+      }
+      return success;
+    },
     addTagToNote: notes.addTagToNote,
     removeTagFromNote: notes.removeTagFromNote
   };
