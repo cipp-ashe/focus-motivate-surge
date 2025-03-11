@@ -1,62 +1,78 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 import MDEditor from '@uiw/react-md-editor';
+import { marked } from 'marked';
 import { cn } from '@/lib/utils';
 
 interface MarkdownEditorProps {
   value: string;
-  onChange: (value: string | undefined) => void;
+  onChange?: (value: string | undefined) => void;
   onBlur?: () => void;
   className?: string;
-  height?: string | number;
-  preview?: 'edit' | 'live' | 'preview';
+  placeholder?: string;
 }
 
-export const MarkdownEditor = ({
+export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   value,
   onChange,
   onBlur,
   className,
-  height = '100%',
-  preview = 'edit'
-}: MarkdownEditorProps) => {
+  placeholder = 'Write your notes here...'
+}) => {
+  const [activeTab, setActiveTab] = useState<string>('write');
+
+  const handlePreviewClick = () => {
+    // Save content when switching to preview
+    if (onBlur) {
+      onBlur();
+    }
+    setActiveTab('preview');
+  };
+
+  const renderedHTML = value ? marked(value) : '';
+
   return (
-    <div
-      className={cn(
-        'markdown-editor [&_.w-md-editor]:!bg-background/50 [&_.w-md-editor]:!border-primary/10',
-        '[&_.w-md-editor-toolbar]:!bg-background/50 [&_.w-md-editor-toolbar]:!border-primary/10',
-        '[&_.w-md-editor-toolbar>ul>li>button]:!text-muted-foreground [&_.w-md-editor-toolbar>ul>li>button:hover]:!text-primary',
-        '[&_.w-md-editor-text]:!bg-transparent [&_.w-md-editor-text]:!text-foreground',
-        '[&_.w-md-editor-text-pre>code]:!bg-transparent',
-        '[&_.w-md-editor-text-pre]:!bg-transparent',
-        '[&_.w-md-editor-text-input]:!bg-transparent',
-        '[&_.wmde-markdown-color]:!text-foreground [&_.wmde-markdown-color>*]:!text-foreground',
-        '[&_.w-md-editor-preview]:!bg-background/50',
-        '[&_.w-md-editor-preview]:!text-foreground',
-        '[&_.w-md-editor-preview>div]:!text-foreground',
-        '[&_pre]:!bg-muted/50',
-        '[&_code]:!text-primary',
-        '[&_blockquote]:!border-l-primary/20 [&_blockquote]:!text-muted-foreground',
-        '[&_hr]:!border-primary/10',
-        '[&_a]:!text-primary',
-        '[&_table]:!border-primary/10 [&_td]:!border-primary/10 [&_th]:!border-primary/10',
-        className
-      )}
-      data-color-mode="dark"
-    >
-      <MDEditor
-        value={value}
-        onChange={(val) => onChange(val || '')}
-        preview={preview}
-        height={height}
-        hideToolbar={false}
-        visibleDragbar={false}
-        textareaProps={{
-          placeholder: 'Write your note here...',
-          onBlur: onBlur,
-          autoFocus: true
-        }}
-      />
+    <div className={cn("flex flex-col h-full", className)}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+        <div className="border-b border-border/10 px-2">
+          <TabsList className="h-9 my-1.5">
+            <TabsTrigger value="write" className="text-xs px-3">Write</TabsTrigger>
+            <TabsTrigger value="preview" className="text-xs px-3" onClick={handlePreviewClick}>Preview</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="write" className="flex-1 p-0 data-[state=active]:flex flex-col h-[calc(100%-44px)]">
+          <MDEditor
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            preview="edit"
+            hideToolbar
+            textareaProps={{
+              placeholder,
+              style: {
+                height: '100%',
+                background: 'transparent',
+                borderRadius: '0',
+                padding: '1rem'
+              }
+            }}
+            className="w-md-editor-without-border h-full w-full border-none outline-none"
+          />
+        </TabsContent>
+
+        <TabsContent value="preview" className="h-[calc(100%-44px)] p-4 overflow-auto">
+          {value ? (
+            <div 
+              className="prose prose-sm dark:prose-invert max-w-none" 
+              dangerouslySetInnerHTML={{ __html: renderedHTML }} 
+            />
+          ) : (
+            <p className="text-muted-foreground text-sm italic">Nothing to preview</p>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

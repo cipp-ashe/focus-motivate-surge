@@ -1,5 +1,4 @@
-
-import React, { useCallback, forwardRef, ForwardedRef } from 'react';
+import React, { useCallback, forwardRef, ForwardedRef, useState } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '@/types/notes';
@@ -27,15 +26,26 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   isEditing,
   onSave: externalOnSave
 }, ref) => {
+  // Use internal state if no external content is provided
+  const [internalContent, setInternalContent] = useState('');
+  
+  // Determine which content to use (external or internal)
+  const content = externalContent !== undefined ? externalContent : internalContent;
+
   const handleChange = (newContent: string | undefined) => {
-    if (!newContent) return;
+    if (newContent === undefined) return;
+    
     if (externalOnChange) {
+      // If external onChange handler is provided, use it
       externalOnChange(newContent);
+    } else {
+      // Otherwise manage content internally
+      setInternalContent(newContent);
     }
   };
 
   const handleSave = useCallback(() => {
-    if (!externalContent?.trim()) return;
+    if (!content?.trim()) return;
 
     try {
       // If external save handler provided, use it
@@ -55,7 +65,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
           note.id === selectedNote.id
             ? { 
                 ...note, 
-                content: externalContent.trim(),
+                content: content.trim(),
                 updatedAt: new Date().toISOString()
               }
             : note
@@ -65,7 +75,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         const newNote: Note = {
           id: crypto.randomUUID(),
           title: 'New Note', // Add a default title
-          content: externalContent.trim(),
+          content: content.trim(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           tags: []
@@ -82,6 +92,12 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       if (onNoteSaved) {
         onNoteSaved();
       }
+      
+      // Reset internal content after saving
+      if (!externalContent) {
+        setInternalContent('');
+      }
+      
       toast.success(selectedNote ? "Note updated ✨" : "Note saved ✨", {
         duration: 1500
       });
@@ -89,7 +105,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       console.error('Error saving note:', error);
       toast.error('Failed to save note');
     }
-  }, [externalContent, externalOnSave, onNoteSaved, selectedNote]);
+  }, [content, externalOnSave, onNoteSaved, selectedNote, externalContent]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -99,10 +115,10 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   };
 
   const handleBlur = useCallback(() => {
-    if (externalContent?.trim() && (!selectedNote || selectedNote.content !== externalContent)) {
+    if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
       handleSave();
     }
-  }, [externalContent, handleSave, selectedNote]);
+  }, [content, handleSave, selectedNote]);
 
   // Expose saveNotes method through ref
   React.useImperativeHandle(ref, () => ({
@@ -121,7 +137,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       </div>
       <div className="flex-1 min-h-0 overflow-hidden bg-background/50 rounded-lg border border-primary/10 shadow-inner">
         <MarkdownEditor
-          value={externalContent || ''}
+          value={content}
           onChange={handleChange}
           onBlur={handleBlur}
           className="h-full"
