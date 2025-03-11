@@ -1,3 +1,4 @@
+
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -123,9 +124,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       }
     } catch (error) {
       console.error('Error saving note:', error);
-      if (!isToolbarAction) {
-        toast.error('Unable to save note');
-      }
+      toast.error('Unable to save note');
     }
   }, [content, externalOnSave, onNoteSaved, selectedNote, externalContent, isToolbarAction]);
 
