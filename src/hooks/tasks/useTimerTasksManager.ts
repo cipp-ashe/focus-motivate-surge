@@ -78,9 +78,20 @@ export const useTimerTasksManager = () => {
   }, []);
   
   // Force a task update when needed (e.g., after timer completion)
-  const forceTaskUpdate = useCallback((taskId: string) => {
-    console.log('TimerTasksManager: Forcing task update:', taskId);
-    eventBus.emit('task:reload', { taskId });
+  // Make taskId parameter optional to fix the error in Timer.tsx
+  const forceTaskUpdate = useCallback((taskId?: string) => {
+    console.log('TimerTasksManager: Forcing task update:', taskId || 'all tasks');
+    
+    if (taskId) {
+      // If taskId is provided, reload just that task
+      eventBus.emit('task:reload', { taskId });
+    } else {
+      // If no taskId is provided, trigger a global task reload
+      eventBus.emit('tasks:reload', {});
+      
+      // Also dispatch a force-task-update event for components listening for it
+      window.dispatchEvent(new Event('force-task-update'));
+    }
   }, []);
   
   return {

@@ -75,6 +75,7 @@ const TimerPage = () => {
           if (storedTask.taskType !== 'timer') {
             timerTasksManager.updateTaskDuration(storedTask.id, storedTask.duration || 1500);
             setTimeout(() => {
+              // Now we can call forceTaskUpdate without arguments since we made it optional
               timerTasksManager.forceTaskUpdate();
             }, 100);
           }
