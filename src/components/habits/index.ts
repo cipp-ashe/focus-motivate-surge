@@ -6,5 +6,5 @@ export { default as HabitTracker } from './HabitTracker';
 export { TodaysHabitsSection } from './TodaysHabitsSection';
 export { TodaysHabitCard } from './TodaysHabitCard';
 export { default as HabitDebugLogger } from './HabitDebugLogger';
-export { default as DaySelector } from './DaySelector';
+export { default as DaySelector } from './ConfigurationDialog/DaySelector';
 export { default as TemplateSelectionSheet } from './TemplateSelectionSheet';
