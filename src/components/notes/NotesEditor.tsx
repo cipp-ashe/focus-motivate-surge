@@ -19,7 +19,7 @@ export interface NotesEditorRef {
   saveNotes: () => void;
 }
 
-export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({ 
+export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   selectedNote,
   onNoteSaved,
   content: externalContent,
@@ -102,7 +102,6 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         };
         
         updatedNotes = [savedNote, ...currentNotes];
-        
         eventManager.emit('note:create', savedNote);
       }
 
@@ -117,14 +116,18 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         setInternalContent('');
       }
       
-      toast.success(selectedNote ? "Note updated ✨" : "Note saved ✨", {
-        duration: 1500
-      });
+      if (!isToolbarAction) {
+        toast.success(selectedNote ? "Note updated ✨" : "Note saved ✨", {
+          duration: 1500
+        });
+      }
     } catch (error) {
       console.error('Error saving note:', error);
-      toast.error('Failed to save note');
+      if (!isToolbarAction) {
+        toast.error('Unable to save note');
+      }
     }
-  }, [content, externalOnSave, onNoteSaved, selectedNote, externalContent]);
+  }, [content, externalOnSave, onNoteSaved, selectedNote, externalContent, isToolbarAction]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
