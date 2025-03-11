@@ -25,9 +25,14 @@ export const useTimerMonitor = ({
   });
 
   useEffect(() => {
-    const handleTimerTick = ({ timeLeft }: { timeLeft: number }) => {
-      timerInfoRef.current.secondsLeft = timeLeft;
-      onProgress?.(timeLeft);
+    // Update the handler to accept both timeLeft and remaining properties
+    const handleTimerTick = (payload: { timeLeft?: number; remaining?: number; taskName?: string }) => {
+      // Use either timeLeft or remaining based on what's available
+      const timeLeft = payload.timeLeft !== undefined ? payload.timeLeft : payload.remaining;
+      if (timeLeft !== undefined) {
+        timerInfoRef.current.secondsLeft = timeLeft;
+        onProgress?.(timeLeft);
+      }
     };
 
     const handleTimerStart = ({
@@ -36,6 +41,7 @@ export const useTimerMonitor = ({
     }: {
       taskName: string;
       duration: number;
+      currentTime?: number;
     }) => {
       timerInfoRef.current = {
         isActive: true,

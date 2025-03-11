@@ -25,6 +25,7 @@ export interface TimerEventPayloads {
   'habit:journal-complete': any;
   'habit:progress-update': any;
   'habit:task-deleted': any;
+  'habit:select': string;
   'habits:check-pending': any;
   'habits:processed': any;
   
@@ -37,6 +38,7 @@ export interface TimerEventPayloads {
     taskId: string;
     metrics?: any;
   };
+  'task:reload': any;
   'tasks:force-update': {
     timestamp: string;
   };
@@ -45,14 +47,14 @@ export interface TimerEventPayloads {
   'timer:init': { taskName: string; duration: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
-  'timer:start': any;
-  'timer:pause': any;
-  'timer:reset': any;
-  'timer:complete': any;
-  'timer:metrics-update': any;
-  'timer:state-update': any;
-  'timer:tick': { timeLeft: number };
-  'timer:resume': any;
+  'timer:start': { taskName: string; duration: number; currentTime?: number };
+  'timer:pause': { taskName: string; timeLeft?: number; metrics?: any };
+  'timer:reset': { taskName: string; duration?: number };
+  'timer:complete': { taskName: string; metrics?: any };
+  'timer:metrics-update': { taskName: string; metrics: any };
+  'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
+  'timer:tick': { timeLeft?: number; remaining?: number; taskName?: string };
+  'timer:resume': { taskName: string };
   
   // Relationship events
   'relationship:create': any;
@@ -65,7 +67,7 @@ export interface TimerEventPayloads {
   'note:create-from-habit': {
     habitId: string;
     habitName: string;
-    description: string;
+    description?: string;
     templateId?: string;
     content?: string;
   };
@@ -79,6 +81,7 @@ export interface TimerEventPayloads {
   };
   'note:deleted': {
     noteId: string;
+    id?: string;
   };
   
   // Tag events

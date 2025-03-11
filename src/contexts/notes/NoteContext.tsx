@@ -174,6 +174,12 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
           console.log(`Created relationship between voice note ${voiceNoteData.voiceNoteId} and note ${newNote.id}`);
         }
       }),
+      
+      eventBus.on('note:deleted', ({ id }) => {
+        // Fix the property name to match what's expected
+        console.log('Note deleted event received', id);
+        // Forward with correct property name if needed
+      }),
     ];
 
     return () => unsubscribers.forEach(unsub => unsub());

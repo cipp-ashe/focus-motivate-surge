@@ -39,13 +39,19 @@ export const useHabitEvents = () => {
           habitId, 
           EntityType.Habit, 
           noteId, 
-          EntityType.Note
+          EntityType.Note, 
+          'habit-journal'
         );
       };
 
-      // Call the create note action
-      if (noteActions.create) {
-        noteActions.create(noteData, handleCreate);
+      // Call the create note action - use the addNote function from NoteContext
+      if (noteActions.addNote) {
+        noteActions.addNote(noteData);
+        
+        // Get the last created note ID from the context and create the relationship
+        if (noteActions.lastCreatedNoteId) {
+          handleCreate(noteActions.lastCreatedNoteId);
+        }
       }
     });
 

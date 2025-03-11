@@ -3,21 +3,21 @@ import mitt, { Emitter } from 'mitt';
 import { Note } from '@/types/notes';
 
 type Events = {
-  'timer:start': { taskName: string; duration: number };
-  'timer:pause': { taskName: string };
+  'timer:start': { taskName: string; duration: number; currentTime?: number };
+  'timer:pause': { taskName: string; timeLeft?: number; metrics?: any };
   'timer:resume': { taskName: string };
-  'timer:complete': { taskName: string };
-  'timer:reset': { taskName: string };
-  'timer:tick': { taskName: string; remaining: number };
+  'timer:complete': { taskName: string; metrics?: any };
+  'timer:reset': { taskName: string; duration?: number };
+  'timer:tick': { taskName: string; remaining: number; timeLeft?: number };
   'timer:init': { taskName: string; duration: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
   'timer:metrics-update': { taskName: string; metrics: any };
-  'timer:state-update': { taskName: string; state: any };
+  'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
   'note:create': Note;
   'note:update': Note;
   'note:delete': { id: string };
-  'note:deleted': { id: string };
+  'note:deleted': { id: string; noteId?: string };
   'note:create-from-habit': { 
     habitId: string; 
     habitName: string; 
@@ -36,6 +36,8 @@ type Events = {
   'task:delete': any;
   'task:select': any;
   'task:complete': any;
+  'task:reload': any;
+  'tasks:force-update': any;
   // Habit events
   'habit:schedule': any;
   'habit:template-add': any;
@@ -48,6 +50,7 @@ type Events = {
   'habit:journal-deleted': any;
   'habit:progress-update': any;
   'habit:task-deleted': any;
+  'habit:select': string;
   // Relationship events
   'relationship:create': any;
   'relationship:delete': any;
@@ -56,6 +59,7 @@ type Events = {
   // Tag events
   'tag:link': any;
   'tag:unlink': any;
+  'tags:force-update': any;
   // Quote events
   'quote:link-task': any;
   // Journal events
@@ -68,21 +72,21 @@ type Events = {
 };
 
 export interface EventPayloads {
-  'timer:start': { taskName: string; duration: number };
-  'timer:pause': { taskName: string };
+  'timer:start': { taskName: string; duration: number; currentTime?: number };
+  'timer:pause': { taskName: string; timeLeft?: number; metrics?: any };
   'timer:resume': { taskName: string };
-  'timer:complete': { taskName: string };
-  'timer:reset': { taskName: string };
-  'timer:tick': { taskName: string; remaining: number };
+  'timer:complete': { taskName: string; metrics?: any };
+  'timer:reset': { taskName: string; duration?: number };
+  'timer:tick': { taskName: string; remaining: number; timeLeft?: number };
   'timer:init': { taskName: string; duration: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
   'timer:metrics-update': { taskName: string; metrics: any };
-  'timer:state-update': { taskName: string; state: any };
+  'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
   'note:create': Note;
   'note:update': Note;
   'note:delete': { id: string };
-  'note:deleted': { id: string };
+  'note:deleted': { id: string; noteId?: string };
   'note:create-from-habit': { 
     habitId: string; 
     habitName: string; 
@@ -101,6 +105,8 @@ export interface EventPayloads {
   'task:delete': any;
   'task:select': any;
   'task:complete': any;
+  'task:reload': any;
+  'tasks:force-update': any;
   // Habit events
   'habit:schedule': any;
   'habit:template-add': any;
@@ -113,6 +119,7 @@ export interface EventPayloads {
   'habit:journal-deleted': any;
   'habit:progress-update': any;
   'habit:task-deleted': any;
+  'habit:select': string;
   // Relationship events
   'relationship:create': any;
   'relationship:delete': any;
@@ -121,6 +128,7 @@ export interface EventPayloads {
   // Tag events
   'tag:link': any;
   'tag:unlink': any;
+  'tags:force-update': any;
   // Quote events
   'quote:link-task': any;
   // Journal events
@@ -130,7 +138,7 @@ export interface EventPayloads {
   // Habits check events
   'habits:check-pending': any;
   'habits:processed': any;
-}
+};
 
 // Export event type and handler for use in other modules
 export type EventType = keyof Events;
