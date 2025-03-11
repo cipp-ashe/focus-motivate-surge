@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TaskInput } from './TaskInput';
 import { Task } from '@/types/tasks';
@@ -111,13 +110,12 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
           <TaskTabsList taskCounts={taskCounts} />
 
           <TaskTypeTab value="all" tasks={allTasks} selectedTaskId={selectedTaskId} />
+          <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="timer" tasks={timerTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="habit" tasks={habitTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="journal" tasks={journalTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="checklist" tasks={checklistTasks} selectedTaskId={selectedTaskId} />
+          <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="voicenote" tasks={voicenoteTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} />
         </Tabs>
       </div>
     </div>
