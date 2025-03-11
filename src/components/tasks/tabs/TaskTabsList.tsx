@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Timer, Image, Calendar, BookOpen, CheckSquare, Mic } from 'lucide-react';
+import { FileText, Timer, Image, BookOpen, CheckSquare, Mic } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface TaskTabsListProps {
