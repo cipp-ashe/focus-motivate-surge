@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Note, Tag, TagColor, isValidTagColor } from '@/types/notes';
@@ -9,15 +8,29 @@ export { isValidTagColor };
 export const STORAGE_KEY = 'notes';
 
 export const useNotes = () => {
+  console.log('useNotes hook initialized');
+  
   const [notes, setNotes] = useState<Note[]>(() => {
     try {
       console.log('Initializing notes from localStorage');
       const savedNotes = localStorage.getItem(STORAGE_KEY);
-      const parsedNotes = savedNotes ? JSON.parse(savedNotes) : [];
+      console.log('Raw notes from localStorage:', savedNotes ? `${savedNotes.substring(0, 50)}...` : 'null');
+      
+      if (!savedNotes) {
+        console.log('No notes found in localStorage, initializing with empty array');
+        return [];
+      }
+      
+      const parsedNotes = JSON.parse(savedNotes);
+      if (!Array.isArray(parsedNotes)) {
+        console.error('Notes in localStorage is not an array:', typeof parsedNotes);
+        return [];
+      }
+      
       console.log(`Loaded ${parsedNotes.length} notes from localStorage`);
       return parsedNotes;
     } catch (error) {
-      console.error('Error loading notes:', error);
+      console.error('Error loading notes from localStorage:', error);
       return [];
     }
   });
@@ -26,9 +39,12 @@ export const useNotes = () => {
   const [currentContent, setCurrentContent] = useState('');
 
   useEffect(() => {
+    console.log('Setting up storage event listeners');
+    
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) {
         try {
+          console.log('Storage event detected for notes');
           const updatedNotes = e.newValue ? JSON.parse(e.newValue) : [];
           console.log(`Storage event: updated to ${updatedNotes.length} notes`);
           setNotes(updatedNotes);
@@ -40,6 +56,7 @@ export const useNotes = () => {
 
     const handleNotesUpdated = () => {
       try {
+        console.log('Notes updated event received');
         const savedNotes = localStorage.getItem(STORAGE_KEY);
         const updatedNotes = savedNotes ? JSON.parse(savedNotes) : [];
         console.log(`Notes updated event: now ${updatedNotes.length} notes`);
@@ -53,6 +70,7 @@ export const useNotes = () => {
     window.addEventListener('notesUpdated', handleNotesUpdated);
 
     return () => {
+      console.log('Removing storage event listeners');
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('notesUpdated', handleNotesUpdated);
     };
@@ -61,6 +79,13 @@ export const useNotes = () => {
   const saveNote = useCallback((note: Note) => {
     try {
       console.log('Saving note:', note.id);
+      
+      if (!Array.isArray(notes)) {
+        console.error('Notes state is not an array:', notes);
+        setNotes([]);
+        return false;
+      }
+      
       const updatedNotes = [...notes];
       const existingIndex = notes.findIndex(n => n.id === note.id);
       
@@ -85,6 +110,12 @@ export const useNotes = () => {
   const deleteNote = useCallback((noteId: string) => {
     try {
       console.log('Deleting note:', noteId);
+      
+      if (!Array.isArray(notes)) {
+        console.error('Notes state is not an array during delete operation:', notes);
+        return false;
+      }
+      
       const updatedNotes = notes.filter(note => note.id !== noteId);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
       setNotes(updatedNotes);
@@ -123,6 +154,7 @@ export const useNotes = () => {
   const addNote = useCallback(() => {
     if (!currentContent.trim()) {
       console.log('Cannot add empty note');
+      toast.error('Cannot add empty note');
       return null;
     }
     
@@ -136,14 +168,23 @@ export const useNotes = () => {
       tags: []
     };
     
-    saveNote(newNote);
-    setCurrentContent('');
-    toast.success('Note added ✨');
-    return newNote;
+    if (saveNote(newNote)) {
+      setCurrentContent('');
+      toast.success('Note added ✨');
+      return newNote;
+    }
+    
+    return null;
   }, [currentContent, saveNote]);
 
   const updateNote = useCallback((noteId: string, content: string) => {
     console.log('Updating note:', noteId);
+    
+    if (!Array.isArray(notes)) {
+      console.error('Notes state is not an array during update operation:', notes);
+      return false;
+    }
+    
     const noteToUpdate = notes.find(note => note.id === noteId);
     if (!noteToUpdate) {
       console.error('Note not found for update:', noteId);
@@ -156,16 +197,17 @@ export const useNotes = () => {
       updatedAt: new Date().toISOString()
     };
     
-    const success = saveNote(updatedNote);
-    if (success) {
-      toast.success('Note updated ✨');
-      clearSelectedNote();
-    }
-    return success;
-  }, [notes, saveNote, clearSelectedNote]);
+    return saveNote(updatedNote);
+  }, [notes, saveNote]);
 
   const addTagToNote = useCallback((noteId: string, tagName: string, colorName: string = 'default') => {
     console.log('Adding tag to note:', noteId, tagName, colorName);
+    
+    if (!Array.isArray(notes)) {
+      console.error('Notes state is not an array during add tag operation:', notes);
+      return false;
+    }
+    
     const color = isValidTagColor(colorName) ? colorName as TagColor : 'default';
     const noteToUpdate = notes.find(note => note.id === noteId);
     if (!noteToUpdate) {
@@ -197,6 +239,12 @@ export const useNotes = () => {
 
   const removeTagFromNote = useCallback((noteId: string, tagName: string) => {
     console.log('Removing tag from note:', noteId, tagName);
+    
+    if (!Array.isArray(notes)) {
+      console.error('Notes state is not an array during remove tag operation:', notes);
+      return false;
+    }
+    
     const noteToUpdate = notes.find(note => note.id === noteId);
     if (!noteToUpdate || !noteToUpdate.tags) {
       console.error('Note not found or has no tags:', noteId);

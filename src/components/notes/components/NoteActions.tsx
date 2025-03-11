@@ -18,9 +18,14 @@ export const NoteActions: React.FC<NoteActionsProps> = ({
   onDelete,
   compact = false 
 }) => {
-  // Add error logging
-  if (!note || !note.id) {
-    console.error('Invalid note passed to NoteActions', note);
+  // Add comprehensive error logging
+  if (!note) {
+    console.error('No note provided to NoteActions');
+    return null;
+  }
+  
+  if (!note.id) {
+    console.error('Invalid note (missing ID) passed to NoteActions', note);
     return null;
   }
   
@@ -35,7 +40,11 @@ export const NoteActions: React.FC<NoteActionsProps> = ({
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation(); // Stop event from bubbling to parent
     console.log('Delete clicked for note:', note.id);
-    onDelete(note.id);
+    try {
+      onDelete(note.id);
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
   };
 
   return (

@@ -28,36 +28,52 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
     removeTagFromNote
   } = useNotes();
   
-  console.log('Notes from useNotes hook:', notes?.length || 0);
+  console.log('Notes from useNotes hook:', notes?.length || 0, 'notes available');
   
   const [currentPage, setCurrentPage] = useState(0);
   const [showClearDialog, setShowClearDialog] = useState(false);
 
   const handleDeleteNote = (noteId: string) => {
+    console.log('Attempting to delete note:', noteId);
     deleteNote(noteId);
     toast.success("Note deleted 🗑️");
   };
 
   const handleAddTag = (noteId: string, tagName: string) => {
     if (!tagName.trim()) return;
+    console.log('Adding tag to note:', noteId, tagName);
     addTagToNote(noteId, tagName);
   };
 
   const handleRemoveTag = (noteId: string, tagName: string) => {
+    console.log('Removing tag from note:', noteId, tagName);
     removeTagFromNote(noteId, tagName);
   };
 
   const handleClearNotes = () => {
+    console.log('Clearing all notes');
     localStorage.removeItem('notes');
     window.dispatchEvent(new Event('notesUpdated'));
     toast.success("All notes cleared 🗑️");
   };
 
-  const totalPages = Math.ceil((notes?.length || 0) / MAX_NOTES);
-  const paginatedNotes = notes?.slice(
-    currentPage * MAX_NOTES,
-    (currentPage + 1) * MAX_NOTES
-  ) || [];
+  // Safely calculate total pages
+  const safeNotes = notes || [];
+  const totalPages = Math.max(1, Math.ceil(safeNotes.length / MAX_NOTES));
+  
+  // Ensure currentPage is within bounds
+  const safePage = Math.min(Math.max(0, currentPage), Math.max(0, totalPages - 1));
+  if (safePage !== currentPage) {
+    setCurrentPage(safePage);
+  }
+  
+  // Safely slice the notes array
+  const paginatedNotes = safeNotes.slice(
+    safePage * MAX_NOTES,
+    (safePage + 1) * MAX_NOTES
+  );
+
+  console.log('Paginated notes:', paginatedNotes.length, 'on page', safePage + 1, 'of', totalPages);
 
   return (
     <div className="space-y-4">
@@ -68,7 +84,7 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
           <div className="flex items-center gap-1">
             <ActionButton
               icon={Download}
-              onClick={() => downloadAllNotes(notes || [])}
+              onClick={() => downloadAllNotes(safeNotes)}
               className="h-7 w-7 p-0"
             />
             <ActionButton
@@ -78,7 +94,7 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
             />
           </div>
           <NotesPagination
-            currentPage={currentPage}
+            currentPage={safePage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
@@ -86,7 +102,7 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
       </div>
 
       {/* Notes List */}
-      {!notes || notes.length === 0 ? (
+      {safeNotes.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
           <p className="text-sm text-muted-foreground">No notes yet</p>
           <p className="text-xs text-muted-foreground/60">Start writing to create your first note</p>

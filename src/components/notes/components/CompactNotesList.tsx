@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, Trash2 } from 'lucide-react';
 import type { Note, Tag } from '@/types/notes';
 import { NoteCard } from './NoteCard';
@@ -28,6 +28,13 @@ export const CompactNotesList = ({
 }: CompactNotesListProps) => {
   console.log('CompactNotesList rendered with', notes?.length, 'notes');
   
+  // Make sure we have a valid notes array
+  const safeNotes = Array.isArray(notes) ? notes : [];
+  
+  useEffect(() => {
+    console.log('CompactNotesList notes updated:', safeNotes.length);
+  }, [safeNotes]);
+  
   const [showClearDialog, setShowClearDialog] = useState(false);
   const { 
     handleClearNotes, 
@@ -42,11 +49,11 @@ export const CompactNotesList = ({
     totalPages,
     paginatedItems: paginatedNotes
   } = usePagination({
-    items: notes || [],  // Ensure we always have an array
+    items: safeNotes,
     itemsPerPage: MAX_NOTES
   });
 
-  if (!notes || notes.length === 0) {
+  if (safeNotes.length === 0) {
     console.log('No notes to display in CompactNotesList');
     return null;
   }
@@ -59,7 +66,7 @@ export const CompactNotesList = ({
           <div className="flex items-center gap-1">
             <ActionButton
               icon={Download}
-              onClick={() => downloadAllNotes(notes)}
+              onClick={() => downloadAllNotes(safeNotes)}
               className="h-6 w-6 p-0"
             />
             <ActionButton
