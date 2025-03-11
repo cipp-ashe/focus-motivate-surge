@@ -57,7 +57,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     
     onChange(result.newContent);
     
-    // Set up selection for placeholder text or position cursor at end of inserted text
+    // Set selection range after content update
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(
