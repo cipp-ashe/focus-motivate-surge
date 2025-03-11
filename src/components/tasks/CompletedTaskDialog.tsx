@@ -17,6 +17,7 @@ import { Note } from '@/types/notes';
 import { EntityType } from '@/types/core';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 
 // Add note:view to TimerEventType by extending the types
 interface ExtendedEventPayloads extends Record<string, any> {
@@ -37,6 +38,7 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   onOpenChange
 }) => {
   const [linkedNotes, setLinkedNotes] = useState<Note[]>([]);
+  const { forceTaskUpdate } = useTaskEvents();
 
   useEffect(() => {
     if (task && open) {
@@ -126,25 +128,19 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   // Handle creating a new task from this completed one
   const handleCreateNewFromThis = () => {
     try {
-      // Fallback implementation if createFromCompleted doesn't exist
-      if (typeof taskOperations.createFromCompleted !== 'function') {
-        console.warn('taskOperations.createFromCompleted is not available, using fallback');
-        
-        // Create a new task with the same properties
-        taskOperations.createTask({
-          name: task.name,
-          description: task.description || '',
-          completed: false,
-          taskType: task.taskType || 'regular',
-          duration: task.duration || 0,
-          createdAt: new Date().toISOString() // Add the required createdAt property
-        });
-        onOpenChange(false);
-      } else {
-        // If the method exists, use it
-        taskOperations.createFromCompleted(task);
-        onOpenChange(false);
-      }
+      console.log('Creating new task from completed task:', task);
+      
+      // Create a new task with the same properties
+      const newTask = taskOperations.createFromCompleted(task);
+      
+      // Close dialog after creating task
+      onOpenChange(false);
+      
+      // Force update task list to show the new task
+      setTimeout(() => {
+        forceTaskUpdate();
+        toast.success(`Created new task: ${newTask.name}`);
+      }, 100);
     } catch (error) {
       console.error('Error creating new task:', error);
       toast.error('Failed to create new task');
@@ -248,10 +244,17 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   
   // Handle viewing a related note
   const handleViewNote = (noteId: string) => {
+    console.log('Viewing note:', noteId);
+    
     // We need to ensure eventManager.emit accepts 'note:view'
     // @ts-ignore - Using type assertion to bypass the type check
     eventManager.emit('note:view', { noteId });
+    
+    // Close dialog after selecting note
     onOpenChange(false);
+    
+    // Notify user
+    toast.success('Opening note...');
   };
 
   return (
