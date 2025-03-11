@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs';
 import MDEditor from '@uiw/react-md-editor';
@@ -40,7 +41,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const insertMarkdown = (type: string) => {
     if (!onChange) return;
     
-    // Notify parent about toolbar action
+    // Notify parent about toolbar action BEFORE making any changes
     if (onToolbarAction) {
       onToolbarAction(type);
     }

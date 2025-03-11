@@ -1,26 +1,25 @@
 
 import { useEffect, useCallback } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
+import type { EventType } from '@/lib/events/EventManager';
 
 /**
- * Hook to subscribe to events from the event bus with proper cleanup
+ * Hook to subscribe to events from the event manager with proper cleanup
  * @param eventType The event type to listen for
  * @param handler The handler function to be called when the event is fired
  */
 export function useEvent<T = any>(
-  eventType: string, 
+  eventType: EventType, 
   handler: (data: T) => void
 ) {
   // Create a stable reference to the handler to avoid unnecessary resubscriptions
   const stableHandler = useCallback(handler, [handler]);
   
   useEffect(() => {
-    // Log the event subscription for debugging
     console.log(`[useEvent] Subscribing to ${eventType}`);
     
-    // Subscribe to the event
-    // Use type assertion to handle potential type mismatches
-    const unsubscribe = eventBus.on(eventType as any, stableHandler);
+    // Subscribe directly to eventManager instead of eventBus
+    const unsubscribe = eventManager.on(eventType, stableHandler);
     
     // Cleanup subscription on unmount
     return () => {

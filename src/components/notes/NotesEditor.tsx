@@ -50,14 +50,18 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   };
 
   const handleBlur = useCallback(() => {
+    console.log('Editor blur event triggered, isToolbarAction:', isToolbarAction);
+    
     // Skip autosave if this is coming from a toolbar action
     if (isToolbarAction) {
+      console.log('Skipping autosave due to toolbar action');
       setIsToolbarAction(false);
       return;
     }
 
     // Only auto-save if there is content and it's different from the original
     if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
+      console.log('Auto-saving on blur...');
       handleSave();
     }
   }, [content, selectedNote, isToolbarAction]);
@@ -139,6 +143,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   };
 
   const handleToolbarAction = (action: string) => {
+    console.log('Toolbar action detected:', action);
     // Set the flag to prevent auto-save on blur after toolbar actions
     setIsToolbarAction(true);
   };
