@@ -87,7 +87,7 @@ export const useTimerTasksManager = () => {
       eventBus.emit('task:reload', { taskId });
     } else {
       // If no taskId is provided, trigger a global task reload
-      eventBus.emit('task:reload', {}); // Using 'task:reload' event
+      eventBus.emit('task:reload', {}); // Using 'task:reload' event instead of 'tasks:reload'
       
       // Also dispatch a force-task-update event for components listening for it
       window.dispatchEvent(new Event('force-task-update'));
