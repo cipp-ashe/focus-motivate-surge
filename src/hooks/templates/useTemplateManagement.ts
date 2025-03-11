@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
@@ -104,7 +103,10 @@ export const useTemplateManagement = () => {
     });
     
     // Also explicitly trigger a task cleanup to ensure dismissed tasks are removed
-    eventBus.emit('tasks:force-update', { timestamp: new Date().toISOString() });
+    setTimeout(() => {
+      eventBus.emit('tasks:force-update', { timestamp: new Date().toISOString() });
+      window.dispatchEvent(new Event('force-task-update'));
+    }, 100);
     
     // Single toast here
     toast.success('Template removed');

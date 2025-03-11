@@ -70,9 +70,46 @@ export const taskRelationshipStorage = {
         changesMade = true;
       }
       
+      // Force UI update after cleaning up tasks
+      if (changesMade) {
+        window.dispatchEvent(new Event('force-task-update'));
+        window.dispatchEvent(new Event('templates-tasks-cleaned'));
+      }
+      
       return changesMade;
     } catch (error) {
       console.error('Error deleting tasks by template:', error);
+      return false;
+    }
+  },
+  
+  /**
+   * Delete a specific completed/dismissed task
+   * @param taskId The ID of the task
+   * @returns True if successful, false otherwise
+   */
+  deleteCompletedTask: (taskId: string): boolean => {
+    try {
+      // Load completed tasks
+      const completedTasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
+      
+      // Check if task exists
+      const taskExists = completedTasks.some(task => task.id === taskId);
+      if (!taskExists) {
+        console.log(`Task ${taskId} not found in completed tasks`);
+        return false;
+      }
+      
+      // Filter out the task
+      const updatedTasks = completedTasks.filter(task => task.id !== taskId);
+      
+      // Save updated tasks
+      utils.saveToStorage(constants.COMPLETED_TASKS_KEY, updatedTasks);
+      console.log(`Deleted completed/dismissed task ${taskId}`);
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting completed task:', error);
       return false;
     }
   },

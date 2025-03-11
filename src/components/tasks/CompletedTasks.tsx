@@ -5,7 +5,9 @@ import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { eventBus } from '@/lib/eventBus';
 
 interface CompletedTasksProps {
   tasks?: Task[];
@@ -31,6 +33,15 @@ export const CompletedTasks: React.FC<CompletedTasksProps> = ({
     : activeTab === 'dismissed' 
       ? dismissedTasks 
       : tasksToUse;
+
+  // Handle deleting a completed/dismissed task
+  const handleDeleteTask = (taskId: string) => {
+    eventBus.emit('task:delete', { 
+      taskId, 
+      reason: 'manual',
+      suppressToast: false 
+    });
+  };
   
   return (
     <div className="mt-8 mb-4">
@@ -63,7 +74,11 @@ export const CompletedTasks: React.FC<CompletedTasksProps> = ({
             </p>
           ) : (
             displayTasks.map(task => (
-              <CompletedTaskItem key={task.id} task={task} />
+              <CompletedTaskItem 
+                key={task.id} 
+                task={task} 
+                onDelete={handleDeleteTask}
+              />
             ))
           )}
         </TabsContent>
@@ -72,7 +87,12 @@ export const CompletedTasks: React.FC<CompletedTasksProps> = ({
   );
 };
 
-const CompletedTaskItem = ({ task }: { task: Task }) => {
+interface CompletedTaskItemProps {
+  task: Task;
+  onDelete: (taskId: string) => void;
+}
+
+const CompletedTaskItem = ({ task, onDelete }: CompletedTaskItemProps) => {
   const isDismissed = !!task.dismissedAt;
   
   return (
@@ -92,11 +112,25 @@ const CompletedTaskItem = ({ task }: { task: Task }) => {
             Habit
           </Badge>
         )}
+        {task.relationships?.templateId && (
+          <Badge variant="outline" className="text-xs mt-1 ml-1 bg-blue-500/10 text-blue-500">
+            Template
+          </Badge>
+        )}
       </div>
       
-      <div className="text-xs text-muted-foreground">
+      <div className="text-xs text-muted-foreground mr-2">
         {isDismissed ? 'Dismissed' : 'Completed'}
       </div>
+
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        onClick={() => onDelete(task.id)}
+        className="h-8 w-8 p-0"
+      >
+        <Trash2 className="h-4 w-4 text-red-500" />
+      </Button>
     </div>
   );
 };

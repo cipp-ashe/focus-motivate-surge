@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
@@ -41,7 +40,7 @@ export const useTaskEventListeners = (
       // Handle task selection
       eventBus.on('task:select', eventHandlers.handleTaskSelect),
       
-      // Handle template deletion
+      // Handle template deletion - make sure all related tasks are removed
       eventBus.on('habit:template-delete', eventHandlers.handleTemplateDelete),
       
       // Handle habit checking
@@ -61,6 +60,7 @@ export const useTaskEventListeners = (
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
+    window.addEventListener('templates-tasks-cleaned', handleForceUpdate);
     
     // Setup verification cleanup
     const verificationCleanup = taskVerification.setupPeriodicVerification(
@@ -79,6 +79,7 @@ export const useTaskEventListeners = (
     return () => {
       unsubscribers.forEach(unsub => unsub());
       window.removeEventListener('force-task-update', handleForceUpdate);
+      window.removeEventListener('templates-tasks-cleaned', handleForceUpdate);
       verificationCleanup();
     };
   }, [
