@@ -6,7 +6,7 @@ import { habitReducer } from './habitReducer';
 import { HabitState, HabitContextActions, initialState } from './types';
 import { useHabitEvents } from './useHabitEvents';
 import { createHabitActions } from './useHabitActions';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 // Create contexts with proper typing
 const HabitContext = createContext<HabitState | undefined>(undefined);
@@ -15,9 +15,6 @@ const HabitActionsContext = createContext<HabitContextActions | undefined>(undef
 export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
   
-  // Set up event handlers - now without parameters
-  const eventHandlers = useHabitEvents();
-
   // Load initial templates
   const { data, refetch } = useQuery({
     queryKey: ['habits'],
@@ -34,7 +31,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
         // Mark as loaded
         setTimeout(() => {
           // Update habit processing
-          eventBus.emit('habits:check-pending', {});
+          eventManager.emit('habits:check-pending', {});
         }, 300);
         
         return templates;
@@ -46,6 +43,10 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
+  // Set up event handlers with the current templates
+  // Pass state.templates to avoid circular dependency
+  const eventHandlers = useHabitEvents(state.templates);
+
   // Create action handlers with refetch capability
   const baseActions = createHabitActions(state, dispatch);
   const actions: HabitContextActions = {
@@ -55,7 +56,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
       
       // Also trigger events to ensure task synchronization
       setTimeout(() => {
-        eventBus.emit('habits:check-pending', {});
+        eventManager.emit('habits:check-pending', {});
         window.dispatchEvent(new Event('force-habits-update'));
       }, 100);
     }
@@ -65,7 +66,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkInterval = setInterval(() => {
       console.log('HabitContext: Periodic habit check');
-      eventBus.emit('habits:check-pending', {});
+      eventManager.emit('habits:check-pending', {});
     }, 60000); // Check every minute
     
     return () => clearInterval(checkInterval);

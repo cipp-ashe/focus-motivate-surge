@@ -16,19 +16,36 @@ export const useTheme = () => {
   useEffect(() => {
     if (!mounted) return;
     
-    // Force dark theme by default
-    document.documentElement.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
-    setTheme('dark');
-    setIsDark(true);
+    // Check if there's a saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    console.log("Theme initialization - saved theme:", savedTheme);
+    
+    if (savedTheme === 'dark' || !savedTheme) {
+      // Apply dark theme by default or if explicitly set
+      document.documentElement.classList.add('dark');
+      setTheme('dark');
+      setIsDark(true);
+    } else {
+      // Apply light theme if saved
+      document.documentElement.classList.remove('dark');
+      setTheme('light');
+      setIsDark(false);
+    }
     
     // Listen for system preference changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
-      if (localStorage.getItem('theme') !== 'light') {
-        setIsDark(true);
-        document.documentElement.classList.add('dark');
-        setTheme('dark');
+      const userTheme = localStorage.getItem('theme');
+      if (!userTheme) {
+        // Only apply system preference if user hasn't explicitly chosen
+        const systemPrefersDark = mediaQuery.matches;
+        setIsDark(systemPrefersDark);
+        setTheme(systemPrefersDark ? 'dark' : 'light');
+        if (systemPrefersDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
       }
     };
     
@@ -39,6 +56,8 @@ export const useTheme = () => {
   // Update document class and localStorage when theme changes
   useEffect(() => {
     if (!mounted) return;
+    
+    console.log("Theme changed:", isDark ? "dark" : "light");
     
     if (isDark) {
       document.documentElement.classList.add('dark');

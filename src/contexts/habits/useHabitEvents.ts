@@ -1,17 +1,15 @@
 
 import { useEffect } from 'react';
 import { eventBus } from '@/lib/eventBus';
-import { eventManager } from '@/lib/events/EventManager';
-import { useHabitState } from './HabitContext';
-import { useNotes } from '@/hooks/data/useNotes';
-import { ActiveTemplate, HabitTemplate } from '@/components/habits/types';
+import { ActiveTemplate } from '@/components/habits/types';
 import { EntityType } from '@/types/core';
+import { useNotes } from '@/hooks/data/useNotes';
 
 /**
  * Set up event listeners for habit-related events
+ * This version doesn't depend on useHabitState - templates are passed as a parameter
  */
-export const useHabitEvents = () => {
-  const state = useHabitState();
+export const useHabitEvents = (templates: ActiveTemplate[] = []) => {
   const { saveNote } = useNotes();
   
   // Listen for journal open events and create a note from habit
@@ -29,7 +27,7 @@ export const useHabitEvents = () => {
         // Get template info if available
         let template: ActiveTemplate | undefined;
         if (data.templateId) {
-          template = state.templates.find(t => t.templateId === data.templateId);
+          template = templates.find(t => t.templateId === data.templateId);
         }
         
         // Create the note
@@ -66,7 +64,7 @@ export const useHabitEvents = () => {
     return () => {
       unsubscribe();
     };
-  }, [state.templates, saveNote]);
+  }, [templates, saveNote]);
   
   return {}; // Return an empty object as we're just setting up listeners
 };

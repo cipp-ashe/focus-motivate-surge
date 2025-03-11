@@ -16,7 +16,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   
   // Add debug logging
   console.log("AppLayout rendering with path:", location.pathname);
-  console.log("Children present:", !!children);
+  console.log("Theme state:", { isDark, mounted });
   
   // Only hide header on the main dashboard page
   const showHeader = location.pathname !== '/';
@@ -25,15 +25,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   useEffect(() => {
     if (!mounted) return;
     
-    console.log("Theme mounted, isDark:", isDark);
+    console.log("Theme mounted, applying isDark:", isDark);
     
-    // Force dark theme application
-    document.documentElement.classList.add('dark');
-    
-    // Still respect the user's preference if they manually toggle
-    if (!isDark) {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
       document.documentElement.classList.remove('dark');
     }
+    
   }, [isDark, mounted]);
 
   return (
