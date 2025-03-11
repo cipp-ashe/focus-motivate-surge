@@ -40,6 +40,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     }
   }, [selectedNote, externalContent]);
 
+  // Clean up any existing timeout on unmount
   useEffect(() => {
     return () => {
       if (toolbarActionTimeoutRef.current) {

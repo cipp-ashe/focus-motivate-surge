@@ -101,10 +101,12 @@ class EventManager {
   }
 
   emit<K extends keyof Events>(event: K, payload: Events[K]) {
+    console.log(`Event emitted: ${String(event)}`, payload);
     this.emitter.emit(event, payload);
   }
 
   on<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void) {
+    console.log(`Event listener registered: ${String(event)}`);
     this.emitter.on(event, handler as any);
     return () => this.off(event, handler);
   }

@@ -19,12 +19,37 @@ import { HabitProvider } from './contexts/habits/HabitContext';
 import { TaskProvider } from './contexts/tasks/TaskContext';
 import { VoiceNotesProvider } from './contexts/voiceNotes/VoiceNotesContext';
 import { NoteProvider } from './contexts/notes/NoteContext';
+import { eventManager } from './lib/events/EventManager';
 
 function App() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
+    },
+  });
 
   useEffect(() => {
     console.log("App component mounted");
+    
+    // Report successful app initialization after a small delay
+    setTimeout(() => {
+      console.log("App initialization complete");
+      eventManager.emit('app:initialization-complete', {});
+    }, 500);
+    
+    // Listen for route changes
+    const handleRouteChange = () => {
+      console.log("Route changed to:", window.location.pathname);
+    };
+    
+    window.addEventListener('popstate', handleRouteChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   return (

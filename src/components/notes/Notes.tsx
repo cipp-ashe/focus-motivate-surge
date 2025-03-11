@@ -34,16 +34,20 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
 
   // Listen for formatting events
   useEffect(() => {
-    const handleFormatStart = ({ noteId }: { noteId: string }) => {
-      if (selectedNote && selectedNote.id === noteId) {
-        console.log('Format operation started for note:', noteId);
+    console.log("Setting up note formatting event listeners");
+    
+    const handleFormatStart = (data: { noteId: string; action: string }) => {
+      console.log("Format start event received:", data);
+      if (selectedNote && selectedNote.id === data.noteId) {
+        console.log('Format operation started for note:', data.noteId);
         setIsFormatting(true);
       }
     };
 
-    const handleFormatComplete = ({ noteId }: { noteId: string }) => {
-      if (selectedNote && selectedNote.id === noteId) {
-        console.log('Format operation completed for note:', noteId);
+    const handleFormatComplete = (data: { noteId: string }) => {
+      console.log("Format complete event received:", data);
+      if (selectedNote && selectedNote.id === data.noteId) {
+        console.log('Format operation completed for note:', data.noteId);
         setIsFormatting(false);
       }
     };
@@ -56,6 +60,11 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
       formatCompleteUnsubscribe();
     };
   }, [selectedNote]);
+
+  // Add debugging to check component rendering
+  useEffect(() => {
+    console.log("Notes component rendered", { hideNotes, selectedNote });
+  }, [hideNotes, selectedNote]);
 
   return (
     <div className="h-full flex flex-col">
