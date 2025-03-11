@@ -83,7 +83,7 @@ export const useHabitTaskProcessor = () => {
         console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
         
         // Ensure task has the proper taskType based on the metric type
-        const properTaskType = determineTaskType(event.taskType, event.metricType);
+        const properTaskType = determineTaskType(event.taskType, event.metricType, event.name);
         
         // Only update if the task type needs to be changed
         // Check if the task type is not a valid TaskType or doesn't match the proper type
@@ -108,8 +108,8 @@ export const useHabitTaskProcessor = () => {
           window.dispatchEvent(new Event('force-task-update'));
         }, 100);
       } else {
-        // Determine proper task type from the metric type
-        const taskType = determineTaskType(event.taskType, event.metricType);
+        // Determine proper task type from the metric type AND habit name
+        const taskType = determineTaskType(event.taskType, event.metricType, event.name);
         
         // Create the habit task using the creator hook
         const newTaskId = createHabitTask(
@@ -159,13 +159,26 @@ export const useHabitTaskProcessor = () => {
   };
   
   // Helper function to determine the appropriate task type from habit metric type
-  const determineTaskType = (taskType?: TaskType, metricType?: string): TaskType => {
+  // Now also considers the habit name for more accurate detection
+  const determineTaskType = (taskType?: TaskType, metricType?: string, habitName?: string): TaskType => {
     // If a specific task type is provided and it's valid, use it
     if (taskType && isValidTaskType(taskType)) {
       return taskType;
     }
     
-    console.log(`Determining task type from metric type: ${metricType}`);
+    console.log(`Determining task type from metric type: ${metricType} and name: ${habitName}`);
+    
+    // First check if the habit name indicates a journal task
+    if (habitName) {
+      const nameLower = habitName.toLowerCase();
+      if (nameLower.includes('journal') || 
+          nameLower.includes('gratitude') || 
+          nameLower.includes('diary') ||
+          nameLower.includes('reflect')) {
+        console.log(`Detected journal task from name: ${habitName}`);
+        return 'journal';
+      }
+    }
     
     // Aligned mapping between metric types and task types
     switch (metricType) {
@@ -208,14 +221,6 @@ export const useHabitTaskProcessor = () => {
     
     // Add robust logging for debugging
     console.log(`Handling habit schedule event for ${event.name} (${event.habitId}), templateId: ${event.templateId}, metricType: ${event.metricType}`);
-    
-    // Special handling for journal type habits based on name
-    if (event.name.toLowerCase().includes('journal') || 
-        event.name.toLowerCase().includes('gratitude') || 
-        event.name.toLowerCase().includes('reflect')) {
-      console.log(`Detected journal-like habit: ${event.name}, forcing journal task type`);
-      event.metricType = 'journal';
-    }
     
     // Ensure date format is correct - expect string format like "Sun Mar 09 2025"
     if (typeof event.date !== 'string' || event.date.split(' ').length !== 4) {
@@ -267,7 +272,11 @@ export const useHabitTaskProcessor = () => {
           if (!task.taskType || !isValidTaskType(task.taskType)) {
             // Convert to appropriate type based on habit metrics
             // For now, default to regular if we can't determine
-            task.taskType = 'regular';
+            if (task.name && task.name.toLowerCase().includes('journal')) {
+              task.taskType = 'journal';
+            } else {
+              task.taskType = 'regular';
+            }
             
             // Save the updated task type
             taskStorage.updateTask(task.id, task);

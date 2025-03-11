@@ -45,8 +45,23 @@ export const useHabitTaskIntegration = () => {
         return;
       }
       
-      // Create a new habit task with the appropriate task type
-      const taskType = event.metricType === 'timer' ? 'timer' : 'regular';
+      // Determine the appropriate task type based on habit name and metric type
+      let taskType = 'regular';
+      
+      // Check if this is a journal by name
+      const nameLower = event.name.toLowerCase();
+      if (nameLower.includes('journal') || 
+          nameLower.includes('gratitude') || 
+          nameLower.includes('diary') ||
+          nameLower.includes('reflect')) {
+        taskType = 'journal';
+      } 
+      // Or check by metric type
+      else if (event.metricType === 'timer') {
+        taskType = 'timer';
+      } else if (event.metricType === 'journal') {
+        taskType = 'journal';
+      }
       
       console.log(`Creating new habit task for ${event.name} with type ${taskType}`);
       const result = habitTaskOperations.createHabitTask(

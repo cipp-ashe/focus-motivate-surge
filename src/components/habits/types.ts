@@ -5,7 +5,7 @@ export const DAYS_OF_WEEK: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fr
 
 export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export type MetricType = 'timer' | 'counter' | 'boolean' | 'rating' | 'journal';
+export type MetricType = 'timer' | 'counter' | 'boolean' | 'rating' | 'journal' | 'checklist' | 'voicenote' | 'screenshot';
 
 export interface HabitMetric {
   type: MetricType;

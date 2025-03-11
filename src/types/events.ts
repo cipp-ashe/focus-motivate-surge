@@ -7,6 +7,7 @@ export interface TimerEventPayloads {
     name: string;
     duration: number;
     date: string;
+    metricType?: string;
   };
   'habit:template-update': any;
   'habit:template-delete': { 
