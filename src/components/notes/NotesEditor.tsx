@@ -1,3 +1,4 @@
+
 import React, { useCallback, forwardRef, ForwardedRef, useState } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -115,6 +116,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   };
 
   const handleBlur = useCallback(() => {
+    // Auto-save on blur if there's content and it's different from the original
     if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
       handleSave();
     }
