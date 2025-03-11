@@ -70,7 +70,8 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       createJournalFromHabit(habit, templateId);
       return;
     }
-    else if (habit.metrics?.type === 'checklist') {
+    // Fix type comparison - don't compare string literal 'checklist' with the habit metrics type
+    else if (habit.metrics?.type && ['checklist', 'todo'].includes(habit.metrics.type)) {
       // Create a checklist task
       const taskId = habitTaskOperations.createHabitTask(
         habit.id,
@@ -89,7 +90,8 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       }
       return;
     }
-    else if (habit.metrics?.type === 'voicenote') {
+    // Fix type comparison - don't compare string literal 'voicenote' with the habit metrics type
+    else if (habit.metrics?.type && ['voicenote', 'audio'].includes(habit.metrics.type)) {
       // Create a voice note task
       const taskId = habitTaskOperations.createHabitTask(
         habit.id,

@@ -85,8 +85,9 @@ export const useHabitTaskProcessor = () => {
         // Ensure task has the proper taskType based on the metric type
         const properTaskType = determineTaskType(event.taskType, event.metricType);
         
-        // Only update if the task type needs to be changed - don't convert from a specific type back to "habit"
-        if (existingTask.taskType === 'habit' || !existingTask.taskType) {
+        // Only update if the task type needs to be changed
+        // Instead of comparing to "habit", check if it doesn't match the proper type
+        if (!existingTask.taskType || existingTask.taskType !== properTaskType) {
           const updatedTask = {
             ...existingTask,
             taskType: properTaskType
@@ -153,8 +154,8 @@ export const useHabitTaskProcessor = () => {
   
   // Helper function to determine the appropriate task type
   const determineTaskType = (taskType?: TaskType, metricType?: string): TaskType => {
-    // If a specific non-habit task type is provided, use it
-    if (taskType && taskType !== 'habit') {
+    // If a specific task type is provided, use it (as long as it's a valid TaskType)
+    if (taskType && taskType !== 'regular') {
       return taskType;
     }
     
@@ -163,15 +164,15 @@ export const useHabitTaskProcessor = () => {
       return 'timer';
     } else if (metricType === 'journal') {
       return 'journal';
-    } else if (metricType === 'checklist') {
+    } else if (metricType === 'checklist' || metricType === 'todo') {
       return 'checklist';
-    } else if (metricType === 'voicenote') {
+    } else if (metricType === 'voicenote' || metricType === 'audio') {
       return 'voicenote';
     } else if (metricType === 'screenshot') {
       return 'screenshot';
     }
     
-    // Default fallback - use regular instead of habit
+    // Default fallback
     return 'regular';
   };
   

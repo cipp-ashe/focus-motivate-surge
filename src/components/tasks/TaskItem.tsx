@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Task, Tag } from '@/types/tasks';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -29,14 +28,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
         return <Timer className="h-4 w-4 text-purple-400" />;
       case 'screenshot':
         return <Image className="h-4 w-4 text-blue-400" />;
-      case 'habit':
-        return <Calendar className="h-4 w-4 text-green-400" />;
       case 'journal':
         return <BookOpen className="h-4 w-4 text-amber-400" />;
       case 'checklist':
         return <CheckSquare className="h-4 w-4 text-cyan-400" />;
       case 'voicenote':
         return <Mic className="h-4 w-4 text-rose-400" />;
+      case 'regular':
       default:
         return <FileText className="h-4 w-4 text-primary" />;
     }

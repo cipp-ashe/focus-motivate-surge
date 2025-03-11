@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Task } from '@/types/tasks';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -116,11 +115,11 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   const getTaskTypeDisplay = () => {
     switch (task.taskType) {
       case 'timer': return 'Timer Task';
-      case 'habit': return 'Habit Task';
       case 'screenshot': return 'Screenshot Task';
       case 'journal': return 'Journal Entry';
       case 'checklist': return 'Checklist';
       case 'voicenote': return 'Voice Note';
+      case 'regular': return 'Regular Task';
       default: return 'Regular Task';
     }
   };
