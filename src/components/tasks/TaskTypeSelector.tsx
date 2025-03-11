@@ -12,7 +12,9 @@ import {
   Timer, 
   FileText, 
   BookOpen, 
-  CheckSquare
+  CheckSquare,
+  Image,
+  Mic
 } from 'lucide-react';
 
 interface TaskTypeSelectorProps {
@@ -56,6 +58,18 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
           <div className="flex items-center gap-2">
             <CheckSquare className="h-4 w-4 text-cyan-400" />
             <span>Checklist</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="screenshot">
+          <div className="flex items-center gap-2">
+            <Image className="h-4 w-4 text-blue-400" />
+            <span>Screenshot</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="voicenote">
+          <div className="flex items-center gap-2">
+            <Mic className="h-4 w-4 text-rose-400" />
+            <span>Voice Note</span>
           </div>
         </SelectItem>
       </SelectContent>
