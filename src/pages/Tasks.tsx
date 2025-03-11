@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
@@ -44,6 +45,8 @@ const TaskPage = () => {
       
       const customEvent = event as CustomEvent;
       const { taskId, taskName, items } = customEvent.detail;
+      
+      console.log('Opening checklist:', taskId, taskName, items);
       
       // Set current checklist task and open the sheet
       setCurrentChecklistTask({
@@ -155,6 +158,7 @@ const TaskPage = () => {
               placeholder="Add new item..."
               className="flex-1"
               onKeyDown={handleKeyPress}
+              autoFocus
             />
             <Button onClick={handleAddItem}>
               <Plus className="h-4 w-4" />

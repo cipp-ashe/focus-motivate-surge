@@ -1,4 +1,3 @@
-
 import { Task } from "@/types/tasks";
 import { Sparkles, X, Clock, BookOpen, Image, CheckSquare, Mic, Zap } from "lucide-react";
 import { TaskTags } from "./TaskTags";
@@ -8,6 +7,7 @@ import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
+import { eventBus } from "@/lib/eventBus";
 
 interface TaskContentProps {
   task: Task;
@@ -107,8 +107,7 @@ export const TaskContent = ({
         break;
       case 'checklist':
         // Open checklist view - DON'T convert to timer
-        // Just emit task:select to select the task, without converting it
-        eventManager.emit('task:select', task.id);
+        console.log('Opening checklist for task:', task.id, task.name);
         
         // Create and dispatch a custom event to open checklist view
         // Allow opening even if no items exist yet
