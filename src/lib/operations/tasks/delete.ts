@@ -1,8 +1,7 @@
 
-import { taskStorage } from '@/lib/storage/taskStorage';
+import { taskStorage } from '@/lib/storage/task';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
-import { taskRelationshipStorage } from '@/lib/storage/task/taskRelationshipStorage';
 
 /**
  * Operations related to deleting tasks

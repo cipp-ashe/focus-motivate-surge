@@ -1,5 +1,9 @@
-import { taskStorage, ACTIVE_TASKS_KEY, COMPLETED_TASKS_KEY } from '../taskStorage';
+
+import { taskStorage } from '../task/index';
 import { Task } from '@/types/tasks';
+import { constants } from '../task/constants';
+
+const { ACTIVE_TASKS_KEY, COMPLETED_TASKS_KEY } = constants;
 
 describe('taskStorage', () => {
   // Mock localStorage
