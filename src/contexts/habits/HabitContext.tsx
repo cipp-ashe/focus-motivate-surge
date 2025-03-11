@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -14,7 +15,7 @@ const HabitActionsContext = createContext<HabitContextActions | undefined>(undef
 export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
   
-  // Set up event handlers - remove parameters to match the function signature
+  // Set up event handlers - now without parameters
   useHabitEvents();
 
   // Load initial templates

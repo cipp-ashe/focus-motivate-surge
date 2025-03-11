@@ -4,7 +4,6 @@ import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { activeTasksStorage } from '@/lib/storage/task/activeTasksStorage';
 import { v4 as uuidv4 } from 'uuid';
-import { TimerEventType } from '@/types/events';
 
 export const useTaskManager = () => {
   const createTask = useCallback((task: Omit<Task, 'id' | 'createdAt'>) => {
@@ -18,7 +17,7 @@ export const useTaskManager = () => {
     activeTasksStorage.addTask(newTask);
     
     // Emit event
-    eventBus.emit('task:create' as TimerEventType, newTask);
+    eventBus.emit('task:create', newTask);
     
     return newTask;
   }, []);
@@ -40,7 +39,7 @@ export const useTaskManager = () => {
     activeTasksStorage.updateTask(taskId, updatedTask);
     
     // Emit event
-    eventBus.emit('task:update' as TimerEventType, { taskId, updates });
+    eventBus.emit('task:update', { taskId, updates });
     
     return updatedTask;
   }, []);
@@ -50,7 +49,7 @@ export const useTaskManager = () => {
     activeTasksStorage.removeTask(taskId);
     
     // Emit event
-    eventBus.emit('task:delete' as TimerEventType, { taskId, reason, suppressToast });
+    eventBus.emit('task:delete', { taskId, reason, suppressToast });
   }, []);
   
   return { createTask, updateTask, deleteTask };

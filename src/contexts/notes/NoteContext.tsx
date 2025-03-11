@@ -262,8 +262,8 @@ export const NoteProvider = ({ children }: { children: ReactNode }) => {
       const filteredNotes = notes.filter((note: Note) => note.id !== noteId);
       localStorage.setItem('notes', JSON.stringify(filteredNotes));
       
-      // Emit note:deleted event to notify other systems
-      eventBus.emit('note:deleted', { noteId });
+      // Emit note:deleted event to notify other systems - FIX: Use 'id' instead of 'noteId'
+      eventBus.emit('note:deleted', { id: noteId });
       
       toast.success('Note deleted 🗑️');
     },

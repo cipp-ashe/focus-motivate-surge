@@ -1,4 +1,3 @@
-
 import mitt, { Emitter } from 'mitt';
 import { Note } from '@/types/notes';
 
@@ -18,6 +17,7 @@ type Events = {
   'note:update': Note;
   'note:delete': { id: string };
   'note:deleted': { id: string; noteId?: string };
+  'note:view': { noteId: string };
   'note:create-from-habit': { 
     habitId: string; 
     habitName: string; 
@@ -60,6 +60,10 @@ type Events = {
   'tag:link': any;
   'tag:unlink': any;
   'tags:force-update': any;
+  'tag:select': string;
+  'tag:remove': any;
+  'tag:create': any;
+  'tag:delete': any;
   // Quote events
   'quote:link-task': any;
   // Journal events
@@ -69,6 +73,9 @@ type Events = {
   // Habits check events
   'habits:check-pending': any;
   'habits:processed': any;
+  // Navigation events
+  'nav:route-change': { from: string; to: string };
+  'app:initialization-complete': any;
 };
 
 export interface EventPayloads {
@@ -87,6 +94,7 @@ export interface EventPayloads {
   'note:update': Note;
   'note:delete': { id: string };
   'note:deleted': { id: string; noteId?: string };
+  'note:view': { noteId: string };
   'note:create-from-habit': { 
     habitId: string; 
     habitName: string; 
@@ -129,6 +137,10 @@ export interface EventPayloads {
   'tag:link': any;
   'tag:unlink': any;
   'tags:force-update': any;
+  'tag:select': string;
+  'tag:remove': any;
+  'tag:create': any;
+  'tag:delete': any;
   // Quote events
   'quote:link-task': any;
   // Journal events
@@ -138,7 +150,10 @@ export interface EventPayloads {
   // Habits check events
   'habits:check-pending': any;
   'habits:processed': any;
-};
+  // Navigation events
+  'nav:route-change': { from: string; to: string };
+  'app:initialization-complete': any;
+}
 
 // Export event type and handler for use in other modules
 export type EventType = keyof Events;

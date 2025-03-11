@@ -80,8 +80,8 @@ export interface TimerEventPayloads {
     noteId: string;
   };
   'note:deleted': {
-    noteId: string;
-    id?: string;
+    id: string;
+    noteId?: string;
   };
   
   // Tag events

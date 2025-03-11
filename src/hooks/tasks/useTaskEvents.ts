@@ -2,7 +2,6 @@
 import { useCallback } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
-import { TimerEventType } from '@/types/events';
 
 export const useTaskEvents = () => {
   const forceTaskUpdate = useCallback(() => {
@@ -12,10 +11,10 @@ export const useTaskEvents = () => {
     window.dispatchEvent(new Event('force-task-update'));
     
     // Also emit via event bus for components using that system
-    eventBus.emit('task:reload' as any, {});
+    eventBus.emit('task:reload', {});
     
     // And via event manager
-    eventManager.emit('task:reload' as TimerEventType, {});
+    eventManager.emit('task:reload', {});
   }, []);
   
   return {
