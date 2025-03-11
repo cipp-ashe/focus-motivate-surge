@@ -1,18 +1,15 @@
 
 import React from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Timer, Image, Calendar, BookOpen, CheckSquare, Mic } from 'lucide-react';
+import { FileText, Timer, BookOpen, CheckSquare } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface TaskTabsListProps {
   taskCounts: {
     all: number;
     timer: number;
-    screenshot: number;
-    habit: number;
     journal: number;
     checklist: number;
-    voicenote: number;
     regular: number;
   };
 }
@@ -35,18 +32,6 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({ taskCounts }) => {
           {isMobile && <span className="sr-only">Timer tasks</span>}
           {isMobile && <span className="text-xs">{taskCounts.timer}</span>}
         </TabsTrigger>
-        <TabsTrigger value="screenshot" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''} data-[state=active]:bg-blue-500/10 data-[state=active]:text-blue-500`}>
-          <Image className="h-4 w-4 text-blue-400" />
-          {!isMobile && <span>Screenshots ({taskCounts.screenshot})</span>}
-          {isMobile && <span className="sr-only">Screenshot tasks</span>}
-          {isMobile && <span className="text-xs">{taskCounts.screenshot}</span>}
-        </TabsTrigger>
-        <TabsTrigger value="habit" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''} data-[state=active]:bg-green-500/10 data-[state=active]:text-green-500`}>
-          <Calendar className="h-4 w-4 text-green-400" />
-          {!isMobile && <span>Habits ({taskCounts.habit})</span>}
-          {isMobile && <span className="sr-only">Habit tasks</span>}
-          {isMobile && <span className="text-xs">{taskCounts.habit}</span>}
-        </TabsTrigger>
         <TabsTrigger value="journal" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''} data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-500`}>
           <BookOpen className="h-4 w-4 text-amber-400" />
           {!isMobile && <span>Journal ({taskCounts.journal})</span>}
@@ -58,12 +43,6 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({ taskCounts }) => {
           {!isMobile && <span>Checklists ({taskCounts.checklist})</span>}
           {isMobile && <span className="sr-only">Checklist tasks</span>}
           {isMobile && <span className="text-xs">{taskCounts.checklist}</span>}
-        </TabsTrigger>
-        <TabsTrigger value="voicenote" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''} data-[state=active]:bg-rose-500/10 data-[state=active]:text-rose-500`}>
-          <Mic className="h-4 w-4 text-rose-400" />
-          {!isMobile && <span>Voice Notes ({taskCounts.voicenote})</span>}
-          {isMobile && <span className="sr-only">Voice note tasks</span>}
-          {isMobile && <span className="text-xs">{taskCounts.voicenote}</span>}
         </TabsTrigger>
         <TabsTrigger value="regular" className={`flex items-center gap-1 ${isMobile ? 'flex-1 justify-center' : ''} data-[state=active]:bg-primary/10 data-[state=active]:text-primary`}>
           <FileText className="h-4 w-4 text-primary" />
