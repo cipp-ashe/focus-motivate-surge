@@ -1,4 +1,3 @@
-
 export interface TimerEventPayloads {
   // Habit events
   'habit:schedule': {
@@ -42,6 +41,7 @@ export interface TimerEventPayloads {
   'tasks:force-update': {
     timestamp: string;
   };
+  'timer:set-task': { id: string; name: string; duration?: number } | any;
   
   // Timer events
   'timer:init': { taskName: string; duration: number };

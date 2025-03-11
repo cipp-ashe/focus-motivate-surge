@@ -17,6 +17,7 @@ type Events = {
   'timer:collapse': { taskName: string; saveNotes: boolean };
   'timer:metrics-update': { taskName: string; metrics: any };
   'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
+  'timer:set-task': { id: string; name: string; duration?: number } | any;
   'note:create': Note;
   'note:update': Note;
   'note:delete': { id: string };
