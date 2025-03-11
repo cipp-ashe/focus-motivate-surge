@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { TemplateSelectionSheet } from '@/components/habits';
 import { habitTemplates } from '@/utils/habitTemplates';
-import { eventManager } from '@/lib/events/EventManager';
+import { eventBus } from '@/lib/eventBus';
 import { ActiveTemplate } from './types';
 
 interface HabitTemplateManagerProps {
@@ -17,6 +17,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   const [customTemplates, setCustomTemplates] = useState([]);
   const isAddingRef = useRef<boolean>(false);
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastAddedTemplateRef = useRef<string | null>(null);
   
   // Load custom templates
   useEffect(() => {
@@ -67,8 +68,15 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       return;
     }
     
-    // Set global cooldown
+    // Prevent adding the same template twice
+    if (lastAddedTemplateRef.current === templateId && isAddingRef.current) {
+      console.log("Preventing duplicate template add:", templateId);
+      return;
+    }
+    
+    // Set global cooldown and track last added template
     isAddingRef.current = true;
+    lastAddedTemplateRef.current = templateId;
     
     // Check both built-in and custom templates
     const template = 
@@ -79,7 +87,7 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
       console.log("Adding template:", template);
       
       // Emit template-add event to context - WITH suppressToast flag to prevent duplicate toasts
-      eventManager.emit('habit:template-add', templateId);
+      eventBus.emit('habit:template-add', templateId);
       
       // Single toast notification from this component only
       toast.success(`Added template: ${template.name}`);
@@ -91,7 +99,8 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
         // Allow new additions after a shorter delay
         cooldownTimerRef.current = setTimeout(() => {
           isAddingRef.current = false;
-        }, 300);
+          lastAddedTemplateRef.current = null;
+        }, 500);
       }, 300);
     }
   };

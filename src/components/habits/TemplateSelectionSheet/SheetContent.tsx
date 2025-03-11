@@ -85,8 +85,8 @@ const SheetContent: React.FC<SheetContentProps> = ({
     // Mark as processed for today
     processedToday.current.add(template.id);
     
-    // Add template only once - we directly call the callback 
-    // but do NOT emit an event - the callback will do that
+    // Call the callback but do NOT emit any events directly from here
+    // The callback (onSelectTemplate) will handle event emission to avoid duplicates
     console.log(`Selecting template: ${template.id}`);
     onSelectTemplate(template.id);
     

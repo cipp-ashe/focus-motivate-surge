@@ -36,6 +36,13 @@ const TemplateList: React.FC<TemplateListProps> = ({
   useEffect(() => {
     console.log("ActiveTemplateList - activeTemplates:", activeTemplates);
     
+    // Check for duplicate template IDs and log a warning
+    const templateIds = activeTemplates.map(t => t.templateId);
+    const duplicateIds = templateIds.filter((id, index) => templateIds.indexOf(id) !== index);
+    if (duplicateIds.length > 0) {
+      console.warn("Found duplicate template IDs:", duplicateIds);
+    }
+    
     // Load custom templates for reference
     try {
       const customTemplatesStr = localStorage.getItem('custom-templates');
@@ -99,20 +106,25 @@ const TemplateList: React.FC<TemplateListProps> = ({
     );
   }
 
+  // Filter out any potential duplicate templates before rendering
+  const uniqueTemplates = activeTemplates.filter((template, index, self) => 
+    index === self.findIndex(t => t.templateId === template.templateId)
+  );
+
   return (
     <>
       <div className={cn(
         "grid gap-3",
-        activeTemplates.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+        uniqueTemplates.length > 1 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
       )}>
-        {activeTemplates.map((template, index) => {
+        {uniqueTemplates.map((template, index) => {
           // Check if it's a custom template first
           if (isCustomTemplate(template.templateId)) {
             const customTemplateInfo = getCustomTemplateInfo(template.templateId);
             
             return (
               <div
-                key={template.templateId}
+                key={`${template.templateId}-${index}`}
                 draggable
                 onDragStart={(e) => handleDragStart(e, index)}
                 onDragOver={(e) => handleDragOver(e, index)}
@@ -149,7 +161,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
 
           return (
             <div
-              key={template.templateId}
+              key={`${template.templateId}-${index}`}
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => handleDragOver(e, index)}
