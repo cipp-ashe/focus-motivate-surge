@@ -1,21 +1,13 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic
-} from 'lucide-react';
-
+import { CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic } from 'lucide-react';
 const IndexPage: React.FC = () => {
   useEffect(() => {
     console.log("Index page mounted");
   }, []);
-
-  return (
-    <div className="min-h-screen py-8 px-4 sm:px-6">
+  return <div className="min-h-screen py-8 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-12 text-primary">
-          Productivity Dashboard
-        </h1>
+        <h1 className="text-4xl font-bold text-center mb-12 text-primary">Focus Dashboard</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Task card */}
@@ -73,8 +65,6 @@ const IndexPage: React.FC = () => {
           </Link>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default IndexPage;
