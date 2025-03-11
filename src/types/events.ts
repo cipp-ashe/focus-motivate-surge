@@ -1,4 +1,3 @@
-
 export interface TimerEventPayloads {
   // Habit events
   'habit:schedule': {
@@ -38,6 +37,11 @@ export interface TimerEventPayloads {
   'task:complete': {
     taskId: string;
     metrics?: any;
+  };
+  'task:dismiss': {
+    taskId: string;
+    habitId: string;
+    date: string;
   };
   'task:reload': any;
   'tasks:force-update': {

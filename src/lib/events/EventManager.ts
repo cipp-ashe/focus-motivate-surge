@@ -1,3 +1,4 @@
+
 import mitt, { Emitter } from 'mitt';
 import { Note } from '@/types/notes';
 import { TimerEventType, TimerEventPayloads } from '@/types/events';
@@ -43,6 +44,11 @@ type Events = {
   'task:delete': any;
   'task:select': any;
   'task:complete': any;
+  'task:dismiss': {
+    taskId: string;
+    habitId: string;
+    date: string;
+  };
   'task:reload': any;
   'tasks:force-update': any;
   // Habit events

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -122,10 +121,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         </TabsContent>
 
         <TabsContent value="completed" className={tabContentClass}>
-          <CompletedTasks
-            tasks={completedTasks}
-            onTasksClear={handleClearCompletedTasks}
-          />
+          <CompletedTasks onTasksClear={handleClearCompletedTasks} />
         </TabsContent>
       </Tabs>
     </div>
