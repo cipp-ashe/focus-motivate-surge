@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+
+import { useState, useCallback, useEffect } from 'react';
 import { HabitDetail } from '@/components/habits/types';
 import { ActiveTemplate } from '@/components/habits/types';
 import { useHabitRelationships } from './useHabitRelationships';
 import { habitTaskOperations } from '@/lib/operations/tasks/habit';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
 export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: ActiveTemplate[]) => {
@@ -11,8 +12,59 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
   const [dismissedHabits, setDismissedHabits] = useState<string[]>([]);
   const { createTaskFromHabit, createJournalFromHabit } = useHabitRelationships();
   
+  // Listen for habit dismissed events
+  useEffect(() => {
+    // When a habit task is dismissed, mark the habit as dismissed
+    const handleHabitDismissed = (payload: { habitId: string; date: string }) => {
+      const { habitId } = payload;
+      console.log(`Marking habit ${habitId} as dismissed`);
+      
+      // Update dismissed habits list
+      setDismissedHabits(prev => {
+        if (prev.includes(habitId)) return prev;
+        return [...prev, habitId];
+      });
+    };
+    
+    // Set up event listener
+    const unsubscribe = eventManager.on('habit:dismissed', handleHabitDismissed);
+    
+    // Check localStorage for any already dismissed habits for today
+    const storedDismissed = localStorage.getItem('dismissedHabitTasks');
+    if (storedDismissed) {
+      try {
+        const dismissed = JSON.parse(storedDismissed);
+        const today = new Date().toDateString();
+        
+        // Find habits dismissed today
+        Object.entries(dismissed).forEach(([key, _]) => {
+          if (key.includes(today)) {
+            const [habitId] = key.split('-');
+            if (habitId && todaysHabits.some(h => h.id === habitId)) {
+              setDismissedHabits(prev => {
+                if (prev.includes(habitId)) return prev;
+                return [...prev, habitId];
+              });
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error loading dismissed habits:', error);
+      }
+    }
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [todaysHabits]);
+  
   // Handle marking a habit as complete
   const handleHabitComplete = useCallback((habitId: string, completed: boolean) => {
+    // Don't allow changing dismissed habits
+    if (dismissedHabits.includes(habitId)) {
+      return;
+    }
+    
     setCompletedHabits(prev => {
       const updated = new Set(prev);
       if (completed) {
@@ -30,7 +82,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
     const templateId = habit.relationships?.templateId || '';
     
     // Emit event for habit completion
-    eventBus.emit('habit:complete', {
+    eventManager.emit('habit:complete', {
       habitId,
       completed,
       date: new Date().toDateString(),
@@ -38,7 +90,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
     });
     
     toast.success(`Habit ${completed ? 'completed' : 'uncompleted'}: ${habit.name}`);
-  }, [todaysHabits]);
+  }, [todaysHabits, dismissedHabits]);
   
   // Handle adding a habit to tasks
   const handleAddHabitToTasks = useCallback((habit: HabitDetail) => {

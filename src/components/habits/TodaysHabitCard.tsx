@@ -42,21 +42,22 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
   };
 
   return (
-    <div className={`p-4 border rounded-lg shadow-sm transition-colors ${completed ? 'bg-muted/50' : 'bg-card'}`}>
+    <div className={`p-4 border rounded-lg shadow-sm transition-colors ${completed || dismissed ? 'bg-muted/50' : 'bg-card'}`}>
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
           <Checkbox 
             id={`habit-${habit.id}`}
-            checked={completed}
+            checked={completed || dismissed}
             onCheckedChange={onComplete}
             className="mt-1"
+            disabled={dismissed}
           />
           
           <div>
             <div className="flex items-center gap-2 mb-1">
               <label 
                 htmlFor={`habit-${habit.id}`}
-                className={`font-medium text-base cursor-pointer ${completed ? 'line-through text-muted-foreground' : ''}`}
+                className={`font-medium text-base cursor-pointer ${(completed || dismissed) ? 'line-through text-muted-foreground' : ''}`}
               >
                 {habit.name}
               </label>
@@ -86,7 +87,7 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          className={`flex items-center gap-1.5 ${hasTask ? 'text-muted-foreground' : ''}`}
+          className={`flex items-center gap-1.5 ${hasTask || dismissed ? 'text-muted-foreground' : ''}`}
           onClick={onAddToTasks}
           disabled={hasTask || dismissed}
         >

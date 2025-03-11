@@ -1,9 +1,11 @@
+
 import { useEffect, useCallback, useRef } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task, TaskType } from '@/types/tasks';
 import { HabitDetail } from '@/components/habits/types';
 import { habitTaskOperations } from '@/lib/operations/tasks/habit';
 import { taskStorage } from '@/lib/storage/taskStorage';
+import { eventManager } from '@/lib/events/EventManager';
 
 /**
  * Hook that handles integration between habits and tasks
@@ -108,6 +110,9 @@ export const useHabitTaskIntegration = () => {
     // Store dismissed habits in localStorage to persist across sessions
     const dismissedHabits = Object.fromEntries(dismissedHabitsRef.current.entries());
     localStorage.setItem('dismissedHabitTasks', JSON.stringify(dismissedHabits));
+    
+    // Emit event to mark habit as dismissed in the UI
+    eventManager.emit('habit:dismissed', { habitId, date });
   }, []);
   
   // Check for any habits that should be tasks
