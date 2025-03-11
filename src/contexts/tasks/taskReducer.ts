@@ -1,4 +1,3 @@
-
 import type { TaskContextState } from './types';
 import type { Task } from '@/types/tasks';
 
@@ -7,6 +6,7 @@ type TaskAction =
   | { type: 'ADD_TASK'; payload: Task }
   | { type: 'UPDATE_TASK'; payload: { taskId: string; updates: Partial<Task> } }
   | { type: 'DELETE_TASK'; payload: { taskId: string, reason?: string } }
+  | { type: 'DISMISS_TASK'; payload: { taskId: string, habitId: string, date: string } }
   | { type: 'COMPLETE_TASK'; payload: { taskId: string; metrics?: any } }
   | { type: 'DELETE_TASKS_BY_TEMPLATE'; payload: { templateId: string } }
   | { type: 'SELECT_TASK'; payload: string | null };
@@ -68,6 +68,33 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
         ...state,
         items: isInItems ? state.items.filter(task => task.id !== taskId) : state.items,
         completed: isInCompleted ? state.completed.filter(task => task.id !== taskId) : state.completed,
+        selected: state.selected === taskId ? null : state.selected,
+      };
+    }
+    
+    case 'DISMISS_TASK': {
+      const taskId = action.payload.taskId;
+      const task = state.items.find(t => t.id === taskId);
+      
+      if (!task) {
+        console.log(`TaskContext: Task ${taskId} not found for dismissal`);
+        return state;
+      }
+      
+      // Create a dismissed version of the task
+      const dismissedTask: Task = {
+        ...task,
+        dismissedAt: new Date().toISOString(),
+        clearReason: 'dismissed'
+      };
+      
+      console.log(`TaskContext: Task ${taskId} dismissed`, dismissedTask);
+      
+      // Move to completed array but mark as dismissed
+      return {
+        ...state,
+        items: state.items.filter(t => t.id !== taskId),
+        completed: [...state.completed, dismissedTask],
         selected: state.selected === taskId ? null : state.selected,
       };
     }

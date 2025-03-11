@@ -1,4 +1,3 @@
-
 import { useEffect, useCallback, useRef } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task, TaskType } from '@/types/tasks';
@@ -12,6 +11,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 export const useHabitTaskIntegration = () => {
   const processingHabitsRef = useRef<Set<string>>(new Set());
   const syncCountRef = useRef(0);
+  const dismissedHabitsRef = useRef<Map<string, string>>(new Map()); // Track dismissed habits for today
   
   // Process habit schedule events
   const handleHabitSchedule = useCallback((event: {
@@ -26,6 +26,12 @@ export const useHabitTaskIntegration = () => {
     const habitKey = `${event.habitId}-${event.date}`;
     if (processingHabitsRef.current.has(habitKey)) {
       console.log(`Already processing habit ${event.habitId} for ${event.date}, skipping`);
+      return;
+    }
+    
+    // Skip if this habit was dismissed for today
+    if (dismissedHabitsRef.current.has(habitKey)) {
+      console.log(`Habit ${event.habitId} was dismissed for ${event.date}, skipping task creation`);
       return;
     }
     
@@ -91,6 +97,19 @@ export const useHabitTaskIntegration = () => {
     }
   }, []);
   
+  // Handle habit task dismissed event
+  const handleHabitTaskDismissed = useCallback((event: CustomEvent) => {
+    const { habitId, date } = event.detail;
+    const habitKey = `${habitId}-${date}`;
+    
+    console.log(`Marking habit ${habitId} as dismissed for ${date}`);
+    dismissedHabitsRef.current.set(habitKey, new Date().toISOString());
+    
+    // Store dismissed habits in localStorage to persist across sessions
+    const dismissedHabits = Object.fromEntries(dismissedHabitsRef.current.entries());
+    localStorage.setItem('dismissedHabitTasks', JSON.stringify(dismissedHabits));
+  }, []);
+  
   // Check for any habits that should be tasks
   const syncHabitsWithTasks = useCallback(() => {
     // For each habit that should have a task today, ensure the task exists
@@ -123,7 +142,28 @@ export const useHabitTaskIntegration = () => {
   
   // Set up event listeners
   useEffect(() => {
-    console.log("Setting up habit task integration");
+    console.log("Setting up habit task integration with dismissal handling");
+    
+    // Load previously dismissed habits from localStorage
+    const storedDismissed = localStorage.getItem('dismissedHabitTasks');
+    if (storedDismissed) {
+      try {
+        const dismissed = JSON.parse(storedDismissed);
+        dismissedHabitsRef.current = new Map(Object.entries(dismissed));
+        
+        // Clean up old entries (only keep today's)
+        const today = new Date().toDateString();
+        Array.from(dismissedHabitsRef.current.keys()).forEach(key => {
+          if (!key.includes(today)) {
+            dismissedHabitsRef.current.delete(key);
+          }
+        });
+        
+        console.log(`Loaded ${dismissedHabitsRef.current.size} dismissed habits for today`);
+      } catch (error) {
+        console.error('Error loading dismissed habits:', error);
+      }
+    }
     
     // Listen for habit schedule events
     const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
@@ -144,6 +184,9 @@ export const useHabitTaskIntegration = () => {
       }
     });
     
+    // Listen for habit task dismissed events
+    window.addEventListener('habit-task-dismissed', handleHabitTaskDismissed as EventListener);
+    
     // Check for any pending habits that should be tasks
     syncHabitsWithTasks();
     
@@ -153,9 +196,10 @@ export const useHabitTaskIntegration = () => {
     return () => {
       unsubscribeSchedule();
       unsubscribeComplete();
+      window.removeEventListener('habit-task-dismissed', handleHabitTaskDismissed as EventListener);
       clearInterval(intervalId);
     };
-  }, [handleHabitSchedule, syncHabitsWithTasks]);
+  }, [handleHabitSchedule, syncHabitsWithTasks, handleHabitTaskDismissed]);
   
   return {
     syncHabitsWithTasks

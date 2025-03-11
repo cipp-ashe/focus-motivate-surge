@@ -17,6 +17,17 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
     dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
   }, [dispatch]);
   
+  // Add new handler for task dismissal
+  const handleTaskDismiss = useCallback(({ taskId, habitId, date }) => {
+    console.log("TaskEvents: Dismissing habit task", taskId, "for habit", habitId, "on", date);
+    dispatch({ type: 'DISMISS_TASK', payload: { taskId, habitId, date } });
+    
+    // Emit an event to track this dismissal in the habit system
+    window.dispatchEvent(new CustomEvent('habit-task-dismissed', {
+      detail: { habitId, taskId, date }
+    }));
+  }, [dispatch]);
+  
   // Handle task updates
   const handleTaskUpdate = useCallback(({ taskId, updates }) => {
     console.log("TaskEvents: Updating task", taskId);
@@ -33,6 +44,7 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
     handleTaskComplete,
     handleTaskDelete,
     handleTaskUpdate,
-    handleTaskSelect
+    handleTaskSelect,
+    handleTaskDismiss
   };
 };

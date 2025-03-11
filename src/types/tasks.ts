@@ -1,4 +1,3 @@
-
 // Task type enum for type checking
 export type TaskType = 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote';
 
@@ -29,7 +28,8 @@ export interface Task {
   duration?: number;
   createdAt: string;
   completedAt?: string;
-  clearReason?: 'manual' | 'completed';
+  dismissedAt?: string; // New field to track when a task was dismissed
+  clearReason?: 'manual' | 'completed' | 'dismissed'; // Added 'dismissed' as a reason
   taskType?: TaskType; // Using the TaskType enum
   relationships?: {
     habitId?: string;    // If this task was created from a habit

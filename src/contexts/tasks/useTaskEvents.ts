@@ -1,83 +1,59 @@
 
-import { useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Task } from '@/types/tasks';
-import { useEventDebounce } from './events/useEventDebounce';
-import { useTaskReload } from './events/useTaskReload';
-import { useTaskCreationHandler } from './events/useTaskCreationHandler';
+import { eventBus } from '@/lib/eventBus';
 import { useTaskUpdateHandler } from './events/useTaskUpdateHandler';
-import { useTemplateHandler } from './events/useTemplateHandler';
-import { useHabitVerification } from './events/useHabitVerification';
-import { useTaskEventListeners } from './events/useTaskEventListeners';
 
 /**
- * Hook for handling task-related events with improved error handling, synchronization and verification
+ * Hook to manage task events
  */
 export const useTaskEvents = (
-  items: Task[],
-  completed: Task[],
+  tasks: Task[], 
+  completedTasks: Task[], 
   dispatch: React.Dispatch<any>
 ) => {
-  // Set up debouncing system
-  const {
-    lastEventTime,
-    setLastEventTime,
-    lastForceUpdateTime,
-    setLastForceUpdateTime,
-    shouldProcessEvent
-  } = useEventDebounce();
-  
-  // Set up task reload system
-  const {
-    pendingTaskUpdates,
-    setPendingTaskUpdates,
-    forceTasksReload: baseForceTasksReload
-  } = useTaskReload(dispatch);
-  
-  // Create a wrapped version of forceTasksReload that includes the debounce state
-  const forceTasksReload = useCallback(() => {
-    baseForceTasksReload(lastEventTime, setLastEventTime);
-  }, [baseForceTasksReload, lastEventTime, setLastEventTime]);
-  
-  // Set up task event handlers
-  const { handleTaskCreate } = useTaskCreationHandler(
-    items, 
-    dispatch, 
-    setPendingTaskUpdates
-  );
-  
+  // Get task event handlers
   const {
     handleTaskComplete,
     handleTaskDelete,
     handleTaskUpdate,
-    handleTaskSelect
+    handleTaskSelect,
+    handleTaskDismiss // Import the new handler
   } = useTaskUpdateHandler(dispatch);
   
-  const { handleTemplateDelete } = useTemplateHandler(dispatch);
-  
-  const { handleHabitCheck } = useHabitVerification(
-    items,
-    dispatch,
-    shouldProcessEvent
-  );
+  // Force reload of tasks from storage
+  const forceTasksReload = useCallback(() => {
+    console.log("TaskEvents: Forcing tasks reload");
+    window.dispatchEvent(new Event('force-task-update'));
+  }, []);
   
   // Set up event listeners
-  useTaskEventListeners(
-    items,
-    dispatch,
-    {
-      handleTaskCreate,
-      handleTaskComplete,
-      handleTaskDelete,
-      handleTaskUpdate,
-      handleTaskSelect,
-      handleTemplateDelete,
-      handleHabitCheck
-    },
-    forceTasksReload,
-    lastForceUpdateTime,
-    setLastForceUpdateTime
-  );
+  useEffect(() => {
+    console.log("TaskEvents: Setting up event listeners");
+    
+    const unsubTaskCreate = eventBus.on('task:create', (task) => {
+      console.log("TaskEvents: Task created", task.id);
+      dispatch({ type: 'ADD_TASK', payload: task });
+    });
+    
+    const unsubTaskUpdate = eventBus.on('task:update', handleTaskUpdate);
+    const unsubTaskDelete = eventBus.on('task:delete', handleTaskDelete);
+    const unsubTaskComplete = eventBus.on('task:complete', handleTaskComplete);
+    const unsubTaskSelect = eventBus.on('task:select', handleTaskSelect);
+    
+    // Add new subscription for task dismiss event
+    const unsubTaskDismiss = eventBus.on('task:dismiss', handleTaskDismiss);
+    
+    // Clean up subscriptions
+    return () => {
+      unsubTaskCreate();
+      unsubTaskUpdate();
+      unsubTaskDelete();
+      unsubTaskComplete();
+      unsubTaskSelect();
+      unsubTaskDismiss(); // Clean up the new subscription
+    };
+  }, [dispatch, handleTaskComplete, handleTaskDelete, handleTaskUpdate, handleTaskSelect, handleTaskDismiss]);
   
-  // Provide the reload function
   return { forceTasksReload };
 };

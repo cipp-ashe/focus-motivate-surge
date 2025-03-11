@@ -155,6 +155,27 @@ export const TaskContent = ({
     }
   };
 
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (task.relationships?.habitId) {
+      console.log('Dismissing habit task rather than deleting:', task.id);
+      
+      eventBus.emit('task:dismiss', { 
+        taskId: task.id, 
+        habitId: task.relationships.habitId,
+        date: task.relationships.date || new Date().toDateString() 
+      });
+      
+      toast.success(`Dismissed habit task for today: ${task.name}`, {
+        description: "You won't see this habit task today"
+      });
+    } else {
+      eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
+    }
+  };
+
   const durationInMinutes = Math.round((task.duration || 1500) / 60);
   
   const getTaskActionButton = () => {
@@ -327,8 +348,8 @@ export const TaskContent = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onDelete}
-            onTouchStart={onDelete}
+            onClick={handleDelete}
+            onTouchStart={handleDelete}
             className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation hover:bg-destructive/10"
             data-action="true"
           >
