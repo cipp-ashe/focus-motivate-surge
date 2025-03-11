@@ -11,6 +11,7 @@ import { ChecklistItem, Task } from '@/types/tasks';
 import { X, Plus, Save } from 'lucide-react';
 import { eventBus } from '@/lib/eventBus';
 import { v4 as uuidv4 } from 'uuid';
+import { MarkdownEditor } from '@/components/ui/markdown-editor';
 
 const TaskPage = () => {
   // Keep track of mounted state to prevent callbacks on unmounted component
@@ -26,6 +27,15 @@ const TaskPage = () => {
   } | null>(null);
   const [newItemText, setNewItemText] = useState('');
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  
+  // State for journal management
+  const [isJournalOpen, setIsJournalOpen] = useState(false);
+  const [currentJournalTask, setCurrentJournalTask] = useState<{
+    taskId: string;
+    taskName: string;
+    entry: string;
+  } | null>(null);
+  const [journalContent, setJournalContent] = useState('');
   
   // Set up event listeners for task actions with proper cleanup
   useEffect(() => {
@@ -63,6 +73,29 @@ const TaskPage = () => {
       }, 10);
     };
     
+    const handleOpenJournal = (event: Event) => {
+      if (!isMounted.current) return;
+      
+      const customEvent = event as CustomEvent;
+      const { taskId, taskName, entry } = customEvent.detail;
+      
+      console.log('Tasks.tsx - Received open-journal event:', { taskId, taskName, entry });
+      
+      // Set current journal task and open the sheet
+      setCurrentJournalTask({
+        taskId,
+        taskName,
+        entry: entry || ''
+      });
+      setJournalContent(entry || '');
+      setIsJournalOpen(true);
+      
+      // Force sheet to open (workaround for any potential issues)
+      setTimeout(() => {
+        setIsJournalOpen(true);
+      }, 10);
+    };
+    
     const handleOpenVoiceRecorder = (event: Event) => {
       if (!isMounted.current) return;
       
@@ -79,6 +112,7 @@ const TaskPage = () => {
     // Add event listeners
     window.addEventListener('show-image', handleShowImage);
     window.addEventListener('open-checklist', handleOpenChecklist);
+    window.addEventListener('open-journal', handleOpenJournal);
     window.addEventListener('open-voice-recorder', handleOpenVoiceRecorder);
     
     // Cleanup
@@ -86,6 +120,7 @@ const TaskPage = () => {
       isMounted.current = false;
       window.removeEventListener('show-image', handleShowImage);
       window.removeEventListener('open-checklist', handleOpenChecklist);
+      window.removeEventListener('open-journal', handleOpenJournal);
       window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder);
     };
   }, []); // Empty dependency array ensures this only runs once
@@ -143,6 +178,27 @@ const TaskPage = () => {
       setIsChecklistOpen(false);
     }
   };
+  
+  // Save journal entry to the task
+  const saveJournal = () => {
+    if (currentJournalTask) {
+      console.log('Saving journal entry for task:', {
+        taskId: currentJournalTask.taskId,
+        entry: journalContent
+      });
+      
+      eventBus.emit('task:update', {
+        taskId: currentJournalTask.taskId,
+        updates: { 
+          journalEntry: journalContent,
+          taskType: 'journal' // Ensure task type remains journal
+        }
+      });
+      
+      toast.success(`Saved journal entry for: ${currentJournalTask.taskName}`);
+      setIsJournalOpen(false);
+    }
+  };
 
   // Handle key press in the new item input
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -152,13 +208,23 @@ const TaskPage = () => {
   };
 
   // Log when sheet open state changes
-  const handleSheetOpenChange = (open: boolean) => {
-    console.log('Sheet open state changed:', open, 'current:', isChecklistOpen);
+  const handleChecklistSheetOpenChange = (open: boolean) => {
+    console.log('Checklist sheet open state changed:', open, 'current:', isChecklistOpen);
     if (!open && isChecklistOpen) {
       // We're closing the sheet - save the checklist
       saveChecklist();
     }
     setIsChecklistOpen(open);
+  };
+  
+  // Handle journal sheet open state changes
+  const handleJournalSheetOpenChange = (open: boolean) => {
+    console.log('Journal sheet open state changed:', open, 'current:', isJournalOpen);
+    if (!open && isJournalOpen) {
+      // We're closing the sheet - save the journal entry
+      saveJournal();
+    }
+    setIsJournalOpen(open);
   };
 
   return (
@@ -171,7 +237,7 @@ const TaskPage = () => {
       {/* Checklist Sheet */}
       <Sheet 
         open={isChecklistOpen} 
-        onOpenChange={handleSheetOpenChange}
+        onOpenChange={handleChecklistSheetOpenChange}
       >
         <SheetContent className="w-full md:max-w-md overflow-y-auto" side="right">
           <SheetHeader className="mb-4">
@@ -230,6 +296,34 @@ const TaskPage = () => {
           <div className="mt-6">
             <Button onClick={saveChecklist} className="w-full" type="button">
               <Save className="h-4 w-4 mr-2" /> Save Checklist
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+      
+      {/* Journal Entry Sheet */}
+      <Sheet 
+        open={isJournalOpen} 
+        onOpenChange={handleJournalSheetOpenChange}
+      >
+        <SheetContent className="w-full md:max-w-xl overflow-y-auto p-0" side="right">
+          <SheetHeader className="p-4 pb-2 border-b">
+            <SheetTitle>{currentJournalTask?.taskName || 'Journal Entry'}</SheetTitle>
+          </SheetHeader>
+          
+          <div className="h-[calc(100vh-10rem)]">
+            <MarkdownEditor
+              value={journalContent}
+              onChange={(value) => setJournalContent(value || '')}
+              placeholder="Write your thoughts here..."
+              height="100%"
+            />
+          </div>
+          
+          {/* Save button */}
+          <div className="p-4 border-t">
+            <Button onClick={saveJournal} className="w-full" type="button">
+              <Save className="h-4 w-4 mr-2" /> Save Journal Entry
             </Button>
           </div>
         </SheetContent>

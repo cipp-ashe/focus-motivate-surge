@@ -93,9 +93,15 @@ export const TaskContent = ({
         break;
         
       case 'journal':
-        // Open journal editor
-        console.log("Dispatching journal:open event");
+        // Open journal editor - FIX: Don't dispatch task:select which triggers conversion to timer task
+        console.log("Dispatching journal:open event for", task.id, task.name);
         eventManager.emit('journal:open', { habitId: task.id, habitName: task.name });
+        
+        // Create a custom event to open the journal editor directly
+        const openJournalEvent = new CustomEvent('open-journal', {
+          detail: { taskId: task.id, taskName: task.name, entry: task.journalEntry }
+        });
+        window.dispatchEvent(openJournalEvent);
         break;
         
       case 'screenshot':

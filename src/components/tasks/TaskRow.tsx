@@ -111,16 +111,18 @@ export const TaskRow = ({
   };
 
   const handleTaskClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Check if we clicked on a button or an input or any interactive element
+    // More robust check for interactive elements to prevent task selection when clicking on buttons
     const target = e.target as HTMLElement;
-    if (
+    const isInteractive = 
       target.tagName === 'BUTTON' || 
       target.closest('button') || 
       target.tagName === 'INPUT' || 
       target.closest('input') ||
       target.getAttribute('role') === 'button' ||
-      target.getAttribute('data-action') === 'true'
-    ) {
+      target.getAttribute('data-action') === 'true' ||
+      target.closest('[data-action="true"]'); // Check for data-action attribute in parent elements too
+    
+    if (isInteractive) {
       console.log('Clicked on an interactive element inside TaskRow, not propagating');
       e.stopPropagation();
       return;
