@@ -122,7 +122,7 @@ export const useHabitTaskProcessor = () => {
         );
         
         if (newTaskId) {
-          console.log(`Successfully created task ${newTaskId} for habit ${habitId} with type ${taskType}`);
+          console.log(`Successfully created task ${newTaskId} for habit ${event.habitId} with type ${taskType}`);
           toast.success(`Created ${taskType} task: ${event.name}`, {
             description: "Your habit task has been scheduled."
           });
