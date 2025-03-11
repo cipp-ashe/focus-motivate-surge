@@ -75,15 +75,26 @@ export const TaskContent = ({
     onBlur();
   };
 
-  // Handle task-specific actions
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(`Task action clicked for ${task.name} (${task.taskType})`);
     e.stopPropagation();
     e.preventDefault();
     
+    if (task.relationships?.habitId) {
+      console.log("This is a habit-related task with ID:", task.relationships.habitId);
+      
+      if (e.currentTarget.getAttribute('data-action-type') === 'view-habit') {
+        if (task.relationships?.habitId) {
+          window.location.href = `/habits?habitId=${task.relationships.habitId}`;
+        } else {
+          toast.info(`Viewing habit task: ${task.name}`);
+        }
+        return;
+      }
+    }
+    
     switch(task.taskType) {
       case 'timer':
-        // Start timer
         console.log("Dispatching timer:init event");
         eventManager.emit('timer:init', { 
           taskName: task.name, 
@@ -92,10 +103,8 @@ export const TaskContent = ({
         break;
         
       case 'journal':
-        // Open journal editor - Don't emit task:select event at all for journal tasks
         console.log("Dispatching custom open-journal event for", task.id, task.name);
         
-        // Create a custom event to open the journal editor directly
         const openJournalEvent = new CustomEvent('open-journal', {
           detail: { taskId: task.id, taskName: task.name, entry: task.journalEntry }
         });
@@ -103,10 +112,8 @@ export const TaskContent = ({
         break;
         
       case 'screenshot':
-        // Display the image in a modal or full screen view
         console.log("Handling screenshot view");
         if (task.imageUrl) {
-          // Create and dispatch a custom event to show the image
           const showImageEvent = new CustomEvent('show-image', {
             detail: { imageUrl: task.imageUrl, taskName: task.name }
           });
@@ -117,14 +124,11 @@ export const TaskContent = ({
         break;
         
       case 'checklist':
-        // Open checklist view
         console.log('Opening checklist for task:', task.id, task.name);
         
-        // Ensure we have a valid items array or an empty one
         const itemsToPass = task.checklistItems || [];
         console.log('Checklist items:', itemsToPass);
         
-        // Create and dispatch a custom event to open checklist view
         const openChecklistEvent = new CustomEvent('open-checklist', {
           detail: { 
             taskId: task.id, 
@@ -136,7 +140,6 @@ export const TaskContent = ({
         break;
         
       case 'voicenote':
-        // Open voice recorder component
         console.log("Dispatching open-voice-recorder event");
         const openVoiceRecorderEvent = new CustomEvent('open-voice-recorder', {
           detail: { taskId: task.id, taskName: task.name }
@@ -144,20 +147,7 @@ export const TaskContent = ({
         window.dispatchEvent(openVoiceRecorderEvent);
         break;
         
-      case 'habit':
-        // Handle habit view - possibly navigate to habits view
-        console.log("Handling habit task view");
-        eventManager.emit('task:select', task.id);
-        if (task.relationships?.habitId) {
-          // Navigate to the related habit
-          window.location.href = `/habits?habitId=${task.relationships.habitId}`;
-        } else {
-          toast.info(`Viewing habit task: ${task.name}`);
-        }
-        break;
-        
       default:
-        // For regular tasks - mark as complete
         console.log("Completing regular task");
         eventBus.emit('task:complete', { taskId: task.id });
         toast.success(`Completed task: ${task.name}`);
@@ -165,13 +155,33 @@ export const TaskContent = ({
     }
   };
 
-  // Convert seconds to minutes for display
   const durationInMinutes = Math.round((task.duration || 1500) / 60);
   
-  // Get task type-specific action button
   const getTaskActionButton = () => {
+    if (task.relationships?.habitId) {
+      return (
+        <div className="flex items-center gap-2">
+          {getStandardActionButton()}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleTaskAction}
+            className="h-7 px-2 flex items-center gap-1 text-xs bg-green-500/10 hover:bg-green-500/20 text-green-500"
+            data-action="true"
+            data-action-type="view-habit"
+          >
+            <Zap className="h-3.5 w-3.5 text-green-500" />
+            <span>View Habit</span>
+          </Button>
+        </div>
+      );
+    }
+    
+    return getStandardActionButton();
+  };
+
+  const getStandardActionButton = () => {
     if (task.taskType === 'timer') {
-      // Timer tasks have the minutes display/editor
       return (
         <Badge variant="outline" className="flex items-center gap-1 bg-primary/5 hover:bg-primary/10">
           <Clock className="h-3.5 w-3.5 text-primary opacity-70" />
@@ -205,7 +215,6 @@ export const TaskContent = ({
       );
     }
     
-    // Action buttons for other task types
     if (task.taskType === 'journal') {
       return (
         <Button
@@ -266,38 +275,6 @@ export const TaskContent = ({
       );
     }
     
-    if (task.taskType === 'regular') {
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleTaskAction}
-          className="h-7 px-2 flex items-center gap-1 text-xs"
-          data-action="true"
-        >
-          <CheckSquare className="h-3.5 w-3.5 text-green-500" />
-          <span>Complete</span>
-        </Button>
-      );
-    }
-    
-    // For habit tasks, show a badge indicating it's a habit
-    if (task.taskType === 'habit' || task.relationships?.habitId) {
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleTaskAction}
-          className="h-7 px-2 flex items-center gap-1 text-xs"
-          data-action="true"
-        >
-          <Zap className="h-3.5 w-3.5 text-green-500" />
-          <span>View Habit</span>
-        </Button>
-      );
-    }
-    
-    // Default action button for any other task type
     return (
       <Button
         variant="outline"
@@ -306,13 +283,12 @@ export const TaskContent = ({
         className="h-7 px-2 flex items-center gap-1 text-xs"
         data-action="true"
       >
-        <CheckSquare className="h-3.5 w-3.5 text-primary" />
+        <CheckSquare className="h-3.5 w-3.5 text-green-500" />
         <span>Complete</span>
       </Button>
     );
   };
 
-  // Get icon based on task type
   const getTaskIcon = () => {
     switch(task.taskType) {
       case 'timer':
@@ -325,8 +301,6 @@ export const TaskContent = ({
         return <CheckSquare className="h-4 w-4 text-cyan-400" />;
       case 'voicenote':
         return <Mic className="h-4 w-4 text-rose-400" />;
-      case 'habit':
-        return <Zap className="h-4 w-4 text-green-400" />;
       default:
         return <Sparkles className="h-4 w-4 text-primary" />;
     }
@@ -339,7 +313,14 @@ export const TaskContent = ({
           <div className="rounded-full bg-primary/10 p-1.5">
             {getTaskIcon()}
           </div>
-          <span className="text-foreground line-clamp-1 flex-1 font-medium">{task.name}</span>
+          <span className="text-foreground line-clamp-1 flex-1 font-medium">
+            {task.name}
+            {task.relationships?.habitId && (
+              <Badge variant="outline" className="ml-2 text-xs bg-green-500/10 text-green-500">
+                Habit
+              </Badge>
+            )}
+          </span>
         </div>
         <div className="flex items-center gap-3">
           {getTaskActionButton()}

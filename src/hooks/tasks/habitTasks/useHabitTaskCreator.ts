@@ -44,7 +44,7 @@ export const useHabitTaskCreator = () => {
       // Generate task ID
       const taskId = uuidv4();
       
-      // Create task object with appropriate task type
+      // Create task object with appropriate task type - use the provided task type, not "habit"
       const task: Task = {
         id: taskId,
         name: name,
@@ -52,7 +52,7 @@ export const useHabitTaskCreator = () => {
         completed: false,
         duration: duration,
         createdAt: new Date().toISOString(),
-        taskType: taskType, // Use the specified task type
+        taskType: taskType, // Use the specific task type (timer, regular, journal, etc.)
         relationships: {
           habitId: habitId,
           templateId: templateId,
@@ -68,7 +68,7 @@ export const useHabitTaskCreator = () => {
       // Emit event to create task
       eventManager.emit('task:create', task);
       
-      // Add habit tag
+      // Add habit tag to identify it as from a habit
       eventManager.emit('tag:link', {
         tagId: 'habit',
         entityId: taskId,
@@ -92,7 +92,7 @@ export const useHabitTaskCreator = () => {
         window.dispatchEvent(new Event('force-task-update'));
       }, 100);
       
-      toast.success(`Added habit task: ${name}`, {
+      toast.success(`Added ${taskType} task: ${name}`, {
         description: `Task added to your ${taskType} list`
       });
       

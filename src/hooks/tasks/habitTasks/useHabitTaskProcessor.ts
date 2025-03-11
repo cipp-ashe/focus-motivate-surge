@@ -82,11 +82,11 @@ export const useHabitTaskProcessor = () => {
       if (existingTask) {
         console.log(`Task already exists for habit ${event.habitId} on ${event.date}, skipping creation`);
         
-        // Ensure task has the proper taskType
-        if (!existingTask.taskType || existingTask.taskType === 'habit') {
-          // Determine proper task type from the metric type
-          const properTaskType = determineTaskType(event.taskType, event.metricType);
-          
+        // Ensure task has the proper taskType based on the metric type
+        const properTaskType = determineTaskType(event.taskType, event.metricType);
+        
+        // Only update if the task type needs to be changed - don't convert from a specific type back to "habit"
+        if (existingTask.taskType === 'habit' || !existingTask.taskType) {
           const updatedTask = {
             ...existingTask,
             taskType: properTaskType
@@ -121,8 +121,8 @@ export const useHabitTaskProcessor = () => {
         );
         
         if (newTaskId) {
-          console.log(`Successfully created task ${newTaskId} for habit ${event.habitId}`);
-          toast.success(`Created habit task: ${event.name}`, {
+          console.log(`Successfully created task ${newTaskId} for habit ${event.habitId} with type ${taskType}`);
+          toast.success(`Created ${taskType} task: ${event.name}`, {
             description: "Your habit task has been scheduled."
           });
           
@@ -153,6 +153,7 @@ export const useHabitTaskProcessor = () => {
   
   // Helper function to determine the appropriate task type
   const determineTaskType = (taskType?: TaskType, metricType?: string): TaskType => {
+    // If a specific non-habit task type is provided, use it
     if (taskType && taskType !== 'habit') {
       return taskType;
     }
@@ -162,11 +163,15 @@ export const useHabitTaskProcessor = () => {
       return 'timer';
     } else if (metricType === 'journal') {
       return 'journal';
-    } else if (metricType === 'boolean') {
-      return 'regular';
+    } else if (metricType === 'checklist') {
+      return 'checklist';
+    } else if (metricType === 'voicenote') {
+      return 'voicenote';
+    } else if (metricType === 'screenshot') {
+      return 'screenshot';
     }
     
-    // Default fallback
+    // Default fallback - use regular instead of habit
     return 'regular';
   };
   
@@ -233,6 +238,12 @@ export const useHabitTaskProcessor = () => {
         // Emit task:create events for each habit task to ensure they're in memory
         habitTasks.forEach(task => {
           console.log(`Ensuring habit task ${task.id} is loaded in memory`);
+          
+          // If the task is still using the generic 'habit' type, convert it to a proper type
+          if (task.taskType === 'habit') {
+            task.taskType = 'regular'; // Default to regular if we can't determine the type
+          }
+          
           eventManager.emit('task:create', task);
         });
         

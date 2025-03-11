@@ -80,7 +80,6 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   const checklistTasks = tasks.filter(task => task.taskType === 'checklist');
   const regularTasks = tasks.filter(task => !task.taskType || task.taskType === 'regular');
   const screenshotTasks = tasks.filter(task => task.taskType === 'screenshot');
-  const habitTasks = tasks.filter(task => task.taskType === 'habit');
   const voicenoteTasks = tasks.filter(task => task.taskType === 'voicenote');
   const allTasks = tasks;
 
@@ -89,7 +88,6 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     all: allTasks.length,
     timer: timerTasks.length,
     screenshot: screenshotTasks.length,
-    habit: habitTasks.length,
     journal: journalTasks.length,
     checklist: checklistTasks.length,
     voicenote: voicenoteTasks.length,

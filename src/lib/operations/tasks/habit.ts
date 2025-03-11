@@ -50,8 +50,9 @@ export const habitTaskOperations = {
         return existingTask.id;
       }
       
-      // Determine appropriate task type
-      const taskType = options.taskType || 'habit';
+      // Always use the specified taskType instead of a default 'habit' type
+      // This ensures the task appears under the proper category in the UI
+      const taskType = options.taskType || 'regular';
       
       // Create new task with proper taskType and include createdAt
       const task = createTaskOperations.createTask({
@@ -71,8 +72,9 @@ export const habitTaskOperations = {
         selectAfterCreate: options.selectAfterCreate
       });
       
-      // Add a 'habit' tag to the task for easy identification
+      // Add habit-related tags to the task for identification
       if (task.id) {
+        // Add a 'habit' tag to identify it as a habit task
         eventManager.emit('tag:link', {
           tagId: 'habit',
           entityId: task.id,

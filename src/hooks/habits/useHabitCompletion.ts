@@ -47,7 +47,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
     
     // Determine which type of task to create based on habit metrics type
     if (habit.metrics?.type === 'timer') {
-      // Create a timer task with proper taskType
+      // Create a timer task
       const taskId = habitTaskOperations.createHabitTask(
         habit.id,
         templateId,
@@ -56,7 +56,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
         new Date().toDateString(),
         { 
           selectAfterCreate: true,
-          taskType: 'timer' // Explicitly set task type to match habit type
+          taskType: 'timer' // Use timer task type
         }
       );
       
@@ -70,24 +70,60 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       createJournalFromHabit(habit, templateId);
       return;
     }
-    else {
-      // For other habit types, create a task with the appropriate type
-      const taskType = habit.metrics?.type === 'boolean' ? 'regular' : habit.metrics?.type || 'regular';
-      
+    else if (habit.metrics?.type === 'checklist') {
+      // Create a checklist task
       const taskId = habitTaskOperations.createHabitTask(
         habit.id,
         templateId,
         habit.name,
-        0, // No duration for non-timer habits
+        0, // No duration needed
         new Date().toDateString(),
         { 
           selectAfterCreate: true,
-          taskType: taskType as any // Cast to any to avoid type issues
+          taskType: 'checklist'
         }
       );
       
       if (taskId) {
-        toast.success(`Added habit "${habit.name}" to your ${taskType} tasks`);
+        toast.success(`Added habit "${habit.name}" to checklist tasks`);
+      }
+      return;
+    }
+    else if (habit.metrics?.type === 'voicenote') {
+      // Create a voice note task
+      const taskId = habitTaskOperations.createHabitTask(
+        habit.id,
+        templateId,
+        habit.name,
+        0, // No duration needed
+        new Date().toDateString(),
+        { 
+          selectAfterCreate: true,
+          taskType: 'voicenote'
+        }
+      );
+      
+      if (taskId) {
+        toast.success(`Added habit "${habit.name}" to voice note tasks`);
+      }
+      return;
+    }
+    else {
+      // For other habit types, create a regular task
+      const taskId = habitTaskOperations.createHabitTask(
+        habit.id,
+        templateId,
+        habit.name,
+        0, // No duration for regular tasks
+        new Date().toDateString(),
+        { 
+          selectAfterCreate: true,
+          taskType: 'regular' // Use regular task type as default
+        }
+      );
+      
+      if (taskId) {
+        toast.success(`Added habit "${habit.name}" to your regular tasks`);
       }
     }
   }, [createJournalFromHabit]);

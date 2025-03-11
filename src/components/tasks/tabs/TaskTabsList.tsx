@@ -9,7 +9,6 @@ interface TaskTabsListProps {
     all: number;
     timer: number;
     screenshot: number;
-    habit: number;
     journal: number;
     checklist: number;
     voicenote: number;
