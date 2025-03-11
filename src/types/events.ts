@@ -66,7 +66,7 @@ export interface TimerEventPayloads {
   // Note events
   'note:create': any;
   'note:update': any;
-  'note:delete': any;
+  'note:delete': { id: string };
   'note:create-from-habit': {
     habitId: string;
     habitName: string;
