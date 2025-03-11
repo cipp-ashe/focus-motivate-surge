@@ -34,6 +34,13 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   // Determine which content to use (external or internal)
   const content = externalContent !== undefined ? externalContent : internalContent;
 
+  // Update internal content when selectedNote changes
+  useEffect(() => {
+    if (selectedNote && !externalContent) {
+      setInternalContent(selectedNote.content);
+    }
+  }, [selectedNote, externalContent]);
+
   const handleChange = (newContent: string | undefined) => {
     if (newContent === undefined) return;
     

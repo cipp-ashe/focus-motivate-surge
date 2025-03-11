@@ -14,7 +14,7 @@ export type NoteEventType =
   | 'note:create-from-habit'
   | 'note:create-from-voice';
 
-export interface EventPayloads extends TimerEventPayloads {
+export interface EventPayloads extends Omit<TimerEventPayloads, 'note:create-from-habit'> {
   // Tag events
   'tag:select': string;
   'tag:remove': any;
@@ -32,6 +32,7 @@ export interface EventPayloads extends TimerEventPayloads {
     habitId?: string;
     habitName: string;
     description?: string;
+    templateId?: string;
     content?: string;
   };
   'note:create-from-voice': {

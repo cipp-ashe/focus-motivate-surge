@@ -21,14 +21,14 @@ export default function NotesPage() {
             <Link to="/voice-notes">
               <Button variant="outline" size="sm" className="gap-2">
                 <Mic className="h-4 w-4" />
-                <span className="hidden sm:inline">Voice Notes</span>
+                <span className="sm:inline">Voice Notes</span>
               </Button>
             </Link>
             
             <Link to="/screenshots">
               <Button variant="outline" size="sm" className="gap-2">
                 <Image className="h-4 w-4" />
-                <span className="hidden sm:inline">Screenshots</span>
+                <span className="sm:inline">Screenshots</span>
               </Button>
             </Link>
             

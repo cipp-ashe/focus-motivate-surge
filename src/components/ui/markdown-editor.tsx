@@ -54,120 +54,81 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     let selectedText = value.substring(start, end);
     let newText = '';
     let placeholderText = '';
-    let selectionOffset = 0;
     
     switch(type) {
       case 'bold':
         placeholderText = 'bold text';
         newText = `**${selectedText || placeholderText}**`;
-        if (!selectedText) {
-          selectionOffset = 2; // Position cursor after the first ** but before placeholderText
-        }
         break;
       case 'italic':
         placeholderText = 'italic text';
         newText = `*${selectedText || placeholderText}*`;
-        if (!selectedText) {
-          selectionOffset = 1; // Position cursor after the first * but before placeholderText
-        }
         break;
       case 'heading1':
         placeholderText = 'Heading 1';
         newText = `\n# ${selectedText || placeholderText}\n`;
-        if (!selectedText) {
-          selectionOffset = 3; // Position cursor after # and space but before placeholderText
-        }
         break;
       case 'heading2':
         placeholderText = 'Heading 2';
         newText = `\n## ${selectedText || placeholderText}\n`;
-        if (!selectedText) {
-          selectionOffset = 4; // Position cursor after ## and space but before placeholderText
-        }
         break;
       case 'heading3':
         placeholderText = 'Heading 3';
         newText = `\n### ${selectedText || placeholderText}\n`;
-        if (!selectedText) {
-          selectionOffset = 5; // Position cursor after ### and space but before placeholderText
-        }
         break;
       case 'link':
         placeholderText = 'link text';
         newText = `[${selectedText || placeholderText}](url)`;
-        if (!selectedText) {
-          selectionOffset = 1; // Position cursor after [ but before placeholderText
-        }
         break;
       case 'image':
         placeholderText = 'alt text';
         newText = `![${selectedText || placeholderText}](image-url)`;
-        if (!selectedText) {
-          selectionOffset = 2; // Position cursor after ![ but before placeholderText
-        }
         break;
       case 'bulletList':
         placeholderText = 'List item';
         newText = `\n- ${selectedText || placeholderText}\n`;
-        if (!selectedText) {
-          selectionOffset = 3; // Position cursor after "- " but before placeholderText
-        }
         break;
       case 'numberedList':
         placeholderText = 'List item';
         newText = `\n1. ${selectedText || placeholderText}\n`;
-        if (!selectedText) {
-          selectionOffset = 4; // Position cursor after "1. " but before placeholderText
-        }
         break;
       case 'quote':
         placeholderText = 'Quote';
         newText = `\n> ${selectedText || placeholderText}\n`;
-        if (!selectedText) {
-          selectionOffset = 3; // Position cursor after "> " but before placeholderText
-        }
         break;
       case 'code':
         placeholderText = 'code block';
         newText = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`` : "```\ncode block\n```";
-        if (!selectedText) {
-          selectionOffset = 4; // Position cursor after "```\n" but before placeholderText
-        }
         break;
       case 'inlineCode':
         placeholderText = 'code';
         newText = `\`${selectedText || placeholderText}\``;
-        if (!selectedText) {
-          selectionOffset = 1; // Position cursor after first ` but before placeholderText
-        }
         break;
       case 'strikethrough':
         placeholderText = 'strikethrough text';
         newText = `~~${selectedText || placeholderText}~~`;
-        if (!selectedText) {
-          selectionOffset = 2; // Position cursor after ~~ but before placeholderText
-        }
         break;
       default:
         return;
     }
     
+    // Create the new content by replacing the selected text with formatted text
     const newContent = value.substring(0, start) + newText + value.substring(end);
     onChange(newContent);
     
-    // Focus and set cursor position
+    // Set up selection for placeholder text or position cursor at end of inserted text
     setTimeout(() => {
       textarea.focus();
-      if (selectedText) {
-        // If there was selected text, place cursor at the end of the insertion
-        const newCursorPos = start + newText.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-      } else {
-        // If no text was selected, place cursor where the placeholder starts
-        const placeholderStart = start + selectionOffset;
+      
+      if (!selectedText) {
+        // If no text was selected, select the placeholder text so the user can immediately type over it
+        const placeholderStart = start + newText.indexOf(placeholderText);
         const placeholderEnd = placeholderStart + placeholderText.length;
-        // Select the placeholder text so user can immediately type over it
         textarea.setSelectionRange(placeholderStart, placeholderEnd);
+      } else {
+        // If text was selected, place cursor at the end of the newly formatted text
+        const newPosition = start + newText.length;
+        textarea.setSelectionRange(newPosition, newPosition);
       }
     }, 0);
   };
