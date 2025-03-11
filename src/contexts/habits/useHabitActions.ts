@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { DayOfWeek, ActiveTemplate } from '@/components/habits/types';
 import { eventBus } from '@/lib/eventBus';
@@ -10,8 +9,23 @@ export const createHabitActions = (
 ): HabitContextActions => {
   const addTemplate = useCallback((template: ActiveTemplate) => {
     console.log("Adding template:", template);
+    
+    // Check if template already exists
+    if (state.templates.some((t: ActiveTemplate) => t.templateId === template.templateId)) {
+      console.log("Template already exists, skipping");
+      return;
+    }
+    
+    // Update state through reducer
     dispatch({ type: 'ADD_TEMPLATE', payload: template });
-  }, [dispatch]);
+    
+    // Update localStorage
+    const updatedTemplates = [...state.templates, template];
+    localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+    
+    // Emit event to notify other components
+    eventBus.emit('habit:template-update', template);
+  }, [dispatch, state.templates]);
 
   const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
     console.log("Updating template:", templateId, updates);

@@ -8,7 +8,7 @@ import { useEvent } from '@/hooks/useEvent';
 
 const HabitTracker = () => {
   const { templates } = useHabitState();
-  const { removeTemplate } = useHabitActions();
+  const { removeTemplate, addTemplate } = useHabitActions();
   const { getTodayProgress, updateProgress } = useHabitProgress();
   const [forceUpdate, setForceUpdate] = useState(0);
   const [debugMode, setDebugMode] = useState(false);
@@ -52,7 +52,19 @@ const HabitTracker = () => {
     setForceUpdate(prev => prev + 1);
   });
 
-  // Handler for removing templates - now updated to ensure proper template deletion
+  useEvent('habit:template-add', (templateId: string) => {
+    console.log("HabitTracker: Detected template add event for", templateId);
+    const templateToAdd = {
+      templateId,
+      habits: [],
+      activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      customized: false
+    };
+    addTemplate(templateToAdd);
+    setForceUpdate(prev => prev + 1);
+  });
+
+  // Handler for removing templates
   const handleRemoveTemplate = (templateId: string) => {
     console.log(`HabitTracker: Initiating template deletion for ${templateId}`);
     
