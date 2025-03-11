@@ -85,25 +85,20 @@ const SheetContent: React.FC<SheetContentProps> = ({
     // Mark as processed for today
     processedToday.current.add(template.id);
     
-    // Add template only once
-    console.log(`Adding template: ${template.id}`);
-    
-    // Fire an event to add this template to active templates
-    eventBus.emit('habit:template-add', template.id);
-    
-    // Also call the provided callback
+    // Add template only once - we directly call the callback 
+    // but do NOT emit an event - the callback will do that
+    console.log(`Selecting template: ${template.id}`);
     onSelectTemplate(template.id);
-    toast.success(`Added template: ${template.name}`);
     
     // Close sheet after selection
     setTimeout(() => {
       onOpenChange(false);
+      
+      // Clear the processing flag after a delay
+      setTimeout(() => {
+        processingTemplateRef.current = null;
+      }, 500);
     }, 300);
-    
-    // Clear the processing flag after a delay
-    setTimeout(() => {
-      processingTemplateRef.current = null;
-    }, 1000);
   };
 
   const handleDeleteCustomTemplate = (templateId: string) => {
