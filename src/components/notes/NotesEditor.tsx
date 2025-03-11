@@ -4,7 +4,6 @@ import { toast } from 'sonner';
 import type { Note } from '@/types/notes';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { ActionButton } from '@/components/ui/action-button';
-import { eventManager } from '@/lib/events/EventManager';
 
 interface NotesEditorProps {
   selectedNote?: Note | null;
@@ -29,6 +28,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
 }, ref) => {
   // Use internal state if no external content is provided
   const [internalContent, setInternalContent] = useState('');
+  const [isToolbarAction, setIsToolbarAction] = useState(false);
   
   // Determine which content to use (external or internal)
   const content = externalContent !== undefined ? externalContent : internalContent;
@@ -53,15 +53,17 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
   };
 
   const handleBlur = useCallback(() => {
-    // Auto-save on blur only if there's content and it's different from the original
-    // AND if toolbar formatting is not being applied (we'll save later)
-    if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
-      // Only save if we're not in the middle of applying formatting
-      if (!document.activeElement?.closest('.markdown-editor-toolbar')) {
-        handleSave();
-      }
+    // Don't save if we're performing a toolbar action
+    if (isToolbarAction) {
+      setIsToolbarAction(false);
+      return;
     }
-  }, [content, selectedNote]);
+
+    // Auto-save on blur only if there's content and it's different from the original
+    if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
+      handleSave();
+    }
+  }, [content, selectedNote, isToolbarAction]);
 
   const handleSave = useCallback(() => {
     if (!content?.trim()) return;
@@ -150,6 +152,10 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     }
   };
 
+  const handleToolbarAction = (action: string) => {
+    setIsToolbarAction(true);
+  };
+
   // Expose saveNotes method through ref
   React.useImperativeHandle(ref, () => ({
     saveNotes: handleSave
@@ -169,6 +175,8 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
         <MarkdownEditor
           value={content}
           onChange={handleChange}
+          onBlur={handleBlur}
+          onToolbarAction={handleToolbarAction}
           className="h-full markdown-editor"
           preview="edit"
         />

@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../tabs';
 import MDEditor from '@uiw/react-md-editor';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ export interface MarkdownEditorProps {
   value: string;
   onChange?: (value: string | undefined) => void;
   onBlur?: () => void;
+  onToolbarAction?: (action: string) => void;
   className?: string;
   placeholder?: string;
   height?: string;
@@ -21,6 +22,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   value,
   onChange,
   onBlur,
+  onToolbarAction,
   className,
   placeholder = 'Write your notes here...',
   height = '100%',
@@ -30,15 +32,19 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   
   const handlePreviewClick = () => {
-    // Save content when switching to preview
     if (onBlur) {
       onBlur();
     }
     setActiveTab('preview');
   };
-  
+
   const insertMarkdown = (type: string) => {
     if (!onChange) return;
+    
+    // Notify parent about toolbar action
+    if (onToolbarAction) {
+      onToolbarAction(type);
+    }
     
     const textarea = document.querySelector('.w-md-editor-text-input') as HTMLTextAreaElement;
     if (!textarea) return;
@@ -47,7 +53,6 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     const end = textarea.selectionEnd;
     const selectedText = value.substring(start, end);
     
-    // Use the utility function to properly insert formatted text
     const result = insertMarkdownText({
       type,
       selectedText,
@@ -56,10 +61,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       selectionEnd: end
     });
     
-    // Update content with our properly formatted text
     onChange(result.newContent);
     
-    // Position cursor after formatting
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(
