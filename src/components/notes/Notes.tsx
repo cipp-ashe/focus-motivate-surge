@@ -8,8 +8,10 @@ export const Notes: React.FC<NotesProps> = ({ hideNotes }) => {
   const [noteContent, setNoteContent] = useState('');
 
   // Make sure noteContent is a string
-  const handleChange = (content: string) => {
-    setNoteContent(content);
+  const handleChange = (content: string | undefined) => {
+    if (content !== undefined) {
+      setNoteContent(content);
+    }
   };
 
   return (

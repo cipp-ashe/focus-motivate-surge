@@ -12,7 +12,7 @@ interface MarkdownEditorProps {
   className?: string;
   placeholder?: string;
   height?: string;
-  preview?: 'live' | 'edit' | 'preview'; // Add preview prop to match MDEditor's options
+  preview?: 'live' | 'edit' | 'preview';
 }
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
@@ -22,7 +22,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   className,
   placeholder = 'Write your notes here...',
   height = '100%',
-  preview = 'edit' // Default to 'edit' mode
+  preview = 'edit'
 }) => {
   const [activeTab, setActiveTab] = useState<string>('write');
 
@@ -51,7 +51,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             value={value}
             onChange={onChange}
             onBlur={onBlur}
-            preview={preview} // Pass the preview prop to MDEditor
+            preview={preview}
             hideToolbar
             textareaProps={{
               placeholder,

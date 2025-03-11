@@ -141,6 +141,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
           onChange={handleChange}
           onBlur={handleBlur}
           className="h-full"
+          preview="edit"
         />
       </div>
     </div>
