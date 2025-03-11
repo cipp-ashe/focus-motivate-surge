@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { ActionButton } from '@/components/ui/action-button';
@@ -17,15 +18,27 @@ export const NoteActions: React.FC<NoteActionsProps> = ({
   onDelete,
   compact = false 
 }) => {
+  // Add error logging
+  console.log('Rendering NoteActions for note:', note.id);
+  
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling to parent
+    console.log('Edit clicked for note:', note.id);
+    if (onEdit) onEdit(note);
+  };
+  
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling to parent
+    console.log('Delete clicked for note:', note.id);
+    onDelete(note.id);
+  };
+
   return (
     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       {onEdit && (
         <ActionButton
           icon={Edit2}
-          onClick={(e) => {
-            e.stopPropagation(); // Stop event from bubbling to parent
-            if (onEdit) onEdit(note);
-          }}
+          onClick={handleEdit}
           className={cn(
             "p-0",
             compact ? "h-5 w-5" : "h-6 w-6"
@@ -34,10 +47,7 @@ export const NoteActions: React.FC<NoteActionsProps> = ({
       )}
       <ActionButton
         icon={Trash2}
-        onClick={(e) => {
-          e.stopPropagation(); // Stop event from bubbling to parent
-          onDelete(note.id);
-        }}
+        onClick={handleDelete}
         className={cn(
           "p-0 text-destructive/70 hover:text-destructive",
           compact ? "h-5 w-5" : "h-6 w-6"

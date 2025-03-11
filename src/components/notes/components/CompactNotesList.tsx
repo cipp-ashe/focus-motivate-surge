@@ -14,13 +14,13 @@ interface CompactNotesListProps {
   inExpandedView?: boolean;
 }
 
-const MAX_NOTES = 4;
-
 export const CompactNotesList = ({ 
-  notes,
+  notes = [],  // Default to empty array if notes is undefined
   onEditNote,
   inExpandedView = false
 }: CompactNotesListProps) => {
+  console.log('CompactNotesList rendered with', notes.length, 'notes');
+  
   const [showClearDialog, setShowClearDialog] = useState(false);
   const { 
     handleClearNotes, 
@@ -35,11 +35,12 @@ export const CompactNotesList = ({
     totalPages,
     paginatedItems: paginatedNotes
   } = usePagination({
-    items: notes,
+    items: notes || [],  // Ensure we always have an array
     itemsPerPage: MAX_NOTES
   });
 
-  if (notes.length === 0) {
+  if (!notes || notes.length === 0) {
+    console.log('No notes to display in CompactNotesList');
     return null;
   }
 
@@ -83,3 +84,6 @@ export const CompactNotesList = ({
     </div>
   );
 };
+
+// Define this constant
+const MAX_NOTES = 4;

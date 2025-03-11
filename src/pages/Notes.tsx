@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Notes } from '@/components/notes/Notes';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
@@ -7,6 +7,31 @@ import { useTheme } from "@/hooks/useTheme";
 
 export default function NotesPage() {
   const { isDark, toggleTheme } = useTheme();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Add logging and proper initialization
+  useEffect(() => {
+    console.log('NotesPage mounted');
+    
+    // Make sure everything is loaded
+    const timer = setTimeout(() => {
+      console.log('NotesPage finished loading');
+      setIsLoading(false);
+    }, 200);
+    
+    return () => {
+      console.log('NotesPage unmounted');
+      clearTimeout(timer);
+    };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Loading notes...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
