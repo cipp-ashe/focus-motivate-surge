@@ -11,10 +11,6 @@ interface TemplateCardProps {
   isCustom?: boolean;
 }
 
-/**
- * TemplateCard handles the logic for template selection and deletion,
- * while delegating the presentation to TemplateCardView.
- */
 const TemplateCard: React.FC<TemplateCardProps> = ({
   template,
   isActive,
@@ -26,10 +22,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     onSelect(template);
   };
   
-  const handleDelete = (e: React.MouseEvent) => {
-    // Stop event propagation to prevent selection when clicking delete
-    e.stopPropagation();
-    
+  const handleDelete = () => {
     if (onDelete) {
       console.log('Deleting template:', template.id);
       onDelete(template.id);
