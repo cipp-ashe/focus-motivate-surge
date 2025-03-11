@@ -18,6 +18,9 @@ export const deleteTaskOperations = {
     options: {
       reason?: string;
       suppressToast?: boolean;
+      isDismissal?: boolean;
+      habitId?: string;
+      date?: string;
     } = {}
   ): void {
     console.log(`TaskOperations: Deleting task ${taskId}`, options);
@@ -26,20 +29,34 @@ export const deleteTaskOperations = {
       // Get task before deleting to show name in toast
       const task = taskStorage.getTaskById(taskId);
       
-      if (task) {
-        // Active task - remove from active storage
-        taskStorage.removeTask(taskId);
-        console.log(`TaskOperations: Removed active task ${taskId}`);
-      } else {
-        // Check if it's a completed/dismissed task
-        const isCompletedDeleted = taskRelationshipStorage.deleteCompletedTask(taskId);
-        if (isCompletedDeleted) {
-          console.log(`TaskOperations: Removed completed/dismissed task ${taskId}`);
-        } else {
-          console.warn(`Task ${taskId} not found for deletion`);
-          return;
-        }
+      if (!task) {
+        console.warn(`Task ${taskId} not found for deletion`);
+        return;
       }
+      
+      // If this is a dismissal (habit task being skipped for today)
+      if (options.isDismissal && task.relationships?.habitId && task.relationships?.date) {
+        console.log(`TaskOperations: Dismissing habit task ${taskId} for ${task.relationships.habitId} on ${task.relationships.date}`);
+        
+        // Create a dismissal event with all required data
+        eventManager.emit('task:dismiss', { 
+          taskId,
+          habitId: task.relationships.habitId, 
+          date: task.relationships.date
+        });
+        
+        // Show toast for dismissal
+        if (!options.suppressToast) {
+          toast.success(`Dismissed task: ${task.name}`);
+        }
+        
+        // We'll let the task:dismiss event handler actually remove the task
+        return;
+      }
+      
+      // Regular task deletion - remove from active storage
+      taskStorage.removeTask(taskId);
+      console.log(`TaskOperations: Removed active task ${taskId}`);
       
       // Emit task deletion event
       eventManager.emit('task:delete', { 

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { v4 as uuidv4 } from 'uuid';
 import { useTaskManager } from '@/hooks/tasks/useTaskManager';
+import { deleteTaskOperations } from '@/lib/operations/tasks/delete';
 
 interface TaskItemProps {
   task: Task;
@@ -21,7 +22,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
   const [newTag, setNewTag] = useState('');
   const { updateTask } = useTaskManager();
 
-  // Helper function to get task type icon
   const getTaskTypeIcon = () => {
     switch (task.taskType) {
       case 'timer':
@@ -40,7 +40,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
     }
   };
 
-  // Helper function to get task details based on type
   const getTaskDetails = () => {
     switch (task.taskType) {
       case 'timer':
@@ -74,11 +73,26 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
     updateTask(task.id, { tags: updatedTags });
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (task.relationships?.habitId && task.relationships?.date) {
+      console.log(`Dismissing habit task rather than deleting: ${task.id}`);
+      
+      deleteTaskOperations.deleteTask(task.id, {
+        isDismissal: true, 
+        habitId: task.relationships.habitId,
+        date: task.relationships.date
+      });
+    } else {
+      deleteTaskOperations.deleteTask(task.id);
+    }
+  };
+
   const taskDetails = getTaskDetails();
   const isFromHabit = !!task.relationships?.habitId;
   const createdDate = new Date(task.createdAt);
   
-  // Format the task's scheduled date if it exists
   const formattedScheduledDate = task.relationships?.date 
     ? format(new Date(task.relationships.date), "MMM d, yyyy")
     : null;
@@ -96,7 +110,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
         className="mt-1"
         onClick={(e) => {
           e.stopPropagation();
-          // Handle checkbox click - this should be provided via props if needed
         }}
       />
       <div className="flex-1 min-w-0">
@@ -160,7 +173,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
         )}
       </div>
       
-      {/* Add tag button that appears on hover */}
       {!showTagInput && (
         <Button 
           variant="ghost" 

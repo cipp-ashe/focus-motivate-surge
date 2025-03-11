@@ -4,6 +4,7 @@ import { completedTasksStorage } from './completedTasksStorage';
 import { taskRelationshipStorage } from './taskRelationshipStorage';
 import { constants } from './constants';
 import { migrateTaskTypes } from './taskMigration';
+import { Task } from '@/types/tasks';
 
 // Export all storage modules with a unified interface
 export const taskStorage = {
@@ -11,6 +12,14 @@ export const taskStorage = {
   ...completedTasksStorage,
   ...taskRelationshipStorage,
   migrateTaskTypes, // Export the migration utility
+  
+  // Add a convenience method to load all tasks at once
+  loadAllTasks: (): { active: Task[], completed: Task[] } => {
+    const active = activeTasksStorage.loadTasks();
+    const completed = completedTasksStorage.loadCompletedTasks();
+    return { active, completed };
+  },
+  
   // For testing
   ACTIVE_TASKS_KEY: constants.ACTIVE_TASKS_KEY,
   COMPLETED_TASKS_KEY: constants.COMPLETED_TASKS_KEY,

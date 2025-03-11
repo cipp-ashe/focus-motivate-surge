@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
@@ -17,6 +18,7 @@ export const useTaskEventListeners = (
     handleTaskSelect: (taskId: string) => void;
     handleTemplateDelete: (data: { templateId: string, isOriginatingAction?: boolean }) => void;
     handleHabitCheck: () => void;
+    handleTaskDismiss: (data: { taskId: string, habitId: string, date: string }) => void;
   },
   forceTasksReload: () => void,
   lastForceUpdateTime: number,
@@ -45,6 +47,9 @@ export const useTaskEventListeners = (
       
       // Handle habit checking
       eventBus.on('habits:check-pending', eventHandlers.handleHabitCheck),
+      
+      // Handle task dismissal
+      eventBus.on('task:dismiss', eventHandlers.handleTaskDismiss),
     ];
     
     // Handle force update events from window with debouncing

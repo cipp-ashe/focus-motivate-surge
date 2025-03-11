@@ -1,103 +1,96 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
+import { taskStorage } from '@/lib/storage/taskStorage';
 import { useTaskEventListeners } from './events/useTaskEventListeners';
-import { useTaskReload } from './events/useTaskReload';
-import { useTaskUpdateHandler } from './events/useTaskUpdateHandler';
+import { useTemplateHandler } from './events/useTemplateHandler';
 
 /**
- * Hook for managing task events and event handlers
+ * Hook for handling task-related events
  */
 export const useTaskEvents = (
-  items: Task[],
-  completed: Task[],
+  activeTasks: Task[],
+  completedTasks: Task[],
   dispatch: React.Dispatch<any>
 ) => {
-  const [lastEventTime, setLastEventTime] = useState<Record<string, number>>({});
+  const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
+  const forceUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Set up task update handlers
-  const {
-    handleTaskComplete,
-    handleTaskDelete,
-    handleTaskUpdate,
-    handleTaskSelect,
-    handleTaskDismiss
-  } = useTaskUpdateHandler(dispatch);
-  
-  // Set up task reload handlers
-  const {
-    preventReentrantUpdate,
-    pendingTaskUpdates,
-    setPendingTaskUpdates,
-    isInitializing,
-    setIsInitializing,
-    forceTasksReload: reloadTasks,
-  } = useTaskReload(dispatch);
-  
-  // Debounced force reload function
+  // Force reload tasks from storage
   const forceTasksReload = useCallback(() => {
-    reloadTasks(lastEventTime, setLastEventTime);
-  }, [reloadTasks, lastEventTime]);
-  
-  // Task creation handler
-  const handleTaskCreate = useCallback((task: Task) => {
-    console.log("TaskEvents: Creating task", task);
-    
-    // Check if task already exists in current state
-    const taskExists = items.some(t => t.id === task.id) ||
-      items.some(t => 
-        t.relationships?.habitId === task.relationships?.habitId && 
-        t.relationships?.date === task.relationships?.date
-      );
-    
-    if (taskExists) {
-      console.log("TaskEvents: Task already exists, skipping create");
-      return;
-    }
-    
-    // Check if we're still initializing
-    if (isInitializing || preventReentrantUpdate) {
-      console.log("TaskEvents: Storing task for later processing:", task);
-      setPendingTaskUpdates(prev => [...prev, task]);
-      return;
-    }
-    
-    dispatch({ type: 'ADD_TASK', payload: task });
-  }, [dispatch, items, isInitializing, preventReentrantUpdate, setPendingTaskUpdates]);
-  
-  // Template deletion handler
-  const handleTemplateDelete = useCallback(({ templateId, isOriginatingAction }) => {
-    console.log("TaskEvents: Deleting all tasks for template", templateId);
-    
-    // Dispatch action to delete all tasks related to this template
-    // This will remove both active and completed/dismissed tasks
-    dispatch({ 
-      type: 'DELETE_TASKS_BY_TEMPLATE', 
-      payload: { templateId } 
-    });
-    
-    // If this is the originating action (from template management),
-    // force storage cleanup to ensure consistency
-    if (isOriginatingAction) {
-      console.log("TaskEvents: Originating template delete, forcing storage cleanup");
+    try {
+      const result = taskStorage.loadAllTasks();
       
-      // Add small delay to allow state updates to process
-      setTimeout(() => {
-        forceTasksReload();
-      }, 100);
+      dispatch({
+        type: 'LOAD_TASKS',
+        payload: {
+          tasks: result.active,
+          completed: result.completed
+        }
+      });
+      
+      // Clear any pending force update timeout
+      if (forceUpdateTimeoutRef.current) {
+        clearTimeout(forceUpdateTimeoutRef.current);
+        forceUpdateTimeoutRef.current = null;
+      }
+    } catch (error) {
+      console.error('Error in force tasks reload:', error);
     }
-  }, [dispatch, forceTasksReload]);
+  }, [dispatch]);
   
-  // Habit check handler - simplified implementation
+  // Task event handlers
+  const handleTaskCreate = useCallback((task: Task) => {
+    console.log(`TaskEvents: Handling task create for ${task.id}`, task);
+    dispatch({ type: 'ADD_TASK', payload: task });
+  }, [dispatch]);
+  
+  const handleTaskUpdate = useCallback((data: { taskId: string, updates: any }) => {
+    console.log(`TaskEvents: Handling task update for ${data.taskId}`, data.updates);
+    dispatch({ type: 'UPDATE_TASK', payload: data });
+  }, [dispatch]);
+  
+  const handleTaskDelete = useCallback((data: { taskId: string, reason?: string }) => {
+    console.log(`TaskEvents: Handling task delete for ${data.taskId}`, data);
+    dispatch({ type: 'DELETE_TASK', payload: data });
+  }, [dispatch]);
+  
+  const handleTaskComplete = useCallback((data: { taskId: string, metrics?: any }) => {
+    console.log(`TaskEvents: Handling task complete for ${data.taskId}`, data);
+    dispatch({ type: 'COMPLETE_TASK', payload: data });
+  }, [dispatch]);
+  
+  const handleTaskSelect = useCallback((taskId: string) => {
+    console.log(`TaskEvents: Handling task select for ${taskId}`);
+    dispatch({ type: 'SELECT_TASK', payload: taskId });
+  }, [dispatch]);
+  
   const handleHabitCheck = useCallback(() => {
     console.log("TaskEvents: Checking for pending habits");
-    // Processing moved to the integration hook
-  }, []);
+    // Simply trigger a force update to ensure all habit tasks are loaded
+    forceUpdateTimeoutRef.current = setTimeout(() => {
+      forceTasksReload();
+    }, 250);
+  }, [forceTasksReload]);
   
-  // Set up event listeners using the handlers
+  // Handle task dismissal (for habit tasks)
+  const handleTaskDismiss = useCallback((data: { taskId: string, habitId: string, date: string }) => {
+    console.log(`TaskEvents: Handling task dismiss for ${data.taskId}`, data);
+    dispatch({ type: 'DISMISS_TASK', payload: data });
+    
+    // Also dispatch a custom event for habit integration
+    window.dispatchEvent(new CustomEvent('habit-task-dismissed', { 
+      detail: { habitId: data.habitId, date: data.date }
+    }));
+  }, [dispatch]);
+  
+  // Template-related event handlers
+  const { handleTemplateDelete } = useTemplateHandler(dispatch);
+  
+  // Set up event listeners
   useTaskEventListeners(
-    items,
+    activeTasks,
     dispatch,
     {
       handleTaskCreate,
@@ -106,15 +99,15 @@ export const useTaskEvents = (
       handleTaskUpdate,
       handleTaskSelect,
       handleTemplateDelete,
-      handleHabitCheck
+      handleHabitCheck,
+      handleTaskDismiss
     },
     forceTasksReload,
-    lastEventTime.forceUpdate || 0,
-    (time) => setLastEventTime(prev => ({ ...prev, forceUpdate: time }))
+    lastForceUpdateTime,
+    setLastForceUpdateTime
   );
   
   return {
-    forceTasksReload,
-    isInitializing
+    forceTasksReload
   };
 };
