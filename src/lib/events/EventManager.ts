@@ -1,9 +1,18 @@
 
 import { TimerEventType, TimerEventPayloads } from '@/types/events';
 import { TagEventType } from './types';
+import { Note } from '@/types/notes';
 
 // Combine all event types
-export type EventType = TimerEventType | TagEventType;
+export type EventType = TimerEventType | TagEventType | NoteEventType;
+
+// Add note event types
+export type NoteEventType = 
+  | 'note:create'
+  | 'note:update'
+  | 'note:deleted'
+  | 'note:create-from-habit'
+  | 'note:create-from-voice';
 
 export interface EventPayloads extends TimerEventPayloads {
   // Tag events
@@ -14,6 +23,22 @@ export interface EventPayloads extends TimerEventPayloads {
   };
   'tag:create': any;
   'tag:delete': any;
+  
+  // Note events
+  'note:create': Note;
+  'note:update': Note;
+  'note:deleted': { noteId: string };
+  'note:create-from-habit': {
+    habitId?: string;
+    habitName: string;
+    description?: string;
+    content?: string;
+  };
+  'note:create-from-voice': {
+    voiceNoteId?: string;
+    title?: string;
+    content: string;
+  };
 }
 
 export type EventHandler<T extends EventType> = (payload: T extends keyof EventPayloads ? EventPayloads[T] : any) => void;
@@ -37,6 +62,7 @@ class EventManager {
   }
 
   emit<T extends EventType>(event: T, payload: T extends keyof EventPayloads ? EventPayloads[T] : any): void {
+    console.log(`Emitting event: ${event}`, payload);
     this.listeners[event]?.forEach(callback => {
       callback(payload);
     });

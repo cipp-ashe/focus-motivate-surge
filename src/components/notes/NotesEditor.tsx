@@ -1,10 +1,11 @@
 
-import React, { useCallback, forwardRef, ForwardedRef, useState } from 'react';
+import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '@/types/notes';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { ActionButton } from '@/components/ui/action-button';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface NotesEditorProps {
   selectedNote?: Note | null;
@@ -60,20 +61,25 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       const currentNotes: Note[] = savedNotes ? JSON.parse(savedNotes) : [];
 
       let updatedNotes: Note[];
+      let savedNote: Note;
+      
       if (selectedNote) {
         // Update existing note
+        savedNote = {
+          ...selectedNote,
+          content: content.trim(),
+          updatedAt: new Date().toISOString()
+        };
+        
         updatedNotes = currentNotes.map(note =>
-          note.id === selectedNote.id
-            ? { 
-                ...note, 
-                content: content.trim(),
-                updatedAt: new Date().toISOString()
-              }
-            : note
+          note.id === selectedNote.id ? savedNote : note
         );
+        
+        // Emit update event
+        eventManager.emit('note:update', savedNote);
       } else {
         // Create new note
-        const newNote: Note = {
+        savedNote = {
           id: crypto.randomUUID(),
           title: 'New Note', // Add a default title
           content: content.trim(),
@@ -81,7 +87,11 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
           updatedAt: new Date().toISOString(),
           tags: []
         };
-        updatedNotes = [newNote, ...currentNotes];
+        
+        updatedNotes = [savedNote, ...currentNotes];
+        
+        // Emit create event
+        eventManager.emit('note:create', savedNote);
       }
 
       // Save to localStorage

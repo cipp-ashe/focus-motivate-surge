@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs';
 import MDEditor from '@uiw/react-md-editor';
 import { marked } from 'marked';
@@ -31,8 +31,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   preview = 'edit'
 }) => {
   const [activeTab, setActiveTab] = useState<string>('write');
-  const [selectionRange, setSelectionRange] = useState<{ start: number; end: number } | null>(null);
-  
+  const editorRef = useRef<HTMLDivElement>(null);
+
   const handlePreviewClick = () => {
     // Save content when switching to preview
     if (onBlur) {
@@ -53,46 +53,100 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     let end = textarea.selectionEnd;
     let selectedText = value.substring(start, end);
     let newText = '';
+    let placeholderText = '';
+    let selectionOffset = 0;
     
     switch(type) {
       case 'bold':
-        newText = `**${selectedText || 'bold text'}**`;
+        placeholderText = 'bold text';
+        newText = `**${selectedText || placeholderText}**`;
+        if (!selectedText) {
+          selectionOffset = 2; // Position cursor after the first ** but before placeholderText
+        }
         break;
       case 'italic':
-        newText = `*${selectedText || 'italic text'}*`;
+        placeholderText = 'italic text';
+        newText = `*${selectedText || placeholderText}*`;
+        if (!selectedText) {
+          selectionOffset = 1; // Position cursor after the first * but before placeholderText
+        }
         break;
       case 'heading1':
-        newText = `\n# ${selectedText || 'Heading 1'}\n`;
+        placeholderText = 'Heading 1';
+        newText = `\n# ${selectedText || placeholderText}\n`;
+        if (!selectedText) {
+          selectionOffset = 3; // Position cursor after # and space but before placeholderText
+        }
         break;
       case 'heading2':
-        newText = `\n## ${selectedText || 'Heading 2'}\n`;
+        placeholderText = 'Heading 2';
+        newText = `\n## ${selectedText || placeholderText}\n`;
+        if (!selectedText) {
+          selectionOffset = 4; // Position cursor after ## and space but before placeholderText
+        }
         break;
       case 'heading3':
-        newText = `\n### ${selectedText || 'Heading 3'}\n`;
+        placeholderText = 'Heading 3';
+        newText = `\n### ${selectedText || placeholderText}\n`;
+        if (!selectedText) {
+          selectionOffset = 5; // Position cursor after ### and space but before placeholderText
+        }
         break;
       case 'link':
-        newText = `[${selectedText || 'link text'}](url)`;
+        placeholderText = 'link text';
+        newText = `[${selectedText || placeholderText}](url)`;
+        if (!selectedText) {
+          selectionOffset = 1; // Position cursor after [ but before placeholderText
+        }
         break;
       case 'image':
-        newText = `![${selectedText || 'alt text'}](image-url)`;
+        placeholderText = 'alt text';
+        newText = `![${selectedText || placeholderText}](image-url)`;
+        if (!selectedText) {
+          selectionOffset = 2; // Position cursor after ![ but before placeholderText
+        }
         break;
       case 'bulletList':
-        newText = `\n- ${selectedText || 'List item'}\n`;
+        placeholderText = 'List item';
+        newText = `\n- ${selectedText || placeholderText}\n`;
+        if (!selectedText) {
+          selectionOffset = 3; // Position cursor after "- " but before placeholderText
+        }
         break;
       case 'numberedList':
-        newText = `\n1. ${selectedText || 'List item'}\n`;
+        placeholderText = 'List item';
+        newText = `\n1. ${selectedText || placeholderText}\n`;
+        if (!selectedText) {
+          selectionOffset = 4; // Position cursor after "1. " but before placeholderText
+        }
         break;
       case 'quote':
-        newText = `\n> ${selectedText || 'Quote'}\n`;
+        placeholderText = 'Quote';
+        newText = `\n> ${selectedText || placeholderText}\n`;
+        if (!selectedText) {
+          selectionOffset = 3; // Position cursor after "> " but before placeholderText
+        }
         break;
       case 'code':
+        placeholderText = 'code block';
         newText = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`` : "```\ncode block\n```";
+        if (!selectedText) {
+          selectionOffset = 4; // Position cursor after "```\n" but before placeholderText
+        }
         break;
       case 'inlineCode':
-        newText = `\`${selectedText || 'code'}\``;
+        placeholderText = 'code';
+        newText = `\`${selectedText || placeholderText}\``;
+        if (!selectedText) {
+          selectionOffset = 1; // Position cursor after first ` but before placeholderText
+        }
         break;
       case 'strikethrough':
-        newText = `~~${selectedText || 'strikethrough text'}~~`;
+        placeholderText = 'strikethrough text';
+        newText = `~~${selectedText || placeholderText}~~`;
+        if (!selectedText) {
+          selectionOffset = 2; // Position cursor after ~~ but before placeholderText
+        }
         break;
       default:
         return;
@@ -101,11 +155,20 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     const newContent = value.substring(0, start) + newText + value.substring(end);
     onChange(newContent);
     
-    // Focus and set cursor position after the inserted text
+    // Focus and set cursor position
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = start + newText.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      if (selectedText) {
+        // If there was selected text, place cursor at the end of the insertion
+        const newCursorPos = start + newText.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+      } else {
+        // If no text was selected, place cursor where the placeholder starts
+        const placeholderStart = start + selectionOffset;
+        const placeholderEnd = placeholderStart + placeholderText.length;
+        // Select the placeholder text so user can immediately type over it
+        textarea.setSelectionRange(placeholderStart, placeholderEnd);
+      }
     }, 0);
   };
 
@@ -165,23 +228,25 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             </div>
           </div>
           
-          <MDEditor
-            value={value}
-            onChange={onChange}
-            onBlur={onBlur}
-            preview={preview}
-            hideToolbar
-            textareaProps={{
-              placeholder,
-              style: {
-                height: height,
-                background: 'transparent',
-                borderRadius: '0',
-                padding: '1rem'
-              }
-            }}
-            className="w-md-editor-without-border h-full w-full border-none outline-none"
-          />
+          <div ref={editorRef} className="flex-1">
+            <MDEditor
+              value={value}
+              onChange={onChange}
+              onBlur={onBlur}
+              preview={preview}
+              hideToolbar
+              textareaProps={{
+                placeholder,
+                style: {
+                  height: height,
+                  background: 'transparent',
+                  borderRadius: '0',
+                  padding: '1rem'
+                }
+              }}
+              className="w-md-editor-without-border h-full w-full border-none outline-none"
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="preview" className="h-[calc(100%-44px)] p-4 overflow-auto">
