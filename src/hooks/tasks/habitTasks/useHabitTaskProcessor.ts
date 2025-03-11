@@ -86,8 +86,8 @@ export const useHabitTaskProcessor = () => {
         const properTaskType = determineTaskType(event.taskType, event.metricType);
         
         // Only update if the task type needs to be changed
-        // Instead of comparing to "habit", check if it doesn't match the proper type
-        if (!existingTask.taskType || existingTask.taskType !== properTaskType) {
+        // Check if the task type is not a valid TaskType or doesn't match the proper type
+        if (!existingTask.taskType || !isValidTaskType(existingTask.taskType) || existingTask.taskType !== properTaskType) {
           const updatedTask = {
             ...existingTask,
             taskType: properTaskType
@@ -122,7 +122,7 @@ export const useHabitTaskProcessor = () => {
         );
         
         if (newTaskId) {
-          console.log(`Successfully created task ${newTaskId} for habit ${event.habitId} with type ${taskType}`);
+          console.log(`Successfully created task ${newTaskId} for habit ${habitId} with type ${taskType}`);
           toast.success(`Created ${taskType} task: ${event.name}`, {
             description: "Your habit task has been scheduled."
           });
@@ -152,10 +152,16 @@ export const useHabitTaskProcessor = () => {
     }
   }, [createHabitTask]);
   
+  // Helper function to check if a taskType is valid according to the TaskType enum
+  const isValidTaskType = (taskType: string): taskType is TaskType => {
+    const validTypes: TaskType[] = ['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote'];
+    return validTypes.includes(taskType as TaskType);
+  };
+  
   // Helper function to determine the appropriate task type
   const determineTaskType = (taskType?: TaskType, metricType?: string): TaskType => {
-    // If a specific task type is provided, use it (as long as it's a valid TaskType)
-    if (taskType && taskType !== 'regular') {
+    // If a specific task type is provided and it's valid, use it
+    if (taskType && isValidTaskType(taskType)) {
       return taskType;
     }
     
@@ -241,9 +247,13 @@ export const useHabitTaskProcessor = () => {
           console.log(`Ensuring habit task ${task.id} is loaded in memory`);
           
           // Check if task has valid type, convert if needed
-          if (!task.taskType || !['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote'].includes(task.taskType)) {
-            // If not a valid task type, convert to regular
-            task.taskType = 'regular'; // Default to regular if we can't determine the type
+          if (!task.taskType || !isValidTaskType(task.taskType)) {
+            // Convert to appropriate type based on habit metrics
+            // For now, default to regular if we can't determine
+            task.taskType = 'regular';
+            
+            // Save the updated task type
+            taskStorage.updateTask(task.id, task);
           }
           
           eventManager.emit('task:create', task);

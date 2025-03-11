@@ -16,6 +16,26 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const initialCheckDoneRef = useRef(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const migrationRunRef = useRef(false);
+  
+  // Run task type migration only once when component first mounts
+  useEffect(() => {
+    if (migrationRunRef.current) return;
+    
+    console.log('Running task type migration...');
+    migrationRunRef.current = true;
+    
+    // Run the migration
+    const migratedCount = taskStorage.migrateTaskTypes();
+    
+    if (migratedCount > 0) {
+      console.log(`Migrated ${migratedCount} tasks with invalid types`);
+      // Force a UI update
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('force-task-update'));
+      }, 100);
+    }
+  }, []);
   
   // Check for pending habits only once when component first mounts
   useEffect(() => {
