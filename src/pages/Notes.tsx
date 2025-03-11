@@ -2,8 +2,7 @@
 import React from 'react';
 import { Notes } from '@/components/notes/Notes';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { Moon, Sun, Mic, Image } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from "@/hooks/useTheme";
 
 export default function NotesPage() {
@@ -18,20 +17,6 @@ export default function NotesPage() {
           </h1>
           
           <div className="flex items-center gap-2 ml-auto">
-            <Link to="/voice-notes">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Mic className="h-4 w-4" />
-                <span className="sm:inline">Voice Notes</span>
-              </Button>
-            </Link>
-            
-            <Link to="/screenshots">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Image className="h-4 w-4" />
-                <span className="sm:inline">Screenshots</span>
-              </Button>
-            </Link>
-            
             <Button
               variant="ghost"
               size="icon"
