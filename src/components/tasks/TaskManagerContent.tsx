@@ -38,6 +38,11 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     
     // Show toast
     toast.success(`Added ${task.taskType || 'regular'} task: ${task.name}`);
+    
+    // Force refresh the UI
+    setTimeout(() => {
+      window.dispatchEvent(new Event('force-task-update'));
+    }, 100);
   };
 
   const handleTasksAdd = (tasks: Task[]) => {
@@ -51,15 +56,17 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     
     // Show toast
     toast.success(`Added ${tasks.length} tasks`);
+    
+    // Force refresh the UI
+    setTimeout(() => {
+      window.dispatchEvent(new Event('force-task-update'));
+    }, 100);
   };
 
   // Filter tasks by type
   const timerTasks = tasks.filter(task => task.taskType === 'timer');
-  const screenshotTasks = tasks.filter(task => task.taskType === 'screenshot');
-  const habitTasks = tasks.filter(task => task.taskType === 'habit');
   const journalTasks = tasks.filter(task => task.taskType === 'journal');
   const checklistTasks = tasks.filter(task => task.taskType === 'checklist');
-  const voiceNoteTasks = tasks.filter(task => task.taskType === 'voicenote');
   const regularTasks = tasks.filter(task => !task.taskType || task.taskType === 'regular');
   const allTasks = tasks;
 
@@ -67,11 +74,8 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   const taskCounts = {
     all: allTasks.length,
     timer: timerTasks.length,
-    screenshot: screenshotTasks.length,
-    habit: habitTasks.length,
     journal: journalTasks.length,
     checklist: checklistTasks.length,
-    voicenote: voiceNoteTasks.length,
     regular: regularTasks.length
   };
 
@@ -102,11 +106,8 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
 
           <TaskTypeTab value="all" tasks={allTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="timer" tasks={timerTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="habit" tasks={habitTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="journal" tasks={journalTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="checklist" tasks={checklistTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="voicenote" tasks={voiceNoteTasks} selectedTaskId={selectedTaskId} />
           <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} />
         </Tabs>
       </div>

@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { useToast } from '@/hooks/use-toast';
 import { Tag } from '@/types/tasks';
+import { eventBus } from '@/lib/eventBus';
 
 interface UseTaskCreationProps {
   onTaskAdd: (task: Task) => void;
@@ -62,7 +63,14 @@ export const useTaskCreation = ({
       tags: tags.map(tag => ({ id: uuidv4(), name: tag }))
     };
     
+    // Call the parent handler
     onTaskAdd(newTask);
+    
+    // Also emit an event to ensure all components are notified
+    eventBus.emit('task:create', newTask);
+    
+    console.log('Task created and emitted:', newTask);
+    
     resetForm();
   };
   
@@ -84,7 +92,15 @@ export const useTaskCreation = ({
       tags: tags.map(tag => ({ id: uuidv4(), name: tag }))
     }));
     
+    // Call the parent handler
     onTasksAdd(newTasks);
+    
+    // Also emit events for each task
+    newTasks.forEach(task => {
+      eventBus.emit('task:create', task);
+      console.log('Multiple task created and emitted:', task);
+    });
+    
     resetForm();
     setIsAddingMultiple(false);
   };

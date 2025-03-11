@@ -50,7 +50,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
               size="icon" 
               className="absolute left-2 hover:bg-transparent"
             >
-              {taskTypeIcons[taskType] || taskTypeIcons.regular}
+              {taskTypeIcons[taskType as keyof typeof taskTypeIcons] || taskTypeIcons.regular}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-48 p-1">
