@@ -19,6 +19,11 @@ export const NoteActions: React.FC<NoteActionsProps> = ({
   compact = false 
 }) => {
   // Add error logging
+  if (!note || !note.id) {
+    console.error('Invalid note passed to NoteActions', note);
+    return null;
+  }
+  
   console.log('Rendering NoteActions for note:', note.id);
   
   const handleEdit = (e: React.MouseEvent) => {

@@ -11,8 +11,11 @@ export const STORAGE_KEY = 'notes';
 export const useNotes = () => {
   const [notes, setNotes] = useState<Note[]>(() => {
     try {
+      console.log('Initializing notes from localStorage');
       const savedNotes = localStorage.getItem(STORAGE_KEY);
-      return savedNotes ? JSON.parse(savedNotes) : [];
+      const parsedNotes = savedNotes ? JSON.parse(savedNotes) : [];
+      console.log(`Loaded ${parsedNotes.length} notes from localStorage`);
+      return parsedNotes;
     } catch (error) {
       console.error('Error loading notes:', error);
       return [];
@@ -27,6 +30,7 @@ export const useNotes = () => {
       if (e.key === STORAGE_KEY) {
         try {
           const updatedNotes = e.newValue ? JSON.parse(e.newValue) : [];
+          console.log(`Storage event: updated to ${updatedNotes.length} notes`);
           setNotes(updatedNotes);
         } catch (error) {
           console.error('Error parsing notes from storage event:', error);
@@ -38,6 +42,7 @@ export const useNotes = () => {
       try {
         const savedNotes = localStorage.getItem(STORAGE_KEY);
         const updatedNotes = savedNotes ? JSON.parse(savedNotes) : [];
+        console.log(`Notes updated event: now ${updatedNotes.length} notes`);
         setNotes(updatedNotes);
       } catch (error) {
         console.error('Error parsing notes from custom event:', error);
@@ -55,6 +60,7 @@ export const useNotes = () => {
 
   const saveNote = useCallback((note: Note) => {
     try {
+      console.log('Saving note:', note.id);
       const updatedNotes = [...notes];
       const existingIndex = notes.findIndex(n => n.id === note.id);
       
@@ -78,9 +84,17 @@ export const useNotes = () => {
 
   const deleteNote = useCallback((noteId: string) => {
     try {
+      console.log('Deleting note:', noteId);
       const updatedNotes = notes.filter(note => note.id !== noteId);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
       setNotes(updatedNotes);
+      
+      // If the deleted note was selected, clear the selection
+      if (selectedNote && selectedNote.id === noteId) {
+        setSelectedNote(null);
+        setCurrentContent('');
+      }
+      
       window.dispatchEvent(new Event('notesUpdated'));
       
       return true;
@@ -89,13 +103,14 @@ export const useNotes = () => {
       toast.error('Failed to delete note');
       return false;
     }
-  }, [notes]);
+  }, [notes, selectedNote]);
 
   const updateCurrentContent = useCallback((content: string) => {
     setCurrentContent(content);
   }, []);
 
   const selectNoteForEdit = useCallback((note: Note) => {
+    console.log('Selecting note for edit:', note.id);
     setSelectedNote(note);
     setCurrentContent(note.content);
   }, []);
@@ -106,8 +121,12 @@ export const useNotes = () => {
   }, []);
 
   const addNote = useCallback(() => {
-    if (!currentContent.trim()) return null;
+    if (!currentContent.trim()) {
+      console.log('Cannot add empty note');
+      return null;
+    }
     
+    console.log('Adding new note');
     const newNote: Note = {
       id: crypto.randomUUID(),
       title: 'New Note',
@@ -119,12 +138,17 @@ export const useNotes = () => {
     
     saveNote(newNote);
     setCurrentContent('');
+    toast.success('Note added ✨');
     return newNote;
   }, [currentContent, saveNote]);
 
   const updateNote = useCallback((noteId: string, content: string) => {
+    console.log('Updating note:', noteId);
     const noteToUpdate = notes.find(note => note.id === noteId);
-    if (!noteToUpdate) return false;
+    if (!noteToUpdate) {
+      console.error('Note not found for update:', noteId);
+      return false;
+    }
     
     const updatedNote = {
       ...noteToUpdate,
@@ -132,23 +156,34 @@ export const useNotes = () => {
       updatedAt: new Date().toISOString()
     };
     
-    return saveNote(updatedNote);
-  }, [notes, saveNote]);
+    const success = saveNote(updatedNote);
+    if (success) {
+      toast.success('Note updated ✨');
+      clearSelectedNote();
+    }
+    return success;
+  }, [notes, saveNote, clearSelectedNote]);
 
   const addTagToNote = useCallback((noteId: string, tagName: string, colorName: string = 'default') => {
+    console.log('Adding tag to note:', noteId, tagName, colorName);
     const color = isValidTagColor(colorName) ? colorName as TagColor : 'default';
     const noteToUpdate = notes.find(note => note.id === noteId);
-    if (!noteToUpdate) return false;
+    if (!noteToUpdate) {
+      console.error('Note not found for adding tag:', noteId);
+      return false;
+    }
     
+    // Ensure tags array exists
+    const existingTags = noteToUpdate.tags || [];
     const newTag: Tag = { name: tagName.trim(), color };
-    const existingTagIndex = noteToUpdate.tags.findIndex(t => t.name === tagName);
+    const existingTagIndex = existingTags.findIndex(t => t.name === tagName);
     
     let updatedTags;
     if (existingTagIndex >= 0) {
-      updatedTags = [...noteToUpdate.tags];
+      updatedTags = [...existingTags];
       updatedTags[existingTagIndex] = newTag;
     } else {
-      updatedTags = [...noteToUpdate.tags, newTag];
+      updatedTags = [...existingTags, newTag];
     }
     
     const updatedNote = {
@@ -161,8 +196,12 @@ export const useNotes = () => {
   }, [notes, saveNote]);
 
   const removeTagFromNote = useCallback((noteId: string, tagName: string) => {
+    console.log('Removing tag from note:', noteId, tagName);
     const noteToUpdate = notes.find(note => note.id === noteId);
-    if (!noteToUpdate) return false;
+    if (!noteToUpdate || !noteToUpdate.tags) {
+      console.error('Note not found or has no tags:', noteId);
+      return false;
+    }
     
     const updatedNote = {
       ...noteToUpdate,

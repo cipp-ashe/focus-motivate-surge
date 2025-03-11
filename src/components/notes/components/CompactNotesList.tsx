@@ -1,12 +1,19 @@
 
 import React, { useState } from 'react';
-import type { Note } from '@/types/notes';
+import { Download, Trash2 } from 'lucide-react';
+import type { Note, Tag } from '@/types/notes';
 import { NoteCard } from './NoteCard';
 import { NotesDialog } from './NotesDialog';
-import { NotesListHeader } from './NotesListHeader';
+import { NotesPagination } from './components/NotesPagination';
+import { ActionButton } from '@/components/ui/action-button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { downloadAllNotes } from '@/utils/downloadUtils';
+import { toast } from 'sonner';
 import { useNoteStorage } from '@/hooks/useNoteStorage';
 import { usePagination } from '@/hooks/usePagination';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+// Define this constant
+const MAX_NOTES = 4;
 
 interface CompactNotesListProps {
   notes: Note[];
@@ -19,7 +26,7 @@ export const CompactNotesList = ({
   onEditNote,
   inExpandedView = false
 }: CompactNotesListProps) => {
-  console.log('CompactNotesList rendered with', notes.length, 'notes');
+  console.log('CompactNotesList rendered with', notes?.length, 'notes');
   
   const [showClearDialog, setShowClearDialog] = useState(false);
   const { 
@@ -46,17 +53,32 @@ export const CompactNotesList = ({
 
   return (
     <div className="space-y-2">
-      <NotesListHeader
-        notes={notes}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        onClearClick={() => setShowClearDialog(true)}
-        compact
-      />
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-medium text-muted-foreground">Recent Notes</h3>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <ActionButton
+              icon={Download}
+              onClick={() => downloadAllNotes(notes)}
+              className="h-6 w-6 p-0"
+            />
+            <ActionButton
+              icon={Trash2}
+              onClick={() => setShowClearDialog(true)}
+              className="h-6 w-6 p-0"
+            />
+          </div>
+          <NotesPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            compact
+          />
+        </div>
+      </div>
 
       <ScrollArea className="h-[200px] w-full rounded-md border border-primary/10 bg-card/30 backdrop-blur-sm p-2">
-        <div className="grid gap-1">
+        <div className="grid gap-1.5">
           {paginatedNotes.map(note => (
             <NoteCard
               key={note.id}
@@ -84,6 +106,3 @@ export const CompactNotesList = ({
     </div>
   );
 };
-
-// Define this constant
-const MAX_NOTES = 4;

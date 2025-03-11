@@ -19,12 +19,16 @@ interface SavedNotesProps {
 const MAX_NOTES = 4;
 
 export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: SavedNotesProps) => {
+  console.log('SavedNotes component rendered');
+  
   const { 
     notes,
     deleteNote,
     addTagToNote,
     removeTagFromNote
   } = useNotes();
+  
+  console.log('Notes from useNotes hook:', notes?.length || 0);
   
   const [currentPage, setCurrentPage] = useState(0);
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -49,11 +53,11 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
     toast.success("All notes cleared 🗑️");
   };
 
-  const totalPages = Math.ceil(notes.length / MAX_NOTES);
-  const paginatedNotes = notes.slice(
+  const totalPages = Math.ceil((notes?.length || 0) / MAX_NOTES);
+  const paginatedNotes = notes?.slice(
     currentPage * MAX_NOTES,
     (currentPage + 1) * MAX_NOTES
-  );
+  ) || [];
 
   return (
     <div className="space-y-4">
@@ -64,7 +68,7 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
           <div className="flex items-center gap-1">
             <ActionButton
               icon={Download}
-              onClick={() => downloadAllNotes(notes)}
+              onClick={() => downloadAllNotes(notes || [])}
               className="h-7 w-7 p-0"
             />
             <ActionButton
@@ -82,7 +86,7 @@ export const SavedNotes = ({ onOpenEmailModal, onEditNote, onUpdateTagColor }: S
       </div>
 
       {/* Notes List */}
-      {notes.length === 0 ? (
+      {!notes || notes.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
           <p className="text-sm text-muted-foreground">No notes yet</p>
           <p className="text-xs text-muted-foreground/60">Start writing to create your first note</p>

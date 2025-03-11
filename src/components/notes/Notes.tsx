@@ -1,10 +1,16 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NotesEditor } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
 import { useNotes } from '@/hooks/useNotes';
 
 export const Notes = () => {
+  // Add logging to monitor component rendering
+  useEffect(() => {
+    console.log('Notes component mounted');
+    return () => console.log('Notes component unmounted');
+  }, []);
+
   const { 
     selectedNote,
     currentContent,
@@ -17,7 +23,16 @@ export const Notes = () => {
     removeTagFromNote
   } = useNotes();
 
+  // Add logging to debug state values
+  useEffect(() => {
+    console.log('Notes state:', { 
+      hasSelectedNote: !!selectedNote, 
+      contentLength: currentContent?.length || 0 
+    });
+  }, [selectedNote, currentContent]);
+
   const handleSave = () => {
+    console.log('Attempting to save note', { hasSelectedNote: !!selectedNote });
     if (selectedNote) {
       updateNote(selectedNote.id, currentContent);
     } else {
