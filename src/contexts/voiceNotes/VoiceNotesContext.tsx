@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { VoiceNote, VoiceNoteContextType } from '@/types/voiceNotes';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   });
 
+  const [lastCreatedNoteId, setLastCreatedNoteId] = useState<string | null>(null);
   const noteActions = useNoteActions();
 
   useEffect(() => {
@@ -73,30 +75,34 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Create a new note with the voice note content
     try {
       const title = voiceNote.text.split('\n')[0].substring(0, 50) || 'Voice Note';
-      const newNote = {
-        title,
-        content: voiceNote.text,
-        tags: [{ name: 'voice-note', color: 'blue' as const }]
-      };
-
-      // Add the note
-      noteActions.addNote(newNote);
+      const content = voiceNote.text;
       
-      // Link the voice note and regular note
-      if (noteActions.lastCreatedNoteId) {
+      // Add the note - the function doesn't accept an object per the NoteActions interface
+      const newNote = noteActions.addNote();
+      
+      if (newNote) {
+        // If note was created successfully, update it with the voice note content
+        noteActions.updateNote(newNote.id, content);
+        
+        // Store the created note ID for relationship creation
+        const createdNoteId = newNote.id;
+        
+        // Link the voice note and regular note
         relationshipManager.createRelationship(
           voiceNoteId,
           EntityType.VoiceNote,
-          noteActions.lastCreatedNoteId,
+          createdNoteId,
           EntityType.Note,
           'source' as RelationType
         );
+        
+        toast.success("Created note from voice recording");
+        
+        // Mark voice note as complete
+        toggleNoteComplete(voiceNoteId);
+      } else {
+        toast.error("Failed to create note");
       }
-      
-      toast.success("Created note from voice recording");
-      
-      // Mark voice note as complete
-      toggleNoteComplete(voiceNoteId);
     } catch (error) {
       console.error("Failed to create note from voice note:", error);
       toast.error("Failed to create note");
