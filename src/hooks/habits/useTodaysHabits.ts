@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useHabitState } from '@/contexts/habits/HabitContext';
@@ -83,15 +84,19 @@ export const useTodaysHabits = () => {
               };
               habits.push(newHabit);
               
+              // Get habit duration from settings or use default
+              const habitDuration = habit.settings?.duration || 1500;
+              const metricType = habit.settings?.metricType || habit.metricType || 'regular';
+              
               // Immediately schedule this habit as a task
-              console.log(`Scheduling habit task for ${habit.name} from template ${template.templateId}`);
+              console.log(`Scheduling habit task for ${habit.name} from template ${template.templateId} with duration ${habitDuration}, metric type ${metricType}`);
               eventBus.emit('habit:schedule', {
                 habitId: habit.id,
                 templateId: template.templateId,
                 name: habit.name,
-                duration: habit.duration || 1500,
+                duration: habitDuration,
                 date: currentDate,
-                metricType: habit.metricType
+                metricType: metricType
               });
             }
           });
