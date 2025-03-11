@@ -10,6 +10,8 @@ import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { TaskInputRow } from './inputs/TaskInputRow';
 import { useTaskCreation } from './hooks/useTaskCreation';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
@@ -63,14 +65,25 @@ export const TaskInput: React.FC<TaskInputProps> = ({
     return (
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <input
+          <Input
             type="text"
             placeholder="Add a timer task"
             value={taskName}
             onChange={handleTaskNameChange}
-            className="flex-grow"
+            className="flex-grow bg-background/20 dark:bg-[#222222] border-input/30 text-foreground"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleAddTask();
+              }
+            }}
           />
-          <button onClick={handleAddTask}>Add Timer</button>
+          <Button 
+            onClick={handleAddTask}
+            variant="default"
+            className="bg-primary text-primary-foreground"
+          >
+            Add Timer
+          </Button>
         </div>
       </div>
     );
@@ -78,7 +91,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({
   
   // UI Rendering for full view with improved styling
   return (
-    <div className="flex flex-col gap-4 bg-background/80 p-4 rounded-xl shadow-sm border border-border/30">
+    <div className="flex flex-col gap-4 bg-background/80 dark:bg-background/20 p-4 rounded-xl shadow-sm border border-border/30">
       {/* Main Task Input Row */}
       <TaskInputRow
         taskName={taskName}

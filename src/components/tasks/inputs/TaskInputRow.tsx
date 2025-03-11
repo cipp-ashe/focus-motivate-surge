@@ -76,7 +76,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
           value={taskName}
           onChange={onTaskNameChange}
           ref={inputRef}
-          className="flex-grow bg-background border-input/50 focus-visible:border-primary pl-12"
+          className="flex-grow bg-background/20 dark:bg-[#1A1F2C] border-input/50 focus-visible:border-primary pl-12"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               onAddTask();

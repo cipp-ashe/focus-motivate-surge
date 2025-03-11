@@ -19,8 +19,8 @@ export const TimerView: React.FC<TimerViewProps> = ({
   onTasksAdd
 }) => {
   return (
-    <div className="flex flex-col h-full bg-background rounded-xl overflow-hidden shadow-sm border border-border/30">
-      <div className="p-4 border-b border-border/10">
+    <div className="flex flex-col h-full bg-background/20 dark:bg-[#1A1F2C] rounded-xl overflow-hidden shadow-sm border border-border/30">
+      <div className="p-4 border-b border-border/10 bg-background/30 dark:bg-[#1A1F2C]">
         <TaskInput 
           onTaskAdd={onTaskAdd} 
           onTasksAdd={onTasksAdd}
