@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 import { ScreenshotUpload } from "@/components/screenshots/ScreenshotUpload";
 import { ScreenshotList } from "@/components/screenshots/ScreenshotList";
@@ -28,26 +27,10 @@ const Screenshots = () => {
       setTasks(prev => prev.filter(task => task.id !== data.taskId));
     };
 
-    const handleTaskComplete = (data: { taskId: string }) => {
-      setTasks(prev => prev.filter(task => task.id !== data.taskId));
-    };
-
-    const handleTaskCreate = (task: Task) => {
-      if (task.taskType === 'screenshot') {
-        setTasks(prev => {
-          // Avoid adding duplicates
-          if (prev.some(t => t.id === task.id)) return prev;
-          return [...prev, task];
-        });
-      }
-    };
-
     // Subscribe to events
     const unsubscribeUpdate = eventBus.on('task:update', handleTaskUpdate);
     const unsubscribeDelete = eventBus.on('task:delete', handleTaskDelete);
-    const unsubscribeComplete = eventBus.on('task:complete', handleTaskComplete);
-    const unsubscribeCreate = eventBus.on('task:create', handleTaskCreate);
-
+    
     // Listen for storage changes from other tabs/windows
     const handleStorageChange = () => {
       loadScreenshotTasks();
@@ -57,21 +40,17 @@ const Screenshots = () => {
     window.addEventListener('tasksUpdated', handleStorageChange);
 
     return () => {
-      // Unsubscribe when component unmounts
       unsubscribeUpdate();
       unsubscribeDelete();
-      unsubscribeComplete();
-      unsubscribeCreate();
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('tasksUpdated', handleStorageChange);
     };
   }, []);
 
   const loadScreenshotTasks = () => {
-    // Load from taskStorage to ensure we get the latest data
     const allTasks = taskStorage.loadTasks();
     const screenshotTasks = allTasks.filter((task: Task) => 
-      task.taskType === 'screenshot' || task.imageUrl
+      task.taskType === 'screenshot'
     );
     setTasks(screenshotTasks);
   };
@@ -108,9 +87,7 @@ const Screenshots = () => {
       });
 
       toast.success("Screenshot saved");
-      
-      // Add to local state immediately for responsive UI
-      setTasks(prev => [task, ...prev]);
+      loadScreenshotTasks(); // Reload from storage to ensure consistency
     } catch (error) {
       console.error("Error processing image:", error);
       toast.error("Failed to process image");
