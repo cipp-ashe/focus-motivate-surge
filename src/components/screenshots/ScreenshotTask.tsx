@@ -10,10 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, Trash, Calendar, Tag } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Eye, Trash, Calendar, Tag, Edit, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { TimerMetrics } from "@/types/metrics";
+import { toast } from "sonner";
+import { eventBus } from "@/lib/eventBus";
 
 interface ScreenshotTaskProps {
   task: Task;
@@ -21,6 +25,9 @@ interface ScreenshotTaskProps {
 
 export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(task.name);
+  const [editedDescription, setEditedDescription] = useState(task.description || "");
 
   const formatTaskDate = (dateString?: string) => {
     if (!dateString) return "Unknown";
@@ -35,15 +42,66 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
   const metrics = task.metrics as TimerMetrics;
   const completionDate = task.completedAt || metrics?.completionDate;
 
+  const handleDelete = () => {
+    eventBus.emit('task:delete', { taskId: task.id });
+    toast.success("Screenshot deleted");
+  };
+
+  const handleSaveEdit = () => {
+    if (!editedName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
+    const updates = {
+      name: editedName.trim(),
+      description: editedDescription.trim()
+    };
+
+    eventBus.emit('task:update', { 
+      taskId: task.id, 
+      updates 
+    });
+
+    setIsEditing(false);
+    toast.success("Screenshot details updated");
+  };
+
+  const handleCancelEdit = () => {
+    setEditedName(task.name);
+    setEditedDescription(task.description || "");
+    setIsEditing(false);
+  };
+
   return (
     <Card className="overflow-hidden transition-all duration-200 h-full">
       <CardHeader className="p-4 pb-0">
-        <CardTitle className="text-base font-medium line-clamp-1">
-          {task.name}
-        </CardTitle>
-        <CardDescription className="line-clamp-1">
-          {task.description || "No description"}
-        </CardDescription>
+        {isEditing ? (
+          <div className="space-y-2">
+            <Input
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              placeholder="Screenshot name"
+              className="font-medium"
+              autoFocus
+            />
+            <Textarea
+              value={editedDescription}
+              onChange={(e) => setEditedDescription(e.target.value)}
+              placeholder="Add a description"
+              className="min-h-[60px] text-sm"
+            />
+          </div>
+        ) : (
+          <>
+            <CardTitle className="text-base font-medium line-clamp-1">
+              {task.name}
+            </CardTitle>
+            <CardDescription className="line-clamp-1">
+              {task.description || "No description"}
+            </CardDescription>
+          </>
+        )}
       </CardHeader>
       
       <CardContent className="p-4 pt-3">
@@ -97,24 +155,63 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
       </CardContent>
       
       <CardFooter className="p-4 pt-0 flex justify-between">
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs h-8"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <Eye className="h-3 w-3 mr-1" />
-          {isExpanded ? "Less" : "More"}
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs h-8 text-destructive hover:bg-destructive/10"
-        >
-          <Trash className="h-3 w-3 mr-1" />
-          Delete
-        </Button>
+        {isEditing ? (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-8"
+              onClick={handleCancelEdit}
+            >
+              <X className="h-3 w-3 mr-1" />
+              Cancel
+            </Button>
+            
+            <Button
+              variant="default"
+              size="sm"
+              className="text-xs h-8"
+              onClick={handleSaveEdit}
+            >
+              <Save className="h-3 w-3 mr-1" />
+              Save
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-8"
+              onClick={() => isExpanded ? setIsExpanded(false) : setIsExpanded(true)}
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              {isExpanded ? "Less" : "More"}
+            </Button>
+            
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit className="h-3 w-3 mr-1" />
+                Edit
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs h-8 text-destructive hover:bg-destructive/10"
+                onClick={handleDelete}
+              >
+                <Trash className="h-3 w-3 mr-1" />
+                Delete
+              </Button>
+            </div>
+          </>
+        )}
       </CardFooter>
     </Card>
   );
