@@ -2,7 +2,7 @@
 import React from "react";
 import { Timer as TimerIcon } from "lucide-react";
 import { CardHeader, CardTitle } from "@/components/ui/card";
-import { TimerExpandedViewRef, Quote } from "@/types/timer";
+import { TimerExpandedViewRef, Quote, SoundOption } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { CompletionView } from "./views/CompletionView";
 import { TimerRenderer } from "./views/TimerRenderer";
@@ -18,8 +18,8 @@ interface TimerContentProps {
   metrics: TimerStateMetrics;
   internalMinutes: number;
   setInternalMinutes: (minutes: number) => void;
-  selectedSound: string;
-  setSelectedSound: (sound: string) => void;
+  selectedSound: SoundOption;
+  setSelectedSound: React.Dispatch<React.SetStateAction<SoundOption>>;
   testSound: () => void;
   isLoadingAudio: boolean;
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
