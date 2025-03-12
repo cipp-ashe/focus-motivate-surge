@@ -1,13 +1,8 @@
+import React, { useState } from 'react';
 import { Task } from "@/types/tasks";
-import { Sparkles, X, Clock, BookOpen, Image, CheckSquare, Mic, Zap } from "lucide-react";
-import { TaskTags } from "./TaskTags";
-import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { useState, useEffect } from "react";
+import { eventBus } from "@/lib/eventBus";
 import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
-import { eventBus } from "@/lib/eventBus";
 
 interface TaskContentProps {
   task: Task;
