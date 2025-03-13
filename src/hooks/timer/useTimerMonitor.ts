@@ -65,15 +65,27 @@ export const useTimerMonitor = ({
       if (onStart) onStart(taskName, duration);
     };
 
-    const handleTimerPause = () => {
+    const handleTimerPause = ({ timeLeft }: { taskName: string; timeLeft: number }) => {
       console.log("Timer pause event received");
       timerInfoRef.current.isActive = false;
+      
+      // Update seconds left if provided
+      if (timeLeft !== undefined) {
+        timerInfoRef.current.secondsLeft = timeLeft;
+      }
+      
       if (onPause) onPause();
     };
 
-    const handleTimerResume = () => {
+    const handleTimerResume = ({ timeLeft }: { taskName: string; timeLeft: number }) => {
       console.log("Timer resume event received");
       timerInfoRef.current.isActive = true;
+      
+      // Update seconds left if provided
+      if (timeLeft !== undefined) {
+        timerInfoRef.current.secondsLeft = timeLeft;
+      }
+      
       if (onResume) onResume();
     };
 
@@ -85,13 +97,13 @@ export const useTimerMonitor = ({
     };
 
     // Handle timer reset event
-    const handleTimerReset = ({ taskName, duration }: { taskName: string; duration: number }) => {
+    const handleTimerReset = ({ taskName, duration }: { taskName: string; duration?: number }) => {
       console.log(`Timer reset event received for ${taskName} with duration ${duration}`);
       timerInfoRef.current = {
         isActive: false,
-        secondsLeft: duration,
+        secondsLeft: duration || timerInfoRef.current.totalSeconds,
         taskName,
-        totalSeconds: duration,
+        totalSeconds: duration || timerInfoRef.current.totalSeconds,
       };
     };
 

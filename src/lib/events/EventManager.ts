@@ -7,8 +7,8 @@ import { TimerEventType, TimerEventPayloads } from '@/types/events';
 // This should be synchronized with TimerEventPayloads in types/events.ts
 type Events = {
   'timer:start': { taskName: string; duration: number; currentTime?: number };
-  'timer:pause': { taskName: string; timeLeft?: number; metrics?: any };
-  'timer:resume': { taskName: string; timeLeft?: number; currentTime?: number; metrics?: any };
+  'timer:pause': { taskName: string; timeLeft: number; metrics?: any };
+  'timer:resume': { taskName: string; timeLeft: number; currentTime?: number; metrics?: any };
   'timer:complete': { taskName: string; metrics?: any };
   'timer:reset': { taskName: string; duration?: number };
   'timer:tick': { taskName: string; remaining: number; timeLeft?: number };

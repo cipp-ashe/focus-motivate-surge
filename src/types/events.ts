@@ -1,3 +1,4 @@
+
 export interface TimerEventPayloads {
   // Habit events
   'habit:schedule': {
@@ -64,13 +65,13 @@ export interface TimerEventPayloads {
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
   'timer:start': { taskName: string; duration: number; currentTime?: number };
-  'timer:pause': { taskName: string; timeLeft?: number; metrics?: any };
+  'timer:pause': { taskName: string; timeLeft: number; metrics?: any };
   'timer:reset': { taskName: string; duration?: number };
   'timer:complete': { taskName: string; metrics?: any };
   'timer:metrics-update': { taskName: string; metrics: any };
   'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
   'timer:tick': { timeLeft?: number; remaining?: number; taskName?: string };
-  'timer:resume': { taskName: string; timeLeft?: number; currentTime?: number; metrics?: any };
+  'timer:resume': { taskName: string; timeLeft: number; currentTime?: number; metrics?: any };
   
   // Relationship events
   'relationship:create': any;
