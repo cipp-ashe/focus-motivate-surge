@@ -17,62 +17,75 @@ export function completeTask({ taskId, taskList, completedTasks, metrics }: Comp
   updatedTaskList: Task[]; 
   updatedCompletedTasks: Task[] 
 } {
-  // Find the task to complete
-  const taskToComplete = taskList.find((task) => task.id === taskId);
-  
-  if (!taskToComplete) {
-    toast.error("Task not found");
+  try {
+    // Find the task to complete
+    const taskToComplete = taskList.find((task) => task.id === taskId);
+    
+    if (!taskToComplete) {
+      toast.error("Task not found");
+      return { updatedTaskList: taskList, updatedCompletedTasks: completedTasks };
+    }
+    
+    console.log("Completing task with original metrics:", metrics);
+    
+    // Current timestamp as ISO string for default values
+    const currentTimeIso = new Date().toISOString();
+    
+    // Prepare task metrics
+    const formattedMetrics: TaskMetrics = {
+      // Default values
+      timeSpent: 0,
+      timeElapsed: 0,
+      pauseCount: 0,
+      completionDate: currentTimeIso,
+      
+      // If we have metrics, use them
+      ...(metrics ? {
+        // Standard task metrics
+        timeSpent: 'timeSpent' in metrics ? metrics.timeSpent : (metrics.actualDuration || 0),
+        timeElapsed: 'timeElapsed' in metrics ? metrics.timeElapsed : (metrics.actualDuration || 0),
+        pauseCount: metrics.pauseCount || 0,
+        
+        // Timer-specific metrics
+        expectedTime: metrics.expectedTime || 0,
+        actualDuration: metrics.actualDuration || 0,
+        favoriteQuotes: Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [],
+        pausedTime: metrics.pausedTime || 0,
+        extensionTime: metrics.extensionTime || 0,
+        netEffectiveTime: metrics.netEffectiveTime || 0,
+        efficiencyRatio: metrics.efficiencyRatio || 0,
+        completionStatus: metrics.completionStatus || 'Completed',
+        
+        // Ensure completionDate is a string
+        completionDate: typeof metrics.completionDate === 'string' 
+          ? metrics.completionDate 
+          : currentTimeIso,
+      } : {})
+    };
+    
+    console.log("Completing task with formatted metrics:", formattedMetrics);
+    
+    // Create completed task
+    const completedTask: Task = {
+      ...taskToComplete,
+      completed: true,
+      completedAt: currentTimeIso,
+      metrics: formattedMetrics
+    };
+    
+    // Remove from active tasks, add to completed tasks
+    const updatedTaskList = taskList.filter((task) => task.id !== taskId);
+    const updatedCompletedTasks = [...completedTasks, completedTask];
+    
+    // Show toast notification
+    toast.success(`Task "${taskToComplete.name}" completed`);
+    
+    return { updatedTaskList, updatedCompletedTasks };
+  } catch (error) {
+    console.error("Error in completeTask operation:", error);
+    toast.error("Failed to complete task");
     return { updatedTaskList: taskList, updatedCompletedTasks: completedTasks };
   }
-  
-  console.log("Completing task with original metrics:", metrics);
-  
-  // Prepare task metrics
-  const formattedMetrics: TaskMetrics = {
-    // Default values
-    timeSpent: 0,
-    timeElapsed: 0,
-    pauseCount: 0,
-    completionDate: new Date().toISOString(),
-    
-    // If we have metrics, use them
-    ...(metrics ? {
-      // Standard task metrics
-      timeSpent: 'timeSpent' in metrics ? metrics.timeSpent : (metrics.actualDuration || 0),
-      timeElapsed: 'timeElapsed' in metrics ? metrics.timeElapsed : (metrics.actualDuration || 0),
-      pauseCount: metrics.pauseCount || 0,
-      
-      // Timer-specific metrics
-      expectedTime: metrics.expectedTime || 0,
-      actualDuration: metrics.actualDuration || 0,
-      favoriteQuotes: Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [],
-      pausedTime: metrics.pausedTime || 0,
-      extensionTime: metrics.extensionTime || 0,
-      netEffectiveTime: metrics.netEffectiveTime || 0,
-      efficiencyRatio: metrics.efficiencyRatio || 0,
-      completionStatus: metrics.completionStatus || 'Completed',
-      completionDate: metrics.completionDate || new Date().toISOString(),
-    } : {})
-  };
-  
-  console.log("Completing task with formatted metrics:", formattedMetrics);
-  
-  // Create completed task
-  const completedTask: Task = {
-    ...taskToComplete,
-    completed: true,
-    completedAt: new Date().toISOString(),
-    metrics: formattedMetrics
-  };
-  
-  // Remove from active tasks, add to completed tasks
-  const updatedTaskList = taskList.filter((task) => task.id !== taskId);
-  const updatedCompletedTasks = [...completedTasks, completedTask];
-  
-  // Show toast notification
-  toast.success(`Task "${taskToComplete.name}" completed`);
-  
-  return { updatedTaskList, updatedCompletedTasks };
 }
 
 // Export the operations object

@@ -72,7 +72,7 @@ export const useTimerActions = (
       const { timeLeft, updateTimeLeft, updateMetrics } = props as TimerActionProps;
       updateTimeLeft(timeLeft + seconds);
       updateMetrics({
-        extensionTime: seconds
+        extensionTime: (props as TimerActionProps).metrics.extensionTime + seconds
       });
     } else {
       const { dispatch } = props as UseTimerActionsProps;
@@ -93,52 +93,72 @@ export const useTimerActions = (
   }, [props, isLegacyInterface]);
 
   const completeTimer = useCallback(() => {
-    if (isLegacyInterface) {
-      const { setIsRunning, updateMetrics, metrics } = props as TimerActionProps;
-      const now = new Date();
+    try {
+      if (isLegacyInterface) {
+        const { setIsRunning, updateMetrics, metrics } = props as TimerActionProps;
+        const now = new Date();
+        
+        // Make sure we have a startTime
+        const startTime = metrics.startTime || new Date(now.getTime() - (metrics.expectedTime * 1000));
+        
+        // Calculate actual duration in seconds
+        const actualDuration = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+        
+        // Calculate effective working time (accounting for pauses)
+        const pausedTime = metrics.pausedTime || 0;
+        const extensionTime = metrics.extensionTime || 0;
+        const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
+        
+        // Calculate efficiency metrics
+        const efficiencyRatio = calculateEfficiencyRatio(metrics.expectedTime, netEffectiveTime);
+        const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime);
+        
+        // Create a properly formatted completion metrics object
+        const updatedMetrics = {
+          startTime: startTime,
+          endTime: now,
+          actualDuration,
+          pausedTime,
+          extensionTime,
+          netEffectiveTime,
+          efficiencyRatio,
+          completionStatus,
+          isPaused: false,
+          pausedTimeLeft: null,
+          // Always ensure completionDate is a string
+          completionDate: now.toISOString()
+        };
+        
+        console.log("useTimerActions: Completing timer with metrics:", updatedMetrics);
+        
+        // Update state and metrics
+        setIsRunning(false);
+        updateMetrics(updatedMetrics);
+        
+        // Return the complete metrics
+        return {
+          ...metrics,
+          ...updatedMetrics
+        };
+      } else {
+        const { dispatch } = props as UseTimerActionsProps;
+        dispatch({ type: 'COMPLETE' });
+        return null;
+      }
+    } catch (error) {
+      console.error("Error in completeTimer:", error);
       
-      // Make sure we have a startTime
-      const startTime = metrics.startTime || new Date(now.getTime() - (metrics.expectedTime * 1000));
-      
-      // Calculate actual duration in seconds
-      const actualDuration = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-      
-      // Calculate effective working time (accounting for pauses)
-      const pausedTime = metrics.pausedTime || 0;
-      const extensionTime = metrics.extensionTime || 0;
-      const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
-      
-      // Calculate efficiency metrics
-      const efficiencyRatio = calculateEfficiencyRatio(metrics.expectedTime, netEffectiveTime);
-      const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime);
-      
-      // Create a properly formatted completion metrics object
-      const updatedMetrics = {
-        startTime: startTime,
-        endTime: now,
-        actualDuration,
-        pausedTime,
-        extensionTime,
-        netEffectiveTime,
-        efficiencyRatio,
-        completionStatus,
-        isPaused: false,
-        pausedTimeLeft: null,
-        completionDate: now.toISOString() // Convert Date to string for storage
-      };
-      
-      // Update state and metrics
-      setIsRunning(false);
-      updateMetrics(updatedMetrics);
-      
-      // Return the complete metrics
-      return {
-        ...metrics,
-        ...updatedMetrics
-      };
-    } else {
-      const { dispatch } = props as UseTimerActionsProps;
-      dispatch({ type: 'COMPLETE' });
+      // Return basic metrics to prevent crashes
+      if (isLegacyInterface) {
+        const { metrics } = props as TimerActionProps;
+        return {
+          ...metrics,
+          completionDate: new Date().toISOString(),
+          endTime: new Date(),
+          isPaused: false
+        };
+      }
+      return null;
     }
   }, [props, isLegacyInterface]);
 

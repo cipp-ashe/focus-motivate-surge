@@ -37,22 +37,27 @@ export const Timer = ({
   const handleComplete = React.useCallback((metrics: any) => {
     console.log("Timer: handleComplete with metrics:", metrics);
     
-    // Ensure we have valid metrics before passing to consumer
-    const validatedMetrics = {
-      ...metrics,
-      // Make sure we have these required fields with default values if needed
-      startTime: metrics.startTime || new Date(),
-      endTime: metrics.endTime || new Date(),
-      completionDate: metrics.completionDate || new Date().toISOString()
-    };
-    
-    if (onComplete) {
-      try {
+    try {
+      // Ensure we have valid metrics with all required fields
+      const validatedMetrics = {
+        ...metrics,
+        // Make sure we have these required fields with default values if needed
+        startTime: metrics.startTime || new Date(),
+        endTime: metrics.endTime || new Date(),
+        // Ensure completionDate is a string, not a Date object
+        completionDate: typeof metrics.completionDate === 'string' 
+          ? metrics.completionDate 
+          : new Date().toISOString()
+      };
+      
+      console.log("Timer: Validated metrics:", validatedMetrics);
+      
+      if (onComplete) {
         onComplete(validatedMetrics);
-      } catch (error) {
-        console.error("Error in timer completion callback:", error);
-        toast.error("Error completing timer");
       }
+    } catch (error) {
+      console.error("Error in timer completion callback:", error);
+      toast.error("Error completing timer");
     }
   }, [onComplete]);
 
