@@ -13,6 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScreenshotContent } from "@/components/screenshots/components/ScreenshotContent";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Edit, Save, X } from "lucide-react";
 
 interface TaskContentProps {
   task: Task;
@@ -40,12 +44,24 @@ export const TaskContent = ({
   const [localInputValue, setLocalInputValue] = useState(inputValue);
   const [isScreenshotDialogOpen, setIsScreenshotDialogOpen] = useState(false);
   const [isScreenshotExpanded, setIsScreenshotExpanded] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(task.name);
+  const [editedDescription, setEditedDescription] = useState(task.description || "");
   
   useEffect(() => {
     if (editingTaskId === task.id) {
       setLocalInputValue(inputValue);
     }
   }, [inputValue, editingTaskId, task.id]);
+
+  useEffect(() => {
+    // Reset editing state and update edited values when dialog opens/closes
+    if (isScreenshotDialogOpen) {
+      setEditedName(task.name);
+      setEditedDescription(task.description || "");
+      setIsEditing(false);
+    }
+  }, [isScreenshotDialogOpen, task.name, task.description]);
 
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -164,6 +180,32 @@ export const TaskContent = ({
     }
   };
 
+  const handleSaveEdit = () => {
+    if (!editedName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
+    const updates = {
+      name: editedName.trim(),
+      description: editedDescription.trim() || undefined
+    };
+
+    eventBus.emit('task:update', { 
+      taskId: task.id, 
+      updates 
+    });
+
+    setIsEditing(false);
+    toast.success("Screenshot details updated");
+  };
+
+  const handleCancelEdit = () => {
+    setEditedName(task.name);
+    setEditedDescription(task.description || "");
+    setIsEditing(false);
+  };
+
   return (
     <>
       <div className="flex flex-col gap-2 p-4">
@@ -191,9 +233,69 @@ export const TaskContent = ({
       {task.taskType === 'screenshot' && (
         <Dialog open={isScreenshotDialogOpen} onOpenChange={setIsScreenshotDialogOpen}>
           <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-xl">{task.name}</DialogTitle>
+            <DialogHeader className="flex flex-col space-y-1.5 pb-2">
+              {isEditing ? (
+                <div className="space-y-2">
+                  <Input
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    placeholder="Screenshot name"
+                    className="font-medium"
+                    autoFocus
+                  />
+                  <Textarea
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    placeholder="Add a description"
+                    className="min-h-[60px] text-sm"
+                  />
+                </div>
+              ) : (
+                <DialogTitle className="text-xl">{task.name}</DialogTitle>
+              )}
+              
+              {/* Edit/Save buttons */}
+              <div className="flex justify-end space-x-2 mt-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={handleCancelEdit}
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={handleSaveEdit}
+                    >
+                      <Save className="h-3 w-3 mr-1" />
+                      Save
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                )}
+              </div>
             </DialogHeader>
+            
+            {!isEditing && task.description && (
+              <p className="text-sm text-muted-foreground px-1 -mt-1 mb-4">
+                {task.description}
+              </p>
+            )}
             
             <div className="mt-2">
               <ScreenshotContent 
