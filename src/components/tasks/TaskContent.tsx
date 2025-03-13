@@ -16,7 +16,7 @@ interface TaskContentProps {
   onBlur: () => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
-  onOpenTaskDialog?: () => void; // Add this prop to pass through
+  onOpenTaskDialog?: () => void; // Prop for opening task dialogs
 }
 
 export const TaskContent: React.FC<TaskContentProps> = ({
@@ -29,10 +29,10 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   onBlur,
   onKeyDown,
   preventPropagation,
-  onOpenTaskDialog, // Destructure the new prop
+  onOpenTaskDialog,
 }) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
-  const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog); // Pass onOpenTaskDialog to the handler
+  const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
   
   // Format the created date
   const createdDate = new Date(task.createdAt);

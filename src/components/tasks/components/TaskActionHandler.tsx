@@ -9,13 +9,21 @@ export const useTaskActionHandler = (
   task: Task,
   onOpenTaskDialog?: () => void
 ) => {
-  const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>) => {
+    // Ensure proper event handling
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     
-    const actionType = e.currentTarget.getAttribute('data-action-type');
+    // Get the action type from the clicked element
+    const actionType = e.currentTarget instanceof HTMLElement 
+      ? e.currentTarget.getAttribute('data-action-type') 
+      : null;
+      
     console.log("Task action:", actionType, "for task:", task.id);
     
+    // Handle habit-related tasks
     if (task.relationships?.habitId) {
       if (actionType === 'view-habit') {
         if (task.relationships?.habitId) {
@@ -67,26 +75,6 @@ export const useTaskActionHandler = (
       return;
     }
     
-    // Legacy handling for toggle-progress action
-    if (actionType === 'toggle-progress') {
-      // Toggle between pending and in-progress
-      const newStatus = task.status === 'in-progress' ? 'pending' : 'in-progress';
-      eventBus.emit('task:update', { 
-        taskId: task.id, 
-        updates: { status: newStatus } 
-      });
-      
-      toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`);
-      return;
-    }
-    
-    // Legacy handling for complete action
-    if (actionType === 'complete') {
-      eventBus.emit('task:complete', { taskId: task.id });
-      toast.success(`Completed task: ${task.name}`);
-      return;
-    }
-    
     // Process specific task types
     switch(task.taskType) {
       case 'timer':
@@ -115,7 +103,7 @@ export const useTaskActionHandler = (
         }
         
         // Always dispatch event first to ensure UI is updated
-        // This is critical for both new and existing journal entries
+        console.log("Dispatching open-journal event for task:", task.id);
         window.dispatchEvent(new CustomEvent('open-journal', {
           detail: {
             taskId: task.id,
