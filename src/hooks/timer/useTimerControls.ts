@@ -10,7 +10,7 @@ interface UseTimerControlsParams {
   onStart: () => void;
   onPause: () => void;
   onComplete: () => void;
-  onAddTime?: (minutes: number) => void;
+  onAddTime?: (minutes: number) => void;  // Ensure correct signature
 }
 
 export const useTimerControls = ({
@@ -34,9 +34,10 @@ export const useTimerControls = ({
     onComplete();
   }, [onComplete]);
 
-  const handleAddTime = useCallback(() => {
+  // Update to explicitly pass minutes parameter
+  const handleAddTime = useCallback((minutes: number = TIMER_CONSTANTS.ADD_TIME_MINUTES) => {
     if (onAddTime) {
-      onAddTime(TIMER_CONSTANTS.ADD_TIME_MINUTES);
+      onAddTime(minutes);
     }
   }, [onAddTime]);
 

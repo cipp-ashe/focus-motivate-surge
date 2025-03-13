@@ -11,8 +11,8 @@ interface UseTimerViewProps {
   isExpanded: boolean;
   handleTimerToggle: () => void;
   handleComplete: () => void;
-  handleAddTime: () => void;
-  pauseTimeLeft: number;
+  handleAddTime: (minutes: number) => void;  // Update signature to accept minutes parameter
+  pauseTimeLeft: number | null;
 }
 
 export const useTimerView = ({
@@ -38,7 +38,7 @@ export const useTimerView = ({
     onToggle: handleTimerToggle,
     isPaused: metrics.isPaused,
     onComplete: handleComplete,
-    onAddTime: handleAddTime,
+    onAddTime: handleAddTime,  // This now passes through the function with its parameters
     metrics,
     showAddTime: isExpanded,
     pauseTimeLeft,

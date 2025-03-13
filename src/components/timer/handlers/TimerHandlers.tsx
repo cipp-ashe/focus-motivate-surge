@@ -9,7 +9,7 @@ interface TimerHandlersProps {
   start: () => void;
   pause: () => void;
   reset: () => Promise<void>;
-  addTime: (minutes: number) => void;
+  addTime: (minutes: number) => void;  // This signature must be consistent across the app
   completeTimer: () => Promise<void>;
   playSound: () => void;
   onAddTime?: (minutes: number) => void;
@@ -53,7 +53,7 @@ export const useTimerHandlers = ({
     }
   }, [isRunning, pause, start]);
 
-  // Handle add time button click
+  // Handle add time button click - now expecting minutes parameter
   const handleAddTime = useCallback(
     (minutes: number) => {
       console.log(`Adding ${minutes} minutes to timer`);

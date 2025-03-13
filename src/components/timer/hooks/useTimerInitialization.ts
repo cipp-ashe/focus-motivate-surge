@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import { TimerProps } from "@/types/timer";
 import { TimerExpandedViewRef } from "@/types/timer";
@@ -83,7 +82,7 @@ export const useTimerInitialization = ({
     taskName,
     metrics,
     setIsExpanded,
-    onComplete
+    onComplete: onComplete || (() => {})
   });
 
   // Set up event listeners
@@ -94,16 +93,14 @@ export const useTimerInitialization = ({
     expandedViewRef,
   });
 
-  // Initialize handlers
+  // Initialize handlers with consistent function signatures
   const timerHandlers = useTimerHandlers({
     taskName,
     isRunning,
     start: startTimer,
     pause: pauseTimer,
-    // Fix: Create an adapter function that works with both signatures
-    addTime: extendTimer, // Use extendTimer directly since it already has the correct signature
-    completeTimer: () => {
-      // Fix: Convert synchronous function to Promise
+    addTime: extendTimer,
+    completeTimer: async () => {
       timerComplete();
       return Promise.resolve();
     },
@@ -118,8 +115,7 @@ export const useTimerInitialization = ({
     updateMetrics,
     setPauseTimeLeft,
     pauseTimerRef,
-    reset: () => {
-      // Fix: Convert synchronous function to Promise
+    reset: async () => {
       resetTimer();
       return Promise.resolve();
     },
