@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
+import { toast } from 'sonner';
 
 interface TaskLoaderProps {
   onTasksLoaded: (tasks: Task[]) => void;
@@ -17,6 +18,7 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
   const initialCheckDoneRef = useRef(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const migrationRunRef = useRef(false);
+  const lastLoadTimeRef = useRef<number>(0);
   
   // Run task type migration only once when component first mounts
   useEffect(() => {
@@ -37,6 +39,32 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     }
   }, []);
   
+  // Set up periodic task refreshes
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      // Only refresh if we're not currently loading and enough time has passed
+      if (!isLoading && Date.now() - lastLoadTimeRef.current > 15000) {
+        console.log("TaskLoader - Periodic refresh triggered");
+        reloadTasksFromStorage();
+      }
+    }, 30000); // Check every 30 seconds
+    
+    return () => clearInterval(refreshInterval);
+  }, [isLoading]);
+  
+  // Function to reload tasks from storage
+  const reloadTasksFromStorage = () => {
+    try {
+      const storedTasks = taskStorage.loadTasks();
+      console.log("TaskLoader - Reloading tasks from storage:", storedTasks);
+      onTasksLoaded(storedTasks);
+      lastLoadTimeRef.current = Date.now();
+    } catch (error) {
+      console.error("Error reloading tasks from storage:", error);
+      toast.error("Error refreshing tasks");
+    }
+  };
+  
   // Check for pending habits only once when component first mounts
   useEffect(() => {
     if (initialCheckDoneRef.current) return;
@@ -51,6 +79,7 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     const storedTasks = taskStorage.loadTasks();
     console.log("TaskLoader - Initial load from storage:", storedTasks);
     onTasksLoaded(storedTasks);
+    lastLoadTimeRef.current = Date.now();
     
     // Check for pending habits on mount with a small delay
     const timeout = setTimeout(() => {
@@ -76,9 +105,7 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
         setIsLoading(false);
         
         // Force an update from storage
-        const storedTasks = taskStorage.loadTasks();
-        console.log("TaskLoader - Loaded tasks from storage after timeout:", storedTasks);
-        onTasksLoaded(storedTasks);
+        reloadTasksFromStorage();
         
         loadingTimeoutRef.current = null;
       }, 1000);
@@ -90,7 +117,7 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
         loadingTimeoutRef.current = null;
       }
     };
-  }, [isLoading, onTasksLoaded]);
+  }, [isLoading]);
 
   // Add a loading state to prevent white screen
   if (isLoading) {

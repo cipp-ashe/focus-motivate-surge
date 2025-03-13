@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { taskReducer } from './taskReducer';
 import { taskState } from './taskState';
@@ -7,6 +7,8 @@ import { useTaskEvents } from './useTaskEvents';
 import { useTaskPersistence } from './useTaskPersistence';
 import { useTaskNavigation } from './useTaskNavigation';
 import { TaskContextState } from './types';
+import { eventManager } from '@/lib/events/EventManager';
+import { taskStateVerifier } from '@/lib/verification/taskStateVerifier';
 
 /**
  * Context for providing task state throughout the application
@@ -28,6 +30,7 @@ const TaskContext = createContext<TaskContextState | undefined>(undefined);
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
   // Initialize with data from localStorage
   const [state, dispatch] = useReducer(taskReducer, taskState.getInitialState());
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Debug: Log state on changes
   useEffect(() => {
@@ -58,7 +61,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         // Check for pending habits
         setTimeout(() => {
           console.log("TaskContext: Initial load complete, checking for pending habits");
-          window.dispatchEvent(new Event('force-task-update'));
+          eventManager.emit('habits:check-pending', {});
+          setIsInitialized(true);
         }, 250);
       }, 100);
     } catch (error) {
@@ -67,25 +71,55 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Progressive verification system to ensure data integrity
+  // Set up comprehensive verification system for detecting and fixing missing tasks
   useEffect(() => {
-    if (!state.isLoaded) return;
+    if (!state.isLoaded || !isInitialized) return;
     
-    const verificationTimeout = setTimeout(() => {
+    // Initial verification after load
+    const initialVerification = setTimeout(() => {
       const missingTasks = taskState.verifyConsistency(state.items);
       
       if (missingTasks.length > 0) {
-        console.log(`TaskContext: Verification found ${missingTasks.length} missing tasks, adding to state`);
+        console.log(`TaskContext: Initial verification found ${missingTasks.length} missing tasks, adding to state`);
         missingTasks.forEach(task => {
           dispatch({ type: 'ADD_TASK', payload: task });
         });
+        
+        // Force UI refresh
+        window.dispatchEvent(new Event('force-task-update'));
       } else {
-        console.log("TaskContext: Verification complete, all tasks are in sync");
+        console.log("TaskContext: Initial verification complete, all tasks are in sync");
       }
     }, 500);
     
-    return () => clearTimeout(verificationTimeout);
-  }, [state.isLoaded, state.items]);
+    // Set up periodic verification to catch desynchronization issues
+    const cleanupVerification = taskStateVerifier.setupPeriodicVerification(
+      () => state.items,
+      (missingTasks) => {
+        missingTasks.forEach(task => {
+          dispatch({ type: 'ADD_TASK', payload: task });
+        });
+        window.dispatchEvent(new Event('force-task-update'));
+      },
+      30000 // Check every 30 seconds
+    );
+    
+    // Set up listener for page visibility changes to force reload on tab focus
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log("TaskContext: Page became visible, forcing reload");
+        forceTasksReload();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      clearTimeout(initialVerification);
+      cleanupVerification();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [state.isLoaded, state.items, isInitialized, forceTasksReload]);
 
   return (
     <TaskContext.Provider value={state}>

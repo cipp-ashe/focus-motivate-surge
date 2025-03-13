@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { taskState } from '../taskState';
 import { taskStorage } from '@/lib/storage/taskStorage';
@@ -11,6 +11,22 @@ export const useTaskReload = (dispatch: React.Dispatch<any>) => {
   const [preventReentrantUpdate, setPreventReentrantUpdate] = useState(false);
   const [pendingTaskUpdates, setPendingTaskUpdates] = useState<Task[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
+  
+  // Set up a periodic reload to ensure data consistency
+  useEffect(() => {
+    if (isInitializing) {
+      // Don't set up periodic reload during initialization
+      return;
+    }
+    
+    const periodicReloadId = setInterval(() => {
+      console.log("TaskEvents: Periodic task reload triggered");
+      // Use a shorter debounce for the periodic reload
+      forceTasksReload({}, (prev) => prev);
+    }, 60000); // Every minute
+    
+    return () => clearInterval(periodicReloadId);
+  }, [isInitializing]);
   
   // Force reload tasks from storage
   const forceTasksReload = useCallback((lastEventTime: Record<string, number>, setLastEventTime: (fn: (prev: Record<string, number>) => Record<string, number>) => void) => {
@@ -24,7 +40,7 @@ export const useTaskReload = (dispatch: React.Dispatch<any>) => {
       // Debounce force reloads
       const now = Date.now();
       const lastReloadTime = lastEventTime['forceReload'] || 0;
-      if (now - lastReloadTime < 800) {
+      if (now - lastReloadTime < 500) { // Reduced from 800ms to 500ms for faster response
         console.log("TaskEvents: Skipping rapid reload, last reload was", now - lastReloadTime, "ms ago");
         return;
       }
@@ -59,7 +75,7 @@ export const useTaskReload = (dispatch: React.Dispatch<any>) => {
       // Release the lock after a small delay
       setTimeout(() => {
         setPreventReentrantUpdate(false);
-      }, 300);
+      }, 200); // Reduced from 300ms to 200ms
     } catch (error) {
       console.error('TaskEvents: Error forcing tasks reload:', error);
       setPreventReentrantUpdate(false);

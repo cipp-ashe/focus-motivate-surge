@@ -21,6 +21,10 @@ export const taskStateVerifier = {
         !tasksInMemory.some(memoryTask => memoryTask.id === storageTask.id)
       );
       
+      if (missingTasks.length > 0) {
+        console.log(`TaskStateVerifier: Found ${missingTasks.length} missing tasks`, missingTasks);
+      }
+      
       return missingTasks;
     } catch (error) {
       console.error('Error in taskStateVerifier.findMissingTasks:', error);
@@ -43,6 +47,10 @@ export const taskStateVerifier = {
       const orphanedTasks = tasksInMemory.filter(memoryTask => 
         !tasksInStorageIds.includes(memoryTask.id)
       );
+      
+      if (orphanedTasks.length > 0) {
+        console.log(`TaskStateVerifier: Found ${orphanedTasks.length} orphaned tasks`, orphanedTasks);
+      }
       
       return orphanedTasks;
     } catch (error) {
@@ -84,7 +92,7 @@ export const taskStateVerifier = {
   setupPeriodicVerification(
     getTasksInMemory: () => Task[],
     onTasksMissing: (missingTasks: Task[]) => void,
-    intervalMs: number = 60000
+    intervalMs: number = 30000 // Reduce interval to 30 seconds
   ): () => void {
     const intervalId = setInterval(() => {
       try {
@@ -94,6 +102,9 @@ export const taskStateVerifier = {
         if (missingTasks.length > 0) {
           console.log(`TaskVerification: Found ${missingTasks.length} tasks in storage missing from memory`);
           onTasksMissing(missingTasks);
+          
+          // Force a refresh
+          window.dispatchEvent(new Event('force-task-update'));
         } else {
           console.log('TaskVerification: All tasks are in sync');
         }
