@@ -100,7 +100,7 @@ export const useTimerInitialization = ({
     isRunning,
     start: startTimer,
     pause: pauseTimer,
-    // Fix: Wrap extendTimer in a function that matches the expected signature
+    // Fix: The addTime function needs to accept minutes parameter
     addTime: (minutes: number) => extendTimer(minutes),
     completeTimer: () => {
       // Fix: Convert synchronous function to Promise

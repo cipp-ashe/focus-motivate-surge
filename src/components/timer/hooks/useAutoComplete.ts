@@ -17,7 +17,7 @@ export const useAutoComplete = ({
 }: {
   isRunning: boolean;
   pause: () => void;
-  playSound: () => Promise<void>;
+  playSound: () => void;
   metrics: TimerStateMetrics;
   completeTimer: () => Promise<void>;
   onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
