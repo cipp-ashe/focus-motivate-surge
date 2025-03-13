@@ -15,20 +15,13 @@ interface TimerViewProps {
   selectedTaskId: string | null;
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
-  dialogOpeners?: {
-    checklist: (taskId: string, taskName: string, items: any[]) => void;
-    journal: (taskId: string, taskName: string, entry: string) => void;
-    screenshot: (imageUrl: string, taskName: string) => void;
-    voicenote: (taskId: string, taskName: string) => void;
-  };
 }
 
 export const TimerView: React.FC<TimerViewProps> = ({ 
   tasks, 
   selectedTaskId, 
   onTaskAdd, 
-  onTasksAdd,
-  dialogOpeners
+  onTasksAdd
 }) => {
   // Filter for timer tasks only
   const timerTasks = tasks.filter(task => task.taskType === 'timer');
@@ -39,6 +32,7 @@ export const TimerView: React.FC<TimerViewProps> = ({
   
   const handleTaskSelect = (task: Task) => {
     console.log("TimerView: Selected task", task.id);
+    eventBus.emit('task:select', task.id);
     eventBus.emit('timer:set-task', task);
     toast.success(`Selected timer task: ${task.name}`);
   };

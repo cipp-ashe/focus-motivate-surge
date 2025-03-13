@@ -30,45 +30,67 @@ export const TimerSection = ({
   }, [selectedTask]);
 
   // Listen for timer:set-task events to update the current task
-  useEvent('timer:set-task', (task: Task) => {
-    console.log("TimerSection: Received timer:set-task event", task);
+  useEffect(() => {
+    const handleTimerSetTask = (task: Task) => {
+      console.log("TimerSection: Received timer:set-task event", task);
+      
+      // Only accept timer tasks
+      if (task.taskType === 'timer') {
+        setCurrentTask(task);
+      } else {
+        console.warn("TimerSection: Ignoring non-timer task:", task);
+        toast.warning("Only timer tasks can be used in the Timer view");
+      }
+    };
     
-    // Only accept timer tasks
-    if (task.taskType === 'timer') {
-      setCurrentTask(task);
-    } else {
-      console.warn("TimerSection: Ignoring non-timer task:", task);
-      toast.warning("Only timer tasks can be used in the Timer view");
-    }
-  });
+    // Listen for the event
+    window.addEventListener('timer:set-task', handleTimerSetTask as EventListener);
+    
+    // Also subscribe to the event bus
+    const unsubscribe = eventBus.on('timer:set-task', handleTimerSetTask);
+    
+    return () => {
+      window.removeEventListener('timer:set-task', handleTimerSetTask as EventListener);
+      unsubscribe();
+    };
+  }, []);
 
   // Also listen for task:select events directly
-  useEvent('task:select', (taskId: string) => {
-    console.log("TimerSection: Received task:select event for", taskId);
-    
-    // Find the task in local storage to get its details
-    try {
-      const taskList = JSON.parse(localStorage.getItem('taskList') || '[]');
-      const task = taskList.find((t: Task) => t.id === taskId);
+  useEffect(() => {
+    const handleTaskSelect = (taskId: string) => {
+      console.log("TimerSection: Received task:select event for", taskId);
       
-      if (task) {
-        console.log("TimerSection: Found task in localStorage:", task);
+      // Find the task in local storage to get its details
+      try {
+        const taskList = JSON.parse(localStorage.getItem('taskList') || '[]');
+        const task = taskList.find((t: Task) => t.id === taskId);
         
-        // Only accept timer tasks
-        if (task.taskType === 'timer') {
-          setCurrentTask(task);
-          toast.success(`Selected timer task: ${task.name}`);
+        if (task) {
+          console.log("TimerSection: Found task in localStorage:", task);
+          
+          // Only accept timer tasks
+          if (task.taskType === 'timer') {
+            setCurrentTask(task);
+            toast.success(`Selected timer task: ${task.name}`);
+          } else {
+            console.warn("TimerSection: Ignoring non-timer task:", task);
+            toast.warning("Only timer tasks can be used in the Timer view");
+          }
         } else {
-          console.warn("TimerSection: Ignoring non-timer task:", task);
-          toast.warning("Only timer tasks can be used in the Timer view");
+          console.warn("TimerSection: Task not found in localStorage:", taskId);
         }
-      } else {
-        console.warn("TimerSection: Task not found in localStorage:", taskId);
+      } catch (e) {
+        console.error("TimerSection: Error processing task:select event", e);
       }
-    } catch (e) {
-      console.error("TimerSection: Error processing task:select event", e);
-    }
-  });
+    };
+    
+    // Subscribe to the event bus
+    const unsubscribe = eventBus.on('task:select', handleTaskSelect);
+    
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Update current task when selectedTask changes
   useEffect(() => {
