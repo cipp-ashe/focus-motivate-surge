@@ -90,10 +90,10 @@ export const useTimerActions = ({
     const efficiencyRatio = expectedTime > 0 ? netEffective / expectedTime : 0;
     
     // Determine completion status
-    let completionStatus = 'Completed On Time';
+    let completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late' = 'Completed On Time';
     
     if (metrics.extensionTime && metrics.extensionTime > 0) {
-      completionStatus = 'Completed With Extra Time';
+      completionStatus = 'Completed Late';
     } else if (timeLeft > 0 && timeLeft < expectedTime) {
       completionStatus = 'Completed Early';
     }

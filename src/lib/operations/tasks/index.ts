@@ -57,3 +57,6 @@ export const taskOperations = {
    */
   createHabitTask: habitTaskOperations.createHabitTask
 };
+
+// Export the individual operation modules for direct access
+export { createTaskOperations, updateTaskOperations, deleteTaskOperations, completeTaskOperations, habitTaskOperations };

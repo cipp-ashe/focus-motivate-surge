@@ -101,7 +101,11 @@ export const useTimerInitialization = ({
     start: startTimer,
     pause: pauseTimer,
     addTime: extendTimer,
-    completeTimer: timerComplete,
+    completeTimer: () => {
+      // Convert synchronous function to Promise
+      timerComplete();
+      return Promise.resolve();
+    },
     playSound,
     onAddTime,
     onComplete,
@@ -113,7 +117,11 @@ export const useTimerInitialization = ({
     updateMetrics,
     setPauseTimeLeft,
     pauseTimerRef,
-    reset: resetTimer,
+    reset: () => {
+      // Convert synchronous function to Promise
+      resetTimer();
+      return Promise.resolve();
+    },
   });
 
   // Monitor timer state
@@ -143,7 +151,11 @@ export const useTimerInitialization = ({
     pause: pauseTimer,
     playSound,
     metrics,
-    completeTimer: timerComplete,
+    completeTimer: () => {
+      // Convert synchronous function to Promise
+      timerComplete();
+      return Promise.resolve();
+    },
     onComplete,
     taskName,
     setCompletionMetrics,

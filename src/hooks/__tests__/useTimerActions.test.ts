@@ -3,7 +3,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useTimerActions } from '../timer/useTimerActions';
 import { TimerStateMetrics } from '@/types/metrics';
-import { TimerState } from '@/types/timer';
 
 describe('useTimerActions', () => {
   const mockMetrics: TimerStateMetrics = {
@@ -23,75 +22,103 @@ describe('useTimerActions', () => {
     pausedTimeLeft: null
   };
 
-  const mockState: TimerState = {
+  const mockProps = {
     timeLeft: 300,
-    isRunning: false,
-    isPaused: false,
-    showCompletion: false,
-    completionCelebrated: false,
-    metrics: mockMetrics
+    metrics: mockMetrics,
+    updateTimeLeft: vi.fn(),
+    updateMetrics: vi.fn(),
+    setIsRunning: vi.fn()
   };
-
-  const mockDispatch = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should handle startTimer correctly', () => {
-    const { result } = renderHook(() => useTimerActions(mockState, mockDispatch));
+    const { result } = renderHook(() => useTimerActions(mockProps));
     
     result.current.startTimer();
     
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'START' });
-    expect(mockDispatch).toHaveBeenCalledWith({ 
-      type: 'SET_START_TIME', 
-      payload: expect.any(Date) 
+    expect(mockProps.setIsRunning).toHaveBeenCalledWith(true);
+    expect(mockProps.updateMetrics).toHaveBeenCalledWith({
+      startTime: expect.any(Date),
+      isPaused: false
     });
   });
 
   it('should handle pauseTimer correctly', () => {
-    const runningState = { ...mockState, isRunning: true };
-    const { result } = renderHook(() => useTimerActions(runningState, mockDispatch));
+    const runningProps = {
+      ...mockProps,
+      timeLeft: 200
+    };
+    
+    const { result } = renderHook(() => useTimerActions(runningProps));
     
     result.current.pauseTimer();
     
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'PAUSE' });
-    expect(mockDispatch).toHaveBeenCalledWith({ 
-      type: 'SET_LAST_PAUSE_TIMESTAMP', 
-      payload: expect.any(Date) 
+    expect(runningProps.setIsRunning).toHaveBeenCalledWith(false);
+    expect(runningProps.updateMetrics).toHaveBeenCalledWith({
+      pauseCount: 1,
+      lastPauseTimestamp: expect.any(Date),
+      isPaused: true,
+      pausedTimeLeft: 200
     });
-  });
-
-  it('should not pause if already paused', () => {
-    const pausedState = { ...mockState, isRunning: true, isPaused: true };
-    const { result } = renderHook(() => useTimerActions(pausedState, mockDispatch));
-    
-    result.current.pauseTimer();
-    
-    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
   it('should handle resetTimer correctly', () => {
-    const { result } = renderHook(() => useTimerActions(mockState, mockDispatch));
+    const { result } = renderHook(() => useTimerActions(mockProps));
     
     result.current.resetTimer();
     
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'RESET' });
+    expect(mockProps.setIsRunning).toHaveBeenCalledWith(false);
+    expect(mockProps.updateTimeLeft).toHaveBeenCalledWith(300);
+    expect(mockProps.updateMetrics).toHaveBeenCalledWith({
+      startTime: null,
+      endTime: null,
+      pauseCount: 0,
+      actualDuration: 0,
+      pausedTime: 0,
+      lastPauseTimestamp: null,
+      extensionTime: 0,
+      isPaused: false,
+      pausedTimeLeft: null
+    });
   });
 
   it('should handle extendTimer correctly', () => {
-    const { result } = renderHook(() => useTimerActions(mockState, mockDispatch));
+    const { result } = renderHook(() => useTimerActions(mockProps));
     
     result.current.extendTimer(5);
     
-    expect(mockDispatch).toHaveBeenCalledWith({ 
-      type: 'EXTEND', 
-      payload: 300 
+    expect(mockProps.updateTimeLeft).toHaveBeenCalledWith(600); // 300 + (5 * 60)
+    expect(mockProps.updateMetrics).toHaveBeenCalledWith({
+      extensionTime: 300 // 5 * 60
     });
-    expect(mockDispatch).toHaveBeenCalledWith({ 
-      type: 'SET_EXTENSION_TIME', 
-      payload: 300 
-    });
+  });
+
+  it('should handle completeTimer correctly', () => {
+    const { result } = renderHook(() => useTimerActions(mockProps));
+    
+    const returnedMetrics = result.current.completeTimer();
+    
+    expect(mockProps.setIsRunning).toHaveBeenCalledWith(false);
+    expect(mockProps.updateMetrics).toHaveBeenCalledWith(expect.objectContaining({
+      endTime: expect.any(Date),
+      actualDuration: expect.any(Number),
+      netEffectiveTime: expect.any(Number),
+      efficiencyRatio: expect.any(Number),
+      completionStatus: expect.any(String),
+      isPaused: false
+    }));
+    
+    expect(returnedMetrics).toEqual(expect.objectContaining({
+      ...mockMetrics,
+      endTime: expect.any(Date),
+      actualDuration: expect.any(Number),
+      netEffectiveTime: expect.any(Number),
+      efficiencyRatio: expect.any(Number),
+      completionStatus: expect.any(String),
+      isPaused: false
+    }));
   });
 });

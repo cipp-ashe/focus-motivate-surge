@@ -1,7 +1,6 @@
 
-import { useCallback, RefObject } from "react";
+import { useCallback } from "react";
 import { eventBus } from "@/lib/eventBus";
-import { toast } from "sonner";
 import { TimerStateMetrics } from "@/types/metrics";
 
 interface TimerHandlersProps {
@@ -9,20 +8,20 @@ interface TimerHandlersProps {
   isRunning: boolean;
   start: () => void;
   pause: () => void;
+  reset: () => Promise<void>;
   addTime: (minutes: number) => void;
-  completeTimer: () => TimerStateMetrics;
+  completeTimer: () => Promise<void>;
   playSound: () => void;
-  onAddTime?: () => void;
+  onAddTime?: (minutes: number) => void;
   onComplete?: (metrics: TimerStateMetrics) => void;
   setShowConfirmation: (show: boolean) => void;
-  setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
+  setCompletionMetrics: (metrics: any) => void;
   setShowCompletion: (show: boolean) => void;
   setIsExpanded: (expanded: boolean) => void;
   metrics: TimerStateMetrics;
-  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
-  setPauseTimeLeft: (time: number | null) => void;
-  pauseTimerRef: RefObject<NodeJS.Timeout | null>;
-  reset: () => void;
+  updateMetrics: (metrics: Partial<TimerStateMetrics>) => void;
+  setPauseTimeLeft: (timeLeft: number | null) => void;
+  pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | null>;
 }
 
 export const useTimerHandlers = ({
@@ -30,6 +29,7 @@ export const useTimerHandlers = ({
   isRunning,
   start,
   pause,
+  reset,
   addTime,
   completeTimer,
   playSound,
@@ -43,141 +43,132 @@ export const useTimerHandlers = ({
   updateMetrics,
   setPauseTimeLeft,
   pauseTimerRef,
-  reset,
 }: TimerHandlersProps) => {
-  // Toggle timer state (start/pause)
+  // Handle toggle button click
   const handleToggle = useCallback(() => {
     if (isRunning) {
-      console.log('[TimerHandlers] Pausing timer');
       pause();
-      updateMetrics({ isPaused: true });
-      toast.info(`Timer paused for: ${taskName}`);
     } else {
-      console.log('[TimerHandlers] Starting timer');
       start();
-      updateMetrics({ 
-        isPaused: false,
-        startTime: metrics.startTime || new Date()
+    }
+  }, [isRunning, pause, start]);
+
+  // Handle add time button click
+  const handleAddTime = useCallback(
+    (minutes: number) => {
+      console.log(`Adding ${minutes} minutes to timer`);
+      
+      addTime(minutes);
+      
+      // Call onAddTime callback if provided
+      if (onAddTime) {
+        onAddTime(minutes);
+      }
+    },
+    [addTime, onAddTime]
+  );
+
+  // Handle timer reset
+  const handleReset = useCallback(async () => {
+    await reset();
+    setShowConfirmation(false);
+  }, [reset, setShowConfirmation]);
+
+  // Handle timer completion
+  const handleComplete = useCallback(async () => {
+    if (isRunning) {
+      pause();
+    }
+    
+    try {
+      // Calculate completion metrics
+      const calculatedMetrics = {
+        ...metrics,
+        completionDate: new Date().toISOString(),
+      };
+      
+      // Play completion sound
+      playSound();
+      
+      // Update metrics
+      setCompletionMetrics(calculatedMetrics);
+      
+      // Call the onComplete callback if provided
+      if (onComplete) {
+        onComplete(calculatedMetrics);
+      }
+      
+      // Show completion screen
+      setShowCompletion(true);
+      
+      // Close expanded view if open
+      setIsExpanded(false);
+      
+      // Complete the timer
+      await completeTimer();
+      
+      // Emit completion event for integration with other components
+      eventBus.emit('timer:complete', { 
+        taskName, 
+        metrics: calculatedMetrics 
       });
       
-      // Auto expand when starting timer
-      setIsExpanded(true);
-      toast.success(`Timer started for: ${taskName}`);
+      console.log("Timer completed with metrics:", calculatedMetrics);
+      
+    } catch (error) {
+      console.error("Error completing timer:", error);
     }
-  }, [isRunning, start, pause, taskName, updateMetrics, metrics.startTime, setIsExpanded]);
+  }, [
+    isRunning,
+    pause,
+    metrics,
+    playSound,
+    setCompletionMetrics,
+    onComplete,
+    setShowCompletion,
+    setIsExpanded,
+    completeTimer,
+    taskName,
+  ]);
 
-  // Handle completing the timer
-  const handleComplete = useCallback(() => {
-    console.log('[TimerHandlers] Completing timer');
+  // Handle timer close
+  const handleClose = useCallback(() => {
+    // Use a custom event since this event isn't in the eventBus types
+    const event = new CustomEvent('timer:close', { detail: { taskName } });
+    window.dispatchEvent(event);
     
-    // Don't auto-expand for completion
-    setIsExpanded(false);
-    
-    // Calculate final metrics
-    const completedMetrics = completeTimer();
-    
-    // Play completion sound
-    playSound();
-    
-    // Call external onComplete callback if provided
-    if (onComplete) {
-      onComplete(completedMetrics);
-    }
-    
-    // Set completion state
-    setCompletionMetrics(completedMetrics);
-    setShowCompletion(true);
-    
-    // Return to timer selection after delay
-    // We don't auto-reset here to allow user to see metrics
-    
-    // Emit event for completion
-    eventBus.emit('timer:complete', { 
-      taskName,
-      metrics: completedMetrics
-    });
-    
-    toast.success(`Timer completed for: ${taskName}`);
-  }, [completeTimer, playSound, onComplete, setCompletionMetrics, setShowCompletion, taskName, setIsExpanded]);
-
-  // Add more time to the timer
-  const handleAddTime = useCallback(() => {
-    console.log('[TimerHandlers] Adding time to timer');
-    const minutes = 5;
-    addTime(minutes);
-    
-    // Update extension metrics
-    updateMetrics({
-      extensionTime: (metrics.extensionTime || 0) + (minutes * 60)
-    });
-    
-    // Call external onAddTime callback if provided
-    if (onAddTime) {
-      onAddTime();
-    }
-    
-    toast.info(`Added ${minutes} minutes to timer`);
-  }, [addTime, onAddTime, updateMetrics, metrics.extensionTime]);
-
-  // Close the completion view
-  const handleCloseCompletion = useCallback(() => {
-    console.log('[TimerHandlers] Closing completion view');
-    setShowCompletion(false);
-    setCompletionMetrics(null);
+    // Reset the timer
     reset();
-  }, [setShowCompletion, setCompletionMetrics, reset]);
+  }, [reset, taskName]);
 
-  // Close the entire timer
-  const handleCloseTimer = useCallback(() => {
-    console.log('[TimerHandlers] Closing timer');
-    // Reset timer state
-    reset();
-    
-    // Reset completion
-    setShowCompletion(false);
-    setCompletionMetrics(null);
-    
-    // Collapse any expanded view
-    setIsExpanded(false);
-    
-    // Emit close event
-    eventBus.emit('timer:close', { taskName });
-  }, [reset, setShowCompletion, setCompletionMetrics, setIsExpanded, taskName]);
+  // Handle confirmation dialog
+  const showResetConfirmation = useCallback(() => {
+    setShowConfirmation(true);
+  }, [setShowConfirmation]);
 
-  // Add time and continue timer
-  const handleAddTimeAndContinue = useCallback(() => {
-    console.log('[TimerHandlers] Adding time and continuing');
-    // Add 5 minutes and continue
-    const minutes = 5;
-    addTime(minutes);
+  // Handle pause timer
+  const handlePause = useCallback(() => {
+    // Get current state for later resume
+    setPauseTimeLeft(metrics.pausedTimeLeft || null);
     
-    // Update extension metrics
+    // Store pause timestamp
     updateMetrics({
-      extensionTime: (metrics.extensionTime || 0) + (minutes * 60)
+      lastPauseTimestamp: new Date(),
+      pauseCount: metrics.pauseCount + 1,
+      isPaused: true
     });
     
-    // Call external onAddTime callback if provided
-    if (onAddTime) {
-      onAddTime();
-    }
-    
-    // Hide confirmation
-    setShowConfirmation(false);
-    
-    // Start timer if not running
-    if (!isRunning) {
-      start();
-    }
-    
-    toast.info(`Added ${minutes} minutes to timer`);
-  }, [addTime, onAddTime, updateMetrics, metrics.extensionTime, setShowConfirmation, isRunning, start]);
+    // Actually pause the timer
+    pause();
+  }, [pause, setPauseTimeLeft, metrics.pausedTimeLeft, metrics.pauseCount, updateMetrics]);
 
   return {
     handleToggle,
-    handleComplete,
     handleAddTime,
-    handleCloseCompletion,
-    handleCloseTimer,
-    handleAddTimeAndContinue,
+    handleReset,
+    handleComplete,
+    handleClose,
+    showResetConfirmation,
+    handlePause,
   };
 };

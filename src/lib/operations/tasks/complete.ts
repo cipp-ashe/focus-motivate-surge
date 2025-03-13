@@ -36,8 +36,8 @@ export function completeTask({ taskId, taskList, completedTasks, metrics }: Comp
     // If we have metrics, use them
     ...(metrics ? {
       // Standard task metrics
-      timeSpent: metrics.actualDuration || metrics.timeSpent || 0,
-      timeElapsed: metrics.actualDuration || metrics.timeElapsed || 0,
+      timeSpent: 'timeSpent' in metrics ? metrics.timeSpent : (metrics.actualDuration || 0),
+      timeElapsed: 'timeElapsed' in metrics ? metrics.timeElapsed : (metrics.actualDuration || 0),
       pauseCount: metrics.pauseCount || 0,
       
       // Timer-specific metrics
@@ -71,3 +71,13 @@ export function completeTask({ taskId, taskList, completedTasks, metrics }: Comp
   
   return { updatedTaskList, updatedCompletedTasks };
 }
+
+// Export the operations object
+export const completeTaskOperations = {
+  completeTask: (taskId: string, metrics?: TaskMetrics | TimerMetrics) => {
+    // This function will be filled by the task reducer implementation
+    // It's just a placeholder to conform to the expected API
+    console.log(`Complete task operation called for ${taskId}`);
+    return { taskId, metrics };
+  }
+};

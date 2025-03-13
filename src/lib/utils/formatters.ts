@@ -95,6 +95,16 @@ export function formatTime(dateString: string | null | undefined): string {
 }
 
 /**
+ * Format a timestamp to a human-readable format
+ * This is an alias for formatDateTime for backward compatibility
+ * @param dateString ISO date string
+ * @returns Formatted string like "Mar 15, 2025 at 3:45 PM"
+ */
+export function formatTimestamp(dateString: string | null | undefined): string {
+  return formatDateTime(dateString);
+}
+
+/**
  * Format a number as a percentage
  * @param value Number value (0-1)
  * @returns Formatted percentage string like "75%"
