@@ -57,9 +57,9 @@ const TimerPage: React.FC<TimerPageProps> = () => {
         onComplete={handleTimerComplete}
         onAddTime={() => console.log('Adding time')}
         onDurationChange={(duration) => console.log('Duration changed to', duration)}
-        showCelebration={isCompletionVisible}
-        setFavorites={() => {}}
         favorites={[]}
+        setFavorites={() => {}}
+        duration={1500} // Adding the required duration prop (25 minutes in seconds)
       />
     </div>
   );
