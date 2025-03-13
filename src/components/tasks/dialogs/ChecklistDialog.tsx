@@ -86,9 +86,6 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
       });
       
       toast.success(`Saved checklist for: ${currentTask.taskName}`);
-      
-      // Always close the dialog after saving
-      console.log('ChecklistDialog: Closing dialog after save');
       onOpenChange(false);
     }
   };
@@ -100,7 +97,6 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   };
 
   const handleClose = () => {
-    console.log('ChecklistDialog: Manually closing dialog');
     onOpenChange(false);
   };
 
@@ -170,7 +166,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button onClick={saveChecklist} type="button">
+          <Button onClick={saveChecklist}>
             <Save className="h-4 w-4 mr-2" /> Save Checklist
           </Button>
         </div>

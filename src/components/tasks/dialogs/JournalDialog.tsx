@@ -5,10 +5,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Save, X, Pencil, Eye } from 'lucide-react';
+import { X, Pencil, Save } from 'lucide-react';
 import { eventBus } from '@/lib/eventBus';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { toast } from 'sonner';
@@ -33,7 +32,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   const [journalContent, setJournalContent] = useState('');
   const [activeTab, setActiveTab] = useState<string>("write");
   const [isEditing, setIsEditing] = useState(false);
-  const isNewEntry = currentTask?.entry === '';
+  const isNewEntry = !currentTask?.entry;
 
   useEffect(() => {
     if (currentTask) {
@@ -41,7 +40,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       setJournalContent(currentTask.entry || '');
       
       // For new entries, start in edit mode with writing tab active
-      if (isNewEntry) {
+      if (!currentTask.entry) {
         setIsEditing(true);
         setActiveTab("write");
       } else {
@@ -50,7 +49,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
         setActiveTab("preview");
       }
     }
-  }, [currentTask, isNewEntry]);
+  }, [currentTask]);
 
   const saveJournal = () => {
     if (currentTask) {
@@ -68,33 +67,12 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       });
       
       toast.success(`Saved journal entry for: ${currentTask.taskName}`);
-      
-      // Always close the dialog after saving
-      console.log('JournalDialog: Closing dialog after save');
       onOpenChange(false);
     }
   };
 
-  const handleCancel = () => {
-    console.log('Cancelling journal edit');
-    if (isEditing) {
-      // If it's a new entry, close the dialog entirely
-      if (isNewEntry) {
-        onOpenChange(false);
-        return;
-      }
-      
-      // Otherwise just exit edit mode
-      setIsEditing(false);
-      setActiveTab("preview");
-      
-      // Restore original content if canceling an edit
-      if (currentTask) {
-        setJournalContent(currentTask.entry || '');
-      }
-    } else {
-      onOpenChange(false);
-    }
+  const handleClose = () => {
+    onOpenChange(false);
   };
   
   const handleEdit = () => {
@@ -102,9 +80,20 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     setActiveTab("write");
   };
   
-  const handleClose = () => {
-    console.log('JournalDialog: Manually closing dialog');
-    onOpenChange(false);
+  const handleCancel = () => {
+    if (isEditing) {
+      if (isNewEntry) {
+        onOpenChange(false);
+      } else {
+        setIsEditing(false);
+        setActiveTab("preview");
+        if (currentTask) {
+          setJournalContent(currentTask.entry || '');
+        }
+      }
+    } else {
+      onOpenChange(false);
+    }
   };
 
   // Title text based on whether it's a new or existing entry
@@ -113,13 +102,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     : `${currentTask?.taskName} - Journal Entry`;
 
   return (
-    <Dialog 
-      open={isOpen} 
-      onOpenChange={(open) => {
-        console.log('JournalDialog: onOpenChange called with:', open);
-        onOpenChange(open);
-      }}
-    >
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader className="flex justify-between items-center">
           <DialogTitle>{dialogTitle}</DialogTitle>
@@ -170,7 +153,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button onClick={saveJournal} type="button">
+              <Button onClick={saveJournal}>
                 <Save className="h-4 w-4 mr-2" /> Save Journal Entry
               </Button>
             </div>
@@ -194,7 +177,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
               <Button variant="outline" onClick={handleClose}>
                 Close
               </Button>
-              <Button onClick={handleEdit} type="button">
+              <Button onClick={handleEdit}>
                 <Pencil className="h-4 w-4 mr-2" /> Edit Journal Entry
               </Button>
             </div>

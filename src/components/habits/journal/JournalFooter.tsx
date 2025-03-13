@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Save, X } from "lucide-react";
 
 interface JournalFooterProps {
   isExistingNote: boolean;
@@ -16,9 +17,11 @@ const JournalFooter: React.FC<JournalFooterProps> = ({
   return (
     <div className="flex justify-end gap-2">
       <Button variant="outline" onClick={onCancel}>
+        <X className="h-4 w-4 mr-2" />
         Cancel
       </Button>
       <Button onClick={onSave}>
+        <Save className="h-4 w-4 mr-2" />
         {isExistingNote ? "Update Journal Entry" : "Save Journal Entry"}
       </Button>
     </div>
