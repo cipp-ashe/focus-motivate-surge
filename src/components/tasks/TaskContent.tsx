@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Task } from "@/types/tasks";
+import { Sparkles, X, Clock, BookOpen, Image as ImageIcon, CheckSquare, Mic, Zap } from "lucide-react";
+import { TaskTags } from "./TaskTags";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { eventBus } from "@/lib/eventBus";
 import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
@@ -255,7 +261,7 @@ export const TaskContent = ({
           className="h-7 px-2 flex items-center gap-1 text-xs"
           data-action="true"
         >
-          <Image className="h-3.5 w-3.5 text-blue-400" />
+          <ImageIcon className="h-3.5 w-3.5 text-blue-400" />
           <span>View</span>
         </Button>
       );
@@ -310,7 +316,7 @@ export const TaskContent = ({
       case 'timer':
         return <Clock className="h-4 w-4 text-purple-400" />;
       case 'screenshot':
-        return <Image className="h-4 w-4 text-blue-400" />;
+        return <ImageIcon className="h-4 w-4 text-blue-400" />;
       case 'journal':
         return <BookOpen className="h-4 w-4 text-amber-400" />;
       case 'checklist':
