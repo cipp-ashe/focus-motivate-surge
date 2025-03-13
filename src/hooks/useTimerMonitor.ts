@@ -33,8 +33,10 @@ export const useTimerMonitor = ({
     const handleTimerTick = (payload: { timeLeft?: number; remaining?: number; taskName?: string }) => {
       // Use either timeLeft or remaining based on what's available
       const timeLeft = payload.timeLeft !== undefined ? payload.timeLeft : payload.remaining;
+      
       if (timeLeft !== undefined) {
         timerInfoRef.current.secondsLeft = timeLeft;
+        timerInfoRef.current.isActive = true; // Assume running when tick received
         
         // Call both callbacks if provided
         if (onProgress) onProgress(timeLeft);
@@ -82,12 +84,24 @@ export const useTimerMonitor = ({
       if (onComplete) onComplete();
     };
 
+    // Handle timer reset event
+    const handleTimerReset = ({ taskName, duration }: { taskName: string; duration: number }) => {
+      console.log(`Timer reset event received for ${taskName} with duration ${duration}`);
+      timerInfoRef.current = {
+        isActive: false,
+        secondsLeft: duration,
+        taskName,
+        totalSeconds: duration,
+      };
+    };
+
     // Subscribe to timer events
     const unsubscribeTick = eventManager.on('timer:tick', handleTimerTick);
     const unsubscribeStart = eventManager.on('timer:start', handleTimerStart);
     const unsubscribePause = eventManager.on('timer:pause', handleTimerPause);
     const unsubscribeResume = eventManager.on('timer:resume', handleTimerResume);
     const unsubscribeComplete = eventManager.on('timer:complete', handleTimerComplete);
+    const unsubscribeReset = eventManager.on('timer:reset', handleTimerReset);
 
     console.log("Timer monitor event listeners set up");
 
@@ -98,6 +112,7 @@ export const useTimerMonitor = ({
       unsubscribePause();
       unsubscribeResume();
       unsubscribeComplete();
+      unsubscribeReset();
     };
   }, [onComplete, onProgress, onStart, onPause, onResume, onTick]);
 

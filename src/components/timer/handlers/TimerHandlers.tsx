@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -9,7 +10,7 @@ interface TimerHandlersProps {
   start: () => void;
   pause: () => void;
   reset: () => Promise<void>;
-  addTime: (minutes: number) => void;  // Consistent signature
+  addTime: (minutes: number) => void;
   completeTimer: () => Promise<void>;
   playSound: () => void;
   onAddTime?: (minutes: number) => void;
@@ -22,7 +23,7 @@ interface TimerHandlersProps {
   updateMetrics: (metrics: Partial<TimerStateMetrics>) => void;
   setPauseTimeLeft: (timeLeft: number | null) => void;
   pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | null>;
-  timeLeft: number; // Add timeLeft to props
+  timeLeft: number;
 }
 
 export const useTimerHandlers = ({
@@ -48,11 +49,11 @@ export const useTimerHandlers = ({
 }: TimerHandlersProps) => {
   // Handle toggle button click
   const handleToggle = useCallback(() => {
-    console.log(`Toggle timer for ${taskName}. Current state: isRunning=${isRunning}`);
+    console.log(`Toggle timer for ${taskName}. Current state: isRunning=${isRunning}, timeLeft=${timeLeft}`);
     
     if (isRunning) {
       pause();
-      // Emit pause event
+      // Emit pause event with current time left
       eventManager.emit('timer:pause', { 
         taskName, 
         timeLeft,
@@ -60,14 +61,30 @@ export const useTimerHandlers = ({
       });
     } else {
       start();
-      // Emit start event with proper details
-      eventManager.emit('timer:start', { 
-        taskName, 
-        duration: timeLeft,
-        currentTime: Date.now()
-      });
+      // Determine if this is a resume or a fresh start
+      if (metrics.isPaused) {
+        // Resume from pause - emit resume event
+        console.log(`Resuming timer for ${taskName} with time left: ${timeLeft}`);
+        eventManager.emit('timer:resume', { 
+          taskName, 
+          timeLeft,
+          currentTime: Date.now()
+        });
+        // Update metrics to indicate no longer paused
+        updateMetrics({
+          isPaused: false
+        });
+      } else {
+        // Fresh start - emit start event
+        console.log(`Starting fresh timer for ${taskName} with duration: ${timeLeft}`);
+        eventManager.emit('timer:start', { 
+          taskName, 
+          duration: timeLeft,
+          currentTime: Date.now()
+        });
+      }
     }
-  }, [isRunning, pause, start, taskName, timeLeft, metrics]);
+  }, [isRunning, pause, start, taskName, timeLeft, metrics, updateMetrics]);
 
   // Handle add time button click - explicitly accepting minutes parameter
   const handleAddTime = useCallback(
@@ -75,6 +92,18 @@ export const useTimerHandlers = ({
       console.log(`Adding ${minutes} minutes to timer`);
       
       addTime(minutes);
+      
+      // Calculate new timeLeft after adding minutes
+      const newTimeLeft = timeLeft + (minutes * 60);
+      
+      // Emit event to update the timer with new time
+      if (isRunning) {
+        eventManager.emit('timer:tick', {
+          taskName,
+          remaining: newTimeLeft,
+          timeLeft: newTimeLeft
+        });
+      }
       
       // Call onAddTime callback if provided
       if (onAddTime) {
@@ -90,7 +119,7 @@ export const useTimerHandlers = ({
         }
       });
     },
-    [addTime, onAddTime, taskName, metrics]
+    [addTime, onAddTime, taskName, metrics, timeLeft, isRunning]
   );
 
   // Handle timer reset
@@ -100,6 +129,12 @@ export const useTimerHandlers = ({
     
     // Emit reset event
     eventManager.emit('timer:reset', {
+      taskName,
+      duration: metrics.expectedTime
+    });
+    
+    // Also emit init event to ensure timer is properly reset
+    eventManager.emit('timer:init', {
       taskName,
       duration: metrics.expectedTime
     });
@@ -180,13 +215,14 @@ export const useTimerHandlers = ({
   // Handle pause timer
   const handlePause = useCallback(() => {
     // Get current state for later resume
-    setPauseTimeLeft(metrics.pausedTimeLeft || null);
+    setPauseTimeLeft(timeLeft);
     
     // Store pause timestamp
     updateMetrics({
       lastPauseTimestamp: new Date(),
       pauseCount: metrics.pauseCount + 1,
-      isPaused: true
+      isPaused: true,
+      pausedTimeLeft: timeLeft
     });
     
     // Actually pause the timer
@@ -200,6 +236,24 @@ export const useTimerHandlers = ({
     });
   }, [pause, setPauseTimeLeft, metrics, updateMetrics, taskName, timeLeft]);
 
+  // Adding a resume handler for more explicit control
+  const handleResume = useCallback(() => {
+    // Update metrics to indicate timer is no longer paused
+    updateMetrics({
+      isPaused: false
+    });
+    
+    // Start the timer
+    start();
+    
+    // Emit resume event
+    eventManager.emit('timer:resume', {
+      taskName,
+      timeLeft,
+      metrics
+    });
+  }, [start, updateMetrics, taskName, timeLeft, metrics]);
+
   return {
     handleToggle,
     handleAddTime,
@@ -208,5 +262,6 @@ export const useTimerHandlers = ({
     handleClose,
     showResetConfirmation,
     handlePause,
+    handleResume,
   };
 };

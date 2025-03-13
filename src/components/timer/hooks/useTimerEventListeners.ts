@@ -20,6 +20,10 @@ export const useTimerEventListeners = ({
   const eventIdsRef = useRef<{[key: string]: string}>({});
   // Add a timer interval ref to clear on unmount
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Store time left for pause/resume functionality
+  const timeLeftRef = useRef<number>(0);
+  // Track if timer is currently running
+  const isRunningRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Only set up listeners if we have a task name
@@ -32,14 +36,17 @@ export const useTimerEventListeners = ({
     const expandId = `timer:expand:${taskName}:${Date.now()}`;
     const collapseId = `timer:collapse:${taskName}:${Date.now()}`;
     const startId = `timer:start:${taskName}:${Date.now()}`;
+    const pauseId = `timer:pause:${taskName}:${Date.now()}`;
+    const resumeId = `timer:resume:${taskName}:${Date.now()}`;
     const tickId = `timer:tick:${taskName}:${Date.now()}`;
     
-    eventIdsRef.current = { initId, expandId, collapseId, startId, tickId };
+    eventIdsRef.current = { initId, expandId, collapseId, startId, pauseId, resumeId, tickId };
     
     // Handle timer initialization
     const unsubInit = eventManager.on('timer:init', (payload) => {
       if (payload.taskName === taskName) {
         console.log(`Timer init for ${taskName} with duration: ${payload.duration} [${initId}]`);
+        timeLeftRef.current = payload.duration;
         const minutes = Math.floor(payload.duration / 60);
         setInternalMinutes(minutes);
       }
@@ -74,35 +81,86 @@ export const useTimerEventListeners = ({
           clearInterval(timerIntervalRef.current);
         }
         
-        let currentTimeLeft = payload.duration;
+        // Initialize or use the stored time left
+        if (payload.duration !== undefined) {
+          timeLeftRef.current = payload.duration;
+        }
+        
+        isRunningRef.current = true;
         
         // Create new interval for countdown
         timerIntervalRef.current = setInterval(() => {
-          currentTimeLeft -= 1;
-          
-          // Emit tick event with the new time
-          eventManager.emit('timer:tick', {
-            taskName,
-            remaining: currentTimeLeft,
-            timeLeft: currentTimeLeft
-          });
-          
-          // Check if timer is complete
-          if (currentTimeLeft <= 0) {
-            if (timerIntervalRef.current) {
-              clearInterval(timerIntervalRef.current);
-              timerIntervalRef.current = null;
+          if (isRunningRef.current && timeLeftRef.current > 0) {
+            timeLeftRef.current -= 1;
+            
+            // Emit tick event with the new time
+            eventManager.emit('timer:tick', {
+              taskName,
+              remaining: timeLeftRef.current,
+              timeLeft: timeLeftRef.current
+            });
+            
+            // Check if timer is complete
+            if (timeLeftRef.current <= 0) {
+              if (timerIntervalRef.current) {
+                clearInterval(timerIntervalRef.current);
+                timerIntervalRef.current = null;
+              }
+              isRunningRef.current = false;
+              eventManager.emit('timer:complete', { taskName });
             }
-            eventManager.emit('timer:complete', { taskName });
           }
         }, 1000);
       }
     });
     
-    // Handle timer tick - log tick events
+    // Handle timer pause - stop the interval
+    const unsubPause = eventManager.on('timer:pause', (payload) => {
+      if (payload.taskName === taskName) {
+        console.log(`Pausing timer for ${taskName} [${pauseId}], time left: ${timeLeftRef.current}`);
+        
+        isRunningRef.current = false;
+        
+        // If the payload contains timeLeft, use it
+        if (payload.timeLeft !== undefined) {
+          timeLeftRef.current = payload.timeLeft;
+        }
+        
+        // Emit a tick event to ensure UI updates
+        eventManager.emit('timer:tick', {
+          taskName,
+          remaining: timeLeftRef.current,
+          timeLeft: timeLeftRef.current
+        });
+      }
+    });
+    
+    // Handle timer resume - restart the interval with the current time left
+    const unsubResume = eventManager.on('timer:resume', (payload) => {
+      if (payload.taskName === taskName) {
+        console.log(`Resuming timer for ${taskName} [${resumeId}], time left: ${timeLeftRef.current}`);
+        
+        isRunningRef.current = true;
+        
+        // If the payload contains timeLeft, use it
+        if (payload.timeLeft !== undefined) {
+          timeLeftRef.current = payload.timeLeft;
+        }
+        
+        // Emit a tick event to ensure UI updates
+        eventManager.emit('timer:tick', {
+          taskName,
+          remaining: timeLeftRef.current,
+          timeLeft: timeLeftRef.current
+        });
+      }
+    });
+    
+    // Handle timer tick - log tick events (no need to handle as we're emitting them)
     const unsubTick = eventManager.on('timer:tick', (payload) => {
       if (payload.taskName === taskName) {
-        console.log(`Timer tick for ${taskName}: ${payload.remaining}s remaining [${tickId}]`);
+        // Log but don't process as we're the emitter
+        console.log(`Timer tick for ${taskName}: ${payload.remaining || payload.timeLeft}s remaining [${tickId}]`);
       }
     });
     
@@ -113,6 +171,8 @@ export const useTimerEventListeners = ({
       unsubExpand();
       unsubCollapse();
       unsubStart();
+      unsubPause();
+      unsubResume();
       unsubTick();
       
       // Clear any active timer interval
