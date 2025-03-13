@@ -1,46 +1,124 @@
 
 /**
- * Formats a duration in seconds to a human-readable string
- * @param seconds - The duration in seconds
- * @returns A formatted string like "1h 30m" or "45m"
+ * Format a duration in seconds to a human-readable string
+ * @param seconds Duration in seconds
+ * @returns Formatted string in format "1h 30m" or "45s"
  */
-export const formatDuration = (seconds: number): string => {
-  if (!seconds || isNaN(seconds)) return "0m";
+export function formatDuration(seconds: number): string {
+  if (!seconds && seconds !== 0) return '0s';
   
-  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  
+  let result = '';
+  
+  if (hours > 0) {
+    result += `${hours}h `;
+  }
+  
+  if (minutes > 0 || hours > 0) {
+    result += `${minutes}m `;
+  }
+  
+  if (remainingSeconds > 0 && hours === 0) {
+    result += `${remainingSeconds}s`;
+  }
+  
+  return result.trim();
+}
+
+/**
+ * Format a datetime string to a human-readable format
+ * @param dateString ISO date string
+ * @returns Formatted string like "Mar 15, 2025 at 3:45 PM"
+ */
+export function formatDateTime(dateString: string | null | undefined): string {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
+}
+
+/**
+ * Format a date string to a human-readable format without time
+ * @param dateString ISO date string
+ * @returns Formatted string like "Mar 15, 2025"
+ */
+export function formatDate(dateString: string | null | undefined): string {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
+}
+
+/**
+ * Format a time string to a human-readable format
+ * @param dateString ISO date string
+ * @returns Formatted string like "3:45 PM"
+ */
+export function formatTime(dateString: string | null | undefined): string {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return 'Invalid Time';
+  }
+}
+
+/**
+ * Format a number as a percentage
+ * @param value Number value (0-1)
+ * @returns Formatted percentage string like "75%"
+ */
+export function formatPercentage(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+/**
+ * Convert minutes to a readable time format
+ * @param minutes Number of minutes
+ * @returns Formatted string
+ */
+export function formatMinutes(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes} min`;
+  }
+  
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
   
-  if (hours > 0) {
-    return `${hours}h ${remainingMinutes > 0 ? `${remainingMinutes}m` : ''}`;
+  if (remainingMinutes === 0) {
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
   }
-  return `${minutes}m`;
-};
-
-/**
- * Formats a percentage value
- * @param value - The percentage as a decimal (0-1)
- * @returns A formatted percentage string
- */
-export const formatPercentage = (value: number): string => {
-  if (isNaN(value)) return "0%";
-  return `${Math.round(value * 100)}%`;
-};
-
-/**
- * Formats a timestamp to a readable date/time
- * @param timestamp - ISO timestamp or Date object
- * @returns Formatted date string
- */
-export const formatTimestamp = (timestamp: string | Date | null): string => {
-  if (!timestamp) return "N/A";
   
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-  
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric'
-  });
-};
+  return `${hours}h ${remainingMinutes}m`;
+}

@@ -1,86 +1,128 @@
 
-import { useCallback, Dispatch } from 'react';
-import { TimerState, TimerAction } from '@/types/timer';
+import { useCallback } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
-import { eventBus } from '@/lib/eventBus';
 
-export const useTimerActions = (state: TimerState, dispatch: Dispatch<TimerAction>) => {
+interface UseTimerActionsProps {
+  timeLeft: number;
+  metrics: TimerStateMetrics;
+  updateTimeLeft: (timeLeft: number) => void;
+  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
+  setIsRunning: (isRunning: boolean) => void;
+}
+
+export const useTimerActions = ({
+  timeLeft,
+  metrics,
+  updateTimeLeft,
+  updateMetrics,
+  setIsRunning,
+}: UseTimerActionsProps) => {
   const startTimer = useCallback(() => {
-    if (!state.isRunning) {
-      dispatch({ type: 'START' });
-      dispatch({ type: 'SET_START_TIME', payload: new Date() });
-      eventBus.emit('timer:start', {
-        taskName: 'Task', // Default value
-        duration: state.timeLeft,
-        currentTime: state.timeLeft
+    console.log('Starting timer');
+    setIsRunning(true);
+    
+    // Set start time if not already set
+    if (!metrics.startTime) {
+      updateMetrics({
+        startTime: new Date(),
+        isPaused: false
       });
     }
-  }, [state.isRunning, dispatch, state.timeLeft]);
-
+  }, [setIsRunning, metrics.startTime, updateMetrics]);
+  
   const pauseTimer = useCallback(() => {
-    if (state.isRunning && !state.isPaused) {
-      dispatch({ type: 'PAUSE' });
-      dispatch({ type: 'SET_LAST_PAUSE_TIMESTAMP', payload: new Date() });
-      eventBus.emit('timer:pause', {
-        taskName: 'Task', // Default value
-        timeLeft: state.timeLeft,
-        metrics: state.metrics
-      });
-    }
-  }, [state.isRunning, state.isPaused, dispatch, state.timeLeft, state.metrics]);
-
+    console.log('Pausing timer');
+    setIsRunning(false);
+    
+    updateMetrics({
+      pauseCount: metrics.pauseCount + 1,
+      lastPauseTimestamp: new Date(),
+      isPaused: true,
+      pausedTimeLeft: timeLeft
+    });
+  }, [setIsRunning, metrics.pauseCount, updateMetrics, timeLeft]);
+  
   const resetTimer = useCallback(() => {
-    dispatch({ type: 'RESET' });
-    eventBus.emit('timer:reset', {
-      taskName: 'Task', // Default value
-      duration: state.metrics.expectedTime
+    console.log('Resetting timer');
+    setIsRunning(false);
+    updateTimeLeft(metrics.expectedTime || 0);
+    
+    updateMetrics({
+      startTime: null,
+      endTime: null,
+      pauseCount: 0,
+      actualDuration: 0,
+      pausedTime: 0,
+      lastPauseTimestamp: null,
+      extensionTime: 0,
+      isPaused: false,
+      pausedTimeLeft: null
     });
-  }, [dispatch, state.metrics.expectedTime]);
-
+  }, [setIsRunning, updateTimeLeft, metrics.expectedTime, updateMetrics]);
+  
   const extendTimer = useCallback((minutes: number) => {
-    dispatch({ type: 'EXTEND', payload: minutes * 60 });
-    dispatch({ type: 'SET_EXTENSION_TIME', payload: minutes * 60 });
-  }, [dispatch]);
-
-  const updateMetrics = useCallback((updates: Partial<TimerStateMetrics>) => {
-    dispatch({ type: 'UPDATE_METRICS', payload: updates });
-    eventBus.emit('timer:metrics-update', {
-      taskName: 'Task', // Default value
-      metrics: updates
+    console.log(`Extending timer by ${minutes} minutes`);
+    const extensionSeconds = minutes * 60;
+    
+    // Add time to timeLeft
+    updateTimeLeft(timeLeft + extensionSeconds);
+    
+    // Update metrics
+    updateMetrics({
+      extensionTime: (metrics.extensionTime || 0) + extensionSeconds
     });
-  }, [dispatch]);
-
+  }, [updateTimeLeft, timeLeft, updateMetrics, metrics.extensionTime]);
+  
   const completeTimer = useCallback(() => {
-    dispatch({ type: 'COMPLETE' });
-    eventBus.emit('timer:complete', {
-      taskName: 'Task', // Default value
-      metrics: state.metrics
-    });
+    console.log('Completing timer');
+    setIsRunning(false);
     
+    // Calculate metrics
+    const startTime = metrics.startTime ? new Date(metrics.startTime) : new Date();
     const endTime = new Date();
-    const actualDuration = (endTime.getTime() - (state.metrics.startTime?.getTime() || endTime.getTime())) / 1000;
-    const netEffectiveTime = actualDuration - state.metrics.pausedTime;
-    const efficiencyRatio = state.metrics.expectedTime ? Math.min((netEffectiveTime / state.metrics.expectedTime) * 100, 200) : 0;
+    const elapsedSeconds = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
     
-    const updatedMetrics: TimerStateMetrics = {
-      ...state.metrics,
+    // Calculate effective time (actual - paused)
+    const netEffective = Math.max(0, elapsedSeconds - (metrics.pausedTime || 0));
+    
+    // Calculate efficiency ratio
+    const expectedTime = metrics.expectedTime || 1500; // Default to 25 minutes
+    const efficiencyRatio = expectedTime > 0 ? netEffective / expectedTime : 0;
+    
+    // Determine completion status
+    let completionStatus = 'Completed On Time';
+    
+    if (metrics.extensionTime && metrics.extensionTime > 0) {
+      completionStatus = 'Completed With Extra Time';
+    } else if (timeLeft > 0 && timeLeft < expectedTime) {
+      completionStatus = 'Completed Early';
+    }
+    
+    // Update final metrics
+    const finalMetrics = {
       endTime,
-      actualDuration,
-      netEffectiveTime,
+      actualDuration: elapsedSeconds,
+      netEffectiveTime: netEffective,
       efficiencyRatio,
-      completionStatus: 'Completed On Time',
-      favoriteQuotes: [], // Fix: Changed from number to string[]
+      completionStatus,
+      isPaused: false
     };
     
-    updateMetrics(updatedMetrics);
-  }, [state.metrics, dispatch, updateMetrics]);
-
+    updateMetrics(finalMetrics);
+    
+    // Return full metrics object
+    return {
+      ...metrics,
+      ...finalMetrics
+    };
+  }, [setIsRunning, metrics, updateMetrics, timeLeft]);
+  
   return {
     startTimer,
     pauseTimer,
     resetTimer,
     extendTimer,
-    updateMetrics,
     completeTimer,
+    updateMetrics
   };
 };

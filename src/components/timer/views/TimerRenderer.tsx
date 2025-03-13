@@ -97,7 +97,7 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
 
       {/* Expanded timer view (fullscreen state) - only rendered when expanded */}
       {isExpanded && (
-        <div className="opacity-100 z-[9999] fixed inset-0 w-full h-full bg-background/95 backdrop-blur-sm">
+        <div className="fixed inset-0 w-full h-full bg-background/95 backdrop-blur-sm z-[9999]">
           <TimerExpandedView
             ref={expandedViewRef}
             taskName={taskName}

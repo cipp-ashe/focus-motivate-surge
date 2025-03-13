@@ -1,4 +1,5 @@
 
+import React, { useEffect, useState } from "react";
 import { Timer } from "./Timer";
 import { Task } from "@/types/tasks";
 import { Quote } from "@/types/timer";
@@ -8,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { eventBus } from "@/lib/eventBus";
 import { useEvent } from "@/hooks/useEvent";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface TimerSectionProps {

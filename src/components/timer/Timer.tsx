@@ -33,19 +33,23 @@ export const Timer = ({
     );
   }
 
+  // Initialize the timer
+  const timerProps = useTimerInitialization({
+    duration,
+    taskName,
+    onComplete,
+    onAddTime,
+    onDurationChange,
+  });
+
   return (
     <TimerErrorBoundary>
       <Card className="shadow-md border-border/20 overflow-hidden">
         <TimerContent
-          {...useTimerInitialization({
-            duration,
-            taskName,
-            onComplete,
-            onAddTime,
-            onDurationChange,
-          })}
+          {...timerProps}
           favorites={favorites}
           setFavorites={setFavorites}
+          taskName={taskName} // Ensure taskName is explicitly passed
         />
       </Card>
     </TimerErrorBoundary>
