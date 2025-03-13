@@ -78,11 +78,16 @@ export const updateTaskOperations = {
         toast.success(`Updated task: ${currentTask.name}`);
       }
       
-      // Dispatch a custom event for UI refresh - completely separate from data events
-      // Use a new custom event type to avoid confusion with the old ones
+      // IMPORTANT: Always dispatch a custom event for UI refresh - completely separate from data events
+      // This ensures UI updates happen immediately even when the regular event is suppressed
       window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
         detail: { taskId, changes: updates } 
       }));
+      
+      // For status changes, also dispatch a simpler event for broader compatibility
+      if (updates.status) {
+        window.dispatchEvent(new Event('force-task-update'));
+      }
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Failed to update task: ' + (error instanceof Error ? error.message : 'Unknown error'));

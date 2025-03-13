@@ -31,11 +31,12 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   useEvent('task:update', onTaskUpdate);
   useEvent('task:delete', onTaskDelete);
   
-  // Handle our new custom UI refresh events to avoid event loops
+  // Handle our new custom UI refresh events - this is critical for immediate UI updates
   useEffect(() => {
     const handleTaskUiRefresh = (event: CustomEvent) => {
       if (isMountedRef.current) {
         console.log('TaskEventHandler: Received task-ui-refresh event:', event.detail);
+        // This will force the parent component to re-render
         onForceUpdate();
       }
     };

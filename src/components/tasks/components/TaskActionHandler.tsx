@@ -63,7 +63,7 @@ export const useTaskActionHandler = (
             updateTaskOperations.updateTask(task.id, { 
               status: 'dismissed', 
               dismissedAt: new Date().toISOString() 
-            });
+            }, { suppressEvent: true });
           }
         } else {
           // For other statuses, use the update operations directly
