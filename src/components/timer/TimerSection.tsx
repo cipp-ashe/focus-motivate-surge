@@ -31,11 +31,12 @@ export const TimerSection = ({
 
   // Listen for timer:set-task events to update the current task
   useEffect(() => {
-    const handleTimerSetTask = (task: Task) => {
-      console.log("TimerSection: Received timer:set-task event", task);
+    const handleTimerSetTask = (event: CustomEvent) => {
+      console.log("TimerSection: Received timer:set-task event", event.detail);
+      const task = event.detail as Task;
       
       // Only accept timer tasks
-      if (task.taskType === 'timer') {
+      if (task && task.taskType === 'timer') {
         setCurrentTask(task);
       } else {
         console.warn("TimerSection: Ignoring non-timer task:", task);
@@ -44,21 +45,32 @@ export const TimerSection = ({
     };
     
     // Listen for the event
-    window.addEventListener('timer:set-task', handleTimerSetTask as EventListener);
+    window.addEventListener('timer:set-task', handleTimerSetTask);
     
     // Also subscribe to the event bus
-    const unsubscribe = eventBus.on('timer:set-task', handleTimerSetTask);
+    const unsubscribe = eventBus.on('timer:set-task', (task: Task) => {
+      console.log("TimerSection: Received timer:set-task event from bus", task);
+      
+      // Only accept timer tasks
+      if (task.taskType === 'timer') {
+        setCurrentTask(task);
+      } else {
+        console.warn("TimerSection: Ignoring non-timer task:", task);
+        toast.warning("Only timer tasks can be used in the Timer view");
+      }
+    });
     
     return () => {
-      window.removeEventListener('timer:set-task', handleTimerSetTask as EventListener);
+      window.removeEventListener('timer:set-task', handleTimerSetTask);
       unsubscribe();
     };
   }, []);
 
   // Also listen for task:select events directly
   useEffect(() => {
-    const handleTaskSelect = (taskId: string) => {
-      console.log("TimerSection: Received task:select event for", taskId);
+    const handleTaskSelect = (event: CustomEvent) => {
+      const taskId = event.detail as string;
+      console.log("TimerSection: Received task:select DOM event for", taskId);
       
       // Find the task in local storage to get its details
       try {
@@ -85,9 +97,38 @@ export const TimerSection = ({
     };
     
     // Subscribe to the event bus
-    const unsubscribe = eventBus.on('task:select', handleTaskSelect);
+    const unsubscribe = eventBus.on('task:select', (taskId: string) => {
+      console.log("TimerSection: Received task:select event for", taskId);
+      
+      // Find the task in local storage to get its details
+      try {
+        const taskList = JSON.parse(localStorage.getItem('taskList') || '[]');
+        const task = taskList.find((t: Task) => t.id === taskId);
+        
+        if (task) {
+          console.log("TimerSection: Found task in localStorage:", task);
+          
+          // Only accept timer tasks
+          if (task.taskType === 'timer') {
+            setCurrentTask(task);
+            toast.success(`Selected timer task: ${task.name}`);
+          } else {
+            console.warn("TimerSection: Ignoring non-timer task:", task);
+            toast.warning("Only timer tasks can be used in the Timer view");
+          }
+        } else {
+          console.warn("TimerSection: Task not found in localStorage:", taskId);
+        }
+      } catch (e) {
+        console.error("TimerSection: Error processing task:select event", e);
+      }
+    });
+
+    // Listen for DOM events as well
+    window.addEventListener('task:select', handleTaskSelect);
     
     return () => {
+      window.removeEventListener('task:select', handleTaskSelect);
       unsubscribe();
     };
   }, []);
