@@ -20,7 +20,7 @@ interface TaskActionButtonProps {
   editingTaskId: string | null;
   inputValue: string;
   durationInMinutes: number;
-  onTaskAction: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>) => void;
+  onTaskAction: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => void;
   handleLocalChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleLocalBlur: () => void;
   handleLocalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -46,9 +46,8 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onTaskAction}
+          onClick={(e) => onTaskAction(e, 'view-habit')}
           className="h-7 px-2 flex items-center gap-1 text-xs bg-green-500/10 hover:bg-green-500/20 text-green-500"
-          data-action-type="view-habit"
         >
           <Zap className="h-3.5 w-3.5 text-green-500" />
           <span>View Habit</span>
@@ -65,7 +64,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
     </div>
   );
 
-  function StatusDropdownMenu({ task, onTaskAction }: { task: Task; onTaskAction: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>) => void }) {
+  function StatusDropdownMenu({ task, onTaskAction }: { task: Task; onTaskAction: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => void }) {
     // Get status label and colors
     const getStatusInfo = (status: TaskStatus = 'pending') => {
       switch (status) {
@@ -99,82 +98,28 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-36 bg-background">
           <DropdownMenuItem
-            onClick={(e) => {
-              // Create a custom event with status data
-              const customEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-              });
-              
-              // Set a data attribute on the event target
-              Object.defineProperty(customEvent, 'currentTarget', {
-                value: {
-                  getAttribute: () => 'status-pending'
-                }
-              });
-              
-              onTaskAction(customEvent as any);
-            }}
+            onClick={(e) => onTaskAction(e, 'status-pending')}
             className="text-xs cursor-pointer"
           >
             <Square className="h-3.5 w-3.5 mr-2" />
             Not Started
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={(e) => {
-              const customEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-              });
-              
-              Object.defineProperty(customEvent, 'currentTarget', {
-                value: {
-                  getAttribute: () => 'status-in-progress'
-                }
-              });
-              
-              onTaskAction(customEvent as any);
-            }}
+            onClick={(e) => onTaskAction(e, 'status-in-progress')}
             className="text-xs cursor-pointer"
           >
             <Play className="h-3.5 w-3.5 mr-2" />
             In Progress
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={(e) => {
-              const customEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-              });
-              
-              Object.defineProperty(customEvent, 'currentTarget', {
-                value: {
-                  getAttribute: () => 'status-completed'
-                }
-              });
-              
-              onTaskAction(customEvent as any);
-            }}
+            onClick={(e) => onTaskAction(e, 'status-completed')}
             className="text-xs cursor-pointer text-green-600"
           >
             <Check className="h-3.5 w-3.5 mr-2" />
             Complete
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={(e) => {
-              const customEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-              });
-              
-              Object.defineProperty(customEvent, 'currentTarget', {
-                value: {
-                  getAttribute: () => 'status-dismissed'
-                }
-              });
-              
-              onTaskAction(customEvent as any);
-            }}
+            onClick={(e) => onTaskAction(e, 'status-dismissed')}
             className="text-xs cursor-pointer text-red-500"
           >
             <X className="h-3.5 w-3.5 mr-2" />
@@ -225,9 +170,8 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onTaskAction}
+          onClick={(e) => onTaskAction(e, 'open-journal')}
           className="h-7 px-2 flex items-center gap-1 text-xs"
-          data-action-type="open-journal"
         >
           <BookOpen className="h-3.5 w-3.5 text-amber-400" />
           <span>{task.journalEntry ? 'View' : 'Write'}</span>
@@ -240,9 +184,8 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onTaskAction}
+          onClick={(e) => onTaskAction(e, 'true')}
           className="h-7 px-2 flex items-center gap-1 text-xs"
-          data-action="true"
         >
           <ImageIcon className="h-3.5 w-3.5 text-blue-400" />
           <span>{task.imageUrl ? 'View' : 'Add'}</span>
@@ -255,9 +198,8 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onTaskAction}
+          onClick={(e) => onTaskAction(e, 'true')}
           className="h-7 px-2 flex items-center gap-1 text-xs"
-          data-action="true"
         >
           <CheckSquare className="h-3.5 w-3.5 text-cyan-400" />
           <span>{task.checklistItems?.length ? 'View' : 'Create'} Checklist</span>
@@ -270,9 +212,8 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onTaskAction}
+          onClick={(e) => onTaskAction(e, 'true')}
           className="h-7 px-2 flex items-center gap-1 text-xs"
-          data-action="true"
         >
           <Mic className="h-3.5 w-3.5 text-rose-400" />
           <span>{task.voiceNoteUrl ? 'Listen' : 'Record'}</span>

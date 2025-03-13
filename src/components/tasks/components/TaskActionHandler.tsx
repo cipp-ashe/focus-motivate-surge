@@ -9,23 +9,24 @@ export const useTaskActionHandler = (
   task: Task,
   onOpenTaskDialog?: () => void
 ) => {
-  const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>) => {
+  const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     // Ensure proper event handling
     if (e && e.stopPropagation) {
       e.stopPropagation();
       e.preventDefault();
     }
     
-    // Get the action type from the clicked element
-    const actionType = e.currentTarget instanceof HTMLElement 
-      ? e.currentTarget.getAttribute('data-action-type') 
-      : null;
+    // Get the action type from the parameter or clicked element
+    const action = actionType || 
+      (e.currentTarget instanceof HTMLElement 
+        ? e.currentTarget.getAttribute('data-action-type') 
+        : null);
       
-    console.log("Task action:", actionType, "for task:", task.id);
+    console.log("Task action:", action, "for task:", task.id);
     
     // Handle status changes via the dropdown
-    if (actionType?.startsWith('status-')) {
-      const newStatus = actionType.replace('status-', '') as 'pending' | 'in-progress' | 'completed' | 'dismissed';
+    if (action?.startsWith('status-')) {
+      const newStatus = action.replace('status-', '') as 'pending' | 'in-progress' | 'completed' | 'dismissed';
       console.log(`Changing task ${task.id} status to: ${newStatus}`);
       
       if (newStatus === 'completed') {
@@ -66,19 +67,17 @@ export const useTaskActionHandler = (
     }
     
     // Handle habit-related tasks
-    if (task.relationships?.habitId) {
-      if (actionType === 'view-habit') {
-        if (task.relationships?.habitId) {
-          window.location.href = `/habits?habitId=${task.relationships.habitId}`;
-        } else {
-          toast.info(`Viewing habit task: ${task.name}`);
-        }
-        return;
+    if (task.relationships?.habitId && action === 'view-habit') {
+      if (task.relationships?.habitId) {
+        window.location.href = `/habits?habitId=${task.relationships.habitId}`;
+      } else {
+        toast.info(`Viewing habit task: ${task.name}`);
       }
+      return;
     }
     
     // If this is a journal task, handle it properly
-    if (task.taskType === 'journal' && actionType === 'open-journal') {
+    if (task.taskType === 'journal' && action === 'open-journal') {
       // Always dispatch event first to ensure UI is updated
       console.log("Dispatching open-journal event for task:", task.id);
       
@@ -110,37 +109,8 @@ export const useTaskActionHandler = (
     
     // Process specific task types when action button is clicked
     switch(task.taskType) {
-      case 'journal':
-        if (actionType === 'true') {
-          // Set task to in-progress first
-          if (task.status !== 'in-progress') {
-            eventBus.emit('task:update', { 
-              taskId: task.id, 
-              updates: { status: 'in-progress' } 
-            });
-          }
-          
-          // Handle journal opening
-          if (onOpenTaskDialog) {
-            window.dispatchEvent(new CustomEvent('open-journal', {
-              detail: {
-                taskId: task.id,
-                taskName: task.name,
-                entry: task.journalEntry || ''
-              }
-            }));
-            
-            console.log("Opening journal dialog for task:", task.id);
-            onOpenTaskDialog();
-          } else {
-            console.error('No dialog opener provided for journal task:', task.id);
-            toast.error('Unable to open journal editor');
-          }
-        }
-        break;
-        
       case 'timer':
-        if (actionType === 'true') {
+        if (action === 'true') {
           // Set task to in-progress first
           if (task.status !== 'in-progress') {
             eventBus.emit('task:update', { 
@@ -158,9 +128,7 @@ export const useTaskActionHandler = (
         break;
         
       case 'screenshot':
-      case 'checklist':
-      case 'voicenote':
-        if (actionType === 'true') {
+        if (action === 'true') {
           // Mark as in-progress when opening these task types
           if (task.status !== 'in-progress') {
             eventBus.emit('task:update', { 
@@ -171,18 +139,60 @@ export const useTaskActionHandler = (
           
           // Open the appropriate dialog
           if (onOpenTaskDialog) {
-            console.log(`Opening ${task.taskType} dialog for task:`, task.id);
+            console.log(`Opening screenshot dialog for task:`, task.id);
             onOpenTaskDialog();
           } else {
-            console.error(`No dialog opener provided for ${task.taskType} task:`, task.id);
-            toast.error(`Unable to open ${task.taskType} editor`);
+            console.error(`No dialog opener provided for screenshot task:`, task.id);
+            toast.error(`Unable to open screenshot editor`);
+          }
+        }
+        break;
+        
+      case 'checklist':
+        if (action === 'true') {
+          // Mark as in-progress when opening these task types
+          if (task.status !== 'in-progress') {
+            eventBus.emit('task:update', { 
+              taskId: task.id, 
+              updates: { status: 'in-progress' } 
+            });
+          }
+          
+          // Open the appropriate dialog
+          if (onOpenTaskDialog) {
+            console.log(`Opening checklist dialog for task:`, task.id);
+            onOpenTaskDialog();
+          } else {
+            console.error(`No dialog opener provided for checklist task:`, task.id);
+            toast.error(`Unable to open checklist editor`);
+          }
+        }
+        break;
+        
+      case 'voicenote':
+        if (action === 'true') {
+          // Mark as in-progress when opening these task types
+          if (task.status !== 'in-progress') {
+            eventBus.emit('task:update', { 
+              taskId: task.id, 
+              updates: { status: 'in-progress' } 
+            });
+          }
+          
+          // Open the appropriate dialog
+          if (onOpenTaskDialog) {
+            console.log(`Opening voicenote dialog for task:`, task.id);
+            onOpenTaskDialog();
+          } else {
+            console.error(`No dialog opener provided for voicenote task:`, task.id);
+            toast.error(`Unable to open voicenote editor`);
           }
         }
         break;
         
       default:
         // Regular tasks just get completed directly if action button is clicked
-        if (actionType === 'true') {
+        if (action === 'true') {
           eventBus.emit('task:complete', { taskId: task.id });
           toast.success(`Completed task: ${task.name}`);
         }
