@@ -17,14 +17,19 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
     dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
   }, [dispatch]);
   
-  // Add new handler for task dismissal
+  // Add new handler for task dismissal - fix the issue with missing fields
   const handleTaskDismiss = useCallback(({ taskId, habitId, date }) => {
     console.log("TaskEvents: Dismissing habit task", taskId, "for habit", habitId, "on", date);
-    dispatch({ type: 'DISMISS_TASK', payload: { taskId, habitId, date } });
+    
+    // Ensure we have valid values for habitId and date
+    const safeHabitId = habitId || 'none';
+    const safeDate = date || new Date().toISOString();
+    
+    dispatch({ type: 'DISMISS_TASK', payload: { taskId, habitId: safeHabitId, date: safeDate } });
     
     // Emit an event to track this dismissal in the habit system
     window.dispatchEvent(new CustomEvent('habit-task-dismissed', {
-      detail: { habitId, taskId, date }
+      detail: { habitId: safeHabitId, taskId, date: safeDate }
     }));
   }, [dispatch]);
   

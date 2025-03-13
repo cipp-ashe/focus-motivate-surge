@@ -56,7 +56,7 @@ export const useTaskActionHandler = (
             });
             toast.success(`Dismissed habit task: ${task.name}`, { duration: 2000 });
           } else {
-            // For regular tasks, mark as dismissed
+            // For regular tasks, mark as dismissed - fix by adding minimum required fields
             updateTaskOperations.updateTask(task.id, { 
               status: 'dismissed', 
               dismissedAt: new Date().toISOString() 

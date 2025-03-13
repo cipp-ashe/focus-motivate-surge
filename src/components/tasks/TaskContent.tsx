@@ -59,7 +59,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       const newStatus = actionType.split('-')[1];
       console.log("Task status change:", newStatus, "for task:", task.id);
       
-      // Use updateTask instead of non-existent updateTaskStatus
+      // Fix: Use updateTask instead of updateTaskStatus
       updateTaskOperations.updateTask(task.id, { status: newStatus as any });
       return;
     }
@@ -83,11 +83,11 @@ export const TaskContent: React.FC<TaskContentProps> = ({
           date: task.relationships.date
         });
       } else {
-        // For non-habit tasks, just emit a basic event
+        // For non-habit tasks, use default placeholders for required fields
         eventBus.emit('task:dismiss', { 
           taskId: task.id,
           habitId: 'none',
-          date: 'none'
+          date: new Date().toISOString()
         });
       }
       toast.info(`Dismissed task: ${task.name}`);
@@ -103,8 +103,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
     }
     
     // Special handling for each task type
-    if (task.taskType === 'journal' && actionType === 'true') {
-      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+    if (task.taskType === 'journal' && actionType === 'journal') {
+      console.log("Opening journal for task:", task.id);
       if (dialogOpeners?.journal) {
         dialogOpeners.journal(task.id, task.name, task.journalEntry || '');
       } else {
@@ -113,8 +113,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       return;
     }
     
-    if (task.taskType === 'checklist' && actionType === 'true') {
-      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+    if (task.taskType === 'checklist' && actionType === 'checklist') {
+      console.log("Opening checklist for task:", task.id);
       if (dialogOpeners?.checklist) {
         dialogOpeners.checklist(task.id, task.name, task.checklistItems || []);
       } else {
@@ -123,15 +123,15 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       return;
     }
     
-    if (task.taskType === 'timer' && actionType === 'true') {
-      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+    if (task.taskType === 'timer' && actionType === 'timer') {
+      console.log("Setting timer task:", task.id);
       // Handle timer task action
       eventBus.emit('timer:set-task', task);
       return;
     }
     
-    if (task.taskType === 'screenshot' && actionType === 'true') {
-      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+    if (task.taskType === 'screenshot' && actionType === 'screenshot') {
+      console.log("Opening screenshot for task:", task.id);
       if (dialogOpeners?.screenshot && task.imageUrl) {
         dialogOpeners.screenshot(task.imageUrl, task.name);
       } else {
@@ -140,8 +140,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       return;
     }
     
-    if (task.taskType === 'voicenote' && actionType === 'true') {
-      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+    if (task.taskType === 'voicenote' && actionType === 'voicenote') {
+      console.log("Opening voice note for task:", task.id);
       if (dialogOpeners?.voicenote) {
         dialogOpeners.voicenote(task.id, task.name);
       } else {

@@ -1,5 +1,4 @@
-
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +20,7 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   onTaskUpdate
 }) => {
   const navigate = useNavigate();
+  const isModalOpenRef = useRef(false);
   
   useEffect(() => {
     console.log('TaskEventListener: Setting up event listeners');
@@ -31,29 +31,75 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
     // Handler for opening screenshot/image viewer
     const handleOpenImage = (data: { taskId: string; imageUrl: string; taskName: string }) => {
       console.log('TaskEventListener: Received show-image event:', data);
+      
+      // Set the modal flag
+      isModalOpenRef.current = true;
+      
+      // Call the handler
       onShowImage(data.imageUrl, data.taskName);
+      
+      // Reset the flag after a delay
+      setTimeout(() => {
+        isModalOpenRef.current = false;
+      }, 100);
     };
     
     // Handler for opening checklist
     const handleOpenChecklist = (data: { taskId: string; taskName: string; items: any[] }) => {
       console.log('TaskEventListener: Received open-checklist event:', data);
+      
+      // Set the modal flag
+      isModalOpenRef.current = true;
+      
+      // Call the handler
       onOpenChecklist(data.taskId, data.taskName, data.items || []);
+      
+      // Reset the flag after a delay
+      setTimeout(() => {
+        isModalOpenRef.current = false;
+      }, 100);
     };
     
     // Handler for opening journal
     const handleOpenJournal = (data: { taskId: string; taskName: string; entry: string }) => {
       console.log('TaskEventListener: Received open-journal event:', data);
+      
+      // Set the modal flag
+      isModalOpenRef.current = true;
+      
+      // Call the handler
       onOpenJournal(data.taskId, data.taskName, data.entry || '');
+      
+      // Reset the flag after a delay
+      setTimeout(() => {
+        isModalOpenRef.current = false;
+      }, 100);
     };
     
     // Handler for opening voice recorder
     const handleOpenVoiceRecorder = (data: { taskId: string; taskName: string }) => {
       console.log('TaskEventListener: Received open-voice-recorder event:', data);
+      
+      // Set the modal flag
+      isModalOpenRef.current = true;
+      
+      // Call the handler
       onOpenVoiceRecorder(data.taskId, data.taskName);
+      
+      // Reset the flag after a delay
+      setTimeout(() => {
+        isModalOpenRef.current = false;
+      }, 100);
     };
     
     // Improved handler for task updates with strict loop prevention
     const handleTaskUpdate = (data: { taskId: string; updates: any }) => {
+      // Skip if a modal is open to prevent interactions while dialogs are showing
+      if (isModalOpenRef.current) {
+        console.log('TaskEventListener: Skipping task update because a modal is open');
+        return;
+      }
+      
       const { taskId, updates } = data;
       
       // Skip further processing if we don't have updates
