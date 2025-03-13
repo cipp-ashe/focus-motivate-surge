@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
@@ -53,7 +52,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   }, [currentTask]);
 
   const saveJournal = () => {
-    if (currentTask) {
+    if (currentTask && journalContent.trim()) {
       console.log('Saving journal entry for task:', {
         taskId: currentTask.taskId,
         entry: journalContent
@@ -63,12 +62,13 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       eventBus.emit('task:update', {
         taskId: currentTask.taskId,
         updates: { 
-          journalEntry: journalContent,
+          journalEntry: journalContent.trim(),
           taskType: 'journal' 
         }
       });
       
       toast.success(`Saved journal entry for: ${currentTask.taskName}`);
+      setIsEditing(false);
       onOpenChange(false);
     }
   };
