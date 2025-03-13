@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TIMER_CONSTANTS } from "@/types/timer";
@@ -51,12 +52,13 @@ export const useTimerHandlers = ({
       setTimeout(() => {
         setCompletionMetrics(metrics);
         setShowCompletion(true);
+        setIsExpanded(false); // Ensure we collapse the expanded view on completion
       }, 0);
     } catch (error) {
       console.error('Error in timer completion flow:', error);
       toast.error("An error occurred while completing the timer ⚠️");
     }
-  }, [completeTimer, playSound, metrics, setCompletionMetrics, setShowCompletion]);
+  }, [completeTimer, playSound, metrics, setCompletionMetrics, setShowCompletion, setIsExpanded]);
 
   const handleComplete = useCallback(async () => {
     setShowConfirmation(false);
@@ -80,10 +82,11 @@ export const useTimerHandlers = ({
       setPauseTimeLeft(0);
     }
     
-    setIsExpanded(false);
+    // First start the timer, then expand the view
+    start();
     
+    // Set a small delay to ensure the timer is running before expanding
     setTimeout(() => {
-      start();
       setIsExpanded(true);
       toast.success("Timer started! Let's focus! 🎯");
     }, 100);

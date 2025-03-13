@@ -54,11 +54,15 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
   handleAddTimeAndContinue,
   handleComplete,
 }) => {
-  // Modified to ensure that at least one view is always visible
+  // Don't show anything if the timer is completed and we're in completion view
+  if (showCompletion) {
+    return null;
+  }
+
   return (
     <div className="relative">
       {/* Main timer view (collapsed state) - only hide when fully expanded */}
-      <div className={`transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none absolute inset-0 z-0' : 'opacity-100 z-10'}`}>
         <MainTimerView
           isExpanded={isExpanded}
           setIsExpanded={() => eventBus.emit('timer:expand', { taskName })}
