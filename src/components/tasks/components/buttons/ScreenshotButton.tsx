@@ -9,14 +9,14 @@ export interface ScreenshotButtonProps extends TaskButtonProps {}
 export const ScreenshotButton: React.FC<ScreenshotButtonProps> = ({ task, onTaskAction }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    onTaskAction(e, 'true');
+    onTaskAction(e, 'screenshot');
   };
 
   return (
     <Button 
       variant="ghost"
       size="sm"
-      className="h-7 w-7 p-0 text-purple-500 hover:text-purple-700 hover:bg-purple-100"
+      className="h-7 w-7 p-0 text-blue-400 hover:text-blue-600 hover:bg-blue-100"
       onClick={handleClick}
       title="View Screenshot"
     >

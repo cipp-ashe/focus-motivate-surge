@@ -8,14 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Timer, 
-  FileText, 
-  BookOpen, 
-  CheckSquare,
-  Image,
-  Mic
-} from 'lucide-react';
+import TaskIcon from './components/TaskIcon';
 
 /**
  * Props for the TaskTypeSelector component
@@ -27,6 +20,18 @@ interface TaskTypeSelectorProps {
   value: TaskType;
   onChange: (value: TaskType) => void;
 }
+
+/**
+ * Task type information including labels
+ */
+const taskTypes: Array<{ type: TaskType; label: string }> = [
+  { type: 'regular', label: 'Regular Task' },
+  { type: 'timer', label: 'Focused Timer' },
+  { type: 'journal', label: 'Journal Entry' },
+  { type: 'checklist', label: 'Checklist' },
+  { type: 'screenshot', label: 'Screenshot' },
+  { type: 'voicenote', label: 'Voice Note' }
+];
 
 /**
  * A component that renders a dropdown for selecting task types
@@ -55,42 +60,14 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
         <SelectValue placeholder="Select task type" />
       </SelectTrigger>
       <SelectContent className="bg-background/95 backdrop-blur-sm border-border/50">
-        <SelectItem value="regular" className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-primary" />
-            <span>Regular Task</span>
-          </div>
-        </SelectItem>
-        <SelectItem value="timer">
-          <div className="flex items-center gap-2">
-            <Timer className="h-4 w-4 text-purple-400" />
-            <span>Focused Timer</span>
-          </div>
-        </SelectItem>
-        <SelectItem value="journal">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-amber-400" />
-            <span>Journal Entry</span>
-          </div>
-        </SelectItem>
-        <SelectItem value="checklist">
-          <div className="flex items-center gap-2">
-            <CheckSquare className="h-4 w-4 text-cyan-400" />
-            <span>Checklist</span>
-          </div>
-        </SelectItem>
-        <SelectItem value="screenshot">
-          <div className="flex items-center gap-2">
-            <Image className="h-4 w-4 text-blue-400" />
-            <span>Screenshot</span>
-          </div>
-        </SelectItem>
-        <SelectItem value="voicenote">
-          <div className="flex items-center gap-2">
-            <Mic className="h-4 w-4 text-rose-400" />
-            <span>Voice Note</span>
-          </div>
-        </SelectItem>
+        {taskTypes.map(({ type, label }) => (
+          <SelectItem key={type} value={type} className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <TaskIcon taskType={type} size={16} />
+              <span>{label}</span>
+            </div>
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

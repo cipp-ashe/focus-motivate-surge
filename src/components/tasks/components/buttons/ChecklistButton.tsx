@@ -9,14 +9,14 @@ export interface ChecklistButtonProps extends TaskButtonProps {}
 export const ChecklistButton: React.FC<ChecklistButtonProps> = ({ task, onTaskAction }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    onTaskAction(e, 'true');
+    onTaskAction(e, 'checklist');
   };
 
   return (
     <Button 
       variant="ghost"
       size="sm"
-      className="h-7 w-7 p-0 text-amber-500 hover:text-amber-700 hover:bg-amber-100"
+      className="h-7 w-7 p-0 text-cyan-400 hover:text-cyan-600 hover:bg-cyan-100"
       onClick={handleClick}
       title="Open Checklist"
     >
