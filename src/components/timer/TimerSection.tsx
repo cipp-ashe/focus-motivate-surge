@@ -32,8 +32,14 @@ export const TimerSection = ({
   // Listen for timer:set-task events to update the current task
   useEvent('timer:set-task', (task: Task) => {
     console.log("TimerSection: Received timer:set-task event", task);
-    // Don't modify the task type here - accept it as is
-    setCurrentTask(task);
+    
+    // Only accept timer tasks
+    if (task.taskType === 'timer') {
+      setCurrentTask(task);
+    } else {
+      console.warn("TimerSection: Ignoring non-timer task:", task);
+      toast.warning("Only timer tasks can be used in the Timer view");
+    }
   });
 
   // Also listen for task:select events directly
@@ -47,10 +53,15 @@ export const TimerSection = ({
       
       if (task) {
         console.log("TimerSection: Found task in localStorage:", task);
-        setCurrentTask(task);
         
-        // Show toast for debugging
-        toast.success(`Selected task: ${task.name}`);
+        // Only accept timer tasks
+        if (task.taskType === 'timer') {
+          setCurrentTask(task);
+          toast.success(`Selected timer task: ${task.name}`);
+        } else {
+          console.warn("TimerSection: Ignoring non-timer task:", task);
+          toast.warning("Only timer tasks can be used in the Timer view");
+        }
       } else {
         console.warn("TimerSection: Task not found in localStorage:", taskId);
       }
@@ -62,8 +73,13 @@ export const TimerSection = ({
   // Update current task when selectedTask changes
   useEffect(() => {
     if (selectedTask && (!currentTask || selectedTask.id !== currentTask.id)) {
-      console.log("TimerSection: Selected task changed", selectedTask);
-      setCurrentTask(selectedTask);
+      // Only accept timer tasks
+      if (selectedTask.taskType === 'timer') {
+        console.log("TimerSection: Selected task changed", selectedTask);
+        setCurrentTask(selectedTask);
+      } else {
+        console.warn("TimerSection: Ignoring non-timer selected task:", selectedTask);
+      }
     }
   }, [selectedTask, currentTask]);
 

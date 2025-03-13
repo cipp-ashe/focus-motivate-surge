@@ -57,25 +57,25 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       }
     };
     
-    // Handler for timer task selection
+    // Handler for timer task selection - Only navigate to timer for timer tasks
     const handleTimerTaskSet = (task: Task) => {
       console.log('TaskEventListener: Timer task set event received for', task.id);
-      // Navigate to timer page if not already there
-      if (!window.location.pathname.includes('/timer')) {
-        navigate('/timer');
-      }
       
-      // Dispatch a custom event to set the task in the timer - ONLY convert to timer if actually needed
-      setTimeout(() => {
-        // Only convert to timer type if we're on the timer page and it's not already a timer
-        const isTimerPage = window.location.pathname.includes('/timer');
-        const taskToSend = isTimerPage && task.taskType !== 'timer' 
-          ? { ...task, taskType: 'timer' } 
-          : task;
+      // Only handle timer tasks, do not convert other task types
+      if (task.taskType === 'timer') {
+        // Navigate to timer page if not already there
+        if (!window.location.pathname.includes('/timer')) {
+          navigate('/timer');
+        }
         
-        const event = new CustomEvent('timer:set-task', { detail: taskToSend });
-        window.dispatchEvent(event);
-      }, 300); // Small delay to ensure navigation completes first
+        // Send the task to the timer without modifying its type
+        setTimeout(() => {
+          const event = new CustomEvent('timer:set-task', { detail: task });
+          window.dispatchEvent(event);
+        }, 300); // Small delay to ensure navigation completes first
+      } else {
+        console.log('TaskEventListener: Ignoring non-timer task for timer page:', task);
+      }
     };
     
     // Set up event listeners

@@ -6,62 +6,28 @@ import { eventBus } from '@/lib/eventBus';
 import { taskStorage } from '@/lib/storage/taskStorage';
 
 /**
- * A hook to manage timer-specific task behaviors, like converting
- * tasks to timer tasks when selected in the timer view
+ * A hook to manage timer-specific task behaviors, like selecting
+ * timer tasks when in the timer view
  */
 export const useTimerTasksManager = () => {
   const { items, selected } = useTaskContext();
   
-  // Auto-convert selected non-timer tasks to timer tasks ONLY when selected in Timer view
-  useEffect(() => {
-    // We need to check if we're in the Timer route before auto-converting
-    const isTimerRoute = window.location.pathname.includes('/timer');
-    
-    // Only process if we have a selected task AND we're on the timer page
-    if (selected && isTimerRoute) {
-      const selectedTask = items.find(task => task.id === selected);
-      
-      if (selectedTask && selectedTask.taskType !== 'timer') {
-        console.log('TimerTasksManager: Converting task to timer task:', selectedTask.name);
-        
-        // Update the task type to timer
-        eventBus.emit('task:update', {
-          taskId: selectedTask.id,
-          updates: { taskType: 'timer' }
-        });
-        
-        toast.success(`Task converted to timer task`);
-      }
-    }
-  }, [selected, items]);
-  
-  // Handle task selection
+  // Handle task selection for the timer view
   const handleTaskSelect = useCallback((taskId: string) => {
     console.log('TimerTasksManager: Task selected:', taskId);
     
-    // Don't auto-convert tasks when not in timer view
+    // Check if we're in the timer route
     const isTimerRoute = window.location.pathname.includes('/timer');
-    
-    if (!isTimerRoute) {
-      // If not in timer route, just select the task without conversion
-      eventBus.emit('task:select', taskId);
-      return;
-    }
     
     // In timer route, find the task to check its type
     const task = items.find(t => t.id === taskId);
     
     if (task) {
-      if (task.taskType !== 'timer') {
-        console.log('TimerTasksManager: Converting task to timer task:', task.name);
-        
-        // Update the task type to timer
-        eventBus.emit('task:update', {
-          taskId: task.id,
-          updates: { taskType: 'timer' }
-        });
-        
-        toast.success(`Task converted to timer task`);
+      // Only proceed with timer tasks in timer view
+      if (isTimerRoute && task.taskType !== 'timer') {
+        console.log('TimerTasksManager: Ignoring non-timer task in timer view:', task.name);
+        toast.warning(`Only timer tasks can be used in Timer view`);
+        return;
       }
       
       // Select the task
@@ -72,12 +38,11 @@ export const useTimerTasksManager = () => {
       if (storedTask) {
         console.log('TimerTasksManager: Found task in storage:', storedTask);
         
-        // Convert to timer task if needed
-        if (storedTask.taskType !== 'timer') {
-          eventBus.emit('task:update', {
-            taskId: storedTask.id,
-            updates: { taskType: 'timer' }
-          });
+        // Check if it's a timer task when in timer view
+        if (isTimerRoute && storedTask.taskType !== 'timer') {
+          console.log('TimerTasksManager: Ignoring non-timer task in timer view:', storedTask.name);
+          toast.warning(`Only timer tasks can be used in Timer view`);
+          return;
         }
         
         // Select the task and trigger a refresh

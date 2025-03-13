@@ -18,6 +18,9 @@ export const TimerView: React.FC<TimerViewProps> = ({
   onTaskAdd,
   onTasksAdd
 }) => {
+  // Filter only timer tasks for display in timer view
+  const timerTasks = tasks.filter(task => task.taskType === 'timer');
+  
   return (
     <div className="flex flex-col h-full bg-background/20 dark:bg-[#1A1F2C] rounded-xl overflow-hidden shadow-sm border border-border/30">
       <div className="p-4 border-b border-border/10 bg-background/30 dark:bg-[#1A1F2C]">
@@ -30,7 +33,7 @@ export const TimerView: React.FC<TimerViewProps> = ({
       </div>
       <div className="flex-1 overflow-auto">
         <TaskList
-          tasks={tasks}
+          tasks={timerTasks}
           selectedTasks={selectedTaskId ? [selectedTaskId] : []}
           onTaskClick={(taskId) => eventManager.emit('task:select', taskId)}
           simplifiedView

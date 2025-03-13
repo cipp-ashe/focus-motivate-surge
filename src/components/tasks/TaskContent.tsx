@@ -85,8 +85,9 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       return;
     }
     
+    // Only timer tasks should navigate to timer page
     if (task.taskType === 'timer' && action === 'true') {
-      // For timer tasks, we need to update the status first
+      // Update task status if needed
       if (task.status !== 'in-progress') {
         window.dispatchEvent(new CustomEvent('task-update', {
           detail: {
@@ -96,7 +97,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
         }));
       }
       
-      // Navigate to the timer page with this task selected
+      // Trigger timer:set-task event for the timer task
       window.dispatchEvent(new CustomEvent('timer:set-task', {
         detail: task
       }));
@@ -104,7 +105,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       // Navigate to the timer page
       navigate('/timer');
       
-      console.log(`Navigating to timer page with task: ${task.id}`);
+      console.log(`Navigating to timer page with timer task: ${task.id}`);
       return;
     }
     

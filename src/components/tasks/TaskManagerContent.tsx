@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TaskInput } from './TaskInput';
 import { Task } from '@/types/tasks';
@@ -31,11 +30,6 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   const handleTaskAdd = (task: Task) => {
     console.log("TaskManagerContent - Adding task:", task);
     
-    // Ensure timer tasks in timer view
-    if (isTimerView && (!task.taskType || task.taskType !== 'timer')) {
-      task.taskType = 'timer';
-    }
-    
     // Add to storage first
     taskStorage.addTask(task);
     
@@ -50,7 +44,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
       window.dispatchEvent(new Event('force-task-update'));
       
       // For timer view, also emit task:select event to automatically select the task
-      if (isTimerView) {
+      if (isTimerView && task.taskType === 'timer') {
         eventBus.emit('task:select', task.id);
       }
     }, 100);
@@ -58,11 +52,6 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
 
   const handleTasksAdd = (tasks: Task[]) => {
     console.log(`TaskManagerContent - Adding ${tasks.length} tasks`);
-    
-    // Ensure timer tasks in timer view
-    if (isTimerView) {
-      tasks = tasks.map(task => ({ ...task, taskType: 'timer' }));
-    }
     
     // Add all tasks to storage
     tasks.forEach(task => taskStorage.addTask(task));
@@ -77,9 +66,13 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     setTimeout(() => {
       window.dispatchEvent(new Event('force-task-update'));
       
-      // For timer view, also select the first task automatically
-      if (isTimerView && tasks.length > 0) {
-        eventBus.emit('task:select', tasks[0].id);
+      // For timer view, find first timer task and select it
+      if (isTimerView) {
+        const timerTask = tasks.find(task => task.taskType === 'timer');
+        if (timerTask) {
+          console.log("TaskManagerContent: Auto-selecting first timer task", timerTask.id);
+          eventBus.emit('task:select', timerTask.id);
+        }
       }
     }, 100);
   };
@@ -108,7 +101,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   if (isTimerView) {
     return (
       <TimerView
-        tasks={timerTasks}
+        tasks={tasks}
         selectedTaskId={selectedTaskId}
         onTaskAdd={handleTaskAdd}
         onTasksAdd={handleTasksAdd}
