@@ -84,20 +84,6 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
 
     const statusInfo = getStatusInfo(task.status);
 
-    // Helper to create proper MouseEvent with data-action-type
-    const createStatusEvent = (status: string) => (e: React.MouseEvent) => {
-      // Create a synthetic event with the proper data attribute
-      const newEvent = {
-        ...e,
-        currentTarget: {
-          ...e.currentTarget,
-          getAttribute: () => `status-${status}`
-        }
-      };
-      
-      onTaskAction(newEvent as any);
-    };
-
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -113,28 +99,82 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-36 bg-background">
           <DropdownMenuItem
-            onClick={createStatusEvent('pending')}
+            onClick={(e) => {
+              // Create a custom event with status data
+              const customEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+              });
+              
+              // Set a data attribute on the event target
+              Object.defineProperty(customEvent, 'currentTarget', {
+                value: {
+                  getAttribute: () => 'status-pending'
+                }
+              });
+              
+              onTaskAction(customEvent as any);
+            }}
             className="text-xs cursor-pointer"
           >
             <Square className="h-3.5 w-3.5 mr-2" />
             Not Started
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={createStatusEvent('in-progress')}
+            onClick={(e) => {
+              const customEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+              });
+              
+              Object.defineProperty(customEvent, 'currentTarget', {
+                value: {
+                  getAttribute: () => 'status-in-progress'
+                }
+              });
+              
+              onTaskAction(customEvent as any);
+            }}
             className="text-xs cursor-pointer"
           >
             <Play className="h-3.5 w-3.5 mr-2" />
             In Progress
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={createStatusEvent('completed')}
+            onClick={(e) => {
+              const customEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+              });
+              
+              Object.defineProperty(customEvent, 'currentTarget', {
+                value: {
+                  getAttribute: () => 'status-completed'
+                }
+              });
+              
+              onTaskAction(customEvent as any);
+            }}
             className="text-xs cursor-pointer text-green-600"
           >
             <Check className="h-3.5 w-3.5 mr-2" />
             Complete
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={createStatusEvent('dismissed')}
+            onClick={(e) => {
+              const customEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+              });
+              
+              Object.defineProperty(customEvent, 'currentTarget', {
+                value: {
+                  getAttribute: () => 'status-dismissed'
+                }
+              });
+              
+              onTaskAction(customEvent as any);
+            }}
             className="text-xs cursor-pointer text-red-500"
           >
             <X className="h-3.5 w-3.5 mr-2" />
@@ -187,7 +227,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           size="sm"
           onClick={onTaskAction}
           className="h-7 px-2 flex items-center gap-1 text-xs"
-          data-action="true"
+          data-action-type="open-journal"
         >
           <BookOpen className="h-3.5 w-3.5 text-amber-400" />
           <span>{task.journalEntry ? 'View' : 'Write'}</span>
