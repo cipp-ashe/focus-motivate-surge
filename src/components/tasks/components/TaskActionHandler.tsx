@@ -72,7 +72,9 @@ export const useTaskActionHandler = (
         
         // If dialog opener is provided, use it to open the dialog
         if (onOpenTaskDialog) {
-          // For existing entry, dispatch event first to ensure UI is updated
+          // Always dispatch event first to ensure UI is updated
+          // This was causing the issue - we need to ensure the event is dispatched
+          // even if there's already a journal entry
           window.dispatchEvent(new CustomEvent('open-journal', {
             detail: {
               taskId: task.id,
@@ -80,7 +82,12 @@ export const useTaskActionHandler = (
               entry: task.journalEntry || ''
             }
           }));
+          
+          // Then open the dialog
           onOpenTaskDialog();
+        } else {
+          console.error('No dialog opener provided for journal task:', task.id);
+          toast.error('Unable to open journal editor');
         }
         break;
         

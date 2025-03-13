@@ -29,15 +29,37 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   const [editedName, setEditedName] = useState(task.name);
   const [editedJournalEntry, setEditedJournalEntry] = useState(task.journalEntry || '');
 
-  // Reset states when dialog opens
+  // Reset states when dialog opens or task changes
   useEffect(() => {
     if (isOpen) {
+      console.log("Journal dialog opened with task:", task);
       setEditedName(task.name);
       setEditedJournalEntry(task.journalEntry || '');
       // If there's no existing entry, start in editing mode
       setIsEditing(!task.journalEntry);
     }
-  }, [isOpen, task.name, task.journalEntry]);
+  }, [isOpen, task]);
+
+  // Also listen for open-journal events
+  useEffect(() => {
+    const handleOpenJournal = (event: CustomEvent) => {
+      const { taskId, taskName, entry } = event.detail;
+      
+      if (taskId === task.id) {
+        console.log("Received open-journal event for task:", taskId);
+        setEditedName(taskName);
+        setEditedJournalEntry(entry || '');
+        setIsEditing(!entry);
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener('open-journal' as any, handleOpenJournal);
+    
+    return () => {
+      window.removeEventListener('open-journal' as any, handleOpenJournal);
+    };
+  }, [task.id, setIsOpen]);
 
   const handleSaveEdit = () => {
     if (!editedName.trim()) {
@@ -49,6 +71,8 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       name: editedName.trim(),
       journalEntry: editedJournalEntry.trim() || undefined
     };
+
+    console.log("Saving journal entry updates:", updates);
 
     eventBus.emit('task:update', { 
       taskId: task.id, 
