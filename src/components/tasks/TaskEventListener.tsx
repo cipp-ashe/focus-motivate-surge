@@ -1,6 +1,7 @@
 
 import { useEffect } from 'react';
 import { eventBus } from '@/lib/eventBus';
+import { Task } from '@/types/tasks';
 
 interface TaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
@@ -53,6 +54,12 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       }
     };
     
+    // Handler for timer task selection
+    const handleTimerTaskSet = (task: Task) => {
+      console.log('TaskEventListener: Timer task set event received for', task.id);
+      // We don't need to do anything special here, as this is handled by the Timer page
+    };
+    
     // Set up event listeners
     const unsubscribers = [
       eventBus.on('show-image', handleOpenImage),
@@ -60,6 +67,7 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       eventBus.on('open-journal', handleOpenJournal),
       eventBus.on('open-voice-recorder', handleOpenVoiceRecorder),
       eventBus.on('task:update', handleTaskUpdate),
+      eventBus.on('timer:set-task', handleTimerTaskSet),
     ];
     
     // Force a refresh at startup to ensure all is in sync

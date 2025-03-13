@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { useTaskActionHandler } from "./components/TaskActionHandler";
 import { TaskActionButton } from "./components/TaskActionButton";
+import { useNavigate } from 'react-router-dom';
 
 interface TaskContentProps {
   task: Task;
@@ -37,6 +38,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   dialogOpeners,
 }) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
+  const navigate = useNavigate();
   
   // Use the hook at the component level, not inside another function
   const { handleTaskAction: statusTaskAction } = useTaskActionHandler(task);
@@ -93,14 +95,15 @@ export const TaskContent: React.FC<TaskContentProps> = ({
         }));
       }
       
-      // Then initialize the timer
-      window.dispatchEvent(new CustomEvent('timer:init', {
-        detail: {
-          taskName: task.name,
-          duration: task.duration || 1500
-        }
+      // Navigate to the timer page with this task selected
+      window.dispatchEvent(new CustomEvent('timer:set-task', {
+        detail: task
       }));
-      console.log(`Initialized timer for task: ${task.id}`);
+      
+      // Navigate to the timer page
+      navigate('/timer');
+      
+      console.log(`Navigating to timer page with task: ${task.id}`);
       return;
     }
     

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Clock } from "lucide-react";
+import { Clock, Timer } from "lucide-react";
 
 interface TimerButtonProps {
   durationInMinutes: number;
@@ -28,10 +28,10 @@ export const TimerButton: React.FC<TimerButtonProps> = ({
   return (
     <Badge 
       variant="outline" 
-      className="flex items-center gap-1 bg-primary/5 hover:bg-primary/10"
+      className="flex items-center gap-1 bg-primary/5 hover:bg-primary/10 transition duration-200 active:scale-95"
       onClick={onClick}
     >
-      <Clock className="h-3.5 w-3.5 text-primary opacity-70" />
+      <Timer className="h-3.5 w-3.5 text-purple-500" />
       {isEditing ? (
         <Input
           type="text"
