@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap, 
-  ChevronDown, Square, Play, Loader2, X, Check
+  ChevronDown, Square, Play, X, Check
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -84,6 +84,20 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
 
     const statusInfo = getStatusInfo(task.status);
 
+    // Helper to create proper MouseEvent with data-action-type
+    const createStatusEvent = (status: string) => (e: React.MouseEvent) => {
+      // Create a synthetic event with the proper data attribute
+      const newEvent = {
+        ...e,
+        currentTarget: {
+          ...e.currentTarget,
+          getAttribute: () => `status-${status}`
+        }
+      };
+      
+      onTaskAction(newEvent as any);
+    };
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -99,28 +113,28 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-36 bg-background">
           <DropdownMenuItem
-            onClick={(e) => onTaskAction({ ...e, currentTarget: { getAttribute: () => 'status-pending' } } as any)}
+            onClick={createStatusEvent('pending')}
             className="text-xs cursor-pointer"
           >
             <Square className="h-3.5 w-3.5 mr-2" />
             Not Started
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={(e) => onTaskAction({ ...e, currentTarget: { getAttribute: () => 'status-in-progress' } } as any)}
+            onClick={createStatusEvent('in-progress')}
             className="text-xs cursor-pointer"
           >
             <Play className="h-3.5 w-3.5 mr-2" />
             In Progress
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={(e) => onTaskAction({ ...e, currentTarget: { getAttribute: () => 'status-completed' } } as any)}
+            onClick={createStatusEvent('completed')}
             className="text-xs cursor-pointer text-green-600"
           >
             <Check className="h-3.5 w-3.5 mr-2" />
             Complete
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={(e) => onTaskAction({ ...e, currentTarget: { getAttribute: () => 'status-dismissed' } } as any)}
+            onClick={createStatusEvent('dismissed')}
             className="text-xs cursor-pointer text-red-500"
           >
             <X className="h-3.5 w-3.5 mr-2" />

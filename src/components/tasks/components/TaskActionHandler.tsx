@@ -75,6 +75,37 @@ export const useTaskActionHandler = (
       return;
     }
     
+    // If this is a journal task, handle it properly
+    if (task.taskType === 'journal') {
+      // Always dispatch event first to ensure UI is updated
+      console.log("Dispatching open-journal event for task:", task.id);
+      
+      if (onOpenTaskDialog) {
+        // Make sure we set in-progress status
+        if (task.status !== 'in-progress') {
+          eventBus.emit('task:update', { 
+            taskId: task.id, 
+            updates: { status: 'in-progress' } 
+          });
+        }
+        
+        window.dispatchEvent(new CustomEvent('open-journal', {
+          detail: {
+            taskId: task.id,
+            taskName: task.name,
+            entry: task.journalEntry || ''
+          }
+        }));
+        
+        console.log("Opening journal dialog for task:", task.id);
+        onOpenTaskDialog();
+      } else {
+        console.error('No dialog opener provided for journal task:', task.id);
+        toast.error('Unable to open journal editor');
+      }
+      return;
+    }
+    
     // Process specific task types
     switch(task.taskType) {
       case 'timer':
@@ -91,35 +122,6 @@ export const useTaskActionHandler = (
           taskName: task.name, 
           duration: task.duration || 1500 
         });
-        break;
-        
-      case 'journal':
-        // Mark as in-progress when opening journal
-        if (task.status !== 'in-progress') {
-          eventBus.emit('task:update', { 
-            taskId: task.id, 
-            updates: { status: 'in-progress' } 
-          });
-        }
-        
-        // Always dispatch event first to ensure UI is updated
-        console.log("Dispatching open-journal event for task:", task.id);
-        window.dispatchEvent(new CustomEvent('open-journal', {
-          detail: {
-            taskId: task.id,
-            taskName: task.name,
-            entry: task.journalEntry || ''
-          }
-        }));
-        
-        // Then open the dialog if opener is provided
-        if (onOpenTaskDialog) {
-          console.log("Opening journal dialog for task:", task.id);
-          onOpenTaskDialog();
-        } else {
-          console.error('No dialog opener provided for journal task:', task.id);
-          toast.error('Unable to open journal editor');
-        }
         break;
         
       case 'screenshot':
