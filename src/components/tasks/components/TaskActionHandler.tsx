@@ -39,40 +39,55 @@ export const useTaskActionHandler = (
       
       console.log(`Changing task ${task.id} status from ${task.status} to: ${newStatus}`);
       
-      if (newStatus === 'completed') {
-        // For completed status, use completeTaskOperations to properly handle completion
-        completeTaskOperations.completeTask(task.id);
-        toast.success(`Task ${task.name} marked as complete`, { duration: 2000 });
-      } else if (newStatus === 'dismissed') {
-        // For dismissed status, use a specialized handler based on task type
-        if (task.relationships?.habitId) {
-          // Habit-related tasks need special dismissal
-          deleteTaskOperations.deleteTask(task.id, {
-            isDismissal: true,
-            habitId: task.relationships.habitId,
-            date: task.relationships.date || new Date().toDateString(),
-            reason: 'dismissed'
-          });
-          toast.success(`Dismissed habit task: ${task.name}`, { duration: 2000 });
+      try {
+        if (newStatus === 'completed') {
+          // For completed status, use completeTaskOperations to properly handle completion
+          completeTaskOperations.completeTask(task.id);
+          toast.success(`Task ${task.name} marked as complete`, { duration: 2000 });
+        } else if (newStatus === 'dismissed') {
+          // For dismissed status, use a specialized handler based on task type
+          if (task.relationships?.habitId) {
+            // Habit-related tasks need special dismissal
+            deleteTaskOperations.deleteTask(task.id, {
+              isDismissal: true,
+              habitId: task.relationships.habitId,
+              date: task.relationships.date || new Date().toDateString(),
+              reason: 'dismissed'
+            });
+            toast.success(`Dismissed habit task: ${task.name}`, { duration: 2000 });
+          } else {
+            // For regular tasks, mark as dismissed
+            updateTaskOperations.updateTask(task.id, { 
+              status: 'dismissed', 
+              dismissedAt: new Date().toISOString() 
+            });
+            
+            // Then move to completed after a short delay
+            setTimeout(() => {
+              completeTaskOperations.completeTask(task.id);
+            }, 100);
+            toast.success(`Dismissed task: ${task.name}`, { duration: 2000 });
+          }
         } else {
-          // For regular tasks, mark as dismissed
-          updateTaskOperations.updateTask(task.id, { 
-            status: 'dismissed', 
-            dismissedAt: new Date().toISOString() 
-          });
+          // For other statuses, use proper task update operation
+          console.log(`Using updateTaskOperations for ${task.id} with status ${newStatus}`);
           
-          // Then move to completed after a short delay
+          // Use direct storage operation to minimize event loops
+          updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressToast: true });
+          
+          // Create a manual event with enough delay to prevent loops
           setTimeout(() => {
-            completeTaskOperations.completeTask(task.id);
-          }, 100);
-          toast.success(`Dismissed task: ${task.name}`, { duration: 2000 });
+            // Force a UI refresh instead of another event
+            window.dispatchEvent(new Event('force-task-update'));
+          }, 50);
+          
+          toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
         }
-      } else {
-        // For other statuses, use proper task update operation
-        console.log(`Using updateTaskOperations for ${task.id} with status ${newStatus}`);
-        updateTaskOperations.updateTask(task.id, { status: newStatus });
-        toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
+      } catch (error) {
+        console.error('Error updating task status:', error);
+        toast.error(`Failed to update task status: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
+      
       return; // Early return to ensure event doesn't propagate further
     }
     

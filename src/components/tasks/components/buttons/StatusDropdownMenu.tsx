@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { eventBus } from "@/lib/eventBus";
 import { updateTaskOperations } from "@/lib/operations/tasks/update";
 import { toast } from "sonner";
 
@@ -59,11 +58,17 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
     
     console.log(`StatusDropdownMenu: Changing status of task ${task.id} from ${task.status} to ${newStatus}`);
     
-    // Use the onTaskAction to handle the status change and bubble up the event
-    onTaskAction(e, `status-${newStatus}`);
-    
-    // Close the dropdown
-    setOpen(false);
+    try {
+      // First close the dropdown to improve UI feedback
+      setOpen(false);
+      
+      // Then use the onTaskAction to handle the status change and bubble up the event
+      onTaskAction(e, `status-${newStatus}`);
+    } catch (error) {
+      console.error("Error changing task status:", error);
+      toast.error("Failed to update task status");
+      setOpen(false);
+    }
   };
 
   return (
