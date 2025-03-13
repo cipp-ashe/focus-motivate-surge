@@ -1,6 +1,6 @@
+
 import { useEffect, useRef, useCallback } from 'react';
-import { eventBus } from '@/lib/eventBus';
-import { TimerEventType, TimerEventPayloads } from '@/types/events';
+import { eventManager, EventType, EventPayloads } from '@/lib/events/EventManager';
 
 /**
  * Hook to subscribe to a specific event and handle it
@@ -8,9 +8,9 @@ import { TimerEventType, TimerEventPayloads } from '@/types/events';
  * @param eventType - The event type to subscribe to
  * @param callback - The callback to run when the event is emitted
  */
-export function useEvent<T extends TimerEventType>(
+export function useEvent<T extends EventType>(
   eventType: T,
-  callback: (payload: TimerEventPayloads[T]) => void
+  callback: (payload: EventPayloads[T]) => void
 ) {
   // Keep track of the latest callback
   const callbackRef = useRef(callback);
@@ -22,14 +22,14 @@ export function useEvent<T extends TimerEventType>(
   
   // Create a stable wrapper function
   const stableCallback = useCallback((payload: any) => {
-    callbackRef.current(payload as TimerEventPayloads[T]);
+    callbackRef.current(payload as EventPayloads[T]);
   }, []);
   
   useEffect(() => {
     console.log(`[useEvent] Subscribing to event: ${eventType}`);
     
     // Subscribe to the event with the stable callback
-    const unsubscribe = eventBus.on(eventType, stableCallback);
+    const unsubscribe = eventManager.on(eventType, stableCallback);
     
     // Return cleanup function
     return () => {

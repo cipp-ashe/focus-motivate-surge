@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
 
 /**
@@ -28,7 +28,7 @@ export const useTimerComplete = ({
     }
     
     // Emit completion event
-    eventBus.emit('timer:complete', { 
+    eventManager.emit('timer:complete', { 
       taskName, 
       metrics 
     });

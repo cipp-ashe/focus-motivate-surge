@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
 import { useMediaHandlers } from './MediaEventHandlers';
 import { useTaskUpdateHandler } from './TaskUpdateHandler';
@@ -41,14 +41,14 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   useEffect(() => {
     console.log('TaskEventListener: Setting up event listeners');
     
-    // Set up event listeners with the event bus
+    // Set up event listeners with the event manager
     const unsubscribers = [
-      eventBus.on('show-image', mediaHandlers.handleOpenImage),
-      eventBus.on('open-checklist', mediaHandlers.handleOpenChecklist),
-      eventBus.on('open-journal', mediaHandlers.handleOpenJournal),
-      eventBus.on('open-voice-recorder', mediaHandlers.handleOpenVoiceRecorder),
-      eventBus.on('task:update', processTaskUpdate),
-      eventBus.on('timer:set-task', handleTimerTaskSet),
+      eventManager.on('show-image', mediaHandlers.handleOpenImage),
+      eventManager.on('open-checklist', mediaHandlers.handleOpenChecklist),
+      eventManager.on('open-journal', mediaHandlers.handleOpenJournal),
+      eventManager.on('open-voice-recorder', mediaHandlers.handleOpenVoiceRecorder),
+      eventManager.on('task:update', processTaskUpdate),
+      eventManager.on('timer:set-task', handleTimerTaskSet),
     ];
     
     // Add direct DOM event listeners

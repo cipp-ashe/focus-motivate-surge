@@ -1,6 +1,6 @@
 
 import { useEffect, RefObject, useRef } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { TimerExpandedViewRef } from '@/types/timer';
 
 interface UseTimerEventListenersProps {
@@ -33,7 +33,7 @@ export const useTimerEventListeners = ({
     eventIdsRef.current = { initId, expandId, collapseId };
     
     // Handle timer initialization
-    const unsubInit = eventBus.on('timer:init', (payload) => {
+    const unsubInit = eventManager.on('timer:init', (payload) => {
       if (payload.taskName === taskName) {
         console.log(`Timer init for ${taskName} with duration: ${payload.duration} [${initId}]`);
         const minutes = Math.floor(payload.duration / 60);
@@ -42,7 +42,7 @@ export const useTimerEventListeners = ({
     });
     
     // Handle timer expand
-    const unsubExpand = eventBus.on('timer:expand', (payload) => {
+    const unsubExpand = eventManager.on('timer:expand', (payload) => {
       if (payload.taskName === taskName) {
         console.log(`Expanding timer for ${taskName} [${expandId}]`);
         setIsExpanded(true);
@@ -50,7 +50,7 @@ export const useTimerEventListeners = ({
     });
     
     // Handle timer collapse
-    const unsubCollapse = eventBus.on('timer:collapse', (payload) => {
+    const unsubCollapse = eventManager.on('timer:collapse', (payload) => {
       if (payload.taskName === taskName) {
         console.log(`Collapsing timer for ${taskName} [${collapseId}]`);
         setIsExpanded(false);

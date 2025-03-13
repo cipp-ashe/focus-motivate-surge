@@ -1,12 +1,12 @@
 
-import { useCallback, RefObject } from 'react';
+import { useCallback, MutableRefObject } from 'react';
 
 interface MediaHandlersProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
   onOpenChecklist: (taskId: string, taskName: string, items: any[]) => void;
   onOpenJournal: (taskId: string, taskName: string, entry: string) => void;
   onOpenVoiceRecorder: (taskId: string, taskName: string) => void;
-  isModalOpenRef: RefObject<boolean>;
+  isModalOpenRef: MutableRefObject<boolean>;
 }
 
 export const useMediaHandlers = ({

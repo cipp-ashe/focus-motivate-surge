@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface UseTimerMonitorProps {
   onComplete?: () => void;
@@ -69,11 +69,11 @@ export const useTimerMonitor = ({
     };
 
     // Subscribe to timer events
-    const unsubscribeTick = eventBus.on('timer:tick', handleTimerTick);
-    const unsubscribeStart = eventBus.on('timer:start', handleTimerStart);
-    const unsubscribePause = eventBus.on('timer:pause', handleTimerPause);
-    const unsubscribeResume = eventBus.on('timer:resume', handleTimerResume);
-    const unsubscribeComplete = eventBus.on('timer:complete', handleTimerComplete);
+    const unsubscribeTick = eventManager.on('timer:tick', handleTimerTick);
+    const unsubscribeStart = eventManager.on('timer:start', handleTimerStart);
+    const unsubscribePause = eventManager.on('timer:pause', handleTimerPause);
+    const unsubscribeResume = eventManager.on('timer:resume', handleTimerResume);
+    const unsubscribeComplete = eventManager.on('timer:complete', handleTimerComplete);
 
     return () => {
       unsubscribeTick();
