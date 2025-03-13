@@ -11,6 +11,7 @@ import { Save } from 'lucide-react';
 import { eventBus } from '@/lib/eventBus';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface JournalDialogProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   currentTask
 }) => {
   const [journalContent, setJournalContent] = useState('');
+  const [activeTab, setActiveTab] = useState<string>("write");
 
   // Set content when the current task changes
   useEffect(() => {
@@ -74,14 +76,35 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
           <DialogTitle>{currentTask?.taskName || 'Journal Entry'}</DialogTitle>
         </DialogHeader>
         
-        <div className="h-[60vh]">
-          <MarkdownEditor
-            value={journalContent}
-            onChange={(value) => setJournalContent(value || '')}
-            placeholder="Write your thoughts here..."
-            height="100%"
-          />
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="write">Write</TabsTrigger>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="write" className="h-[60vh]">
+            <MarkdownEditor
+              value={journalContent}
+              onChange={(value) => setJournalContent(value || '')}
+              placeholder="Write your thoughts here..."
+              height="100%"
+              preview="edit"
+            />
+          </TabsContent>
+          
+          <TabsContent value="preview" className="h-[60vh] overflow-y-auto p-4 border rounded-md">
+            {journalContent ? (
+              <div 
+                className="prose prose-sm dark:prose-invert max-w-none" 
+                dangerouslySetInnerHTML={{ __html: marked.parse(journalContent) }} 
+              />
+            ) : (
+              <p className="text-muted-foreground text-center py-4">
+                Nothing to preview yet. Start writing in the editor!
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
         
         <div className="pt-4">
           <Button onClick={saveJournal} className="w-full" type="button">

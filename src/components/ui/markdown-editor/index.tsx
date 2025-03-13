@@ -74,6 +74,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             onChange={onChange}
             onBlur={onBlur}
             hideToolbar
+            preview={preview}
             textareaProps={{
               placeholder,
               style: {
@@ -84,6 +85,11 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
               }
             }}
             className="w-md-editor-without-border h-full w-full border-none outline-none"
+            previewOptions={{
+              style: {
+                display: 'none' // Hide the preview part when in edit mode
+              }
+            }}
           />
         </div>
       </div>
