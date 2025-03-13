@@ -4,7 +4,8 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle 
+  DialogTitle,
+  DialogFooter
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -162,14 +163,14 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
           )}
         </div>
         
-        <div className="mt-6 flex justify-end gap-2">
+        <DialogFooter className="mt-6 flex justify-end gap-2">
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button onClick={saveChecklist}>
+          <Button onClick={saveChecklist} type="button">
             <Save className="h-4 w-4 mr-2" /> Save Checklist
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
