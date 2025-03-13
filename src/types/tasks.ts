@@ -1,3 +1,4 @@
+
 // Task type enum for type checking
 export type TaskType = 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote';
 
@@ -44,6 +45,14 @@ export interface Task {
   imageType?: 'screenshot' | 'image' | null;
   fileName?: string;
   capturedText?: string;
+  imageMetadata?: {
+    dimensions: {
+      width: number;
+      height: number;
+    };
+    fileSize: number;
+    format: string;
+  };
   
   // Journal task specific field
   journalEntry?: string;

@@ -6,6 +6,7 @@ import { CardContent } from "@/components/ui/card";
 import { Calendar, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { TimerMetrics } from "@/types/metrics";
+import { ScreenshotDetails } from "./ScreenshotDetails";
 
 interface ScreenshotContentProps {
   task: Task;
@@ -50,13 +51,19 @@ export const ScreenshotContent: React.FC<ScreenshotContentProps> = ({
         )}
       </div>
       
-      {isExpanded && task.capturedText && (
-        <div className="mt-3 mb-3 text-sm">
-          <h4 className="font-medium mb-1">Captured Text:</h4>
-          <p className="text-muted-foreground text-xs whitespace-pre-line">
-            {task.capturedText}
-          </p>
-        </div>
+      {isExpanded && (
+        <>
+          {task.capturedText && (
+            <div className="mt-3 mb-3 text-sm">
+              <h4 className="font-medium mb-1">Captured Text:</h4>
+              <p className="text-muted-foreground text-xs whitespace-pre-line">
+                {task.capturedText}
+              </p>
+            </div>
+          )}
+          
+          <ScreenshotDetails task={task} />
+        </>
       )}
       
       <div className="flex flex-wrap gap-1 mt-2">

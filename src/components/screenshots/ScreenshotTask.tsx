@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { eventBus } from "@/lib/eventBus";
 import { ScreenshotHeader } from "./components/ScreenshotHeader";
 import { ScreenshotContent } from "./components/ScreenshotContent";
 import { ScreenshotFooter } from "./components/ScreenshotFooter";
+import { extractImageMetadata } from "@/utils/imageUtils";
 
 interface ScreenshotTaskProps {
   task: Task;
@@ -17,6 +18,26 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(task.name);
   const [editedDescription, setEditedDescription] = useState(task.description || "");
+
+  useEffect(() => {
+    // Extract and update image metadata if it doesn't exist
+    const updateMetadata = async () => {
+      if (task.imageUrl && !task.imageMetadata) {
+        try {
+          const metadata = await extractImageMetadata(task.imageUrl);
+          
+          eventBus.emit('task:update', { 
+            taskId: task.id, 
+            updates: { imageMetadata: metadata }
+          });
+        } catch (error) {
+          console.error("Error extracting image metadata:", error);
+        }
+      }
+    };
+    
+    updateMetadata();
+  }, [task.id, task.imageUrl, task.imageMetadata]);
 
   const handleDelete = () => {
     eventBus.emit('task:delete', { taskId: task.id });
