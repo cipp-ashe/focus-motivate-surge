@@ -79,8 +79,8 @@ export const useTaskActionHandler = (
     if (action === 'open-journal') {
       console.log("Opening journal for task:", task.id);
       
-      // Make sure we set in-progress status if not already
-      if (task.status !== 'in-progress') {
+      // Make sure we set in-progress status if not already and if this is the first time opening the journal
+      if (task.status !== 'in-progress' && !task.journalEntry) {
         eventBus.emit('task:update', { 
           taskId: task.id, 
           updates: { status: 'in-progress' } 
@@ -112,7 +112,7 @@ export const useTaskActionHandler = (
     switch(task.taskType) {
       case 'timer':
         if (action === 'true') {
-          // Set task to in-progress first
+          // Set task to in-progress first - only for timer tasks
           if (task.status !== 'in-progress') {
             eventBus.emit('task:update', { 
               taskId: task.id, 
@@ -138,13 +138,7 @@ export const useTaskActionHandler = (
         
       case 'screenshot':
         if (action === 'true') {
-          // Mark as in-progress when opening these task types
-          if (task.status !== 'in-progress') {
-            eventBus.emit('task:update', { 
-              taskId: task.id, 
-              updates: { status: 'in-progress' } 
-            });
-          }
+          // Don't automatically mark as in-progress for screenshot tasks
           
           // Dispatch the event to open the screenshot dialog
           window.dispatchEvent(new CustomEvent('show-image', {
@@ -162,13 +156,7 @@ export const useTaskActionHandler = (
         
       case 'checklist':
         if (action === 'true') {
-          // Mark as in-progress when opening these task types
-          if (task.status !== 'in-progress') {
-            eventBus.emit('task:update', { 
-              taskId: task.id, 
-              updates: { status: 'in-progress' } 
-            });
-          }
+          // Don't automatically mark as in-progress for checklist tasks
           
           // Dispatch the event to open the checklist dialog
           window.dispatchEvent(new CustomEvent('open-checklist', {
@@ -186,13 +174,7 @@ export const useTaskActionHandler = (
         
       case 'voicenote':
         if (action === 'true') {
-          // Mark as in-progress when opening these task types
-          if (task.status !== 'in-progress') {
-            eventBus.emit('task:update', { 
-              taskId: task.id, 
-              updates: { status: 'in-progress' } 
-            });
-          }
+          // Don't automatically mark as in-progress for voicenote tasks
           
           // Dispatch the event to open the voicenote dialog
           window.dispatchEvent(new CustomEvent('open-voice-recorder', {
