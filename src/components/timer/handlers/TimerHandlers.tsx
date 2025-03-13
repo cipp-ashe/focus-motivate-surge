@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TIMER_CONSTANTS } from "@/types/timer";
 
@@ -23,6 +23,7 @@ interface TimerHandlersProps {
   updateMetrics: (metrics: Partial<TimerStateMetrics>) => void;
   setPauseTimeLeft: (timeLeft: number | null) => void;
   pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | null>;
+  timeLeft: number; // Add timeLeft to props
 }
 
 export const useTimerHandlers = ({
@@ -44,15 +45,42 @@ export const useTimerHandlers = ({
   updateMetrics,
   setPauseTimeLeft,
   pauseTimerRef,
+  timeLeft,
 }: TimerHandlersProps) => {
   // Handle toggle button click
   const handleToggle = useCallback(() => {
+    console.log(`Toggle timer for ${taskName}. Current state: isRunning=${isRunning}`);
+    
     if (isRunning) {
       pause();
+      // Emit pause event
+      eventManager.emit('timer:pause', { 
+        taskName, 
+        timeLeft,
+        metrics 
+      });
     } else {
       start();
+      // Emit start event
+      eventManager.emit('timer:start', { 
+        taskName, 
+        duration: timeLeft,
+        currentTime: Date.now()
+      });
+      
+      // Start sending tick events
+      let tickInterval = setInterval(() => {
+        eventManager.emit('timer:tick', {
+          taskName,
+          remaining: timeLeft,
+          timeLeft
+        });
+      }, 1000);
+      
+      // Clean up interval if component unmounts
+      return () => clearInterval(tickInterval);
     }
-  }, [isRunning, pause, start]);
+  }, [isRunning, pause, start, taskName, timeLeft, metrics]);
 
   // Handle add time button click - explicitly accepting minutes parameter
   const handleAddTime = useCallback(
@@ -65,15 +93,30 @@ export const useTimerHandlers = ({
       if (onAddTime) {
         onAddTime(minutes);
       }
+      
+      // Emit event for adding time
+      eventManager.emit('timer:metrics-update', {
+        taskName,
+        metrics: {
+          ...metrics,
+          extensionTime: (metrics.extensionTime || 0) + (minutes * 60)
+        }
+      });
     },
-    [addTime, onAddTime]
+    [addTime, onAddTime, taskName, metrics]
   );
 
   // Handle timer reset
   const handleReset = useCallback(async () => {
     await reset();
     setShowConfirmation(false);
-  }, [reset, setShowConfirmation]);
+    
+    // Emit reset event
+    eventManager.emit('timer:reset', {
+      taskName,
+      duration: metrics.expectedTime
+    });
+  }, [reset, setShowConfirmation, taskName, metrics.expectedTime]);
 
   // Handle timer completion
   const handleComplete = useCallback(async () => {
@@ -109,7 +152,7 @@ export const useTimerHandlers = ({
       await completeTimer();
       
       // Emit completion event for integration with other components
-      eventBus.emit('timer:complete', { 
+      eventManager.emit('timer:complete', { 
         taskName, 
         metrics: calculatedMetrics 
       });
@@ -161,7 +204,14 @@ export const useTimerHandlers = ({
     
     // Actually pause the timer
     pause();
-  }, [pause, setPauseTimeLeft, metrics.pausedTimeLeft, metrics.pauseCount, updateMetrics]);
+    
+    // Emit pause event
+    eventManager.emit('timer:pause', {
+      taskName,
+      timeLeft,
+      metrics
+    });
+  }, [pause, setPauseTimeLeft, metrics, updateMetrics, taskName, timeLeft]);
 
   return {
     handleToggle,

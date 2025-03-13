@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { TimerProps } from "@/types/timer";
 import { TimerExpandedViewRef } from "@/types/timer";
 import { useTimerHandlers } from "../handlers/TimerHandlers";
@@ -11,6 +11,7 @@ import { useTimerState } from "@/hooks/timer/useTimerState";
 import { useTimerActions } from '@/hooks/timer/useTimerActions';
 import { useTimerComplete } from "../state/TimerState";
 import { TimerActionProps } from "@/hooks/timer/types/UseTimerTypes";
+import { eventManager } from "@/lib/events/EventManager";
 
 export const useTimerInitialization = ({
   duration,
@@ -60,7 +61,7 @@ export const useTimerInitialization = ({
     pauseTimer, 
     extendTimer, 
     resetTimer, 
-    completeTimer: completeTimerAction, 
+    completeTimer: completeTimerAction,
     updateMetrics: updateMetricsAction
   } = useTimerActions(timerActionProps);
 
@@ -97,10 +98,25 @@ export const useTimerInitialization = ({
     expandedViewRef,
   });
 
+  // Emit an initialization event when the component mounts
+  useEffect(() => {
+    console.log(`Initializing timer for task: ${taskName} with duration: ${duration}`);
+    eventManager.emit('timer:init', {
+      taskName,
+      duration
+    });
+    
+    // Clean up on unmount
+    return () => {
+      console.log(`Cleaning up timer for task: ${taskName}`);
+    };
+  }, [taskName, duration]);
+
   // Initialize handlers with consistent function signatures
   const timerHandlers = useTimerHandlers({
     taskName,
     isRunning,
+    timeLeft, // Pass timeLeft to handlers
     start: startTimer,
     pause: pauseTimer,
     addTime: extendTimer,
@@ -127,10 +143,29 @@ export const useTimerInitialization = ({
 
   // Monitor timer state
   useTimerMonitor({
-    timeLeft,
-    isRunning,
-    metrics,
-    componentName: 'Timer'
+    onTick: (seconds) => {
+      console.log(`Timer tick: ${seconds}s remaining for ${taskName}`);
+      updateTimeLeft(seconds);
+      
+      // Emit tick event
+      eventManager.emit('timer:tick', {
+        taskName,
+        remaining: seconds,
+        timeLeft: seconds
+      });
+    },
+    onComplete: () => {
+      timerHandlers.handleComplete();
+    },
+    onStart: (task, duration) => {
+      console.log(`Timer started for ${task} with duration ${duration}`);
+    },
+    onPause: () => {
+      console.log(`Timer paused for ${taskName}`);
+    },
+    onResume: () => {
+      console.log(`Timer resumed for ${taskName}`);
+    }
   });
 
   // Get view props

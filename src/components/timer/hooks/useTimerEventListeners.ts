@@ -29,8 +29,10 @@ export const useTimerEventListeners = ({
     const initId = `timer:init:${taskName}:${Date.now()}`;
     const expandId = `timer:expand:${taskName}:${Date.now()}`;
     const collapseId = `timer:collapse:${taskName}:${Date.now()}`;
+    const startId = `timer:start:${taskName}:${Date.now()}`;
+    const tickId = `timer:tick:${taskName}:${Date.now()}`;
     
-    eventIdsRef.current = { initId, expandId, collapseId };
+    eventIdsRef.current = { initId, expandId, collapseId, startId, tickId };
     
     // Handle timer initialization
     const unsubInit = eventManager.on('timer:init', (payload) => {
@@ -60,12 +62,28 @@ export const useTimerEventListeners = ({
       }
     });
     
+    // Handle timer start - explicitly log when timer starts
+    const unsubStart = eventManager.on('timer:start', (payload) => {
+      if (payload.taskName === taskName) {
+        console.log(`Starting timer for ${taskName} with duration: ${payload.duration} [${startId}]`);
+      }
+    });
+    
+    // Handle timer tick - log tick events
+    const unsubTick = eventManager.on('timer:tick', (payload) => {
+      if (payload.taskName === taskName) {
+        console.log(`Timer tick for ${taskName}: ${payload.remaining}s remaining [${tickId}]`);
+      }
+    });
+    
     // Clean up all listeners when the component unmounts or taskName changes
     return () => {
       console.log(`Cleaning up timer event listeners for task: ${taskName}`, eventIdsRef.current);
       unsubInit();
       unsubExpand();
       unsubCollapse();
+      unsubStart();
+      unsubTick();
     };
   }, [taskName, setInternalMinutes, setIsExpanded, expandedViewRef]);
 };
