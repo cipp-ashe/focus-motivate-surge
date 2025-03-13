@@ -55,7 +55,12 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
   };
 
   return (
-    <Select value={value} onValueChange={handleChange} open={isOpen} onOpenChange={setIsOpen}>
+    <Select 
+      value={value} 
+      onValueChange={handleChange} 
+      open={isOpen} 
+      onOpenChange={setIsOpen}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select task type" />
       </SelectTrigger>

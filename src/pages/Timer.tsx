@@ -174,13 +174,8 @@ const TimerPage: React.FC<TimerPageProps> = () => {
   const TimerSectionComponent = (
     <div className="w-full h-full">
       {selectedTask ? (
-        <Timer
-          key={timerKey}
-          taskName={selectedTask.name}
-          duration={selectedTask.duration || 1500}
-          onComplete={(metrics) => handleTimerComplete(selectedTask.id, metrics)}
-          onAddTime={() => {}} // This was causing the type error, fixed to match expected signature
-          onDurationChange={(minutes) => handleDurationChange(minutes)}
+        <TimerSection 
+          selectedTask={selectedTask}
           favorites={favorites}
           setFavorites={setFavorites}
         />
