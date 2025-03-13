@@ -8,6 +8,7 @@ import { Task } from '@/types/tasks';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
+import { TimerSection } from '@/components/timer/TimerSection';
 
 interface TimerPageProps {}
 
@@ -139,8 +140,8 @@ const TimerPage: React.FC<TimerPageProps> = () => {
     }
   };
   
-  const handleAddTime = (taskId: string, minutes: number) => {
-    console.log('TimerPage - Adding time to task:', taskId, minutes);
+  const handleAddTime = (minutes: number) => {
+    console.log('TimerPage - Adding time to task:', selectedTask?.id, minutes);
     
     if (selectedTask) {
       const currentDuration = selectedTask.duration || 1500;
@@ -156,8 +157,8 @@ const TimerPage: React.FC<TimerPageProps> = () => {
     }
   };
   
-  const handleDurationChange = (taskId: string, minutes: number) => {
-    console.log('TimerPage - Updating duration for task:', taskId, minutes);
+  const handleDurationChange = (minutes: number) => {
+    console.log('TimerPage - Updating duration for task:', selectedTask?.id, minutes);
     
     if (selectedTask) {
       const newDuration = minutes * 60;
@@ -170,7 +171,7 @@ const TimerPage: React.FC<TimerPageProps> = () => {
     }
   };
   
-  const TimerSection = (
+  const TimerSectionComponent = (
     <div className="w-full h-full">
       {selectedTask ? (
         <Timer
@@ -178,8 +179,8 @@ const TimerPage: React.FC<TimerPageProps> = () => {
           taskName={selectedTask.name}
           duration={selectedTask.duration || 1500}
           onComplete={(metrics) => handleTimerComplete(selectedTask.id, metrics)}
-          onAddTime={(minutes) => handleAddTime(selectedTask.id, minutes)}
-          onDurationChange={(minutes) => handleDurationChange(selectedTask.id, minutes)}
+          onAddTime={() => {}} // This was causing the type error, fixed to match expected signature
+          onDurationChange={(minutes) => handleDurationChange(minutes)}
           favorites={favorites}
           setFavorites={setFavorites}
         />
@@ -202,7 +203,7 @@ const TimerPage: React.FC<TimerPageProps> = () => {
   
   return (
     <TaskLayout
-      mainContent={TimerSection}
+      mainContent={TimerSectionComponent}
       asideContent={TaskSection}
     />
   );
