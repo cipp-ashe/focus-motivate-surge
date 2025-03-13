@@ -3,10 +3,13 @@ import React from "react";
 import { Task } from "@/types/tasks";
 import { Badge } from "@/components/ui/badge";
 import { CardContent } from "@/components/ui/card";
-import { Calendar, Tag } from "lucide-react";
+import { Calendar, Download, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { TimerMetrics } from "@/types/metrics";
 import { ScreenshotDetails } from "./ScreenshotDetails";
+import { Button } from "@/components/ui/button";
+import { downloadContent } from "@/utils/downloadUtils";
+import { toast } from "sonner";
 
 interface ScreenshotContentProps {
   task: Task;
@@ -32,6 +35,31 @@ export const ScreenshotContent: React.FC<ScreenshotContentProps> = ({
   const metrics = task.metrics as TimerMetrics;
   const completionDate = task.completedAt || metrics?.completionDate;
 
+  const handleDownload = async () => {
+    if (!task.imageUrl) {
+      toast.error("No image available to download");
+      return;
+    }
+
+    try {
+      // Generate a filename based on the task name and date
+      const timestamp = format(new Date(task.createdAt), "yyyy-MM-dd-HHmmss");
+      const sanitizedName = task.name.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+      const filename = `screenshot-${sanitizedName}-${timestamp}.${task.imageMetadata?.format?.toLowerCase() || 'png'}`;
+      
+      // Fetch the image as blob
+      const response = await fetch(task.imageUrl);
+      const blob = await response.blob();
+      const content = await blob.text();
+      
+      // Download the file using the utility function
+      await downloadContent(content, filename, blob.type);
+    } catch (error) {
+      console.error("Error downloading screenshot:", error);
+      toast.error("Failed to download screenshot");
+    }
+  };
+
   return (
     <CardContent className="p-4 pt-3">
       <div className="relative aspect-video bg-muted rounded-md overflow-hidden mb-3">
@@ -48,6 +76,18 @@ export const ScreenshotContent: React.FC<ScreenshotContentProps> = ({
           <div className="flex items-center justify-center h-full text-muted-foreground">
             No image
           </div>
+        )}
+        
+        {task.imageUrl && (
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+            onClick={handleDownload}
+          >
+            <Download className="h-4 w-4 mr-1" />
+            Download
+          </Button>
         )}
       </div>
       
