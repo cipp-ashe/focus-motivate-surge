@@ -33,8 +33,9 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   const [newItemText, setNewItemText] = useState('');
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentTask) {
+      console.log('ChecklistDialog: Setting items from currentTask:', currentTask.items);
       setChecklistItems(Array.isArray(currentTask.items) ? currentTask.items : []);
     }
   }, [currentTask]);
@@ -87,6 +88,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
       toast.success(`Saved checklist for: ${currentTask.taskName}`);
       
       // Always close the dialog after saving
+      console.log('ChecklistDialog: Closing dialog after save');
       onOpenChange(false);
     }
   };
@@ -98,6 +100,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   };
 
   const handleClose = () => {
+    console.log('ChecklistDialog: Manually closing dialog');
     onOpenChange(false);
   };
 

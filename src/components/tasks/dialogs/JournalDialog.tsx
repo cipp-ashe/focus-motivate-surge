@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
@@ -36,6 +37,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
 
   useEffect(() => {
     if (currentTask) {
+      console.log('JournalDialog: Setting content from currentTask:', currentTask);
       setJournalContent(currentTask.entry || '');
       
       // For new entries, start in edit mode with writing tab active
@@ -68,6 +70,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       toast.success(`Saved journal entry for: ${currentTask.taskName}`);
       
       // Always close the dialog after saving
+      console.log('JournalDialog: Closing dialog after save');
       onOpenChange(false);
     }
   };
@@ -100,6 +103,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   };
   
   const handleClose = () => {
+    console.log('JournalDialog: Manually closing dialog');
     onOpenChange(false);
   };
 
@@ -111,7 +115,10 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   return (
     <Dialog 
       open={isOpen} 
-      onOpenChange={onOpenChange}
+      onOpenChange={(open) => {
+        console.log('JournalDialog: onOpenChange called with:', open);
+        onOpenChange(open);
+      }}
     >
       <DialogContent className="sm:max-w-xl">
         <DialogHeader className="flex justify-between items-center">

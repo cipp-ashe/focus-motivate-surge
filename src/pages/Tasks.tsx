@@ -94,14 +94,12 @@ const TaskPage = () => {
       
       <TaskManager dialogOpeners={taskDialogOpeners} />
       
-      {/* Make sure the ChecklistDialog component receives the correct props */}
       <ChecklistDialog 
         isOpen={isChecklistOpen}
         onOpenChange={setIsChecklistOpen}
         currentTask={currentChecklistTask}
       />
       
-      {/* Make sure the JournalDialog component receives the correct props */}
       <JournalDialog 
         isOpen={isJournalOpen}
         onOpenChange={setIsJournalOpen}
