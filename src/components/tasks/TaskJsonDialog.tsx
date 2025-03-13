@@ -1,9 +1,11 @@
+
 import type { Task } from "@/types/tasks";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useIsMobile } from "@/hooks/ui/useIsMobile";
+import { X } from "lucide-react";
 
 interface TaskJsonDialogProps {
   tasks: Task[];
@@ -19,6 +21,10 @@ export const TaskJsonDialog = ({ tasks, open, onOpenChange }: TaskJsonDialogProp
     const jsonContent = JSON.stringify(tasks, null, 2);
     navigator.clipboard.writeText(jsonContent);
     toast.success('JSON copied to clipboard');
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
   };
 
   // Calculate max width based on screen size
@@ -44,8 +50,17 @@ export const TaskJsonDialog = ({ tasks, open, onOpenChange }: TaskJsonDialogProp
           margin: isMobile ? '16px' : undefined
         }}
       >
-        <DialogHeader>
+        <DialogHeader className="flex justify-between items-center">
           <DialogTitle>Task Metrics JSON Data</DialogTitle>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleClose}
+            className="absolute right-4 top-4"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
         </DialogHeader>
         <div className="relative flex-1 min-h-0">
           <pre className="bg-muted p-4 rounded-lg overflow-auto" style={{ maxHeight: isMobile ? 'calc(100vh - 200px)' : '60vh' }}>
@@ -60,6 +75,11 @@ export const TaskJsonDialog = ({ tasks, open, onOpenChange }: TaskJsonDialogProp
             size="sm"
           >
             Copy JSON
+          </Button>
+        </div>
+        <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={handleClose}>
+            Close
           </Button>
         </div>
       </DialogContent>

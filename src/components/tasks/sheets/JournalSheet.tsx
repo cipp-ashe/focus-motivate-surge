@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import { eventBus } from '@/lib/eventBus';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ export const JournalSheet: React.FC<JournalSheetProps> = ({
   currentTask
 }) => {
   const [journalContent, setJournalContent] = useState('');
+  const isNewEntry = currentTask?.entry === '';
 
   // Set content when the current task changes
   useEffect(() => {
@@ -59,27 +60,48 @@ export const JournalSheet: React.FC<JournalSheetProps> = ({
     onOpenChange(open);
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
+  // Title text based on whether it's a new or existing entry
+  const sheetTitle = isNewEntry 
+    ? `New Journal Entry: ${currentTask?.taskName}` 
+    : `${currentTask?.taskName} - Journal Entry`;
+
   return (
     <Sheet 
       open={isOpen} 
       onOpenChange={handleSheetOpenChange}
     >
       <SheetContent className="w-full md:max-w-xl overflow-y-auto p-0" side="right">
-        <SheetHeader className="p-4 pb-2 border-b">
-          <SheetTitle>{currentTask?.taskName || 'Journal Entry'}</SheetTitle>
+        <SheetHeader className="p-4 pb-2 border-b flex justify-between items-center relative">
+          <SheetTitle>{sheetTitle}</SheetTitle>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleClose}
+            className="absolute right-4 top-4"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
         </SheetHeader>
         
         <div className="h-[calc(100vh-10rem)]">
           <MarkdownEditor
             value={journalContent}
             onChange={(value) => setJournalContent(value || '')}
-            placeholder="Write your thoughts here..."
+            placeholder={isNewEntry ? "What are your thoughts about this task?" : "Write your thoughts here..."}
             height="100%"
           />
         </div>
         
-        <div className="p-4 border-t">
-          <Button onClick={saveJournal} className="w-full" type="button">
+        <div className="p-4 border-t flex justify-end gap-2">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button onClick={saveJournal} type="button">
             <Save className="h-4 w-4 mr-2" /> Save Journal Entry
           </Button>
         </div>

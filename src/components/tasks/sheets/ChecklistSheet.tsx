@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -99,14 +99,27 @@ export const ChecklistSheet: React.FC<ChecklistSheetProps> = ({
     }
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
   return (
     <Sheet 
       open={isOpen} 
       onOpenChange={handleSheetOpenChange}
     >
       <SheetContent className="w-full md:max-w-md overflow-y-auto" side="right">
-        <SheetHeader className="mb-4">
+        <SheetHeader className="mb-4 flex justify-between items-center relative">
           <SheetTitle>{currentTask?.taskName || 'Checklist'}</SheetTitle>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleClose}
+            className="absolute right-4 top-0"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
         </SheetHeader>
         
         <div className="flex gap-2 mb-6">
@@ -155,7 +168,10 @@ export const ChecklistSheet: React.FC<ChecklistSheetProps> = ({
           )}
         </div>
         
-        <div className="mt-6">
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
           <Button onClick={saveChecklist} className="w-full" type="button">
             <Save className="h-4 w-4 mr-2" /> Save Checklist
           </Button>

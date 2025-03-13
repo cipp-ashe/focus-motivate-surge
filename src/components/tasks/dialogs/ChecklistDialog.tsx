@@ -96,11 +96,24 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
     }
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+        <DialogHeader className="flex justify-between items-center">
           <DialogTitle>{currentTask?.taskName || 'Checklist'}</DialogTitle>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleClose} 
+            className="absolute right-4 top-4"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
         </DialogHeader>
         
         <div className="flex gap-2 mb-6">
@@ -149,8 +162,11 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
           )}
         </div>
         
-        <div className="mt-6">
-          <Button onClick={saveChecklist} className="w-full" type="button">
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button onClick={saveChecklist} type="button">
             <Save className="h-4 w-4 mr-2" /> Save Checklist
           </Button>
         </div>
