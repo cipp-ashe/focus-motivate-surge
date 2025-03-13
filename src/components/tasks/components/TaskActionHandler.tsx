@@ -60,13 +60,15 @@ export const useTaskActionHandler = (
           toast.success(`Dismissed task: ${task.name}`, { duration: 2000 });
         }
       } else {
-        // For other statuses, just update the task
+        // For other statuses, directly update the task with the new status
+        console.log(`Emitting task:update event for ${task.id} with status ${newStatus}`);
         eventBus.emit('task:update', { 
           taskId: task.id, 
           updates: { status: newStatus } 
         });
         toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
       }
+      return; // Early return to ensure event doesn't propagate further
     }
     
     // Handle habit-related tasks

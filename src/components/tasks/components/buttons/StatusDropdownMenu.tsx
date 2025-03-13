@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { eventBus } from "@/lib/eventBus";
 
 interface StatusDropdownMenuProps {
   task: Task;
@@ -40,6 +41,26 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
 
   const statusInfo = getStatusInfo(task.status);
 
+  // Debugging function to ensure status changes are working
+  const handleStatusChange = (e: React.MouseEvent<HTMLElement>, newStatus: TaskStatus) => {
+    console.log(`StatusDropdownMenu: Changing status of task ${task.id} to ${newStatus}`);
+    
+    // First call the parent handler
+    onTaskAction(e, `status-${newStatus}`);
+    
+    // As a fallback, also emit the event directly
+    if (task && task.id) {
+      eventBus.emit('task:update', {
+        taskId: task.id,
+        updates: { status: newStatus }
+      });
+    }
+    
+    // Prevent the click from propagating to parent elements
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -47,50 +68,53 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
           variant="outline"
           size="sm"
           className={`h-7 px-2 flex items-center gap-1 text-xs ${statusInfo.className}`}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent triggers of parent elements
+          }}
         >
           {statusInfo.icon}
           <span>{statusInfo.label}</span>
           <ChevronDown className="h-3 w-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-36 bg-background">
+      <DropdownMenuContent align="end" className="w-36 bg-popover z-50 shadow-md border border-border/30">
         <DropdownMenuItem
-          onClick={(e) => onTaskAction(e, 'status-pending')}
+          onClick={(e) => handleStatusChange(e, 'pending')}
           className="text-xs cursor-pointer"
         >
           <Square className="h-3.5 w-3.5 mr-2" />
           Not Started
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={(e) => onTaskAction(e, 'status-started')}
+          onClick={(e) => handleStatusChange(e, 'started')}
           className="text-xs cursor-pointer"
         >
           <ArrowRight className="h-3.5 w-3.5 mr-2" />
           Started
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={(e) => onTaskAction(e, 'status-in-progress')}
+          onClick={(e) => handleStatusChange(e, 'in-progress')}
           className="text-xs cursor-pointer"
         >
           <Play className="h-3.5 w-3.5 mr-2" />
           In Progress
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={(e) => onTaskAction(e, 'status-delayed')}
+          onClick={(e) => handleStatusChange(e, 'delayed')}
           className="text-xs cursor-pointer"
         >
           <AlertTriangle className="h-3.5 w-3.5 mr-2" />
           Delayed
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={(e) => onTaskAction(e, 'status-completed')}
+          onClick={(e) => handleStatusChange(e, 'completed')}
           className="text-xs cursor-pointer text-green-600"
         >
           <Check className="h-3.5 w-3.5 mr-2" />
           Complete
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={(e) => onTaskAction(e, 'status-dismissed')}
+          onClick={(e) => handleStatusChange(e, 'dismissed')}
           className="text-xs cursor-pointer text-red-500"
         >
           <X className="h-3.5 w-3.5 mr-2" />

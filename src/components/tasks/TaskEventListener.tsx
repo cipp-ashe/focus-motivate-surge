@@ -51,10 +51,7 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
     // Handler for task updates - making it a one-way process to avoid loops
     const handleTaskUpdate = (data: { taskId: string; updates: any }) => {
       console.log('TaskEventListener: Task update event received', data);
-      // Only forward task updates that don't originate from dialogs
-      if (!data.updates.journalEntry && !data.updates.checklistItems) {
-        onTaskUpdate(data);
-      }
+      onTaskUpdate(data);
     };
     
     // Handler for timer task selection - Only navigate to timer for timer tasks
