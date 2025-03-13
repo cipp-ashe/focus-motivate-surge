@@ -74,11 +74,11 @@ const TaskManager: React.FC<TaskManagerProps> = ({ dialogOpeners }) => {
       eventBus.on('task:reload', handleForceReload),
     ];
     
-    const unsubManager = eventManager.subscribe({
-      'task:create': handleTaskCreate,
-      'task:update': handleTaskUpdate,
-      'task:delete': handleTaskDelete,
-    });
+    // We need to change this since eventManager.subscribe doesn't exist
+    // Register event handlers individually with eventManager
+    const unregisterCreate = eventManager.on('task:create', handleTaskCreate);
+    const unregisterUpdate = eventManager.on('task:update', handleTaskUpdate);
+    const unregisterDelete = eventManager.on('task:delete', handleTaskDelete);
     
     // Force update events
     const handleForceUpdate = () => {
@@ -90,7 +90,10 @@ const TaskManager: React.FC<TaskManagerProps> = ({ dialogOpeners }) => {
     // Cleanup listeners
     return () => {
       unsubscribers.forEach(unsub => unsub());
-      unsubManager();
+      // Clean up eventManager listeners
+      unregisterCreate();
+      unregisterUpdate();
+      unregisterDelete();
       window.removeEventListener('force-task-update', handleForceUpdate);
     };
   }, []);
@@ -100,9 +103,17 @@ const TaskManager: React.FC<TaskManagerProps> = ({ dialogOpeners }) => {
   return (
     <div className="space-y-4">
       <div className="p-4 bg-card rounded-lg border">
-        <TaskInput onTaskAdd={(task) => {
-          eventBus.emit('task:create', task);
-        }} />
+        <TaskInput 
+          onTaskAdd={(task) => {
+            eventBus.emit('task:create', task);
+          }}
+          onTasksAdd={(tasks) => {
+            // Add this missing prop handler
+            tasks.forEach(task => {
+              eventBus.emit('task:create', task);
+            });
+          }} 
+        />
       </div>
       
       <div className="bg-card rounded-lg border min-h-[60vh]">
