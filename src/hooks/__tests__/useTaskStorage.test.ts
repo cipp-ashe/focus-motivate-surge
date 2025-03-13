@@ -1,3 +1,4 @@
+
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTaskStorage } from '../useTaskStorage';
 import { eventBus } from '@/lib/eventBus';
@@ -6,6 +7,9 @@ describe('useTaskStorage', () => {
   beforeEach(() => {
     localStorage.clear();
     eventBus.clear();
+    
+    // Mock the window.dispatchEvent
+    window.dispatchEvent = jest.fn();
   });
 
   it('should initialize with empty tasks', () => {

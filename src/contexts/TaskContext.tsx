@@ -6,10 +6,10 @@ import type { TaskState } from '@/types/tasks';
 const TaskContext = createContext<TaskState | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const taskStorage = useTaskStorage();
+  const taskState = useTaskStorage();
   
   return (
-    <TaskContext.Provider value={taskStorage}>
+    <TaskContext.Provider value={taskState}>
       {children}
     </TaskContext.Provider>
   );
