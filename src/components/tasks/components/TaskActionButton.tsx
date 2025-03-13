@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap, 
-  ChevronDown, Square, Play, X, Check
+  ChevronDown, Square, Play, X, Check, AlertTriangle, ArrowRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -70,8 +70,12 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
       switch (status) {
         case 'pending':
           return { label: 'Not Started', icon: <Square className="h-3.5 w-3.5 mr-1" />, className: "bg-gray-500/10 hover:bg-gray-500/20 text-gray-500" };
+        case 'started':
+          return { label: 'Started', icon: <ArrowRight className="h-3.5 w-3.5 mr-1" />, className: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-500" };
         case 'in-progress':
           return { label: 'In Progress', icon: <Play className="h-3.5 w-3.5 mr-1" />, className: "bg-amber-500/10 hover:bg-amber-500/20 text-amber-500" };
+        case 'delayed':
+          return { label: 'Delayed', icon: <AlertTriangle className="h-3.5 w-3.5 mr-1" />, className: "bg-orange-500/10 hover:bg-orange-500/20 text-orange-500" };
         case 'completed':
           return { label: 'Complete', icon: <Check className="h-3.5 w-3.5 mr-1" />, className: "bg-green-500/10 hover:bg-green-500/20 text-green-500" };
         case 'dismissed':
@@ -105,11 +109,25 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
             Not Started
           </DropdownMenuItem>
           <DropdownMenuItem
+            onClick={(e) => onTaskAction(e, 'status-started')}
+            className="text-xs cursor-pointer"
+          >
+            <ArrowRight className="h-3.5 w-3.5 mr-2" />
+            Started
+          </DropdownMenuItem>
+          <DropdownMenuItem
             onClick={(e) => onTaskAction(e, 'status-in-progress')}
             className="text-xs cursor-pointer"
           >
             <Play className="h-3.5 w-3.5 mr-2" />
             In Progress
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={(e) => onTaskAction(e, 'status-delayed')}
+            className="text-xs cursor-pointer"
+          >
+            <AlertTriangle className="h-3.5 w-3.5 mr-2" />
+            Delayed
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={(e) => onTaskAction(e, 'status-completed')}

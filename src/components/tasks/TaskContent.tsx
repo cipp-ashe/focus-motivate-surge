@@ -38,12 +38,22 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   const createdDate = new Date(task.createdAt);
   const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true });
   
-  // Get status indicator (for backward compatibility - now mostly handled by the dropdown)
+  // Get status indicator for the task status
   const getStatusIndicator = () => {
     if (task.status === 'in-progress') {
       return {
         className: "ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800",
         text: "In Progress"
+      };
+    } else if (task.status === 'started') {
+      return {
+        className: "ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800",
+        text: "Started"
+      };
+    } else if (task.status === 'delayed') {
+      return {
+        className: "ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800",
+        text: "Delayed"
       };
     }
     return null;
@@ -57,7 +67,9 @@ export const TaskContent: React.FC<TaskContentProps> = ({
         <div className="min-w-0 flex-1">
           <h3 className={cn(
             "text-base font-medium leading-6 text-primary",
-            task.status === 'in-progress' && "text-amber-600"
+            task.status === 'in-progress' && "text-amber-600",
+            task.status === 'started' && "text-blue-600",
+            task.status === 'delayed' && "text-orange-600"
           )}>
             {task.name}
             

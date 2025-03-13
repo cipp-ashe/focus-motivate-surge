@@ -26,7 +26,7 @@ export const useTaskActionHandler = (
     
     // Handle status changes via the dropdown
     if (action?.startsWith('status-')) {
-      const newStatus = action.replace('status-', '') as 'pending' | 'in-progress' | 'completed' | 'dismissed';
+      const newStatus = action.replace('status-', '') as 'pending' | 'started' | 'in-progress' | 'delayed' | 'completed' | 'dismissed';
       console.log(`Changing task ${task.id} status to: ${newStatus}`);
       
       if (newStatus === 'completed') {
@@ -62,8 +62,7 @@ export const useTaskActionHandler = (
         });
         toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`);
       }
-      // Return early to prevent task-specific action handling
-      return;
+      return; // Exit early after handling the status change
     }
     
     // Handle habit-related tasks
@@ -76,34 +75,35 @@ export const useTaskActionHandler = (
       return;
     }
     
-    // If this is a journal task, handle it properly
-    if (task.taskType === 'journal' && action === 'open-journal') {
-      // Always dispatch event first to ensure UI is updated
-      console.log("Dispatching open-journal event for task:", task.id);
+    // Handle journal tasks - specific handling for open-journal action
+    if (action === 'open-journal') {
+      console.log("Opening journal for task:", task.id);
       
-      if (onOpenTaskDialog) {
-        // Make sure we set in-progress status
-        if (task.status !== 'in-progress') {
-          eventBus.emit('task:update', { 
-            taskId: task.id, 
-            updates: { status: 'in-progress' } 
-          });
-        }
-        
-        window.dispatchEvent(new CustomEvent('open-journal', {
-          detail: {
-            taskId: task.id,
-            taskName: task.name,
-            entry: task.journalEntry || ''
-          }
-        }));
-        
-        console.log("Opening journal dialog for task:", task.id);
-        onOpenTaskDialog();
-      } else {
+      if (!onOpenTaskDialog) {
         console.error('No dialog opener provided for journal task:', task.id);
         toast.error('Unable to open journal editor');
+        return;
       }
+      
+      // Make sure we set in-progress status if not already
+      if (task.status !== 'in-progress') {
+        eventBus.emit('task:update', { 
+          taskId: task.id, 
+          updates: { status: 'in-progress' } 
+        });
+      }
+      
+      // Dispatch the event to open the journal dialog
+      window.dispatchEvent(new CustomEvent('open-journal', {
+        detail: {
+          taskId: task.id,
+          taskName: task.name,
+          entry: task.journalEntry || ''
+        }
+      }));
+      
+      console.log("Opening journal dialog for task:", task.id);
+      onOpenTaskDialog();
       return;
     }
     
@@ -127,6 +127,14 @@ export const useTaskActionHandler = (
         }
         break;
         
+      case 'journal':
+        if (action === 'true') {
+          // The journal handling is now done in the open-journal action block above
+          // This redirects to that handler
+          handleTaskAction(e, 'open-journal');
+        }
+        break;
+        
       case 'screenshot':
         if (action === 'true') {
           // Mark as in-progress when opening these task types
@@ -140,6 +148,16 @@ export const useTaskActionHandler = (
           // Open the appropriate dialog
           if (onOpenTaskDialog) {
             console.log(`Opening screenshot dialog for task:`, task.id);
+            
+            // Dispatch the event to open the screenshot dialog
+            window.dispatchEvent(new CustomEvent('show-image', {
+              detail: {
+                taskId: task.id,
+                taskName: task.name,
+                imageUrl: task.imageUrl || ''
+              }
+            }));
+            
             onOpenTaskDialog();
           } else {
             console.error(`No dialog opener provided for screenshot task:`, task.id);
@@ -161,6 +179,16 @@ export const useTaskActionHandler = (
           // Open the appropriate dialog
           if (onOpenTaskDialog) {
             console.log(`Opening checklist dialog for task:`, task.id);
+            
+            // Dispatch the event to open the checklist dialog
+            window.dispatchEvent(new CustomEvent('open-checklist', {
+              detail: {
+                taskId: task.id,
+                taskName: task.name,
+                items: task.checklistItems || []
+              }
+            }));
+            
             onOpenTaskDialog();
           } else {
             console.error(`No dialog opener provided for checklist task:`, task.id);
@@ -182,6 +210,16 @@ export const useTaskActionHandler = (
           // Open the appropriate dialog
           if (onOpenTaskDialog) {
             console.log(`Opening voicenote dialog for task:`, task.id);
+            
+            // Dispatch the event to open the voicenote dialog
+            window.dispatchEvent(new CustomEvent('open-voice-recorder', {
+              detail: {
+                taskId: task.id,
+                taskName: task.name,
+                voiceNoteUrl: task.voiceNoteUrl || ''
+              }
+            }));
+            
             onOpenTaskDialog();
           } else {
             console.error(`No dialog opener provided for voicenote task:`, task.id);
