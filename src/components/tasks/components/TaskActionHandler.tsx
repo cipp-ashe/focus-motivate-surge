@@ -60,7 +60,7 @@ export const useTaskActionHandler = (
             updateTaskOperations.updateTask(task.id, { 
               status: 'dismissed', 
               dismissedAt: new Date().toISOString() 
-            });
+            }, { suppressEvent: true });  // Prevent event loop
             
             // Then move to completed after a short delay
             setTimeout(() => {
@@ -69,18 +69,13 @@ export const useTaskActionHandler = (
             toast.success(`Dismissed task: ${task.name}`, { duration: 2000 });
           }
         } else {
-          // For other statuses, use proper task update operation
-          console.log(`Using updateTaskOperations for ${task.id} with status ${newStatus}`);
+          // For other statuses, use direct event emission to avoid operation loops
+          eventBus.emit('task:update', { 
+            taskId: task.id, 
+            updates: { status: newStatus } 
+          });
           
-          // Use direct storage operation to minimize event loops
-          updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressToast: true });
-          
-          // Create a manual event with enough delay to prevent loops
-          setTimeout(() => {
-            // Force a UI refresh instead of another event
-            window.dispatchEvent(new Event('force-task-update'));
-          }, 50);
-          
+          // Add a success toast with short duration
           toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
         }
       } catch (error) {

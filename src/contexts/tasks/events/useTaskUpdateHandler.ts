@@ -27,15 +27,30 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
     
     dispatch({ type: 'DISMISS_TASK', payload: { taskId, habitId: safeHabitId, date: safeDate } });
     
-    // Emit an event to track this dismissal in the habit system
-    window.dispatchEvent(new CustomEvent('habit-task-dismissed', {
-      detail: { habitId: safeHabitId, taskId, date: safeDate }
-    }));
+    // Emit an event to track this dismissal in the habit system - but with a delay to prevent loops
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('habit-task-dismissed', {
+        detail: { habitId: safeHabitId, taskId, date: safeDate }
+      }));
+    }, 50);
   }, [dispatch]);
   
-  // Handle task updates
+  // Handle task updates - with improved error handling
   const handleTaskUpdate = useCallback(({ taskId, updates }) => {
-    console.log("TaskEvents: Updating task", taskId);
+    console.log("TaskEvents: Updating task", taskId, updates);
+    
+    // Skip empty updates to prevent unnecessary reducer calls
+    if (!updates || Object.keys(updates).length === 0) {
+      console.log(`TaskEvents: No updates provided for task ${taskId}, skipping`);
+      return;
+    }
+    
+    // Make sure we have a valid taskId
+    if (!taskId) {
+      console.error("TaskEvents: Attempted to update task without taskId");
+      return;
+    }
+    
     dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
   }, [dispatch]);
   

@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CheckIcon, TimerIcon, ImageIcon, PencilIcon, ClipboardListIcon, MicIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { StatusDropdownMenu } from './components/buttons/StatusDropdownMenu';
-import { updateTaskOperations } from '@/lib/operations/tasks/update';
 import { eventBus } from '@/lib/eventBus';
 import { JournalButton } from './components/buttons/JournalButton';
 import { ChecklistButton } from './components/buttons/ChecklistButton';
@@ -48,19 +47,15 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   onKeyDown,
   preventPropagation
 }) => {
-  const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => {
+  const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     e.stopPropagation();
     console.log("TaskContent: Action", actionType, "clicked for task", task.id, "of type", task.taskType);
     
     if (!actionType) return;
     
-    // Handle status change actions
+    // Don't handle status change actions here anymore - StatusDropdownMenu emits events directly
     if (actionType.startsWith('status-')) {
-      const newStatus = actionType.split('-')[1];
-      console.log("Task status change:", newStatus, "for task:", task.id);
-      
-      // Fix: Use updateTask instead of updateTaskStatus
-      updateTaskOperations.updateTask(task.id, { status: newStatus as any });
+      console.log("Task status change handled by StatusDropdownMenu directly");
       return;
     }
     
