@@ -1,7 +1,11 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
-import { calculateEfficiencyRatio, determineCompletionStatus, formatTime } from '@/utils/timeUtils';
+import { 
+  calculateEfficiencyRatio, 
+  determineCompletionStatus, 
+  formatTime 
+} from '@/lib/utils/formatters';
 
 export const useTimerMetrics = (initialDurationSeconds: number) => {
   const [metrics, setMetrics] = useState<TimerStateMetrics>({
@@ -103,14 +107,17 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
         const actualWorkingTime = Math.max(0, totalElapsedSeconds - finalPausedTime);
         const netEffectiveTime = actualWorkingTime + prev.extensionTime;
         
+        const efficiencyRatio = calculateEfficiencyRatio(prev.expectedTime, netEffectiveTime);
+        const completionStatus = determineCompletionStatus(prev.expectedTime, netEffectiveTime);
+        
         const finalMetrics: TimerStateMetrics = {
           ...prev,
           endTime: completionTime,
           actualDuration: totalElapsedSeconds,
           pausedTime: finalPausedTime,
           netEffectiveTime: netEffectiveTime,
-          efficiencyRatio: calculateEfficiencyRatio(prev.expectedTime, actualWorkingTime),
-          completionStatus: determineCompletionStatus(prev.expectedTime, actualWorkingTime),
+          efficiencyRatio: efficiencyRatio,
+          completionStatus: completionStatus,
           isPaused: false,
           pausedTimeLeft: null,
           lastPauseTimestamp: null,

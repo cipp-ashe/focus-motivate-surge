@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { TimerAction } from '@/types/timer';
 import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
@@ -103,8 +102,8 @@ export const useTimerActions = (
       const netEffectiveTime = actualDuration - metrics.pausedTime;
       const efficiencyRatio = calculateEfficiencyRatio(metrics.expectedTime, netEffectiveTime);
       
-      // Use a typed completion status
-      const completionStatus = determineCompletionStatus(efficiencyRatio);
+      // Determine completion status based on efficiency ratio
+      const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime);
       
       const updatedMetrics = {
         endTime: now,

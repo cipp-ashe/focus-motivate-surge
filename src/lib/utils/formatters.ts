@@ -1,4 +1,7 @@
 
+// Consolidated time and formatting utilities
+
+// Duration formatting (seconds to human-readable)
 export const formatDuration = (seconds: number): string => {
   if (!seconds || seconds === 0) return '0s';
   
@@ -15,6 +18,14 @@ export const formatDuration = (seconds: number): string => {
   return `${remainingSeconds}s`;
 };
 
+// Convert seconds to MM:SS format
+export const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+// Format a date string to a localized date
 export const formatDate = (dateString?: string): string => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -26,6 +37,65 @@ export const formatDate = (dateString?: string): string => {
   });
 };
 
+// Format a date string to a localized timestamp
+export const formatTimestamp = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    console.error('Error formatting timestamp:', error);
+    return dateString;
+  }
+};
+
+// Helper function to format a date to a localized string with customizable options
+export const formatDateLocalized = (date: Date, options?: Intl.DateTimeFormatOptions): string => {
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  
+  return date.toLocaleDateString(undefined, options || defaultOptions);
+};
+
+// Format a number as a percentage
+export const formatPercentage = (value: number): string => {
+  const percentage = value * 100;
+  return `${Math.round(percentage)}%`;
+};
+
+// Timer efficiency calculations
+export const calculateEfficiencyRatio = (expectedTime: number, netEffectiveTime: number): number => {
+  if (netEffectiveTime === 0 || expectedTime === 0) return 0;
+  return netEffectiveTime / expectedTime;
+};
+
+export const calculateEfficiencyPercentage = (expectedTime: number, netEffectiveTime: number): number => {
+  if (netEffectiveTime === 0 || expectedTime === 0) return 0;
+  const ratio = (netEffectiveTime / expectedTime) * 100;
+  return Math.min(ratio, 100);
+};
+
+// Determine the completion status based on efficiency ratio
+export const determineCompletionStatus = (
+  expectedTime: number, 
+  netEffectiveTime: number
+): 'Completed Early' | 'Completed On Time' | 'Completed Late' => {
+  const ratio = calculateEfficiencyRatio(expectedTime, netEffectiveTime);
+  if (ratio < 0.8) return 'Completed Early';
+  if (ratio > 1.2) return 'Completed Late';
+  return 'Completed On Time';
+};
+
+// Visual styles for task completion status
 export const getCompletionStatusColor = (status: string) => {
   switch (status) {
     case 'Completed Early':
@@ -52,50 +122,6 @@ export const getCompletionIcon = (status: string) => {
   }
 };
 
-export const formatPercentage = (value: number): string => {
-  const percentage = value * 100;
-  return `${Math.round(percentage)}%`;
-};
-
-export const formatTimestamp = (dateString: string): string => {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch (error) {
-    console.error('Error formatting timestamp:', error);
-    return dateString;
-  }
-};
-
-// Additional utilities from timeUtils.ts
-export const formatTime = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-};
-
-export const calculateEfficiencyRatio = (expectedTime: number, netEffectiveTime: number): number => {
-  if (netEffectiveTime === 0 || expectedTime === 0) return 0;
-  return netEffectiveTime / expectedTime;
-};
-
-export const calculateEfficiencyPercentage = (expectedTime: number, netEffectiveTime: number): number => {
-  if (netEffectiveTime === 0 || expectedTime === 0) return 0;
-  const ratio = (netEffectiveTime / expectedTime) * 100;
-  return Math.min(ratio, 100);
-};
-
-export const determineCompletionStatus = (efficiencyRatio: number): 'Completed Early' | 'Completed On Time' | 'Completed Late' => {
-  if (efficiencyRatio < 0.8) return 'Completed Early';
-  if (efficiencyRatio > 1.2) return 'Completed Late';
-  return 'Completed On Time';
-};
-
 export const getCompletionTimingClass = (status: 'Completed Early' | 'Completed On Time' | 'Completed Late' | string): string => {
   switch (status) {
     case 'Completed Early':
@@ -107,17 +133,4 @@ export const getCompletionTimingClass = (status: 'Completed Early' | 'Completed 
     default:
       return 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-200/30';
   }
-};
-
-// Helper function to format a date to a localized string
-export const formatDateLocalized = (date: Date, options?: Intl.DateTimeFormatOptions): string => {
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  };
-  
-  return date.toLocaleDateString(undefined, options || defaultOptions);
 };

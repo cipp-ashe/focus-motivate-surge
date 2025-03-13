@@ -1,9 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import TaskManager from '@/components/tasks/TaskManager';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
-import { Timer } from '@/components/timer/Timer';
 import { Task } from '@/types/tasks';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -13,7 +11,6 @@ import { TimerSection } from '@/components/timer/TimerSection';
 interface TimerPageProps {}
 
 const TimerPage: React.FC<TimerPageProps> = () => {
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [timerKey, setTimerKey] = useState(Date.now());
@@ -121,85 +118,24 @@ const TimerPage: React.FC<TimerPageProps> = () => {
     };
   }, []);
   
-  const handleTimerComplete = (taskId: string, metrics: any) => {
-    console.log('TimerPage - Timer completed for task:', taskId, metrics);
-    
-    if (selectedTask) {
-      // Mark the task as completed
-      eventBus.emit('task:complete', { 
-        taskId: selectedTask.id,
-        metrics: metrics 
-      });
-      
-      toast.success(`Timer completed for: ${selectedTask.name}`);
-      
-      // Reset the selected task
-      setTimeout(() => {
-        setSelectedTask(null);
-      }, 3000);
-    }
-  };
-  
-  const handleAddTime = (minutes: number) => {
-    console.log('TimerPage - Adding time to task:', selectedTask?.id, minutes);
-    
-    if (selectedTask) {
-      const currentDuration = selectedTask.duration || 1500;
-      const newDuration = currentDuration + (minutes * 60);
-      
-      // Update the task duration
-      eventBus.emit('task:update', {
-        taskId: selectedTask.id,
-        updates: { duration: newDuration }
-      });
-      
-      toast.info(`Added ${minutes} minutes to: ${selectedTask.name}`);
-    }
-  };
-  
-  const handleDurationChange = (minutes: number) => {
-    console.log('TimerPage - Updating duration for task:', selectedTask?.id, minutes);
-    
-    if (selectedTask) {
-      const newDuration = minutes * 60;
-      
-      // Update the task duration
-      eventBus.emit('task:update', {
-        taskId: selectedTask.id,
-        updates: { duration: newDuration }
-      });
-    }
-  };
-  
-  const TimerSectionComponent = (
-    <div className="w-full h-full">
-      {selectedTask ? (
-        <TimerSection 
-          selectedTask={selectedTask}
-          favorites={favorites}
-          setFavorites={setFavorites}
-        />
-      ) : (
-        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">No Task Selected</h2>
-          <p className="text-muted-foreground mb-4">
-            Select a task from the list to start the timer.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-  
-  const TaskSection = (
-    <div className="w-full">
-      <TaskManager key="timer-task-manager" isTimerView={true} />
-    </div>
-  );
-  
+  // Render the timer page with the task section and timer section
   return (
     <TaskLayout
-      mainContent={TimerSectionComponent}
-      asideContent={TaskSection}
+      mainContent={
+        <div className="w-full h-full">
+          <TimerSection 
+            key={timerKey}
+            selectedTask={selectedTask}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
+        </div>
+      }
+      asideContent={
+        <div className="w-full">
+          <TaskManager key="timer-task-manager" isTimerView={true} />
+        </div>
+      }
     />
   );
 };

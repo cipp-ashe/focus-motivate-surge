@@ -49,7 +49,8 @@ export const formatDailySummary = (
     totalPlannedTime: metrics.reduce((total, metric) => total + (metric.expectedTime || 0), 0),
     totalPauses: metrics.reduce((total, metric) => total + (metric.pauseCount || 0), 0),
     averageEfficiency: metrics.length > 0 ? 
-      metrics.reduce((total, metric) => total + calculateEfficiencyPercentage(metric.expectedTime, metric.netEffectiveTime), 0) / metrics.length : 0,
+      metrics.reduce((total, metric) => 
+        total + calculateEfficiencyPercentage(metric.expectedTime, metric.netEffectiveTime), 0) / metrics.length : 0,
     favoriteQuotes,
     notes: notes ? formatNotesSummary(notes) : undefined,
   };

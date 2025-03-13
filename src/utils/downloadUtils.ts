@@ -107,7 +107,7 @@ const generateUniqueId = (): string => {
  */
 export const downloadNoteAsMarkdown = async (note: Note) => {
   console.log('Preparing note for download:', note.id);
-  const timestamp = format(new Date(note.createdAt), 'MMMM d, yyyy HH:mm');
+  const timestamp = formatDateLocalized(new Date(note.createdAt));
   const metadata = [
     `Created: ${format(new Date(note.createdAt), 'MMM d, yyyy HH:mm')}`,
     note.updatedAt && `Updated: ${format(new Date(note.updatedAt), 'MMM d, yyyy HH:mm')}`,
@@ -130,13 +130,14 @@ export const downloadAllNotes = async (notes: Note[]) => {
   const timestamp = format(new Date(), 'MMMM d, yyyy');
   
   const notesContent = notes.map(note => {
+    const noteTimestamp = formatDateLocalized(new Date(note.createdAt));
     const metadata = [
       `Created: ${format(new Date(note.createdAt), 'MMM d, yyyy HH:mm')}`,
       note.updatedAt && `Updated: ${format(new Date(note.updatedAt), 'MMM d, yyyy HH:mm')}`,
       note.tags.length > 0 && formatTags(note.tags)
     ].filter(Boolean).join('\n');
 
-    return `# ${format(new Date(note.createdAt), 'MMMM d, yyyy HH:mm')}\n\n${note.content}\n\n---\n\n${metadata}\n\n`;
+    return `# ${noteTimestamp}\n\n${note.content}\n\n---\n\n${metadata}\n\n`;
   }).join('\n');
 
   const uniqueId = generateUniqueId();

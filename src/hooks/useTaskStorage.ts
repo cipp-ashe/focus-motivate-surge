@@ -4,7 +4,6 @@ import { Task, TaskMetrics } from '@/types/tasks';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 import { TimerStateMetrics } from '@/types/metrics';
-import { EventHandler } from '@/lib/events/EventManager';
 
 const TASKS_STORAGE_KEY = 'taskList';
 const COMPLETED_TASKS_STORAGE_KEY = 'completedTasks';
@@ -38,6 +37,7 @@ export const useTaskStorage = () => {
 
     loadTasks();
 
+    // Event handlers
     const handleTaskCreate = (task: Task) => {
       setItems(prev => {
         if (prev.some(t => t.id === task.id)) {
