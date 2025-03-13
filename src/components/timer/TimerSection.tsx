@@ -45,7 +45,7 @@ export const TimerSection = ({
     };
     
     // Listen for the event
-    window.addEventListener('timer:set-task', handleTimerSetTask);
+    window.addEventListener('timer:set-task', handleTimerSetTask as EventListener);
     
     // Also subscribe to the event bus
     const unsubscribe = eventBus.on('timer:set-task', (task: Task) => {
@@ -61,7 +61,7 @@ export const TimerSection = ({
     });
     
     return () => {
-      window.removeEventListener('timer:set-task', handleTimerSetTask);
+      window.removeEventListener('timer:set-task', handleTimerSetTask as EventListener);
       unsubscribe();
     };
   }, []);
@@ -125,10 +125,10 @@ export const TimerSection = ({
     });
 
     // Listen for DOM events as well
-    window.addEventListener('task:select', handleTaskSelect);
+    window.addEventListener('task:select', handleTaskSelect as EventListener);
     
     return () => {
-      window.removeEventListener('task:select', handleTaskSelect);
+      window.removeEventListener('task:select', handleTaskSelect as EventListener);
       unsubscribe();
     };
   }, []);

@@ -42,21 +42,25 @@ export const taskReducer = (state: StateContext['tasks'], action: TaskAction): S
       // Format metrics properly for storage
       const formattedMetrics: TaskMetrics = action.payload.metrics ? {
         // Ensure all metrics are properly typed
-        timeSpent: action.payload.metrics.timeSpent || action.payload.metrics.actualDuration,
-        timeElapsed: action.payload.metrics.actualDuration,
-        pauseCount: action.payload.metrics.pauseCount || 0,
+        timeSpent: 'actualDuration' in action.payload.metrics 
+          ? action.payload.metrics.actualDuration 
+          : ('timeSpent' in action.payload.metrics ? action.payload.metrics.timeSpent : 0),
+        timeElapsed: 'actualDuration' in action.payload.metrics 
+          ? action.payload.metrics.actualDuration 
+          : 0,
+        pauseCount: 'pauseCount' in action.payload.metrics ? action.payload.metrics.pauseCount : 0,
         completionDate: new Date().toISOString(),
         // Timer-specific metrics
-        expectedTime: action.payload.metrics.expectedTime,
-        actualDuration: action.payload.metrics.actualDuration,
-        favoriteQuotes: Array.isArray(action.payload.metrics.favoriteQuotes)
+        expectedTime: 'expectedTime' in action.payload.metrics ? action.payload.metrics.expectedTime : 0,
+        actualDuration: 'actualDuration' in action.payload.metrics ? action.payload.metrics.actualDuration : 0,
+        favoriteQuotes: 'favoriteQuotes' in action.payload.metrics && Array.isArray(action.payload.metrics.favoriteQuotes)
           ? action.payload.metrics.favoriteQuotes
           : [],
-        pausedTime: action.payload.metrics.pausedTime,
-        extensionTime: action.payload.metrics.extensionTime,
-        netEffectiveTime: action.payload.metrics.netEffectiveTime,
-        efficiencyRatio: action.payload.metrics.efficiencyRatio,
-        completionStatus: action.payload.metrics.completionStatus,
+        pausedTime: 'pausedTime' in action.payload.metrics ? action.payload.metrics.pausedTime : 0,
+        extensionTime: 'extensionTime' in action.payload.metrics ? action.payload.metrics.extensionTime : 0,
+        netEffectiveTime: 'netEffectiveTime' in action.payload.metrics ? action.payload.metrics.netEffectiveTime : 0,
+        efficiencyRatio: 'efficiencyRatio' in action.payload.metrics ? action.payload.metrics.efficiencyRatio : 0,
+        completionStatus: 'completionStatus' in action.payload.metrics ? action.payload.metrics.completionStatus : 'Completed',
       } : {};
 
       const completedTask = {

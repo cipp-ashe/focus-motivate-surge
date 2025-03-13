@@ -54,12 +54,11 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
   handleAddTimeAndContinue,
   handleComplete,
 }) => {
-  // When expanded, hide the main timer view completely with CSS
-  // When collapsed, hide the expanded view completely
+  // Modified to ensure that at least one view is always visible
   return (
     <div className="relative">
-      {/* Main timer view (collapsed state) - hidden when expanded */}
-      <div className={`transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
+      {/* Main timer view (collapsed state) - only hide when fully expanded */}
+      <div className={`transition-all duration-500 ${isExpanded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <MainTimerView
           isExpanded={isExpanded}
           setIsExpanded={() => eventBus.emit('timer:expand', { taskName })}
@@ -88,25 +87,27 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
 
       {/* Expanded timer view (fullscreen state) - only rendered when expanded */}
       {isExpanded && (
-        <TimerExpandedView
-          ref={expandedViewRef}
-          taskName={taskName}
-          timerCircleProps={timerCircleProps}
-          timerControlsProps={{
-            ...timerControlsProps,
-            size: "large"
-          }}
-          metrics={metrics}
-          onClose={() => eventBus.emit('timer:collapse', { taskName, saveNotes: true })}
-          onLike={() => {
-            const currentFavorites = Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [];
-            updateMetrics({ 
-              favoriteQuotes: [...currentFavorites, "New quote"]
-            });
-          }}
-          favorites={favorites}
-          setFavorites={setFavorites}
-        />
+        <div className="opacity-100 z-50">
+          <TimerExpandedView
+            ref={expandedViewRef}
+            taskName={taskName}
+            timerCircleProps={timerCircleProps}
+            timerControlsProps={{
+              ...timerControlsProps,
+              size: "large"
+            }}
+            metrics={metrics}
+            onClose={() => eventBus.emit('timer:collapse', { taskName, saveNotes: true })}
+            onLike={() => {
+              const currentFavorites = Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [];
+              updateMetrics({ 
+                favoriteQuotes: [...currentFavorites, "New quote"]
+              });
+            }}
+            favorites={favorites}
+            setFavorites={setFavorites}
+          />
+        </div>
       )}
     </div>
   );

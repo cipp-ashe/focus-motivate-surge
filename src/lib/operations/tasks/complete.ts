@@ -35,21 +35,23 @@ export const completeTaskOperations = {
       // Format metrics to ensure they're in the correct format
       const formattedMetrics: TaskMetrics = metrics ? {
         // Handle both Timer metrics and Task metrics
-        timeSpent: metrics.actualDuration || metrics.timeSpent,
-        timeElapsed: metrics.actualDuration,
-        pauseCount: metrics.pauseCount || 0,
+        timeSpent: 'actualDuration' in metrics 
+          ? metrics.actualDuration 
+          : ('timeSpent' in metrics ? metrics.timeSpent : 0),
+        timeElapsed: 'actualDuration' in metrics ? metrics.actualDuration : 0,
+        pauseCount: 'pauseCount' in metrics ? metrics.pauseCount : 0,
         completionDate: new Date().toISOString(),
-        expectedTime: metrics.expectedTime,
-        actualDuration: metrics.actualDuration,
+        expectedTime: 'expectedTime' in metrics ? metrics.expectedTime : 0,
+        actualDuration: 'actualDuration' in metrics ? metrics.actualDuration : 0,
         // Ensure favoriteQuotes is a string array
-        favoriteQuotes: Array.isArray(metrics.favoriteQuotes) 
+        favoriteQuotes: 'favoriteQuotes' in metrics && Array.isArray(metrics.favoriteQuotes) 
           ? metrics.favoriteQuotes 
           : (metrics.favoriteQuotes ? [String(metrics.favoriteQuotes)] : []),
-        pausedTime: metrics.pausedTime,
-        extensionTime: metrics.extensionTime,
-        netEffectiveTime: metrics.netEffectiveTime,
-        efficiencyRatio: metrics.efficiencyRatio,
-        completionStatus: metrics.completionStatus,
+        pausedTime: 'pausedTime' in metrics ? metrics.pausedTime : 0,
+        extensionTime: 'extensionTime' in metrics ? metrics.extensionTime : 0,
+        netEffectiveTime: 'netEffectiveTime' in metrics ? metrics.netEffectiveTime : 0,
+        efficiencyRatio: 'efficiencyRatio' in metrics ? metrics.efficiencyRatio : 0,
+        completionStatus: 'completionStatus' in metrics ? metrics.completionStatus : 'Completed',
       } : {};
       
       // Update task to completed

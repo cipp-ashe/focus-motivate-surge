@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { TIMER_CONSTANTS } from "@/types/timer";
@@ -81,10 +80,11 @@ export const useTimerHandlers = ({
       setPauseTimeLeft(0);
     }
     
-    setIsExpanded(true);
+    setIsExpanded(false);
     
     setTimeout(() => {
       start();
+      setIsExpanded(true);
       toast.success("Timer started! Let's focus! 🎯");
     }, 100);
     
