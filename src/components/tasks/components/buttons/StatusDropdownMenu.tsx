@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Task, TaskStatus } from "@/types/tasks";
 import { Button } from "@/components/ui/button";
@@ -24,8 +23,8 @@ interface StatusDropdownMenuProps {
 export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, onTaskAction }) => {
   const [open, setOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [lastStatusChange, setLastStatusChange] = useState<{status: TaskStatus, timestamp: number} | null>(null);
   
-  // Get status label and colors
   const getStatusInfo = (status: TaskStatus = 'pending') => {
     switch (status) {
       case 'pending':
@@ -47,15 +46,24 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
 
   const statusInfo = getStatusInfo(task.status);
 
-  // Properly handle status changes by directly using the operations
   const handleStatusChange = (e: React.MouseEvent<HTMLElement>, newStatus: TaskStatus) => {
     e.stopPropagation();
     e.preventDefault();
     
-    // Don't update if already updating
-    if (isUpdating) return;
+    if (isUpdating) {
+      console.log(`StatusDropdownMenu: Already processing an update, ignoring ${newStatus}`);
+      return;
+    }
     
-    // Don't update if the status is already the same
+    const now = Date.now();
+    if (lastStatusChange && 
+        lastStatusChange.status === newStatus && 
+        now - lastStatusChange.timestamp < 2000) {
+      console.log(`StatusDropdownMenu: Debouncing duplicate status change to ${newStatus}`);
+      setOpen(false);
+      return;
+    }
+    
     if (task.status === newStatus) {
       console.log(`StatusDropdownMenu: Task ${task.id} already has status ${newStatus}, ignoring`);
       setOpen(false);
@@ -65,18 +73,15 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
     console.log(`StatusDropdownMenu: Changing status of task ${task.id} from ${task.status} to ${newStatus}`);
     
     try {
-      // First close the dropdown to improve UI feedback
       setOpen(false);
       setIsUpdating(true);
       
-      // Handle different status types with appropriate operations
+      setLastStatusChange({ status: newStatus, timestamp: now });
+      
       if (newStatus === 'completed') {
-        // For completed status, use completeTaskOperations
         completeTaskOperations.completeTask(task.id);
       } else if (newStatus === 'dismissed') {
-        // For dismissed status, use specialized handler based on task type
         if (task.relationships?.habitId) {
-          // Habit-related tasks need special dismissal
           deleteTaskOperations.deleteTask(task.id, {
             isDismissal: true,
             habitId: task.relationships.habitId,
@@ -84,24 +89,20 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
             reason: 'dismissed'
           });
         } else {
-          // For regular tasks, use direct update with dismissal fields
           updateTaskOperations.updateTask(task.id, { 
             status: 'dismissed', 
             dismissedAt: new Date().toISOString() 
           });
         }
       } else {
-        // For other status values, use direct update
-        updateTaskOperations.updateTask(task.id, { status: newStatus });
+        updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressEvent: false });
       }
       
-      // Show a success toast with the updated status
       toast.success(`Task status updated to ${getStatusInfo(newStatus).label}`);
     } catch (error) {
       console.error("Error changing task status:", error);
       toast.error("Failed to update task status");
     } finally {
-      // Reset updating state after a short delay
       setTimeout(() => {
         setIsUpdating(false);
       }, 500);

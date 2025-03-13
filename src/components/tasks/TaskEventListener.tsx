@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { useNavigate } from 'react-router-dom';
@@ -23,11 +23,11 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   const navigate = useNavigate();
   const isModalOpenRef = useRef(false);
   
+  // Track processed updates with timestamps for effective debouncing
+  const [processedUpdates] = useState<Map<string, {timestamp: number, updates: any}>>(new Map());
+  
   useEffect(() => {
     console.log('TaskEventListener: Setting up event listeners');
-    
-    // Track last processed updates to prevent infinite loops
-    const processedUpdates = new Map<string, {timestamp: number, updates: any}>();
     
     // Handler for opening screenshot/image viewer
     const handleOpenImage = (data: { taskId: string; imageUrl: string; taskName: string }) => {
@@ -48,49 +48,25 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
     // Handler for opening checklist
     const handleOpenChecklist = (data: { taskId: string; taskName: string; items: any[] }) => {
       console.log('TaskEventListener: Received open-checklist event:', data);
-      
-      // Set the modal flag
       isModalOpenRef.current = true;
-      
-      // Call the handler
       onOpenChecklist(data.taskId, data.taskName, data.items || []);
-      
-      // Reset the flag after a delay
-      setTimeout(() => {
-        isModalOpenRef.current = false;
-      }, 500);
+      setTimeout(() => { isModalOpenRef.current = false; }, 500);
     };
     
     // Handler for opening journal
     const handleOpenJournal = (data: { taskId: string; taskName: string; entry: string }) => {
       console.log('TaskEventListener: Received open-journal event:', data);
-      
-      // Set the modal flag
       isModalOpenRef.current = true;
-      
-      // Call the handler
       onOpenJournal(data.taskId, data.taskName, data.entry || '');
-      
-      // Reset the flag after a delay
-      setTimeout(() => {
-        isModalOpenRef.current = false;
-      }, 500);
+      setTimeout(() => { isModalOpenRef.current = false; }, 500);
     };
     
     // Handler for opening voice recorder
     const handleOpenVoiceRecorder = (data: { taskId: string; taskName: string }) => {
       console.log('TaskEventListener: Received open-voice-recorder event:', data);
-      
-      // Set the modal flag
       isModalOpenRef.current = true;
-      
-      // Call the handler
       onOpenVoiceRecorder(data.taskId, data.taskName);
-      
-      // Reset the flag after a delay
-      setTimeout(() => {
-        isModalOpenRef.current = false;
-      }, 500);
+      setTimeout(() => { isModalOpenRef.current = false; }, 500);
     };
     
     // Handler for task updates with strict loop prevention
@@ -109,9 +85,9 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       }
       
       // Critical loop prevention - check if we've just processed this exact update
-      const lastUpdateKey = `${taskId}-${JSON.stringify(updates)}`;
+      const updateKey = `${taskId}-${JSON.stringify(updates)}`;
       const now = Date.now();
-      const lastProcessed = processedUpdates.get(lastUpdateKey);
+      const lastProcessed = processedUpdates.get(updateKey);
       
       if (lastProcessed && now - lastProcessed.timestamp < 2000) {
         console.log(`TaskEventListener: Skipping duplicate update for task ${taskId} (processed recently)`);
@@ -119,7 +95,7 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       }
       
       // Record this update to prevent duplicate processing
-      processedUpdates.set(lastUpdateKey, { timestamp: now, updates });
+      processedUpdates.set(updateKey, { timestamp: now, updates });
       
       // Filter out special content properties to avoid UI update loops
       const filteredUpdates = { ...updates };
@@ -166,31 +142,40 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       }
     };
     
-    // Listen for direct DOM events for dialog opening
+    // Handle the new force-ui-refresh event - this doesn't cause task updates
+    const handleForceUiRefresh = (e: CustomEvent<{taskId: string}>) => {
+      console.log('TaskEventListener: Received force-ui-refresh event:', e.detail);
+      // This event exists just to trigger a UI refresh without triggering task updates
+      // No need to do anything here, React will handle the re-render
+    };
+    
+    // DOM event handlers with consistent structure
     const handleDomOpenJournal = (e: CustomEvent<{taskId: string, taskName: string, entry: string}>) => {
       console.log('TaskEventListener: Received DOM open-journal event:', e.detail);
+      isModalOpenRef.current = true;
       onOpenJournal(e.detail.taskId, e.detail.taskName, e.detail.entry || '');
+      setTimeout(() => { isModalOpenRef.current = false; }, 500);
     };
     
     const handleDomOpenChecklist = (e: CustomEvent<{taskId: string, taskName: string, items: any[]}>) => {
       console.log('TaskEventListener: Received DOM open-checklist event:', e.detail);
+      isModalOpenRef.current = true;
       onOpenChecklist(e.detail.taskId, e.detail.taskName, e.detail.items || []);
+      setTimeout(() => { isModalOpenRef.current = false; }, 500);
     };
     
     const handleDomShowImage = (e: CustomEvent<{imageUrl: string, taskName: string}>) => {
       console.log('TaskEventListener: Received DOM show-image event:', e.detail);
+      isModalOpenRef.current = true;
       onShowImage(e.detail.imageUrl, e.detail.taskName);
+      setTimeout(() => { isModalOpenRef.current = false; }, 500);
     };
     
     const handleDomOpenVoiceRecorder = (e: CustomEvent<{taskId: string, taskName: string}>) => {
       console.log('TaskEventListener: Received DOM open-voice-recorder event:', e.detail);
+      isModalOpenRef.current = true;
       onOpenVoiceRecorder(e.detail.taskId, e.detail.taskName);
-    };
-    
-    // Handle the new force-ui-refresh event
-    const handleForceUiRefresh = (e: CustomEvent<{taskId: string}>) => {
-      console.log('TaskEventListener: Received force-ui-refresh event:', e.detail);
-      // This event exists just to trigger a UI refresh without triggering task updates
+      setTimeout(() => { isModalOpenRef.current = false; }, 500);
     };
     
     // Set up event listeners

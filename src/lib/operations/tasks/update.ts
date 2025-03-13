@@ -39,10 +39,21 @@ export const updateTaskOperations = {
         return;
       }
       
-      // IMPORTANT: Skip redundant updates (same status for example)
-      // This is critical to prevent infinite loops
+      // CRITICAL FIX: Skip redundant updates with strict equality check
+      // This is critical to prevent infinite loops when the same status is set repeatedly
       if (updates.status && updates.status === currentTask.status) {
-        console.log(`TaskOperations: Task ${taskId} already has status ${updates.status}, skipping update`);
+        console.log(`TaskOperations: Task ${taskId} already has status ${updates.status}, skipping update to prevent loop`);
+        return;
+      }
+      
+      // Extra safeguard: Check entire update object for equivalence
+      // This handles cases where multiple properties are being set but they're all the same
+      const hasChanges = Object.keys(updates).some(key => {
+        return updates[key as keyof Partial<Task>] !== currentTask[key as keyof Task];
+      });
+      
+      if (!hasChanges) {
+        console.log(`TaskOperations: No actual changes in update for task ${taskId}, skipping update`);
         return;
       }
       
@@ -72,8 +83,8 @@ export const updateTaskOperations = {
         toast.success(`Updated task: ${currentTask.name}`);
       }
       
-      // Force a UI refresh to ensure consistency
-      // Use a unique event name that won't conflict with other task events
+      // Use a custom event for UI refresh instead of task:update
+      // This prevents event handlers from trying to update the task again
       window.dispatchEvent(new CustomEvent('force-ui-refresh', { detail: { taskId }}));
     } catch (error) {
       console.error('Error updating task:', error);

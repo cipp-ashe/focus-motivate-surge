@@ -1,4 +1,3 @@
-
 import { Task } from '@/types/tasks';
 import { useCallback } from 'react';
 import { completeTaskOperations } from '@/lib/operations/tasks/complete';
@@ -58,11 +57,14 @@ export const useTaskActionHandler = (
             updateTaskOperations.updateTask(task.id, { 
               status: 'dismissed', 
               dismissedAt: new Date().toISOString() 
-            });
+            }, { suppressEvent: true }); // Use suppressEvent to prevent recursion
           }
         } else {
-          // For other statuses, use the update operations directly
-          updateTaskOperations.updateTask(task.id, { status: newStatus });
+          // For other statuses, use the update operations directly with suppressEvent option
+          updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressEvent: true });
+          
+          // Force UI refresh after update to ensure consistency without triggering another event
+          window.dispatchEvent(new CustomEvent('force-ui-refresh', { detail: { taskId: task.id }}));
         }
       } catch (error) {
         console.error('Error updating task status:', error);
