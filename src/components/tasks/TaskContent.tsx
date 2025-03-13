@@ -24,13 +24,29 @@ interface TaskContentProps {
     screenshot: (imageUrl: string, taskName: string) => void;
     voicenote: (taskId: string, taskName: string) => void;
   };
+  editingTaskId?: string | null;
+  inputValue?: string;
+  onDelete?: (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => void;
+  onDurationClick?: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  preventPropagation?: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
 }
 
 export const TaskContent: React.FC<TaskContentProps> = ({ 
   task, 
   isSelected = false, 
   onSelect,
-  dialogOpeners
+  dialogOpeners,
+  editingTaskId,
+  inputValue,
+  onDelete,
+  onDurationClick,
+  onChange,
+  onBlur,
+  onKeyDown,
+  preventPropagation
 }) => {
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => {
     e.stopPropagation();
@@ -43,7 +59,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       const newStatus = actionType.split('-')[1];
       console.log("Task status change:", newStatus, "for task:", task.id);
       
-      updateTaskOperations.updateTaskStatus(task.id, newStatus as any);
+      // Use updateTask instead of non-existent updateTaskStatus
+      updateTaskOperations.updateTask(task.id, { status: newStatus as any });
       return;
     }
     
@@ -58,7 +75,21 @@ export const TaskContent: React.FC<TaskContentProps> = ({
     // Handle task dismissal
     if (actionType === 'dismiss') {
       console.log("Task dismissal for task:", task.id);
-      eventBus.emit('task:dismiss', { taskId: task.id });
+      // Check if this is a habit task with relationships
+      if (task.relationships?.habitId && task.relationships?.date) {
+        eventBus.emit('task:dismiss', { 
+          taskId: task.id, 
+          habitId: task.relationships.habitId,
+          date: task.relationships.date
+        });
+      } else {
+        // For non-habit tasks, just emit a basic event
+        eventBus.emit('task:dismiss', { 
+          taskId: task.id,
+          habitId: 'none',
+          date: 'none'
+        });
+      }
       toast.info(`Dismissed task: ${task.name}`);
       return;
     }
@@ -200,6 +231,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
             task={task} 
             onTaskAction={handleTaskAction}
             dialogOpeners={dialogOpeners}
+            editingTaskId={editingTaskId}
+            inputValue={inputValue}
           />
         </div>
       </CardContent>

@@ -132,6 +132,8 @@ export const TaskRow = ({
     >
       <TaskContent
         task={task}
+        isSelected={isSelected}
+        onSelect={() => handleTaskClick as any}
         editingTaskId={editingTaskId}
         inputValue={inputValue}
         onDelete={handleDelete}

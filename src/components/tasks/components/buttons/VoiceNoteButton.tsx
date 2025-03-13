@@ -1,26 +1,26 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Mic } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { MicIcon } from 'lucide-react';
+import { TaskButtonProps } from './ButtonTypes';
 
-interface VoiceNoteButtonProps {
-  hasRecording: boolean;
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
+export interface VoiceNoteButtonProps extends TaskButtonProps {}
 
-export const VoiceNoteButton: React.FC<VoiceNoteButtonProps> = ({
-  hasRecording,
-  onClick,
-}) => {
+export const VoiceNoteButton: React.FC<VoiceNoteButtonProps> = ({ task, onTaskAction }) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onTaskAction(e, 'true');
+  };
+
   return (
-    <Button
-      variant="outline"
+    <Button 
+      variant="ghost"
       size="sm"
-      onClick={onClick}
-      className="h-7 px-2 flex items-center gap-1 text-xs"
+      className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+      onClick={handleClick}
+      title="Play Voice Note"
     >
-      <Mic className="h-3.5 w-3.5 text-rose-400" />
-      <span>{hasRecording ? 'Listen' : 'Record'}</span>
+      <MicIcon className="h-4 w-4" />
     </Button>
   );
 };

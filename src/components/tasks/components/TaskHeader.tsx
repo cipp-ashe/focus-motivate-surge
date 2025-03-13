@@ -12,7 +12,7 @@ interface TaskHeaderProps {
   editingTaskId: string | null;
   inputValue: string;
   onDelete: (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => void;
-  onTaskAction: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onTaskAction: (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => void;
   handleLocalChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleLocalBlur: () => void;
   handleLocalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;

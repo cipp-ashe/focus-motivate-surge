@@ -1,26 +1,26 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { BookOpen } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { PencilIcon } from 'lucide-react';
+import { TaskButtonProps } from './ButtonTypes';
 
-interface JournalButtonProps {
-  hasEntry: boolean;
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
+export interface JournalButtonProps extends TaskButtonProps {}
 
-export const JournalButton: React.FC<JournalButtonProps> = ({
-  hasEntry,
-  onClick,
-}) => {
+export const JournalButton: React.FC<JournalButtonProps> = ({ task, onTaskAction }) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onTaskAction(e, 'true');
+  };
+
   return (
-    <Button
-      variant="outline"
+    <Button 
+      variant="ghost"
       size="sm"
-      onClick={onClick}
-      className="h-7 px-2 flex items-center gap-1 text-xs"
+      className="h-7 w-7 p-0 text-green-500 hover:text-green-700 hover:bg-green-100"
+      onClick={handleClick}
+      title="Open Journal Entry"
     >
-      <BookOpen className="h-3.5 w-3.5 text-amber-400" />
-      <span>{hasEntry ? 'View' : 'Write'}</span>
+      <PencilIcon className="h-4 w-4" />
     </Button>
   );
 };

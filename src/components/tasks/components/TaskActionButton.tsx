@@ -21,12 +21,26 @@ interface TaskActionButtonProps {
     screenshot: (imageUrl: string, taskName: string) => void;
     voicenote: (taskId: string, taskName: string) => void;
   };
+  editingTaskId?: string | null;
+  inputValue?: string;
+  durationInMinutes?: number;
+  handleLocalChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleLocalBlur?: () => void;
+  handleLocalKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  preventPropagation?: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
 }
 
 export const TaskActionButton: React.FC<TaskActionButtonProps> = ({ 
   task, 
   onTaskAction,
-  dialogOpeners
+  dialogOpeners,
+  editingTaskId,
+  inputValue,
+  durationInMinutes,
+  handleLocalChange,
+  handleLocalBlur,
+  handleLocalKeyDown,
+  preventPropagation
 }) => {
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>, actionType: string) => {
     e.stopPropagation();
