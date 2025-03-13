@@ -22,7 +22,7 @@ export const useTaskActionHandler = (
         ? e.currentTarget.getAttribute('data-action-type') 
         : null);
       
-    console.log("Task action:", action, "for task:", task.id);
+    console.log("Task action:", action, "for task:", task.id, "onOpenTaskDialog available:", !!onOpenTaskDialog);
     
     // Handle status changes via the dropdown
     if (action?.startsWith('status-')) {
@@ -102,8 +102,8 @@ export const useTaskActionHandler = (
         }
       }));
       
-      console.log("Opening journal dialog for task:", task.id);
-      onOpenTaskDialog();
+      console.log("Triggering journal dialog for task:", task.id);
+      onOpenTaskDialog(); // Call the opener function directly
       return;
     }
     
@@ -158,7 +158,7 @@ export const useTaskActionHandler = (
               }
             }));
             
-            onOpenTaskDialog();
+            onOpenTaskDialog(); // Call the opener function directly
           } else {
             console.error(`No dialog opener provided for screenshot task:`, task.id);
             toast.error(`Unable to open screenshot editor`);
@@ -189,7 +189,7 @@ export const useTaskActionHandler = (
               }
             }));
             
-            onOpenTaskDialog();
+            onOpenTaskDialog(); // Call the opener function directly
           } else {
             console.error(`No dialog opener provided for checklist task:`, task.id);
             toast.error(`Unable to open checklist editor`);
@@ -220,7 +220,7 @@ export const useTaskActionHandler = (
               }
             }));
             
-            onOpenTaskDialog();
+            onOpenTaskDialog(); // Call the opener function directly
           } else {
             console.error(`No dialog opener provided for voicenote task:`, task.id);
             toast.error(`Unable to open voicenote editor`);
