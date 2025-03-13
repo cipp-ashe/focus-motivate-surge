@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -81,6 +82,13 @@ export const ChecklistSheet: React.FC<ChecklistSheetProps> = ({
       
       toast.success(`Saved checklist for: ${currentTask.taskName}`);
       onOpenChange(false);  // Close sheet after saving
+    }
+  };
+
+  // Add the missing handleKeyPress function
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleAddItem();
     }
   };
 
