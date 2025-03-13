@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
@@ -8,7 +7,7 @@ import {
   DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Save, X, Pencil } from 'lucide-react';
+import { Save, X, Pencil, Eye } from 'lucide-react';
 import { eventBus } from '@/lib/eventBus';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { toast } from 'sonner';
@@ -31,17 +30,25 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   currentTask
 }) => {
   const [journalContent, setJournalContent] = useState('');
-  const [activeTab, setActiveTab] = useState<string>("preview");
+  const [activeTab, setActiveTab] = useState<string>("write");
   const [isEditing, setIsEditing] = useState(false);
+  const isNewEntry = currentTask?.entry === '';
 
   useEffect(() => {
     if (currentTask) {
       setJournalContent(currentTask.entry || '');
-      // Start in preview mode by default
-      setActiveTab("preview");
-      setIsEditing(false);
+      
+      // For new entries, start in edit mode with writing tab active
+      if (isNewEntry) {
+        setIsEditing(true);
+        setActiveTab("write");
+      } else {
+        // For existing entries, start in preview mode
+        setIsEditing(false);
+        setActiveTab("preview");
+      }
     }
-  }, [currentTask]);
+  }, [currentTask, isNewEntry]);
 
   const saveJournal = () => {
     if (currentTask) {
@@ -61,12 +68,23 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       toast.success(`Saved journal entry for: ${currentTask.taskName}`);
       setIsEditing(false);
       setActiveTab("preview");
+      // Close the dialog after saving if it's a new entry
+      if (isNewEntry) {
+        onOpenChange(false);
+      }
     }
   };
 
   const handleCancel = () => {
     console.log('Cancelling journal edit');
     if (isEditing) {
+      // If it's a new entry, close the dialog entirely
+      if (isNewEntry) {
+        onOpenChange(false);
+        return;
+      }
+      
+      // Otherwise just exit edit mode
       setIsEditing(false);
       setActiveTab("preview");
       
@@ -88,6 +106,11 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     onOpenChange(false);
   };
 
+  // Title text based on whether it's a new or existing entry
+  const dialogTitle = isNewEntry 
+    ? `New Journal Entry: ${currentTask?.taskName}` 
+    : `${currentTask?.taskName} - Journal Entry`;
+
   return (
     <Dialog 
       open={isOpen} 
@@ -95,7 +118,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     >
       <DialogContent className="sm:max-w-xl">
         <DialogHeader className="flex justify-between items-center">
-          <DialogTitle>{currentTask?.taskName || 'Journal Entry'}</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -119,7 +142,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
                 <MarkdownEditor
                   value={journalContent}
                   onChange={(value) => setJournalContent(value || '')}
-                  placeholder="Write your thoughts here..."
+                  placeholder={isNewEntry ? "What are your thoughts about this task?" : "Write your thoughts here..."}
                   height="100%"
                   preview="edit"
                 />
