@@ -100,9 +100,10 @@ export const useTimerInitialization = ({
     isRunning,
     start: startTimer,
     pause: pauseTimer,
-    addTime: extendTimer,
+    // Fix: Wrap extendTimer in a function that matches the expected signature
+    addTime: (minutes: number) => extendTimer(minutes),
     completeTimer: () => {
-      // Convert synchronous function to Promise
+      // Fix: Convert synchronous function to Promise
       timerComplete();
       return Promise.resolve();
     },
@@ -118,7 +119,7 @@ export const useTimerInitialization = ({
     setPauseTimeLeft,
     pauseTimerRef,
     reset: () => {
-      // Convert synchronous function to Promise
+      // Fix: Convert synchronous function to Promise
       resetTimer();
       return Promise.resolve();
     },
@@ -152,7 +153,7 @@ export const useTimerInitialization = ({
     playSound,
     metrics,
     completeTimer: () => {
-      // Convert synchronous function to Promise
+      // Fix: Convert synchronous function to Promise
       timerComplete();
       return Promise.resolve();
     },
