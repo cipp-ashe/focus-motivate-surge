@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap, Edit, Eye, 
-  PlayCircle, PauseCircle, CheckCircle 
+  Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap, 
+  CheckCircle, AlertCircle
 } from "lucide-react";
 
 interface TaskActionButtonProps {
@@ -56,31 +56,20 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
     <div className="flex items-center gap-2">
       {getStandardActionButton()}
       
-      {/* Progress toggle button */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onTaskAction}
-        className={`h-7 px-2 flex items-center gap-1 text-xs ${
-          task.status === 'in-progress' 
-            ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-500' 
-            : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-500'
-        }`}
-        data-action="true"
-        data-action-type="toggle-progress"
-      >
-        {task.status === 'in-progress' ? (
-          <>
-            <PauseCircle className="h-3.5 w-3.5" />
-            <span>Pause</span>
-          </>
-        ) : (
-          <>
-            <PlayCircle className="h-3.5 w-3.5" />
-            <span>Start</span>
-          </>
-        )}
-      </Button>
+      {/* Status indicator - shows if task is in progress */}
+      {task.status === 'in-progress' && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onTaskAction}
+          className="h-7 px-2 flex items-center gap-1 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-500"
+          data-action="true"
+          data-action-type="toggle-progress"
+        >
+          <AlertCircle className="h-3.5 w-3.5" />
+          <span>In Progress</span>
+        </Button>
+      )}
       
       {/* Complete button */}
       <Button

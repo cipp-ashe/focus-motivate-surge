@@ -36,6 +36,19 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   const createdDate = new Date(task.createdAt);
   const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true });
   
+  // Get status color and text
+  const getStatusIndicator = () => {
+    if (task.status === 'in-progress') {
+      return {
+        className: "ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800",
+        text: "In Progress"
+      };
+    }
+    return null;
+  };
+  
+  const statusIndicator = getStatusIndicator();
+  
   return (
     <div className="p-4 relative">
       <div className="flex items-start justify-between gap-x-2">
@@ -47,9 +60,9 @@ export const TaskContent: React.FC<TaskContentProps> = ({
             {task.name}
             
             {/* Status indicator */}
-            {task.status === 'in-progress' && (
-              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                In Progress
+            {statusIndicator && (
+              <span className={statusIndicator.className}>
+                {statusIndicator.text}
               </span>
             )}
           </h3>

@@ -1,6 +1,6 @@
 
 import type { TaskContextState } from './types';
-import type { Task } from '@/types/tasks';
+import type { Task, TaskStatus } from '@/types/tasks';
 
 type TaskAction = 
   | { type: 'LOAD_TASKS'; payload: { tasks: Task[], completed: Task[] } }
@@ -92,7 +92,8 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
       const dismissedTask: Task = {
         ...task,
         dismissedAt: new Date().toISOString(),
-        clearReason: 'dismissed'
+        clearReason: 'dismissed',
+        status: 'dismissed' as TaskStatus
       };
       
       console.log(`TaskContext: Task ${taskId} dismissed`, dismissedTask);
@@ -110,11 +111,11 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
       const task = state.items.find(t => t.id === action.payload.taskId);
       if (!task) return state;
 
-      const completedTask = {
+      const completedTask: Task = {
         ...task,
         completed: true,
         completedAt: new Date().toISOString(),
-        status: 'completed',
+        status: 'completed' as TaskStatus,
         metrics: {
           ...task.metrics,
           ...action.payload.metrics,
