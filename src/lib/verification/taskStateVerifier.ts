@@ -16,13 +16,24 @@ export const taskStateVerifier = {
       // Get all tasks from storage
       const tasksInStorage = taskStorage.loadTasks();
       
-      // Find tasks that are in storage but not in memory
+      // Find tasks that are in storage but not in memory by comparing IDs
       const missingTasks = tasksInStorage.filter(storageTask => 
         !tasksInMemory.some(memoryTask => memoryTask.id === storageTask.id)
       );
       
       if (missingTasks.length > 0) {
         console.log(`TaskStateVerifier: Found ${missingTasks.length} missing tasks`, missingTasks);
+        
+        // Log missing task types for debugging
+        const missingTasksByType = {
+          timer: missingTasks.filter(t => t.taskType === 'timer').length,
+          journal: missingTasks.filter(t => t.taskType === 'journal').length,
+          checklist: missingTasks.filter(t => t.taskType === 'checklist').length,
+          screenshot: missingTasks.filter(t => t.taskType === 'screenshot').length,
+          voicenote: missingTasks.filter(t => t.taskType === 'voicenote').length,
+          regular: missingTasks.filter(t => !t.taskType || t.taskType === 'regular').length
+        };
+        console.log("TaskStateVerifier: Missing tasks by type:", missingTasksByType);
       }
       
       return missingTasks;
@@ -50,6 +61,17 @@ export const taskStateVerifier = {
       
       if (orphanedTasks.length > 0) {
         console.log(`TaskStateVerifier: Found ${orphanedTasks.length} orphaned tasks`, orphanedTasks);
+        
+        // Log orphaned task types for debugging
+        const orphanedTasksByType = {
+          timer: orphanedTasks.filter(t => t.taskType === 'timer').length,
+          journal: orphanedTasks.filter(t => t.taskType === 'journal').length,
+          checklist: orphanedTasks.filter(t => t.taskType === 'checklist').length,
+          screenshot: orphanedTasks.filter(t => t.taskType === 'screenshot').length,
+          voicenote: orphanedTasks.filter(t => t.taskType === 'voicenote').length,
+          regular: orphanedTasks.filter(t => !t.taskType || t.taskType === 'regular').length
+        };
+        console.log("TaskStateVerifier: Orphaned tasks by type:", orphanedTasksByType);
       }
       
       return orphanedTasks;
@@ -72,9 +94,17 @@ export const taskStateVerifier = {
     const tasksToAddToStorage = this.findOrphanedTasks(tasksInMemory);
     
     // Add tasks to storage that are in memory but not in storage
-    tasksToAddToStorage.forEach(task => {
-      taskStorage.addTask(task);
-    });
+    if (tasksToAddToStorage.length > 0) {
+      console.log(`TaskStateVerifier: Adding ${tasksToAddToStorage.length} orphaned tasks to storage`);
+      tasksToAddToStorage.forEach(task => {
+        taskStorage.addTask(task);
+      });
+    }
+    
+    // Log synchronization results
+    if (tasksToAddToMemory.length > 0 || tasksToAddToStorage.length > 0) {
+      console.log(`TaskStateVerifier: Synchronization complete - ${tasksToAddToMemory.length} tasks to add to memory, ${tasksToAddToStorage.length} tasks added to storage`);
+    }
     
     return {
       tasksToAddToMemory,
@@ -92,7 +122,7 @@ export const taskStateVerifier = {
   setupPeriodicVerification(
     getTasksInMemory: () => Task[],
     onTasksMissing: (missingTasks: Task[]) => void,
-    intervalMs: number = 30000 // Reduce interval to 30 seconds
+    intervalMs: number = 20000 // Reduce interval to 20 seconds (from 30 seconds)
   ): () => void {
     const intervalId = setInterval(() => {
       try {
@@ -107,6 +137,15 @@ export const taskStateVerifier = {
           window.dispatchEvent(new Event('force-task-update'));
         } else {
           console.log('TaskVerification: All tasks are in sync');
+        }
+        
+        // Also check for orphaned tasks and save them to storage if needed
+        const orphanedTasks = this.findOrphanedTasks(tasksInMemory);
+        if (orphanedTasks.length > 0) {
+          console.log(`TaskVerification: Saving ${orphanedTasks.length} orphaned tasks to storage`);
+          orphanedTasks.forEach(task => {
+            taskStorage.addTask(task);
+          });
         }
       } catch (error) {
         console.error('Error in periodic task verification:', error);

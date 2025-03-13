@@ -23,7 +23,7 @@ export const useTaskReload = (dispatch: React.Dispatch<any>) => {
       console.log("TaskEvents: Periodic task reload triggered");
       // Use a shorter debounce for the periodic reload
       forceTasksReload({}, (prev) => prev);
-    }, 60000); // Every minute
+    }, 30000); // Every 30 seconds (reduced from 60 seconds for more frequent sync)
     
     return () => clearInterval(periodicReloadId);
   }, [isInitializing]);
@@ -49,7 +49,18 @@ export const useTaskReload = (dispatch: React.Dispatch<any>) => {
       setPreventReentrantUpdate(true);
       
       const { tasks, completed } = taskState.loadFromStorage();
-      console.log(`TaskEvents: Loaded ${tasks.length} tasks from storage during force reload`);
+      console.log(`TaskEvents: Loaded ${tasks.length} tasks and ${completed.length} completed tasks from storage during force reload`);
+      
+      // Add debug logging for task types
+      const tasksByType = {
+        timer: tasks.filter(t => t.taskType === 'timer').length,
+        journal: tasks.filter(t => t.taskType === 'journal').length,
+        checklist: tasks.filter(t => t.taskType === 'checklist').length,
+        screenshot: tasks.filter(t => t.taskType === 'screenshot').length,
+        voicenote: tasks.filter(t => t.taskType === 'voicenote').length,
+        regular: tasks.filter(t => !t.taskType || t.taskType === 'regular').length
+      };
+      console.log("TaskEvents: Task counts by type:", tasksByType);
       
       // Process any pending task updates
       if (pendingTaskUpdates.length > 0) {
@@ -71,6 +82,11 @@ export const useTaskReload = (dispatch: React.Dispatch<any>) => {
       
       dispatch({ type: 'LOAD_TASKS', payload: { tasks, completed } });
       setIsInitializing(false);
+      
+      // Force UI refresh after data load
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 100);
       
       // Release the lock after a small delay
       setTimeout(() => {

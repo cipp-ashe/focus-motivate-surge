@@ -89,12 +89,32 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   };
 
   // Filter tasks by type for display
+  // Ensure we're properly categorizing each task type
   const timerTasks = tasks.filter(task => task.taskType === 'timer');
   const journalTasks = tasks.filter(task => task.taskType === 'journal');
   const checklistTasks = tasks.filter(task => task.taskType === 'checklist');
   const regularTasks = tasks.filter(task => !task.taskType || task.taskType === 'regular');
   const screenshotTasks = tasks.filter(task => task.taskType === 'screenshot');
   const voicenoteTasks = tasks.filter(task => task.taskType === 'voicenote');
+  
+  console.log("TaskManagerContent - Task counts:", {
+    all: tasks.length,
+    timer: timerTasks.length, 
+    journal: journalTasks.length,
+    checklist: checklistTasks.length,
+    regular: regularTasks.length,
+    screenshot: screenshotTasks.length,
+    voicenote: voicenoteTasks.length
+  });
+  
+  // Debug tasks by type
+  if (journalTasks.length > 0) {
+    console.log("Journal tasks:", journalTasks);
+  }
+  if (voicenoteTasks.length > 0) {
+    console.log("Voice note tasks:", voicenoteTasks);
+  }
+  
   const allTasks = tasks;
 
   // Collect counts for the tab list

@@ -39,15 +39,15 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     }
   }, []);
   
-  // Set up periodic task refreshes
+  // Set up periodic task refreshes with more frequent updates
   useEffect(() => {
     const refreshInterval = setInterval(() => {
       // Only refresh if we're not currently loading and enough time has passed
-      if (!isLoading && Date.now() - lastLoadTimeRef.current > 15000) {
+      if (!isLoading && Date.now() - lastLoadTimeRef.current > 10000) { // Reduced from 15000 to 10000 ms
         console.log("TaskLoader - Periodic refresh triggered");
         reloadTasksFromStorage();
       }
-    }, 30000); // Check every 30 seconds
+    }, 20000); // Reduced from 30000 to 20000 ms
     
     return () => clearInterval(refreshInterval);
   }, [isLoading]);
@@ -57,19 +57,36 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     try {
       const storedTasks = taskStorage.loadTasks();
       console.log("TaskLoader - Reloading tasks from storage:", storedTasks);
+      
+      // Log task types for debugging
+      const tasksByType = {
+        timer: storedTasks.filter(t => t.taskType === 'timer').length,
+        journal: storedTasks.filter(t => t.taskType === 'journal').length,
+        checklist: storedTasks.filter(t => t.taskType === 'checklist').length,
+        screenshot: storedTasks.filter(t => t.taskType === 'screenshot').length,
+        voicenote: storedTasks.filter(t => t.taskType === 'voicenote').length,
+        regular: storedTasks.filter(t => !t.taskType || t.taskType === 'regular').length
+      };
+      console.log("TaskLoader - Tasks by type:", tasksByType);
+      
       onTasksLoaded(storedTasks);
       lastLoadTimeRef.current = Date.now();
+      
+      // Force a UI update
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 100);
     } catch (error) {
       console.error("Error reloading tasks from storage:", error);
       toast.error("Error refreshing tasks");
     }
   };
   
-  // Check for pending habits only once when component first mounts
+  // Check for pending habits and load tasks when component first mounts
   useEffect(() => {
     if (initialCheckDoneRef.current) return;
     
-    console.log('TaskLoader mounted, performing initial habits check');
+    console.log('TaskLoader mounted, performing initial tasks load and habits check');
     initialCheckDoneRef.current = true;
     
     // Ensure loading state starts as true
@@ -108,7 +125,7 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
         reloadTasksFromStorage();
         
         loadingTimeoutRef.current = null;
-      }, 1000);
+      }, 800); // Reduced from 1000 to 800 ms
     }
     
     return () => {
