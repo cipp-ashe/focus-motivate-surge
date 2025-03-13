@@ -12,12 +12,12 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 export const useTimerTasksManager = () => {
   const { items, selected } = useTaskContext();
   
-  // Auto-convert selected non-timer tasks to timer tasks when selected in Timer view
+  // Auto-convert selected non-timer tasks to timer tasks ONLY when selected in Timer view
   useEffect(() => {
     // We need to check if we're in the Timer route before auto-converting
     const isTimerRoute = window.location.pathname.includes('/timer');
     
-    // Only process if we have a selected task
+    // Only process if we have a selected task AND we're on the timer page
     if (selected && isTimerRoute) {
       const selectedTask = items.find(task => task.id === selected);
       
@@ -39,7 +39,7 @@ export const useTimerTasksManager = () => {
   const handleTaskSelect = useCallback((taskId: string) => {
     console.log('TimerTasksManager: Task selected:', taskId);
     
-    // Don't auto-convert journal or checklist tasks when not in timer view
+    // Don't auto-convert tasks when not in timer view
     const isTimerRoute = window.location.pathname.includes('/timer');
     
     if (!isTimerRoute) {

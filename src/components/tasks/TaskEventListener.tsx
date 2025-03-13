@@ -65,9 +65,15 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
         navigate('/timer');
       }
       
-      // Dispatch a custom event to set the task in the timer
+      // Dispatch a custom event to set the task in the timer - ONLY convert to timer if actually needed
       setTimeout(() => {
-        const event = new CustomEvent('timer:set-task', { detail: task });
+        // Only convert to timer type if we're on the timer page and it's not already a timer
+        const isTimerPage = window.location.pathname.includes('/timer');
+        const taskToSend = isTimerPage && task.taskType !== 'timer' 
+          ? { ...task, taskType: 'timer' } 
+          : task;
+        
+        const event = new CustomEvent('timer:set-task', { detail: taskToSend });
         window.dispatchEvent(event);
       }, 300); // Small delay to ensure navigation completes first
     };

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTaskActionHandler } from "./components/TaskActionHandler";
 import { TaskActionButton } from "./components/TaskActionButton";
 import { useNavigate } from 'react-router-dom';
+import { TaskIcon } from './components/TaskIcon';
 
 interface TaskContentProps {
   task: Task;
@@ -159,11 +160,12 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       <div className="flex items-start justify-between gap-x-2">
         <div className="min-w-0 flex-1">
           <h3 className={cn(
-            "text-base font-medium leading-6 text-primary",
+            "text-base font-medium leading-6 text-primary flex items-center gap-1",
             task.status === 'in-progress' && "text-amber-600",
             task.status === 'started' && "text-blue-600",
             task.status === 'delayed' && "text-orange-600"
           )}>
+            <TaskIcon taskType={task.taskType} className="h-4 w-4 mr-1" />
             {task.name}
             
             {/* Status indicator (legacy visualization) */}

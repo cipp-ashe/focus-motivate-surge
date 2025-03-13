@@ -65,12 +65,22 @@ const TaskPage = () => {
     console.log("Tasks.tsx - Handled open-voice-recorder event for:", taskName);
   };
   
-  // FIXED: Updated to use the correct parameter structure
+  // Handle task updates, but make sure we don't change the task type unless specifically requested
   const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
     console.log('Tasks.tsx - Task update received:', data);
-    // Don't forward journal or checklist updates to avoid loops
-    if (!data.updates.journalEntry && !data.updates.checklistItems) {
-      eventBus.emit('task:update', data);
+    
+    // Only forward updates that don't have journal, checklist, or taskType changes to avoid loops
+    // and unwanted type conversions
+    const updatesToForward = { ...data.updates };
+    delete updatesToForward.journalEntry;
+    delete updatesToForward.checklistItems;
+    
+    // Only forward if there are remaining updates
+    if (Object.keys(updatesToForward).length > 0) {
+      eventBus.emit('task:update', {
+        taskId: data.taskId,
+        updates: updatesToForward
+      });
     }
   };
 

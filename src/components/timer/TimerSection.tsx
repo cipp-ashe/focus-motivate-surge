@@ -32,6 +32,7 @@ export const TimerSection = ({
   // Listen for timer:set-task events to update the current task
   useEvent('timer:set-task', (task: Task) => {
     console.log("TimerSection: Received timer:set-task event", task);
+    // Don't modify the task type here - accept it as is
     setCurrentTask(task);
   });
 
