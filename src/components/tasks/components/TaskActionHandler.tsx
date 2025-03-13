@@ -30,7 +30,14 @@ export const useTaskActionHandler = (
     // Handle status changes via the dropdown
     if (action?.startsWith('status-')) {
       const newStatus = action.replace('status-', '') as 'pending' | 'started' | 'in-progress' | 'delayed' | 'completed' | 'dismissed';
-      console.log(`Changing task ${task.id} status to: ${newStatus}`);
+      
+      // Skip update if status is already the same (prevents infinite loops)
+      if (task.status === newStatus) {
+        console.log(`TaskActionHandler: Task ${task.id} already has status ${newStatus}, ignoring`);
+        return;
+      }
+      
+      console.log(`Changing task ${task.id} status from ${task.status} to: ${newStatus}`);
       
       if (newStatus === 'completed') {
         // For completed status, use completeTaskOperations to properly handle completion
@@ -64,6 +71,7 @@ export const useTaskActionHandler = (
         // For other statuses, use proper task update operation
         console.log(`Using updateTaskOperations for ${task.id} with status ${newStatus}`);
         updateTaskOperations.updateTask(task.id, { status: newStatus });
+        toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
       }
       return; // Early return to ensure event doesn't propagate further
     }

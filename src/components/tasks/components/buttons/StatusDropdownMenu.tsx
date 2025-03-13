@@ -45,24 +45,22 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
 
   const statusInfo = getStatusInfo(task.status);
 
-  // Improved handler for status changes
+  // Fixed handler for status changes - avoids infinite loop
   const handleStatusChange = (e: React.MouseEvent<HTMLElement>, newStatus: TaskStatus) => {
     e.stopPropagation();
     e.preventDefault();
     
-    console.log(`StatusDropdownMenu: Changing status of task ${task.id} to ${newStatus}`);
+    // Don't update if the status is already the same to prevent infinite loops
+    if (task.status === newStatus) {
+      console.log(`StatusDropdownMenu: Task ${task.id} already has status ${newStatus}, ignoring`);
+      setOpen(false);
+      return;
+    }
     
-    // Directly update the task status using the operation
-    updateTaskOperations.updateTask(task.id, { status: newStatus });
+    console.log(`StatusDropdownMenu: Changing status of task ${task.id} from ${task.status} to ${newStatus}`);
     
-    // Also emit the event directly to ensure UI updates
-    eventBus.emit('task:update', {
-      taskId: task.id,
-      updates: { status: newStatus }
-    });
-    
-    // Show a success toast
-    toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
+    // Use the onTaskAction to handle the status change and bubble up the event
+    onTaskAction(e, `status-${newStatus}`);
     
     // Close the dropdown
     setOpen(false);

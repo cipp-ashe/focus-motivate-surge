@@ -25,6 +25,9 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   useEffect(() => {
     console.log('TaskEventListener: Setting up event listeners');
     
+    // Track last update to prevent loops
+    const lastUpdates = new Map<string, {status?: string, timestamp: number}>();
+    
     // Handler for opening screenshot/image viewer
     const handleOpenImage = (data: { taskId: string; imageUrl: string; taskName: string }) => {
       console.log('TaskEventListener: Received show-image event:', data);
@@ -49,17 +52,31 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       onOpenVoiceRecorder(data.taskId, data.taskName);
     };
     
-    // Improved handler for task updates with better logging
+    // Improved handler for task updates with loop prevention
     const handleTaskUpdate = (data: { taskId: string; updates: any }) => {
-      console.log('TaskEventListener: Task update event received', data);
+      const { taskId, updates } = data;
       
+      // Check if this is a status update to detect potential loops
+      if (updates.status) {
+        const lastUpdate = lastUpdates.get(taskId);
+        const now = Date.now();
+        
+        // If we have a recent update with the same status, skip to prevent loops
+        if (lastUpdate && 
+            lastUpdate.status === updates.status && 
+            now - lastUpdate.timestamp < 1000) {
+          console.log(`TaskEventListener: Ignoring duplicate status update for task ${taskId} to "${updates.status}" (debounced)`);
+          return;
+        }
+        
+        // Record this update to prevent rapid duplicate updates
+        lastUpdates.set(taskId, { status: updates.status, timestamp: now });
+        console.log(`TaskEventListener: Status update to "${updates.status}" for task ${taskId}`);
+      }
+      
+      console.log('TaskEventListener: Task update event received', data);
       // Forward all updates to parent handler
       onTaskUpdate(data);
-      
-      // For debugging, log what kind of update this is
-      if (data.updates.status) {
-        console.log(`TaskEventListener: Status update to "${data.updates.status}" for task ${data.taskId}`);
-      }
     };
     
     // Handler for timer task selection - Only navigate to timer for timer tasks
