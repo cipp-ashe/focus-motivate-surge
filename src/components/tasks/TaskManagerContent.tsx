@@ -116,7 +116,6 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
         selectedTaskId={selectedTaskId}
         onTaskAdd={handleTaskAdd}
         onTasksAdd={handleTasksAdd}
-        dialogOpeners={dialogOpeners}
       />
     );
   }
