@@ -59,6 +59,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
         entry: journalContent
       });
       
+      // Emit task update event with proper structure
       eventBus.emit('task:update', {
         taskId: currentTask.taskId,
         updates: { 
@@ -158,6 +159,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
                 <Button 
                   onClick={saveJournal} 
                   type="button"
+                  disabled={!journalContent.trim()}
                 >
                   <Save className="h-4 w-4 mr-2" /> Save Journal Entry
                 </Button>

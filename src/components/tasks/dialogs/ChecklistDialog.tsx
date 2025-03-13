@@ -78,6 +78,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
         items: checklistItems
       });
       
+      // Emit the event with the proper structure
       eventBus.emit('task:update', {
         taskId: currentTask.taskId,
         updates: { 
@@ -171,6 +172,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
             <Button 
               onClick={saveChecklist}
               type="button"
+              disabled={checklistItems.length === 0}
             >
               <Save className="h-4 w-4 mr-2" /> Save Checklist
             </Button>

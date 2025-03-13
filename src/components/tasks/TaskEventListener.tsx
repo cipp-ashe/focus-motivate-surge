@@ -44,10 +44,13 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       onOpenVoiceRecorder(data.taskId, data.taskName);
     };
     
-    // Handler for task updates
+    // Handler for task updates - making it a one-way process to avoid loops
     const handleTaskUpdate = (data: { taskId: string; updates: any }) => {
       console.log('TaskEventListener: Task update event received', data);
-      onTaskUpdate(data.taskId, data.updates);
+      // Only forward task updates that don't originate from dialogs
+      if (!data.updates.journalEntry && !data.updates.checklistItems) {
+        onTaskUpdate(data.taskId, data.updates);
+      }
     };
     
     // Set up event listeners

@@ -66,8 +66,11 @@ const TaskPage = () => {
   };
   
   const handleTaskUpdate = (taskId: string, updates: Partial<Task>) => {
-    console.log('Tasks.tsx - Forwarding task-update event:', { taskId, updates });
-    eventBus.emit('task:update', { taskId, updates });
+    console.log('Tasks.tsx - Task update received:', { taskId, updates });
+    // Don't forward journal or checklist updates to avoid loops
+    if (!updates.journalEntry && !updates.checklistItems) {
+      eventBus.emit('task:update', { taskId, updates });
+    }
   };
 
   // Create an object with all the dialog opener functions
