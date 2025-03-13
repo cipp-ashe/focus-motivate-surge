@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -61,24 +60,12 @@ export const useTimerHandlers = ({
       });
     } else {
       start();
-      // Emit start event
+      // Emit start event with proper details
       eventManager.emit('timer:start', { 
         taskName, 
         duration: timeLeft,
         currentTime: Date.now()
       });
-      
-      // Start sending tick events
-      let tickInterval = setInterval(() => {
-        eventManager.emit('timer:tick', {
-          taskName,
-          remaining: timeLeft,
-          timeLeft
-        });
-      }, 1000);
-      
-      // Clean up interval if component unmounts
-      return () => clearInterval(tickInterval);
     }
   }, [isRunning, pause, start, taskName, timeLeft, metrics]);
 

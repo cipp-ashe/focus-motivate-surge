@@ -18,6 +18,8 @@ export const useTimerEventListeners = ({
 }: UseTimerEventListenersProps) => {
   // Maintain event IDs for debugging
   const eventIdsRef = useRef<{[key: string]: string}>({});
+  // Add a timer interval ref to clear on unmount
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Only set up listeners if we have a task name
@@ -62,10 +64,38 @@ export const useTimerEventListeners = ({
       }
     });
     
-    // Handle timer start - explicitly log when timer starts
+    // Handle timer start - set up the interval for counting down
     const unsubStart = eventManager.on('timer:start', (payload) => {
       if (payload.taskName === taskName) {
         console.log(`Starting timer for ${taskName} with duration: ${payload.duration} [${startId}]`);
+        
+        // Clear any existing interval
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+        }
+        
+        let currentTimeLeft = payload.duration;
+        
+        // Create new interval for countdown
+        timerIntervalRef.current = setInterval(() => {
+          currentTimeLeft -= 1;
+          
+          // Emit tick event with the new time
+          eventManager.emit('timer:tick', {
+            taskName,
+            remaining: currentTimeLeft,
+            timeLeft: currentTimeLeft
+          });
+          
+          // Check if timer is complete
+          if (currentTimeLeft <= 0) {
+            if (timerIntervalRef.current) {
+              clearInterval(timerIntervalRef.current);
+              timerIntervalRef.current = null;
+            }
+            eventManager.emit('timer:complete', { taskName });
+          }
+        }, 1000);
       }
     });
     
@@ -84,6 +114,12 @@ export const useTimerEventListeners = ({
       unsubCollapse();
       unsubStart();
       unsubTick();
+      
+      // Clear any active timer interval
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
     };
   }, [taskName, setInternalMinutes, setIsExpanded, expandedViewRef]);
 };

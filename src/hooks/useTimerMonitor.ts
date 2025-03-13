@@ -8,7 +8,7 @@ interface UseTimerMonitorProps {
   onStart?: (taskName: string, duration: number) => void;
   onPause?: () => void;
   onResume?: () => void;
-  onTick?: (secondsLeft: number) => void; // Add explicit onTick handler
+  onTick?: (secondsLeft: number) => void;
 }
 
 export const useTimerMonitor = ({
@@ -29,14 +29,17 @@ export const useTimerMonitor = ({
   useEffect(() => {
     console.log("Setting up timer monitor event listeners");
     
-    // Update the handler to accept both timeLeft and remaining properties
+    // Update the handler to correctly process remaining or timeLeft values
     const handleTimerTick = (payload: { timeLeft?: number; remaining?: number; taskName?: string }) => {
       // Use either timeLeft or remaining based on what's available
       const timeLeft = payload.timeLeft !== undefined ? payload.timeLeft : payload.remaining;
       if (timeLeft !== undefined) {
         timerInfoRef.current.secondsLeft = timeLeft;
-        onProgress?.(timeLeft);
-        onTick?.(timeLeft); // Call the explicit tick handler
+        
+        // Call both callbacks if provided
+        if (onProgress) onProgress(timeLeft);
+        if (onTick) onTick(timeLeft);
+        
         console.log(`Timer tick processed: ${timeLeft}s remaining`);
       }
     };
@@ -56,26 +59,27 @@ export const useTimerMonitor = ({
         taskName,
         totalSeconds: duration,
       };
-      onStart?.(taskName, duration);
+      
+      if (onStart) onStart(taskName, duration);
     };
 
     const handleTimerPause = () => {
       console.log("Timer pause event received");
       timerInfoRef.current.isActive = false;
-      onPause?.();
+      if (onPause) onPause();
     };
 
     const handleTimerResume = () => {
       console.log("Timer resume event received");
       timerInfoRef.current.isActive = true;
-      onResume?.();
+      if (onResume) onResume();
     };
 
     const handleTimerComplete = () => {
       console.log("Timer complete event received");
       timerInfoRef.current.isActive = false;
       timerInfoRef.current.secondsLeft = 0;
-      onComplete?.();
+      if (onComplete) onComplete();
     };
 
     // Subscribe to timer events
