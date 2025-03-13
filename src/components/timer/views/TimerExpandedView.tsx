@@ -54,7 +54,7 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
     <div 
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50"
+      className="fixed inset-0 z-[9999]" // Z-index increased to ensure it's above everything
     >
       {/* Overlay/Backdrop - Made darker and with more blur for better focus */}
       <div 

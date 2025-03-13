@@ -58,7 +58,7 @@ export const TimerContent: React.FC<TimerContentProps> = ({
   handleAddTimeAndContinue,
   handleComplete,
 }) => {
-  // Show completion view if timer is complete
+  // Show completion view if timer is complete and we have completion metrics
   if (showCompletion && completionMetrics) {
     return (
       <>

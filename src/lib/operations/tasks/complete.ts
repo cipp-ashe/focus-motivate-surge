@@ -35,24 +35,37 @@ export const completeTaskOperations = {
       // Format metrics to ensure they're in the correct format
       const formattedMetrics: TaskMetrics = metrics ? {
         // Handle both Timer metrics and Task metrics
-        timeSpent: 'actualDuration' in metrics 
-          ? metrics.actualDuration 
-          : ('timeSpent' in metrics ? metrics.timeSpent : 0),
-        timeElapsed: 'actualDuration' in metrics ? metrics.actualDuration : 0,
-        pauseCount: 'pauseCount' in metrics ? metrics.pauseCount : 0,
+        timeSpent: metrics.actualDuration || metrics.timeSpent || 0,
+        timeElapsed: metrics.actualDuration || 0,
+        pauseCount: metrics.pauseCount || 0,
         completionDate: new Date().toISOString(),
-        expectedTime: 'expectedTime' in metrics ? metrics.expectedTime : 0,
-        actualDuration: 'actualDuration' in metrics ? metrics.actualDuration : 0,
-        // Ensure favoriteQuotes is a string array
-        favoriteQuotes: 'favoriteQuotes' in metrics && Array.isArray(metrics.favoriteQuotes) 
+        expectedTime: metrics.expectedTime || 0,
+        actualDuration: metrics.actualDuration || 0,
+        
+        // Ensure favoriteQuotes is properly handled
+        favoriteQuotes: Array.isArray(metrics.favoriteQuotes) 
           ? metrics.favoriteQuotes 
-          : (metrics.favoriteQuotes ? [String(metrics.favoriteQuotes)] : []),
-        pausedTime: 'pausedTime' in metrics ? metrics.pausedTime : 0,
-        extensionTime: 'extensionTime' in metrics ? metrics.extensionTime : 0,
-        netEffectiveTime: 'netEffectiveTime' in metrics ? metrics.netEffectiveTime : 0,
-        efficiencyRatio: 'efficiencyRatio' in metrics ? metrics.efficiencyRatio : 0,
-        completionStatus: 'completionStatus' in metrics ? metrics.completionStatus : 'Completed',
-      } : {};
+          : [],
+          
+        pausedTime: metrics.pausedTime || 0,
+        extensionTime: metrics.extensionTime || 0,
+        netEffectiveTime: metrics.netEffectiveTime || 0,
+        efficiencyRatio: metrics.efficiencyRatio || 0,
+        completionStatus: metrics.completionStatus || 'Completed',
+      } : {
+        timeSpent: 0,
+        timeElapsed: 0,
+        pauseCount: 0,
+        completionDate: new Date().toISOString(),
+        expectedTime: 0,
+        actualDuration: 0,
+        favoriteQuotes: [],
+        pausedTime: 0,
+        extensionTime: 0,
+        netEffectiveTime: 0,
+        efficiencyRatio: 0,
+        completionStatus: 'Completed',
+      };
       
       // Update task to completed
       const completedTask: Task = { 

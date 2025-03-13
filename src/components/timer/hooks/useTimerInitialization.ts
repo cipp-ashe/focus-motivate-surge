@@ -1,13 +1,14 @@
 
 import { useRef } from "react";
 import { TimerProps } from "@/types/timer";
-import { useTimerState } from "../state/TimerState";
+import { useTimerComplete } from "../state/TimerState";
 import { TimerExpandedViewRef } from "@/types/timer";
 import { useTimerHandlers } from "../handlers/TimerHandlers";
 import { useTimerMonitor } from "@/hooks/useTimerMonitor";
 import { useTimerView } from "./useTimerView";
 import { useTimerEventListeners } from "./useTimerEventListeners";
 import { useAutoComplete } from "./useAutoComplete";
+import { useTimerState } from "@/hooks/timer/useTimerState";
 
 export const useTimerInitialization = ({
   duration,
@@ -20,16 +21,20 @@ export const useTimerInitialization = ({
   const expandedViewRef = useRef<TimerExpandedViewRef | null>(null);
 
   // Initialize the timer state
-  const timerState = useTimerState({
-    duration,
-    taskName,
-    onComplete,
-    onAddTime,
-    onDurationChange,
-  });
-
-  // Extract values from timer state
   const {
+    timeLeft,
+    minutes,
+    isRunning,
+    metrics,
+    updateTimeLeft,
+    updateMinutes,
+    setIsRunning,
+    updateMetrics,
+    isMountedRef,
+  } = useTimerState(duration);
+
+  // Initialize view state
+  const [
     isExpanded,
     setIsExpanded,
     selectedSound,
@@ -45,21 +50,30 @@ export const useTimerInitialization = ({
     pauseTimeLeft,
     setPauseTimeLeft,
     pauseTimerRef,
-    timeLeft,
-    minutes,
-    isRunning,
-    metrics,
     start,
     pause,
     addTime,
-    setMinutes,
-    completeTimer,
-    updateMetrics,
     playSound,
     testSound,
     isLoadingAudio,
     reset,
-  } = timerState;
+    completeTimer,
+    setMinutes
+  ] = useTimerState({
+    duration,
+    taskName,
+    onComplete,
+    onAddTime,
+    onDurationChange,
+  });
+
+  // Use the timer completion hook
+  const { completeTimer: timerComplete } = useTimerComplete({
+    taskName,
+    metrics,
+    setIsExpanded,
+    onComplete
+  });
 
   // Set up event listeners
   useTimerEventListeners({
@@ -76,7 +90,7 @@ export const useTimerInitialization = ({
     start,
     pause,
     addTime,
-    completeTimer,
+    completeTimer: timerComplete,
     playSound,
     onAddTime,
     onComplete,
@@ -118,7 +132,7 @@ export const useTimerInitialization = ({
     pause,
     playSound,
     metrics,
-    completeTimer,
+    completeTimer: timerComplete,
     onComplete,
     taskName,
     setCompletionMetrics,

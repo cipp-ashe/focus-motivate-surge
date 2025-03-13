@@ -49,11 +49,13 @@ export const useTimerHandlers = ({
     try {
       await completeTimer();
       await playSound();
-      setTimeout(() => {
-        setCompletionMetrics(metrics);
-        setShowCompletion(true);
-        setIsExpanded(false); // Ensure we collapse the expanded view on completion
-      }, 0);
+      
+      // We need to ensure we set the completion state and metrics before collapsing
+      setCompletionMetrics(metrics);
+      setShowCompletion(true);
+      setIsExpanded(false); // Collapse the expanded view on completion
+      
+      toast.success("Timer completed! 🎉");
     } catch (error) {
       console.error('Error in timer completion flow:', error);
       toast.error("An error occurred while completing the timer ⚠️");
@@ -82,15 +84,13 @@ export const useTimerHandlers = ({
       setPauseTimeLeft(0);
     }
     
-    // First start the timer, then expand the view
+    // IMPORTANT: First start the timer, then ensure expanded view is set
     start();
     
-    // Set a small delay to ensure the timer is running before expanding
-    setTimeout(() => {
-      setIsExpanded(true);
-      toast.success("Timer started! Let's focus! 🎯");
-    }, 100);
+    // Make sure the timer is expanded immediately
+    setIsExpanded(true);
     
+    toast.success("Timer started! Let's focus! 🎯");
   }, [start, pauseTimerRef, setPauseTimeLeft, setIsExpanded]);
 
   const handlePause = useCallback(() => {
@@ -107,6 +107,9 @@ export const useTimerHandlers = ({
         return prev - 1;
       });
     }, 1000);
+    
+    // Do not collapse on pause
+    toast.info("Timer paused. Take a short break!");
   }, [pause, playSound, setPauseTimeLeft, pauseTimerRef]);
 
   const handleToggle = useCallback(() => {
@@ -138,13 +141,13 @@ export const useTimerHandlers = ({
   }, [addTime, onAddTime]);
 
   const handleCloseTimer = useCallback(() => {
+    // Only collapse the expanded view, don't reset the timer
     setIsExpanded(false);
-    reset();
     if (pauseTimerRef.current) {
       clearInterval(pauseTimerRef.current);
       setPauseTimeLeft(0);
     }
-  }, [setIsExpanded, reset, pauseTimerRef, setPauseTimeLeft]);
+  }, [setIsExpanded, pauseTimerRef, setPauseTimeLeft]);
 
   return {
     handleTimerCompletion,
