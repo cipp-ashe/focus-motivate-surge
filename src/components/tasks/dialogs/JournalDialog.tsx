@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Pencil, Save } from 'lucide-react';
@@ -149,14 +150,16 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
               </TabsContent>
             </Tabs>
             
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button onClick={saveJournal}>
-                <Save className="h-4 w-4 mr-2" /> Save Journal Entry
-              </Button>
-            </div>
+            <DialogFooter className="pt-4">
+              <div className="flex justify-end gap-2 w-full">
+                <Button variant="outline" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button onClick={() => saveJournal()} type="button">
+                  <Save className="h-4 w-4 mr-2" /> Save Journal Entry
+                </Button>
+              </div>
+            </DialogFooter>
           </>
         ) : (
           <>
@@ -173,14 +176,16 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
               )}
             </div>
             
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleClose}>
-                Close
-              </Button>
-              <Button onClick={handleEdit}>
-                <Pencil className="h-4 w-4 mr-2" /> Edit Journal Entry
-              </Button>
-            </div>
+            <DialogFooter className="pt-4">
+              <div className="flex justify-end gap-2 w-full">
+                <Button variant="outline" onClick={handleClose}>
+                  Close
+                </Button>
+                <Button onClick={handleEdit}>
+                  <Pencil className="h-4 w-4 mr-2" /> Edit Journal Entry
+                </Button>
+              </div>
+            </DialogFooter>
           </>
         )}
       </DialogContent>
