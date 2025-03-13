@@ -9,7 +9,7 @@ export interface JournalButtonProps extends TaskButtonProps {}
 export const JournalButton: React.FC<JournalButtonProps> = ({ task, onTaskAction }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    onTaskAction(e, 'true');
+    onTaskAction(e, 'journal');
   };
 
   return (

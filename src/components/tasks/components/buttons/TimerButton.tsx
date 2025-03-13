@@ -9,7 +9,7 @@ export interface TimerButtonProps extends TaskButtonProps {}
 export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    onTaskAction(e, 'true');
+    onTaskAction(e, 'timer');
   };
 
   return (

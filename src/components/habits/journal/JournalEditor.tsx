@@ -5,9 +5,14 @@ import { MarkdownEditor } from "@/components/ui/markdown-editor/index";
 interface JournalEditorProps {
   content: string;
   onChange: (value: string) => void;
+  placeholder?: string;
 }
 
-const JournalEditor: React.FC<JournalEditorProps> = ({ content, onChange }) => {
+const JournalEditor: React.FC<JournalEditorProps> = ({ 
+  content, 
+  onChange,
+  placeholder = "Write your thoughts here..." 
+}) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
   const handleChange = (value: string | undefined) => {
@@ -23,6 +28,7 @@ const JournalEditor: React.FC<JournalEditorProps> = ({ content, onChange }) => {
         onChange={handleChange}
         height="100%"
         preview="edit"
+        placeholder={placeholder}
       />
     </div>
   );
