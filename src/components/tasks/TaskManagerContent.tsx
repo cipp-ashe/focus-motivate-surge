@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TaskInput } from './TaskInput';
 import { Task } from '@/types/tasks';
@@ -16,6 +17,12 @@ interface TaskManagerContentProps {
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
   isTimerView?: boolean;
+  dialogOpeners?: {
+    checklist: (taskId: string, taskName: string, items: any[]) => void;
+    journal: (taskId: string, taskName: string, entry: string) => void;
+    screenshot: (imageUrl: string, taskName: string) => void;
+    voicenote: (taskId: string, taskName: string) => void;
+  };
 }
 
 export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
@@ -23,7 +30,8 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   selectedTaskId,
   onTaskAdd,
   onTasksAdd,
-  isTimerView = false
+  isTimerView = false,
+  dialogOpeners
 }) => {
   const isMobile = useIsMobile();
   
@@ -105,6 +113,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
         selectedTaskId={selectedTaskId}
         onTaskAdd={handleTaskAdd}
         onTasksAdd={handleTasksAdd}
+        dialogOpeners={dialogOpeners}
       />
     );
   }
@@ -122,13 +131,13 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
         <Tabs defaultValue="all" className="h-full flex flex-col">
           <TaskTabsList taskCounts={taskCounts} />
 
-          <TaskTypeTab value="all" tasks={allTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="timer" tasks={timerTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="journal" tasks={journalTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="checklist" tasks={checklistTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} />
-          <TaskTypeTab value="voicenote" tasks={voicenoteTasks} selectedTaskId={selectedTaskId} />
+          <TaskTypeTab value="all" tasks={allTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+          <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+          <TaskTypeTab value="timer" tasks={timerTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+          <TaskTypeTab value="journal" tasks={journalTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+          <TaskTypeTab value="checklist" tasks={checklistTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+          <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+          <TaskTypeTab value="voicenote" tasks={voicenoteTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
         </Tabs>
       </div>
     </div>

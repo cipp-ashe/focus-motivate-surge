@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
@@ -41,7 +40,6 @@ const TaskPage = () => {
     taskName: string;
   } | null>(null);
   
-  // Event handlers
   const handleShowImage = (imageUrl: string, taskName: string) => {
     console.log("Tasks.tsx - Opening screenshot for:", taskName, imageUrl);
     setCurrentScreenshotTask({
@@ -85,17 +83,13 @@ const TaskPage = () => {
     toast.info(`Recording for: ${taskName}`, { duration: 1500 });
   };
   
-  // Handle task updates, but make sure we don't change the task type unless specifically requested
   const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
     console.log('Tasks.tsx - Task update received:', data);
     
-    // Only forward updates that don't have journal, checklist, or taskType changes to avoid loops
-    // and unwanted type conversions
     const updatesToForward = { ...data.updates };
     delete updatesToForward.journalEntry;
     delete updatesToForward.checklistItems;
     
-    // Only forward if there are remaining updates
     if (Object.keys(updatesToForward).length > 0) {
       eventBus.emit('task:update', {
         taskId: data.taskId,
@@ -104,7 +98,6 @@ const TaskPage = () => {
     }
   };
 
-  // Dialog openers to pass to TaskManager
   const dialogOpeners = {
     checklist: handleOpenChecklist,
     journal: handleOpenJournal,
@@ -152,7 +145,8 @@ const TaskPage = () => {
             id: currentScreenshotTask.taskId,
             name: currentScreenshotTask.taskName,
             imageUrl: currentScreenshotTask.imageUrl,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            completed: false
           }}
         />
       )}
@@ -164,7 +158,8 @@ const TaskPage = () => {
           task={{
             id: currentVoiceNoteTask.taskId,
             name: currentVoiceNoteTask.taskName,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            completed: false
           }}
         />
       )}

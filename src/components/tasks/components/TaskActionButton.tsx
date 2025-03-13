@@ -1,125 +1,107 @@
 
 import React from 'react';
-import { Task } from "@/types/tasks";
+import { Task } from '@/types/tasks';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal, Trash, Check, X, Edit, Clock, Image, FileText, List, Mic } from 'lucide-react';
 import {
-  TimerButton,
-  JournalButton,
-  ScreenshotButton,
-  ChecklistButton,
-  VoiceNoteButton,
-  HabitButton,
-  StatusDropdownMenu
-} from './buttons';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 interface TaskActionButtonProps {
   task: Task;
-  editingTaskId: string | null;
-  inputValue: string;
-  durationInMinutes: number;
-  onTaskAction: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => void;
-  handleLocalChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleLocalBlur: () => void;
-  handleLocalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
-  onOpenTaskDialog?: () => void; // The dialog opener function
+  onTaskAction: (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => void;
+  dialogOpeners?: {
+    checklist: (taskId: string, taskName: string, items: any[]) => void;
+    journal: (taskId: string, taskName: string, entry: string) => void;
+    screenshot: (imageUrl: string, taskName: string) => void;
+    voicenote: (taskId: string, taskName: string) => void;
+  };
 }
 
-export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
-  task,
-  editingTaskId,
-  inputValue,
-  durationInMinutes,
+export const TaskActionButton: React.FC<TaskActionButtonProps> = ({ 
+  task, 
   onTaskAction,
-  handleLocalChange,
-  handleLocalBlur,
-  handleLocalKeyDown,
-  preventPropagation,
-  onOpenTaskDialog,
+  dialogOpeners
 }) => {
-  // For habit-related tasks
-  if (task.relationships?.habitId) {
-    return (
-      <div className="flex items-center gap-2">
-        {getTaskTypeButton()}
-        <HabitButton onClick={(e) => onTaskAction(e, 'view-habit')} />
-        <StatusDropdownMenu task={task} onTaskAction={onTaskAction} />
-      </div>
-    );
-  }
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>, actionType: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    // Call the parent handler for most actions
+    onTaskAction(e, actionType);
+    
+    // Special handling for opening task-specific dialogs
+    if (actionType === 'open') {
+      console.log(`${task.taskType} button clicked for task: ${task.id}`);
+      
+      if (task.taskType === 'journal' && dialogOpeners?.journal) {
+        dialogOpeners.journal(task.id, task.name, task.journalEntry || '');
+      } else if (task.taskType === 'checklist' && dialogOpeners?.checklist) {
+        dialogOpeners.checklist(task.id, task.name, task.checklistItems || []);
+      } else if (task.taskType === 'screenshot' && task.imageUrl && dialogOpeners?.screenshot) {
+        dialogOpeners.screenshot(task.imageUrl, task.name);
+      } else if (task.taskType === 'voicenote' && dialogOpeners?.voicenote) {
+        dialogOpeners.voicenote(task.id, task.name);
+      } else if (task.taskType === 'timer') {
+        // For timer, we just trigger the action
+        onTaskAction(e, 'true');
+      } else {
+        console.warn(`No dialog opener provided for ${task.taskType} task: ${task.id}`);
+      }
+    }
+  };
   
   return (
-    <div className="flex items-center gap-2">
-      {getTaskTypeButton()}
-      <StatusDropdownMenu task={task} onTaskAction={onTaskAction} />
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[160px]">
+        <DropdownMenuItem onClick={(e) => handleButtonClick(e as any, 'open')}>
+          {task.taskType === 'timer' && <Clock className="mr-2 h-4 w-4" />}
+          {task.taskType === 'screenshot' && <Image className="mr-2 h-4 w-4" />}
+          {task.taskType === 'journal' && <FileText className="mr-2 h-4 w-4" />}
+          {task.taskType === 'checklist' && <List className="mr-2 h-4 w-4" />}
+          {task.taskType === 'voicenote' && <Mic className="mr-2 h-4 w-4" />}
+          {(!task.taskType || task.taskType === 'regular') && <Edit className="mr-2 h-4 w-4" />}
+          Open {task.taskType || 'Task'}
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem 
+          onClick={(e) => handleButtonClick(e as any, 'complete')}
+          className="text-green-600"
+        >
+          <Check className="mr-2 h-4 w-4" />
+          Complete
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          onClick={(e) => handleButtonClick(e as any, 'dismiss')}
+          className="text-amber-600"
+        >
+          <X className="mr-2 h-4 w-4" />
+          Dismiss
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem 
+          onClick={(e) => handleButtonClick(e as any, 'delete')}
+          className="text-red-600"
+        >
+          <Trash className="mr-2 h-4 w-4" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-
-  function getTaskTypeButton() {
-    const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>) => {
-      console.log(`${task.taskType} button clicked for task:`, task.id);
-      onTaskAction(e, 'true');
-      
-      if (onOpenTaskDialog) {
-        console.log(`Calling onOpenTaskDialog from ${task.taskType} button`);
-        onOpenTaskDialog();
-      } else {
-        console.warn(`No dialog opener provided for ${task.taskType} task:`, task.id);
-      }
-    };
-
-    // Handle timer button separately because it has different behavior
-    if (task.taskType === 'timer') {
-      return (
-        <TimerButton
-          durationInMinutes={durationInMinutes}
-          isEditing={editingTaskId === task.id}
-          inputValue={inputValue}
-          handleChange={handleLocalChange}
-          handleBlur={handleLocalBlur}
-          handleKeyDown={handleLocalKeyDown}
-          preventPropagation={preventPropagation}
-          onClick={(e) => onTaskAction(e, 'true')}
-        />
-      );
-    }
-    
-    if (task.taskType === 'journal') {
-      return (
-        <JournalButton 
-          hasEntry={!!task.journalEntry} 
-          onClick={handleButtonClick}
-        />
-      );
-    }
-    
-    if (task.taskType === 'screenshot') {
-      return (
-        <ScreenshotButton 
-          hasImage={!!task.imageUrl} 
-          onClick={handleButtonClick}
-        />
-      );
-    }
-    
-    if (task.taskType === 'checklist') {
-      return (
-        <ChecklistButton 
-          hasItems={!!(task.checklistItems?.length)} 
-          onClick={handleButtonClick}
-        />
-      );
-    }
-    
-    if (task.taskType === 'voicenote') {
-      return (
-        <VoiceNoteButton 
-          hasRecording={!!task.voiceNoteUrl} 
-          onClick={handleButtonClick}
-        />
-      );
-    }
-    
-    // If there's no specific action type, we don't need a button
-    return null;
-  }
 };

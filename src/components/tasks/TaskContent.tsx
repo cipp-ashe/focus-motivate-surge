@@ -1,23 +1,23 @@
 
 import React from 'react';
-import { Task } from "@/types/tasks";
-import { formatDistanceToNow } from 'date-fns';
-import { cn } from "@/lib/utils";
-import { useTaskActionHandler } from "./components/TaskActionHandler";
-import { TaskActionButton } from "./components/TaskActionButton";
-import { useNavigate } from 'react-router-dom';
-import { TaskIcon } from './components/TaskIcon';
+import { Task } from '@/types/tasks';
+import { Card, CardContent } from '@/components/ui/card';
+import { CheckIcon, TimerIcon, ImageIcon, PencilIcon, ClipboardListIcon, MicIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { StatusDropdownMenu } from './components/buttons/StatusDropdownMenu';
+import { updateTaskOperations } from '@/lib/operations/tasks/update';
+import { eventBus } from '@/lib/eventBus';
+import { JournalButton } from './components/buttons/JournalButton';
+import { ChecklistButton } from './components/buttons/ChecklistButton';
+import { TimerButton } from './components/buttons/TimerButton';
+import { ScreenshotButton } from './components/buttons/ScreenshotButton';
+import { VoiceNoteButton } from './components/buttons/VoiceNoteButton';
+import { TaskActionButton } from './components/TaskActionButton';
 
 interface TaskContentProps {
   task: Task;
-  editingTaskId: string | null;
-  inputValue: string;
-  onDelete: (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => void;
-  onDurationClick: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: () => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
+  isSelected?: boolean;
+  onSelect?: () => void;
   dialogOpeners?: {
     checklist: (taskId: string, taskName: string, items: any[]) => void;
     journal: (taskId: string, taskName: string, entry: string) => void;
@@ -26,175 +26,183 @@ interface TaskContentProps {
   };
 }
 
-export const TaskContent: React.FC<TaskContentProps> = ({
-  task,
-  editingTaskId,
-  inputValue,
-  onDelete,
-  onDurationClick,
-  onChange,
-  onBlur,
-  onKeyDown,
-  preventPropagation,
-  dialogOpeners,
+export const TaskContent: React.FC<TaskContentProps> = ({ 
+  task, 
+  isSelected = false, 
+  onSelect,
+  dialogOpeners
 }) => {
-  const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
-  const navigate = useNavigate();
-  
-  // Use the hook at the component level, not inside another function
-  const { handleTaskAction: statusTaskAction } = useTaskActionHandler(task);
-  
-  // Handle the task action with direct event dispatching
-  const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
-    // Prevent event propagation
-    if (e && e.stopPropagation) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
+  const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => {
+    e.stopPropagation();
+    console.log("TaskContent: Action", actionType, "clicked for task", task.id, "of type", task.taskType);
     
-    // Get the action type from the parameter or clicked element
-    const action = actionType || 
-      (e.currentTarget instanceof HTMLElement 
-        ? e.currentTarget.getAttribute('data-action-type') 
-        : null);
+    if (!actionType) return;
     
-    console.log(`TaskContent: Action ${action} clicked for task ${task.id} of type ${task.taskType}`);
-    
-    // Handle task specific dialog opening based on task type
-    if (task.taskType === 'checklist' && action === 'true' && dialogOpeners?.checklist) {
-      console.log('Opening checklist via dialog opener');
-      dialogOpeners.checklist(task.id, task.name, task.checklistItems || []);
+    // Handle status change actions
+    if (actionType.startsWith('status-')) {
+      const newStatus = actionType.split('-')[1];
+      console.log("Task status change:", newStatus, "for task:", task.id);
+      
+      updateTaskOperations.updateTaskStatus(task.id, newStatus as any);
       return;
     }
     
-    if (task.taskType === 'journal' && action === 'true' && dialogOpeners?.journal) {
-      console.log('Opening journal via dialog opener');
-      dialogOpeners.journal(task.id, task.name, task.journalEntry || '');
+    // Handle task completion
+    if (actionType === 'complete') {
+      console.log("Task completion for task:", task.id);
+      eventBus.emit('task:complete', { taskId: task.id });
+      toast.success(`Completed task: ${task.name}`);
       return;
     }
     
-    if (task.taskType === 'voicenote' && action === 'true' && dialogOpeners?.voicenote) {
-      console.log('Opening voice recorder via dialog opener');
-      dialogOpeners.voicenote(task.id, task.name);
+    // Handle task dismissal
+    if (actionType === 'dismiss') {
+      console.log("Task dismissal for task:", task.id);
+      eventBus.emit('task:dismiss', { taskId: task.id });
+      toast.info(`Dismissed task: ${task.name}`);
       return;
     }
     
-    if (task.taskType === 'screenshot' && action === 'true' && dialogOpeners?.screenshot) {
-      console.log('Opening screenshot via dialog opener');
-      dialogOpeners.screenshot(task.imageUrl || '', task.name);
+    // Handle task deletion
+    if (actionType === 'delete') {
+      console.log("Task deletion for task:", task.id);
+      eventBus.emit('task:delete', { taskId: task.id });
+      toast.info(`Deleted task: ${task.name}`);
       return;
     }
     
-    // Only timer tasks should navigate to timer page
-    if (task.taskType === 'timer' && action === 'true') {
-      // Update task status if needed
-      if (task.status !== 'in-progress') {
-        window.dispatchEvent(new CustomEvent('task-update', {
-          detail: {
-            taskId: task.id,
-            updates: { status: 'in-progress' }
-          }
-        }));
+    // Special handling for each task type
+    if (task.taskType === 'journal' && actionType === 'true') {
+      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+      if (dialogOpeners?.journal) {
+        dialogOpeners.journal(task.id, task.name, task.journalEntry || '');
+      } else {
+        console.warn("No dialog opener provided for journal task:", task.id);
       }
-      
-      // Trigger timer:set-task event for the timer task
-      window.dispatchEvent(new CustomEvent('timer:set-task', {
-        detail: task
-      }));
-      
-      // Navigate to the timer page
-      navigate('/timer');
-      
-      console.log(`Navigating to timer page with timer task: ${task.id}`);
       return;
     }
     
-    // Use the task action handler for any other actions
-    statusTaskAction(e, action);
-  };
-  
-  // Format the created date
-  const createdDate = new Date(task.createdAt);
-  const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true });
-  
-  // Get status indicator for the task status
-  const getStatusIndicator = () => {
-    if (task.status === 'in-progress') {
-      return {
-        className: "ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800",
-        text: "In Progress"
-      };
-    } else if (task.status === 'started') {
-      return {
-        className: "ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800",
-        text: "Started"
-      };
-    } else if (task.status === 'delayed') {
-      return {
-        className: "ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800",
-        text: "Delayed"
-      };
+    if (task.taskType === 'checklist' && actionType === 'true') {
+      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+      if (dialogOpeners?.checklist) {
+        dialogOpeners.checklist(task.id, task.name, task.checklistItems || []);
+      } else {
+        console.warn("No dialog opener provided for checklist task:", task.id);
+      }
+      return;
     }
-    return null;
-  };
-  
-  const statusIndicator = getStatusIndicator();
-  
-  const onOpenTaskDialog = (task.taskType && dialogOpeners) ? () => {
-    console.log(`Opening dialog for ${task.taskType} task:`, task.id);
     
-    if (task.taskType === 'journal' && dialogOpeners.journal) {
-      dialogOpeners.journal(task.id, task.name, task.journalEntry || '');
-    } else if (task.taskType === 'checklist' && dialogOpeners.checklist) {
-      dialogOpeners.checklist(task.id, task.name, task.checklistItems || []);
-    } else if (task.taskType === 'screenshot' && dialogOpeners.screenshot) {
-      dialogOpeners.screenshot(task.imageUrl || '', task.name);
-    } else if (task.taskType === 'voicenote' && dialogOpeners.voicenote) {
-      dialogOpeners.voicenote(task.id, task.name);
+    if (task.taskType === 'timer' && actionType === 'true') {
+      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+      // Handle timer task action
+      eventBus.emit('timer:set-task', task);
+      return;
     }
-  } : undefined;
+    
+    if (task.taskType === 'screenshot' && actionType === 'true') {
+      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+      if (dialogOpeners?.screenshot && task.imageUrl) {
+        dialogOpeners.screenshot(task.imageUrl, task.name);
+      } else {
+        console.warn("No dialog opener provided for screenshot task or missing imageUrl:", task.id);
+      }
+      return;
+    }
+    
+    if (task.taskType === 'voicenote' && actionType === 'true') {
+      console.log("Task action: true for task:", task.id, "type:", task.taskType);
+      if (dialogOpeners?.voicenote) {
+        dialogOpeners.voicenote(task.id, task.name);
+      } else {
+        console.warn("No dialog opener provided for voicenote task:", task.id);
+      }
+      return;
+    }
+  };
   
-  console.log("TaskContent rendering for task:", task.id, task.name, "type:", task.taskType, "dialogOpeners available:", !!dialogOpeners);
+  // Determine what type-specific button to show
+  const renderTypeSpecificButton = () => {
+    switch (task.taskType) {
+      case 'journal':
+        return (
+          <JournalButton 
+            task={task} 
+            onTaskAction={handleTaskAction} 
+          />
+        );
+      case 'checklist':
+        return (
+          <ChecklistButton 
+            task={task} 
+            onTaskAction={handleTaskAction} 
+          />
+        );
+      case 'timer':
+        return (
+          <TimerButton 
+            task={task} 
+            onTaskAction={handleTaskAction} 
+          />
+        );
+      case 'screenshot':
+        return (
+          <ScreenshotButton 
+            task={task} 
+            onTaskAction={handleTaskAction} 
+          />
+        );
+      case 'voicenote':
+        return (
+          <VoiceNoteButton 
+            task={task} 
+            onTaskAction={handleTaskAction} 
+          />
+        );
+      default:
+        return null;
+    }
+  };
   
   return (
-    <div className="p-4 relative">
-      <div className="flex items-start justify-between gap-x-2">
-        <div className="min-w-0 flex-1">
-          <h3 className={cn(
-            "text-base font-medium leading-6 text-primary flex items-center gap-1",
-            task.status === 'in-progress' && "text-amber-600",
-            task.status === 'started' && "text-blue-600",
-            task.status === 'delayed' && "text-orange-600"
-          )}>
-            <TaskIcon taskType={task.taskType} className="h-4 w-4 mr-1" />
-            {task.name}
-            
-            {/* Status indicator (legacy visualization) */}
-            {statusIndicator && (
-              <span className={statusIndicator.className}>
-                {statusIndicator.text}
-              </span>
-            )}
-          </h3>
+    <Card 
+      className={`transition-all ${
+        isSelected ? 'ring-2 ring-primary' : 'hover:shadow-md'
+      }`}
+      onClick={onSelect}
+    >
+      <CardContent className="p-3 flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-grow min-w-0">
+          <div className="flex-shrink-0">
+            {task.taskType === 'timer' && <TimerIcon className="h-5 w-5 text-blue-500" />}
+            {task.taskType === 'screenshot' && <ImageIcon className="h-5 w-5 text-purple-500" />}
+            {task.taskType === 'journal' && <PencilIcon className="h-5 w-5 text-green-500" />}
+            {task.taskType === 'checklist' && <ClipboardListIcon className="h-5 w-5 text-amber-500" />}
+            {task.taskType === 'voicenote' && <MicIcon className="h-5 w-5 text-red-500" />}
+            {(!task.taskType || task.taskType === 'regular') && <CheckIcon className="h-5 w-5 text-gray-500" />}
+          </div>
           
-          <p className="mt-1 truncate text-sm text-muted-foreground">
-            {task.description || `Created ${timeAgo}`}
-          </p>
+          <div className="truncate">
+            <h3 className="font-medium leading-none truncate">{task.name}</h3>
+            {task.description && (
+              <p className="text-xs text-muted-foreground mt-1 truncate">{task.description}</p>
+            )}
+          </div>
         </div>
         
-        <TaskActionButton
-          task={task}
-          editingTaskId={editingTaskId}
-          inputValue={inputValue}
-          durationInMinutes={durationInMinutes}
-          onTaskAction={handleTaskAction}
-          handleLocalChange={onChange}
-          handleLocalBlur={onBlur}
-          handleLocalKeyDown={onKeyDown}
-          preventPropagation={preventPropagation}
-          onOpenTaskDialog={onOpenTaskDialog}
-        />
-      </div>
-    </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <StatusDropdownMenu task={task} onTaskAction={handleTaskAction} />
+          
+          {/* Type-specific action button */}
+          {renderTypeSpecificButton()}
+          
+          {/* General task action button */}
+          <TaskActionButton 
+            task={task} 
+            onTaskAction={handleTaskAction}
+            dialogOpeners={dialogOpeners}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 };
