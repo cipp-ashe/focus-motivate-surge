@@ -79,7 +79,7 @@ export const useTaskActionHandler = (
       eventBus.emit('task:complete', { taskId: task.id });
       toast.success(`Completed task: ${task.name}`);
     }
-  }, [task, onOpenTaskDialog]);
+  }, [task]);
 
   const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.stopPropagation();

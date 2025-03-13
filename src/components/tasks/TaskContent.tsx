@@ -33,6 +33,9 @@ export const TaskContent: React.FC<TaskContentProps> = ({
 }) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   
+  // Use the hook at the component level, not inside another function
+  const { handleTaskAction: statusTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
+  
   // Handle the task action with direct event dispatching
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     // Prevent event propagation
@@ -121,8 +124,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
     }
     
     // Use the task action handler for any other actions
-    const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
-    handleTaskAction(e, action);
+    statusTaskAction(e, action);
   };
   
   // Format the created date
