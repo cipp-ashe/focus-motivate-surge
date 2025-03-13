@@ -142,21 +142,32 @@ export const useTimerHandlers = ({
 
   // Handle timer completion
   const handleComplete = useCallback(async () => {
-    if (isRunning) {
-      pause();
-    }
-    
     try {
-      // Calculate completion metrics
+      // If timer is running, pause it first
+      if (isRunning) {
+        pause();
+      }
+      
+      // Ensure we have a valid start time
+      const startTime = metrics.startTime || new Date(Date.now() - (metrics.expectedTime * 1000));
+      
+      // Update metrics with completion information
+      const now = new Date();
       const calculatedMetrics = {
         ...metrics,
-        completionDate: new Date().toISOString(),
+        startTime,
+        endTime: now,
+        completionDate: now.toISOString(),
+        actualDuration: metrics.actualDuration || Math.floor((now.getTime() - startTime.getTime()) / 1000),
+        // Ensure we have valid fields for completed timer
+        isPaused: false,
+        pausedTimeLeft: null
       };
       
       // Play completion sound
       playSound();
       
-      // Update metrics
+      // Update metrics state
       setCompletionMetrics(calculatedMetrics);
       
       // Call the onComplete callback if provided

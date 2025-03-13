@@ -25,6 +25,8 @@ export function completeTask({ taskId, taskList, completedTasks, metrics }: Comp
     return { updatedTaskList: taskList, updatedCompletedTasks: completedTasks };
   }
   
+  console.log("Completing task with original metrics:", metrics);
+  
   // Prepare task metrics
   const formattedMetrics: TaskMetrics = {
     // Default values
@@ -43,16 +45,17 @@ export function completeTask({ taskId, taskList, completedTasks, metrics }: Comp
       // Timer-specific metrics
       expectedTime: metrics.expectedTime || 0,
       actualDuration: metrics.actualDuration || 0,
-      favoriteQuotes: metrics.favoriteQuotes || [],
+      favoriteQuotes: Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [],
       pausedTime: metrics.pausedTime || 0,
       extensionTime: metrics.extensionTime || 0,
       netEffectiveTime: metrics.netEffectiveTime || 0,
       efficiencyRatio: metrics.efficiencyRatio || 0,
       completionStatus: metrics.completionStatus || 'Completed',
+      completionDate: metrics.completionDate || new Date().toISOString(),
     } : {})
   };
   
-  console.log("Completing task with metrics:", formattedMetrics);
+  console.log("Completing task with formatted metrics:", formattedMetrics);
   
   // Create completed task
   const completedTask: Task = {

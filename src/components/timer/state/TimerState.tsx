@@ -19,21 +19,30 @@ export const useTimerComplete = ({
 }) => {
   // Handle timer completion
   const completeTimer = useCallback(() => {
+    // Ensure metrics has a completionDate if missing
+    const finalMetrics = {
+      ...metrics,
+      // Ensure there's a completionDate string for storage compatibility
+      completionDate: metrics.completionDate || new Date().toISOString(),
+      // Make sure we have an endTime
+      endTime: metrics.endTime || new Date()
+    };
+    
     // Close expanded view if open
     setIsExpanded(false);
     
     // Call the onComplete callback if provided
     if (onComplete) {
-      onComplete(metrics);
+      onComplete(finalMetrics);
     }
     
     // Emit completion event
     eventManager.emit('timer:complete', { 
       taskName, 
-      metrics 
+      metrics: finalMetrics 
     });
     
-    return metrics;
+    return finalMetrics;
   }, [taskName, metrics, onComplete, setIsExpanded]);
 
   return { completeTimer };

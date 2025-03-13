@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { TimerAction } from '@/types/timer';
 import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
@@ -95,29 +96,42 @@ export const useTimerActions = (
     if (isLegacyInterface) {
       const { setIsRunning, updateMetrics, metrics } = props as TimerActionProps;
       const now = new Date();
-      const actualDuration = metrics.startTime 
-        ? Math.floor((now.getTime() - metrics.startTime.getTime()) / 1000) 
-        : 0;
       
-      const netEffectiveTime = actualDuration - metrics.pausedTime;
+      // Make sure we have a startTime
+      const startTime = metrics.startTime || new Date(now.getTime() - (metrics.expectedTime * 1000));
+      
+      // Calculate actual duration in seconds
+      const actualDuration = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+      
+      // Calculate effective working time (accounting for pauses)
+      const pausedTime = metrics.pausedTime || 0;
+      const extensionTime = metrics.extensionTime || 0;
+      const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
+      
+      // Calculate efficiency metrics
       const efficiencyRatio = calculateEfficiencyRatio(metrics.expectedTime, netEffectiveTime);
-      
-      // Determine completion status based on efficiency ratio
       const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime);
       
+      // Create a properly formatted completion metrics object
       const updatedMetrics = {
+        startTime: startTime,
         endTime: now,
         actualDuration,
+        pausedTime,
+        extensionTime,
         netEffectiveTime,
         efficiencyRatio,
         completionStatus,
         isPaused: false,
-        completionDate: now.toISOString() // Convert Date to string
+        pausedTimeLeft: null,
+        completionDate: now.toISOString() // Convert Date to string for storage
       };
       
+      // Update state and metrics
       setIsRunning(false);
       updateMetrics(updatedMetrics);
       
+      // Return the complete metrics
       return {
         ...metrics,
         ...updatedMetrics
