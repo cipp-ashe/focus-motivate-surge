@@ -8,8 +8,23 @@ import { useTaskPersistence } from './useTaskPersistence';
 import { useTaskNavigation } from './useTaskNavigation';
 import { TaskContextState } from './types';
 
+/**
+ * Context for providing task state throughout the application
+ */
 const TaskContext = createContext<TaskContextState | undefined>(undefined);
 
+/**
+ * Provider component for the task context
+ * 
+ * This component is responsible for:
+ * - Initializing task state from storage
+ * - Setting up event listeners for task events
+ * - Handling persistence of task state
+ * - Performing verification to ensure data integrity
+ *
+ * @param {object} props - The component props
+ * @param {ReactNode} props.children - The child components to render
+ */
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
   // Initialize with data from localStorage
   const [state, dispatch] = useReducer(taskReducer, taskState.getInitialState());
@@ -79,6 +94,15 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+/**
+ * Hook for accessing the task context
+ * 
+ * This hook provides access to the task state and throws an error if
+ * used outside of a TaskProvider.
+ * 
+ * @returns {TaskContextState} The current task context state
+ * @throws {Error} If used outside of a TaskProvider
+ */
 export const useTaskContext = () => {
   const context = useContext(TaskContext);
   if (context === undefined) {

@@ -6,16 +6,29 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Send, Upload, FileText, Timer, BookOpen, CheckSquare } from "lucide-react";
 import { TaskType } from '@/types/tasks';
 
+/**
+ * Props for the TaskInputRow component
+ * @interface TaskInputRowProps
+ */
 interface TaskInputRowProps {
+  /** Current task name in the input field */
   taskName: string;
+  /** Currently selected task type */
   taskType: TaskType;
+  /** Callback when task name changes */
   onTaskNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Callback when task type changes */
   onTaskTypeChange: (value: string) => void;
+  /** Callback to add a new task */
   onAddTask: () => void;
+  /** Callback to toggle multiple task input mode */
   onToggleMultipleInput: () => void;
 }
 
-// Only include the allowed task types
+/**
+ * Map of task types to their corresponding icons
+ * Only includes the allowed task types
+ */
 const taskTypeIcons = {
   regular: <FileText className="h-4 w-4 text-primary" />,
   timer: <Timer className="h-4 w-4 text-purple-400" />,
@@ -23,6 +36,9 @@ const taskTypeIcons = {
   checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />
 };
 
+/**
+ * Map of task types to their display labels
+ */
 const taskTypeLabels = {
   regular: 'Regular Task',
   timer: 'Focused Timer',
@@ -30,6 +46,18 @@ const taskTypeLabels = {
   checklist: 'Checklist'
 };
 
+/**
+ * A component that renders an input row for creating new tasks
+ * 
+ * This component handles the main task input UI, including:
+ * - Text input for the task name
+ * - Task type selector dropdown
+ * - Add button
+ * - Toggle for multiple task input mode
+ *
+ * @param {TaskInputRowProps} props - The component props
+ * @returns {JSX.Element} The rendered component
+ */
 export const TaskInputRow: React.FC<TaskInputRowProps> = ({
   taskName,
   taskType,
@@ -59,7 +87,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
               {taskTypeIcons[taskType as keyof typeof taskTypeIcons] || taskTypeIcons.regular}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-1">
+          <PopoverContent className="w-48 p-1 bg-background/95 backdrop-blur-sm border-border/50">
             <div className="space-y-1">
               {Object.entries(taskTypeIcons).map(([type, icon]) => (
                 <Button
@@ -95,6 +123,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
         onClick={onAddTask}
         className="bg-primary text-primary-foreground hover:bg-primary/90"
         size="icon"
+        aria-label="Add task"
       >
         <Send size={18} />
       </Button>
@@ -105,6 +134,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
         onClick={onToggleMultipleInput}
         title="Bulk Import Tasks"
         className="border-input/50 hover:bg-accent"
+        aria-label="Bulk import tasks"
       >
         <Upload size={18} />
       </Button>

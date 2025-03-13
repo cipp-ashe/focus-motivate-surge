@@ -17,11 +17,27 @@ import {
   Mic
 } from 'lucide-react';
 
+/**
+ * Props for the TaskTypeSelector component
+ * @interface TaskTypeSelectorProps
+ * @property {TaskType} value - The currently selected task type
+ * @property {function} onChange - Callback function when task type changes
+ */
 interface TaskTypeSelectorProps {
   value: TaskType;
   onChange: (value: TaskType) => void;
 }
 
+/**
+ * A component that renders a dropdown for selecting task types
+ * 
+ * This component provides a visual selector for different task types, each with
+ * its own icon and label. It handles internal open/close state and calls the provided
+ * onChange handler when a selection is made.
+ * 
+ * @param {TaskTypeSelectorProps} props - Component props
+ * @returns {JSX.Element} A select dropdown for task types
+ */
 export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
   value,
   onChange
@@ -38,7 +54,7 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select task type" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-background/95 backdrop-blur-sm border-border/50">
         <SelectItem value="regular" className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-primary" />

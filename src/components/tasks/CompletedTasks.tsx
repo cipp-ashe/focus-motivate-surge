@@ -7,18 +7,37 @@ import { Badge } from '@/components/ui/badge';
 import { eventBus } from '@/lib/eventBus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CompletedTasksList from './completed/CompletedTasksList';
+import { Button } from '@/components/ui/button';
+import { RefreshCw, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
+/**
+ * Props for the CompletedTasks component
+ */
 interface CompletedTasksProps {
+  /** Optional array of completed tasks to display */
   tasks?: Task[];
+  /** Optional callback for clearing all completed tasks */
   onTasksClear?: () => void;
 }
 
+/**
+ * A component that displays completed and dismissed tasks
+ * 
+ * This component shows tabs for 'All', 'Completed', and 'Dismissed' tasks,
+ * allowing the user to filter and view tasks in different states.
+ * It also provides functionality for deleting individual tasks.
+ *
+ * @param {CompletedTasksProps} props - The component props
+ * @returns {JSX.Element} The rendered component
+ */
 export const CompletedTasks: React.FC<CompletedTasksProps> = ({ 
   tasks: propTasks,
   onTasksClear
 }) => {
   const { completed } = useTaskContext();
   const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'dismissed'>('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Use props tasks if provided, otherwise use from context
   const tasksToUse = propTasks || completed;
@@ -42,6 +61,49 @@ export const CompletedTasks: React.FC<CompletedTasksProps> = ({
     });
   };
   
+  // Handle refresh to force reload tasks
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.dispatchEvent(new Event('force-task-update'));
+    
+    // Reset refreshing state after animation
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
+    
+    toast.info('Refreshing task list', {
+      duration: 1500
+    });
+  };
+  
+  // Handle clearing all tasks in the current view
+  const handleClearAll = () => {
+    if (onTasksClear) {
+      onTasksClear();
+      return;
+    }
+    
+    // Fallback implementation if no onTasksClear provided
+    if (displayTasks.length === 0) {
+      toast.info('No tasks to clear');
+      return;
+    }
+    
+    // Confirm before deleting
+    if (window.confirm(`Are you sure you want to delete all ${displayTasks.length} tasks in this view?`)) {
+      // Delete all displayed tasks
+      displayTasks.forEach(task => {
+        eventBus.emit('task:delete', {
+          taskId: task.id,
+          reason: 'manual',
+          suppressToast: true
+        });
+      });
+      
+      toast.success(`Cleared ${displayTasks.length} tasks`);
+    }
+  };
+  
   return (
     <Card className="bg-card/90 backdrop-blur-sm border-border/40 shadow-sm">
       <CardHeader className="pb-3">
@@ -54,6 +116,32 @@ export const CompletedTasks: React.FC<CompletedTasksProps> = ({
               </Badge>
             )}
           </CardTitle>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="h-8 w-8 p-0"
+              aria-label="Refresh tasks"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+            
+            {displayTasks.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleClearAll}
+                className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                aria-label="Clear all tasks"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                <span className="text-xs">Clear All</span>
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       

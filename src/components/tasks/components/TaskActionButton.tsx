@@ -12,24 +12,49 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
+/**
+ * Props for the TaskActionButton component
+ * @interface TaskActionButtonProps
+ */
 interface TaskActionButtonProps {
+  /** The task this action button is associated with */
   task: Task;
+  /** Callback for task actions like complete, delete, dismiss */
   onTaskAction: (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => void;
+  /** Optional dialog openers for specific task types */
   dialogOpeners?: {
     checklist: (taskId: string, taskName: string, items: any[]) => void;
     journal: (taskId: string, taskName: string, entry: string) => void;
     screenshot: (imageUrl: string, taskName: string) => void;
     voicenote: (taskId: string, taskName: string) => void;
   };
+  /** ID of the task currently being edited, if any */
   editingTaskId?: string | null;
+  /** Current input value for the task being edited */
   inputValue?: string;
+  /** Task duration in minutes */
   durationInMinutes?: number;
+  /** Handler for local input changes */
   handleLocalChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Handler for input blur events */
   handleLocalBlur?: () => void;
+  /** Handler for key down events in the input */
   handleLocalKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  /** Handler to prevent event propagation */
   preventPropagation?: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
 }
 
+/**
+ * A dropdown menu button for task actions
+ * 
+ * This component provides a dropdown menu with various actions that can be performed
+ * on a task, such as opening, completing, dismissing, or deleting the task.
+ * It handles closing the dropdown after a selection and supports different actions
+ * based on the task type.
+ *
+ * @param {TaskActionButtonProps} props - The component props
+ * @returns {JSX.Element} The rendered dropdown menu
+ */
 export const TaskActionButton: React.FC<TaskActionButtonProps> = ({ 
   task, 
   onTaskAction,
@@ -78,11 +103,11 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label="Task actions">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[160px]">
+      <DropdownMenuContent align="end" className="w-[160px] bg-background/95 backdrop-blur-sm border-border/50">
         <DropdownMenuItem onClick={(e) => handleButtonClick(e as any, 'open')}>
           {task.taskType === 'timer' && <Clock className="mr-2 h-4 w-4" />}
           {task.taskType === 'screenshot' && <Image className="mr-2 h-4 w-4" />}

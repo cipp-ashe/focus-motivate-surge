@@ -1,19 +1,31 @@
 
+import React, { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
-import { useState, useEffect } from "react";
 import { eventBus } from "@/lib/eventBus";
 import { Card } from "@/components/ui/card";
 import { TaskContent } from "./TaskContent";
 
+/**
+ * Props for the TaskRow component
+ */
 interface TaskRowProps {
+  /** The task this row represents */
   task: Task;
+  /** Whether this task is currently selected */
   isSelected: boolean;
+  /** ID of the task currently being edited, if any */
   editingTaskId: string | null;
+  /** Callback when the task is clicked */
   onTaskClick: (task: Task, event: React.MouseEvent<HTMLDivElement>) => void;
+  /** Callback when the task is deleted */
   onTaskDelete: (taskId: string) => void;
+  /** Callback when the task duration is changed */
   onDurationChange: (taskId: string, newDuration: string) => void;
+  /** Callback when the duration element is clicked */
   onDurationClick: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => void;
+  /** Callback when an input field loses focus */
   onInputBlur: () => void;
+  /** Dialog openers for specific task types */
   dialogOpeners?: {
     checklist: (taskId: string, taskName: string, items: any[]) => void;
     journal: (taskId: string, taskName: string, entry: string) => void;
@@ -22,7 +34,17 @@ interface TaskRowProps {
   };
 }
 
-export const TaskRow = ({
+/**
+ * A component that renders a single task row
+ * 
+ * This component is responsible for displaying a task in the task list,
+ * handling selection state, and integrating with the TaskContent component
+ * for rendering the actual task content.
+ *
+ * @param {TaskRowProps} props - The component props
+ * @returns {JSX.Element} The rendered task row
+ */
+export const TaskRow: React.FC<TaskRowProps> = ({
   task,
   isSelected,
   editingTaskId,
@@ -32,10 +54,11 @@ export const TaskRow = ({
   onDurationClick,
   onInputBlur,
   dialogOpeners,
-}: TaskRowProps) => {
+}) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   const [inputValue, setInputValue] = useState(durationInMinutes.toString());
 
+  // Update input value when task duration changes
   useEffect(() => {
     if (task.duration) {
       const minutes = Math.round(task.duration / 60);
@@ -43,10 +66,12 @@ export const TaskRow = ({
     }
   }, [task.duration, task.id]);
 
+  // Prevent click events from bubbling up from interactive elements
   const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
     e.stopPropagation();
   };
 
+  // Handle key down in input fields
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleBlur();
@@ -54,27 +79,31 @@ export const TaskRow = ({
     e.stopPropagation();
   };
 
+  // Handle changes to input values
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     
+    // Only allow numeric input
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
     }
   };
 
+  // Handle input blur events
   const handleBlur = () => {
     const numValue = parseInt(inputValue, 10);
     let finalValue = inputValue;
     
+    // Validate input value
     if (isNaN(numValue) || numValue < 1) {
-      finalValue = '25';
+      finalValue = '25'; // Default to 25 minutes if invalid
     } else if (numValue > 60) {
-      finalValue = '60';
+      finalValue = '60'; // Cap at 60 minutes
     }
     
     setInputValue(finalValue);
     
-    // Convert minutes to seconds and update
+    // Convert minutes to seconds and update task
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     
     eventBus.emit('task:update', {
@@ -84,14 +113,16 @@ export const TaskRow = ({
     onInputBlur();
   };
 
+  // Handle task deletion
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
     eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
   };
 
+  // Handle clicks on the task row
   const handleTaskClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // More robust check for interactive elements to prevent task selection when clicking on buttons
+    // Check for clicks on interactive elements to prevent task selection
     const target = e.target as HTMLElement;
     const isInteractive = 
       target.tagName === 'BUTTON' || 
@@ -107,7 +138,7 @@ export const TaskRow = ({
       return;
     }
     
-    // Special handling for journal and checklist tasks to prevent conversion to timer
+    // Special handling for journal and checklist tasks
     if ((task.taskType === 'journal' || task.taskType === 'checklist') && !isSelected) {
       e.stopPropagation();
       
@@ -129,6 +160,8 @@ export const TaskRow = ({
         }
       `}
       onClick={handleTaskClick}
+      data-task-id={task.id}
+      data-task-type={task.taskType}
     >
       <TaskContent
         task={task}
