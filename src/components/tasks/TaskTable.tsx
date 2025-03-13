@@ -8,18 +8,26 @@ import { eventBus } from '@/lib/eventBus';
 interface TaskTableProps {
   tasks: Task[];
   selectedTasks: string[];
+  dialogOpeners?: {
+    checklist: (taskId: string, taskName: string, items: any[]) => void;
+    journal: (taskId: string, taskName: string, entry: string) => void;
+    screenshot: (imageUrl: string, taskName: string) => void;
+    voicenote: (taskId: string, taskName: string) => void;
+  };
 }
 
 export const TaskTable: React.FC<TaskTableProps> = ({
   tasks,
   selectedTasks,
+  dialogOpeners,
 }) => {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   
   // Debug: Log tasks whenever they change
   useEffect(() => {
     console.log("TaskTable received tasks:", tasks.length, "tasks:", tasks);
-  }, [tasks]);
+    console.log("TaskTable has dialogOpeners:", !!dialogOpeners);
+  }, [tasks, dialogOpeners]);
   
   // Handle input blur to exit editing mode
   const handleInputBlur = () => {
@@ -78,6 +86,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
             onDurationChange={handleDurationChange}
             onDurationClick={handleDurationClick}
             onInputBlur={handleInputBlur}
+            dialogOpeners={dialogOpeners}
           />
         ))}
       </div>

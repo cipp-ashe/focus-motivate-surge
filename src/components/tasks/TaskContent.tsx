@@ -16,7 +16,12 @@ interface TaskContentProps {
   onBlur: () => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
-  onOpenTaskDialog?: () => void; // Prop for opening task dialogs
+  dialogOpeners?: {
+    checklist: (taskId: string, taskName: string, items: any[]) => void;
+    journal: (taskId: string, taskName: string, entry: string) => void;
+    screenshot: (imageUrl: string, taskName: string) => void;
+    voicenote: (taskId: string, taskName: string) => void;
+  };
 }
 
 export const TaskContent: React.FC<TaskContentProps> = ({
@@ -29,12 +34,12 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   onBlur,
   onKeyDown,
   preventPropagation,
-  onOpenTaskDialog,
+  dialogOpeners,
 }) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   
   // Use the hook at the component level, not inside another function
-  const { handleTaskAction: statusTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
+  const { handleTaskAction: statusTaskAction } = useTaskActionHandler(task);
   
   // Handle the task action with direct event dispatching
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
@@ -53,51 +58,27 @@ export const TaskContent: React.FC<TaskContentProps> = ({
     console.log(`TaskContent: Action ${action} clicked for task ${task.id} of type ${task.taskType}`);
     
     // Handle task specific dialog opening based on task type
-    if (task.taskType === 'checklist' && action === 'true') {
-      console.log('Dispatching open-checklist event directly');
-      window.dispatchEvent(new CustomEvent('open-checklist', {
-        detail: {
-          taskId: task.id,
-          taskName: task.name,
-          items: task.checklistItems || []
-        }
-      }));
+    if (task.taskType === 'checklist' && action === 'true' && dialogOpeners?.checklist) {
+      console.log('Opening checklist via dialog opener');
+      dialogOpeners.checklist(task.id, task.name, task.checklistItems || []);
       return;
     }
     
-    if (task.taskType === 'journal' && action === 'true') {
-      console.log('Dispatching open-journal event directly');
-      window.dispatchEvent(new CustomEvent('open-journal', {
-        detail: {
-          taskId: task.id,
-          taskName: task.name,
-          entry: task.journalEntry || ''
-        }
-      }));
+    if (task.taskType === 'journal' && action === 'true' && dialogOpeners?.journal) {
+      console.log('Opening journal via dialog opener');
+      dialogOpeners.journal(task.id, task.name, task.journalEntry || '');
       return;
     }
     
-    if (task.taskType === 'voicenote' && action === 'true') {
-      console.log('Dispatching open-voice-recorder event directly');
-      window.dispatchEvent(new CustomEvent('open-voice-recorder', {
-        detail: {
-          taskId: task.id,
-          taskName: task.name,
-          voiceNoteUrl: task.voiceNoteUrl || ''
-        }
-      }));
+    if (task.taskType === 'voicenote' && action === 'true' && dialogOpeners?.voicenote) {
+      console.log('Opening voice recorder via dialog opener');
+      dialogOpeners.voicenote(task.id, task.name);
       return;
     }
     
-    if (task.taskType === 'screenshot' && action === 'true') {
-      console.log('Dispatching show-image event directly');
-      window.dispatchEvent(new CustomEvent('show-image', {
-        detail: {
-          taskId: task.id,
-          taskName: task.name,
-          imageUrl: task.imageUrl || ''
-        }
-      }));
+    if (task.taskType === 'screenshot' && action === 'true' && dialogOpeners?.screenshot) {
+      console.log('Opening screenshot via dialog opener');
+      dialogOpeners.screenshot(task.imageUrl || '', task.name);
       return;
     }
     
@@ -154,7 +135,21 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   
   const statusIndicator = getStatusIndicator();
   
-  console.log("TaskContent rendering for task:", task.id, task.name, "type:", task.taskType, "onOpenTaskDialog available:", !!onOpenTaskDialog);
+  const onOpenTaskDialog = (task.taskType && dialogOpeners) ? () => {
+    console.log(`Opening dialog for ${task.taskType} task:`, task.id);
+    
+    if (task.taskType === 'journal' && dialogOpeners.journal) {
+      dialogOpeners.journal(task.id, task.name, task.journalEntry || '');
+    } else if (task.taskType === 'checklist' && dialogOpeners.checklist) {
+      dialogOpeners.checklist(task.id, task.name, task.checklistItems || []);
+    } else if (task.taskType === 'screenshot' && dialogOpeners.screenshot) {
+      dialogOpeners.screenshot(task.imageUrl || '', task.name);
+    } else if (task.taskType === 'voicenote' && dialogOpeners.voicenote) {
+      dialogOpeners.voicenote(task.id, task.name);
+    }
+  } : undefined;
+  
+  console.log("TaskContent rendering for task:", task.id, task.name, "type:", task.taskType, "dialogOpeners available:", !!dialogOpeners);
   
   return (
     <div className="p-4 relative">

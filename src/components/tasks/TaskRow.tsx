@@ -14,6 +14,12 @@ interface TaskRowProps {
   onDurationChange: (taskId: string, newDuration: string) => void;
   onDurationClick: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => void;
   onInputBlur: () => void;
+  dialogOpeners?: {
+    checklist: (taskId: string, taskName: string, items: any[]) => void;
+    journal: (taskId: string, taskName: string, entry: string) => void;
+    screenshot: (imageUrl: string, taskName: string) => void;
+    voicenote: (taskId: string, taskName: string) => void;
+  };
 }
 
 export const TaskRow = ({
@@ -25,6 +31,7 @@ export const TaskRow = ({
   onDurationChange,
   onDurationClick,
   onInputBlur,
+  dialogOpeners,
 }: TaskRowProps) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   const [inputValue, setInputValue] = useState(durationInMinutes.toString());
@@ -133,6 +140,7 @@ export const TaskRow = ({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         preventPropagation={preventPropagation}
+        dialogOpeners={dialogOpeners}
       />
     </Card>
   );
