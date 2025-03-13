@@ -8,6 +8,8 @@ import { eventBus } from '@/lib/eventBus';
 import { TaskEventListener } from '@/components/tasks/TaskEventListener';
 import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
 import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
+import { ScreenshotDialog } from '@/components/tasks/components/ScreenshotDialog';
+import { VoiceNoteDialog } from '@/components/tasks/components/VoiceNoteDialog';
 
 const TaskPage = () => {
   const isMobile = useIsMobile();
@@ -26,13 +28,29 @@ const TaskPage = () => {
     entry: string;
   } | null>(null);
   
+  const [isScreenshotOpen, setIsScreenshotOpen] = useState(false);
+  const [currentScreenshotTask, setCurrentScreenshotTask] = useState<{
+    taskId: string;
+    taskName: string;
+    imageUrl: string;
+  } | null>(null);
+  
+  const [isVoiceNoteOpen, setIsVoiceNoteOpen] = useState(false);
+  const [currentVoiceNoteTask, setCurrentVoiceNoteTask] = useState<{
+    taskId: string;
+    taskName: string;
+  } | null>(null);
+  
   // Event handlers
   const handleShowImage = (imageUrl: string, taskName: string) => {
-    toast.info(`Viewing image for: ${taskName}`, {
-      description: "Image viewer functionality is not yet implemented",
-      duration: 2000
+    console.log("Tasks.tsx - Opening screenshot for:", taskName, imageUrl);
+    setCurrentScreenshotTask({
+      taskId: 'screenshot',
+      taskName,
+      imageUrl
     });
-    console.log("Tasks.tsx - Handled show-image event for:", taskName);
+    setIsScreenshotOpen(true);
+    toast.info(`Viewing image for: ${taskName}`, { duration: 1500 });
   };
   
   const handleOpenChecklist = (taskId: string, taskName: string, items: ChecklistItem[]) => {
@@ -58,11 +76,13 @@ const TaskPage = () => {
   };
   
   const handleOpenVoiceRecorder = (taskId: string, taskName: string) => {
-    toast.info(`Recording for: ${taskName}`, {
-      description: "Voice recorder functionality is not yet implemented",
-      duration: 2000
+    console.log('Tasks.tsx - Opening voice recorder for task:', { taskId, taskName });
+    setCurrentVoiceNoteTask({
+      taskId,
+      taskName
     });
-    console.log("Tasks.tsx - Handled open-voice-recorder event for:", taskName);
+    setIsVoiceNoteOpen(true);
+    toast.info(`Recording for: ${taskName}`, { duration: 1500 });
   };
   
   // Handle task updates, but make sure we don't change the task type unless specifically requested
@@ -84,6 +104,14 @@ const TaskPage = () => {
     }
   };
 
+  // Dialog openers to pass to TaskManager
+  const dialogOpeners = {
+    checklist: handleOpenChecklist,
+    journal: handleOpenJournal,
+    screenshot: handleShowImage,
+    voicenote: handleOpenVoiceRecorder
+  };
+
   return (
     <div className={`container mx-auto ${isMobile ? 'p-2' : 'py-3 px-4 sm:py-5 sm:px-6'} max-w-6xl`}>
       <h1 className={`${isMobile ? 'text-xl mb-2' : 'text-2xl sm:text-3xl mb-3 sm:mb-5'} font-bold text-primary`}>
@@ -98,19 +126,48 @@ const TaskPage = () => {
         onTaskUpdate={handleTaskUpdate}
       />
       
-      <TaskManager />
+      <TaskManager dialogOpeners={dialogOpeners} />
       
-      <ChecklistDialog 
-        isOpen={isChecklistOpen}
-        onOpenChange={setIsChecklistOpen}
-        currentTask={currentChecklistTask}
-      />
+      {currentChecklistTask && (
+        <ChecklistDialog 
+          isOpen={isChecklistOpen}
+          onOpenChange={setIsChecklistOpen}
+          currentTask={currentChecklistTask}
+        />
+      )}
       
-      <JournalDialog 
-        isOpen={isJournalOpen}
-        onOpenChange={setIsJournalOpen}
-        currentTask={currentJournalTask}
-      />
+      {currentJournalTask && (
+        <JournalDialog 
+          isOpen={isJournalOpen}
+          onOpenChange={setIsJournalOpen}
+          currentTask={currentJournalTask}
+        />
+      )}
+      
+      {currentScreenshotTask && (
+        <ScreenshotDialog 
+          isOpen={isScreenshotOpen}
+          onOpenChange={setIsScreenshotOpen}
+          task={{
+            id: currentScreenshotTask.taskId,
+            name: currentScreenshotTask.taskName,
+            imageUrl: currentScreenshotTask.imageUrl,
+            createdAt: new Date().toISOString()
+          }}
+        />
+      )}
+      
+      {currentVoiceNoteTask && (
+        <VoiceNoteDialog 
+          isOpen={isVoiceNoteOpen}
+          onOpenChange={setIsVoiceNoteOpen}
+          task={{
+            id: currentVoiceNoteTask.taskId,
+            name: currentVoiceNoteTask.taskName,
+            createdAt: new Date().toISOString()
+          }}
+        />
+      )}
     </div>
   );
 };

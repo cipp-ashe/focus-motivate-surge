@@ -117,6 +117,27 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       }
     };
     
+    // Also listen for direct DOM events for dialog opening
+    const handleDomOpenJournal = (e: CustomEvent<{taskId: string, taskName: string, entry: string}>) => {
+      console.log('TaskEventListener: Received DOM open-journal event:', e.detail);
+      onOpenJournal(e.detail.taskId, e.detail.taskName, e.detail.entry || '');
+    };
+    
+    const handleDomOpenChecklist = (e: CustomEvent<{taskId: string, taskName: string, items: any[]}>) => {
+      console.log('TaskEventListener: Received DOM open-checklist event:', e.detail);
+      onOpenChecklist(e.detail.taskId, e.detail.taskName, e.detail.items || []);
+    };
+    
+    const handleDomShowImage = (e: CustomEvent<{imageUrl: string, taskName: string}>) => {
+      console.log('TaskEventListener: Received DOM show-image event:', e.detail);
+      onShowImage(e.detail.imageUrl, e.detail.taskName);
+    };
+    
+    const handleDomOpenVoiceRecorder = (e: CustomEvent<{taskId: string, taskName: string}>) => {
+      console.log('TaskEventListener: Received DOM open-voice-recorder event:', e.detail);
+      onOpenVoiceRecorder(e.detail.taskId, e.detail.taskName);
+    };
+    
     // Set up event listeners
     const unsubscribers = [
       eventBus.on('show-image', handleOpenImage),
@@ -127,12 +148,22 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       eventBus.on('timer:set-task', handleTimerTaskSet),
     ];
     
+    // Add direct DOM event listeners
+    window.addEventListener('open-journal', handleDomOpenJournal as EventListener);
+    window.addEventListener('open-checklist', handleDomOpenChecklist as EventListener);
+    window.addEventListener('show-image', handleDomShowImage as EventListener);
+    window.addEventListener('open-voice-recorder', handleDomOpenVoiceRecorder as EventListener);
+    
     // Force a refresh at startup to ensure all is in sync
     window.dispatchEvent(new Event('force-task-update'));
     
     // Cleanup event listeners on unmount
     return () => {
       unsubscribers.forEach((unsubscribe) => unsubscribe());
+      window.removeEventListener('open-journal', handleDomOpenJournal as EventListener);
+      window.removeEventListener('open-checklist', handleDomOpenChecklist as EventListener);
+      window.removeEventListener('show-image', handleDomShowImage as EventListener);
+      window.removeEventListener('open-voice-recorder', handleDomOpenVoiceRecorder as EventListener);
       console.log('TaskEventListener: Cleaned up event listeners');
     };
   }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder, onTaskUpdate, navigate]);

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -5,36 +6,21 @@ import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { TaskEventListener } from './TaskEventListener';
 import { TaskEventHandler } from './TaskEventHandler';
-import { JournalDialog } from './components/JournalDialog';
-import { ChecklistDialog } from './components/ChecklistDialog';
-import { ScreenshotDialog } from './components/ScreenshotDialog';
-import { VoiceNoteDialog } from './components/VoiceNoteDialog';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
+  dialogOpeners?: {
+    checklist: (taskId: string, taskName: string, items: any[]) => void;
+    journal: (taskId: string, taskName: string, entry: string) => void;
+    screenshot: (imageUrl: string, taskName: string) => void;
+    voicenote: (taskId: string, taskName: string) => void;
+  };
 }
 
-const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
+const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false, dialogOpeners }) => {
   const { items, selected } = useTaskContext();
-  const [showImageViewer, setShowImageViewer] = useState(false);
-  const [currentImage, setCurrentImage] = useState('');
-  const [currentImageTitle, setCurrentImageTitle] = useState('');
   
-  const [showJournal, setShowJournal] = useState(false);
-  const [journalTaskId, setJournalTaskId] = useState('');
-  const [journalTaskName, setJournalTaskName] = useState('');
-  const [journalContent, setJournalContent] = useState('');
-  
-  const [showChecklist, setShowChecklist] = useState(false);
-  const [checklistTaskId, setChecklistTaskId] = useState('');
-  const [checklistTaskName, setChecklistTaskName] = useState('');
-  const [checklistItems, setChecklistItems] = useState<any[]>([]);
-  
-  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
-  const [voiceNoteTaskId, setVoiceNoteTaskId] = useState('');
-  const [voiceNoteTaskName, setVoiceNoteTaskName] = useState('');
-  
-  console.log("TaskManager: Rendering with dialogOpeners:", !!showJournal || !!showChecklist || !!showImageViewer || !!showVoiceRecorder);
+  console.log("TaskManager: Rendering with dialogOpeners available:", !!dialogOpeners);
   
   const handleTaskAdd = (task: Task) => {
     console.log("TaskManager: Adding task", task);
@@ -64,37 +50,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
     }
   };
   
-  // Show image viewer (for screenshots)
-  const handleShowImage = (imageUrl: string, taskName: string) => {
-    setCurrentImage(imageUrl);
-    setCurrentImageTitle(taskName);
-    setShowImageViewer(true);
-  };
-  
-  // Open journal dialog
-  const handleOpenJournal = (taskId: string, taskName: string, entry: string) => {
-    setJournalTaskId(taskId);
-    setJournalTaskName(taskName);
-    setJournalContent(entry || '');
-    setShowJournal(true);
-  };
-  
-  // Open checklist dialog
-  const handleOpenChecklist = (taskId: string, taskName: string, items: any[]) => {
-    setChecklistTaskId(taskId);
-    setChecklistTaskName(taskName);
-    setChecklistItems(items || []);
-    setShowChecklist(true);
-  };
-  
-  // Open voice recorder dialog
-  const handleOpenVoiceRecorder = (taskId: string, taskName: string) => {
-    setVoiceNoteTaskId(taskId);
-    setVoiceNoteTaskName(taskName);
-    setShowVoiceRecorder(true);
-  };
-  
-  // Handle task updates from dialogs - FIXED: match the expected interface
+  // Handle task updates from dialogs
   const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
     console.log("TaskManager: Updating task", data.taskId, data.updates);
     eventBus.emit('task:update', data);
@@ -121,14 +77,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
         onTaskAdd={handleTaskAdd}
         onTasksAdd={handleTasksAdd}
         isTimerView={isTimerView}
-      />
-      
-      <TaskEventListener
-        onShowImage={handleShowImage}
-        onOpenChecklist={handleOpenChecklist}
-        onOpenJournal={handleOpenJournal}
-        onOpenVoiceRecorder={handleOpenVoiceRecorder}
-        onTaskUpdate={handleTaskUpdate}
+        dialogOpeners={dialogOpeners}
       />
       
       <TaskEventHandler 
@@ -137,54 +86,6 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
         onTaskUpdate={handleTaskUpdate}
         onTaskDelete={handleTaskDelete}
         onForceUpdate={handleForceUpdate}
-      />
-      
-      <JournalDialog
-        isOpen={showJournal}
-        onOpenChange={setShowJournal}
-        task={{
-          id: journalTaskId,
-          name: journalTaskName,
-          journalEntry: journalContent,
-          completed: false,
-          createdAt: new Date().toISOString()
-        }}
-      />
-      
-      {/* FIXED: Changed props to match ChecklistDialog component interface */}
-      <ChecklistDialog
-        isOpen={showChecklist}
-        setIsOpen={setShowChecklist}
-        task={{
-          id: checklistTaskId,
-          name: checklistTaskName,
-          checklistItems: checklistItems,
-          completed: false,
-          createdAt: new Date().toISOString()
-        }}
-      />
-      
-      <ScreenshotDialog
-        isOpen={showImageViewer}
-        onOpenChange={setShowImageViewer}
-        task={{
-          id: 'screenshot',
-          name: currentImageTitle,
-          imageUrl: currentImage,
-          completed: false,
-          createdAt: new Date().toISOString()
-        }}
-      />
-      
-      <VoiceNoteDialog
-        isOpen={showVoiceRecorder}
-        onOpenChange={setShowVoiceRecorder}
-        task={{
-          id: voiceNoteTaskId,
-          name: voiceNoteTaskName,
-          completed: false,
-          createdAt: new Date().toISOString()
-        }}
       />
     </>
   );
