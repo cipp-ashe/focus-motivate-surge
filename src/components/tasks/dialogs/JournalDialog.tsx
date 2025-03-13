@@ -66,12 +66,9 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       });
       
       toast.success(`Saved journal entry for: ${currentTask.taskName}`);
-      setIsEditing(false);
-      setActiveTab("preview");
-      // Close the dialog after saving if it's a new entry
-      if (isNewEntry) {
-        onOpenChange(false);
-      }
+      
+      // Always close the dialog after saving
+      onOpenChange(false);
     }
   };
 
