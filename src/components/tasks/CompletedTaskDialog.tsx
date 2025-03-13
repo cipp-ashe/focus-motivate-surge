@@ -4,7 +4,6 @@ import { Clock, BarChart3, Pause, Maximize, CalendarClock } from 'lucide-react';
 import { formatDuration, formatPercentage, formatTimestamp } from '@/lib/utils/formatters';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { formatDuration as formatDurationUtil } from '@/lib/utils/formatters';
 import { Task } from '@/types/tasks';
 import { TimerStateMetrics } from '@/types/metrics';
 import { Badge } from '../ui/badge';

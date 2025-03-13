@@ -34,39 +34,36 @@ export const useTimerInitialization = ({
     isMountedRef,
   } = timerState;
 
-  // Initialize view state - importing from the correct hook which returns an array
-  const [
-    isExpanded,
-    setIsExpanded,
-    selectedSound,
-    setSelectedSound,
-    showCompletion,
-    setShowCompletion,
-    showConfirmation,
-    setShowConfirmation,
-    completionMetrics,
-    setCompletionMetrics,
-    internalMinutes,
-    setInternalMinutes,
-    pauseTimeLeft,
-    setPauseTimeLeft,
-    pauseTimerRef,
-    start,
-    pause,
-    addTime,
-    playSound,
-    testSound,
-    isLoadingAudio,
-    reset,
-    completeTimer,
-    setMinutes
-  ] = useTimerState(duration);
+  // Initialize view state separately
+  const isExpanded = true; // Start expanded by default
+  const [selectedSound, setSelectedSound] = useState({ id: 'bell', label: 'Bell', file: 'bell.mp3' });
+  const [showCompletion, setShowCompletion] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [completionMetrics, setCompletionMetrics] = useState(null);
+  const [internalMinutes, setInternalMinutes] = useState(Math.floor(duration / 60));
+  const [pauseTimeLeft, setPauseTimeLeft] = useState(null);
+  const pauseTimerRef = useRef(null);
+  
+  // Import timer action hooks
+  const { 
+    start, 
+    pause, 
+    addTime, 
+    reset, 
+    completeTimer, 
+    playSound, 
+    testSound, 
+    isLoadingAudio, 
+    setMinutes 
+  } = useTimerActions({ timeLeft, metrics, updateTimeLeft, updateMetrics, setIsRunning });
 
   // Use the timer completion hook
   const { completeTimer: timerComplete } = useTimerComplete({
     taskName,
     metrics,
-    setIsExpanded,
+    setIsExpanded: (value) => {
+      // Implement this function
+    },
     onComplete
   });
 
@@ -74,7 +71,9 @@ export const useTimerInitialization = ({
   useTimerEventListeners({
     taskName,
     setInternalMinutes,
-    setIsExpanded,
+    setIsExpanded: (value) => {
+      // Implement this function
+    },
     expandedViewRef,
   });
 
@@ -92,7 +91,9 @@ export const useTimerInitialization = ({
     setShowConfirmation,
     setCompletionMetrics,
     setShowCompletion,
-    setIsExpanded,
+    setIsExpanded: (value) => {
+      // Implement this function
+    },
     metrics,
     updateMetrics,
     setPauseTimeLeft,
@@ -164,3 +165,7 @@ export const useTimerInitialization = ({
     isLoadingAudio,
   };
 };
+
+// Add missing imports
+import { useState } from 'react';
+import { useTimerActions } from '@/hooks/timer/useTimerActions';

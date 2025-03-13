@@ -82,17 +82,14 @@ export const useTaskStorage = () => {
       setSelected(taskId);
     };
 
-    // Fix the type mismatch by adapting the function signature
-    // to match the expected EventHandler<"task:complete"> type
-    const handleTaskComplete: EventHandler<"task:complete"> = (payload) => {
+    const handleTaskComplete = (payload: { taskId: string; metrics?: TaskMetrics | TimerStateMetrics }) => {
       const { taskId, metrics } = payload;
       const task = items.find(t => t.id === taskId);
       if (!task) return;
 
-      // Convert TimerMetrics to TaskMetrics if needed
-      const taskMetrics: TaskMetrics = metrics ? {
+      // Ensure favoriteQuotes is properly formatted
+      const safeMetrics = metrics ? {
         ...metrics,
-        // Ensure favoriteQuotes is a string array
         favoriteQuotes: Array.isArray(metrics.favoriteQuotes) 
           ? metrics.favoriteQuotes 
           : (metrics.favoriteQuotes ? [`${metrics.favoriteQuotes}`] : [])
@@ -101,7 +98,8 @@ export const useTaskStorage = () => {
       const completedTask: Task = {
         ...task,
         completed: true,
-        metrics: taskMetrics,
+        completedAt: new Date().toISOString(),
+        metrics: safeMetrics as TaskMetrics,
         clearReason: 'completed'
       };
 

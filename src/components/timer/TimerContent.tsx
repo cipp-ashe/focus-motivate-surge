@@ -8,56 +8,78 @@ import { CompletionView } from "./views/CompletionView";
 import { TimerRenderer } from "./views/TimerRenderer";
 
 interface TimerContentProps {
-  showCompletion: boolean;
-  completionMetrics: TimerStateMetrics | null;
-  handleCloseCompletion: () => void;
+  // Refs
+  expandedViewRef: React.RefObject<TimerExpandedViewRef>;
+  
+  // State
   isExpanded: boolean;
-  taskName: string;
-  timerCircleProps: any;
-  timerControlsProps: any;
-  metrics: TimerStateMetrics;
-  internalMinutes: number;
-  setInternalMinutes: (minutes: number) => void;
   selectedSound: SoundOption;
   setSelectedSound: React.Dispatch<React.SetStateAction<SoundOption>>;
-  testSound: () => void;
-  isLoadingAudio: boolean;
-  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
-  expandedViewRef: React.RefObject<TimerExpandedViewRef>;
-  handleCloseTimer: () => void;
-  favorites: Quote[];
-  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  showCompletion: boolean;
   showConfirmation: boolean;
   setShowConfirmation: (show: boolean) => void;
-  handleAddTimeAndContinue: () => void;
-  handleComplete: () => void;
+  completionMetrics: TimerStateMetrics | null;
+  internalMinutes: number;
+  setInternalMinutes: (minutes: number) => void;
+  metrics: TimerStateMetrics;
+  isRunning: boolean;
+  
+  // Handlers
+  timerHandlers: any;
+  
+  // Props generators
+  getTimerCircleProps: () => any;
+  getTimerControlsProps: () => any;
+  
+  // Utility functions
+  testSound: () => void;
+  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
+  isLoadingAudio: boolean;
+  
+  // External props
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  taskName: string;
 }
 
-export const TimerContent: React.FC<TimerContentProps> = ({
-  showCompletion,
-  completionMetrics,
-  handleCloseCompletion,
-  isExpanded,
-  taskName,
-  timerCircleProps,
-  timerControlsProps,
-  metrics,
-  internalMinutes,
-  setInternalMinutes,
-  selectedSound,
-  setSelectedSound,
-  testSound,
-  isLoadingAudio,
-  updateMetrics,
-  expandedViewRef,
-  handleCloseTimer,
-  favorites,
-  setFavorites,
-  showConfirmation,
-  setShowConfirmation,
-  handleAddTimeAndContinue,
-  handleComplete,
-}) => {
+export const TimerContent: React.FC<TimerContentProps> = (props) => {
+  // Destructure props for clarity
+  const {
+    showCompletion,
+    completionMetrics,
+    isExpanded,
+    taskName,
+    metrics,
+    internalMinutes,
+    setInternalMinutes,
+    selectedSound,
+    setSelectedSound,
+    testSound,
+    isLoadingAudio,
+    updateMetrics,
+    expandedViewRef,
+    favorites,
+    setFavorites,
+    showConfirmation,
+    setShowConfirmation,
+    timerHandlers,
+    getTimerCircleProps,
+    getTimerControlsProps,
+    isRunning,
+  } = props;
+
+  // Extract handlers for readability
+  const {
+    handleCloseCompletion,
+    handleCloseTimer,
+    handleAddTimeAndContinue,
+    handleComplete
+  } = timerHandlers;
+
+  // Get props objects
+  const timerCircleProps = getTimerCircleProps();
+  const timerControlsProps = getTimerControlsProps();
+
   // Show completion view if timer is complete and we have completion metrics
   if (showCompletion && completionMetrics) {
     return (
@@ -78,7 +100,7 @@ export const TimerContent: React.FC<TimerContentProps> = ({
       <CardHeader className="bg-card/70 border-b border-border/10 py-4">
         <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
           <TimerIcon className="h-5 w-5 text-purple-400" />
-          Timer
+          {isRunning ? "Timer Running" : "Timer"}
         </CardTitle>
       </CardHeader>
       <TimerRenderer

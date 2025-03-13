@@ -6,6 +6,7 @@ import type { TimerProps } from "@/types/timer";
 import { TimerError } from "./TimerError";
 import { TimerContent } from "./TimerContent";
 import { useTimerInitialization } from "./hooks/useTimerInitialization";
+import { TimerErrorBoundary } from "./TimerErrorBoundary";
 
 export const Timer = ({
   duration,
@@ -22,84 +23,33 @@ export const Timer = ({
     isValid: Boolean(duration && taskName)
   });
 
-  try {
-    const {
-      // Refs
-      expandedViewRef,
-      
-      // State
-      isExpanded,
-      selectedSound,
-      setSelectedSound,
-      showCompletion,
-      showConfirmation,
-      setShowConfirmation,
-      completionMetrics,
-      internalMinutes,
-      setInternalMinutes,
-      metrics,
-      
-      // Handlers
-      timerHandlers,
-      
-      // Props generators
-      getTimerCircleProps,
-      getTimerControlsProps,
-      
-      // Utility functions
-      testSound,
-      updateMetrics,
-      isLoadingAudio,
-    } = useTimerInitialization({
-      duration,
-      taskName,
-      onComplete,
-      onAddTime,
-      onDurationChange,
-    });
-
-    const timerCircleProps = getTimerCircleProps();
-    const timerControlsProps = getTimerControlsProps();
-
-    return (
-      <Card className="shadow-md border-border/20 overflow-hidden">
-        <TimerContent
-          showCompletion={showCompletion}
-          completionMetrics={completionMetrics}
-          handleCloseCompletion={timerHandlers.handleCloseCompletion}
-          isExpanded={isExpanded}
-          taskName={taskName}
-          timerCircleProps={timerCircleProps}
-          timerControlsProps={timerControlsProps}
-          metrics={metrics}
-          internalMinutes={internalMinutes}
-          setInternalMinutes={setInternalMinutes}
-          selectedSound={selectedSound}
-          setSelectedSound={setSelectedSound}
-          testSound={testSound}
-          isLoadingAudio={isLoadingAudio}
-          updateMetrics={updateMetrics}
-          expandedViewRef={expandedViewRef}
-          handleCloseTimer={timerHandlers.handleCloseTimer}
-          favorites={favorites}
-          setFavorites={setFavorites}
-          showConfirmation={showConfirmation}
-          setShowConfirmation={setShowConfirmation}
-          handleAddTimeAndContinue={timerHandlers.handleAddTimeAndContinue}
-          handleComplete={timerHandlers.handleComplete}
-        />
-      </Card>
-    );
-    
-  } catch (error) {
-    console.error("Error in Timer component:", error);
-    toast.error("Could not initialize timer");
+  // Validate required props
+  if (!duration || !taskName) {
+    console.error('Timer missing required props:', { duration, taskName });
     return (
       <Card className="shadow-md border-border/20 overflow-hidden">
         <TimerError />
       </Card>
     );
   }
+
+  return (
+    <TimerErrorBoundary>
+      <Card className="shadow-md border-border/20 overflow-hidden">
+        <TimerContent
+          {...useTimerInitialization({
+            duration,
+            taskName,
+            onComplete,
+            onAddTime,
+            onDurationChange,
+          })}
+          favorites={favorites}
+          setFavorites={setFavorites}
+        />
+      </Card>
+    </TimerErrorBoundary>
+  );
 };
 
 Timer.displayName = 'Timer';
