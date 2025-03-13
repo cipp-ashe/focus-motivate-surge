@@ -1,5 +1,6 @@
+
 import { Task } from '@/types/tasks';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { completeTaskOperations } from '@/lib/operations/tasks/complete';
 import { deleteTaskOperations } from '@/lib/operations/tasks/delete';
 import { updateTaskOperations } from '@/lib/operations/tasks/update';
@@ -10,6 +11,9 @@ export const useTaskActionHandler = (
   task: Task,
   onOpenTaskDialog?: () => void
 ) => {
+  // Use a ref to track processed task actions
+  const processedActionsRef = useRef<Map<string, number>>(new Map());
+
   // This handler is primarily focused on status changes and task completion
   const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     // Ensure proper event handling
@@ -26,11 +30,29 @@ export const useTaskActionHandler = (
       
     console.log("Task action:", action, "for task:", task.id, "type:", task.taskType);
     
+    // No action specified
+    if (!action) {
+      return;
+    }
+    
+    // Check for duplicate processing
+    const now = Date.now();
+    const actionKey = `${task.id}-${action}`;
+    const lastProcessed = processedActionsRef.current.get(actionKey);
+    
+    if (lastProcessed && now - lastProcessed < 1000) {
+      console.log(`TaskActionHandler: Already processed action '${action}' for task ${task.id} ${now - lastProcessed}ms ago, skipping`);
+      return;
+    }
+    
+    // Record this action as processed
+    processedActionsRef.current.set(actionKey, now);
+    
     // Handle status changes via the dropdown
     if (action?.startsWith('status-')) {
       const newStatus = action.replace('status-', '') as 'pending' | 'started' | 'in-progress' | 'delayed' | 'completed' | 'dismissed';
       
-      // Skip update if status is already the same (prevents infinite loops)
+      // Skip update if status is already the same
       if (task.status === newStatus) {
         console.log(`TaskActionHandler: Task ${task.id} already has status ${newStatus}, ignoring`);
         return;
@@ -54,10 +76,11 @@ export const useTaskActionHandler = (
             });
           } else {
             // For regular tasks, update with required dismissed fields
+            // IMPORTANT: suppressEvent to break the loop
             updateTaskOperations.updateTask(task.id, { 
               status: 'dismissed', 
               dismissedAt: new Date().toISOString() 
-            }, { suppressEvent: true }); // Use suppressEvent to prevent recursion
+            }, { suppressEvent: true }); 
           }
         } else {
           // For other statuses, use the update operations directly with suppressEvent option
@@ -98,6 +121,19 @@ export const useTaskActionHandler = (
   const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
+    
+    // Check for duplicate processing
+    const now = Date.now();
+    const actionKey = `${task.id}-delete`;
+    const lastProcessed = processedActionsRef.current.get(actionKey);
+    
+    if (lastProcessed && now - lastProcessed < 1000) {
+      console.log(`TaskActionHandler: Already processed delete for task ${task.id} ${now - lastProcessed}ms ago, skipping`);
+      return;
+    }
+    
+    // Record this action as processed
+    processedActionsRef.current.set(actionKey, now);
     
     if (task.relationships?.habitId) {
       // Use proper delete operation with dismissal flag for habit tasks

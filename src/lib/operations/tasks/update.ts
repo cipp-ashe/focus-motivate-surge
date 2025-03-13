@@ -4,6 +4,9 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
+// Track last update to prevent duplicate processing
+const lastUpdates = new Map<string, {status: string, timestamp: number}>();
+
 /**
  * Operations related to updating tasks
  */
@@ -39,15 +42,40 @@ export const updateTaskOperations = {
         return;
       }
       
-      // CRITICAL FIX: Skip redundant updates with strict equality check
-      // This is critical to prevent infinite loops when the same status is set repeatedly
-      if (updates.status && updates.status === currentTask.status) {
-        console.log(`TaskOperations: Task ${taskId} already has status ${updates.status}, skipping update to prevent loop`);
-        return;
+      // CRITICAL: Deduplicate status updates using the lastUpdates map
+      if (updates.status) {
+        const now = Date.now();
+        const lastUpdate = lastUpdates.get(taskId);
+        
+        // Skip if we've processed this same status update within the last second
+        if (lastUpdate && 
+            lastUpdate.status === updates.status && 
+            now - lastUpdate.timestamp < 1000) {
+          console.log(`TaskOperations: Skipping duplicate status update for task ${taskId} (${updates.status}) - processed ${now - lastUpdate.timestamp}ms ago`);
+          return;
+        }
+        
+        // Skip if status hasn't changed
+        if (updates.status === currentTask.status) {
+          console.log(`TaskOperations: Task ${taskId} already has status ${updates.status}, skipping update`);
+          return;
+        }
+        
+        // Record this update to prevent duplicates
+        lastUpdates.set(taskId, {status: updates.status, timestamp: now});
+        
+        // Clean up old entries from the Map every 10 seconds to prevent memory leaks
+        if (lastUpdates.size > 100) {
+          const cutoff = now - 10000; // 10 seconds ago
+          for (const [key, value] of lastUpdates.entries()) {
+            if (value.timestamp < cutoff) {
+              lastUpdates.delete(key);
+            }
+          }
+        }
       }
       
       // Extra safeguard: Check entire update object for equivalence
-      // This handles cases where multiple properties are being set but they're all the same
       const hasChanges = Object.keys(updates).some(key => {
         return updates[key as keyof Partial<Task>] !== currentTask[key as keyof Task];
       });
