@@ -1,31 +1,26 @@
 
-import { TimerMetrics } from '@/types/metrics';
+import { TimerStateMetrics } from '@/types/metrics';
 
-export interface UseTimerOptions {
+// Re-export types from the detailed type file
+export * from './types/UseTimerTypes';
+
+// Legacy types for backward compatibility
+export interface UseTimerLegacyOptions {
   initialMinutes?: number;
   onTimeUp?: () => void;
   onDurationChange?: (minutes: number) => void;
 }
 
-export interface UseTimerReturn {
+export interface UseTimerLegacyReturn {
   timeLeft: number;
   minutes: number;
   isRunning: boolean;
-  metrics: TimerMetrics;
-  updateMetrics: ((updates: Partial<TimerMetrics>) => void) & ((updater: (prev: TimerMetrics) => Partial<TimerMetrics>) => void);
+  metrics: TimerStateMetrics;
+  updateMetrics: ((updates: Partial<TimerStateMetrics>) => void) & ((updater: (prev: TimerStateMetrics) => Partial<TimerStateMetrics>) => void);
   start: () => void;
   pause: () => void;
   reset: () => void;
   addTime: (minutes: number) => void;
   setMinutes: (minutes: number) => void;
   completeTimer: () => void;
-}
-
-export interface UseTimerActionsReturn {
-  startTimer: () => void;
-  pauseTimer: () => void;
-  resetTimer: () => void;
-  extendTimer: (additionalMinutes: number) => void;
-  completeTimer: () => void;
-  updateMetrics: (updates: Partial<TimerMetrics>) => void;
 }

@@ -1,3 +1,4 @@
+
 import { useRef, useState } from "react";
 import { TimerProps } from "@/types/timer";
 import { TimerExpandedViewRef } from "@/types/timer";
@@ -9,6 +10,7 @@ import { useAutoComplete } from "./useAutoComplete";
 import { useTimerState } from "@/hooks/timer/useTimerState";
 import { useTimerActions } from '@/hooks/timer/useTimerActions';
 import { useTimerComplete } from "../state/TimerState";
+import { TimerActionProps } from "@/hooks/timer/types/UseTimerTypes";
 
 export const useTimerInitialization = ({
   duration,
@@ -44,7 +46,15 @@ export const useTimerInitialization = ({
   const [pauseTimeLeft, setPauseTimeLeft] = useState<number | null>(null);
   const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Import timer action hooks
+  // Import timer action hooks with the legacy interface
+  const timerActionProps: TimerActionProps = {
+    timeLeft, 
+    metrics, 
+    updateTimeLeft, 
+    updateMetrics, 
+    setIsRunning 
+  };
+  
   const { 
     startTimer, 
     pauseTimer, 
@@ -52,13 +62,7 @@ export const useTimerInitialization = ({
     resetTimer, 
     completeTimer: completeTimerAction, 
     updateMetrics: updateMetricsAction
-  } = useTimerActions({ 
-    timeLeft, 
-    metrics, 
-    updateTimeLeft, 
-    updateMetrics, 
-    setIsRunning 
-  });
+  } = useTimerActions(timerActionProps);
 
   // Add audio functionality
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);

@@ -3,6 +3,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useTimerActions } from '../timer/useTimerActions';
 import { TimerStateMetrics } from '@/types/metrics';
+import { TimerActionProps } from '../timer/types/UseTimerTypes';
 
 describe('useTimerActions', () => {
   const mockMetrics: TimerStateMetrics = {
@@ -22,7 +23,7 @@ describe('useTimerActions', () => {
     pausedTimeLeft: null
   };
 
-  const mockProps = {
+  const mockProps: TimerActionProps = {
     timeLeft: 300,
     metrics: mockMetrics,
     updateTimeLeft: vi.fn(),
