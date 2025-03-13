@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Task } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Trash, Check, X, Edit, Clock, Image, FileText, List, Mic } from 'lucide-react';
@@ -42,9 +42,14 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
   handleLocalKeyDown,
   preventPropagation
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>, actionType: string) => {
     e.stopPropagation();
     e.preventDefault();
+    
+    // Close dropdown immediately
+    setIsOpen(false);
     
     // Call the parent handler for most actions
     onTaskAction(e, actionType);
@@ -71,7 +76,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
   };
   
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
           <MoreHorizontal className="h-4 w-4" />

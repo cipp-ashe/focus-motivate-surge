@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -39,11 +39,17 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
   onToggleMultipleInput
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleTaskTypeSelect = (type: string) => {
+    onTaskTypeChange(type);
+    setIsOpen(false); // Close the popover after selection
+  };
 
   return (
     <div className="flex gap-2">
       <div className="flex-grow relative flex items-center">
-        <Popover>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button 
               variant="ghost" 
@@ -60,7 +66,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
                   key={type}
                   variant={type === taskType ? 'secondary' : 'ghost'}
                   className="w-full justify-start gap-2 px-2"
-                  onClick={() => onTaskTypeChange(type)}
+                  onClick={() => handleTaskTypeSelect(type)}
                 >
                   {icon}
                   <span className="text-sm">{taskTypeLabels[type as TaskType]}</span>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { TaskType } from '@/types/tasks';
 import { 
   Select,
@@ -26,12 +26,15 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
   value,
   onChange
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  
   const handleChange = (newValue: string) => {
     onChange(newValue as TaskType);
+    setIsOpen(false); // Close the select after selection
   };
 
   return (
-    <Select value={value} onValueChange={handleChange}>
+    <Select value={value} onValueChange={handleChange} open={isOpen} onOpenChange={setIsOpen}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select task type" />
       </SelectTrigger>
