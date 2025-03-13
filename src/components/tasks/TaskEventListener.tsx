@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
+import { useNavigate } from 'react-router-dom';
 
 interface TaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
@@ -18,6 +19,8 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   onOpenVoiceRecorder,
   onTaskUpdate
 }) => {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     console.log('TaskEventListener: Setting up event listeners');
     
@@ -57,7 +60,16 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
     // Handler for timer task selection
     const handleTimerTaskSet = (task: Task) => {
       console.log('TaskEventListener: Timer task set event received for', task.id);
-      // We don't need to do anything special here, as this is handled by the Timer page
+      // Navigate to timer page if not already there
+      if (!window.location.pathname.includes('/timer')) {
+        navigate('/timer');
+      }
+      
+      // Dispatch a custom event to set the task in the timer
+      setTimeout(() => {
+        const event = new CustomEvent('timer:set-task', { detail: task });
+        window.dispatchEvent(event);
+      }, 300); // Small delay to ensure navigation completes first
     };
     
     // Set up event listeners
@@ -78,7 +90,7 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       unsubscribers.forEach((unsubscribe) => unsubscribe());
       console.log('TaskEventListener: Cleaned up event listeners');
     };
-  }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder, onTaskUpdate]);
+  }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder, onTaskUpdate, navigate]);
   
   return null;
 };

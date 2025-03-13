@@ -31,6 +31,11 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   const handleTaskAdd = (task: Task) => {
     console.log("TaskManagerContent - Adding task:", task);
     
+    // Ensure timer tasks in timer view
+    if (isTimerView && (!task.taskType || task.taskType !== 'timer')) {
+      task.taskType = 'timer';
+    }
+    
     // Add to storage first
     taskStorage.addTask(task);
     
@@ -53,6 +58,11 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
 
   const handleTasksAdd = (tasks: Task[]) => {
     console.log(`TaskManagerContent - Adding ${tasks.length} tasks`);
+    
+    // Ensure timer tasks in timer view
+    if (isTimerView) {
+      tasks = tasks.map(task => ({ ...task, taskType: 'timer' }));
+    }
     
     // Add all tasks to storage
     tasks.forEach(task => taskStorage.addTask(task));

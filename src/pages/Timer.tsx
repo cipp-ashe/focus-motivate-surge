@@ -197,7 +197,7 @@ const TimerPage: React.FC<TimerPageProps> = () => {
   
   const TaskSection = (
     <div className="w-full">
-      <TaskManager key="timer-task-manager" />
+      <TaskManager key="timer-task-manager" isTimerView={true} />
     </div>
   );
   
