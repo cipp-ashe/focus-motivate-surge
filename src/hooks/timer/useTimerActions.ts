@@ -116,7 +116,7 @@ export const useTimerActions = (
         efficiencyRatio,
         completionStatus,
         isPaused: false,
-        completionDate: now
+        completionDate: now.toISOString() // Convert Date to string here
       };
       
       setIsRunning(false);
