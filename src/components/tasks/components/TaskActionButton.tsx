@@ -25,7 +25,7 @@ interface TaskActionButtonProps {
   handleLocalBlur: () => void;
   handleLocalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
-  onOpenTaskDialog?: () => void; // Add prop for dialog opener
+  onOpenTaskDialog?: () => void; // The dialog opener prop
 }
 
 export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
@@ -153,7 +153,18 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
   function getStandardActionButton() {
     if (task.taskType === 'timer') {
       return (
-        <Badge variant="outline" className="flex items-center gap-1 bg-primary/5 hover:bg-primary/10">
+        <Badge 
+          variant="outline" 
+          className="flex items-center gap-1 bg-primary/5 hover:bg-primary/10"
+          onClick={(e) => {
+            onTaskAction(e, 'true');
+            // We need to make sure the dialog opens for timer tasks
+            if (onOpenTaskDialog) {
+              console.log("Opening dialog for timer task:", task.id);
+              onOpenTaskDialog();
+            }
+          }}
+        >
           <Clock className="h-3.5 w-3.5 text-primary opacity-70" />
           {editingTaskId === task.id ? (
             <Input
@@ -191,12 +202,14 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           variant="outline"
           size="sm"
           onClick={(e) => {
-            // First trigger the task action in the TaskActionHandler
+            // First trigger the task action
             onTaskAction(e, 'open-journal');
-            // Then directly call the dialog opener if available
+            // Then manually open the dialog
             if (onOpenTaskDialog) {
-              console.log("Directly calling dialog opener for journal task:", task.id);
+              console.log("Opening dialog for journal task:", task.id);
               onOpenTaskDialog();
+            } else {
+              console.error("No dialog opener provided for journal task in TaskActionButton:", task.id);
             }
           }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
@@ -215,10 +228,12 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           onClick={(e) => {
             // First trigger the task action
             onTaskAction(e, 'true');
-            // Then directly call the dialog opener if available
+            // Then manually open the dialog
             if (onOpenTaskDialog) {
-              console.log("Directly calling dialog opener for screenshot task:", task.id);
+              console.log("Opening dialog for screenshot task:", task.id);
               onOpenTaskDialog();
+            } else {
+              console.error("No dialog opener provided for screenshot task in TaskActionButton:", task.id);
             }
           }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
@@ -235,11 +250,14 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           variant="outline"
           size="sm"
           onClick={(e) => {
+            console.log("Checklist button clicked for task:", task.id);
+            
             // First trigger the task action
             onTaskAction(e, 'true');
-            // Then directly call the dialog opener if available
+            
+            // Then directly call the dialog opener
             if (onOpenTaskDialog) {
-              console.log("Directly calling dialog opener for checklist task:", task.id);
+              console.log("Opening dialog for checklist task:", task.id);
               onOpenTaskDialog();
             } else {
               console.error("No dialog opener provided for checklist task in TaskActionButton:", task.id);
@@ -261,10 +279,12 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           onClick={(e) => {
             // First trigger the task action
             onTaskAction(e, 'true');
-            // Then directly call the dialog opener if available
+            // Then directly call the dialog opener
             if (onOpenTaskDialog) {
-              console.log("Directly calling dialog opener for voicenote task:", task.id);
+              console.log("Opening dialog for voicenote task:", task.id);
               onOpenTaskDialog();
+            } else {
+              console.error("No dialog opener provided for voicenote task in TaskActionButton:", task.id);
             }
           }}
           className="h-7 px-2 flex items-center gap-1 text-xs"

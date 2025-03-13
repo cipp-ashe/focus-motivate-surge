@@ -1,4 +1,3 @@
-
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
@@ -96,15 +95,7 @@ export const useTaskActionHandler = (
         }
       }));
       
-      console.log("Triggering journal dialog for task:", task.id);
-      // Note: The dialog opener is now directly called in TaskActionButton
-      // This is kept for backward compatibility
-      if (onOpenTaskDialog) {
-        onOpenTaskDialog(); 
-      } else {
-        console.error("No dialog opener provided for journal task:", task.id);
-      }
-      
+      console.log("Triggered journal dialog for task:", task.id);
       return;
     }
     
@@ -125,6 +116,8 @@ export const useTaskActionHandler = (
             taskName: task.name, 
             duration: task.duration || 1500 
           });
+          
+          console.log("Initialized timer for task:", task.id);
         }
         break;
         
@@ -149,14 +142,14 @@ export const useTaskActionHandler = (
             }
           }));
           
-          console.log(`TaskActionHandler: Dispatched show-image event for task:`, task.id);
-          // Note: onOpenTaskDialog is now called directly in TaskActionButton
+          console.log("Dispatched show-image event for task:", task.id);
         }
         break;
         
       case 'checklist':
         if (action === 'true') {
           // Don't automatically mark as in-progress for checklist tasks
+          console.log("TaskActionHandler: Processing checklist action for task:", task.id);
           
           // Dispatch the event to open the checklist dialog
           window.dispatchEvent(new CustomEvent('open-checklist', {
@@ -167,8 +160,7 @@ export const useTaskActionHandler = (
             }
           }));
           
-          console.log(`TaskActionHandler: Dispatched open-checklist event for task:`, task.id);
-          // Note: onOpenTaskDialog is now called directly in TaskActionButton
+          console.log("TaskActionHandler: Dispatched open-checklist event for task:", task.id);
         }
         break;
         
@@ -185,8 +177,7 @@ export const useTaskActionHandler = (
             }
           }));
           
-          console.log(`TaskActionHandler: Dispatched open-voice-recorder event for task:`, task.id);
-          // Note: onOpenTaskDialog is now called directly in TaskActionButton
+          console.log("TaskActionHandler: Dispatched open-voice-recorder event for task:", task.id);
         }
         break;
         

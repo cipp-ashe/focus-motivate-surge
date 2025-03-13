@@ -60,10 +60,6 @@ const TaskPage = () => {
       });
       setChecklistItems(Array.isArray(items) ? items : []);
       setIsChecklistOpen(true);
-      
-      setTimeout(() => {
-        setIsChecklistOpen(true);
-      }, 10);
     };
     
     const handleOpenJournal = (event: Event) => {
@@ -81,10 +77,6 @@ const TaskPage = () => {
       });
       setJournalContent(entry || '');
       setIsJournalOpen(true);
-      
-      setTimeout(() => {
-        setIsJournalOpen(true);
-      }, 10);
     };
     
     const handleOpenVoiceRecorder = (event: Event) => {

@@ -63,6 +63,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   
   const statusIndicator = getStatusIndicator();
   
+  console.log("TaskContent rendering for task:", task.id, "onOpenTaskDialog available:", !!onOpenTaskDialog);
+  
   return (
     <div className="p-4 relative">
       <div className="flex items-start justify-between gap-x-2">
@@ -98,7 +100,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
           handleLocalBlur={onBlur}
           handleLocalKeyDown={onKeyDown}
           preventPropagation={preventPropagation}
-          onOpenTaskDialog={onOpenTaskDialog} // Pass the dialog opener to TaskActionButton
+          onOpenTaskDialog={onOpenTaskDialog} // Explicitly pass the dialog opener
         />
       </div>
     </div>
