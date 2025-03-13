@@ -6,6 +6,13 @@ import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
 import { TaskHeader } from "./components/TaskHeader";
 import { TaskTags } from "./TaskTags";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScreenshotContent } from "@/components/screenshots/components/ScreenshotContent";
 
 interface TaskContentProps {
   task: Task;
@@ -31,6 +38,8 @@ export const TaskContent = ({
   preventPropagation,
 }: TaskContentProps) => {
   const [localInputValue, setLocalInputValue] = useState(inputValue);
+  const [isScreenshotDialogOpen, setIsScreenshotDialogOpen] = useState(false);
+  const [isScreenshotExpanded, setIsScreenshotExpanded] = useState(true);
   
   useEffect(() => {
     if (editingTaskId === task.id) {
@@ -102,10 +111,8 @@ export const TaskContent = ({
         
       case 'screenshot':
         if (task.imageUrl) {
-          const showImageEvent = new CustomEvent('show-image', {
-            detail: { imageUrl: task.imageUrl, taskName: task.name }
-          });
-          window.dispatchEvent(showImageEvent);
+          // Open dialog instead of dispatching an event
+          setIsScreenshotDialogOpen(true);
         } else {
           toast.error(`No image found for task: ${task.name}`);
         }
@@ -158,25 +165,46 @@ export const TaskContent = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 p-4">
-      <TaskHeader 
-        task={task}
-        editingTaskId={editingTaskId}
-        inputValue={localInputValue}
-        onDelete={handleDelete}
-        onTaskAction={handleTaskAction}
-        handleLocalChange={handleLocalChange}
-        handleLocalBlur={handleLocalBlur}
-        handleLocalKeyDown={handleLocalKeyDown}
-        preventPropagation={preventPropagation}
-      />
-
-      {task.tags && (
-        <TaskTags 
-          tags={task.tags}
+    <>
+      <div className="flex flex-col gap-2 p-4">
+        <TaskHeader 
+          task={task}
+          editingTaskId={editingTaskId}
+          inputValue={localInputValue}
+          onDelete={handleDelete}
+          onTaskAction={handleTaskAction}
+          handleLocalChange={handleLocalChange}
+          handleLocalBlur={handleLocalBlur}
+          handleLocalKeyDown={handleLocalKeyDown}
           preventPropagation={preventPropagation}
         />
+
+        {task.tags && (
+          <TaskTags 
+            tags={task.tags}
+            preventPropagation={preventPropagation}
+          />
+        )}
+      </div>
+
+      {/* Screenshot Dialog */}
+      {task.taskType === 'screenshot' && (
+        <Dialog open={isScreenshotDialogOpen} onOpenChange={setIsScreenshotDialogOpen}>
+          <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl">{task.name}</DialogTitle>
+            </DialogHeader>
+            
+            <div className="mt-2">
+              <ScreenshotContent 
+                task={task}
+                isExpanded={isScreenshotExpanded}
+                setIsExpanded={setIsScreenshotExpanded}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
-    </div>
+    </>
   );
 };
