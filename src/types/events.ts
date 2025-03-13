@@ -54,6 +54,12 @@ export interface TimerEventPayloads {
   };
   'timer:set-task': { id: string; name: string; duration?: number } | any;
   
+  // Task-related UI events
+  'show-image': { taskId: string; imageUrl: string; taskName: string };
+  'open-checklist': { taskId: string; taskName: string; items: any[] };
+  'open-journal': { taskId: string; taskName: string; entry: string };
+  'open-voice-recorder': { taskId: string; taskName: string };
+  
   // Timer events
   'timer:init': { taskName: string; duration: number };
   'timer:expand': { taskName: string };

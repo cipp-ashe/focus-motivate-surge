@@ -51,6 +51,11 @@ type Events = {
   };
   'task:reload': any;
   'tasks:force-update': any;
+  // Task-related UI events
+  'show-image': { taskId: string; imageUrl: string; taskName: string };
+  'open-checklist': { taskId: string; taskName: string; items: any[] };
+  'open-journal': { taskId: string; taskName: string; entry: string };
+  'open-voice-recorder': { taskId: string; taskName: string };
   // Habit events
   'habit:complete': { 
     habitId: string; 
