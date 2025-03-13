@@ -96,6 +96,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
           handleLocalBlur={onBlur}
           handleLocalKeyDown={onKeyDown}
           preventPropagation={preventPropagation}
+          onOpenTaskDialog={onOpenTaskDialog} // Pass the dialog opener to TaskActionButton
         />
       </div>
     </div>

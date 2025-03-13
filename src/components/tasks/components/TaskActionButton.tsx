@@ -25,6 +25,7 @@ interface TaskActionButtonProps {
   handleLocalBlur: () => void;
   handleLocalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
+  onOpenTaskDialog?: () => void; // Add prop for dialog opener
 }
 
 export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
@@ -37,6 +38,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
   handleLocalBlur,
   handleLocalKeyDown,
   preventPropagation,
+  onOpenTaskDialog, // Receive the dialog opener prop
 }) => {
   // For habit-related tasks
   if (task.relationships?.habitId) {
@@ -188,7 +190,10 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={(e) => onTaskAction(e, 'open-journal')}
+          onClick={(e) => {
+            onTaskAction(e, 'open-journal');
+            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+          }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >
           <BookOpen className="h-3.5 w-3.5 text-amber-400" />
@@ -202,7 +207,10 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={(e) => onTaskAction(e, 'true')}
+          onClick={(e) => {
+            onTaskAction(e, 'true');
+            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+          }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >
           <ImageIcon className="h-3.5 w-3.5 text-blue-400" />
@@ -216,7 +224,10 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={(e) => onTaskAction(e, 'true')}
+          onClick={(e) => {
+            onTaskAction(e, 'true');
+            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+          }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >
           <CheckSquare className="h-3.5 w-3.5 text-cyan-400" />
@@ -230,7 +241,10 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={(e) => onTaskAction(e, 'true')}
+          onClick={(e) => {
+            onTaskAction(e, 'true');
+            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+          }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >
           <Mic className="h-3.5 w-3.5 text-rose-400" />
