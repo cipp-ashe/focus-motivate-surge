@@ -6,8 +6,8 @@ import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { ChecklistItem, Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { TaskEventListener } from '@/components/tasks/TaskEventListener';
-import { ChecklistSheet } from '@/components/tasks/sheets/ChecklistSheet';
-import { JournalSheet } from '@/components/tasks/sheets/JournalSheet';
+import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
+import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 
 const TaskPage = () => {
   const isMobile = useIsMobile();
@@ -92,13 +92,13 @@ const TaskPage = () => {
       
       <TaskManager dialogOpeners={taskDialogOpeners} />
       
-      <ChecklistSheet 
+      <ChecklistDialog 
         isOpen={isChecklistOpen}
         onOpenChange={setIsChecklistOpen}
         currentTask={currentChecklistTask}
       />
       
-      <JournalSheet 
+      <JournalDialog 
         isOpen={isJournalOpen}
         onOpenChange={setIsJournalOpen}
         currentTask={currentJournalTask}
