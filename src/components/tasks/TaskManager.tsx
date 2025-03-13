@@ -100,6 +100,19 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
     console.log("TaskManager: Updating task", taskId, updates);
     eventBus.emit('task:update', { taskId, updates });
   };
+
+  // TaskEventHandler props
+  const handleTaskCreate = (task: Task) => {
+    console.log("TaskEventHandler: Task create", task);
+  };
+
+  const handleTaskDelete = (data: { taskId: string }) => {
+    console.log("TaskEventHandler: Task delete", data);
+  };
+
+  const handleForceUpdate = () => {
+    console.log("TaskEventHandler: Force update");
+  };
   
   return (
     <>
@@ -119,48 +132,56 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
         onTaskUpdate={handleTaskUpdate}
       />
       
-      <TaskEventHandler />
+      <TaskEventHandler 
+        tasks={items}
+        onTaskCreate={handleTaskCreate}
+        onTaskUpdate={handleTaskUpdate}
+        onTaskDelete={handleTaskDelete}
+        onForceUpdate={handleForceUpdate}
+      />
       
       <JournalDialog
-        open={showJournal}
+        isOpen={showJournal}
         onOpenChange={setShowJournal}
-        taskId={journalTaskId}
-        taskName={journalTaskName}
-        journalContent={journalContent}
-        onUpdate={(content) => {
-          handleTaskUpdate(journalTaskId, { journalEntry: content });
+        task={{
+          id: journalTaskId,
+          name: journalTaskName,
+          journalEntry: journalContent,
+          completed: false,
+          createdAt: new Date().toISOString()
         }}
       />
       
       <ChecklistDialog
-        open={showChecklist}
+        isOpen={showChecklist}
         onOpenChange={setShowChecklist}
-        taskId={checklistTaskId}
-        taskName={checklistTaskName}
-        items={checklistItems}
-        onUpdate={(items) => {
-          handleTaskUpdate(checklistTaskId, { checklistItems: items });
-        }}
+        currentTask={checklistTaskId ? {
+          taskId: checklistTaskId,
+          taskName: checklistTaskName,
+          items: checklistItems
+        } : null}
       />
       
       <ScreenshotDialog
-        open={showImageViewer}
+        isOpen={showImageViewer}
         onOpenChange={setShowImageViewer}
-        imageUrl={currentImage}
-        taskName={currentImageTitle}
+        task={{
+          id: 'screenshot',
+          name: currentImageTitle,
+          imageUrl: currentImage,
+          completed: false,
+          createdAt: new Date().toISOString()
+        }}
       />
       
       <VoiceNoteDialog
-        open={showVoiceRecorder}
+        isOpen={showVoiceRecorder}
         onOpenChange={setShowVoiceRecorder}
-        taskId={voiceNoteTaskId}
-        taskName={voiceNoteTaskName}
-        onUpdate={(text, url, duration) => {
-          handleTaskUpdate(voiceNoteTaskId, {
-            voiceNoteText: text,
-            voiceNoteUrl: url,
-            voiceNoteDuration: duration
-          });
+        task={{
+          id: voiceNoteTaskId,
+          name: voiceNoteTaskName,
+          completed: false,
+          createdAt: new Date().toISOString()
         }}
       />
     </>

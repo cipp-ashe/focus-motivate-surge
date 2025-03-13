@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
@@ -72,14 +73,6 @@ const TaskPage = () => {
     }
   };
 
-  // Create an object with all the dialog opener functions
-  const taskDialogOpeners = {
-    checklist: handleOpenChecklist,
-    journal: handleOpenJournal,
-    screenshot: handleShowImage,
-    voicenote: handleOpenVoiceRecorder,
-  };
-
   return (
     <div className={`container mx-auto ${isMobile ? 'p-2' : 'py-3 px-4 sm:py-5 sm:px-6'} max-w-6xl`}>
       <h1 className={`${isMobile ? 'text-xl mb-2' : 'text-2xl sm:text-3xl mb-3 sm:mb-5'} font-bold text-primary`}>
@@ -94,7 +87,7 @@ const TaskPage = () => {
         onTaskUpdate={handleTaskUpdate}
       />
       
-      <TaskManager dialogOpeners={taskDialogOpeners} />
+      <TaskManager />
       
       <ChecklistDialog 
         isOpen={isChecklistOpen}

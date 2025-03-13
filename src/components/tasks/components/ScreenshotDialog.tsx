@@ -18,13 +18,13 @@ import { Edit, Save, X } from 'lucide-react';
 interface ScreenshotDialogProps {
   task: Task;
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+  onOpenChange: (open: boolean) => void;
 }
 
 export const ScreenshotDialog: React.FC<ScreenshotDialogProps> = ({
   task,
   isOpen,
-  setIsOpen,
+  onOpenChange,
 }) => {
   const [isScreenshotExpanded, setIsScreenshotExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -67,7 +67,7 @@ export const ScreenshotDialog: React.FC<ScreenshotDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-col space-y-1.5 pb-2">
           {isEditing ? (

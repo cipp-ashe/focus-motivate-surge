@@ -17,13 +17,13 @@ import { Edit, Save, X } from 'lucide-react';
 interface JournalDialogProps {
   task: Task;
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+  onOpenChange: (open: boolean) => void;
 }
 
 export const JournalDialog: React.FC<JournalDialogProps> = ({
   task,
   isOpen,
-  setIsOpen,
+  onOpenChange,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(task.name);
@@ -51,7 +51,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
         setEditedName(taskName);
         setEditedJournalEntry(entry || '');
         setIsEditing(!entry);
-        setIsOpen(true);
+        onOpenChange(true);
       }
     };
 
@@ -61,7 +61,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     return () => {
       window.removeEventListener('open-journal', listener);
     };
-  }, [task.id, setIsOpen]);
+  }, [task.id, onOpenChange]);
 
   const handleSaveEdit = () => {
     if (!editedName.trim()) {
@@ -97,7 +97,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto" onClick={handleDialogClick}>
         <DialogHeader className="flex flex-col space-y-1.5 pb-2">
           {isEditing ? (

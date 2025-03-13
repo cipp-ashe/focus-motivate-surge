@@ -5,7 +5,7 @@ import { eventManager } from '@/lib/events/EventManager';
 import { useEvent } from '@/hooks/useEvent';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
-interface TaskEventHandlerProps {
+export interface TaskEventHandlerProps {
   tasks: Task[];
   onTaskCreate: (task: Task) => void;
   onTaskUpdate: (data: { taskId: string, updates: Partial<Task> }) => void;
@@ -14,6 +14,7 @@ interface TaskEventHandlerProps {
 }
 
 export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
+  tasks,
   onTaskCreate,
   onTaskUpdate,
   onTaskDelete,

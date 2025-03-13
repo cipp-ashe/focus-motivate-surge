@@ -16,13 +16,13 @@ import { Edit, Save, X, Play, Pause, Volume2 } from 'lucide-react';
 interface VoiceNoteDialogProps {
   task: Task;
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+  onOpenChange: (open: boolean) => void;
 }
 
 export const VoiceNoteDialog: React.FC<VoiceNoteDialogProps> = ({
   task,
   isOpen,
-  setIsOpen,
+  onOpenChange,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(task.name);
@@ -100,7 +100,7 @@ export const VoiceNoteDialog: React.FC<VoiceNoteDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader className="flex flex-col space-y-1.5 pb-2">
           {isEditing ? (
