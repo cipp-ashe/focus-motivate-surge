@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
-import { useLocalStorageData } from '@/hooks/data/useLocalStorageData';
 import TaskManager from '@/components/tasks/TaskManager';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { Timer } from '@/components/timer/Timer';
@@ -9,9 +9,9 @@ interface TimerPageProps {}
 
 const TimerPage: React.FC<TimerPageProps> = () => {
   const isMobile = useIsMobile();
-  const { selectedTaskName, setSelectedTaskName } = useLocalStorageData('selected-task-name', '');
-  const { selectedTaskId, setSelectedTaskId } = useLocalStorageData('selected-task-id', '');
-  const { isCompletionVisible, setIsCompletionVisible } = useLocalStorageData('completion-visible', false);
+  const [selectedTaskName, setSelectedTaskName] = useState('');
+  const [selectedTaskId, setSelectedTaskId] = useState('');
+  const [isCompletionVisible, setIsCompletionVisible] = useState(false);
   
   const [timerKey, setTimerKey] = useState(Date.now());
   
@@ -28,7 +28,7 @@ const TimerPage: React.FC<TimerPageProps> = () => {
     return () => {
       window.removeEventListener('timer:init', handleTimerInit as EventListener);
     };
-  }, [setSelectedTaskName]);
+  }, []);
   
   const handleTimerSelect = (task: any) => {
     setSelectedTaskName(task.name);
@@ -52,19 +52,20 @@ const TimerPage: React.FC<TimerPageProps> = () => {
   const TimerSection = (
     <div className="w-full h-full">
       <Timer
-        selectedTaskName={selectedTaskName}
-        onTimerInitialize={handleTimerInitialize}
-        onTimerComplete={handleTimerComplete}
-        onTimerReset={handleTimerReset}
+        key={timerKey}
+        taskName={selectedTaskName}
+        onComplete={handleTimerComplete}
+        onAddTime={() => console.log('Adding time')}
+        onDurationChange={(duration) => console.log('Duration changed to', duration)}
         showCelebration={isCompletionVisible}
-        onCelebrationComplete={() => setIsCompletionVisible(false)}
+        setFavorites={() => {}}
+        favorites={[]}
       />
     </div>
   );
   
   const TaskSection = (
     <div className="w-full">
-      {/* Fix this part to not pass invalid props */}
       <TaskManager key="timer-task-manager" />
     </div>
   );
