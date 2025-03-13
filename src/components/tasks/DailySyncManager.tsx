@@ -43,7 +43,7 @@ export const DailySyncManager = ({
       onLastSyncUpdate(today);
       
       // Notify the user
-      toast.info("Tasks have been reset for the new day");
+      toast.info("Tasks have been reset for the new day", { duration: 3000 });
       
       // Trigger habit checks to ensure all habit tasks are created for today
       setTimeout(() => {

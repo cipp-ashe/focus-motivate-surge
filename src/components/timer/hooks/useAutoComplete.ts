@@ -2,6 +2,7 @@
 import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { eventBus } from "@/lib/eventBus";
+import { toast } from "sonner";
 
 export const useAutoComplete = ({
   isRunning,
@@ -54,6 +55,9 @@ export const useAutoComplete = ({
         taskId: habitTask.id,
         metrics: completionMetrics
       });
+      toast.success(`Completed timer for habit: ${taskName}`, { duration: 2000 });
+    } else {
+      toast.success(`Timer completed: ${taskName}`, { duration: 2000 });
     }
   }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName, setCompletionMetrics, setShowCompletion]);
 };

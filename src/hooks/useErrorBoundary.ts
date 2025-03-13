@@ -25,6 +25,7 @@ export const useErrorBoundary = (componentName: string) => {
       // Show toast notification for user feedback
       toast.error(`Error in ${componentName}: ${errorInfo.message}`, {
         description: "Check console for more details",
+        duration: 3000,
       });
     };
 
@@ -40,6 +41,7 @@ export const useErrorBoundary = (componentName: string) => {
       
       toast.error(`Async Error in ${componentName}: ${errorInfo.message}`, {
         description: "Check console for more details",
+        duration: 3000,
       });
     };
 

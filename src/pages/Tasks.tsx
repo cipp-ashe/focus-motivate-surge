@@ -29,7 +29,8 @@ const TaskPage = () => {
   // Event handlers
   const handleShowImage = (imageUrl: string, taskName: string) => {
     toast.info(`Viewing image for: ${taskName}`, {
-      description: "Image viewer functionality is not yet implemented"
+      description: "Image viewer functionality is not yet implemented",
+      duration: 2000
     });
     console.log("Tasks.tsx - Handled show-image event for:", taskName);
   };
@@ -42,7 +43,7 @@ const TaskPage = () => {
     });
     setIsChecklistOpen(true);
     console.log('Tasks.tsx - Opened checklist for task:', taskName);
-    toast.info(`Opening checklist for: ${taskName}`);
+    toast.info(`Opening checklist for: ${taskName}`, { duration: 1500 });
   };
   
   const handleOpenJournal = (taskId: string, taskName: string, entry: string) => {
@@ -53,12 +54,13 @@ const TaskPage = () => {
     });
     setIsJournalOpen(true);
     console.log('Tasks.tsx - Opened journal for task:', taskName);
-    toast.info(`Opening journal for: ${taskName}`);
+    toast.info(`Opening journal for: ${taskName}`, { duration: 1500 });
   };
   
   const handleOpenVoiceRecorder = (taskId: string, taskName: string) => {
     toast.info(`Recording for: ${taskName}`, {
-      description: "Voice recorder functionality is not yet implemented"
+      description: "Voice recorder functionality is not yet implemented",
+      duration: 2000
     });
     console.log("Tasks.tsx - Handled open-voice-recorder event for:", taskName);
   };

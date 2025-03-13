@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useIsMobile } from "@/hooks/ui/useIsMobile";
-import { X } from "lucide-react";
+import { X, Copy } from "lucide-react";
 
 interface TaskJsonDialogProps {
   tasks: Task[];
@@ -20,7 +20,7 @@ export const TaskJsonDialog = ({ tasks, open, onOpenChange }: TaskJsonDialogProp
   const handleCopyJson = () => {
     const jsonContent = JSON.stringify(tasks, null, 2);
     navigator.clipboard.writeText(jsonContent);
-    toast.success('JSON copied to clipboard');
+    toast.success('JSON copied to clipboard', { duration: 1500 });
   };
 
   const handleClose = () => {
@@ -74,6 +74,7 @@ export const TaskJsonDialog = ({ tasks, open, onOpenChange }: TaskJsonDialogProp
             variant="secondary"
             size="sm"
           >
+            <Copy className="h-3.5 w-3.5 mr-1.5" />
             Copy JSON
           </Button>
         </div>

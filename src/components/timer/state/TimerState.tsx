@@ -79,6 +79,7 @@ export const useTimerState = ({
   const addTime = useCallback((minutes: number) => {
     extendTimer(minutes);
     if (onAddTime) onAddTime();
+    toast.info(`Added ${minutes} minutes to timer`, { duration: 1500 });
   }, [extendTimer, onAddTime]);
 
   const setMinutes = useCallback((mins: number) => {
@@ -109,7 +110,7 @@ export const useTimerState = ({
     options: {
       onError: useCallback((error) => {
         console.error("Audio error:", error);
-        toast.error("Could not play sound. Please check your browser settings. 🔇");
+        toast.error("Could not play sound. Please check your browser settings. 🔇", { duration: 2000 });
       }, []),
     },
   });

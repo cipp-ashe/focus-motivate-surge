@@ -86,6 +86,10 @@ function App() {
       </QueryClientProvider>
       <Toaster 
         position="bottom-right" 
+        duration={2000}  
+        closeButton
+        expand={false}
+        offset={16}
         toastOptions={{
           className: "bg-background border border-border text-foreground",
           descriptionClassName: "text-muted-foreground",

@@ -38,7 +38,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     onTaskAdd(task);
     
     // Show toast
-    toast.success(`Added ${task.taskType || 'regular'} task: ${task.name}`);
+    toast.success(`Added ${task.taskType || 'regular'} task: ${task.name}`, { duration: 2000 });
     
     // Force refresh the UI
     setTimeout(() => {
@@ -61,7 +61,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
     onTasksAdd(tasks);
     
     // Show toast
-    toast.success(`Added ${tasks.length} tasks`);
+    toast.success(`Added ${tasks.length} tasks`, { duration: 2000 });
     
     // Force refresh the UI
     setTimeout(() => {

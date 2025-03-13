@@ -50,11 +50,11 @@ export const completeTaskOperations = {
       
       // Show toast unless suppressed
       if (!options.suppressToast) {
-        toast.success(`Completed task: ${task.name}`);
+        toast.success(`Completed task: ${task.name}`, { duration: 2000 });
       }
     } catch (error) {
       console.error('Error completing task:', error);
-      toast.error('Failed to complete task');
+      toast.error('Failed to complete task', { duration: 2000 });
     }
   }
 };

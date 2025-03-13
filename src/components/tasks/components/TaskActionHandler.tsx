@@ -34,7 +34,7 @@ export const useTaskActionHandler = (
       if (newStatus === 'completed') {
         // For completed status, use completeTaskOperations to properly handle completion
         completeTaskOperations.completeTask(task.id);
-        toast.success(`Task ${task.name} marked as complete`);
+        toast.success(`Task ${task.name} marked as complete`, { duration: 2000 });
       } else if (newStatus === 'dismissed') {
         // For dismissed status, use a specialized handler based on task type
         if (task.relationships?.habitId) {
@@ -45,7 +45,7 @@ export const useTaskActionHandler = (
             date: task.relationships.date || new Date().toDateString(),
             reason: 'dismissed'
           });
-          toast.success(`Dismissed habit task: ${task.name}`);
+          toast.success(`Dismissed habit task: ${task.name}`, { duration: 2000 });
         } else {
           // For regular tasks, mark as dismissed then complete it
           eventBus.emit('task:update', { 
@@ -57,7 +57,7 @@ export const useTaskActionHandler = (
           setTimeout(() => {
             completeTaskOperations.completeTask(task.id);
           }, 100);
-          toast.success(`Dismissed task: ${task.name}`);
+          toast.success(`Dismissed task: ${task.name}`, { duration: 2000 });
         }
       } else {
         // For other statuses, just update the task
@@ -65,7 +65,7 @@ export const useTaskActionHandler = (
           taskId: task.id, 
           updates: { status: newStatus } 
         });
-        toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`);
+        toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
       }
     }
     
@@ -74,14 +74,14 @@ export const useTaskActionHandler = (
       if (task.relationships?.habitId) {
         window.location.href = `/habits?habitId=${task.relationships.habitId}`;
       } else {
-        toast.info(`Viewing habit task: ${task.name}`);
+        toast.info(`Viewing habit task: ${task.name}`, { duration: 2000 });
       }
     }
     
     // Handle regular task completion (only for non-special task types)
     if (action === 'true' && !task.taskType) {
       completeTaskOperations.completeTask(task.id);
-      toast.success(`Completed task: ${task.name}`);
+      toast.success(`Completed task: ${task.name}`, { duration: 2000 });
     }
   }, [task]);
 
@@ -99,7 +99,8 @@ export const useTaskActionHandler = (
       });
       
       toast.success(`Dismissed habit task for today: ${task.name}`, {
-        description: "You won't see this habit task today"
+        description: "You won't see this habit task today",
+        duration: 2000
       });
     } else {
       // Use direct delete operation for regular tasks
