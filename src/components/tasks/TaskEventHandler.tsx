@@ -31,7 +31,23 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   useEvent('task:update', onTaskUpdate);
   useEvent('task:delete', onTaskDelete);
   
-  // Handle force update events - with proper cleanup
+  // Handle our new custom UI refresh events to avoid event loops
+  useEffect(() => {
+    const handleTaskUiRefresh = (event: CustomEvent) => {
+      if (isMountedRef.current) {
+        console.log('TaskEventHandler: Received task-ui-refresh event:', event.detail);
+        onForceUpdate();
+      }
+    };
+    
+    window.addEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
+    
+    return () => {
+      window.removeEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
+    };
+  }, [onForceUpdate]);
+  
+  // Also handle legacy force update events for backward compatibility
   useEffect(() => {
     const handleForceUpdate = () => {
       if (isMountedRef.current) {
@@ -83,7 +99,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       // Force a UI update after all tasks are processed
       let timeoutId = setTimeout(() => {
         if (isMountedRef.current) {
-          window.dispatchEvent(new CustomEvent('force-task-update'));
+          window.dispatchEvent(new CustomEvent('task-ui-refresh'));
           processingRef.current = false;
         }
       }, finalDelay);

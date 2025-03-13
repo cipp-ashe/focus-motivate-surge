@@ -4,9 +4,6 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
-// Track last update to prevent duplicate processing
-const lastUpdates = new Map<string, {status: string, timestamp: number}>();
-
 /**
  * Operations related to updating tasks
  */
@@ -42,37 +39,10 @@ export const updateTaskOperations = {
         return;
       }
       
-      // CRITICAL: Deduplicate status updates using the lastUpdates map
-      if (updates.status) {
-        const now = Date.now();
-        const lastUpdate = lastUpdates.get(taskId);
-        
-        // Skip if we've processed this same status update within the last second
-        if (lastUpdate && 
-            lastUpdate.status === updates.status && 
-            now - lastUpdate.timestamp < 1000) {
-          console.log(`TaskOperations: Skipping duplicate status update for task ${taskId} (${updates.status}) - processed ${now - lastUpdate.timestamp}ms ago`);
-          return;
-        }
-        
-        // Skip if status hasn't changed
-        if (updates.status === currentTask.status) {
-          console.log(`TaskOperations: Task ${taskId} already has status ${updates.status}, skipping update`);
-          return;
-        }
-        
-        // Record this update to prevent duplicates
-        lastUpdates.set(taskId, {status: updates.status, timestamp: now});
-        
-        // Clean up old entries from the Map every 10 seconds to prevent memory leaks
-        if (lastUpdates.size > 100) {
-          const cutoff = now - 10000; // 10 seconds ago
-          for (const [key, value] of lastUpdates.entries()) {
-            if (value.timestamp < cutoff) {
-              lastUpdates.delete(key);
-            }
-          }
-        }
+      // Skip status update if status hasn't changed
+      if (updates.status && updates.status === currentTask.status) {
+        console.log(`TaskOperations: Task ${taskId} already has status ${updates.status}, skipping update`);
+        return;
       }
       
       // Extra safeguard: Check entire update object for equivalence
@@ -100,9 +70,6 @@ export const updateTaskOperations = {
       
       // Emit task update event unless suppressed
       if (!options.suppressEvent) {
-        // IMPORTANT: Only emit the SPECIFIC changes that were requested
-        // This helps prevent recursive loops where handlers try to 
-        // re-apply the same changes
         eventManager.emit('task:update', { taskId, updates });
       }
       
@@ -111,9 +78,11 @@ export const updateTaskOperations = {
         toast.success(`Updated task: ${currentTask.name}`);
       }
       
-      // Use a custom event for UI refresh instead of task:update
-      // This prevents event handlers from trying to update the task again
-      window.dispatchEvent(new CustomEvent('force-ui-refresh', { detail: { taskId }}));
+      // Dispatch a custom event for UI refresh
+      // This is the key fix: separating data events from UI events
+      window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
+        detail: { taskId, changes: updates } 
+      }));
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Failed to update task: ' + (error instanceof Error ? error.message : 'Unknown error'));

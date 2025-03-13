@@ -1,6 +1,6 @@
 
 import { Task } from '@/types/tasks';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { completeTaskOperations } from '@/lib/operations/tasks/complete';
 import { deleteTaskOperations } from '@/lib/operations/tasks/delete';
 import { updateTaskOperations } from '@/lib/operations/tasks/update';
@@ -11,9 +11,6 @@ export const useTaskActionHandler = (
   task: Task,
   onOpenTaskDialog?: () => void
 ) => {
-  // Use a ref to track processed task actions
-  const processedActionsRef = useRef<Map<string, number>>(new Map());
-
   // This handler is primarily focused on status changes and task completion
   const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     // Ensure proper event handling
@@ -34,19 +31,6 @@ export const useTaskActionHandler = (
     if (!action) {
       return;
     }
-    
-    // Check for duplicate processing
-    const now = Date.now();
-    const actionKey = `${task.id}-${action}`;
-    const lastProcessed = processedActionsRef.current.get(actionKey);
-    
-    if (lastProcessed && now - lastProcessed < 1000) {
-      console.log(`TaskActionHandler: Already processed action '${action}' for task ${task.id} ${now - lastProcessed}ms ago, skipping`);
-      return;
-    }
-    
-    // Record this action as processed
-    processedActionsRef.current.set(actionKey, now);
     
     // Handle status changes via the dropdown
     if (action?.startsWith('status-')) {
@@ -76,18 +60,14 @@ export const useTaskActionHandler = (
             });
           } else {
             // For regular tasks, update with required dismissed fields
-            // IMPORTANT: suppressEvent to break the loop
             updateTaskOperations.updateTask(task.id, { 
               status: 'dismissed', 
               dismissedAt: new Date().toISOString() 
-            }, { suppressEvent: true }); 
+            });
           }
         } else {
-          // For other statuses, use the update operations directly with suppressEvent option
-          updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressEvent: true });
-          
-          // Force UI refresh after update to ensure consistency without triggering another event
-          window.dispatchEvent(new CustomEvent('force-ui-refresh', { detail: { taskId: task.id }}));
+          // For other statuses, use the update operations directly
+          updateTaskOperations.updateTask(task.id, { status: newStatus });
         }
       } catch (error) {
         console.error('Error updating task status:', error);
@@ -122,19 +102,7 @@ export const useTaskActionHandler = (
     e.stopPropagation();
     e.preventDefault();
     
-    // Check for duplicate processing
-    const now = Date.now();
-    const actionKey = `${task.id}-delete`;
-    const lastProcessed = processedActionsRef.current.get(actionKey);
-    
-    if (lastProcessed && now - lastProcessed < 1000) {
-      console.log(`TaskActionHandler: Already processed delete for task ${task.id} ${now - lastProcessed}ms ago, skipping`);
-      return;
-    }
-    
-    // Record this action as processed
-    processedActionsRef.current.set(actionKey, now);
-    
+    // Simply use the delete operation without any ref-based tracking
     if (task.relationships?.habitId) {
       // Use proper delete operation with dismissal flag for habit tasks
       deleteTaskOperations.deleteTask(task.id, {

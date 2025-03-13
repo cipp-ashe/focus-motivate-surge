@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task, TaskStatus } from "@/types/tasks";
 import { Button } from "@/components/ui/button";
 import { 
@@ -25,25 +25,21 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
   const [open, setOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   
-  // Use a ref to track processed updates - this persists between renders
-  const processedUpdatesRef = useRef<Map<string, number>>(new Map());
-  
-  // Clean up the processed updates map periodically
+  // Listen for refresh events
   useEffect(() => {
-    const interval = setInterval(() => {
-      const map = processedUpdatesRef.current;
-      const now = Date.now();
-      
-      // Remove entries older than 5 seconds
-      for (const [key, timestamp] of map.entries()) {
-        if (now - timestamp > 5000) {
-          map.delete(key);
-        }
+    const handleUiRefresh = (event: CustomEvent) => {
+      // Reset updating state when we receive a UI refresh event for this task
+      if (event.detail?.taskId === task.id) {
+        setIsUpdating(false);
       }
-    }, 10000);
+    };
     
-    return () => clearInterval(interval);
-  }, []);
+    window.addEventListener('task-ui-refresh', handleUiRefresh as EventListener);
+    
+    return () => {
+      window.removeEventListener('task-ui-refresh', handleUiRefresh as EventListener);
+    };
+  }, [task.id]);
 
   const getStatusInfo = (status: TaskStatus = 'pending') => {
     switch (status) {
@@ -84,19 +80,6 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
       return;
     }
     
-    // Check for duplicate processing using the ref
-    const updateKey = `${task.id}-${newStatus}`;
-    const now = Date.now();
-    const lastProcessed = processedUpdatesRef.current.get(updateKey);
-    
-    if (lastProcessed && now - lastProcessed < 2000) {
-      console.log(`StatusDropdownMenu: Already processed status ${newStatus} for task ${task.id} ${now - lastProcessed}ms ago, skipping`);
-      return;
-    }
-    
-    // Mark this update as processed
-    processedUpdatesRef.current.set(updateKey, now);
-    
     console.log(`StatusDropdownMenu: Changing status of task ${task.id} from ${task.status} to ${newStatus}`);
     
     try {
@@ -115,26 +98,22 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
             reason: 'dismissed'
           });
         } else {
-          // For regular dismissal, update with suppressEvent to prevent loops
+          // For regular dismissal, don't suppress events - let the system handle it
           updateTaskOperations.updateTask(task.id, { 
             status: 'dismissed', 
             dismissedAt: new Date().toISOString() 
-          }, { suppressEvent: true });
+          });
         }
       } else {
-        // For other statuses, use update with suppressEvent to prevent loops
-        updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressEvent: true });
+        // For other statuses, don't suppress events - let the system handle it
+        updateTaskOperations.updateTask(task.id, { status: newStatus });
       }
       
       toast.success(`Task status updated to ${getStatusInfo(newStatus).label}`);
     } catch (error) {
       console.error("Error changing task status:", error);
       toast.error("Failed to update task status");
-    } finally {
-      // Delay resetting isUpdating to prevent rapid clicks
-      setTimeout(() => {
-        setIsUpdating(false);
-      }, 500);
+      setIsUpdating(false);
     }
   };
 
