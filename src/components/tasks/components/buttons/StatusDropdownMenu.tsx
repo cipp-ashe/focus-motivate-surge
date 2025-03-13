@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Task, TaskStatus } from "@/types/tasks";
 import { Button } from "@/components/ui/button";
 import { 
@@ -19,6 +19,8 @@ interface StatusDropdownMenuProps {
 }
 
 export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, onTaskAction }) => {
+  const [open, setOpen] = useState(false);
+  
   // Get status label and colors
   const getStatusInfo = (status: TaskStatus = 'pending') => {
     switch (status) {
@@ -41,14 +43,17 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
 
   const statusInfo = getStatusInfo(task.status);
 
-  // Debugging function to ensure status changes are working
+  // Improved handler for status changes
   const handleStatusChange = (e: React.MouseEvent<HTMLElement>, newStatus: TaskStatus) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
     console.log(`StatusDropdownMenu: Changing status of task ${task.id} to ${newStatus}`);
     
-    // First call the parent handler
+    // Call the parent handler
     onTaskAction(e, `status-${newStatus}`);
     
-    // As a fallback, also emit the event directly
+    // Also emit the event directly as a backup
     if (task && task.id) {
       eventBus.emit('task:update', {
         taskId: task.id,
@@ -56,20 +61,19 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
       });
     }
     
-    // Prevent the click from propagating to parent elements
-    e.stopPropagation();
-    e.preventDefault();
+    // Close the dropdown
+    setOpen(false);
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           size="sm"
           className={`h-7 px-2 flex items-center gap-1 text-xs ${statusInfo.className}`}
           onClick={(e) => {
-            e.stopPropagation(); // Prevent triggers of parent elements
+            e.stopPropagation();
           }}
         >
           {statusInfo.icon}
@@ -77,7 +81,10 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
           <ChevronDown className="h-3 w-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-36 bg-popover z-50 shadow-md border border-border/30">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-36 bg-popover z-50 shadow-md border border-border/30"
+      >
         <DropdownMenuItem
           onClick={(e) => handleStatusChange(e, 'pending')}
           className="text-xs cursor-pointer"

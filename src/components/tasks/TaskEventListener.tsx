@@ -48,10 +48,17 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       onOpenVoiceRecorder(data.taskId, data.taskName);
     };
     
-    // Handler for task updates - making it a one-way process to avoid loops
+    // Improved handler for task updates with better logging
     const handleTaskUpdate = (data: { taskId: string; updates: any }) => {
       console.log('TaskEventListener: Task update event received', data);
+      
+      // Forward all legitimate updates
       onTaskUpdate(data);
+      
+      // For debugging, log what kind of update this is
+      if (data.updates.status) {
+        console.log(`TaskEventListener: Status update to "${data.updates.status}" for task ${data.taskId}`);
+      }
     };
     
     // Handler for timer task selection - Only navigate to timer for timer tasks

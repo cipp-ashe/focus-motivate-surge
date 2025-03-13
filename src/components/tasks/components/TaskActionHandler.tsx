@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useCallback } from 'react';
 import { completeTaskOperations } from '@/lib/operations/tasks/complete';
 import { deleteTaskOperations } from '@/lib/operations/tasks/delete';
+import { updateTaskOperations } from '@/lib/operations/tasks/update';
 
 export const useTaskActionHandler = (
   task: Task,
@@ -48,9 +49,9 @@ export const useTaskActionHandler = (
           toast.success(`Dismissed habit task: ${task.name}`, { duration: 2000 });
         } else {
           // For regular tasks, mark as dismissed then complete it
-          eventBus.emit('task:update', { 
-            taskId: task.id, 
-            updates: { status: 'dismissed', dismissedAt: new Date().toISOString() } 
+          updateTaskOperations.updateTask(task.id, { 
+            status: 'dismissed', 
+            dismissedAt: new Date().toISOString() 
           });
           
           // Then move to completed
@@ -60,12 +61,9 @@ export const useTaskActionHandler = (
           toast.success(`Dismissed task: ${task.name}`, { duration: 2000 });
         }
       } else {
-        // For other statuses, directly update the task with the new status
-        console.log(`Emitting task:update event for ${task.id} with status ${newStatus}`);
-        eventBus.emit('task:update', { 
-          taskId: task.id, 
-          updates: { status: newStatus } 
-        });
+        // For other statuses, use proper task update operation
+        console.log(`Using updateTaskOperations for ${task.id} with status ${newStatus}`);
+        updateTaskOperations.updateTask(task.id, { status: newStatus });
         toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
       }
       return; // Early return to ensure event doesn't propagate further
