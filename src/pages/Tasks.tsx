@@ -36,24 +36,24 @@ const TaskPage = () => {
   };
   
   const handleOpenChecklist = (taskId: string, taskName: string, items: ChecklistItem[]) => {
+    console.log('Tasks.tsx - Opening checklist for task:', { taskId, taskName, items });
     setCurrentChecklistTask({
       taskId,
       taskName,
       items
     });
     setIsChecklistOpen(true);
-    console.log('Tasks.tsx - Opened checklist for task:', taskName);
     toast.info(`Opening checklist for: ${taskName}`, { duration: 1500 });
   };
   
   const handleOpenJournal = (taskId: string, taskName: string, entry: string) => {
+    console.log('Tasks.tsx - Opening journal for task:', { taskId, taskName, entry });
     setCurrentJournalTask({
       taskId,
       taskName,
       entry
     });
     setIsJournalOpen(true);
-    console.log('Tasks.tsx - Opened journal for task:', taskName);
     toast.info(`Opening journal for: ${taskName}`, { duration: 1500 });
   };
   
@@ -94,12 +94,14 @@ const TaskPage = () => {
       
       <TaskManager dialogOpeners={taskDialogOpeners} />
       
+      {/* Make sure the ChecklistDialog component receives the correct props */}
       <ChecklistDialog 
         isOpen={isChecklistOpen}
         onOpenChange={setIsChecklistOpen}
         currentTask={currentChecklistTask}
       />
       
+      {/* Make sure the JournalDialog component receives the correct props */}
       <JournalDialog 
         isOpen={isJournalOpen}
         onOpenChange={setIsJournalOpen}

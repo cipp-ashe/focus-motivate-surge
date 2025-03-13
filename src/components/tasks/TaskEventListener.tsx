@@ -22,21 +22,25 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
     
     // Handler for opening screenshot/image viewer
     const handleOpenImage = (data: { taskId: string; imageUrl: string; taskName: string }) => {
+      console.log('TaskEventListener: Received show-image event:', data);
       onShowImage(data.imageUrl, data.taskName);
     };
     
     // Handler for opening checklist
     const handleOpenChecklist = (data: { taskId: string; taskName: string; items: any[] }) => {
+      console.log('TaskEventListener: Received open-checklist event:', data);
       onOpenChecklist(data.taskId, data.taskName, data.items || []);
     };
     
     // Handler for opening journal
     const handleOpenJournal = (data: { taskId: string; taskName: string; entry: string }) => {
+      console.log('TaskEventListener: Received open-journal event:', data);
       onOpenJournal(data.taskId, data.taskName, data.entry || '');
     };
     
     // Handler for opening voice recorder
     const handleOpenVoiceRecorder = (data: { taskId: string; taskName: string }) => {
+      console.log('TaskEventListener: Received open-voice-recorder event:', data);
       onOpenVoiceRecorder(data.taskId, data.taskName);
     };
     

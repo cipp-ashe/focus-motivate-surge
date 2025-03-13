@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
@@ -84,6 +85,8 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
       });
       
       toast.success(`Saved checklist for: ${currentTask.taskName}`);
+      
+      // Always close the dialog after saving
       onOpenChange(false);
     }
   };
@@ -161,7 +164,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
         </div>
         
         <div className="mt-6 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
           <Button onClick={saveChecklist} type="button">
