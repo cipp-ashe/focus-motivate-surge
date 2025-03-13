@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
@@ -12,6 +11,7 @@ import { eventBus } from '@/lib/eventBus';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { marked } from 'marked';
 
 interface JournalDialogProps {
   isOpen: boolean;
@@ -31,7 +31,6 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   const [journalContent, setJournalContent] = useState('');
   const [activeTab, setActiveTab] = useState<string>("write");
 
-  // Set content when the current task changes
   useEffect(() => {
     if (currentTask) {
       setJournalContent(currentTask.entry || '');
