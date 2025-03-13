@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { ChecklistItem, Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
-import { TaskEventListener } from '@/components/tasks/TaskEventListener';
+import { TaskEventListener } from '@/components/tasks/event-handlers/TaskEventHandler';
 import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
 import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/components/ScreenshotDialog';
@@ -121,6 +122,7 @@ const TaskPage = () => {
       
       <TaskManager dialogOpeners={dialogOpeners} />
       
+      {/* Task-specific dialogs */}
       {currentChecklistTask && (
         <ChecklistDialog 
           isOpen={isChecklistOpen}
