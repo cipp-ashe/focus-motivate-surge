@@ -174,7 +174,31 @@ export const TimerSection = ({
   
   const handleTaskComplete = (metrics: TimerStateMetrics) => {
     console.log("TimerSection: Task completed", currentTask.id, metrics);
-    eventBus.emit('task:complete', { taskId: currentTask.id, metrics });
+    
+    // Ensure metrics has all the required fields for task metrics
+    const taskMetrics = {
+      ...metrics,
+      // Ensure we have a string[] for favoriteQuotes
+      favoriteQuotes: Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [],
+      // Add the completion date
+      completionDate: new Date().toISOString(),
+      // Map timer metrics to task metrics format
+      timeSpent: metrics.actualDuration,
+      expectedTime: metrics.expectedTime,
+      actualDuration: metrics.actualDuration,
+      pauseCount: metrics.pauseCount,
+      pausedTime: metrics.pausedTime,
+      extensionTime: metrics.extensionTime,
+      netEffectiveTime: metrics.netEffectiveTime,
+      efficiencyRatio: metrics.efficiencyRatio,
+      completionStatus: metrics.completionStatus,
+    };
+    
+    // Emit the task:complete event with the enriched metrics
+    eventBus.emit('task:complete', { taskId: currentTask.id, metrics: taskMetrics });
+    
+    // Log the complete metrics for debugging
+    console.log("TimerSection: Emitted task:complete with metrics:", taskMetrics);
   };
   
   const handleDurationChange = (minutes: number) => {

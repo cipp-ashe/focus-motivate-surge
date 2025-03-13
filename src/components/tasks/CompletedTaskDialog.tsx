@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Task } from '@/types/tasks';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +18,7 @@ import { EntityType } from '@/types/core';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
+import { formatDuration, getCompletionStatusColor } from '@/utils/taskFormatUtils';
 
 // Add note:view to TimerEventType by extending the types
 interface ExtendedEventPayloads extends Record<string, any> {
@@ -90,8 +92,16 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   
   const creationDate = new Date(task.createdAt);
   const metrics = task.metrics || {};
+  
+  // Timer-specific metrics with proper defaults
   const pauseCount = metrics.pauseCount || 0;
-  const timeSpent = metrics.timeSpent ? Math.floor(metrics.timeSpent / 60) : 0;
+  const timeSpent = metrics.timeSpent ? Math.floor(metrics.timeSpent / 60) : 
+                   (metrics.actualDuration ? Math.floor(metrics.actualDuration / 60) : 0);
+  const efficiencyRatio = metrics.efficiencyRatio 
+    ? Math.round(metrics.efficiencyRatio) 
+    : null;
+  const pausedTime = metrics.pausedTime || 0;
+  const completionStatus = metrics.completionStatus || 'Completed';
   
   // Formatted completion date if available
   const formattedCompletionDate = completionDate 
@@ -105,11 +115,6 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
 
   // Task duration in minutes (if available)
   const taskDuration = task.duration ? Math.floor(task.duration / 60) : null;
-
-  // Efficiency ratio
-  const efficiencyRatio = metrics.efficiencyRatio 
-    ? `${Math.round(metrics.efficiencyRatio * 100)}%` 
-    : null;
 
   // Task type display name
   const getTaskTypeDisplay = () => {
@@ -149,28 +154,70 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
   // Render metrics section based on task type
   const renderMetricsSection = () => {
     if (task.taskType === 'timer') {
+      // For timer tasks, show detailed metrics
       return (
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <TaskMetricsRow 
-            icon={<Clock className="h-4 w-4" />}
-            label="Time Spent"
-            value={`${timeSpent} minutes`}
-          />
-          <TaskMetricsRow 
-            icon={<Hourglass className="h-4 w-4" />}
-            label="Pause Count" 
-            value={pauseCount.toString()}
-          />
-          <TaskMetricsRow 
-            icon={<BarChart3 className="h-4 w-4" />}
-            label="Efficiency"
-            value={efficiencyRatio || 'N/A'}
-          />
-          <TaskMetricsRow 
-            icon={<Trophy className="h-4 w-4" />}
-            label="Completion"
-            value={metrics.completionStatus || 'Complete'}
-          />
+        <div className="space-y-3 mt-4">
+          <h3 className="text-sm font-medium mb-2">Timer Metrics</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* Expected vs Actual Time */}
+            <TaskMetricsRow 
+              icon={<Clock className="h-4 w-4" />}
+              label="Expected"
+              value={metrics.expectedTime ? formatDuration(metrics.expectedTime) : 'N/A'}
+            />
+            <TaskMetricsRow 
+              icon={<Clock className="h-4 w-4" />}
+              label="Total Time"
+              value={metrics.actualDuration ? formatDuration(metrics.actualDuration) : 'N/A'}
+            />
+            
+            {/* Pause Info */}
+            <TaskMetricsRow 
+              icon={<Hourglass className="h-4 w-4" />}
+              label="Pauses" 
+              value={`${pauseCount} times`}
+            />
+            <TaskMetricsRow 
+              icon={<Hourglass className="h-4 w-4" />}
+              label="Paused Time"
+              value={formatDuration(pausedTime)}
+            />
+            
+            {/* Efficiency and Status */}
+            <TaskMetricsRow 
+              icon={<BarChart3 className="h-4 w-4" />}
+              label="Efficiency"
+              value={efficiencyRatio ? `${efficiencyRatio}%` : 'N/A'}
+            />
+            <TaskMetricsRow 
+              icon={<Trophy className="h-4 w-4" />}
+              label="Status"
+              value={
+                <span className={getCompletionStatusColor(completionStatus)}>
+                  {completionStatus}
+                </span>
+              }
+            />
+            
+            {/* Active Working Time */}
+            {metrics.netEffectiveTime && (
+              <TaskMetricsRow 
+                icon={<Clock className="h-4 w-4" />}
+                label="Active Time"
+                value={formatDuration(metrics.netEffectiveTime)}
+              />
+            )}
+            
+            {/* Extension Time if applicable */}
+            {metrics.extensionTime > 0 && (
+              <TaskMetricsRow 
+                icon={<Clock className="h-4 w-4" />}
+                label="Added Time"
+                value={formatDuration(metrics.extensionTime)}
+              />
+            )}
+          </div>
         </div>
       );
     } else if (task.taskType === 'checklist' && task.checklistItems) {
@@ -234,6 +281,19 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
               <p className="whitespace-pre-wrap">{task.voiceNoteText}</p>
             </div>
           )}
+        </div>
+      );
+    }
+    
+    // For regular tasks with completion time
+    if (timeSpent > 0) {
+      return (
+        <div className="mt-4">
+          <TaskMetricsRow 
+            icon={<Clock className="h-4 w-4" />}
+            label="Time Spent"
+            value={`${timeSpent} minutes`}
+          />
         </div>
       );
     }

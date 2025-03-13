@@ -2,6 +2,8 @@
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
+import { Task, TaskMetrics } from '@/types/tasks';
+import { TimerStateMetrics } from '@/types/metrics';
 
 /**
  * Operations related to completing tasks
@@ -15,7 +17,7 @@ export const completeTaskOperations = {
    */
   completeTask(
     taskId: string,
-    metrics?: any,
+    metrics?: TaskMetrics | TimerStateMetrics,
     options: {
       suppressToast?: boolean;
     } = {}
@@ -30,23 +32,50 @@ export const completeTaskOperations = {
         return;
       }
       
+      // Format metrics to ensure they're in the correct format
+      const formattedMetrics: TaskMetrics = metrics ? {
+        // Handle both Timer metrics and Task metrics
+        timeSpent: metrics.actualDuration || metrics.timeSpent,
+        timeElapsed: metrics.actualDuration,
+        pauseCount: metrics.pauseCount || 0,
+        completionDate: new Date().toISOString(),
+        expectedTime: metrics.expectedTime,
+        actualDuration: metrics.actualDuration,
+        // Ensure favoriteQuotes is a string array
+        favoriteQuotes: Array.isArray(metrics.favoriteQuotes) 
+          ? metrics.favoriteQuotes 
+          : (metrics.favoriteQuotes ? [String(metrics.favoriteQuotes)] : []),
+        pausedTime: metrics.pausedTime,
+        extensionTime: metrics.extensionTime,
+        netEffectiveTime: metrics.netEffectiveTime,
+        efficiencyRatio: metrics.efficiencyRatio,
+        completionStatus: metrics.completionStatus,
+      } : {};
+      
       // Update task to completed
-      const completedTask = { ...task, completed: true };
+      const completedTask: Task = { 
+        ...task, 
+        completed: true,
+        completedAt: new Date().toISOString(),
+        metrics: formattedMetrics
+      };
+      
+      console.log("TaskOperations: Completed task with metrics:", completedTask);
+      
+      // Save completion metrics
+      // Store the completed task with its metrics in localStorage
+      const completedTasks = JSON.parse(localStorage.getItem('completed_tasks') || '[]');
+      completedTasks.push(completedTask);
+      localStorage.setItem('completed_tasks', JSON.stringify(completedTasks));
+      
+      // Update the task in the active task list
       taskStorage.updateTask(taskId, completedTask);
       
-      // Save completion metrics (this replaces moveToCompleted since we don't have that method)
-      if (metrics) {
-        // Store the completed task with its metrics in localStorage
-        const completedTasks = JSON.parse(localStorage.getItem('completed_tasks') || '[]');
-        completedTasks.push({...completedTask, completedAt: new Date().toISOString(), metrics});
-        localStorage.setItem('completed_tasks', JSON.stringify(completedTasks));
-        
-        // Remove from active tasks after storing in completed
-        taskStorage.removeTask(taskId);
-      }
+      // Remove from active tasks after storing in completed
+      taskStorage.removeTask(taskId);
       
-      // Emit task complete event
-      eventManager.emit('task:complete', { taskId, metrics });
+      // Emit task complete event with formatted metrics
+      eventManager.emit('task:complete', { taskId, metrics: formattedMetrics });
       
       // Show toast unless suppressed
       if (!options.suppressToast) {
