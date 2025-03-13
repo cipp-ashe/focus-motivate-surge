@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Task } from '@/types/tasks';
 import { Badge } from '@/components/ui/badge';
@@ -43,9 +42,9 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
   
   // Determine completion timing status based on expected vs actual duration
   const getCompletionTimingStatus = () => {
-    if (!task.metrics?.efficiencyRatio) return null;
+    if (!task.metrics?.expectedTime || !task.metrics?.netEffectiveTime) return null;
     
-    const status = determineCompletionStatus(task.metrics.efficiencyRatio);
+    const status = determineCompletionStatus(task.metrics.expectedTime, task.metrics.netEffectiveTime);
     return { 
       label: status.replace('Completed ', ''), 
       className: getCompletionTimingClass(status)
@@ -91,7 +90,6 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
               </Badge>
             )}
             
-            {/* Display completion timing status if available */}
             {timingStatus && !isDismissed && (
               <Badge variant="outline" className={`text-xs ${timingStatus.className}`}>
                 {timingStatus.label}
@@ -102,7 +100,6 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
               {isDismissed ? 'Dismissed' : 'Completed'}
             </span>
             
-            {/* Show completion timeframe */}
             {completionTimeframe && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <CalendarClock className="h-3 w-3" />
@@ -110,7 +107,6 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
               </span>
             )}
             
-            {/* Show metrics for timer tasks */}
             {isTimerTask && timeSpent && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Timer className="h-3 w-3" />
@@ -125,7 +121,6 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
               </span>
             )}
             
-            {/* Show date completed */}
             {task.completedAt && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
@@ -152,7 +147,6 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
         </div>
       </div>
       
-      {/* Task details dialog */}
       <CompletedTaskDialog 
         task={task}
         open={showDetails}
