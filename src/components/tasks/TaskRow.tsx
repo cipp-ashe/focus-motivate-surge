@@ -1,9 +1,9 @@
 
 import { Task } from "@/types/tasks";
 import { useState, useEffect } from "react";
-import { TaskContent } from "./TaskContent";
 import { eventBus } from "@/lib/eventBus";
 import { Card } from "@/components/ui/card";
+import { TaskContent } from "./TaskContent";
 
 interface TaskRowProps {
   task: Task;
@@ -32,27 +32,16 @@ export const TaskRow = ({
   useEffect(() => {
     if (task.duration) {
       const minutes = Math.round(task.duration / 60);
-      console.log('TaskRow - Updating input value from task duration:', {
-        taskId: task.id,
-        minutes,
-        duration: task.duration,
-        isSelected
-      });
       setInputValue(minutes.toString());
     }
-  }, [task.duration, task.id, isSelected]);
+  }, [task.duration, task.id]);
 
   const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
-    console.log('Preventing event propagation');
     e.stopPropagation();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      console.log('TaskRow - Enter pressed:', {
-        taskId: task.id,
-        value: inputValue
-      });
       handleBlur();
     }
     e.stopPropagation();
@@ -60,11 +49,6 @@ export const TaskRow = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log('TaskRow - Handling duration change:', {
-      taskId: task.id,
-      value,
-      isSelected
-    });
     
     if (value === '' || /^\d+$/.test(value)) {
       setInputValue(value);
@@ -81,21 +65,10 @@ export const TaskRow = ({
       finalValue = '60';
     }
     
-    console.log('TaskRow - Handling blur:', {
-      taskId: task.id,
-      finalValue,
-      isSelected
-    });
-    
     setInputValue(finalValue);
     
     // Convert minutes to seconds and update
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
-    console.log('TaskRow - Updating task duration:', {
-      taskId: task.id,
-      newDuration: newDurationInSeconds,
-      isSelected
-    });
     
     eventBus.emit('task:update', {
       taskId: task.id,
@@ -120,18 +93,15 @@ export const TaskRow = ({
       target.closest('input') ||
       target.getAttribute('role') === 'button' ||
       target.getAttribute('data-action') === 'true' ||
-      target.closest('[data-action="true"]'); // Check for data-action attribute in parent elements too
+      target.closest('[data-action="true"]');
     
     if (isInteractive) {
-      console.log('Clicked on an interactive element inside TaskRow, not propagating');
       e.stopPropagation();
       return;
     }
     
     // Special handling for journal and checklist tasks to prevent conversion to timer
     if ((task.taskType === 'journal' || task.taskType === 'checklist') && !isSelected) {
-      console.log(`Clicked on a ${task.taskType} task, handling specially to prevent conversion`);
-      // Don't propagate to parent task manager for special task types
       e.stopPropagation();
       
       // Select the task without triggering conversion
@@ -139,7 +109,6 @@ export const TaskRow = ({
       return;
     }
     
-    console.log('Clicked on TaskRow body, propagating to parent');
     onTaskClick(task, e);
   };
 

@@ -41,7 +41,6 @@ export const TaskContent = ({
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
-      console.log('Handling duration change:', value);
       setLocalInputValue(value);
       onChange(e);
     }
@@ -49,7 +48,6 @@ export const TaskContent = ({
 
   const handleLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      console.log('Enter pressed, handling blur');
       e.currentTarget.blur();
     }
     onKeyDown(e);
@@ -64,7 +62,6 @@ export const TaskContent = ({
       finalValue = Math.min(Math.max(numValue, 1), 60).toString();
     }
     
-    console.log('Handling blur with final value:', finalValue);
     setLocalInputValue(finalValue);
     const syntheticEvent = {
       target: { value: finalValue }
@@ -74,13 +71,10 @@ export const TaskContent = ({
   };
 
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>) => {
-    console.log(`Task action clicked for ${task.name} (${task.taskType})`);
     e.stopPropagation();
     e.preventDefault();
     
     if (task.relationships?.habitId) {
-      console.log("This is a habit-related task with ID:", task.relationships.habitId);
-      
       if (e.currentTarget.getAttribute('data-action-type') === 'view-habit') {
         if (task.relationships?.habitId) {
           window.location.href = `/habits?habitId=${task.relationships.habitId}`;
@@ -93,7 +87,6 @@ export const TaskContent = ({
     
     switch(task.taskType) {
       case 'timer':
-        console.log("Dispatching timer:init event");
         eventManager.emit('timer:init', { 
           taskName: task.name, 
           duration: task.duration || 1500 
@@ -101,8 +94,6 @@ export const TaskContent = ({
         break;
         
       case 'journal':
-        console.log("Dispatching custom open-journal event for", task.id, task.name);
-        
         const openJournalEvent = new CustomEvent('open-journal', {
           detail: { taskId: task.id, taskName: task.name, entry: task.journalEntry }
         });
@@ -110,7 +101,6 @@ export const TaskContent = ({
         break;
         
       case 'screenshot':
-        console.log("Handling screenshot view");
         if (task.imageUrl) {
           const showImageEvent = new CustomEvent('show-image', {
             detail: { imageUrl: task.imageUrl, taskName: task.name }
@@ -122,10 +112,7 @@ export const TaskContent = ({
         break;
         
       case 'checklist':
-        console.log('Opening checklist for task:', task.id, task.name);
-        
         const itemsToPass = task.checklistItems || [];
-        console.log('Checklist items:', itemsToPass);
         
         const openChecklistEvent = new CustomEvent('open-checklist', {
           detail: { 
@@ -138,7 +125,6 @@ export const TaskContent = ({
         break;
         
       case 'voicenote':
-        console.log("Dispatching open-voice-recorder event");
         const openVoiceRecorderEvent = new CustomEvent('open-voice-recorder', {
           detail: { taskId: task.id, taskName: task.name }
         });
@@ -146,7 +132,6 @@ export const TaskContent = ({
         break;
         
       default:
-        console.log("Completing regular task");
         eventBus.emit('task:complete', { taskId: task.id });
         toast.success(`Completed task: ${task.name}`);
         break;
@@ -158,8 +143,6 @@ export const TaskContent = ({
     e.preventDefault();
     
     if (task.relationships?.habitId) {
-      console.log('Dismissing habit task rather than deleting:', task.id);
-      
       eventBus.emit('task:dismiss', { 
         taskId: task.id, 
         habitId: task.relationships.habitId,
