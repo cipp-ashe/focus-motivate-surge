@@ -151,12 +151,12 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
             </Card>
           )}
           
-          {/* Notes section - if there are any */}
-          {task.notes && task.notes.length > 0 && (
+          {/* Description section - if there is any */}
+          {task.description && (
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Notes</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
               <div className="bg-muted/50 rounded-md p-3 text-sm">
-                {task.notes}
+                {task.description}
               </div>
             </div>
           )}
@@ -167,7 +167,7 @@ export const CompletedTaskDialog: React.FC<CompletedTaskDialogProps> = ({
               <h3 className="text-sm font-medium text-muted-foreground">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {task.tags.map((tag, i) => (
-                  <Badge key={i} variant="secondary">{tag}</Badge>
+                  <Badge key={i} variant="secondary">{tag.name}</Badge>
                 ))}
               </div>
             </div>

@@ -21,6 +21,7 @@ export const useTimerInitialization = ({
   const expandedViewRef = useRef<TimerExpandedViewRef | null>(null);
 
   // Initialize the timer state
+  const timerState = useTimerState(duration);
   const {
     timeLeft,
     minutes,
@@ -31,9 +32,9 @@ export const useTimerInitialization = ({
     setIsRunning,
     updateMetrics,
     isMountedRef,
-  } = useTimerState(duration);
+  } = timerState;
 
-  // Initialize view state
+  // Initialize view state - importing from the correct hook which returns an array
   const [
     isExpanded,
     setIsExpanded,
@@ -59,13 +60,7 @@ export const useTimerInitialization = ({
     reset,
     completeTimer,
     setMinutes
-  ] = useTimerState({
-    duration,
-    taskName,
-    onComplete,
-    onAddTime,
-    onDurationChange,
-  });
+  ] = useTimerState(duration);
 
   // Use the timer completion hook
   const { completeTimer: timerComplete } = useTimerComplete({
