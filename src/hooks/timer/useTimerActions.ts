@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { TimerAction } from '@/types/timer';
 import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
+import { determineCompletionStatus, calculateEfficiencyRatio } from '@/lib/utils/formatters';
 
 // This function supports both the new interface (dispatch-based) and the legacy interface (direct update methods)
 export const useTimerActions = (
@@ -100,14 +101,10 @@ export const useTimerActions = (
         : 0;
       
       const netEffectiveTime = actualDuration - metrics.pausedTime;
-      const efficiencyRatio = metrics.expectedTime > 0 
-        ? (netEffectiveTime / metrics.expectedTime) 
-        : 1;
+      const efficiencyRatio = calculateEfficiencyRatio(metrics.expectedTime, netEffectiveTime);
       
-      // Use a typed completion status instead of a generic string
-      let completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late' = 'Completed On Time';
-      if (efficiencyRatio < 0.8) completionStatus = 'Completed Early';
-      if (efficiencyRatio > 1.2) completionStatus = 'Completed Late';
+      // Use a typed completion status
+      const completionStatus = determineCompletionStatus(efficiencyRatio);
       
       const updatedMetrics = {
         endTime: now,
@@ -116,7 +113,7 @@ export const useTimerActions = (
         efficiencyRatio,
         completionStatus,
         isPaused: false,
-        completionDate: now.toISOString() // Convert Date to string here
+        completionDate: now.toISOString() // Convert Date to string
       };
       
       setIsRunning(false);

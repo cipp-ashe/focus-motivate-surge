@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Trash2, ChevronRight, Timer, BarChart, CalendarClock, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CompletedTaskDialog } from '../CompletedTaskDialog';
-import { formatDuration } from '@/lib/utils/formatters';
+import { formatDuration, getCompletionTimingClass, determineCompletionStatus, calculateEfficiencyRatio } from '@/lib/utils/formatters';
 import { formatDistanceToNow } from 'date-fns';
 
 interface CompletedTaskItemProps {
@@ -45,13 +45,11 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
   const getCompletionTimingStatus = () => {
     if (!task.metrics?.efficiencyRatio) return null;
     
-    if (task.metrics.efficiencyRatio < 0.8) {
-      return { label: 'Early', className: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200/30' };
-    } else if (task.metrics.efficiencyRatio > 1.2) {
-      return { label: 'Late', className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/30' };
-    } else {
-      return { label: 'On Time', className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/30' };
-    }
+    const status = determineCompletionStatus(task.metrics.efficiencyRatio);
+    return { 
+      label: status.replace('Completed ', ''), 
+      className: getCompletionTimingClass(status)
+    };
   };
   
   const completionTimeframe = getCompletionTimeframe();

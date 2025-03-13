@@ -1,7 +1,9 @@
+
 import { format } from 'date-fns';
 import { marked } from 'marked';
 import type { Note, Tag } from '@/types/notes';
 import { toast } from 'sonner';
+import { formatDateLocalized } from '@/lib/utils/formatters';
 
 interface SaveFileParams {
   content: string;
