@@ -101,9 +101,7 @@ export const useTimerInitialization = ({
     start: startTimer,
     pause: pauseTimer,
     // Fix: Create an adapter function that works with both signatures
-    addTime: (minutes: number) => {
-      extendTimer(minutes);
-    },
+    addTime: extendTimer, // Use extendTimer directly since it already has the correct signature
     completeTimer: () => {
       // Fix: Convert synchronous function to Promise
       timerComplete();
