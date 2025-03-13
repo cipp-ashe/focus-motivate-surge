@@ -92,26 +92,14 @@ const TaskPage = () => {
       
       <ChecklistDialog 
         isOpen={isChecklistOpen}
-        setIsOpen={setIsChecklistOpen}
-        task={{
-          id: currentChecklistTask?.taskId || '',
-          name: currentChecklistTask?.taskName || '',
-          checklistItems: currentChecklistTask?.items || [],
-          completed: false,
-          createdAt: new Date().toISOString()
-        }}
+        onOpenChange={setIsChecklistOpen}
+        currentTask={currentChecklistTask}
       />
       
       <JournalDialog 
         isOpen={isJournalOpen}
         onOpenChange={setIsJournalOpen}
-        task={{
-          id: currentJournalTask?.taskId || '',
-          name: currentJournalTask?.taskName || '',
-          journalEntry: currentJournalTask?.entry || '',
-          completed: false,
-          createdAt: new Date().toISOString()
-        }}
+        currentTask={currentJournalTask}
       />
     </div>
   );
