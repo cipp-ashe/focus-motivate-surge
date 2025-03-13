@@ -32,6 +32,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   onOpenTaskDialog,
 }) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
+  
   // Pass onOpenTaskDialog to useTaskActionHandler
   const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
   

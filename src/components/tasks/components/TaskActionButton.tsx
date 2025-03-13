@@ -191,8 +191,13 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           variant="outline"
           size="sm"
           onClick={(e) => {
+            // First trigger the task action in the TaskActionHandler
             onTaskAction(e, 'open-journal');
-            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+            // Then directly call the dialog opener if available
+            if (onOpenTaskDialog) {
+              console.log("Directly calling dialog opener for journal task:", task.id);
+              onOpenTaskDialog();
+            }
           }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >
@@ -208,8 +213,13 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           variant="outline"
           size="sm"
           onClick={(e) => {
+            // First trigger the task action
             onTaskAction(e, 'true');
-            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+            // Then directly call the dialog opener if available
+            if (onOpenTaskDialog) {
+              console.log("Directly calling dialog opener for screenshot task:", task.id);
+              onOpenTaskDialog();
+            }
           }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >
@@ -225,8 +235,15 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           variant="outline"
           size="sm"
           onClick={(e) => {
+            // First trigger the task action
             onTaskAction(e, 'true');
-            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+            // Then directly call the dialog opener if available
+            if (onOpenTaskDialog) {
+              console.log("Directly calling dialog opener for checklist task:", task.id);
+              onOpenTaskDialog();
+            } else {
+              console.error("No dialog opener provided for checklist task in TaskActionButton:", task.id);
+            }
           }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >
@@ -242,8 +259,13 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           variant="outline"
           size="sm"
           onClick={(e) => {
+            // First trigger the task action
             onTaskAction(e, 'true');
-            if (onOpenTaskDialog) onOpenTaskDialog(); // Call dialog opener here
+            // Then directly call the dialog opener if available
+            if (onOpenTaskDialog) {
+              console.log("Directly calling dialog opener for voicenote task:", task.id);
+              onOpenTaskDialog();
+            }
           }}
           className="h-7 px-2 flex items-center gap-1 text-xs"
         >

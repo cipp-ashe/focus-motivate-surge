@@ -79,12 +79,6 @@ export const useTaskActionHandler = (
     if (action === 'open-journal') {
       console.log("Opening journal for task:", task.id);
       
-      if (!onOpenTaskDialog) {
-        console.error('No dialog opener provided for journal task:', task.id);
-        toast.error('Unable to open journal editor');
-        return;
-      }
-      
       // Make sure we set in-progress status if not already
       if (task.status !== 'in-progress') {
         eventBus.emit('task:update', { 
@@ -103,7 +97,14 @@ export const useTaskActionHandler = (
       }));
       
       console.log("Triggering journal dialog for task:", task.id);
-      onOpenTaskDialog(); // Call the opener function directly
+      // Note: The dialog opener is now directly called in TaskActionButton
+      // This is kept for backward compatibility
+      if (onOpenTaskDialog) {
+        onOpenTaskDialog(); 
+      } else {
+        console.error("No dialog opener provided for journal task:", task.id);
+      }
+      
       return;
     }
     
@@ -145,24 +146,17 @@ export const useTaskActionHandler = (
             });
           }
           
-          // Open the appropriate dialog
-          if (onOpenTaskDialog) {
-            console.log(`Opening screenshot dialog for task:`, task.id);
-            
-            // Dispatch the event to open the screenshot dialog
-            window.dispatchEvent(new CustomEvent('show-image', {
-              detail: {
-                taskId: task.id,
-                taskName: task.name,
-                imageUrl: task.imageUrl || ''
-              }
-            }));
-            
-            onOpenTaskDialog(); // Call the opener function directly
-          } else {
-            console.error(`No dialog opener provided for screenshot task:`, task.id);
-            toast.error(`Unable to open screenshot editor`);
-          }
+          // Dispatch the event to open the screenshot dialog
+          window.dispatchEvent(new CustomEvent('show-image', {
+            detail: {
+              taskId: task.id,
+              taskName: task.name,
+              imageUrl: task.imageUrl || ''
+            }
+          }));
+          
+          console.log(`TaskActionHandler: Dispatched show-image event for task:`, task.id);
+          // Note: onOpenTaskDialog is now called directly in TaskActionButton
         }
         break;
         
@@ -176,24 +170,17 @@ export const useTaskActionHandler = (
             });
           }
           
-          // Open the appropriate dialog
-          if (onOpenTaskDialog) {
-            console.log(`Opening checklist dialog for task:`, task.id);
-            
-            // Dispatch the event to open the checklist dialog
-            window.dispatchEvent(new CustomEvent('open-checklist', {
-              detail: {
-                taskId: task.id,
-                taskName: task.name,
-                items: task.checklistItems || []
-              }
-            }));
-            
-            onOpenTaskDialog(); // Call the opener function directly
-          } else {
-            console.error(`No dialog opener provided for checklist task:`, task.id);
-            toast.error(`Unable to open checklist editor`);
-          }
+          // Dispatch the event to open the checklist dialog
+          window.dispatchEvent(new CustomEvent('open-checklist', {
+            detail: {
+              taskId: task.id,
+              taskName: task.name,
+              items: task.checklistItems || []
+            }
+          }));
+          
+          console.log(`TaskActionHandler: Dispatched open-checklist event for task:`, task.id);
+          // Note: onOpenTaskDialog is now called directly in TaskActionButton
         }
         break;
         
@@ -207,24 +194,17 @@ export const useTaskActionHandler = (
             });
           }
           
-          // Open the appropriate dialog
-          if (onOpenTaskDialog) {
-            console.log(`Opening voicenote dialog for task:`, task.id);
-            
-            // Dispatch the event to open the voicenote dialog
-            window.dispatchEvent(new CustomEvent('open-voice-recorder', {
-              detail: {
-                taskId: task.id,
-                taskName: task.name,
-                voiceNoteUrl: task.voiceNoteUrl || ''
-              }
-            }));
-            
-            onOpenTaskDialog(); // Call the opener function directly
-          } else {
-            console.error(`No dialog opener provided for voicenote task:`, task.id);
-            toast.error(`Unable to open voicenote editor`);
-          }
+          // Dispatch the event to open the voicenote dialog
+          window.dispatchEvent(new CustomEvent('open-voice-recorder', {
+            detail: {
+              taskId: task.id,
+              taskName: task.name,
+              voiceNoteUrl: task.voiceNoteUrl || ''
+            }
+          }));
+          
+          console.log(`TaskActionHandler: Dispatched open-voice-recorder event for task:`, task.id);
+          // Note: onOpenTaskDialog is now called directly in TaskActionButton
         }
         break;
         
