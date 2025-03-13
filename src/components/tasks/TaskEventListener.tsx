@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface TaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
@@ -52,7 +53,7 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
     const handleTaskUpdate = (data: { taskId: string; updates: any }) => {
       console.log('TaskEventListener: Task update event received', data);
       
-      // Forward all legitimate updates
+      // Forward all updates to parent handler
       onTaskUpdate(data);
       
       // For debugging, log what kind of update this is

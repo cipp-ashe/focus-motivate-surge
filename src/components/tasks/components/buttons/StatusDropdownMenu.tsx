@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { eventBus } from "@/lib/eventBus";
+import { updateTaskOperations } from "@/lib/operations/tasks/update";
+import { toast } from "sonner";
 
 interface StatusDropdownMenuProps {
   task: Task;
@@ -50,16 +52,17 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
     
     console.log(`StatusDropdownMenu: Changing status of task ${task.id} to ${newStatus}`);
     
-    // Call the parent handler
-    onTaskAction(e, `status-${newStatus}`);
+    // Directly update the task status using the operation
+    updateTaskOperations.updateTask(task.id, { status: newStatus });
     
-    // Also emit the event directly as a backup
-    if (task && task.id) {
-      eventBus.emit('task:update', {
-        taskId: task.id,
-        updates: { status: newStatus }
-      });
-    }
+    // Also emit the event directly to ensure UI updates
+    eventBus.emit('task:update', {
+      taskId: task.id,
+      updates: { status: newStatus }
+    });
+    
+    // Show a success toast
+    toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
     
     // Close the dropdown
     setOpen(false);

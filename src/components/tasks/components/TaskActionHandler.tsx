@@ -48,13 +48,13 @@ export const useTaskActionHandler = (
           });
           toast.success(`Dismissed habit task: ${task.name}`, { duration: 2000 });
         } else {
-          // For regular tasks, mark as dismissed then complete it
+          // For regular tasks, mark as dismissed
           updateTaskOperations.updateTask(task.id, { 
             status: 'dismissed', 
             dismissedAt: new Date().toISOString() 
           });
           
-          // Then move to completed
+          // Then move to completed after a short delay
           setTimeout(() => {
             completeTaskOperations.completeTask(task.id);
           }, 100);
@@ -64,7 +64,6 @@ export const useTaskActionHandler = (
         // For other statuses, use proper task update operation
         console.log(`Using updateTaskOperations for ${task.id} with status ${newStatus}`);
         updateTaskOperations.updateTask(task.id, { status: newStatus });
-        toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
       }
       return; // Early return to ensure event doesn't propagate further
     }
@@ -76,6 +75,12 @@ export const useTaskActionHandler = (
       } else {
         toast.info(`Viewing habit task: ${task.name}`, { duration: 2000 });
       }
+    }
+    
+    // Handle timer task selection
+    if (action === 'true' && task.taskType === 'timer') {
+      eventBus.emit('timer:set-task', task);
+      toast.success(`Selected timer task: ${task.name}`, { duration: 2000 });
     }
     
     // Handle regular task completion (only for non-special task types)
