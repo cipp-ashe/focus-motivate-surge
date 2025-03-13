@@ -65,11 +65,12 @@ const TaskPage = () => {
     console.log("Tasks.tsx - Handled open-voice-recorder event for:", taskName);
   };
   
-  const handleTaskUpdate = (taskId: string, updates: Partial<Task>) => {
-    console.log('Tasks.tsx - Task update received:', { taskId, updates });
+  // FIXED: Updated to use the correct parameter structure
+  const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
+    console.log('Tasks.tsx - Task update received:', data);
     // Don't forward journal or checklist updates to avoid loops
-    if (!updates.journalEntry && !updates.checklistItems) {
-      eventBus.emit('task:update', { taskId, updates });
+    if (!data.updates.journalEntry && !data.updates.checklistItems) {
+      eventBus.emit('task:update', data);
     }
   };
 
@@ -91,14 +92,26 @@ const TaskPage = () => {
       
       <ChecklistDialog 
         isOpen={isChecklistOpen}
-        onOpenChange={setIsChecklistOpen}
-        currentTask={currentChecklistTask}
+        setIsOpen={setIsChecklistOpen}
+        task={{
+          id: currentChecklistTask?.taskId || '',
+          name: currentChecklistTask?.taskName || '',
+          checklistItems: currentChecklistTask?.items || [],
+          completed: false,
+          createdAt: new Date().toISOString()
+        }}
       />
       
       <JournalDialog 
         isOpen={isJournalOpen}
         onOpenChange={setIsJournalOpen}
-        currentTask={currentJournalTask}
+        task={{
+          id: currentJournalTask?.taskId || '',
+          name: currentJournalTask?.taskName || '',
+          journalEntry: currentJournalTask?.entry || '',
+          completed: false,
+          createdAt: new Date().toISOString()
+        }}
       />
     </div>
   );

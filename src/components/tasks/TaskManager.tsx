@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -95,7 +94,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
     setShowVoiceRecorder(true);
   };
   
-  // Handle task updates from dialogs - FIXED: adjusted to match the expected type
+  // Handle task updates from dialogs - FIXED: match the expected interface
   const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
     console.log("TaskManager: Updating task", data.taskId, data.updates);
     eventBus.emit('task:update', data);

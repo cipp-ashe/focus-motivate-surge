@@ -9,7 +9,7 @@ interface TaskEventListenerProps {
   onOpenChecklist: (taskId: string, taskName: string, items: any[]) => void;
   onOpenJournal: (taskId: string, taskName: string, entry: string) => void;
   onOpenVoiceRecorder: (taskId: string, taskName: string) => void;
-  onTaskUpdate: (taskId: string, updates: any) => void;
+  onTaskUpdate: (data: { taskId: string; updates: Partial<Task> }) => void;
 }
 
 export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
@@ -53,7 +53,7 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       console.log('TaskEventListener: Task update event received', data);
       // Only forward task updates that don't originate from dialogs
       if (!data.updates.journalEntry && !data.updates.checklistItems) {
-        onTaskUpdate(data.taskId, data.updates);
+        onTaskUpdate(data);
       }
     };
     
