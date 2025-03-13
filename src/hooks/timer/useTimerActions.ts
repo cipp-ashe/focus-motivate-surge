@@ -104,7 +104,8 @@ export const useTimerActions = (
         ? (netEffectiveTime / metrics.expectedTime) 
         : 1;
       
-      let completionStatus = 'Completed On Time';
+      // Use a typed completion status instead of a generic string
+      let completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late' = 'Completed On Time';
       if (efficiencyRatio < 0.8) completionStatus = 'Completed Early';
       if (efficiencyRatio > 1.2) completionStatus = 'Completed Late';
       
