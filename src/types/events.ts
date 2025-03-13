@@ -1,4 +1,3 @@
-
 export interface TimerEventPayloads {
   // Habit events
   'habit:schedule': {
@@ -71,7 +70,7 @@ export interface TimerEventPayloads {
   'timer:metrics-update': { taskName: string; metrics: any };
   'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
   'timer:tick': { timeLeft?: number; remaining?: number; taskName?: string };
-  'timer:resume': { taskName: string };
+  'timer:resume': { taskName: string; timeLeft?: number; currentTime?: number; metrics?: any };
   
   // Relationship events
   'relationship:create': any;

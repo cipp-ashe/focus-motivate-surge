@@ -22,7 +22,7 @@ export const useTimerEvents = () => {
   // Cancel a timer session
   const cancelTimerSession = useCallback((taskName: string, duration: number) => {
     // We need to use 'as any' here since 'timer:reset' is what we need to use instead of 'timer:cancel'
-    eventManager.emit('timer:reset' as any, {
+    eventManager.emit('timer:reset', {
       taskName,
       duration
     });
@@ -37,10 +37,20 @@ export const useTimerEvents = () => {
     });
   }, []);
 
+  // Resume a timer session
+  const resumeTimerSession = useCallback((taskName: string, timeLeft: number, metrics: any) => {
+    eventManager.emit('timer:resume', {
+      taskName,
+      timeLeft,
+      metrics
+    });
+  }, []);
+
   return {
     startTimerWithTask,
     completeTimerSession,
     cancelTimerSession,
-    pauseTimerSession
+    pauseTimerSession,
+    resumeTimerSession
   };
 };
