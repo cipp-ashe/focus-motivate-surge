@@ -1,12 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle 
+  DialogTitle,
+  DialogClose 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 import { eventBus } from '@/lib/eventBus';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { toast } from 'sonner';
@@ -57,22 +59,28 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     }
   };
 
-  const handleDialogOpenChange = (open: boolean) => {
-    console.log('Journal dialog open state changed:', open, 'current:', isOpen);
-    if (!open && isOpen) {
-      saveJournal();
-    }
-    onOpenChange(open);
+  const handleCancel = () => {
+    console.log('Cancelling journal edit');
+    onOpenChange(false);
   };
 
   return (
     <Dialog 
       open={isOpen} 
-      onOpenChange={handleDialogOpenChange}
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
+        <DialogHeader className="flex justify-between items-center">
           <DialogTitle>{currentTask?.taskName || 'Journal Entry'}</DialogTitle>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleCancel}
+            className="absolute right-4 top-4"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -105,8 +113,11 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
           </TabsContent>
         </Tabs>
         
-        <div className="pt-4">
-          <Button onClick={saveJournal} className="w-full" type="button">
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button onClick={saveJournal} type="button">
             <Save className="h-4 w-4 mr-2" /> Save Journal Entry
           </Button>
         </div>
