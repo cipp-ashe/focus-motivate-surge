@@ -4,7 +4,7 @@ import { Task } from "@/types/tasks";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap } from "lucide-react";
+import { Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap, Edit, Eye } from "lucide-react";
 
 interface TaskActionButtonProps {
   task: Task;
@@ -96,7 +96,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           data-action="true"
         >
           <BookOpen className="h-3.5 w-3.5 text-amber-400" />
-          <span>Write</span>
+          <span>{task.journalEntry ? 'View' : 'Write'}</span>
         </Button>
       );
     }
@@ -111,7 +111,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           data-action="true"
         >
           <ImageIcon className="h-3.5 w-3.5 text-blue-400" />
-          <span>View</span>
+          <span>{task.imageUrl ? 'View' : 'Add'}</span>
         </Button>
       );
     }
@@ -126,7 +126,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           data-action="true"
         >
           <CheckSquare className="h-3.5 w-3.5 text-cyan-400" />
-          <span>Checklist</span>
+          <span>{task.checklistItems?.length ? 'View' : 'Create'} Checklist</span>
         </Button>
       );
     }
@@ -141,7 +141,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
           data-action="true"
         >
           <Mic className="h-3.5 w-3.5 text-rose-400" />
-          <span>Record</span>
+          <span>{task.voiceNoteUrl ? 'Listen' : 'Record'}</span>
         </Button>
       );
     }

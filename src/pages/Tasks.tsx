@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
@@ -14,11 +13,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { MarkdownEditor } from '@/components/ui/markdown-editor';
 
 const TaskPage = () => {
-  // Keep track of mounted state to prevent callbacks on unmounted component
   const isMounted = useRef(true);
   const isMobile = useIsMobile();
   
-  // State for checklist management
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const [currentChecklistTask, setCurrentChecklistTask] = useState<{
     taskId: string;
@@ -28,7 +25,6 @@ const TaskPage = () => {
   const [newItemText, setNewItemText] = useState('');
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   
-  // State for journal management
   const [isJournalOpen, setIsJournalOpen] = useState(false);
   const [currentJournalTask, setCurrentJournalTask] = useState<{
     taskId: string;
@@ -37,7 +33,6 @@ const TaskPage = () => {
   } | null>(null);
   const [journalContent, setJournalContent] = useState('');
   
-  // Set up event listeners for task actions with proper cleanup
   useEffect(() => {
     const handleShowImage = (event: Event) => {
       if (!isMounted.current) return;
@@ -58,7 +53,6 @@ const TaskPage = () => {
       
       console.log('Tasks.tsx - Received open-checklist event:', { taskId, taskName, items });
       
-      // Set current checklist task and open the sheet
       setCurrentChecklistTask({
         taskId,
         taskName,
@@ -67,7 +61,6 @@ const TaskPage = () => {
       setChecklistItems(Array.isArray(items) ? items : []);
       setIsChecklistOpen(true);
       
-      // Force sheet to open (workaround for any potential issues)
       setTimeout(() => {
         setIsChecklistOpen(true);
       }, 10);
@@ -81,7 +74,6 @@ const TaskPage = () => {
       
       console.log('Tasks.tsx - Received open-journal event:', { taskId, taskName, entry });
       
-      // Set current journal task and open the sheet
       setCurrentJournalTask({
         taskId,
         taskName,
@@ -90,7 +82,6 @@ const TaskPage = () => {
       setJournalContent(entry || '');
       setIsJournalOpen(true);
       
-      // Force sheet to open (workaround for any potential issues)
       setTimeout(() => {
         setIsJournalOpen(true);
       }, 10);
@@ -109,13 +100,11 @@ const TaskPage = () => {
     
     console.log('Tasks.tsx - Setting up event listeners');
     
-    // Add event listeners
     window.addEventListener('show-image', handleShowImage);
     window.addEventListener('open-checklist', handleOpenChecklist);
     window.addEventListener('open-journal', handleOpenJournal);
     window.addEventListener('open-voice-recorder', handleOpenVoiceRecorder);
     
-    // Cleanup
     return () => {
       isMounted.current = false;
       window.removeEventListener('show-image', handleShowImage);
@@ -123,9 +112,8 @@ const TaskPage = () => {
       window.removeEventListener('open-journal', handleOpenJournal);
       window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder);
     };
-  }, []); // Empty dependency array ensures this only runs once
-
-  // Add a new checklist item
+  }, []);
+  
   const handleAddItem = () => {
     if (!newItemText.trim()) return;
     
@@ -140,7 +128,6 @@ const TaskPage = () => {
     setNewItemText('');
   };
 
-  // Toggle item completion status
   const toggleItemCompletion = (itemId: string) => {
     console.log('Toggling item completion:', itemId);
     setChecklistItems(
@@ -152,13 +139,11 @@ const TaskPage = () => {
     );
   };
 
-  // Delete a checklist item
   const deleteItem = (itemId: string) => {
     console.log('Deleting checklist item:', itemId);
     setChecklistItems(checklistItems.filter(item => item.id !== itemId));
   };
 
-  // Save checklist items to the task
   const saveChecklist = () => {
     if (currentChecklistTask) {
       console.log('Saving checklist items for task:', {
@@ -170,7 +155,7 @@ const TaskPage = () => {
         taskId: currentChecklistTask.taskId,
         updates: { 
           checklistItems: checklistItems,
-          taskType: 'checklist' // Ensure task type is set to checklist
+          taskType: 'checklist' 
         }
       });
       
@@ -178,8 +163,7 @@ const TaskPage = () => {
       setIsChecklistOpen(false);
     }
   };
-  
-  // Save journal entry to the task
+
   const saveJournal = () => {
     if (currentJournalTask) {
       console.log('Saving journal entry for task:', {
@@ -191,7 +175,7 @@ const TaskPage = () => {
         taskId: currentJournalTask.taskId,
         updates: { 
           journalEntry: journalContent,
-          taskType: 'journal' // Ensure task type remains journal
+          taskType: 'journal' 
         }
       });
       
@@ -200,28 +184,23 @@ const TaskPage = () => {
     }
   };
 
-  // Handle key press in the new item input
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleAddItem();
     }
   };
 
-  // Log when sheet open state changes
   const handleChecklistSheetOpenChange = (open: boolean) => {
     console.log('Checklist sheet open state changed:', open, 'current:', isChecklistOpen);
     if (!open && isChecklistOpen) {
-      // We're closing the sheet - save the checklist
       saveChecklist();
     }
     setIsChecklistOpen(open);
   };
-  
-  // Handle journal sheet open state changes
+
   const handleJournalSheetOpenChange = (open: boolean) => {
     console.log('Journal sheet open state changed:', open, 'current:', isJournalOpen);
     if (!open && isJournalOpen) {
-      // We're closing the sheet - save the journal entry
       saveJournal();
     }
     setIsJournalOpen(open);
@@ -234,7 +213,6 @@ const TaskPage = () => {
       </h1>
       <TaskManager />
       
-      {/* Checklist Sheet */}
       <Sheet 
         open={isChecklistOpen} 
         onOpenChange={handleChecklistSheetOpenChange}
@@ -244,7 +222,6 @@ const TaskPage = () => {
             <SheetTitle>{currentChecklistTask?.taskName || 'Checklist'}</SheetTitle>
           </SheetHeader>
           
-          {/* Add new item input */}
           <div className="flex gap-2 mb-6">
             <Input
               value={newItemText}
@@ -259,7 +236,6 @@ const TaskPage = () => {
             </Button>
           </div>
           
-          {/* Checklist items */}
           <div className="space-y-2">
             {checklistItems.length === 0 ? (
               <p className="text-muted-foreground text-center py-4">
@@ -292,7 +268,6 @@ const TaskPage = () => {
             )}
           </div>
           
-          {/* Save button */}
           <div className="mt-6">
             <Button onClick={saveChecklist} className="w-full" type="button">
               <Save className="h-4 w-4 mr-2" /> Save Checklist
@@ -301,7 +276,6 @@ const TaskPage = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Journal Entry Sheet */}
       <Sheet 
         open={isJournalOpen} 
         onOpenChange={handleJournalSheetOpenChange}
@@ -320,7 +294,6 @@ const TaskPage = () => {
             />
           </div>
           
-          {/* Save button */}
           <div className="p-4 border-t">
             <Button onClick={saveJournal} className="w-full" type="button">
               <Save className="h-4 w-4 mr-2" /> Save Journal Entry

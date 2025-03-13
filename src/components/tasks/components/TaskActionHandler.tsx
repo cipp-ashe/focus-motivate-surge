@@ -33,6 +33,33 @@ export const useTaskActionHandler = (
         break;
         
       case 'journal':
+        // If dialog opener is provided, use it to open the dialog
+        if (onOpenTaskDialog) {
+          // Open the appropriate journal dialog
+          if (task.journalEntry) {
+            // For existing entry, dispatch event first to ensure UI is updated
+            window.dispatchEvent(new CustomEvent('open-journal', {
+              detail: {
+                taskId: task.id,
+                taskName: task.name,
+                entry: task.journalEntry
+              }
+            }));
+            onOpenTaskDialog();
+          } else {
+            // For new entry, also dispatch the event but with empty entry
+            window.dispatchEvent(new CustomEvent('open-journal', {
+              detail: {
+                taskId: task.id,
+                taskName: task.name,
+                entry: ''
+              }
+            }));
+            onOpenTaskDialog();
+          }
+        }
+        break;
+        
       case 'screenshot':
       case 'checklist':
       case 'voicenote':

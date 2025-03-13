@@ -29,11 +29,13 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   const [editedName, setEditedName] = useState(task.name);
   const [editedJournalEntry, setEditedJournalEntry] = useState(task.journalEntry || '');
 
+  // Reset states when dialog opens
   useEffect(() => {
     if (isOpen) {
       setEditedName(task.name);
       setEditedJournalEntry(task.journalEntry || '');
-      setIsEditing(false);
+      // If there's no existing entry, start in editing mode
+      setIsEditing(!task.journalEntry);
     }
   }, [isOpen, task.name, task.journalEntry]);
 
@@ -125,6 +127,7 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
               onChange={(e) => setEditedJournalEntry(e.target.value)}
               placeholder="Write your journal entry here..."
               className="min-h-[400px] text-sm"
+              autoFocus={!task.journalEntry}
             />
           ) : (
             <div className="whitespace-pre-wrap bg-muted/30 p-4 rounded-md min-h-[400px] text-sm">
