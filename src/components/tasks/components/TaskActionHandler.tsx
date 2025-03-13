@@ -70,20 +70,18 @@ export const useTaskActionHandler = (
           });
         }
         
-        // If dialog opener is provided, use it to open the dialog
+        // Always dispatch event first to ensure UI is updated
+        // This is critical for both new and existing journal entries
+        window.dispatchEvent(new CustomEvent('open-journal', {
+          detail: {
+            taskId: task.id,
+            taskName: task.name,
+            entry: task.journalEntry || ''
+          }
+        }));
+        
+        // Then open the dialog if opener is provided
         if (onOpenTaskDialog) {
-          // Always dispatch event first to ensure UI is updated
-          // This was causing the issue - we need to ensure the event is dispatched
-          // even if there's already a journal entry
-          window.dispatchEvent(new CustomEvent('open-journal', {
-            detail: {
-              taskId: task.id,
-              taskName: task.name,
-              entry: task.journalEntry || ''
-            }
-          }));
-          
-          // Then open the dialog
           onOpenTaskDialog();
         } else {
           console.error('No dialog opener provided for journal task:', task.id);
@@ -105,6 +103,9 @@ export const useTaskActionHandler = (
         // Open the appropriate dialog
         if (onOpenTaskDialog) {
           onOpenTaskDialog();
+        } else {
+          console.error(`No dialog opener provided for ${task.taskType} task:`, task.id);
+          toast.error(`Unable to open ${task.taskType} editor`);
         }
         break;
         
