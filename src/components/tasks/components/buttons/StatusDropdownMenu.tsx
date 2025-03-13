@@ -11,16 +11,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { eventBus } from "@/lib/eventBus";
+import { updateTaskOperations } from "@/lib/operations/tasks/update";
+import { completeTaskOperations } from "@/lib/operations/tasks/complete";
+import { deleteTaskOperations } from "@/lib/operations/tasks/delete";
 import { toast } from "sonner";
 
 interface StatusDropdownMenuProps {
   task: Task;
-  onTaskAction: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => void;
+  onTaskAction?: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => void;
 }
 
 export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, onTaskAction }) => {
   const [open, setOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   // Get status label and colors
   const getStatusInfo = (status: TaskStatus = 'pending') => {
@@ -44,12 +47,15 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
 
   const statusInfo = getStatusInfo(task.status);
 
-  // Fixed handler for status changes - avoids infinite loop
+  // Properly handle status changes by directly using the operations
   const handleStatusChange = (e: React.MouseEvent<HTMLElement>, newStatus: TaskStatus) => {
     e.stopPropagation();
     e.preventDefault();
     
-    // Don't update if the status is already the same to prevent infinite loops
+    // Don't update if already updating
+    if (isUpdating) return;
+    
+    // Don't update if the status is already the same
     if (task.status === newStatus) {
       console.log(`StatusDropdownMenu: Task ${task.id} already has status ${newStatus}, ignoring`);
       setOpen(false);
@@ -61,21 +67,44 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
     try {
       // First close the dropdown to improve UI feedback
       setOpen(false);
+      setIsUpdating(true);
       
-      // Use direct event emission instead of going through onTaskAction to prevent loops
-      eventBus.emit('task:update', { 
-        taskId: task.id, 
-        updates: { status: newStatus } 
-      });
+      // Handle different status types with appropriate operations
+      if (newStatus === 'completed') {
+        // For completed status, use completeTaskOperations
+        completeTaskOperations.completeTask(task.id);
+      } else if (newStatus === 'dismissed') {
+        // For dismissed status, use specialized handler based on task type
+        if (task.relationships?.habitId) {
+          // Habit-related tasks need special dismissal
+          deleteTaskOperations.deleteTask(task.id, {
+            isDismissal: true,
+            habitId: task.relationships.habitId,
+            date: task.relationships.date || new Date().toDateString(),
+            reason: 'dismissed'
+          });
+        } else {
+          // For regular tasks, use direct update with dismissal fields
+          updateTaskOperations.updateTask(task.id, { 
+            status: 'dismissed', 
+            dismissedAt: new Date().toISOString() 
+          });
+        }
+      } else {
+        // For other status values, use direct update
+        updateTaskOperations.updateTask(task.id, { status: newStatus });
+      }
       
-      // Add a short delay to allow the state to update before showing a success message
-      setTimeout(() => {
-        toast.success(`Task status updated to ${getStatusInfo(newStatus).label}`);
-      }, 50);
+      // Show a success toast with the updated status
+      toast.success(`Task status updated to ${getStatusInfo(newStatus).label}`);
     } catch (error) {
       console.error("Error changing task status:", error);
       toast.error("Failed to update task status");
-      setOpen(false);
+    } finally {
+      // Reset updating state after a short delay
+      setTimeout(() => {
+        setIsUpdating(false);
+      }, 500);
     }
   };
 

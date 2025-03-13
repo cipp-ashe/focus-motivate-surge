@@ -1,11 +1,11 @@
 
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
-import { toast } from 'sonner';
 import { useCallback } from 'react';
 import { completeTaskOperations } from '@/lib/operations/tasks/complete';
 import { deleteTaskOperations } from '@/lib/operations/tasks/delete';
 import { updateTaskOperations } from '@/lib/operations/tasks/update';
+import { toast } from 'sonner';
+import { eventBus } from '@/lib/eventBus';
 
 export const useTaskActionHandler = (
   task: Task,
@@ -43,7 +43,6 @@ export const useTaskActionHandler = (
         if (newStatus === 'completed') {
           // For completed status, use completeTaskOperations to properly handle completion
           completeTaskOperations.completeTask(task.id);
-          toast.success(`Task ${task.name} marked as complete`, { duration: 2000 });
         } else if (newStatus === 'dismissed') {
           // For dismissed status, use a specialized handler based on task type
           if (task.relationships?.habitId) {
@@ -54,29 +53,16 @@ export const useTaskActionHandler = (
               date: task.relationships.date || new Date().toDateString(),
               reason: 'dismissed'
             });
-            toast.success(`Dismissed habit task: ${task.name}`, { duration: 2000 });
           } else {
-            // For regular tasks, mark as dismissed - fix by adding minimum required fields
+            // For regular tasks, update with required dismissed fields
             updateTaskOperations.updateTask(task.id, { 
               status: 'dismissed', 
               dismissedAt: new Date().toISOString() 
-            }, { suppressEvent: true });  // Prevent event loop
-            
-            // Then move to completed after a short delay
-            setTimeout(() => {
-              completeTaskOperations.completeTask(task.id);
-            }, 100);
-            toast.success(`Dismissed task: ${task.name}`, { duration: 2000 });
+            });
           }
         } else {
-          // For other statuses, use direct event emission to avoid operation loops
-          eventBus.emit('task:update', { 
-            taskId: task.id, 
-            updates: { status: newStatus } 
-          });
-          
-          // Add a success toast with short duration
-          toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`, { duration: 2000 });
+          // For other statuses, use the update operations directly
+          updateTaskOperations.updateTask(task.id, { status: newStatus });
         }
       } catch (error) {
         console.error('Error updating task status:', error);
@@ -104,7 +90,6 @@ export const useTaskActionHandler = (
     // Handle regular task completion (only for non-special task types)
     if (action === 'true' && !task.taskType) {
       completeTaskOperations.completeTask(task.id);
-      toast.success(`Completed task: ${task.name}`, { duration: 2000 });
     }
   }, [task]);
 

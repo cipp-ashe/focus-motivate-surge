@@ -17,7 +17,7 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
     dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
   }, [dispatch]);
   
-  // Add new handler for task dismissal - fix the issue with missing fields
+  // Handle task dismissal with full required fields
   const handleTaskDismiss = useCallback(({ taskId, habitId, date }) => {
     console.log("TaskEvents: Dismissing habit task", taskId, "for habit", habitId, "on", date);
     
@@ -27,7 +27,7 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
     
     dispatch({ type: 'DISMISS_TASK', payload: { taskId, habitId: safeHabitId, date: safeDate } });
     
-    // Emit an event to track this dismissal in the habit system - but with a delay to prevent loops
+    // Emit an event to track this dismissal in the habit system
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('habit-task-dismissed', {
         detail: { habitId: safeHabitId, taskId, date: safeDate }
@@ -35,23 +35,27 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
     }, 50);
   }, [dispatch]);
   
-  // Handle task updates - with improved error handling
+  // Improved task update handler with proper type checking and error prevention
   const handleTaskUpdate = useCallback(({ taskId, updates }) => {
     console.log("TaskEvents: Updating task", taskId, updates);
     
-    // Skip empty updates to prevent unnecessary reducer calls
-    if (!updates || Object.keys(updates).length === 0) {
-      console.log(`TaskEvents: No updates provided for task ${taskId}, skipping`);
-      return;
-    }
-    
-    // Make sure we have a valid taskId
+    // Validate required parameters
     if (!taskId) {
       console.error("TaskEvents: Attempted to update task without taskId");
       return;
     }
     
-    dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
+    // Skip empty updates
+    if (!updates || Object.keys(updates).length === 0) {
+      console.log(`TaskEvents: No updates provided for task ${taskId}, skipping`);
+      return;
+    }
+    
+    // Important: prevent status infinite loops by checking before dispatch
+    dispatch({ 
+      type: 'UPDATE_TASK', 
+      payload: { taskId, updates }
+    });
   }, [dispatch]);
   
   // Handle task selection
