@@ -3,12 +3,13 @@ import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
+import { useCallback } from 'react';
 
 export const useTaskActionHandler = (
   task: Task,
-  onOpenScreenshotDialog?: () => void
+  onOpenTaskDialog?: () => void
 ) => {
-  const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
     
@@ -32,41 +33,13 @@ export const useTaskActionHandler = (
         break;
         
       case 'journal':
-        const openJournalEvent = new CustomEvent('open-journal', {
-          detail: { taskId: task.id, taskName: task.name, entry: task.journalEntry }
-        });
-        window.dispatchEvent(openJournalEvent);
-        break;
-        
       case 'screenshot':
-        if (task.imageUrl) {
-          // Open dialog
-          if (onOpenScreenshotDialog) {
-            onOpenScreenshotDialog();
-          }
-        } else {
-          toast.error(`No image found for task: ${task.name}`);
-        }
-        break;
-        
       case 'checklist':
-        const itemsToPass = task.checklistItems || [];
-        
-        const openChecklistEvent = new CustomEvent('open-checklist', {
-          detail: { 
-            taskId: task.id, 
-            taskName: task.name, 
-            items: itemsToPass
-          }
-        });
-        window.dispatchEvent(openChecklistEvent);
-        break;
-        
       case 'voicenote':
-        const openVoiceRecorderEvent = new CustomEvent('open-voice-recorder', {
-          detail: { taskId: task.id, taskName: task.name }
-        });
-        window.dispatchEvent(openVoiceRecorderEvent);
+        // Open the appropriate dialog
+        if (onOpenTaskDialog) {
+          onOpenTaskDialog();
+        }
         break;
         
       default:
@@ -74,9 +47,9 @@ export const useTaskActionHandler = (
         toast.success(`Completed task: ${task.name}`);
         break;
     }
-  };
+  }, [task, onOpenTaskDialog]);
 
-  const handleDelete = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+  const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     e.preventDefault();
     
@@ -93,7 +66,7 @@ export const useTaskActionHandler = (
     } else {
       eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
     }
-  };
+  }, [task]);
 
   return { handleTaskAction, handleDelete };
 };

@@ -1,23 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent, KeyboardEvent } from 'react';
 
 interface InputDurationHandlerProps {
   editingTaskId: string | null;
   taskId: string;
   inputValue: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onBlur: () => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export const InputDurationHandler: React.FC<InputDurationHandlerProps> = ({
+export const useInputDurationHandler = ({
   editingTaskId,
   taskId,
   inputValue,
   onChange,
   onBlur,
   onKeyDown,
-}) => {
+}: InputDurationHandlerProps) => {
   const [localInputValue, setLocalInputValue] = useState(inputValue);
   
   useEffect(() => {
@@ -26,7 +26,7 @@ export const InputDurationHandler: React.FC<InputDurationHandlerProps> = ({
     }
   }, [inputValue, editingTaskId, taskId]);
 
-  const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLocalChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
       setLocalInputValue(value);
@@ -34,7 +34,7 @@ export const InputDurationHandler: React.FC<InputDurationHandlerProps> = ({
     }
   };
 
-  const handleLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleLocalKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.currentTarget.blur();
     }
@@ -53,7 +53,7 @@ export const InputDurationHandler: React.FC<InputDurationHandlerProps> = ({
     setLocalInputValue(finalValue);
     const syntheticEvent = {
       target: { value: finalValue }
-    } as React.ChangeEvent<HTMLInputElement>;
+    } as ChangeEvent<HTMLInputElement>;
     onChange(syntheticEvent);
     onBlur();
   };

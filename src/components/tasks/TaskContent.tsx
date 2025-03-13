@@ -4,7 +4,10 @@ import { Task } from "@/types/tasks";
 import { TaskHeader } from "./components/TaskHeader";
 import { TaskTags } from "./TaskTags";
 import { ScreenshotDialog } from './components/ScreenshotDialog';
-import { InputDurationHandler } from './components/InputDurationHandler';
+import { JournalDialog } from './components/JournalDialog';
+import { ChecklistDialog } from './components/ChecklistDialog';
+import { VoiceNoteDialog } from './components/VoiceNoteDialog';
+import { useInputDurationHandler } from '@/hooks/tasks/useInputDurationHandler';
 import { useTaskActionHandler } from './components/TaskActionHandler';
 
 interface TaskContentProps {
@@ -31,6 +34,9 @@ export const TaskContent = ({
   preventPropagation,
 }: TaskContentProps) => {
   const [isScreenshotDialogOpen, setIsScreenshotDialogOpen] = useState(false);
+  const [isJournalDialogOpen, setIsJournalDialogOpen] = useState(false);
+  const [isChecklistDialogOpen, setIsChecklistDialogOpen] = useState(false);
+  const [isVoiceNoteDialogOpen, setIsVoiceNoteDialogOpen] = useState(false);
   
   // Use the input duration handler
   const { 
@@ -38,7 +44,7 @@ export const TaskContent = ({
     handleLocalChange, 
     handleLocalBlur, 
     handleLocalKeyDown 
-  } = InputDurationHandler({
+  } = useInputDurationHandler({
     editingTaskId,
     taskId: task.id,
     inputValue,
@@ -47,10 +53,25 @@ export const TaskContent = ({
     onKeyDown
   });
 
-  // Use the task action handler
+  // Use the task action handler with dialog open callbacks
   const { handleTaskAction, handleDelete } = useTaskActionHandler(
     task, 
-    () => setIsScreenshotDialogOpen(true)
+    () => {
+      switch(task.taskType) {
+        case 'screenshot':
+          setIsScreenshotDialogOpen(true);
+          break;
+        case 'journal':
+          setIsJournalDialogOpen(true);
+          break;
+        case 'checklist':
+          setIsChecklistDialogOpen(true);
+          break;
+        case 'voicenote':
+          setIsVoiceNoteDialogOpen(true);
+          break;
+      }
+    }
   );
 
   return (
@@ -76,12 +97,36 @@ export const TaskContent = ({
         )}
       </div>
 
-      {/* Screenshot Dialog */}
+      {/* Task-specific dialogs */}
       {task.taskType === 'screenshot' && (
         <ScreenshotDialog
           task={task}
           isOpen={isScreenshotDialogOpen}
           setIsOpen={setIsScreenshotDialogOpen}
+        />
+      )}
+      
+      {task.taskType === 'journal' && (
+        <JournalDialog
+          task={task}
+          isOpen={isJournalDialogOpen}
+          setIsOpen={setIsJournalDialogOpen}
+        />
+      )}
+      
+      {task.taskType === 'checklist' && (
+        <ChecklistDialog
+          task={task}
+          isOpen={isChecklistDialogOpen}
+          setIsOpen={setIsChecklistDialogOpen}
+        />
+      )}
+      
+      {task.taskType === 'voicenote' && (
+        <VoiceNoteDialog
+          task={task}
+          isOpen={isVoiceNoteDialogOpen}
+          setIsOpen={setIsVoiceNoteDialogOpen}
         />
       )}
     </>
