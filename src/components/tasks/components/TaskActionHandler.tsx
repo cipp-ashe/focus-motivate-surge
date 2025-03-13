@@ -1,6 +1,6 @@
+
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
-import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { useCallback } from 'react';
 
@@ -8,6 +8,8 @@ export const useTaskActionHandler = (
   task: Task,
   onOpenTaskDialog?: () => void
 ) => {
+  // This handler is now primarily focused on status changes and task completion,
+  // not for opening dialogs (handled directly in TaskContent)
   const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     // Ensure proper event handling
     if (e && e.stopPropagation) {
@@ -21,7 +23,7 @@ export const useTaskActionHandler = (
         ? e.currentTarget.getAttribute('data-action-type') 
         : null);
       
-    console.log("Task action:", action, "for task:", task.id, "onOpenTaskDialog available:", !!onOpenTaskDialog);
+    console.log("Task action:", action, "for task:", task.id, "type:", task.taskType);
     
     // Handle status changes via the dropdown
     if (action?.startsWith('status-')) {
@@ -61,7 +63,6 @@ export const useTaskActionHandler = (
         });
         toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`);
       }
-      return; // Exit early after handling the status change
     }
     
     // Handle habit-related tasks
@@ -71,123 +72,12 @@ export const useTaskActionHandler = (
       } else {
         toast.info(`Viewing habit task: ${task.name}`);
       }
-      return;
     }
     
-    // Handle journal tasks - specific handling for open-journal action
-    if (action === 'open-journal') {
-      console.log("Opening journal for task:", task.id);
-      
-      // Make sure we set in-progress status if not already and if this is the first time opening the journal
-      if (task.status !== 'in-progress' && !task.journalEntry) {
-        eventBus.emit('task:update', { 
-          taskId: task.id, 
-          updates: { status: 'in-progress' } 
-        });
-      }
-      
-      // Dispatch the event to open the journal dialog
-      window.dispatchEvent(new CustomEvent('open-journal', {
-        detail: {
-          taskId: task.id,
-          taskName: task.name,
-          entry: task.journalEntry || ''
-        }
-      }));
-      
-      console.log("Triggered journal dialog for task:", task.id);
-      return;
-    }
-    
-    // Process specific task types when action button is clicked
-    switch(task.taskType) {
-      case 'timer':
-        if (action === 'true') {
-          // Set task to in-progress first - only for timer tasks
-          if (task.status !== 'in-progress') {
-            eventBus.emit('task:update', { 
-              taskId: task.id, 
-              updates: { status: 'in-progress' } 
-            });
-          }
-          
-          // Then initialize timer
-          eventManager.emit('timer:init', { 
-            taskName: task.name, 
-            duration: task.duration || 1500 
-          });
-          
-          console.log("Initialized timer for task:", task.id);
-        }
-        break;
-        
-      case 'journal':
-        if (action === 'true') {
-          // The journal handling is now done in the open-journal action block above
-          // This redirects to that handler
-          handleTaskAction(e, 'open-journal');
-        }
-        break;
-        
-      case 'screenshot':
-        if (action === 'true') {
-          // Don't automatically mark as in-progress for screenshot tasks
-          
-          // Dispatch the event to open the screenshot dialog
-          window.dispatchEvent(new CustomEvent('show-image', {
-            detail: {
-              taskId: task.id,
-              taskName: task.name,
-              imageUrl: task.imageUrl || ''
-            }
-          }));
-          
-          console.log("Dispatched show-image event for task:", task.id);
-        }
-        break;
-        
-      case 'checklist':
-        if (action === 'true') {
-          // Don't automatically mark as in-progress for checklist tasks
-          console.log("TaskActionHandler: Processing checklist action for task:", task.id);
-          
-          // Dispatch the event to open the checklist dialog
-          window.dispatchEvent(new CustomEvent('open-checklist', {
-            detail: {
-              taskId: task.id,
-              taskName: task.name,
-              items: task.checklistItems || []
-            }
-          }));
-          
-          console.log("TaskActionHandler: Dispatched open-checklist event for task:", task.id);
-        }
-        break;
-        
-      case 'voicenote':
-        if (action === 'true') {
-          // Don't automatically mark as in-progress for voicenote tasks
-          
-          // Dispatch the event to open the voicenote dialog
-          window.dispatchEvent(new CustomEvent('open-voice-recorder', {
-            detail: {
-              taskId: task.id,
-              taskName: task.name,
-              voiceNoteUrl: task.voiceNoteUrl || ''
-            }
-          }));
-          
-          console.log("TaskActionHandler: Dispatched open-voice-recorder event for task:", task.id);
-        }
-        break;
-        
-      default:
-        // Regular tasks just get completed directly if action button is clicked
-        if (action === 'true') {
-          eventBus.emit('task:complete', { taskId: task.id });
-          toast.success(`Completed task: ${task.name}`);
-        }
-        break;
+    // Handle regular task completion (only for non-special task types)
+    if (action === 'true' && !task.taskType) {
+      eventBus.emit('task:complete', { taskId: task.id });
+      toast.success(`Completed task: ${task.name}`);
     }
   }, [task, onOpenTaskDialog]);
 

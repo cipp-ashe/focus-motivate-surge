@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import TaskManager from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
@@ -43,6 +44,8 @@ const TaskPage = () => {
       toast.info(`Viewing image for: ${taskName}`, {
         description: "Image viewer functionality is not yet implemented"
       });
+      
+      console.log("Tasks.tsx - Received show-image event for:", taskName);
     };
     
     const handleOpenChecklist = (event: Event) => {
@@ -60,6 +63,9 @@ const TaskPage = () => {
       });
       setChecklistItems(Array.isArray(items) ? items : []);
       setIsChecklistOpen(true);
+      
+      console.log('Tasks.tsx - Opened checklist for task:', taskName);
+      toast.info(`Opening checklist for: ${taskName}`);
     };
     
     const handleOpenJournal = (event: Event) => {
@@ -77,6 +83,9 @@ const TaskPage = () => {
       });
       setJournalContent(entry || '');
       setIsJournalOpen(true);
+      
+      console.log('Tasks.tsx - Opened journal for task:', taskName);
+      toast.info(`Opening journal for: ${taskName}`);
     };
     
     const handleOpenVoiceRecorder = (event: Event) => {
@@ -88,6 +97,20 @@ const TaskPage = () => {
       toast.info(`Recording for: ${taskName}`, {
         description: "Voice recorder functionality is not yet implemented"
       });
+      
+      console.log("Tasks.tsx - Received open-voice-recorder event for:", taskName);
+    };
+    
+    const handleTaskUpdate = (event: Event) => {
+      if (!isMounted.current) return;
+      
+      const customEvent = event as CustomEvent;
+      const { taskId, updates } = customEvent.detail;
+      
+      console.log('Tasks.tsx - Received task-update event:', { taskId, updates });
+      
+      // Forward to eventBus
+      eventBus.emit('task:update', { taskId, updates });
     };
     
     console.log('Tasks.tsx - Setting up event listeners');
@@ -96,6 +119,7 @@ const TaskPage = () => {
     window.addEventListener('open-checklist', handleOpenChecklist);
     window.addEventListener('open-journal', handleOpenJournal);
     window.addEventListener('open-voice-recorder', handleOpenVoiceRecorder);
+    window.addEventListener('task-update', handleTaskUpdate);
     
     return () => {
       isMounted.current = false;
@@ -103,6 +127,7 @@ const TaskPage = () => {
       window.removeEventListener('open-checklist', handleOpenChecklist);
       window.removeEventListener('open-journal', handleOpenJournal);
       window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder);
+      window.removeEventListener('task-update', handleTaskUpdate);
     };
   }, []);
   

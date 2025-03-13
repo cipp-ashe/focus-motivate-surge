@@ -33,8 +33,97 @@ export const TaskContent: React.FC<TaskContentProps> = ({
 }) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   
-  // Pass onOpenTaskDialog to useTaskActionHandler
-  const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
+  // Handle the task action with direct event dispatching
+  const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
+    // Prevent event propagation
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
+    // Get the action type from the parameter or clicked element
+    const action = actionType || 
+      (e.currentTarget instanceof HTMLElement 
+        ? e.currentTarget.getAttribute('data-action-type') 
+        : null);
+    
+    console.log(`TaskContent: Action ${action} clicked for task ${task.id} of type ${task.taskType}`);
+    
+    // Handle task specific dialog opening based on task type
+    if (task.taskType === 'checklist' && action === 'true') {
+      console.log('Dispatching open-checklist event directly');
+      window.dispatchEvent(new CustomEvent('open-checklist', {
+        detail: {
+          taskId: task.id,
+          taskName: task.name,
+          items: task.checklistItems || []
+        }
+      }));
+      return;
+    }
+    
+    if (task.taskType === 'journal' && action === 'true') {
+      console.log('Dispatching open-journal event directly');
+      window.dispatchEvent(new CustomEvent('open-journal', {
+        detail: {
+          taskId: task.id,
+          taskName: task.name,
+          entry: task.journalEntry || ''
+        }
+      }));
+      return;
+    }
+    
+    if (task.taskType === 'voicenote' && action === 'true') {
+      console.log('Dispatching open-voice-recorder event directly');
+      window.dispatchEvent(new CustomEvent('open-voice-recorder', {
+        detail: {
+          taskId: task.id,
+          taskName: task.name,
+          voiceNoteUrl: task.voiceNoteUrl || ''
+        }
+      }));
+      return;
+    }
+    
+    if (task.taskType === 'screenshot' && action === 'true') {
+      console.log('Dispatching show-image event directly');
+      window.dispatchEvent(new CustomEvent('show-image', {
+        detail: {
+          taskId: task.id,
+          taskName: task.name,
+          imageUrl: task.imageUrl || ''
+        }
+      }));
+      return;
+    }
+    
+    if (task.taskType === 'timer' && action === 'true') {
+      // For timer tasks, we need to update the status first
+      if (task.status !== 'in-progress') {
+        window.dispatchEvent(new CustomEvent('task-update', {
+          detail: {
+            taskId: task.id,
+            updates: { status: 'in-progress' }
+          }
+        }));
+      }
+      
+      // Then initialize the timer
+      window.dispatchEvent(new CustomEvent('timer:init', {
+        detail: {
+          taskName: task.name,
+          duration: task.duration || 1500
+        }
+      }));
+      console.log(`Initialized timer for task: ${task.id}`);
+      return;
+    }
+    
+    // Use the task action handler for any other actions
+    const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
+    handleTaskAction(e, action);
+  };
   
   // Format the created date
   const createdDate = new Date(task.createdAt);
@@ -63,7 +152,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   
   const statusIndicator = getStatusIndicator();
   
-  console.log("TaskContent rendering for task:", task.id, "onOpenTaskDialog available:", !!onOpenTaskDialog);
+  console.log("TaskContent rendering for task:", task.id, task.name, "type:", task.taskType, "onOpenTaskDialog available:", !!onOpenTaskDialog);
   
   return (
     <div className="p-4 relative">
@@ -100,7 +189,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
           handleLocalBlur={onBlur}
           handleLocalKeyDown={onKeyDown}
           preventPropagation={preventPropagation}
-          onOpenTaskDialog={onOpenTaskDialog} // Explicitly pass the dialog opener
+          onOpenTaskDialog={onOpenTaskDialog}
         />
       </div>
     </div>
