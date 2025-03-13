@@ -2,6 +2,7 @@
 import { useCallback } from "react";
 import { eventBus } from "@/lib/eventBus";
 import { TimerStateMetrics } from "@/types/metrics";
+import { TIMER_CONSTANTS } from "@/types/timer";
 
 interface TimerHandlersProps {
   taskName: string;
@@ -9,7 +10,7 @@ interface TimerHandlersProps {
   start: () => void;
   pause: () => void;
   reset: () => Promise<void>;
-  addTime: (minutes: number) => void;  // This signature must be consistent across the app
+  addTime: (minutes: number) => void;  // Consistent signature
   completeTimer: () => Promise<void>;
   playSound: () => void;
   onAddTime?: (minutes: number) => void;
@@ -53,9 +54,9 @@ export const useTimerHandlers = ({
     }
   }, [isRunning, pause, start]);
 
-  // Handle add time button click - now expecting minutes parameter
+  // Handle add time button click - explicitly accepting minutes parameter
   const handleAddTime = useCallback(
-    (minutes: number) => {
+    (minutes: number = TIMER_CONSTANTS.ADD_TIME_MINUTES) => {
       console.log(`Adding ${minutes} minutes to timer`);
       
       addTime(minutes);

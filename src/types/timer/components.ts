@@ -1,3 +1,4 @@
+
 import { TimerMetrics } from '../metrics';
 import type { Quote } from './models';
 
@@ -24,7 +25,7 @@ export interface TimerProps {
   duration: number;
   taskName: string;
   onComplete: (metrics: TimerMetrics) => void;
-  onAddTime: () => void;
+  onAddTime: (minutes: number) => void;
   onDurationChange?: (minutes: number) => void;
   favorites: Quote[];
   setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
@@ -57,7 +58,7 @@ export interface TimerBodyProps {
 }
 
 export interface TimerCircleProps {
-  size: 'normal' | 'large';
+  size?: 'normal' | 'large';
   isRunning: boolean;
   timeLeft: number;
   minutes: number;
@@ -71,14 +72,14 @@ export interface TimerControlsProps {
   isPaused?: boolean;
   onToggle: () => void;
   onComplete: () => void;
-  onAddTime?: () => void;
+  onAddTime?: (minutes: number) => void;
   showAddTime?: boolean;
   size?: 'normal' | 'large';
   toggleButtonA11yProps?: ButtonA11yProps;
   completeButtonA11yProps?: ButtonA11yProps;
   addTimeButtonA11yProps?: ButtonA11yProps;
   metrics?: TimerMetrics;
-  pauseTimeLeft?: number;
+  pauseTimeLeft?: number | null;
 }
 
 export interface MinutesInputProps {

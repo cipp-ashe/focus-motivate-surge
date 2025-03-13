@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, Plus, Check, Sparkles } from "lucide-react";
 import { TimerControlsProps } from "@/types/timer";
 import { memo } from "react";
+import { TIMER_CONSTANTS } from "@/types/timer";
 
 export const TimerControls = memo(({
   isRunning,
@@ -27,6 +28,12 @@ export const TimerControls = memo(({
   };
 
   console.log('TimerControls rendering:', { isRunning, isPaused, showAddTime });
+
+  const handleAddTimeClick = () => {
+    if (onAddTime) {
+      onAddTime(TIMER_CONSTANTS.ADD_TIME_MINUTES);
+    }
+  };
 
   return (
     <div className="space-y-4 flex flex-col items-center w-full">
@@ -70,13 +77,13 @@ export const TimerControls = memo(({
           </Button>
           {showAddTime && onAddTime && (
             <Button
-              onClick={onAddTime}
+              onClick={handleAddTimeClick}
               variant="outline"
               className={`border-primary/20 hover:bg-primary/10 ${buttonSize} flex-1 shadow-sm transition-all font-medium`}
               {...addTimeButtonA11yProps}
             >
               <Plus className={`mr-2 ${iconSize}`} />
-              Add 5m
+              Add {TIMER_CONSTANTS.ADD_TIME_MINUTES}m
             </Button>
           )}
         </div>
