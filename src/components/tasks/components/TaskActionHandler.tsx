@@ -24,6 +24,25 @@ export const useTaskActionHandler = (
       }
     }
     
+    // Handle marking task as in-progress
+    if (e.currentTarget.getAttribute('data-action-type') === 'toggle-progress') {
+      const newStatus = task.status === 'in-progress' ? 'pending' : 'in-progress';
+      eventBus.emit('task:update', { 
+        taskId: task.id, 
+        updates: { status: newStatus } 
+      });
+      
+      toast.success(`${newStatus === 'in-progress' ? 'Started' : 'Paused'} task: ${task.name}`);
+      return;
+    }
+    
+    // Handle marking task as completed
+    if (e.currentTarget.getAttribute('data-action-type') === 'complete') {
+      eventBus.emit('task:complete', { taskId: task.id });
+      toast.success(`Completed task: ${task.name}`);
+      return;
+    }
+    
     switch(task.taskType) {
       case 'timer':
         eventManager.emit('timer:init', { 

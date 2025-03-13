@@ -1,6 +1,8 @@
-
 // Task type enum for type checking
 export type TaskType = 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote';
+
+// Task status to track progress
+export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'dismissed';
 
 export interface TaskMetrics {
   timeSpent?: number;
@@ -32,6 +34,7 @@ export interface Task {
   dismissedAt?: string; // New field to track when a task was dismissed
   clearReason?: 'manual' | 'completed' | 'dismissed'; // Added 'dismissed' as a reason
   taskType?: TaskType; // Using the TaskType enum
+  status?: TaskStatus; // New field to track task status
   relationships?: {
     habitId?: string;    // If this task was created from a habit
     templateId?: string; // The template that contains the habit

@@ -35,10 +35,16 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
         return state;
       }
       
-      console.log(`TaskContext: Added new task ${action.payload.id}:`, action.payload);
+      // Ensure new tasks have a default status
+      const newTask = {
+        ...action.payload,
+        status: action.payload.status || 'pending'
+      };
+      
+      console.log(`TaskContext: Added new task ${newTask.id}:`, newTask);
       return {
         ...state,
-        items: [...state.items, action.payload],
+        items: [...state.items, newTask],
       };
       
     case 'UPDATE_TASK':
@@ -108,6 +114,7 @@ export const taskReducer = (state: TaskContextState, action: TaskAction): TaskCo
         ...task,
         completed: true,
         completedAt: new Date().toISOString(),
+        status: 'completed',
         metrics: {
           ...task.metrics,
           ...action.payload.metrics,

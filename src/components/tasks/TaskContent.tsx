@@ -1,14 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Task } from "@/types/tasks";
-import { TaskHeader } from "./components/TaskHeader";
-import { TaskTags } from "./TaskTags";
-import { ScreenshotDialog } from './components/ScreenshotDialog';
-import { JournalDialog } from './components/JournalDialog';
-import { ChecklistDialog } from './components/ChecklistDialog';
-import { VoiceNoteDialog } from './components/VoiceNoteDialog';
-import { useInputDurationHandler } from '@/hooks/tasks/useInputDurationHandler';
-import { useTaskActionHandler } from './components/TaskActionHandler';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from "@/lib/utils";
+import { useTaskActionHandler } from "./components/TaskActionHandler";
+import { TaskActionButton } from "./components/TaskActionButton";
 
 interface TaskContentProps {
   task: Task;
@@ -22,7 +18,7 @@ interface TaskContentProps {
   preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
 }
 
-export const TaskContent = ({
+export const TaskContent: React.FC<TaskContentProps> = ({
   task,
   editingTaskId,
   inputValue,
@@ -32,103 +28,49 @@ export const TaskContent = ({
   onBlur,
   onKeyDown,
   preventPropagation,
-}: TaskContentProps) => {
-  const [isScreenshotDialogOpen, setIsScreenshotDialogOpen] = useState(false);
-  const [isJournalDialogOpen, setIsJournalDialogOpen] = useState(false);
-  const [isChecklistDialogOpen, setIsChecklistDialogOpen] = useState(false);
-  const [isVoiceNoteDialogOpen, setIsVoiceNoteDialogOpen] = useState(false);
+}) => {
+  const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
+  const { handleTaskAction } = useTaskActionHandler(task);
   
-  // Use the input duration handler
-  const { 
-    localInputValue, 
-    handleLocalChange, 
-    handleLocalBlur, 
-    handleLocalKeyDown 
-  } = useInputDurationHandler({
-    editingTaskId,
-    taskId: task.id,
-    inputValue,
-    onChange,
-    onBlur,
-    onKeyDown
-  });
-
-  // Use the task action handler with dialog open callbacks
-  const { handleTaskAction, handleDelete } = useTaskActionHandler(
-    task, 
-    () => {
-      switch(task.taskType) {
-        case 'screenshot':
-          setIsScreenshotDialogOpen(true);
-          break;
-        case 'journal':
-          setIsJournalDialogOpen(true);
-          break;
-        case 'checklist':
-          setIsChecklistDialogOpen(true);
-          break;
-        case 'voicenote':
-          setIsVoiceNoteDialogOpen(true);
-          break;
-      }
-    }
-  );
-
+  // Format the created date
+  const createdDate = new Date(task.createdAt);
+  const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true });
+  
   return (
-    <>
-      <div className="flex flex-col gap-2 p-4">
-        <TaskHeader 
+    <div className="p-4 relative">
+      <div className="flex items-start justify-between gap-x-2">
+        <div className="min-w-0 flex-1">
+          <h3 className={cn(
+            "text-base font-medium leading-6 text-primary",
+            task.status === 'in-progress' && "text-amber-600"
+          )}>
+            {task.name}
+            
+            {/* Status indicator */}
+            {task.status === 'in-progress' && (
+              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                In Progress
+              </span>
+            )}
+          </h3>
+          
+          <p className="mt-1 truncate text-sm text-muted-foreground">
+            {task.description || `Created ${timeAgo}`}
+          </p>
+        </div>
+        
+        <TaskActionButton
           task={task}
           editingTaskId={editingTaskId}
-          inputValue={localInputValue}
-          onDelete={handleDelete}
+          inputValue={inputValue}
+          durationInMinutes={durationInMinutes}
           onTaskAction={handleTaskAction}
-          handleLocalChange={handleLocalChange}
-          handleLocalBlur={handleLocalBlur}
-          handleLocalKeyDown={handleLocalKeyDown}
+          handleLocalChange={onChange}
+          handleLocalBlur={onBlur}
+          handleLocalKeyDown={onKeyDown}
           preventPropagation={preventPropagation}
         />
-
-        {task.tags && (
-          <TaskTags 
-            tags={task.tags}
-            preventPropagation={preventPropagation}
-          />
-        )}
       </div>
-
-      {/* Task-specific dialogs */}
-      {task.taskType === 'screenshot' && (
-        <ScreenshotDialog
-          task={task}
-          isOpen={isScreenshotDialogOpen}
-          setIsOpen={setIsScreenshotDialogOpen}
-        />
-      )}
-      
-      {task.taskType === 'journal' && (
-        <JournalDialog
-          task={task}
-          isOpen={isJournalDialogOpen}
-          setIsOpen={setIsJournalDialogOpen}
-        />
-      )}
-      
-      {task.taskType === 'checklist' && (
-        <ChecklistDialog
-          task={task}
-          isOpen={isChecklistDialogOpen}
-          setIsOpen={setIsChecklistDialogOpen}
-        />
-      )}
-      
-      {task.taskType === 'voicenote' && (
-        <VoiceNoteDialog
-          task={task}
-          isOpen={isVoiceNoteDialogOpen}
-          setIsOpen={setIsVoiceNoteDialogOpen}
-        />
-      )}
-    </>
+    </div>
   );
 };

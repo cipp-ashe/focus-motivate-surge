@@ -4,7 +4,10 @@ import { Task } from "@/types/tasks";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap, Edit, Eye } from "lucide-react";
+import { 
+  Clock, BookOpen, ImageIcon, CheckSquare, Mic, Zap, Edit, Eye, 
+  PlayCircle, PauseCircle, CheckCircle 
+} from "lucide-react";
 
 interface TaskActionButtonProps {
   task: Task;
@@ -49,7 +52,50 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
     );
   }
   
-  return getStandardActionButton();
+  return (
+    <div className="flex items-center gap-2">
+      {getStandardActionButton()}
+      
+      {/* Progress toggle button */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onTaskAction}
+        className={`h-7 px-2 flex items-center gap-1 text-xs ${
+          task.status === 'in-progress' 
+            ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-500' 
+            : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-500'
+        }`}
+        data-action="true"
+        data-action-type="toggle-progress"
+      >
+        {task.status === 'in-progress' ? (
+          <>
+            <PauseCircle className="h-3.5 w-3.5" />
+            <span>Pause</span>
+          </>
+        ) : (
+          <>
+            <PlayCircle className="h-3.5 w-3.5" />
+            <span>Start</span>
+          </>
+        )}
+      </Button>
+      
+      {/* Complete button */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onTaskAction}
+        className="h-7 px-2 flex items-center gap-1 text-xs bg-green-500/10 hover:bg-green-500/20 text-green-500"
+        data-action="true"
+        data-action-type="complete"
+      >
+        <CheckCircle className="h-3.5 w-3.5" />
+        <span>Complete</span>
+      </Button>
+    </div>
+  );
 
   function getStandardActionButton() {
     if (task.taskType === 'timer') {
@@ -146,17 +192,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
       );
     }
     
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onTaskAction}
-        className="h-7 px-2 flex items-center gap-1 text-xs"
-        data-action="true"
-      >
-        <CheckSquare className="h-3.5 w-3.5 text-green-500" />
-        <span>Complete</span>
-      </Button>
-    );
+    // If there's a specific action type, we don't need a default button
+    return null;
   }
 };
