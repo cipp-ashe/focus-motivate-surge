@@ -53,12 +53,27 @@ export const deleteTaskOperations = {
           }
         }));
         
+        // Update task status to dismissed
+        taskStorage.updateTask(taskId, {
+          ...task,
+          status: 'dismissed',
+          dismissedAt: new Date().toISOString()
+        });
+        
+        // We need to also remove it from active storage or complete it
+        // This is the key fix - we need to also remove it from active tasks
+        taskStorage.removeTask(taskId);
+        
         // Show toast for dismissal
         if (!options.suppressToast) {
           toast.success(`Dismissed task: ${task.name}`);
         }
         
-        // We'll let the task:dismiss event handler actually remove the task
+        // Force UI refresh
+        setTimeout(() => {
+          window.dispatchEvent(new Event('force-task-update'));
+        }, 100);
+        
         return;
       }
       

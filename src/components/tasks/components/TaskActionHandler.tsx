@@ -3,13 +3,14 @@ import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
 import { toast } from 'sonner';
 import { useCallback } from 'react';
+import { completeTaskOperations } from '@/lib/operations/tasks/complete';
+import { deleteTaskOperations } from '@/lib/operations/tasks/delete';
 
 export const useTaskActionHandler = (
   task: Task,
   onOpenTaskDialog?: () => void
 ) => {
-  // This handler is now primarily focused on status changes and task completion,
-  // not for opening dialogs (handled directly in TaskContent)
+  // This handler is primarily focused on status changes and task completion
   const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     // Ensure proper event handling
     if (e && e.stopPropagation) {
@@ -31,27 +32,30 @@ export const useTaskActionHandler = (
       console.log(`Changing task ${task.id} status to: ${newStatus}`);
       
       if (newStatus === 'completed') {
-        // For completed status, use the task:complete event
-        eventBus.emit('task:complete', { taskId: task.id });
+        // For completed status, use completeTaskOperations to properly handle completion
+        completeTaskOperations.completeTask(task.id);
         toast.success(`Task ${task.name} marked as complete`);
       } else if (newStatus === 'dismissed') {
-        // For dismissed status, use the task:dismiss event if it's a habit task
+        // For dismissed status, use a specialized handler based on task type
         if (task.relationships?.habitId) {
-          eventBus.emit('task:dismiss', { 
-            taskId: task.id, 
+          // Habit-related tasks need special dismissal
+          deleteTaskOperations.deleteTask(task.id, {
+            isDismissal: true,
             habitId: task.relationships.habitId,
-            date: task.relationships.date || new Date().toDateString() 
+            date: task.relationships.date || new Date().toDateString(),
+            reason: 'dismissed'
           });
           toast.success(`Dismissed habit task: ${task.name}`);
         } else {
-          // For regular tasks, just mark as dismissed
+          // For regular tasks, mark as dismissed then complete it
           eventBus.emit('task:update', { 
             taskId: task.id, 
             updates: { status: 'dismissed', dismissedAt: new Date().toISOString() } 
           });
+          
           // Then move to completed
           setTimeout(() => {
-            eventBus.emit('task:complete', { taskId: task.id });
+            completeTaskOperations.completeTask(task.id);
           }, 100);
           toast.success(`Dismissed task: ${task.name}`);
         }
@@ -76,7 +80,7 @@ export const useTaskActionHandler = (
     
     // Handle regular task completion (only for non-special task types)
     if (action === 'true' && !task.taskType) {
-      eventBus.emit('task:complete', { taskId: task.id });
+      completeTaskOperations.completeTask(task.id);
       toast.success(`Completed task: ${task.name}`);
     }
   }, [task]);
@@ -86,17 +90,22 @@ export const useTaskActionHandler = (
     e.preventDefault();
     
     if (task.relationships?.habitId) {
-      eventBus.emit('task:dismiss', { 
-        taskId: task.id, 
+      // Use proper delete operation with dismissal flag for habit tasks
+      deleteTaskOperations.deleteTask(task.id, {
+        isDismissal: true,
         habitId: task.relationships.habitId,
-        date: task.relationships.date || new Date().toDateString() 
+        date: task.relationships.date || new Date().toDateString(),
+        reason: 'dismissed'
       });
       
       toast.success(`Dismissed habit task for today: ${task.name}`, {
         description: "You won't see this habit task today"
       });
     } else {
-      eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
+      // Use direct delete operation for regular tasks
+      deleteTaskOperations.deleteTask(task.id, {
+        reason: 'manual'
+      });
     }
   }, [task]);
 
