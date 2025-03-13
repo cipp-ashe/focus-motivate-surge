@@ -1,148 +1,86 @@
 
-import { useState, useEffect } from 'react';
-import { Task, TaskMetrics } from '@/types/tasks';
+import { useCallback } from 'react';
 import { toast } from 'sonner';
-import { eventManager } from '@/lib/events/EventManager';
-import { TimerStateMetrics } from '@/types/metrics';
+import { Task } from '@/types/tasks';
+import { taskStorage } from '@/lib/storage/taskStorage';
 
-const TASKS_STORAGE_KEY = 'taskList';
-const COMPLETED_TASKS_STORAGE_KEY = 'completedTasks';
-const CLEARED_TASKS_STORAGE_KEY = 'clearedTasks';
-
-const parseStoredTasks = (stored: string | null): Task[] => {
-  try {
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Error parsing stored tasks:', error);
-    return [];
-  }
-};
-
+/**
+ * Hook for task storage operations using the centralized taskStorage module
+ */
 export const useTaskStorage = () => {
-  const [items, setItems] = useState<Task[]>([]);
-  const [completed, setCompleted] = useState<Task[]>([]);
-  const [cleared, setCleared] = useState<Task[]>([]);
-  const [selected, setSelected] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadTasks = () => {
-      const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
-      const savedCompletedTasks = localStorage.getItem(COMPLETED_TASKS_STORAGE_KEY);
-      const savedClearedTasks = localStorage.getItem(CLEARED_TASKS_STORAGE_KEY);
+  const saveTasks = useCallback((tasks: Task[]) => {
+    try {
+      // Debug: Log tasks being saved
+      console.log("useTaskStorage: Saving tasks:", tasks);
       
-      setItems(parseStoredTasks(savedTasks));
-      setCompleted(parseStoredTasks(savedCompletedTasks));
-      setCleared(parseStoredTasks(savedClearedTasks));
-    };
-
-    loadTasks();
-
-    // Event handlers
-    const handleTaskCreate = (task: Task) => {
-      setItems(prev => {
-        if (prev.some(t => t.id === task.id)) {
-          return prev;
-        }
-        toast.success('Task added 📝');
-        return [...prev, task];
-      });
-    };
-
-    const handleTaskUpdate = ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) => {
-      setItems(prev => {
-        const newItems = prev.map(task =>
-          task.id === taskId ? { ...task, ...updates } : task
-        );
-        if (JSON.stringify(prev) !== JSON.stringify(newItems)) {
-          toast.success('Task updated ✏️');
-        }
-        return newItems;
-      });
-    };
-
-    const handleTaskDelete = ({ taskId, reason = 'manual' }: { taskId: string; reason?: Task['clearReason'] }) => {
-      setItems(prev => {
-        const taskToDelete = prev.find(t => t.id === taskId);
-        if (!taskToDelete) return prev;
-
-        if (reason === 'manual') {
-          const clearedTask = { ...taskToDelete, clearReason: reason };
-          setCleared(prevCleared => [...prevCleared, clearedTask]);
-          toast.success('Task cleared 🗑️');
-        }
-
-        return prev.filter(task => task.id !== taskId);
-      });
+      // Use the taskStorage module to save tasks
+      const result = taskStorage.saveTasks(tasks);
       
-      setCompleted(prev => prev.filter(task => task.id !== taskId));
-      setSelected(prev => prev === taskId ? null : prev);
-    };
+      if (result) {
+        window.dispatchEvent(new Event('tasksUpdated'));
+      } else {
+        console.error('Task storage operation failed');
+        toast.error('Failed to save tasks. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving tasks:', error);
+      toast.error('Failed to save tasks. Please try again.');
+    }
+  }, []);
 
-    const handleTaskSelect = (taskId: string | null) => {
-      setSelected(taskId);
-    };
+  const loadTasks = useCallback((): Task[] => {
+    try {
+      // Use the taskStorage module to load tasks
+      const tasks = taskStorage.loadTasks();
+      console.log("useTaskStorage: Loaded tasks:", tasks);
+      return tasks;
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      toast.error('Failed to load tasks. Please try again.');
+      return [];
+    }
+  }, []);
 
-    const handleTaskComplete = (payload: { taskId: string; metrics?: TaskMetrics | TimerStateMetrics }) => {
-      const { taskId, metrics } = payload;
-      const task = items.find(t => t.id === taskId);
-      if (!task) return;
+  /**
+   * Add a single task to storage
+   */
+  const addTask = useCallback((task: Task): boolean => {
+    try {
+      // Use the taskStorage module to add a task
+      const result = taskStorage.addTask(task);
+      
+      if (result) {
+        window.dispatchEvent(new Event('tasksUpdated'));
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error adding task:', error);
+      toast.error('Failed to add task. Please try again.');
+      return false;
+    }
+  }, []);
 
-      // Ensure favoriteQuotes is properly formatted
-      const safeMetrics = metrics ? {
-        ...metrics,
-        favoriteQuotes: Array.isArray(metrics.favoriteQuotes) 
-          ? metrics.favoriteQuotes 
-          : (metrics.favoriteQuotes ? [`${metrics.favoriteQuotes}`] : [])
-      } : {};
+  /**
+   * Load completed tasks from storage
+   */
+  const loadCompletedTasks = useCallback((): Task[] => {
+    try {
+      const tasks = taskStorage.loadCompletedTasks();
+      console.log("useTaskStorage: Loaded completed tasks:", tasks);
+      return tasks;
+    } catch (error) {
+      console.error('Error loading completed tasks:', error);
+      toast.error('Failed to load completed tasks. Please try again.');
+      return [];
+    }
+  }, []);
 
-      const completedTask: Task = {
-        ...task,
-        completed: true,
-        completedAt: new Date().toISOString(),
-        metrics: safeMetrics as TaskMetrics,
-        clearReason: 'completed'
-      };
-
-      setCompleted(prev => [...prev, completedTask]);
-      setItems(prev => prev.filter(t => t.id !== taskId));
-      setSelected(prev => prev === taskId ? null : prev);
-      toast.success('Task completed 🎯');
-    };
-
-    // Subscribe to events and store unsubscribe functions
-    const unsubCreate = eventManager.on('task:create', handleTaskCreate);
-    const unsubUpdate = eventManager.on('task:update', handleTaskUpdate);
-    const unsubDelete = eventManager.on('task:delete', handleTaskDelete);
-    const unsubSelect = eventManager.on('task:select', handleTaskSelect);
-    const unsubComplete = eventManager.on('task:complete', handleTaskComplete);
-
-    // Cleanup subscriptions
-    return () => {
-      unsubCreate();
-      unsubUpdate();
-      unsubDelete();
-      unsubSelect();
-      unsubComplete();
-    };
-  }, []); 
-
-  // Persist changes to localStorage
-  useEffect(() => {
-    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
-
-  useEffect(() => {
-    localStorage.setItem(COMPLETED_TASKS_STORAGE_KEY, JSON.stringify(completed));
-  }, [completed]);
-
-  useEffect(() => {
-    localStorage.setItem(CLEARED_TASKS_STORAGE_KEY, JSON.stringify(cleared));
-  }, [cleared]);
-
-  return {
-    items,
-    completed,
-    cleared,
-    selected
+  return { 
+    saveTasks, 
+    loadTasks,
+    addTask,
+    loadCompletedTasks
   };
 };
