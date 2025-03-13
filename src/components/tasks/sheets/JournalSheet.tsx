@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Save, X } from 'lucide-react';
 import { eventBus } from '@/lib/eventBus';
@@ -48,7 +47,7 @@ export const JournalSheet: React.FC<JournalSheetProps> = ({
       });
       
       toast.success(`Saved journal entry for: ${currentTask.taskName}`);
-      onOpenChange(false);
+      onOpenChange(false);  // Close sheet after saving
     }
   };
 

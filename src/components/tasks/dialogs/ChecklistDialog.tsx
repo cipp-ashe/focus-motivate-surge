@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
@@ -33,7 +32,6 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
   const [newItemText, setNewItemText] = useState('');
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
 
-  // Set items when the current task changes
   React.useEffect(() => {
     if (currentTask) {
       setChecklistItems(Array.isArray(currentTask.items) ? currentTask.items : []);
@@ -102,7 +100,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="flex justify-between items-center">
           <DialogTitle>{currentTask?.taskName || 'Checklist'}</DialogTitle>
           <Button 
@@ -163,7 +161,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
         </div>
         
         <div className="mt-6 flex justify-end gap-2">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={saveChecklist} type="button">

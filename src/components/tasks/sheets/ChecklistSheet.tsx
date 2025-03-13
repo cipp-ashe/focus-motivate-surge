@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -81,21 +80,7 @@ export const ChecklistSheet: React.FC<ChecklistSheetProps> = ({
       });
       
       toast.success(`Saved checklist for: ${currentTask.taskName}`);
-      onOpenChange(false);
-    }
-  };
-
-  const handleSheetOpenChange = (open: boolean) => {
-    console.log('Checklist sheet open state changed:', open, 'current:', isOpen);
-    if (!open && isOpen) {
-      saveChecklist();
-    }
-    onOpenChange(open);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleAddItem();
+      onOpenChange(false);  // Close sheet after saving
     }
   };
 
@@ -104,10 +89,7 @@ export const ChecklistSheet: React.FC<ChecklistSheetProps> = ({
   };
 
   return (
-    <Sheet 
-      open={isOpen} 
-      onOpenChange={handleSheetOpenChange}
-    >
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="w-full md:max-w-md overflow-y-auto" side="right">
         <SheetHeader className="mb-4 flex justify-between items-center relative">
           <SheetTitle>{currentTask?.taskName || 'Checklist'}</SheetTitle>
