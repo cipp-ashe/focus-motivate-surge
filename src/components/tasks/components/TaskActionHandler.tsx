@@ -13,8 +13,11 @@ export const useTaskActionHandler = (
     e.stopPropagation();
     e.preventDefault();
     
+    const actionType = e.currentTarget.getAttribute('data-action-type');
+    console.log("Task action:", actionType, "for task:", task.id);
+    
     if (task.relationships?.habitId) {
-      if (e.currentTarget.getAttribute('data-action-type') === 'view-habit') {
+      if (actionType === 'view-habit') {
         if (task.relationships?.habitId) {
           window.location.href = `/habits?habitId=${task.relationships.habitId}`;
         } else {
@@ -24,8 +27,48 @@ export const useTaskActionHandler = (
       }
     }
     
-    // Handle marking task as in-progress
-    if (e.currentTarget.getAttribute('data-action-type') === 'toggle-progress') {
+    // Handle status changes via the dropdown
+    if (actionType?.startsWith('status-')) {
+      const newStatus = actionType.replace('status-', '') as 'pending' | 'in-progress' | 'completed' | 'dismissed';
+      
+      if (newStatus === 'completed') {
+        // For completed status, use the task:complete event
+        eventBus.emit('task:complete', { taskId: task.id });
+        toast.success(`Task ${task.name} marked as complete`);
+      } else if (newStatus === 'dismissed') {
+        // For dismissed status, use the task:dismiss event if it's a habit task
+        if (task.relationships?.habitId) {
+          eventBus.emit('task:dismiss', { 
+            taskId: task.id, 
+            habitId: task.relationships.habitId,
+            date: task.relationships.date || new Date().toDateString() 
+          });
+          toast.success(`Dismissed habit task: ${task.name}`);
+        } else {
+          // For regular tasks, just mark as dismissed
+          eventBus.emit('task:update', { 
+            taskId: task.id, 
+            updates: { status: 'dismissed', dismissedAt: new Date().toISOString() } 
+          });
+          // Then move to completed
+          setTimeout(() => {
+            eventBus.emit('task:complete', { taskId: task.id });
+          }, 100);
+          toast.success(`Dismissed task: ${task.name}`);
+        }
+      } else {
+        // For other statuses, just update the task
+        eventBus.emit('task:update', { 
+          taskId: task.id, 
+          updates: { status: newStatus } 
+        });
+        toast.success(`Task ${task.name} marked as ${newStatus.replace('-', ' ')}`);
+      }
+      return;
+    }
+    
+    // Legacy handling for toggle-progress action
+    if (actionType === 'toggle-progress') {
       // Toggle between pending and in-progress
       const newStatus = task.status === 'in-progress' ? 'pending' : 'in-progress';
       eventBus.emit('task:update', { 
@@ -37,13 +80,14 @@ export const useTaskActionHandler = (
       return;
     }
     
-    // Handle marking task as completed
-    if (e.currentTarget.getAttribute('data-action-type') === 'complete') {
+    // Legacy handling for complete action
+    if (actionType === 'complete') {
       eventBus.emit('task:complete', { taskId: task.id });
       toast.success(`Completed task: ${task.name}`);
       return;
     }
     
+    // Process specific task types
     switch(task.taskType) {
       case 'timer':
         // Set task to in-progress first
@@ -82,6 +126,7 @@ export const useTaskActionHandler = (
         
         // Then open the dialog if opener is provided
         if (onOpenTaskDialog) {
+          console.log("Opening journal dialog for task:", task.id);
           onOpenTaskDialog();
         } else {
           console.error('No dialog opener provided for journal task:', task.id);
@@ -102,6 +147,7 @@ export const useTaskActionHandler = (
         
         // Open the appropriate dialog
         if (onOpenTaskDialog) {
+          console.log(`Opening ${task.taskType} dialog for task:`, task.id);
           onOpenTaskDialog();
         } else {
           console.error(`No dialog opener provided for ${task.taskType} task:`, task.id);

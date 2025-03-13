@@ -40,13 +40,14 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     }
   }, [isOpen, task]);
 
-  // Also listen for open-journal events
+  // Listen for open-journal events
   useEffect(() => {
-    const handleOpenJournal = (event: CustomEvent) => {
+    const handleOpenJournal = (event: CustomEvent<{taskId: string, taskName: string, entry: string}>) => {
+      console.log("Journal Dialog received open-journal event:", event.detail);
       const { taskId, taskName, entry } = event.detail;
       
       if (taskId === task.id) {
-        console.log("Received open-journal event for task:", taskId);
+        console.log("Processing open-journal event for task:", taskId);
         setEditedName(taskName);
         setEditedJournalEntry(entry || '');
         setIsEditing(!entry);
@@ -54,10 +55,11 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
       }
     };
 
-    window.addEventListener('open-journal' as any, handleOpenJournal);
+    const listener = (e: Event) => handleOpenJournal(e as CustomEvent<{taskId: string, taskName: string, entry: string}>);
+    window.addEventListener('open-journal', listener);
     
     return () => {
-      window.removeEventListener('open-journal' as any, handleOpenJournal);
+      window.removeEventListener('open-journal', listener);
     };
   }, [task.id, setIsOpen]);
 
@@ -89,9 +91,14 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
     setIsEditing(false);
   };
 
+  // Prevent auto-closing when clicking inside editor
+  const handleDialogClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto" onClick={handleDialogClick}>
         <DialogHeader className="flex flex-col space-y-1.5 pb-2">
           {isEditing ? (
             <div className="space-y-2">

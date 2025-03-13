@@ -38,7 +38,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   const createdDate = new Date(task.createdAt);
   const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true });
   
-  // Get status color and text
+  // Get status indicator (for backward compatibility - now mostly handled by the dropdown)
   const getStatusIndicator = () => {
     if (task.status === 'in-progress') {
       return {
@@ -61,7 +61,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
           )}>
             {task.name}
             
-            {/* Status indicator */}
+            {/* Status indicator (legacy visualization) */}
             {statusIndicator && (
               <span className={statusIndicator.className}>
                 {statusIndicator.text}
