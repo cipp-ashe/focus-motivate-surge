@@ -1,10 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
 import { eventBus } from '@/lib/eventBus';
-import { TaskEventListener } from './TaskEventListener';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { TaskEventHandler } from './TaskEventHandler';
 
 interface TaskManagerProps {
@@ -17,77 +16,140 @@ interface TaskManagerProps {
   };
 }
 
-const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false, dialogOpeners }) => {
-  const { items, selected } = useTaskContext();
+const TaskManager: React.FC<TaskManagerProps> = ({
+  isTimerView = false,
+  dialogOpeners
+}) => {
+  const { items, completed } = useTaskContext();
+  const [tasks, setTasks] = useState<Task[]>(items);
+  const [completedTasks, setCompletedTasks] = useState<Task[]>(completed);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   
-  console.log("TaskManager: Rendering with dialogOpeners available:", !!dialogOpeners);
-  
-  const handleTaskAdd = (task: Task) => {
-    console.log("TaskManager: Adding task", task);
-    eventBus.emit('task:create', task);
+  // Initialize tasks from context
+  useEffect(() => {
+    setTasks(items);
+    setCompletedTasks(completed);
     
-    // For timer view, automatically select the new task
-    if (isTimerView) {
-      setTimeout(() => {
-        console.log("TaskManager: Auto-selecting newly created task in timer view", task.id);
-        eventBus.emit('task:select', task.id);
-      }, 100);
-    }
-  };
+    // Listen for task selection events
+    const handleTaskSelect = (taskId: string) => {
+      setSelectedTaskId(taskId);
+    };
+    
+    // Subscribe to events
+    eventBus.on('task:select', handleTaskSelect);
+    
+    // Cleanup
+    return () => {
+      eventBus.off('task:select', handleTaskSelect);
+    };
+  }, [items, completed]);
   
-  const handleTasksAdd = (tasks: Task[]) => {
-    console.log(`TaskManager: Adding ${tasks.length} tasks`);
-    tasks.forEach(task => {
-      eventBus.emit('task:create', task);
+  // Handle task creation
+  const handleTaskAdd = useCallback((task: Task) => {
+    setTasks(prev => {
+      // Check if task already exists
+      if (prev.some(t => t.id === task.id)) {
+        return prev;
+      }
+      return [...prev, task];
     });
-    
-    // For timer view, automatically select the first task
-    if (isTimerView && tasks.length > 0) {
-      setTimeout(() => {
-        console.log("TaskManager: Auto-selecting first of multiple tasks in timer view", tasks[0].id);
-        eventBus.emit('task:select', tasks[0].id);
-      }, 100);
-    }
-  };
+  }, []);
   
-  // Handle task updates from dialogs
-  const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
-    console.log("TaskManager: Updating task", data.taskId, data.updates);
-    eventBus.emit('task:update', data);
-  };
-
-  // TaskEventHandler props
-  const handleTaskCreate = (task: Task) => {
-    console.log("TaskEventHandler: Task create", task);
-  };
-
-  const handleTaskDelete = (data: { taskId: string }) => {
-    console.log("TaskEventHandler: Task delete", data);
-  };
-
-  const handleForceUpdate = () => {
-    console.log("TaskEventHandler: Force update");
-  };
+  // Handle multiple tasks addition
+  const handleTasksAdd = useCallback((newTasks: Task[]) => {
+    setTasks(prev => {
+      const uniqueTasks = newTasks.filter(task => 
+        !prev.some(t => t.id === task.id)
+      );
+      return [...prev, ...uniqueTasks];
+    });
+  }, []);
+  
+  // Handle task update events
+  const handleTaskUpdate = useCallback((data: { taskId: string, updates: Partial<Task> }) => {
+    const { taskId, updates } = data;
+    
+    // Check if task should move to completed
+    if (updates.status === 'completed' || updates.completed) {
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      
+      // Find the task to be moved
+      const taskToComplete = tasks.find(task => task.id === taskId);
+      
+      if (taskToComplete) {
+        const completedTask = { 
+          ...taskToComplete, 
+          ...updates, 
+          completed: true,
+          completedAt: updates.completedAt || new Date().toISOString()
+        };
+        
+        setCompletedTasks(prev => [...prev, completedTask]);
+      }
+      return;
+    }
+    
+    // Check if task should move to dismissed
+    if (updates.status === 'dismissed') {
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      
+      // Find the task to be dismissed
+      const taskToDismiss = tasks.find(task => task.id === taskId);
+      
+      if (taskToDismiss) {
+        const dismissedTask = { 
+          ...taskToDismiss, 
+          ...updates, 
+          dismissedAt: updates.dismissedAt || new Date().toISOString()
+        };
+        
+        setCompletedTasks(prev => [...prev, dismissedTask]);
+      }
+      return;
+    }
+    
+    // Regular update
+    setTasks(prev => 
+      prev.map(task => 
+        task.id === taskId ? { ...task, ...updates } : task
+      )
+    );
+  }, [tasks]);
+  
+  // Handle task deletion
+  const handleTaskDelete = useCallback((data: { taskId: string }) => {
+    const { taskId } = data;
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+    setSelectedTaskId(prev => prev === taskId ? null : prev);
+  }, []);
+  
+  // Force refresh of task data
+  const forceUpdate = useCallback(() => {
+    console.log("TaskManager: Force update called, refreshing tasks from context");
+    setTasks([...items]);
+    setCompletedTasks([...completed]);
+  }, [items, completed]);
   
   return (
-    <>
+    <div className="space-y-4">
+      <TaskEventHandler
+        tasks={tasks}
+        onTaskCreate={handleTaskAdd}
+        onTaskUpdate={handleTaskUpdate}
+        onTaskDelete={handleTaskDelete}
+        onForceUpdate={forceUpdate}
+      />
+      
       <TaskManagerContent
-        tasks={items}
-        selectedTaskId={selected}
+        tasks={tasks}
+        completedTasks={completedTasks}
+        selectedTaskId={selectedTaskId}
         onTaskAdd={handleTaskAdd}
         onTasksAdd={handleTasksAdd}
         isTimerView={isTimerView}
         dialogOpeners={dialogOpeners}
       />
-      
-      <TaskEventHandler 
-        tasks={items}
-        onTaskCreate={handleTaskCreate}
-        onTaskUpdate={handleTaskUpdate}
-        onTaskDelete={handleTaskDelete}
-        onForceUpdate={handleForceUpdate}
-      />
-    </>
+    </div>
   );
 };
 

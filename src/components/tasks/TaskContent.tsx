@@ -2,7 +2,6 @@
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckIcon, TimerIcon, ImageIcon, PencilIcon, ClipboardListIcon, MicIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { StatusDropdownMenu } from './components/buttons/StatusDropdownMenu';
 import { eventBus } from '@/lib/eventBus';
@@ -12,6 +11,7 @@ import { TimerButton } from './components/buttons/TimerButton';
 import { ScreenshotButton } from './components/buttons/ScreenshotButton';
 import { VoiceNoteButton } from './components/buttons/VoiceNoteButton';
 import { TaskActionButton } from './components/TaskActionButton';
+import { TaskIcon } from './components/TaskIcon';
 
 interface TaskContentProps {
   task: Task;
@@ -199,12 +199,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       <CardContent className="p-3 flex items-center justify-between">
         <div className="flex items-center gap-3 flex-grow min-w-0">
           <div className="flex-shrink-0">
-            {task.taskType === 'timer' && <TimerIcon className="h-5 w-5 text-blue-500" />}
-            {task.taskType === 'screenshot' && <ImageIcon className="h-5 w-5 text-purple-500" />}
-            {task.taskType === 'journal' && <PencilIcon className="h-5 w-5 text-green-500" />}
-            {task.taskType === 'checklist' && <ClipboardListIcon className="h-5 w-5 text-amber-500" />}
-            {task.taskType === 'voicenote' && <MicIcon className="h-5 w-5 text-red-500" />}
-            {(!task.taskType || task.taskType === 'regular') && <CheckIcon className="h-5 w-5 text-gray-500" />}
+            <TaskIcon taskType={task.taskType} className="h-5 w-5" />
           </div>
           
           <div className="truncate">

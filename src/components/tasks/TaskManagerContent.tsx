@@ -10,9 +10,11 @@ import { TaskTypeTab } from './tabs/TaskTypeTab';
 import { TaskTabsList } from './tabs/TaskTabsList';
 import { TimerView } from './TimerView';
 import { eventBus } from '@/lib/eventBus';
+import { CompletedTasks } from './CompletedTasks';
 
 interface TaskManagerContentProps {
   tasks: Task[];
+  completedTasks: Task[];
   selectedTaskId: string | null;
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
@@ -27,6 +29,7 @@ interface TaskManagerContentProps {
 
 export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
   tasks,
+  completedTasks,
   selectedTaskId,
   onTaskAdd,
   onTasksAdd,
@@ -120,26 +123,33 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
 
   // Mobile-optimized tabs for task types
   return (
-    <div className="flex flex-col h-full bg-background rounded-xl overflow-hidden shadow-sm border border-border/30">
-      <div className={`${isMobile ? 'px-0 pt-0' : 'p-0'}`}>
-        <TaskInput 
-          onTaskAdd={handleTaskAdd} 
-          onTasksAdd={handleTasksAdd}
-        />
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <Tabs defaultValue="all" className="h-full flex flex-col">
-          <TaskTabsList taskCounts={taskCounts} />
+    <div className="flex flex-col space-y-4">
+      <div className="flex flex-col h-full bg-background rounded-xl overflow-hidden shadow-sm border border-border/30">
+        <div className={`${isMobile ? 'px-0 pt-0' : 'p-0'}`}>
+          <TaskInput 
+            onTaskAdd={handleTaskAdd} 
+            onTasksAdd={handleTasksAdd}
+          />
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <Tabs defaultValue="all" className="h-full flex flex-col">
+            <TaskTabsList taskCounts={taskCounts} />
 
-          <TaskTypeTab value="all" tasks={allTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
-          <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
-          <TaskTypeTab value="timer" tasks={timerTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
-          <TaskTypeTab value="journal" tasks={journalTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
-          <TaskTypeTab value="checklist" tasks={checklistTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
-          <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
-          <TaskTypeTab value="voicenote" tasks={voicenoteTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
-        </Tabs>
+            <TaskTypeTab value="all" tasks={allTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+            <TaskTypeTab value="regular" tasks={regularTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+            <TaskTypeTab value="timer" tasks={timerTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+            <TaskTypeTab value="journal" tasks={journalTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+            <TaskTypeTab value="checklist" tasks={checklistTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+            <TaskTypeTab value="screenshot" tasks={screenshotTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+            <TaskTypeTab value="voicenote" tasks={voicenoteTasks} selectedTaskId={selectedTaskId} dialogOpeners={dialogOpeners} />
+          </Tabs>
+        </div>
       </div>
+      
+      {/* Add the CompletedTasks component */}
+      {completedTasks.length > 0 && (
+        <CompletedTasks tasks={completedTasks} />
+      )}
     </div>
   );
 };

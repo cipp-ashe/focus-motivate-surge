@@ -52,6 +52,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   useEffect(() => {
     const handleForceUpdate = () => {
       if (isMountedRef.current) {
+        console.log('TaskEventHandler: Received force-task-update event');
         onForceUpdate();
       }
     };

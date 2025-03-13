@@ -70,6 +70,11 @@ export const useTaskActionHandler = (
           // Set suppressEvent to true to prevent event loops - UI will update via custom event
           updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressEvent: true });
         }
+        
+        // Always dispatch a UI refresh event
+        window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
+          detail: { taskId: task.id, changes: { status: newStatus } } 
+        }));
       } catch (error) {
         console.error('Error updating task status:', error);
         toast.error(`Failed to update task status: ${error instanceof Error ? error.message : 'Unknown error'}`);
