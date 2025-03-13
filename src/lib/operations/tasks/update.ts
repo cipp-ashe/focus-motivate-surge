@@ -39,7 +39,7 @@ export const updateTaskOperations = {
         return;
       }
       
-      // Skip status update if status hasn't changed
+      // Skip status update if status hasn't changed - this is critical to prevent infinite loops
       if (updates.status && updates.status === currentTask.status) {
         console.log(`TaskOperations: Task ${taskId} already has status ${updates.status}, skipping update`);
         return;
@@ -78,8 +78,8 @@ export const updateTaskOperations = {
         toast.success(`Updated task: ${currentTask.name}`);
       }
       
-      // Dispatch a custom event for UI refresh
-      // This is the key fix: separating data events from UI events
+      // Dispatch a custom event for UI refresh - completely separate from data events
+      // Use a new custom event type to avoid confusion with the old ones
       window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
         detail: { taskId, changes: updates } 
       }));

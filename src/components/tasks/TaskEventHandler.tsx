@@ -63,7 +63,6 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   }, [onForceUpdate]);
   
   // Process task queue with staggered timing to prevent race conditions
-  // Make sure this doesn't run on every render and has proper cleanup
   useEffect(() => {
     // Avoid processing if already in progress or queue is empty
     if (processingRef.current || taskQueueRef.current.length === 0) return;
@@ -97,14 +96,12 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       taskQueueRef.current = [];
       
       // Force a UI update after all tasks are processed
-      let timeoutId = setTimeout(() => {
+      setTimeout(() => {
         if (isMountedRef.current) {
           window.dispatchEvent(new CustomEvent('task-ui-refresh'));
           processingRef.current = false;
         }
       }, finalDelay);
-      
-      return () => clearTimeout(timeoutId);
     };
     
     // Start processing with a small delay

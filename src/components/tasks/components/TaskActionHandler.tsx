@@ -67,7 +67,8 @@ export const useTaskActionHandler = (
           }
         } else {
           // For other statuses, use the update operations directly
-          updateTaskOperations.updateTask(task.id, { status: newStatus });
+          // Set suppressEvent to true to prevent event loops - UI will update via custom event
+          updateTaskOperations.updateTask(task.id, { status: newStatus }, { suppressEvent: true });
         }
       } catch (error) {
         console.error('Error updating task status:', error);
