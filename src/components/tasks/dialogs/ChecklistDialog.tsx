@@ -168,7 +168,10 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
             <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button onClick={() => saveChecklist()} type="button">
+            <Button 
+              onClick={saveChecklist}
+              type="button"
+            >
               <Save className="h-4 w-4 mr-2" /> Save Checklist
             </Button>
           </div>

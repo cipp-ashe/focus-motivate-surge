@@ -155,7 +155,10 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
                 <Button variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
-                <Button onClick={() => saveJournal()} type="button">
+                <Button 
+                  onClick={saveJournal} 
+                  type="button"
+                >
                   <Save className="h-4 w-4 mr-2" /> Save Journal Entry
                 </Button>
               </div>
