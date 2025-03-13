@@ -110,7 +110,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={handleClose} 
+            onClick={() => onOpenChange(false)} 
             className="absolute right-4 top-4"
           >
             <X className="h-4 w-4" />
@@ -166,7 +166,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
         
         <DialogFooter className="mt-6">
           <div className="flex justify-end gap-2 w-full">
-            <Button variant="outline" onClick={handleClose}>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button 

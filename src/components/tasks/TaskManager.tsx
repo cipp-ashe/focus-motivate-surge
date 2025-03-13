@@ -95,10 +95,10 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
     setShowVoiceRecorder(true);
   };
   
-  // Handle task updates from dialogs
-  const handleTaskUpdate = (taskId: string, updates: any) => {
-    console.log("TaskManager: Updating task", taskId, updates);
-    eventBus.emit('task:update', { taskId, updates });
+  // Handle task updates from dialogs - FIXED: adjusted to match the expected type
+  const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
+    console.log("TaskManager: Updating task", data.taskId, data.updates);
+    eventBus.emit('task:update', data);
   };
 
   // TaskEventHandler props
@@ -152,14 +152,17 @@ const TaskManager: React.FC<TaskManagerProps> = ({ isTimerView = false }) => {
         }}
       />
       
+      {/* FIXED: Changed props to match ChecklistDialog component interface */}
       <ChecklistDialog
         isOpen={showChecklist}
-        onOpenChange={setShowChecklist}
-        currentTask={checklistTaskId ? {
-          taskId: checklistTaskId,
-          taskName: checklistTaskName,
-          items: checklistItems
-        } : null}
+        setIsOpen={setShowChecklist}
+        task={{
+          id: checklistTaskId,
+          name: checklistTaskName,
+          checklistItems: checklistItems,
+          completed: false,
+          createdAt: new Date().toISOString()
+        }}
       />
       
       <ScreenshotDialog
