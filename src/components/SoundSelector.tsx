@@ -40,15 +40,15 @@ export const SoundSelector = memo(({
       </RadioGroup>
     </div>
     <Button
-      variant="outline"
+      variant="secondary"
       size="sm"
       onClick={onTestSound}
       className={cn(
-        "mt-3 mx-auto block border-primary/30 shadow-sm",
-        "bg-card/80 hover:bg-primary/5 backdrop-blur-sm",
-        "transition-all duration-200 focus:ring-2 focus:ring-primary/30",
+        "mt-3 mx-auto block",
+        "transition-all duration-200",
         "text-foreground/80 hover:text-foreground",
-        "w-32 h-9"
+        "w-32 h-9",
+        isLoadingAudio && "opacity-70"
       )}
       disabled={isLoadingAudio || selectedSound === "none"}
       aria-label={`Test ${selectedSound} sound`}
