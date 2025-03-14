@@ -13,7 +13,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, signInWithMagicLink, user } = useAuth();
   const navigate = useNavigate();
 
   // If user is already logged in, redirect to main page
@@ -69,6 +69,26 @@ const Auth = () => {
     }
   };
 
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast.error('Please enter your email');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await signInWithMagicLink(email);
+      if (!error) {
+        toast.success('Magic link sent! Check your email');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-md">
@@ -76,11 +96,43 @@ const Auth = () => {
           <CardTitle className="text-center">Focus Notes</CardTitle>
         </CardHeader>
         
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
+        <Tabs defaultValue="magic-link" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
+            <TabsTrigger value="signin">Password</TabsTrigger>
             <TabsTrigger value="signup">Create Account</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="magic-link">
+            <form onSubmit={handleMagicLink}>
+              <CardContent className="space-y-4 pt-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email-magic">Email</Label>
+                  <Input
+                    id="email-magic"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  We'll send you a magic link to your email. Click the link to sign in - no password needed!
+                </p>
+              </CardContent>
+              
+              <CardFooter>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Sending magic link...' : 'Send Magic Link'}
+                </Button>
+              </CardFooter>
+            </form>
+          </TabsContent>
           
           <TabsContent value="signin">
             <form onSubmit={handleSignIn}>
