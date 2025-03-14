@@ -59,7 +59,7 @@ export const TimerCompactView = memo(({
   setFavorites,
 }: TimerCompactViewProps) => {
   return (
-    <div className="p-8 space-y-8 animate-fade-in bg-card/70">
+    <div className="p-8 space-y-8 animate-fade-in bg-background/5 dark:bg-card/40 backdrop-blur-sm border border-border/10 shadow-sm rounded-lg transition-colors duration-300">
       <TimerHeader taskName={taskName} />
 
       <div className={cn(
@@ -102,7 +102,7 @@ export const TimerCompactView = memo(({
         <TimerControls {...timerControlsProps} />
       </div>
 
-      <div className="bg-card/30 rounded-lg p-4">
+      <div className="bg-muted/20 dark:bg-card/30 rounded-lg p-4 shadow-inner">
         <TimerMetricsDisplay
           metrics={metrics}
           isRunning={timerCircleProps.isRunning}

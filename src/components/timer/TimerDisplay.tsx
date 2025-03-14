@@ -26,8 +26,8 @@ export const TimerDisplay = memo(({
   return (
     <div 
       className={cn(
-        "rounded-full bg-card/50 shadow-lg transition-all duration-300",
-        isRunning ? "cursor-pointer hover:shadow-xl" : "",
+        "rounded-full bg-background/50 dark:bg-card/50 shadow-lg transition-all duration-300",
+        isRunning ? "cursor-pointer hover:shadow-xl shadow-glow" : "",
         size === "large" ? "p-8" : "p-6"
       )}
       onClick={handleClick}
