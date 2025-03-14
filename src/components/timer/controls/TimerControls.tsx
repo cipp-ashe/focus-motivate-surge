@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { PauseIcon, PlayIcon, CheckIcon, PlusIcon } from "lucide-react";
+import { PauseIcon, PlayIcon, CheckIcon, PlusIcon, AlarmClock } from "lucide-react";
 import type { TimerControlsProps, ButtonA11yProps } from "@/types/timer";
 import { logger } from "@/utils/logManager";
 import { cn } from "@/lib/utils";
@@ -85,6 +85,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
         onClick={handleCompleteClick}
         data-testid="timer-complete-button"
         {...completeButtonA11yProps}
+        aria-label="Complete timer"
       >
         <CheckIcon className={iconSize} />
       </Button>
@@ -100,6 +101,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
           onClick={() => onAddTime(5)}
           data-testid="timer-add-time-button"
           {...addTimeButtonA11yProps}
+          aria-label="Add 5 minutes"
         >
           <PlusIcon className={iconSize} />
         </Button>

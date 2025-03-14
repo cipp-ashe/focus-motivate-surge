@@ -9,7 +9,7 @@ import { QuoteDisplay } from "../../quotes/QuoteDisplay";
 import { Quote } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { NotesEditor } from "../../notes/NotesEditor";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, ClipboardList, BarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface TimerExpandedViewRef {
@@ -104,7 +104,8 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
               {/* Metrics Section */}
               <Card className="bg-card/90 backdrop-blur-md shadow-xl border-primary/20 overflow-hidden">
                 <div className="p-8 h-full">
-                  <h2 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                  <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                    <BarChart className="h-5 w-5 text-primary" />
                     Session Metrics
                   </h2>
                   <TimerMetricsDisplay
@@ -118,7 +119,8 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
             {/* Notes Section */}
             <Card className="bg-card/90 backdrop-blur-md shadow-xl border-primary/20 flex-1 min-h-[300px]">
               <div className="p-8 h-full flex flex-col">
-                <h2 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                  <ClipboardList className="h-5 w-5 text-primary" />
                   Quick Notes
                 </h2>
                 <div className="flex-1 bg-card/30 rounded-lg p-4">
@@ -132,6 +134,7 @@ export const TimerExpandedView = memo(forwardRef<TimerExpandedViewRef, TimerExpa
               className="fixed top-6 right-6 p-3 rounded-full bg-background/80 hover:bg-background/90 transition-colors shadow-md"
               variant="ghost"
               size="icon"
+              aria-label="Collapse timer view"
             >
               <Minimize2 className="h-5 w-5" />
               <span className="sr-only">Collapse timer view</span>

@@ -1,6 +1,8 @@
+
 import React, { ButtonHTMLAttributes } from "react";
 import { Button } from "../ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface MinutesButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   direction: "up" | "down";
@@ -34,7 +36,11 @@ export const MinutesButton = ({
       size="icon"
       onClick={handleClick}
       onTouchStart={handleTouch}
-      className={`border-primary/20 hover:bg-primary/20 touch-manipulation ${className}`}
+      className={cn(
+        "border-primary/20 hover:bg-primary/20 touch-manipulation",
+        disabled && "opacity-50 cursor-not-allowed",
+        className
+      )}
       disabled={disabled}
       {...props}
     >

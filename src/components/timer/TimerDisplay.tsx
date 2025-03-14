@@ -3,6 +3,7 @@ import { memo } from "react";
 import { TimerCircle } from "../timer/TimerCircle";
 import { TimerCircleProps } from "@/types/timer";
 import { cn } from "@/lib/utils";
+import { Clock } from "lucide-react";
 
 interface TimerDisplayProps {
   circleProps: Omit<TimerCircleProps, "size">;
@@ -34,6 +35,7 @@ export const TimerDisplay = memo(({
       onTouchEnd={handleClick}
       role="button"
       tabIndex={0}
+      aria-label={isRunning ? "Expand timer view" : "Timer display"}
     >
       <TimerCircle 
         size={size}

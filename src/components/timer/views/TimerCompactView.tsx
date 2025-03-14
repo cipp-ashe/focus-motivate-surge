@@ -11,6 +11,7 @@ import { SoundSelector } from "../../SoundSelector";
 import { Quote, SoundOption } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { cn } from "@/lib/utils";
+import { Clock, Volume2 } from "lucide-react";
 
 interface TimerCompactViewProps {
   taskName: string;
@@ -66,27 +67,35 @@ export const TimerCompactView = memo(({
         "transition-all duration-700",
         timerCircleProps.isRunning ? 'h-0 opacity-0 overflow-hidden' : 'h-auto opacity-100'
       )}>
-        <div className="grid gap-6 sm:grid-cols-2 items-start">
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground/80">Duration</h3>
-            <MinutesInput
-              minutes={Math.floor(timerCircleProps.minutes)}
-              onMinutesChange={onMinutesChange}
-              minMinutes={1}
-              maxMinutes={60}
-            />
-          </div>
+        <Card className="p-5 bg-card/40 backdrop-blur-sm border-border/20">
+          <div className="grid gap-6 sm:grid-cols-2 items-start">
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-foreground/80 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                <span>Duration</span>
+              </h3>
+              <MinutesInput
+                minutes={Math.floor(timerCircleProps.minutes)}
+                onMinutesChange={onMinutesChange}
+                minMinutes={1}
+                maxMinutes={60}
+              />
+            </div>
 
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground/80">Sound</h3>
-            <SoundSelector
-              selectedSound={selectedSound}
-              onSoundChange={onSoundChange}
-              onTestSound={onTestSound}
-              isLoadingAudio={isLoadingAudio}
-            />
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-foreground/80 flex items-center gap-2">
+                <Volume2 className="h-4 w-4 text-primary" />
+                <span>Sound</span>
+              </h3>
+              <SoundSelector
+                selectedSound={selectedSound}
+                onSoundChange={onSoundChange}
+                onTestSound={onTestSound}
+                isLoadingAudio={isLoadingAudio}
+              />
+            </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       <div className="flex items-center justify-center py-4">
