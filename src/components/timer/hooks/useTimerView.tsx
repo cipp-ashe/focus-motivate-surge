@@ -9,7 +9,7 @@ interface UseTimerViewProps {
   metrics: TimerStateMetrics;
   isExpanded: boolean;
   handleTimerToggle: () => void;
-  handleComplete: () => Promise<void>; // Updated type to match Promise<void>
+  handleComplete: () => Promise<void>; // Ensure this is Promise<void>
   handleAddTime: (minutes: number) => void;
   pauseTimeLeft: number | null;
 }
@@ -41,9 +41,8 @@ export const useTimerView = ({
       isRunning,
       onToggle: handleTimerToggle,
       onComplete: () => {
-        // Ensure we call handleComplete() without awaiting it here
-        // The return is a Promise<void> that can be handled by the caller if needed
-        handleComplete();
+        // Return the Promise from handleComplete
+        return handleComplete();
       },
       onAddTime: handleAddTime,
       showAddTime: true,
