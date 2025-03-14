@@ -1,6 +1,7 @@
 
 import { useEffect } from 'react';
 import { ActiveTemplate, HabitDetail } from './types';
+import { logger } from '@/utils/logManager';
 
 interface HabitDebugLoggerProps {
   templates: ActiveTemplate[];
@@ -13,8 +14,8 @@ const HabitDebugLogger: React.FC<HabitDebugLoggerProps> = ({
   todaysHabits 
 }) => {
   useEffect(() => {
-    console.log("HabitDebugLogger - Active templates:", templates);
-    console.log("HabitDebugLogger - Today's habits:", todaysHabits);
+    logger.debug("HabitDebugLogger", "Active templates:", templates);
+    logger.debug("HabitDebugLogger", "Today's habits:", todaysHabits);
   }, [templates, todaysHabits]);
   
   return null;

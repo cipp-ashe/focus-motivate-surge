@@ -1,6 +1,7 @@
 
 import { useEffect, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
+import { logger } from '@/utils/logManager';
 
 interface UseTimerMonitorProps {
   onComplete?: () => void;
@@ -30,7 +31,7 @@ export const useTimerMonitor = ({
   const lastTickTimeRef = useRef<number>(0);
 
   useEffect(() => {
-    console.log("Setting up timer monitor event listeners");
+    logger.debug('TimerMonitor', "Setting up timer monitor event listeners");
     
     // Update the handler to correctly process remaining or timeLeft values with throttling
     const handleTimerTick = (payload: { timeLeft?: number; remaining?: number; taskName?: string }) => {
@@ -48,11 +49,6 @@ export const useTimerMonitor = ({
           // Call both callbacks if provided
           if (onProgress) onProgress(timeLeft);
           if (onTick) onTick(timeLeft);
-          
-          // Log only occasionally to avoid console flood
-          if (now % 5000 < 1000) {
-            console.log(`Timer tick: ${timeLeft}s remaining for ${payload.taskName}`);
-          }
         }
       }
     };
@@ -65,7 +61,7 @@ export const useTimerMonitor = ({
       duration: number;
       currentTime?: number;
     }) => {
-      console.log(`Timer start event received for ${taskName} with duration ${duration}`);
+      logger.debug('TimerMonitor', `Timer start event received for ${taskName} with duration ${duration}`);
       timerInfoRef.current = {
         isActive: true,
         secondsLeft: duration,
@@ -77,7 +73,7 @@ export const useTimerMonitor = ({
     };
 
     const handleTimerPause = ({ timeLeft }: { taskName: string; timeLeft: number }) => {
-      console.log("Timer pause event received");
+      logger.debug('TimerMonitor', "Timer pause event received");
       timerInfoRef.current.isActive = false;
       
       // Update seconds left if provided
@@ -89,7 +85,7 @@ export const useTimerMonitor = ({
     };
 
     const handleTimerResume = ({ timeLeft }: { taskName: string; timeLeft: number }) => {
-      console.log("Timer resume event received");
+      logger.debug('TimerMonitor', "Timer resume event received");
       timerInfoRef.current.isActive = true;
       
       // Update seconds left if provided
@@ -101,7 +97,7 @@ export const useTimerMonitor = ({
     };
 
     const handleTimerComplete = () => {
-      console.log("Timer complete event received");
+      logger.debug('TimerMonitor', "Timer complete event received");
       timerInfoRef.current.isActive = false;
       timerInfoRef.current.secondsLeft = 0;
       if (onComplete) onComplete();
@@ -109,7 +105,7 @@ export const useTimerMonitor = ({
 
     // Handle timer reset event
     const handleTimerReset = ({ taskName, duration }: { taskName: string; duration?: number }) => {
-      console.log(`Timer reset event received for ${taskName} with duration ${duration}`);
+      logger.debug('TimerMonitor', `Timer reset event received for ${taskName}`);
       timerInfoRef.current = {
         isActive: false,
         secondsLeft: duration || timerInfoRef.current.totalSeconds,
@@ -126,10 +122,10 @@ export const useTimerMonitor = ({
     const unsubscribeComplete = eventManager.on('timer:complete', handleTimerComplete);
     const unsubscribeReset = eventManager.on('timer:reset', handleTimerReset);
 
-    console.log("Timer monitor event listeners set up");
+    logger.debug('TimerMonitor', "Timer monitor event listeners set up");
 
     return () => {
-      console.log("Cleaning up timer monitor event listeners");
+      logger.debug('TimerMonitor', "Cleaning up timer monitor event listeners");
       unsubscribeTick();
       unsubscribeStart();
       unsubscribePause();

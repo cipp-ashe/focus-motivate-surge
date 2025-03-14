@@ -2,6 +2,7 @@
 import { useEffect, RefObject, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { TimerExpandedViewRef } from '@/types/timer';
+import { logger } from '@/utils/logManager';
 
 interface UseTimerEventListenersProps {
   taskName: string;
@@ -16,8 +17,6 @@ export const useTimerEventListeners = ({
   setIsExpanded,
   expandedViewRef,
 }: UseTimerEventListenersProps) => {
-  // Maintain event IDs for debugging
-  const eventIdsRef = useRef<{[key: string]: string}>({});
   // Add a timer interval ref to clear on unmount
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   // Store time left for pause/resume functionality
@@ -31,23 +30,12 @@ export const useTimerEventListeners = ({
     // Only set up listeners if we have a task name
     if (!taskName) return;
     
-    console.log(`Setting up timer event listeners for task: ${taskName}`);
-    
-    // Generate unique IDs for each event listener for debugging
-    const initId = `timer:init:${taskName}:${Date.now()}`;
-    const expandId = `timer:expand:${taskName}:${Date.now()}`;
-    const collapseId = `timer:collapse:${taskName}:${Date.now()}`;
-    const startId = `timer:start:${taskName}:${Date.now()}`;
-    const pauseId = `timer:pause:${taskName}:${Date.now()}`;
-    const resumeId = `timer:resume:${taskName}:${Date.now()}`;
-    const tickId = `timer:tick:${taskName}:${Date.now()}`;
-    
-    eventIdsRef.current = { initId, expandId, collapseId, startId, pauseId, resumeId, tickId };
+    logger.debug('TimerEvents', `Setting up timer event listeners for task: ${taskName}`);
     
     // Handle timer initialization
     const unsubInit = eventManager.on('timer:init', (payload) => {
       if (payload.taskName === taskName) {
-        console.log(`Timer init for ${taskName} with duration: ${payload.duration} [${initId}]`);
+        logger.debug('TimerEvents', `Timer init for ${taskName} with duration: ${payload.duration}`);
         timeLeftRef.current = payload.duration;
         const minutes = Math.floor(payload.duration / 60);
         setInternalMinutes(minutes);
@@ -57,7 +45,7 @@ export const useTimerEventListeners = ({
     // Handle timer expand
     const unsubExpand = eventManager.on('timer:expand', (payload) => {
       if (payload.taskName === taskName) {
-        console.log(`Expanding timer for ${taskName} [${expandId}]`);
+        logger.debug('TimerEvents', `Expanding timer for ${taskName}`);
         setIsExpanded(true);
       }
     });
@@ -65,7 +53,7 @@ export const useTimerEventListeners = ({
     // Handle timer collapse
     const unsubCollapse = eventManager.on('timer:collapse', (payload) => {
       if (payload.taskName === taskName) {
-        console.log(`Collapsing timer for ${taskName} [${collapseId}]`);
+        logger.debug('TimerEvents', `Collapsing timer for ${taskName}`);
         setIsExpanded(false);
         if (payload.saveNotes && expandedViewRef.current) {
           expandedViewRef.current.saveNotes();
@@ -76,7 +64,7 @@ export const useTimerEventListeners = ({
     // Handle timer start - set up the interval for counting down
     const unsubStart = eventManager.on('timer:start', (payload) => {
       if (payload.taskName === taskName) {
-        console.log(`Starting timer for ${taskName} with duration: ${payload.duration} [${startId}]`);
+        logger.debug('TimerEvents', `Starting timer for ${taskName} with duration: ${payload.duration}`);
         
         // Clear any existing interval
         if (timerIntervalRef.current) {
@@ -97,7 +85,7 @@ export const useTimerEventListeners = ({
             
             // Add throttling to prevent excessive tick events
             const now = Date.now();
-            if (now - lastTickTimeRef.current > 500) { // Only emit at most every 500ms
+            if (now - lastTickTimeRef.current > 1000) { // Only emit at most every second
               lastTickTimeRef.current = now;
               
               // Emit tick event with the new time
@@ -125,7 +113,7 @@ export const useTimerEventListeners = ({
     // Handle timer pause - stop the interval
     const unsubPause = eventManager.on('timer:pause', (payload) => {
       if (payload.taskName === taskName) {
-        console.log(`Pausing timer for ${taskName} [${pauseId}], time left: ${timeLeftRef.current}`);
+        logger.debug('TimerEvents', `Pausing timer for ${taskName}, time left: ${timeLeftRef.current}`);
         
         isRunningRef.current = false;
         
@@ -136,7 +124,7 @@ export const useTimerEventListeners = ({
         
         // Emit a tick event to ensure UI updates (with throttling)
         const now = Date.now();
-        if (now - lastTickTimeRef.current > 500) {
+        if (now - lastTickTimeRef.current > 1000) {
           lastTickTimeRef.current = now;
           eventManager.emit('timer:tick', {
             taskName,
@@ -150,7 +138,7 @@ export const useTimerEventListeners = ({
     // Handle timer resume - restart the interval with the current time left
     const unsubResume = eventManager.on('timer:resume', (payload) => {
       if (payload.taskName === taskName) {
-        console.log(`Resuming timer for ${taskName} [${resumeId}], time left: ${timeLeftRef.current}`);
+        logger.debug('TimerEvents', `Resuming timer for ${taskName}, time left: ${timeLeftRef.current}`);
         
         isRunningRef.current = true;
         
@@ -161,7 +149,7 @@ export const useTimerEventListeners = ({
         
         // Emit a tick event to ensure UI updates (with throttling)
         const now = Date.now();
-        if (now - lastTickTimeRef.current > 500) {
+        if (now - lastTickTimeRef.current > 1000) {
           lastTickTimeRef.current = now;
           eventManager.emit('timer:tick', {
             taskName,
@@ -172,27 +160,15 @@ export const useTimerEventListeners = ({
       }
     });
     
-    // Handle timer tick - log tick events with throttling
-    const unsubTick = eventManager.on('timer:tick', (payload) => {
-      if (payload.taskName === taskName) {
-        // Only log a subset of ticks to avoid flooding the console
-        const now = Date.now();
-        if (now % 5000 < 1000) { // Log approximately 20% of ticks
-          console.log(`Timer tick for ${taskName}: ${payload.remaining || payload.timeLeft}s remaining [${tickId}]`);
-        }
-      }
-    });
-    
     // Clean up all listeners when the component unmounts or taskName changes
     return () => {
-      console.log(`Cleaning up timer event listeners for task: ${taskName}`, eventIdsRef.current);
+      logger.debug('TimerEvents', `Cleaning up timer event listeners for task: ${taskName}`);
       unsubInit();
       unsubExpand();
       unsubCollapse();
       unsubStart();
       unsubPause();
       unsubResume();
-      unsubTick();
       
       // Clear any active timer interval
       if (timerIntervalRef.current) {

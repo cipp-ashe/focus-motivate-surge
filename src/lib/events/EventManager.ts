@@ -1,7 +1,7 @@
-
 import mitt, { Emitter } from 'mitt';
 import { Note } from '@/types/notes';
 import { TimerEventType, TimerEventPayloads } from '@/types/events';
+import { logger } from '@/utils/logManager';
 
 // Define all possible events for the application
 // This should be synchronized with TimerEventPayloads in types/events.ts
@@ -38,7 +38,6 @@ type Events = {
   'note:format': { noteId: string; action: string };
   'note:format-complete': { noteId: string };
   'note:save': Note;
-  // Task events
   'task:create': any;
   'task:update': any;
   'task:delete': any;
@@ -51,12 +50,10 @@ type Events = {
   };
   'task:reload': any;
   'tasks:force-update': any;
-  // Task-related UI events
   'show-image': { taskId: string; imageUrl: string; taskName: string };
   'open-checklist': { taskId: string; taskName: string; items: any[] };
   'open-journal': { taskId: string; taskName: string; entry: string };
   'open-voice-recorder': { taskId: string; taskName: string };
-  // Habit events
   'habit:complete': { 
     habitId: string; 
     completed: boolean; 
@@ -79,12 +76,10 @@ type Events = {
   'habit:progress-update': any;
   'habit:task-deleted': any;
   'habit:select': string;
-  // Relationship events
   'relationship:create': any;
   'relationship:delete': any;
   'relationship:update': any;
   'relationship:batch-update': any;
-  // Tag events
   'tag:link': any;
   'tag:unlink': any;
   'tags:force-update': any;
@@ -92,16 +87,11 @@ type Events = {
   'tag:remove': any;
   'tag:create': any;
   'tag:delete': any;
-  // Quote events
   'quote:link-task': any;
-  // Journal events
   'journal:open': any;
-  // Page events
   'page:timer-ready': any;
-  // Habits check events
   'habits:check-pending': any;
   'habits:processed': any;
-  // Navigation events
   'nav:route-change': { from: string; to: string };
   'app:initialization-complete': any;
 };
@@ -115,30 +105,95 @@ export type EventPayloads = Events;
 
 class EventManager {
   private emitter: Emitter<Events>;
+  private static instanceCount: number = 0;
+  private id: number;
+  
+  // Map to prevent duplicate event registrations with same handler
+  private registeredHandlers: Map<string, Set<Function>> = new Map();
+  
+  // Keep track of listener counts per event type for debugging
+  private listenerCounts: Map<string, number> = new Map();
 
   constructor() {
     this.emitter = mitt<Events>();
+    this.id = ++EventManager.instanceCount;
+    logger.info('EventManager', `EventManager instance #${this.id} created`);
   }
 
   emit<K extends keyof Events>(event: K, payload: Events[K]) {
-    console.log(`Event emitted: ${String(event)}`, payload);
+    // Log the event with throttling for high-frequency events like timer:tick
+    const highFrequencyEvents = ['timer:tick'];
+    const throttleTime = highFrequencyEvents.includes(event as string) ? 1000 : 0;
+    
+    logger.logEvent('EventManager', event as string, payload, throttleTime);
+    
     this.emitter.emit(event, payload);
   }
 
   on<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void) {
-    console.log(`Event listener registered: ${String(event)}`);
+    // Create a unique key for this event+handler combination
+    const handlerKey = event as string;
+    
+    // Get or create the handler set for this event
+    if (!this.registeredHandlers.has(handlerKey)) {
+      this.registeredHandlers.set(handlerKey, new Set());
+      this.listenerCounts.set(handlerKey, 0);
+    }
+    
+    const handlers = this.registeredHandlers.get(handlerKey)!;
+    
+    // Skip if this exact handler is already registered to prevent duplicates
+    if (handlers.has(handler)) {
+      logger.warn('EventManager', `Duplicate handler registration for event: ${String(event)}`);
+      return () => this.off(event, handler);
+    }
+    
+    // Add the handler to our tracking set
+    handlers.add(handler);
+    
+    // Update listener count
+    const currentCount = this.listenerCounts.get(handlerKey) || 0;
+    this.listenerCounts.set(handlerKey, currentCount + 1);
+    
+    logger.debug('EventManager', `Event listener registered: ${String(event)} (total: ${currentCount + 1})`);
+    
     this.emitter.on(event, handler as any);
+    
     return () => this.off(event, handler);
   }
 
   off<K extends keyof Events>(event: K, handler?: (payload: Events[K]) => void) {
+    const handlerKey = event as string;
+    
+    if (handler && this.registeredHandlers.has(handlerKey)) {
+      const handlers = this.registeredHandlers.get(handlerKey)!;
+      if (handlers.has(handler)) {
+        handlers.delete(handler);
+        
+        // Update listener count
+        const currentCount = this.listenerCounts.get(handlerKey) || 0;
+        this.listenerCounts.set(handlerKey, Math.max(0, currentCount - 1));
+        
+        logger.debug('EventManager', `Event listener removed: ${String(event)} (total: ${Math.max(0, currentCount - 1)})`);
+      }
+    }
+    
     this.emitter.off(event, handler as any);
   }
 
-  // For testing purposes
+  // For testing and debugging purposes
   clear() {
     this.emitter.all.clear();
+    this.registeredHandlers.clear();
+    this.listenerCounts.clear();
+    logger.info('EventManager', 'All event listeners cleared');
+  }
+  
+  // Debugging method to get listener counts
+  getListenerCounts() {
+    return Object.fromEntries(this.listenerCounts.entries());
   }
 }
 
 export const eventManager = new EventManager();
+

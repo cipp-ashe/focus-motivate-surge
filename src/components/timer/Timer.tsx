@@ -8,6 +8,7 @@ import { TimerContent } from "./TimerContent";
 import { useTimerInitialization } from "./hooks/useTimerInitialization";
 import { TimerErrorBoundary } from "./TimerErrorBoundary";
 import { toISOString } from "@/lib/utils/dateUtils";
+import { logger } from "@/utils/logManager";
 
 export const Timer = ({
   duration,
@@ -18,7 +19,7 @@ export const Timer = ({
   favorites = [],
   setFavorites
 }: TimerProps) => {
-  console.log('Timer component rendering with:', {
+  logger.debug('Timer', 'Timer component rendering with:', {
     duration,
     taskName,
     isValid: Boolean(duration && taskName)
@@ -26,7 +27,7 @@ export const Timer = ({
 
   // Validate required props
   if (!duration || !taskName) {
-    console.error('Timer missing required props:', { duration, taskName });
+    logger.error('Timer', 'Timer missing required props:', { duration, taskName });
     return (
       <Card className="shadow-md border-border/20 overflow-hidden">
         <TimerError />
@@ -36,7 +37,7 @@ export const Timer = ({
 
   // Wrap onComplete to ensure it receives valid metrics
   const handleComplete = React.useCallback((metrics: any) => {
-    console.log("Timer: handleComplete with metrics:", metrics);
+    logger.debug('Timer', "Timer: handleComplete with metrics:", metrics);
     
     try {
       // Ensure we have valid metrics with all required fields
@@ -49,13 +50,13 @@ export const Timer = ({
         completionDate: toISOString(metrics.completionDate || new Date())
       };
       
-      console.log("Timer: Validated metrics:", validatedMetrics);
+      logger.debug('Timer', "Timer: Validated metrics:", validatedMetrics);
       
       if (onComplete) {
         onComplete(validatedMetrics);
       }
     } catch (error) {
-      console.error("Error in timer completion callback:", error);
+      logger.error('Timer', "Error in timer completion callback:", error);
       toast.error("Error completing timer");
     }
   }, [onComplete]);
