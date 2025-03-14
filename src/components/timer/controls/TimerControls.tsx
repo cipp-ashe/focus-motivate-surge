@@ -1,95 +1,84 @@
 
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, Plus, Check, Sparkles } from "lucide-react";
-import { TimerControlsProps } from "@/types/timer";
-import { memo } from "react";
-import { TIMER_CONSTANTS } from "@/types/timer";
+import { PauseIcon, PlayIcon, CheckIcon, PlusIcon } from "lucide-react";
+import type { TimerControlsProps, ButtonA11yProps } from "@/types/timer";
+import { logger } from "@/utils/logManager";
 
-export const TimerControls = memo(({
+export const TimerControls: React.FC<TimerControlsProps> = ({
   isRunning,
+  isPaused,
   onToggle,
   onComplete,
   onAddTime,
-  isPaused = false,
-  showAddTime = false,
+  showAddTime = true,
   size = "normal",
   toggleButtonA11yProps,
   completeButtonA11yProps,
   addTimeButtonA11yProps,
-  pauseTimeLeft = 0,
-}: TimerControlsProps) => {
-  const iconSize = size === "large" ? "h-5 w-5" : "h-4 w-4";
-  const buttonSize = size === "large" ? "px-6 py-3 text-lg" : "px-5 py-2.5";
+  metrics,
+  pauseTimeLeft,
+}) => {
+  logger.debug("TimerControls", `TimerControls rendering:`, {
+    isRunning,
+    isPaused,
+    showAddTime,
+  });
 
-  const formatPauseTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  const buttonSize = size === "large" ? "h-12 w-12" : "h-10 w-10";
+  const iconSize = size === "large" ? "h-6 w-6" : "h-5 w-5";
+  const gapSize = size === "large" ? "gap-4" : "gap-2";
 
-  console.log('TimerControls rendering:', { isRunning, isPaused, showAddTime });
-
-  const handleAddTimeClick = () => {
-    if (onAddTime) {
-      onAddTime(TIMER_CONSTANTS.ADD_TIME_MINUTES);
+  // Handle complete click ensuring Promise is properly handled
+  const handleCompleteClick = () => {
+    if (onComplete) {
+      // Call the Promise-returning function and handle any errors
+      onComplete().catch(error => {
+        console.error("Error completing timer:", error);
+      });
     }
   };
 
   return (
-    <div className="space-y-4 flex flex-col items-center w-full">
-      <div className="w-full flex justify-center">
+    <div className={`flex ${gapSize} items-center justify-center`}>
+      <Button
+        variant="outline"
+        size="icon"
+        className={`${buttonSize} rounded-full bg-card hover:bg-card/80 border-primary-foreground/20`}
+        onClick={onToggle}
+        data-testid="timer-toggle-button"
+        {...toggleButtonA11yProps}
+      >
+        {isRunning ? (
+          <PauseIcon className={iconSize} />
+        ) : (
+          <PlayIcon className={iconSize} />
+        )}
+      </Button>
+
+      <Button
+        variant="outline"
+        size="icon"
+        className={`${buttonSize} rounded-full bg-green-500 hover:bg-green-600 border-none text-white`}
+        onClick={handleCompleteClick}
+        data-testid="timer-complete-button"
+        {...completeButtonA11yProps}
+      >
+        <CheckIcon className={iconSize} />
+      </Button>
+
+      {showAddTime && onAddTime && (
         <Button
-          onClick={() => {
-            console.log('Timer control button clicked:', { isRunning, isPaused });
-            if (onToggle) onToggle();
-          }}
-          className={`bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary ${buttonSize} w-full relative z-10 shadow-md hover:shadow-lg transition-all`}
-          {...toggleButtonA11yProps}
+          variant="outline"
+          size="icon"
+          className={`${buttonSize} rounded-full bg-card hover:bg-card/80 border-primary-foreground/20`}
+          onClick={() => onAddTime(5)}
+          data-testid="timer-add-time-button"
+          {...addTimeButtonA11yProps}
         >
-          {isRunning ? (
-            <>
-              <Clock className={`mr-2 ${iconSize}`} />
-              Pause
-            </>
-          ) : (
-            <>
-              <Sparkles className={`mr-2 ${iconSize}`} />
-              {isPaused ? 'Resume' : 'Start'}
-              {isPaused && pauseTimeLeft > 0 && (
-                <span className="ml-2 text-sm text-foreground">
-                  ({formatPauseTime(pauseTimeLeft)})
-                </span>
-              )}
-            </>
-          )}
+          <PlusIcon className={iconSize} />
         </Button>
-      </div>
-      {(isRunning || isPaused) && (
-        <div className="w-full flex gap-3">
-          <Button
-            onClick={onComplete}
-            variant="outline"
-            className={`border-primary/20 hover:bg-primary/10 ${buttonSize} flex-1 shadow-sm transition-all font-medium`}
-            {...completeButtonA11yProps}
-          >
-            <Check className={`mr-2 ${iconSize}`} />
-            {showAddTime ? "Complete" : "Complete Early"}
-          </Button>
-          {showAddTime && onAddTime && (
-            <Button
-              onClick={handleAddTimeClick}
-              variant="outline"
-              className={`border-primary/20 hover:bg-primary/10 ${buttonSize} flex-1 shadow-sm transition-all font-medium`}
-              {...addTimeButtonA11yProps}
-            >
-              <Plus className={`mr-2 ${iconSize}`} />
-              Add {TIMER_CONSTANTS.ADD_TIME_MINUTES}m
-            </Button>
-          )}
-        </div>
       )}
     </div>
   );
-});
-
-TimerControls.displayName = 'TimerControls';
+};

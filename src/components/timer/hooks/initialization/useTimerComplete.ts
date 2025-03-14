@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -18,7 +19,7 @@ export const useTimerComplete = ({
   onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
 }) => {
   // Handle timer completion
-  const completeTimer = useCallback(async () => {
+  const completeTimer = useCallback(async (): Promise<void> => {
     try {
       // Ensure metrics has a completionDate as a string
       const finalMetrics = {
