@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { PauseIcon, PlayIcon, CheckIcon, PlusIcon, AlarmClock } from "lucide-react";
+import { PlayIcon, PauseIcon, CheckIcon, PlusIcon } from "lucide-react";
 import type { TimerControlsProps, ButtonA11yProps } from "@/types/timer";
 import { logger } from "@/utils/logManager";
 import { cn } from "@/lib/utils";
@@ -26,9 +26,9 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
     showAddTime,
   });
 
-  const buttonSize = size === "large" ? "h-12 w-12" : "h-10 w-10";
+  const buttonSize = size === "large" ? "h-14 w-14" : "h-12 w-12";
   const iconSize = size === "large" ? "h-6 w-6" : "h-5 w-5";
-  const gapSize = size === "large" ? "gap-4" : "gap-2";
+  const gapSize = size === "large" ? "gap-6" : "gap-4";
 
   // Handle complete click - ensuring we properly handle the Promise return type
   const handleCompleteClick = async () => {
@@ -46,11 +46,11 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
   // Toggle button styling based on state
   const getToggleButtonClasses = () => {
     if (isRunning) {
-      return "bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white";
+      return "bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white shadow-lg";
     } else if (isPaused) {
-      return "bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white";
+      return "bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white shadow-lg";
     } else {
-      return "bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white";
+      return "bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white shadow-lg";
     }
   };
 
@@ -64,7 +64,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
         size="icon"
         className={cn(
           buttonSize,
-          "rounded-full border-none transition-colors duration-300 shadow-sm",
+          "rounded-full border-none transition-colors duration-300",
           getToggleButtonClasses()
         )}
         onClick={onToggle}
@@ -80,7 +80,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
         size="icon"
         className={cn(
           buttonSize,
-          "rounded-full bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 border-none text-white transition-colors duration-300 shadow-sm"
+          "rounded-full bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 border-none text-white transition-colors duration-300 shadow-lg"
         )}
         onClick={handleCompleteClick}
         data-testid="timer-complete-button"
@@ -96,7 +96,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
           size="icon"
           className={cn(
             buttonSize,
-            "rounded-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 border-none text-white transition-colors duration-300 shadow-sm"
+            "rounded-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 border-none text-white transition-colors duration-300 shadow-lg"
           )}
           onClick={() => onAddTime(5)}
           data-testid="timer-add-time-button"

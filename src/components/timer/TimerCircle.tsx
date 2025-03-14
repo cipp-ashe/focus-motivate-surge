@@ -1,6 +1,7 @@
 
 import { memo, useEffect, useRef } from "react";
 import { TimerCircleProps } from "../../types/timer";
+import { cn } from "@/lib/utils";
 
 const prefersReducedMotion = typeof window !== 'undefined'
   ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -94,30 +95,40 @@ export const TimerCircle = memo(({
 
   return (
     <div 
-      className={`relative mx-auto ${sizeClasses} ${onClick ? 'cursor-pointer' : ''}`}
+      className={cn(
+        "relative mx-auto",
+        sizeClasses,
+        onClick && "cursor-pointer"
+      )}
       onClick={onClick}
       {...a11yProps}
     >
       <svg 
-        className={`timer-circle ${isRunning ? 'active' : ''}`} 
+        className={cn(
+          "timer-circle transform -rotate-90",
+          isRunning && "active"
+        )}
         viewBox="0 0 100 100"
         aria-hidden="true"
       >
+        {/* Background circle */}
         <circle
-          className="text-muted/20 stroke-current"
+          className="text-muted-foreground/10 dark:text-muted-foreground/5 stroke-current"
           strokeWidth="4"
           fill="transparent"
           r="45"
           cx="50"
           cy="50"
         />
+        {/* Progress circle */}
         <circle
           ref={progressRef}
-          className={`stroke-current ${
+          className={cn(
+            "stroke-current transition-colors",
             isRunning
-              ? 'text-primary filter drop-shadow-lg'
-              : 'text-primary/60'
-          }`}
+              ? "text-primary filter drop-shadow-lg"
+              : "text-primary/70"
+          )}
           strokeWidth="5"
           fill="transparent"
           r="45"
@@ -126,14 +137,17 @@ export const TimerCircle = memo(({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={circumference * ((minutes * 60 - timeLeft) / (minutes * 60))}
-          transform="rotate(-90 50 50)"
           style={prefersReducedMotion ? { transition: 'none' } : undefined}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span 
           ref={textRef}
-          className={`font-mono font-bold ${size === 'large' ? 'text-5xl sm:text-6xl' : 'text-3xl sm:text-4xl'}`}
+          className={cn(
+            "font-mono font-bold",
+            size === 'large' ? 'text-5xl sm:text-6xl' : 'text-3xl sm:text-4xl',
+            isRunning ? "text-foreground" : "text-foreground/90"
+          )}
           style={prefersReducedMotion ? { transition: 'none' } : undefined}
         >
           {formatTime(timeLeft)}

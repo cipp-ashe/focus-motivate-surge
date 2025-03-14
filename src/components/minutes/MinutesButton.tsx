@@ -37,7 +37,7 @@ export const MinutesButton = ({
       onClick={handleClick}
       onTouchStart={handleTouch}
       className={cn(
-        "border-primary/20 hover:bg-primary/20 touch-manipulation",
+        "h-9 w-9 border-primary/30 bg-card hover:bg-primary/10 touch-manipulation shadow-sm",
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}

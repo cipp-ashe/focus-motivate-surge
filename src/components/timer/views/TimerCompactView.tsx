@@ -1,6 +1,6 @@
 
 import { memo } from "react";
-import { Card } from "../../ui/card";
+import { Card, CardContent } from "../../ui/card";
 import { TimerHeader } from "../TimerHeader";
 import { TimerDisplay } from "../TimerDisplay";
 import { TimerControls } from "../controls/TimerControls";
@@ -12,6 +12,7 @@ import { Quote, SoundOption } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { cn } from "@/lib/utils";
 import { Clock, Volume2 } from "lucide-react";
+import { Separator } from "../../ui/separator";
 
 interface TimerCompactViewProps {
   taskName: string;
@@ -24,7 +25,7 @@ interface TimerCompactViewProps {
   timerControlsProps: {
     isRunning: boolean;
     onToggle: () => void;
-    onComplete: () => Promise<void>; // Updated to Promise<void>
+    onComplete: () => Promise<void>;
     onAddTime?: (minutes: number) => void;
     metrics: TimerStateMetrics;
     showAddTime: boolean;
@@ -60,45 +61,52 @@ export const TimerCompactView = memo(({
   setFavorites,
 }: TimerCompactViewProps) => {
   return (
-    <div className="p-8 space-y-8 animate-fade-in bg-background/5 dark:bg-card/40 backdrop-blur-sm border border-border/10 shadow-sm rounded-lg transition-colors duration-300">
-      <TimerHeader taskName={taskName} />
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 animate-fade-in">
+      {/* Task name header with gradient text */}
+      <div className="mb-8">
+        <TimerHeader taskName={taskName} />
+      </div>
 
+      {/* Timer settings area - only visible when timer isn't running */}
       <div className={cn(
-        "transition-all duration-700",
-        timerCircleProps.isRunning ? 'h-0 opacity-0 overflow-hidden' : 'h-auto opacity-100'
+        "transition-all duration-500 overflow-hidden mb-8",
+        timerCircleProps.isRunning ? 'h-0 opacity-0 max-h-0' : 'max-h-[600px] opacity-100'
       )}>
-        <Card className="p-5 bg-card/40 backdrop-blur-sm border-border/20">
-          <div className="grid gap-6 sm:grid-cols-2 items-start">
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground/80 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" />
-                <span>Duration</span>
-              </h3>
-              <MinutesInput
-                minutes={Math.floor(timerCircleProps.minutes)}
-                onMinutesChange={onMinutesChange}
-                minMinutes={1}
-                maxMinutes={60}
-              />
-            </div>
+        <Card className="bg-card/95 backdrop-blur-sm border-primary/20 shadow-md">
+          <CardContent className="p-5 sm:p-6">
+            <div className="grid gap-6 sm:grid-cols-2 items-start">
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground/80 flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary/80" />
+                  <span>Duration</span>
+                </h3>
+                <MinutesInput
+                  minutes={Math.floor(timerCircleProps.minutes)}
+                  onMinutesChange={onMinutesChange}
+                  minMinutes={1}
+                  maxMinutes={60}
+                />
+              </div>
 
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground/80 flex items-center gap-2">
-                <Volume2 className="h-4 w-4 text-primary" />
-                <span>Sound</span>
-              </h3>
-              <SoundSelector
-                selectedSound={selectedSound}
-                onSoundChange={onSoundChange}
-                onTestSound={onTestSound}
-                isLoadingAudio={isLoadingAudio}
-              />
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-foreground/80 flex items-center gap-2">
+                  <Volume2 className="h-4 w-4 text-primary/80" />
+                  <span>Sound</span>
+                </h3>
+                <SoundSelector
+                  selectedSound={selectedSound}
+                  onSoundChange={onSoundChange}
+                  onTestSound={onTestSound}
+                  isLoadingAudio={isLoadingAudio}
+                />
+              </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
 
-      <div className="flex items-center justify-center py-4">
+      {/* Timer display circle */}
+      <div className="flex items-center justify-center py-4 mb-6">
         <TimerDisplay
           circleProps={timerCircleProps}
           size="normal"
@@ -107,18 +115,24 @@ export const TimerCompactView = memo(({
         />
       </div>
 
-      <div className="max-w-md mx-auto w-full">
+      {/* Timer controls */}
+      <div className="max-w-md mx-auto w-full mb-8">
         <TimerControls {...timerControlsProps} />
       </div>
 
-      <div className="bg-muted/20 dark:bg-card/30 rounded-lg p-4 shadow-inner">
-        <TimerMetricsDisplay
-          metrics={metrics}
-          isRunning={timerCircleProps.isRunning}
-        />
-      </div>
+      {/* Metrics display */}
+      <Card className="bg-card/40 backdrop-blur-sm border-primary/10 mb-8">
+        <CardContent className="p-4 sm:p-5">
+          <TimerMetricsDisplay
+            metrics={metrics}
+            isRunning={timerCircleProps.isRunning}
+          />
+        </CardContent>
+      </Card>
 
-      <div className="pt-4 border-t border-border/10">
+      {/* Quote display */}
+      <Separator className="my-6 bg-primary/10" />
+      <div className="pt-2">
         <QuoteDisplay
           currentTask={taskName}
           onLike={onLike}
