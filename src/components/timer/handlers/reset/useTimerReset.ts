@@ -32,6 +32,8 @@ export const useTimerReset = ({
       taskName,
       duration: metrics.expectedTime
     });
+    
+    return Promise.resolve(); // Explicitly return a Promise
   }, [reset, setShowConfirmation, taskName, metrics.expectedTime]);
 
   // Handle confirmation dialog

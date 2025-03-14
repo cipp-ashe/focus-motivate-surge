@@ -51,12 +51,13 @@ interface UseAutoCompleteProps {
   playSound: () => void;
   metrics: TimerStateMetrics;
   completeTimer: () => Promise<void>;
-  onComplete?: (metrics: TimerStateMetrics) => void;
+  onComplete?: (metrics: TimerStateMetrics) => void; // Make onComplete optional here
   taskName: string;
   setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
   setShowCompletion: (show: boolean) => void;
 }
 
 export const useTimerAutoComplete = (props: UseAutoCompleteProps) => {
+  // Pass props through to useAutoComplete
   return useAutoComplete(props);
 };

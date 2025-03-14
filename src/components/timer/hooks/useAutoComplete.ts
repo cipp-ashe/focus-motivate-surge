@@ -20,7 +20,7 @@ export const useAutoComplete = ({
   playSound: () => void;
   metrics: TimerStateMetrics;
   completeTimer: () => Promise<void>;
-  onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
+  onComplete?: ((metrics: TimerStateMetrics) => void);  // Make onComplete optional
   taskName: string;
   setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
   setShowCompletion: (show: boolean) => void;
@@ -59,5 +59,7 @@ export const useAutoComplete = ({
     } else {
       toast.success(`Timer completed: ${taskName}`, { duration: 2000 });
     }
+
+    return Promise.resolve(); // Ensure we return a Promise
   }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName, setCompletionMetrics, setShowCompletion]);
 };

@@ -99,10 +99,13 @@ export const useTimerComplete = ({
       
       console.log("Timer completed with metrics:", calculatedMetrics);
       
+      return Promise.resolve(); // Explicitly return a Promise
+      
     } catch (error) {
       console.error("Error completing timer:", error);
       // Even in case of error, try to show completion
       setShowCompletion(true);
+      return Promise.reject(error); // Return rejected promise in case of error
     }
   }, [
     isRunning,
