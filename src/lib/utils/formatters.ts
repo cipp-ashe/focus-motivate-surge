@@ -29,23 +29,18 @@ export const formatTime = (seconds: number): string => {
 // Legacy formatDate that now uses our new utility (for backwards compatibility)
 export const formatDate = (dateString?: string): string => {
   if (!dateString) return '';
-  return formatDateHelper(dateString, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  return formatDateHelper(dateString, 'MMM d, HH:mm');
+};
+
+// Format date with localized display
+export const formatDateLocalized = (date: Date | string): string => {
+  return formatDateHelper(date, 'MMM d, yyyy');
 };
 
 // Legacy formatTimestamp that now uses our new utility (for backwards compatibility)
 export const formatTimestamp = (dateString: string): string => {
   try {
-    return formatDateHelper(dateString, {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatDateHelper(dateString, 'MMM d, HH:mm');
   } catch (error) {
     console.error('Error formatting timestamp:', error);
     return dateString;
