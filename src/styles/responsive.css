@@ -1,0 +1,16 @@
+
+/* Responsive layout adjustments */
+@media (min-width: 768px) {
+  .responsive-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Better mobile touch targets */
+@media (max-width: 640px) {
+  .touch-target {
+    @apply min-h-12 min-w-12 flex items-center justify-center;
+  }
+}
