@@ -37,7 +37,10 @@ export const MinutesButton = ({
       onClick={handleClick}
       onTouchStart={handleTouch}
       className={cn(
-        "h-9 w-9 border-primary/30 bg-card hover:bg-primary/10 touch-manipulation shadow-sm",
+        "h-9 w-9 border-primary/30 shadow-sm",
+        "bg-card/80 hover:bg-primary/5 backdrop-blur-sm",
+        "transition-all duration-200 focus:ring-2 focus:ring-primary/30",
+        "text-foreground/80 hover:text-foreground",
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}
@@ -45,9 +48,9 @@ export const MinutesButton = ({
       {...props}
     >
       {direction === "up" ? (
-        <ChevronUp className="h-4 w-4" />
+        <ChevronUp className="h-4 w-4 text-primary/70" />
       ) : (
-        <ChevronDown className="h-4 w-4" />
+        <ChevronDown className="h-4 w-4 text-primary/70" />
       )}
     </Button>
   );
