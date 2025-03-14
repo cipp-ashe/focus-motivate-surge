@@ -7,7 +7,7 @@ interface TimerCompletionProps {
   showConfirmation: boolean;
   setShowConfirmation: (show: boolean) => void;
   handleAddTimeAndContinue: () => void;
-  handleComplete: () => void;
+  handleComplete: () => Promise<void>; // Updated to Promise<void>
 }
 
 export const TimerCompletion = ({
@@ -16,6 +16,15 @@ export const TimerCompletion = ({
   handleAddTimeAndContinue,
   handleComplete,
 }: TimerCompletionProps) => {
+  // Handle the button click while properly managing the Promise
+  const onCompleteClick = async () => {
+    try {
+      await handleComplete();
+    } catch (error) {
+      console.error("Error completing timer:", error);
+    }
+  };
+
   return (
     <TimerCompletionDialog open={showConfirmation} onOpenChange={setShowConfirmation}>
       <TimerCompletionDialogContent>
@@ -34,7 +43,7 @@ export const TimerCompletion = ({
             Add 5 Minutes
           </Button>
           <Button
-            onClick={handleComplete}
+            onClick={onCompleteClick}
             className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-500 hover:from-purple-500 hover:to-primary"
           >
             Complete Task

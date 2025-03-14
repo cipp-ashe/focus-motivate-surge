@@ -26,7 +26,7 @@ interface MainTimerViewProps {
   showConfirmation: boolean;
   setShowConfirmation: (show: boolean) => void;
   handleAddTimeAndContinue: () => void;
-  handleComplete: () => void;
+  handleComplete: () => Promise<void>; // Updated to Promise<void>
 }
 
 export const MainTimerView = ({

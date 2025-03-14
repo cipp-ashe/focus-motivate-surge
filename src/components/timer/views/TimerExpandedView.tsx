@@ -27,8 +27,8 @@ interface TimerExpandedViewProps {
   timerControlsProps: {
     isRunning: boolean;
     onToggle: () => void;
-    onComplete: () => void;
-    onAddTime?: () => void;
+    onComplete: () => Promise<void>; // Updated to Promise<void>
+    onAddTime?: (minutes: number) => void;
     metrics: TimerStateMetrics;
     showAddTime: boolean;
     size: "large";

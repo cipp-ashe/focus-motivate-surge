@@ -74,7 +74,7 @@ export const useTimerInitialization = ({
   useTimerMonitoring({
     taskName,
     updateTimeLeft,
-    handleComplete: timerHandlers.handleComplete,
+    handleComplete: timerHandlers.handleComplete, // This now correctly returns Promise<void>
   });
 
   // Get view props
@@ -86,7 +86,7 @@ export const useTimerInitialization = ({
     isExpanded,
     pauseTimeLeft,
     handleToggle: timerHandlers.handleToggle,
-    handleComplete: timerHandlers.handleComplete,
+    handleComplete: timerHandlers.handleComplete, // This now correctly returns Promise<void>
     handleAddTime: timerHandlers.handleAddTime,
   });
 
@@ -96,7 +96,7 @@ export const useTimerInitialization = ({
     pause: pauseTimer,
     playSound,
     metrics,
-    completeTimer: timerHandlers.handleComplete,
+    completeTimer: timerHandlers.handleComplete, // This now correctly returns Promise<void>
     onComplete,
     taskName,
     setCompletionMetrics,
