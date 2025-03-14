@@ -1,9 +1,10 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Task } from '@/types/tasks';
+import { Task, TaskStatus } from '@/types/tasks';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
+import { User } from '@supabase/supabase-js';
 
 export const useTaskStorage = () => {
   const [items, setItems] = useState<Task[]>([]);
@@ -46,10 +47,14 @@ export const useTaskStorage = () => {
         
         if (completedError) throw completedError;
         
-        setItems(activeTasks || []);
-        setCompleted(completedTasks || []);
+        // Convert from DB format to app format
+        const formattedActiveTasks = activeTasks ? activeTasks.map(formatTaskFromDb) : [];
+        const formattedCompletedTasks = completedTasks ? completedTasks.map(formatTaskFromDb) : [];
         
-        console.log("Loaded tasks:", activeTasks?.length, "completed:", completedTasks?.length);
+        setItems(formattedActiveTasks);
+        setCompleted(formattedCompletedTasks);
+        
+        console.log("Loaded tasks:", formattedActiveTasks.length, "completed:", formattedCompletedTasks.length);
       } catch (error) {
         console.error('Error loading tasks:', error);
         toast.error('Failed to load tasks');
@@ -61,23 +66,69 @@ export const useTaskStorage = () => {
     loadTasks();
   }, [user]);
 
+  // Helper to format task from DB to app format
+  const formatTaskFromDb = (dbTask: any): Task => {
+    return {
+      id: dbTask.id,
+      name: dbTask.name,
+      description: dbTask.description || '',
+      completed: dbTask.completed || false,
+      completedAt: dbTask.completed_at || null,
+      dismissedAt: dbTask.dismissed_at || null,
+      createdAt: dbTask.created_at || new Date().toISOString(),
+      duration: dbTask.estimated_minutes ? dbTask.estimated_minutes * 60 : undefined,
+      taskType: dbTask.task_type as Task['taskType'] || 'regular',
+      status: dbTask.status as TaskStatus || 'pending',
+      tags: dbTask.tags || [],
+      metrics: dbTask.metrics ? JSON.parse(dbTask.metrics) : null,
+      relationships: dbTask.relationships ? JSON.parse(dbTask.relationships) : null
+    };
+  };
+
+  // Helper to format task from app to DB format
+  const formatTaskForDb = (task: Task) => {
+    return {
+      id: task.id,
+      user_id: user?.id,
+      name: task.name,
+      description: task.description,
+      completed: task.completed,
+      completed_at: task.completedAt,
+      dismissed_at: task.dismissedAt,
+      task_type: task.taskType,
+      status: task.status,
+      estimated_minutes: task.duration ? Math.floor(task.duration / 60) : null,
+      tags: task.tags || [],
+      metrics: task.metrics ? JSON.stringify(task.metrics) : null,
+      relationships: task.relationships ? JSON.stringify(task.relationships) : null
+    };
+  };
+
   // Add a task
-  const addTask = useCallback(async (task: Omit<Task, 'id' | 'user_id'>) => {
+  const addTask = useCallback(async (task: Omit<Task, 'id' | 'createdAt'>) => {
     if (!user) {
       toast.error('You must be logged in to add tasks');
       return false;
     }
     
     try {
+      const newTask = {
+        ...task,
+        createdAt: new Date().toISOString()
+      } as Task;
+      
+      const taskForDb = formatTaskForDb(newTask);
+      
       const { data, error } = await supabase
         .from('tasks')
-        .insert([{ ...task, user_id: user.id }])
+        .insert([taskForDb])
         .select()
         .single();
       
       if (error) throw error;
       
-      setItems(prev => [data, ...prev]);
+      const formattedTask = formatTaskFromDb(data);
+      setItems(prev => [formattedTask, ...prev]);
       window.dispatchEvent(new Event('tasksUpdated'));
       return true;
     } catch (error) {
@@ -92,9 +143,24 @@ export const useTaskStorage = () => {
     if (!user) return false;
     
     try {
+      // Convert app format updates to DB format
+      const dbUpdates: Record<string, any> = {};
+      
+      if (updates.name !== undefined) dbUpdates.name = updates.name;
+      if (updates.description !== undefined) dbUpdates.description = updates.description;
+      if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
+      if (updates.completedAt !== undefined) dbUpdates.completed_at = updates.completedAt;
+      if (updates.dismissedAt !== undefined) dbUpdates.dismissed_at = updates.dismissedAt;
+      if (updates.taskType !== undefined) dbUpdates.task_type = updates.taskType;
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.duration !== undefined) dbUpdates.estimated_minutes = Math.floor(updates.duration / 60);
+      if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+      if (updates.metrics !== undefined) dbUpdates.metrics = JSON.stringify(updates.metrics);
+      if (updates.relationships !== undefined) dbUpdates.relationships = JSON.stringify(updates.relationships);
+      
       const { error } = await supabase
         .from('tasks')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', taskId)
         .eq('user_id', user.id);
       
@@ -113,7 +179,7 @@ export const useTaskStorage = () => {
             const completedTask = { 
               ...taskToMove, 
               ...updates, 
-              completed_at: updates.completed_at || new Date().toISOString() 
+              completedAt: updates.completedAt || new Date().toISOString() 
             };
             
             setItems(prev => prev.filter(t => t.id !== taskId));
@@ -125,7 +191,7 @@ export const useTaskStorage = () => {
             const activeTask = { 
               ...taskToMove, 
               ...updates, 
-              completed_at: null 
+              completedAt: null 
             };
             
             setCompleted(prev => prev.filter(t => t.id !== taskId));
@@ -179,14 +245,21 @@ export const useTaskStorage = () => {
       
       const updates = {
         completed: true,
-        completed_at: new Date().toISOString(),
-        status: 'completed',
-        metrics: metrics ? JSON.stringify(metrics) : null
+        completedAt: new Date().toISOString(),
+        status: 'completed' as TaskStatus,
+        metrics: metrics || null
+      };
+      
+      const dbUpdates = {
+        completed: true,
+        completed_at: updates.completedAt,
+        status: updates.status,
+        metrics: updates.metrics ? JSON.stringify(updates.metrics) : null
       };
       
       const { error } = await supabase
         .from('tasks')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', taskId)
         .eq('user_id', user.id);
       
@@ -238,19 +311,14 @@ export const useTaskStorage = () => {
       toast.info('Migrating your tasks to your account...', { duration: 5000 });
       
       // Format tasks for database
-      const tasksToInsert = localTasks.map(task => ({
+      const tasksToInsert = localTasks.map(task => formatTaskForDb({
         ...task,
-        user_id: user.id,
-        completed: false,
-        estimated_minutes: task.duration ? Math.floor(task.duration / 60) : null
+        completed: false
       }));
       
-      const completedTasksToInsert = localCompletedTasks.map(task => ({
+      const completedTasksToInsert = localCompletedTasks.map(task => formatTaskForDb({
         ...task,
-        user_id: user.id,
-        completed: true,
-        completed_at: task.completedAt || new Date().toISOString(),
-        estimated_minutes: task.duration ? Math.floor(task.duration / 60) : null
+        completed: true
       }));
       
       // Insert in batches to avoid request size limits
@@ -286,8 +354,8 @@ export const useTaskStorage = () => {
         .eq('completed', true)
         .order('completed_at', { ascending: false });
       
-      setItems(activeTasks || []);
-      setCompleted(completedTasks || []);
+      setItems(activeTasks ? activeTasks.map(formatTaskFromDb) : []);
+      setCompleted(completedTasks ? completedTasks.map(formatTaskFromDb) : []);
       
       toast.success('Tasks migrated successfully!');
     } catch (error) {

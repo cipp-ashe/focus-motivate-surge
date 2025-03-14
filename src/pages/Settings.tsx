@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,9 +7,11 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
 import { ArrowRight, LogIn } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 const Settings = () => {
   const { user, isAuthenticated, signOut } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-3xl">
@@ -59,7 +62,6 @@ const Settings = () => {
         </CardFooter>
       </Card>
       
-      {/* Other settings cards can remain unchanged */}
       {/* Theme Settings */}
       <Card className="mb-6">
         <CardHeader>
@@ -76,8 +78,8 @@ const Settings = () => {
             </div>
             <Switch
               id="dark-mode"
-              checked={theme === 'dark'}
-              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              checked={isDark}
+              onCheckedChange={toggleTheme}
             />
           </div>
         </CardContent>

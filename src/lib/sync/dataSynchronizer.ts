@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Task } from '@/types/tasks';
 import { HabitDetail, ActiveTemplate } from '@/components/habits/types';
 import { toast } from 'sonner';
+import { User } from '@supabase/supabase-js';
 
 /**
  * Synchronize local tasks to Supabase
@@ -23,8 +24,7 @@ export const syncTasksToSupabase = async (userId: string): Promise<boolean> => {
       // Convert camelCase to snake_case for database compatibility
       completed_at: task.completedAt,
       dismissed_at: task.dismissedAt,
-      parent_task_id: task.parentId,
-      estimated_minutes: task.duration,
+      estimated_minutes: task.duration ? Math.floor(task.duration / 60) : null,
       metrics: task.metrics ? JSON.stringify(task.metrics) : null,
       relationships: task.relationships ? JSON.stringify(task.relationships) : null
     }));
@@ -178,10 +178,9 @@ export const getTaskData = async (userId: string | null): Promise<Task[]> => {
       createdAt: task.created_at,
       updatedAt: task.updated_at,
       taskType: task.task_type,
-      duration: task.estimated_minutes,
+      duration: task.estimated_minutes ? task.estimated_minutes * 60 : undefined,
       status: task.status,
       tags: task.tags || [],
-      parentId: task.parent_task_id,
       metrics: task.metrics ? JSON.parse(task.metrics) : null,
       relationships: task.relationships ? JSON.parse(task.relationships) : null
     }));
