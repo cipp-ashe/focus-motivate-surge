@@ -25,24 +25,35 @@ export const useTimerMonitor = ({
     taskName: '',
     totalSeconds: 0,
   });
+  
+  // Throttling refs to prevent excessive updates
+  const lastTickTimeRef = useRef<number>(0);
 
   useEffect(() => {
     console.log("Setting up timer monitor event listeners");
     
-    // Update the handler to correctly process remaining or timeLeft values
+    // Update the handler to correctly process remaining or timeLeft values with throttling
     const handleTimerTick = (payload: { timeLeft?: number; remaining?: number; taskName?: string }) => {
       // Use either timeLeft or remaining based on what's available
       const timeLeft = payload.timeLeft !== undefined ? payload.timeLeft : payload.remaining;
       
       if (timeLeft !== undefined) {
-        timerInfoRef.current.secondsLeft = timeLeft;
-        timerInfoRef.current.isActive = true; // Assume running when tick received
-        
-        // Call both callbacks if provided
-        if (onProgress) onProgress(timeLeft);
-        if (onTick) onTick(timeLeft);
-        
-        console.log(`Timer tick processed: ${timeLeft}s remaining`);
+        // Apply throttling to reduce excessive updates
+        const now = Date.now();
+        if (now - lastTickTimeRef.current > 500 || Math.abs(timerInfoRef.current.secondsLeft - timeLeft) > 5) {
+          lastTickTimeRef.current = now;
+          timerInfoRef.current.secondsLeft = timeLeft;
+          timerInfoRef.current.isActive = true; // Assume running when tick received
+          
+          // Call both callbacks if provided
+          if (onProgress) onProgress(timeLeft);
+          if (onTick) onTick(timeLeft);
+          
+          // Log only occasionally to avoid console flood
+          if (now % 5000 < 1000) {
+            console.log(`Timer tick: ${timeLeft}s remaining for ${payload.taskName}`);
+          }
+        }
       }
     };
 

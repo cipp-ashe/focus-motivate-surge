@@ -24,6 +24,8 @@ export const useTimerEventListeners = ({
   const timeLeftRef = useRef<number>(0);
   // Track if timer is currently running
   const isRunningRef = useRef<boolean>(false);
+  // Track last tick time to prevent recursive ticks
+  const lastTickTimeRef = useRef<number>(0);
 
   useEffect(() => {
     // Only set up listeners if we have a task name
@@ -93,12 +95,18 @@ export const useTimerEventListeners = ({
           if (isRunningRef.current && timeLeftRef.current > 0) {
             timeLeftRef.current -= 1;
             
-            // Emit tick event with the new time
-            eventManager.emit('timer:tick', {
-              taskName,
-              remaining: timeLeftRef.current,
-              timeLeft: timeLeftRef.current
-            });
+            // Add throttling to prevent excessive tick events
+            const now = Date.now();
+            if (now - lastTickTimeRef.current > 500) { // Only emit at most every 500ms
+              lastTickTimeRef.current = now;
+              
+              // Emit tick event with the new time
+              eventManager.emit('timer:tick', {
+                taskName,
+                remaining: timeLeftRef.current,
+                timeLeft: timeLeftRef.current
+              });
+            }
             
             // Check if timer is complete
             if (timeLeftRef.current <= 0) {
@@ -126,12 +134,16 @@ export const useTimerEventListeners = ({
           timeLeftRef.current = payload.timeLeft;
         }
         
-        // Emit a tick event to ensure UI updates
-        eventManager.emit('timer:tick', {
-          taskName,
-          remaining: timeLeftRef.current,
-          timeLeft: timeLeftRef.current
-        });
+        // Emit a tick event to ensure UI updates (with throttling)
+        const now = Date.now();
+        if (now - lastTickTimeRef.current > 500) {
+          lastTickTimeRef.current = now;
+          eventManager.emit('timer:tick', {
+            taskName,
+            remaining: timeLeftRef.current,
+            timeLeft: timeLeftRef.current
+          });
+        }
       }
     });
     
@@ -147,20 +159,27 @@ export const useTimerEventListeners = ({
           timeLeftRef.current = payload.timeLeft;
         }
         
-        // Emit a tick event to ensure UI updates
-        eventManager.emit('timer:tick', {
-          taskName,
-          remaining: timeLeftRef.current,
-          timeLeft: timeLeftRef.current
-        });
+        // Emit a tick event to ensure UI updates (with throttling)
+        const now = Date.now();
+        if (now - lastTickTimeRef.current > 500) {
+          lastTickTimeRef.current = now;
+          eventManager.emit('timer:tick', {
+            taskName,
+            remaining: timeLeftRef.current,
+            timeLeft: timeLeftRef.current
+          });
+        }
       }
     });
     
-    // Handle timer tick - log tick events (no need to handle as we're emitting them)
+    // Handle timer tick - log tick events with throttling
     const unsubTick = eventManager.on('timer:tick', (payload) => {
       if (payload.taskName === taskName) {
-        // Log but don't process as we're the emitter
-        console.log(`Timer tick for ${taskName}: ${payload.remaining || payload.timeLeft}s remaining [${tickId}]`);
+        // Only log a subset of ticks to avoid flooding the console
+        const now = Date.now();
+        if (now % 5000 < 1000) { // Log approximately 20% of ticks
+          console.log(`Timer tick for ${taskName}: ${payload.remaining || payload.timeLeft}s remaining [${tickId}]`);
+        }
       }
     });
     

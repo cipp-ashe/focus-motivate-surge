@@ -46,7 +46,7 @@ export const Timer = ({
         startTime: metrics.startTime || new Date(),
         endTime: metrics.endTime || new Date(),
         // Ensure completionDate is a properly formatted ISO string
-        completionDate: toISOString(metrics.completionDate)
+        completionDate: toISOString(metrics.completionDate || new Date())
       };
       
       console.log("Timer: Validated metrics:", validatedMetrics);
