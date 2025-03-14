@@ -1,3 +1,4 @@
+
 import { useTimerCore } from "./initialization/useTimerCore";
 import { useTimerEvents } from "./initialization/useTimerEvents";
 import { useTimerHandlers } from "./initialization/useTimerHandlers";
@@ -89,16 +90,14 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime,
   });
 
-  // Handle auto-completion - fixed to return Promise<void>
+  // Handle auto-completion
   const handleAutoComplete = useTimerAutoComplete({
     isRunning,
     pause: pauseTimer,
     playSound,
     metrics,
-    completeTimer: async () => {
-      // Explicitly return the Promise from handleComplete
-      return timerHandlers.handleComplete();
-    },
+    // Fixed: Pass the Promise-returning function directly
+    completeTimer: timerHandlers.handleComplete,
     onComplete,
     taskName,
     setCompletionMetrics,
