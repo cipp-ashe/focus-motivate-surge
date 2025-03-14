@@ -57,7 +57,7 @@ interface UseAutoCompleteProps {
   setShowCompletion: (show: boolean) => void;
 }
 
-export const useTimerAutoComplete = (props: UseAutoCompleteProps) => {
+export const useTimerAutoComplete = (props: UseAutoCompleteProps): (() => Promise<void>) => {
   // Pass props through to useAutoComplete
   return useAutoComplete(props);
 };

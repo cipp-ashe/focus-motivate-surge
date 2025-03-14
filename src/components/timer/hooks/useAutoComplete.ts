@@ -24,7 +24,7 @@ export const useAutoComplete = ({
   taskName: string;
   setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
   setShowCompletion: (show: boolean) => void;
-}): () => Promise<void> => { // Fixed the syntax error here - changed from { to =>
+}): () => Promise<void> => {
   return useCallback(async () => {
     if (isRunning) {
       pause();
