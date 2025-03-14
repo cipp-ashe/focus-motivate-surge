@@ -62,12 +62,14 @@ export const useAutoComplete = ({
       } else {
         toast.success(`Timer completed: ${taskName}`, { duration: 2000 });
       }
+      
+      // Explicitly return a resolved promise
+      return Promise.resolve();
     } catch (error) {
       console.error("Error completing timer:", error);
+      // Return a rejected promise for the error case
+      return Promise.reject(error);
     }
-    
-    // Explicitly return a Promise<void>
-    return Promise.resolve();
   }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName, setCompletionMetrics, setShowCompletion]);
   
   return handleComplete;

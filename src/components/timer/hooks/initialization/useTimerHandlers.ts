@@ -25,6 +25,16 @@ interface UseTimerHandlersProps {
   pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | null>;
 }
 
+interface TimerHandlers {
+  handleToggle: () => void;
+  handleAddTime: (minutes: number) => void;
+  handleReset: () => Promise<void>;
+  handleComplete: () => Promise<void>; // Ensure this is Promise<void>
+  handleClose: () => void;
+  showResetConfirmation: () => void;
+  handlePause: () => void;
+}
+
 export const useTimerHandlers = ({
   taskName,
   isRunning,
@@ -44,7 +54,7 @@ export const useTimerHandlers = ({
   updateMetrics,
   setPauseTimeLeft,
   pauseTimerRef,
-}: UseTimerHandlersProps) => {
+}: UseTimerHandlersProps): TimerHandlers => {
   // Use the timer completion hook
   const { completeTimer: timerComplete } = useTimerComplete({
     taskName,
@@ -62,7 +72,7 @@ export const useTimerHandlers = ({
     pause: pauseTimer,
     reset: resetTimer,
     addTime: extendTimer,
-    completeTimer: async () => {
+    completeTimer: async (): Promise<void> => {
       // Call the timer complete function and explicitly await it
       await timerComplete();
       // Return a resolved promise to match the Promise<void> return type

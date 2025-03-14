@@ -70,6 +70,13 @@ export const useTimerInitialization = ({
     pauseTimerRef,
   });
 
+  // Set up timer monitoring - ensures Promise is passed correctly
+  useTimerMonitoring({
+    taskName,
+    updateTimeLeft,
+    handleComplete: timerHandlers.handleComplete,
+  });
+
   // Get view props
   const { getTimerCircleProps, getTimerControlsProps } = useTimerViews({
     isRunning,

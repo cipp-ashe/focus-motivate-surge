@@ -1,44 +1,44 @@
 
-import { useTimerMonitor } from "@/hooks/useTimerMonitor";
+import { useEffect } from "react";
 import { logger } from "@/utils/logManager";
-import { eventManager } from "@/lib/events/EventManager";
 
 interface UseTimerMonitoringProps {
   taskName: string;
-  updateTimeLeft: (seconds: number) => void;
-  handleComplete: () => void;
+  updateTimeLeft: (timeLeft: number) => void;
+  handleComplete: () => Promise<void>; // This should return Promise<void>
 }
 
+/**
+ * Hook for monitoring timer behavior and handling timer completion
+ */
 export const useTimerMonitoring = ({
   taskName,
   updateTimeLeft,
-  handleComplete
+  handleComplete,
 }: UseTimerMonitoringProps) => {
-  // Monitor timer state
-  useTimerMonitor({
-    onTick: (seconds) => {
-      logger.debug('TimerMonitor', `Timer tick: ${seconds}s remaining for ${taskName}`);
-      updateTimeLeft(seconds);
-      
-      // Emit tick event
-      eventManager.emit('timer:tick', {
-        taskName,
-        remaining: seconds,
-        timeLeft: seconds
-      });
+  // Log timer information on mount
+  useEffect(() => {
+    logger.debug("TimerMonitoring", `Monitoring timer for task: ${taskName}`);
+    
+    return () => {
+      logger.debug("TimerMonitoring", `Stopped monitoring timer for task: ${taskName}`);
+    };
+  }, [taskName]);
+
+  // Handle timeLeft reaching zero
+  useEffect(() => {
+    // This effect is intentionally empty as the completion is handled by
+    // the useTimerCore component's time-up logic
+    
+    // Just return cleanup function
+    return () => {};
+  }, []);
+
+  return {
+    handleTimeUp: async (): Promise<void> => {
+      logger.debug("TimerMonitoring", `Timer completed for task: ${taskName}`);
+      // Call the provided handleComplete function and ensure it returns a Promise
+      return handleComplete();
     },
-    onComplete: () => {
-      logger.debug('TimerMonitor', `Timer complete for ${taskName}`);
-      handleComplete();
-    },
-    onStart: (task, duration) => {
-      logger.debug('TimerMonitor', `Timer started for ${task} with duration ${duration}`);
-    },
-    onPause: () => {
-      logger.debug('TimerMonitor', `Timer paused for ${taskName}`);
-    },
-    onResume: () => {
-      logger.debug('TimerMonitor', `Timer resumed for ${taskName}`);
-    }
-  });
+  };
 };
