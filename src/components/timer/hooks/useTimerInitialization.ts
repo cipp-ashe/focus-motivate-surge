@@ -103,6 +103,13 @@ export const useTimerInitialization = ({
     setShowCompletion,
   });
 
+  // Create an async wrapper for handleCloseCompletion to return Promise<void>
+  const handleCloseCompletion = async (): Promise<void> => {
+    setShowCompletion(false);
+    setCompletionMetrics(null);
+    return Promise.resolve();
+  };
+
   return {
     // Refs
     expandedViewRef,
@@ -121,7 +128,13 @@ export const useTimerInitialization = ({
     isRunning,
     
     // Handlers
-    timerHandlers,
+    timerHandlers: {
+      ...timerHandlers,
+      handleCloseCompletion, // Use the async version that returns Promise<void>
+      handleCloseTimer: timerHandlers.handleClose,
+      handleAddTimeAndContinue: timerHandlers.handleAddTime,
+      handleComplete: timerHandlers.handleComplete,
+    },
     
     // Props generators
     getTimerCircleProps,

@@ -28,7 +28,7 @@ interface TimerRendererProps {
   showConfirmation: boolean;
   setShowConfirmation: (show: boolean) => void;
   handleAddTimeAndContinue: () => void;
-  handleComplete: () => Promise<void>; // Update to ensure it's Promise<void>
+  handleComplete: () => Promise<void>; // Keep as Promise<void>
 }
 
 export const TimerRenderer: React.FC<TimerRendererProps> = ({
@@ -91,7 +91,7 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
           showConfirmation={showConfirmation}
           setShowConfirmation={setShowConfirmation}
           handleAddTimeAndContinue={handleAddTimeAndContinue}
-          handleComplete={handleComplete}
+          handleComplete={handleComplete} // Already Promise<void>
         />
       </div>
 
