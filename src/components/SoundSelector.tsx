@@ -21,17 +21,17 @@ export const SoundSelector = memo(({
         className="flex flex-wrap justify-center gap-4"
       >
         {Object.keys(SOUND_OPTIONS).map((sound) => (
-          <div key={sound} className="flex items-center space-x-2">
+          <div key={sound} className="sound-option flex items-center space-x-2">
             <RadioGroupItem 
               value={sound} 
               id={sound}
               disabled={isLoadingAudio}
               aria-label={`Select ${sound} sound`}
-              className="border-primary/30 focus:ring-primary/40"
+              className="radio-item"
             />
             <Label 
               htmlFor={sound} 
-              className="capitalize text-foreground/80 cursor-pointer"
+              className="capitalize text-foreground/80 cursor-pointer radio-label hover:text-foreground"
             >
               {sound}
             </Label>
@@ -43,13 +43,7 @@ export const SoundSelector = memo(({
       variant="secondary"
       size="sm"
       onClick={onTestSound}
-      className={cn(
-        "mt-3 mx-auto block",
-        "transition-all duration-200",
-        "text-foreground/80 hover:text-foreground",
-        "w-32 h-9",
-        isLoadingAudio && "opacity-70"
-      )}
+      className="timer-button w-32 h-9 mx-auto"
       disabled={isLoadingAudio || selectedSound === "none"}
       aria-label={`Test ${selectedSound} sound`}
     >
