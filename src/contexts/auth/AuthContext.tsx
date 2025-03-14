@@ -3,11 +3,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { syncLocalDataToSupabase } from '@/lib/sync/dataSynchronizer';
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null, user: User | null }>;
   signOut: () => Promise<void>;
@@ -26,6 +28,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+      
+      // If user just logged in, sync localStorage data to Supabase
+      if (session?.user && localStorage.getItem('firstLogin') !== 'completed') {
+        syncLocalDataToSupabase(session.user.id);
+        localStorage.setItem('firstLogin', 'completed');
+      }
     });
 
     // Listen for auth changes
@@ -33,6 +41,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+      
+      // If user just logged in, sync localStorage data to Supabase
+      if (session?.user && _event === 'SIGNED_IN' && localStorage.getItem('firstLogin') !== 'completed') {
+        syncLocalDataToSupabase(session.user.id);
+        localStorage.setItem('firstLogin', 'completed');
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -78,7 +92,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      isLoading, 
+      isAuthenticated: !!user,
+      signIn, 
+      signUp, 
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );

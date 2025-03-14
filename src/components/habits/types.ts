@@ -59,8 +59,8 @@ export interface ActiveTemplate {
   habits: HabitDetail[];
   activeDays: DayOfWeek[];
   customized: boolean;
-  name?: string;  // Added name field
-  description?: string;  // Added description field
+  name?: string;
+  description?: string;
   relationships?: {
     habitId?: string;
   };
