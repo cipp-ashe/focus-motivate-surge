@@ -37,29 +37,35 @@ export const useAutoComplete = ({
       completionStatus: "Completed On Time"
     };
     
-    await completeTimer();
-    
-    setCompletionMetrics(completionMetrics);
-    setShowCompletion(true);
-    
-    if (onComplete) {
-      onComplete(completionMetrics);
+    try {
+      // Await the Promise from completeTimer
+      await completeTimer();
+      
+      setCompletionMetrics(completionMetrics);
+      setShowCompletion(true);
+      
+      if (onComplete) {
+        onComplete(completionMetrics);
+      }
+      
+      const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
+      const habitTask = tasks.find((t: any) => t.name === taskName && t.relationships?.habitId);
+      
+      if (habitTask) {
+        console.log('Completing timer task for habit:', habitTask);
+        eventBus.emit('task:complete', { 
+          taskId: habitTask.id,
+          metrics: completionMetrics
+        });
+        toast.success(`Completed timer for habit: ${taskName}`, { duration: 2000 });
+      } else {
+        toast.success(`Timer completed: ${taskName}`, { duration: 2000 });
+      }
+    } catch (error) {
+      console.error("Error completing timer:", error);
     }
     
-    const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-    const habitTask = tasks.find((t: any) => t.name === taskName && t.relationships?.habitId);
-    
-    if (habitTask) {
-      console.log('Completing timer task for habit:', habitTask);
-      eventBus.emit('task:complete', { 
-        taskId: habitTask.id,
-        metrics: completionMetrics
-      });
-      toast.success(`Completed timer for habit: ${taskName}`, { duration: 2000 });
-    } else {
-      toast.success(`Timer completed: ${taskName}`, { duration: 2000 });
-    }
-
-    return Promise.resolve(); // Ensure we return a Promise
+    // Explicitly return a Promise<void>
+    return Promise.resolve();
   }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName, setCompletionMetrics, setShowCompletion]);
 };
