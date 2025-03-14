@@ -90,13 +90,13 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime,
   });
 
-  // Pass timerHandlers.handleComplete directly to avoid wrapping it in another function
+  // Use the auto-complete hook with correct Promise<void> return type
   const handleAutoComplete = useTimerAutoComplete({
     isRunning,
     pause: pauseTimer,
     playSound,
     metrics,
-    completeTimer: timerHandlers.handleComplete, // Directly pass the Promise-returning function
+    completeTimer: timerHandlers.handleComplete,
     onComplete,
     taskName,
     setCompletionMetrics,

@@ -24,8 +24,9 @@ export const useAutoComplete = ({
   taskName: string;
   setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
   setShowCompletion: (show: boolean) => void;
-}): () => Promise<void> => {
-  return useCallback(async () => {
+}): (() => Promise<void>) => {
+  // Return a callback that explicitly returns a Promise<void>
+  return useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();
     }
