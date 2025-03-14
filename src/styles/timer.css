@@ -70,7 +70,9 @@
 
 /* Timer button effects */
 .timer-button {
-  @apply transform transition-all duration-300 active:scale-95;
+  @apply transform transition-all duration-200 active:scale-95 bg-card hover:bg-accent/20;
+  @apply border border-primary/20 text-foreground/90 hover:text-foreground;
+  @apply focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2;
 }
 
 .timer-button:focus-visible {
@@ -86,9 +88,9 @@
 
 /* Timer metrics styling */
 .timer-metrics {
-  @apply text-xs text-muted-foreground p-2 space-y-1 rounded-b-lg;
-  @apply transition-all duration-300 border-t border-border/30;
-  @apply bg-accent/5 backdrop-blur-sm;
+  @apply text-xs text-muted-foreground p-3 space-y-2 rounded-lg;
+  @apply transition-all duration-300 border border-border/20;
+  @apply bg-background/60 backdrop-blur-sm shadow-sm;
 }
 
 .metric-row {

@@ -29,7 +29,7 @@ export const useTimerPauseResume = ({
     // Get current state for later resume
     setPauseTimeLeft(timeLeft);
     
-    // Store pause timestamp
+    // Store pause timestamp for calculating paused time
     updateMetrics({
       lastPauseTimestamp: new Date(),
       pauseCount: metrics.pauseCount + 1,
@@ -52,10 +52,23 @@ export const useTimerPauseResume = ({
   const handleResume = useCallback(() => {
     console.log(`Resuming timer for ${taskName} with time left: ${timeLeft}`);
     
+    // Calculate pause duration if we have a lastPauseTimestamp
+    let pausedTime = metrics.pausedTime || 0;
+    if (metrics.lastPauseTimestamp) {
+      const now = new Date();
+      const pauseDuration = Math.floor(
+        (now.getTime() - metrics.lastPauseTimestamp.getTime()) / 1000
+      );
+      pausedTime += pauseDuration;
+      console.log(`Added ${pauseDuration}s to paused time, total: ${pausedTime}s`);
+    }
+    
     // Update metrics to indicate timer is no longer paused
     updateMetrics({
       isPaused: false,
-      pausedTimeLeft: null
+      pausedTimeLeft: null,
+      lastPauseTimestamp: null,
+      pausedTime: pausedTime
     });
     
     // Start the timer
@@ -65,7 +78,10 @@ export const useTimerPauseResume = ({
     eventManager.emit('timer:resume', {
       taskName,
       timeLeft,
-      metrics
+      metrics: {
+        ...metrics,
+        pausedTime
+      }
     });
   }, [start, updateMetrics, taskName, timeLeft, metrics]);
 

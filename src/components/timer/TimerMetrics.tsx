@@ -51,78 +51,78 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
     : 0;
 
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Time Information */}
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-card/50">
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-card/50 border border-border/30">
           <div className={cn(
-            "p-2.5 rounded-full transition-colors",
-            isRunning ? "bg-primary/10" : "bg-muted"
+            "p-2 rounded-full transition-colors",
+            isRunning ? "bg-primary/10" : "bg-muted/50"
           )}>
             <Clock className="h-4 w-4 text-primary" />
           </div>
           <div className="flex flex-col">
-            <span className="text-foreground font-medium text-sm">
+            <span className="text-foreground font-medium text-xs">
               {metrics.extensionTime > 0 && (
                 <span className="text-primary">
                   +{formatTime(metrics.extensionTime)} added
                 </span>
               )}
             </span>
-            <span className="text-muted-foreground text-sm">
+            <span className="text-muted-foreground text-xs">
               {formatTime(metrics.pausedTime)} paused
             </span>
           </div>
         </div>
         
         {/* Break Count */}
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-card/50">
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-card/50 border border-border/30">
           <div className={cn(
-            "p-2.5 rounded-full transition-colors",
-            isRunning ? "bg-primary/10" : "bg-muted"
+            "p-2 rounded-full transition-colors",
+            isRunning ? "bg-primary/10" : "bg-muted/50"
           )}>
             <Pause className="h-4 w-4 text-primary" />
           </div>
-          <span className="text-foreground text-sm">
+          <span className="text-foreground text-xs">
             {metrics.pauseCount} {metrics.pauseCount === 1 ? 'break' : 'breaks'} taken
           </span>
         </div>
       </div>
       
       {/* Efficiency Status */}
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-card/50">
+      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-card/50 border border-border/30">
         <div className={cn(
-          "p-2.5 rounded-full transition-colors",
-          isRunning ? "bg-primary/10" : "bg-muted"
+          "p-2 rounded-full transition-colors",
+          isRunning ? "bg-primary/10" : "bg-muted/50"
         )}>
           <Zap className={cn("h-4 w-4", efficiencyClass)} />
         </div>
         <div className="flex flex-col">
           <span className={cn(
-            "font-semibold text-sm transition-colors",
+            "font-semibold text-xs transition-colors",
             efficiencyClass
           )}>
-            {Math.round(metrics.efficiencyRatio || 0)}% efficiency
+            {Math.round(localMetrics.efficiencyRatio || 0)}% efficiency
           </span>
           <span className="text-xs text-muted-foreground">
-            {metrics.efficiencyRatio >= 90 ? "Excellent pace!" : 
-             metrics.efficiencyRatio >= 70 ? "Good progress" : 
+            {localMetrics.efficiencyRatio >= 90 ? "Excellent pace!" : 
+             localMetrics.efficiencyRatio >= 70 ? "Good progress" : 
              "Room for improvement"}
           </span>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-3 p-3 rounded-lg bg-card/50">
+      <div className="space-y-2 p-2.5 rounded-lg bg-card/50 border border-border/30">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className={cn(
-              "p-2.5 rounded-full transition-colors",
-              isRunning ? "bg-primary/10" : "bg-muted"
+              "p-2 rounded-full transition-colors",
+              isRunning ? "bg-primary/10" : "bg-muted/50"
             )}>
               <BarChart className="h-4 w-4 text-primary" />
             </div>
-            <span className="text-foreground text-sm">Progress</span>
+            <span className="text-foreground text-xs">Progress</span>
           </div>
           <span className="text-xs text-muted-foreground">
             {Math.round(progressValue)}%
@@ -131,24 +131,24 @@ export const TimerMetricsDisplay = ({ metrics, isRunning }: TimerMetricsDisplayP
         <Progress 
           value={progressValue} 
           className={cn(
-            "h-2 transition-all duration-300",
+            "h-1.5 transition-all duration-300",
             isRunning && "bg-primary/20"
           )} 
         />
       </div>
       
       {/* Quotes Counter */}
-      {Array.isArray(metrics.favoriteQuotes) && metrics.favoriteQuotes.length > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-card/50">
+      {Array.isArray(localMetrics.favoriteQuotes) && localMetrics.favoriteQuotes.length > 0 && (
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-card/50 border border-border/30">
           <div className={cn(
-            "p-2.5 rounded-full transition-colors",
-            isRunning ? "bg-primary/10" : "bg-muted"
+            "p-2 rounded-full transition-colors",
+            isRunning ? "bg-primary/10" : "bg-muted/50"
           )}>
             <Quote className="h-4 w-4 text-primary" />
           </div>
           <div className="flex flex-col">
-            <span className="text-foreground text-sm">
-              {metrics.favoriteQuotes.length} quote{metrics.favoriteQuotes.length !== 1 ? 's' : ''} saved
+            <span className="text-foreground text-xs">
+              {localMetrics.favoriteQuotes.length} quote{localMetrics.favoriteQuotes.length !== 1 ? 's' : ''} saved
             </span>
             <span className="text-xs text-muted-foreground">
               Keep collecting inspiration!
