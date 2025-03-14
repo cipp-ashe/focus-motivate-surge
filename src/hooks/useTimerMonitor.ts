@@ -29,6 +29,19 @@ export const useTimerMonitor = ({
   useEffect(() => {
     console.log("Setting up timer monitor event listeners");
     
+    // Listen for custom timer tick events from window
+    const handleWindowTimerTick = (e: CustomEvent) => {
+      if (e.detail && e.detail.timeLeft !== undefined) {
+        if (onTick) onTick(e.detail.timeLeft);
+        if (onProgress) onProgress(e.detail.timeLeft);
+        timerInfoRef.current.secondsLeft = e.detail.timeLeft;
+        console.log(`Timer tick from window event: ${e.detail.timeLeft}s`);
+      }
+    };
+    
+    // Add window event listener for custom timer tick events
+    window.addEventListener('timer:tick', handleWindowTimerTick as EventListener);
+    
     // Update the handler to correctly process remaining or timeLeft values
     const handleTimerTick = (payload: { timeLeft?: number; remaining?: number; taskName?: string }) => {
       // Use either timeLeft or remaining based on what's available
@@ -107,6 +120,7 @@ export const useTimerMonitor = ({
 
     return () => {
       console.log("Cleaning up timer monitor event listeners");
+      window.removeEventListener('timer:tick', handleWindowTimerTick as EventListener);
       unsubscribeTick();
       unsubscribeStart();
       unsubscribePause();

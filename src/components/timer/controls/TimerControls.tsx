@@ -33,6 +33,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
   const handleCompleteClick = async () => {
     if (onComplete) {
       try {
+        console.log("TimerControls: Complete button clicked");
         // Explicitly await the Promise returned by onComplete
         await onComplete();
       } catch (error) {
@@ -41,21 +42,26 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
     }
   };
 
+  // Toggle button color/icon based on running state
+  const toggleButtonColor = isRunning 
+    ? "bg-amber-500 hover:bg-amber-600 text-white" 
+    : "bg-green-500 hover:bg-green-600 text-white";
+
+  const toggleButtonLabel = isRunning ? "Pause timer" : isPaused ? "Resume timer" : "Start timer";
+  const toggleButtonIcon = isRunning ? <PauseIcon className={iconSize} /> : <PlayIcon className={iconSize} />;
+
   return (
     <div className={`flex ${gapSize} items-center justify-center`}>
       <Button
         variant="outline"
         size="icon"
-        className={`${buttonSize} rounded-full ${isRunning ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-green-500 hover:bg-green-600 text-white"} border-none`}
+        className={`${buttonSize} rounded-full ${toggleButtonColor} border-none`}
         onClick={onToggle}
         data-testid="timer-toggle-button"
         {...toggleButtonA11yProps}
+        aria-label={toggleButtonLabel}
       >
-        {isRunning ? (
-          <PauseIcon className={iconSize} />
-        ) : (
-          <PlayIcon className={iconSize} />
-        )}
+        {toggleButtonIcon}
       </Button>
 
       <Button

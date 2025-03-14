@@ -43,6 +43,7 @@ export const useTimerToggle = ({
         timeLeft,
         metrics 
       });
+      console.log(`Timer paused for ${taskName} with ${timeLeft} seconds remaining`);
     } else {
       // If timer is not running, start it
       start();
@@ -66,6 +67,13 @@ export const useTimerToggle = ({
       } else {
         // Fresh start - emit start event
         console.log(`Starting fresh timer for ${taskName} with duration: ${timeLeft}`);
+        
+        // Make sure to set startTime in metrics for a fresh start
+        updateMetrics({
+          startTime: new Date(),
+          isPaused: false
+        });
+        
         eventManager.emit('timer:start', { 
           taskName, 
           duration: timeLeft,

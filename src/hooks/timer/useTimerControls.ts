@@ -24,19 +24,23 @@ export const useTimerControls = ({
 }: UseTimerControlsParams) => {
   const handleToggle = useCallback(() => {
     if (isRunning) {
+      console.log("useTimerControls: Pausing timer");
       onPause();
     } else {
+      console.log("useTimerControls: Starting timer");
       onStart();
     }
   }, [isRunning, onPause, onStart]);
 
   // Return a Promise here too
   const handleComplete = useCallback(async (): Promise<void> => {
+    console.log("useTimerControls: Completing timer");
     return onComplete();
   }, [onComplete]);
 
   // Consistently accepts a minutes parameter with default value
   const handleAddTime = useCallback((minutes: number = TIMER_CONSTANTS.ADD_TIME_MINUTES) => {
+    console.log(`useTimerControls: Adding ${minutes} minutes to timer`);
     if (onAddTime) {
       onAddTime(minutes);
     }
@@ -49,6 +53,6 @@ export const useTimerControls = ({
     handleComplete,
     handleAddTime,
     showAddTimeButton,
-    isPaused: !isRunning && metrics.startTime !== null,
+    isPaused: !isRunning && metrics.startTime !== null && metrics.isPaused === true,
   };
 };

@@ -19,6 +19,7 @@ export const useTimerActions = (
   const startTimer = useCallback(() => {
     if (isLegacyInterface) {
       const { setIsRunning, updateMetrics } = props as TimerActionProps;
+      console.log("useTimerActions: Starting timer (legacy)");
       setIsRunning(true);
       updateMetrics({
         startTime: new Date(),
@@ -26,6 +27,7 @@ export const useTimerActions = (
       });
     } else {
       const { dispatch } = props as UseTimerActionsProps;
+      console.log("useTimerActions: Starting timer (reducer)");
       dispatch({ type: 'START' });
       dispatch({ type: 'SET_START_TIME', payload: new Date() });
     }
@@ -34,6 +36,7 @@ export const useTimerActions = (
   const pauseTimer = useCallback(() => {
     if (isLegacyInterface) {
       const { timeLeft, setIsRunning, updateMetrics } = props as TimerActionProps;
+      console.log("useTimerActions: Pausing timer (legacy)");
       setIsRunning(false);
       updateMetrics({
         pauseCount: (props as TimerActionProps).metrics.pauseCount + 1,
@@ -43,6 +46,7 @@ export const useTimerActions = (
       });
     } else {
       const { dispatch } = props as UseTimerActionsProps;
+      console.log("useTimerActions: Pausing timer (reducer)");
       dispatch({ type: 'PAUSE' });
       dispatch({ type: 'SET_LAST_PAUSE_TIMESTAMP', payload: new Date() });
     }
@@ -51,6 +55,7 @@ export const useTimerActions = (
   const resetTimer = useCallback(async (): Promise<void> => {
     if (isLegacyInterface) {
       const { updateTimeLeft, setIsRunning, updateMetrics } = props as TimerActionProps;
+      console.log("useTimerActions: Resetting timer (legacy)");
       setIsRunning(false);
       updateTimeLeft((props as TimerActionProps).metrics.expectedTime);
       updateMetrics({
@@ -67,6 +72,7 @@ export const useTimerActions = (
       return Promise.resolve();
     } else {
       const { dispatch } = props as UseTimerActionsProps;
+      console.log("useTimerActions: Resetting timer (reducer)");
       dispatch({ type: 'RESET' });
       return Promise.resolve();
     }
@@ -76,12 +82,14 @@ export const useTimerActions = (
     const seconds = minutes * 60;
     if (isLegacyInterface) {
       const { timeLeft, updateTimeLeft, updateMetrics } = props as TimerActionProps;
+      console.log(`useTimerActions: Extending timer by ${minutes} minutes (legacy)`);
       updateTimeLeft(timeLeft + seconds);
       updateMetrics({
         extensionTime: (props as TimerActionProps).metrics.extensionTime + seconds
       });
     } else {
       const { dispatch } = props as UseTimerActionsProps;
+      console.log(`useTimerActions: Extending timer by ${minutes} minutes (reducer)`);
       dispatch({ type: 'EXTEND', payload: seconds });
       dispatch({ type: 'SET_EXTENSION_TIME', payload: seconds });
     }
@@ -91,9 +99,11 @@ export const useTimerActions = (
     const seconds = minutes * 60;
     if (isLegacyInterface) {
       const { updateTimeLeft } = props as TimerActionProps;
+      console.log(`useTimerActions: Setting timer to ${minutes} minutes (legacy)`);
       updateTimeLeft(seconds);
     } else {
       const { dispatch } = props as UseTimerActionsProps;
+      console.log(`useTimerActions: Setting timer to ${minutes} minutes (reducer)`);
       dispatch({ type: 'INIT', payload: { duration: seconds } });
     }
   }, [props, isLegacyInterface]);
@@ -103,6 +113,7 @@ export const useTimerActions = (
       if (isLegacyInterface) {
         const { setIsRunning, updateMetrics, metrics } = props as TimerActionProps;
         const now = new Date();
+        console.log("useTimerActions: Completing timer (legacy)");
         
         // Make sure we have a startTime
         const startTime = metrics.startTime || new Date(now.getTime() - (metrics.expectedTime * 1000));
@@ -145,6 +156,7 @@ export const useTimerActions = (
         return Promise.resolve();
       } else {
         const { dispatch } = props as UseTimerActionsProps;
+        console.log("useTimerActions: Completing timer (reducer)");
         dispatch({ type: 'COMPLETE' });
         return Promise.resolve();
       }

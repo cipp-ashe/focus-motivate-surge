@@ -50,25 +50,48 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, []);
 
   // Start/stop timer logic
   useEffect(() => {
+    console.log(`Timer running state changed: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
+    
     if (state.isRunning) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      console.log("Setting up timer interval");
+      
+      // Clear any existing interval to prevent multiple intervals
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      
+      // Set up new interval to decrement time
       intervalRef.current = setInterval(() => {
+        console.log(`Timer tick: ${state.timeLeft - 1}s`);
         dispatch({ type: 'DECREMENT_TIME' });
+        
+        // Emit tick event for any listeners
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('timer:tick', { 
+            detail: { timeLeft: state.timeLeft - 1 } 
+          });
+          window.dispatchEvent(event);
+        }
       }, 1000);
     } else if (intervalRef.current) {
+      console.log("Clearing timer interval");
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   
     return () => {
       if (intervalRef.current) {
+        console.log("Cleanup: clearing timer interval");
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [state.isRunning]);
@@ -76,6 +99,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
   // Handle time up
   useEffect(() => {
     if (state.timeLeft === 0 && onTimeUp) {
+      console.log("Timer reached zero, calling onTimeUp");
       onTimeUp();
     }
   }, [state.timeLeft, onTimeUp]);
