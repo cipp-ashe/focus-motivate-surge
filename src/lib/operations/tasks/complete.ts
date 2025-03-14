@@ -2,6 +2,7 @@
 import { toast } from "sonner";
 import type { Task, TaskMetrics } from "@/types/tasks";
 import type { TimerMetrics } from "@/types/metrics";
+import { toISOString, getCurrentISOString } from "@/lib/utils/dateUtils";
 
 interface CompleteTaskOptions {
   taskId: string;
@@ -29,7 +30,7 @@ export function completeTask({ taskId, taskList, completedTasks, metrics }: Comp
     console.log("Completing task with original metrics:", metrics);
     
     // Current timestamp as ISO string for default values
-    const currentTimeIso = new Date().toISOString();
+    const currentTimeIso = getCurrentISOString();
     
     // Prepare task metrics
     const formattedMetrics: TaskMetrics = {
@@ -56,10 +57,8 @@ export function completeTask({ taskId, taskList, completedTasks, metrics }: Comp
         efficiencyRatio: metrics.efficiencyRatio || 0,
         completionStatus: metrics.completionStatus || 'Completed',
         
-        // Ensure completionDate is a string
-        completionDate: typeof metrics.completionDate === 'string' 
-          ? metrics.completionDate 
-          : currentTimeIso,
+        // Ensure completionDate is a properly formatted ISO string
+        completionDate: toISOString(metrics.completionDate),
       } : {})
     };
     

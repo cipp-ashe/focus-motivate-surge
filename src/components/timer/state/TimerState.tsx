@@ -1,7 +1,7 @@
-
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
+import { toISOString, getCurrentISOString } from "@/lib/utils/dateUtils";
 
 /**
  * Hook for handling timer completion
@@ -23,11 +23,9 @@ export const useTimerComplete = ({
       // Ensure metrics has a completionDate as a string
       const finalMetrics = {
         ...metrics,
-        // Always ensure there's a completionDate string
-        completionDate: typeof metrics.completionDate === 'string' 
-          ? metrics.completionDate 
-          : new Date().toISOString(),
-        // Make sure we have an endTime
+        // Always ensure there's a completionDate string using our utility
+        completionDate: toISOString(metrics.completionDate || new Date()),
+        // Make sure we have an endTime - keep as Date object for calculations
         endTime: metrics.endTime || new Date()
       };
       
@@ -53,7 +51,7 @@ export const useTimerComplete = ({
       // Return basic metrics to prevent crashes
       return {
         ...metrics,
-        completionDate: new Date().toISOString(),
+        completionDate: getCurrentISOString(),
         endTime: new Date()
       };
     }

@@ -7,6 +7,7 @@ import { TimerError } from "./TimerError";
 import { TimerContent } from "./TimerContent";
 import { useTimerInitialization } from "./hooks/useTimerInitialization";
 import { TimerErrorBoundary } from "./TimerErrorBoundary";
+import { toISOString } from "@/lib/utils/dateUtils";
 
 export const Timer = ({
   duration,
@@ -44,10 +45,8 @@ export const Timer = ({
         // Make sure we have these required fields with default values if needed
         startTime: metrics.startTime || new Date(),
         endTime: metrics.endTime || new Date(),
-        // Ensure completionDate is a string, not a Date object
-        completionDate: typeof metrics.completionDate === 'string' 
-          ? metrics.completionDate 
-          : new Date().toISOString()
+        // Ensure completionDate is a properly formatted ISO string
+        completionDate: toISOString(metrics.completionDate)
       };
       
       console.log("Timer: Validated metrics:", validatedMetrics);

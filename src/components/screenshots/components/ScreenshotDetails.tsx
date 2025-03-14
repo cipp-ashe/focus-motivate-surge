@@ -9,7 +9,7 @@ import {
   Image as ImageIcon,
   Info
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils/dateUtils";
 import { formatFileSize } from "@/utils/imageUtils";
 
 interface ScreenshotDetailsProps {
@@ -23,11 +23,7 @@ export const ScreenshotDetails: React.FC<ScreenshotDetailsProps> = ({ task }) =>
 
   const formatTaskDate = (dateString?: string) => {
     if (!dateString) return "Unknown";
-    try {
-      return format(new Date(dateString), "MMM d, yyyy 'at' HH:mm");
-    } catch (e) {
-      return "Invalid date";
-    }
+    return formatDate(dateString, "MMM d, yyyy 'at' HH:mm");
   };
 
   return (

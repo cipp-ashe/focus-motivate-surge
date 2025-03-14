@@ -1,8 +1,11 @@
-
 import { useCallback } from 'react';
 import { TimerAction } from '@/types/timer';
 import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
-import { determineCompletionStatus, calculateEfficiencyRatio } from '@/lib/utils/formatters';
+import { 
+  determineCompletionStatus, 
+  calculateEfficiencyRatio 
+} from '@/lib/utils/formatters';
+import { toISOString } from '@/lib/utils/dateUtils';
 
 // This function supports both the new interface (dispatch-based) and the legacy interface (direct update methods)
 export const useTimerActions = (
@@ -125,8 +128,8 @@ export const useTimerActions = (
           completionStatus,
           isPaused: false,
           pausedTimeLeft: null,
-          // Always ensure completionDate is a string
-          completionDate: now.toISOString()
+          // Always ensure completionDate is a properly formatted ISO string
+          completionDate: toISOString(now)
         };
         
         console.log("useTimerActions: Completing timer with metrics:", updatedMetrics);
@@ -153,7 +156,7 @@ export const useTimerActions = (
         const { metrics } = props as TimerActionProps;
         return {
           ...metrics,
-          completionDate: new Date().toISOString(),
+          completionDate: toISOString(new Date()),
           endTime: new Date(),
           isPaused: false
         };

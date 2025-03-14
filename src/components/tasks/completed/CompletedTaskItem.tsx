@@ -6,7 +6,7 @@ import { CheckCircle, XCircle, Trash2, ChevronRight, Timer, BarChart, CalendarCl
 import { cn } from '@/lib/utils';
 import { CompletedTaskDialog } from '../CompletedTaskDialog';
 import { formatDuration, getCompletionTimingClass, determineCompletionStatus, calculateEfficiencyRatio } from '@/lib/utils/formatters';
-import { formatDistanceToNow } from 'date-fns';
+import { formatRelativeTime, formatDate } from '@/lib/utils/dateUtils';
 
 interface CompletedTaskItemProps {
   task: Task;
@@ -21,7 +21,6 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
   const isDismissed = !!task.dismissedAt;
   const isTimerTask = task.taskType === 'timer';
   
-  // Format metrics for compact display
   const timeSpent = task.metrics?.actualDuration 
     ? formatDuration(task.metrics.actualDuration) 
     : (task.metrics?.timeSpent ? formatDuration(task.metrics.timeSpent) : null);
@@ -30,17 +29,12 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
     ? `${Math.round(task.metrics.efficiencyRatio * 100)}%` 
     : null;
   
-  // Calculate how long the task took to complete from creation to completion
   const getCompletionTimeframe = () => {
     if (!task.completedAt || !task.createdAt) return null;
     
-    const completedDate = new Date(task.completedAt);
-    const createdDate = new Date(task.createdAt);
-    
-    return formatDistanceToNow(createdDate, { addSuffix: true });
+    return formatRelativeTime(task.createdAt);
   };
   
-  // Determine completion timing status based on expected vs actual duration
   const getCompletionTimingStatus = () => {
     if (!task.metrics?.expectedTime || !task.metrics?.netEffectiveTime) return null;
     
@@ -124,7 +118,7 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
             {task.completedAt && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                {new Date(task.completedAt).toLocaleDateString()}
+                {formatDate(task.completedAt, 'MMM d, yyyy')}
               </span>
             )}
           </div>

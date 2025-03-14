@@ -1,5 +1,6 @@
 
 // Consolidated time and formatting utilities
+import { formatDate as formatDateHelper, formatRelativeTime } from './dateUtils';
 
 // Duration formatting (seconds to human-readable)
 export const formatDuration = (seconds: number): string => {
@@ -25,11 +26,10 @@ export const formatTime = (seconds: number): string => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-// Format a date string to a localized date
+// Legacy formatDate that now uses our new utility (for backwards compatibility)
 export const formatDate = (dateString?: string): string => {
   if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return formatDateHelper(dateString, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -37,11 +37,10 @@ export const formatDate = (dateString?: string): string => {
   });
 };
 
-// Format a date string to a localized timestamp
+// Legacy formatTimestamp that now uses our new utility (for backwards compatibility)
 export const formatTimestamp = (dateString: string): string => {
   try {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
+    return formatDateHelper(dateString, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -51,19 +50,6 @@ export const formatTimestamp = (dateString: string): string => {
     console.error('Error formatting timestamp:', error);
     return dateString;
   }
-};
-
-// Helper function to format a date to a localized string with customizable options
-export const formatDateLocalized = (date: Date, options?: Intl.DateTimeFormatOptions): string => {
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  };
-  
-  return date.toLocaleDateString(undefined, options || defaultOptions);
 };
 
 // Format a number as a percentage
