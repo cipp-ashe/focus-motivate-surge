@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
-import { toISOString, getCurrentISOString } from "@/lib/utils/dateUtils";
+import { logger } from "@/utils/logManager";
 
 /**
  * Hook for handling timer completion
@@ -15,7 +15,7 @@ export const useTimerComplete = ({
   taskName: string;
   metrics: TimerStateMetrics;
   setIsExpanded: (expanded: boolean) => void;
-  onComplete: (metrics: TimerStateMetrics) => void;
+  onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
 }) => {
   // Handle timer completion
   const completeTimer = useCallback(() => {
@@ -23,13 +23,13 @@ export const useTimerComplete = ({
       // Ensure metrics has a completionDate as a string
       const finalMetrics = {
         ...metrics,
-        // Always ensure there's a completionDate string using our utility
-        completionDate: toISOString(metrics.completionDate || new Date()),
+        // Always ensure there's a completionDate string
+        completionDate: new Date().toISOString(),
         // Make sure we have an endTime - keep as Date object for calculations
         endTime: metrics.endTime || new Date()
       };
       
-      console.log("TimerState: Completing timer with metrics:", finalMetrics);
+      logger.debug("TimerComplete", "Completing timer with metrics:", finalMetrics);
       
       // Close expanded view if open
       setIsExpanded(false);
@@ -47,11 +47,11 @@ export const useTimerComplete = ({
       
       return finalMetrics;
     } catch (error) {
-      console.error("Error in completeTimer:", error);
+      logger.error("TimerComplete", "Error in completeTimer:", error);
       // Return basic metrics to prevent crashes
       return {
         ...metrics,
-        completionDate: getCurrentISOString(),
+        completionDate: new Date().toISOString(),
         endTime: new Date()
       };
     }
