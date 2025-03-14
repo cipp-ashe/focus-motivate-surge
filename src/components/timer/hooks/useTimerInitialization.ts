@@ -98,8 +98,7 @@ export const useTimerInitialization = ({
     metrics,
     completeTimer: () => {
       // Use the extracted completeTimer function
-      timerHandlers.handleComplete();
-      return Promise.resolve();
+      return timerHandlers.handleComplete();
     },
     onComplete,
     taskName,
