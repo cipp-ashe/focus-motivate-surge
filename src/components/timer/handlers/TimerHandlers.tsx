@@ -119,5 +119,6 @@ export const useTimerHandlers = ({
     showResetConfirmation,
     handlePause,
     handleResume,
+    isPaused: metrics.isPaused || false
   };
 };

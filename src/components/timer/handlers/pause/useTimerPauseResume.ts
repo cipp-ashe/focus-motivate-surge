@@ -24,6 +24,8 @@ export const useTimerPauseResume = ({
 }: UseTimerPauseResumeProps) => {
   // Handle pause timer
   const handlePause = useCallback(() => {
+    console.log(`Pausing timer for ${taskName} with time left: ${timeLeft}`);
+    
     // Get current state for later resume
     setPauseTimeLeft(timeLeft);
     
@@ -48,9 +50,12 @@ export const useTimerPauseResume = ({
 
   // Adding a resume handler for more explicit control
   const handleResume = useCallback(() => {
+    console.log(`Resuming timer for ${taskName} with time left: ${timeLeft}`);
+    
     // Update metrics to indicate timer is no longer paused
     updateMetrics({
-      isPaused: false
+      isPaused: false,
+      pausedTimeLeft: null
     });
     
     // Start the timer

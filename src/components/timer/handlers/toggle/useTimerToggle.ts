@@ -23,10 +23,20 @@ export const useTimerToggle = ({
   start,
 }: UseTimerToggleProps) => {
   const handleToggle = useCallback(() => {
-    console.log(`Toggle timer for ${taskName}. Current state: isRunning=${isRunning}, timeLeft=${timeLeft}`);
+    console.log(`Toggle timer for ${taskName}. Current state: isRunning=${isRunning}, isPaused=${metrics.isPaused}, timeLeft=${timeLeft}`);
     
     if (isRunning) {
+      // If timer is running, pause it
       pause();
+      
+      // Update metrics to track pause state
+      updateMetrics({
+        lastPauseTimestamp: new Date(),
+        pauseCount: metrics.pauseCount + 1,
+        isPaused: true,
+        pausedTimeLeft: timeLeft
+      });
+      
       // Emit pause event with current time left
       eventManager.emit('timer:pause', { 
         taskName, 
@@ -34,19 +44,24 @@ export const useTimerToggle = ({
         metrics 
       });
     } else {
+      // If timer is not running, start it
       start();
+      
       // Determine if this is a resume or a fresh start
       if (metrics.isPaused) {
         // Resume from pause - emit resume event
         console.log(`Resuming timer for ${taskName} with time left: ${timeLeft}`);
+        
+        // Update metrics to indicate no longer paused
+        updateMetrics({
+          isPaused: false,
+          pausedTimeLeft: null
+        });
+        
         eventManager.emit('timer:resume', { 
           taskName, 
           timeLeft,
           currentTime: Date.now()
-        });
-        // Update metrics to indicate no longer paused
-        updateMetrics({
-          isPaused: false
         });
       } else {
         // Fresh start - emit start event

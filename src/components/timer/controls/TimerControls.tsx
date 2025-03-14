@@ -46,7 +46,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
       <Button
         variant="outline"
         size="icon"
-        className={`${buttonSize} rounded-full bg-card hover:bg-card/80 border-primary-foreground/20`}
+        className={`${buttonSize} rounded-full ${isRunning ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-green-500 hover:bg-green-600 text-white"} border-none`}
         onClick={onToggle}
         data-testid="timer-toggle-button"
         {...toggleButtonA11yProps}
@@ -61,7 +61,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
       <Button
         variant="outline"
         size="icon"
-        className={`${buttonSize} rounded-full bg-green-500 hover:bg-green-600 border-none text-white`}
+        className={`${buttonSize} rounded-full bg-purple-500 hover:bg-purple-600 border-none text-white`}
         onClick={handleCompleteClick}
         data-testid="timer-complete-button"
         {...completeButtonA11yProps}
@@ -73,7 +73,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className={`${buttonSize} rounded-full bg-card hover:bg-card/80 border-primary-foreground/20`}
+          className={`${buttonSize} rounded-full bg-blue-500 hover:bg-blue-600 border-none text-white`}
           onClick={() => onAddTime(5)}
           data-testid="timer-add-time-button"
           {...addTimeButtonA11yProps}
