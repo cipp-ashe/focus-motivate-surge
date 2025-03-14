@@ -11,7 +11,7 @@ interface UseTimerViewsProps {
   isExpanded: boolean;
   pauseTimeLeft: number | null;
   handleToggle: () => void;
-  handleComplete: () => void;
+  handleComplete: () => Promise<void>;  // Updated to match correct return type
   handleAddTime: (minutes: number) => void;
 }
 
@@ -51,7 +51,7 @@ interface UseAutoCompleteProps {
   playSound: () => void;
   metrics: TimerStateMetrics;
   completeTimer: () => Promise<void>;
-  onComplete?: (metrics: TimerStateMetrics) => void; // Make onComplete optional here
+  onComplete?: (metrics: TimerStateMetrics) => void;
   taskName: string;
   setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
   setShowCompletion: (show: boolean) => void;

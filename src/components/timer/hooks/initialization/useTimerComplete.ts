@@ -18,7 +18,7 @@ export const useTimerComplete = ({
   onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
 }) => {
   // Handle timer completion
-  const completeTimer = useCallback(() => {
+  const completeTimer = useCallback(async () => {
     try {
       // Ensure metrics has a completionDate as a string
       const finalMetrics = {
@@ -45,15 +45,12 @@ export const useTimerComplete = ({
         metrics: finalMetrics 
       });
       
-      return finalMetrics;
+      // Return void explicitly through Promise.resolve()
+      return Promise.resolve();
     } catch (error) {
       logger.error("TimerComplete", "Error in completeTimer:", error);
-      // Return basic metrics to prevent crashes
-      return {
-        ...metrics,
-        completionDate: new Date().toISOString(),
-        endTime: new Date()
-      };
+      // Return rejected promise in case of error
+      return Promise.reject(error);
     }
   }, [taskName, metrics, onComplete, setIsExpanded]);
 

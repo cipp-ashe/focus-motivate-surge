@@ -1,7 +1,6 @@
 
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
-import { TIMER_CONSTANTS } from "@/types/timer";
 
 interface UseTimerViewProps {
   isRunning: boolean;
@@ -10,8 +9,8 @@ interface UseTimerViewProps {
   metrics: TimerStateMetrics;
   isExpanded: boolean;
   handleTimerToggle: () => void;
-  handleComplete: () => void;
-  handleAddTime: (minutes: number) => void;  // Consistent signature
+  handleComplete: () => Promise<void>; // Updated type to match Promise<void>
+  handleAddTime: (minutes: number) => void;
   pauseTimeLeft: number | null;
 }
 
@@ -26,24 +25,34 @@ export const useTimerView = ({
   handleAddTime,
   pauseTimeLeft,
 }: UseTimerViewProps) => {
-  const getTimerCircleProps = useCallback(() => ({
-    isRunning,
-    timeLeft,
-    minutes,
-    circumference: TIMER_CONSTANTS.CIRCLE_CIRCUMFERENCE,
-  }), [isRunning, timeLeft, minutes]);
+  const getTimerCircleProps = useMemo(
+    () => () => ({
+      isRunning,
+      timeLeft,
+      minutes,
+      circumference: 283,
+      onClick: handleTimerToggle,
+    }),
+    [isRunning, timeLeft, minutes, handleTimerToggle]
+  );
 
-  const getTimerControlsProps = useCallback((size: 'normal' | 'large' = 'normal') => ({
-    isRunning,
-    onToggle: handleTimerToggle,
-    isPaused: metrics.isPaused,
-    onComplete: handleComplete,
-    onAddTime: (minutes: number = TIMER_CONSTANTS.ADD_TIME_MINUTES) => handleAddTime(minutes),
-    metrics,
-    showAddTime: isExpanded,
-    pauseTimeLeft,
-    size,
-  }), [isRunning, handleTimerToggle, metrics, handleComplete, handleAddTime, isExpanded, pauseTimeLeft]);
+  const getTimerControlsProps = useMemo(
+    () => (size: 'normal' | 'large' = 'normal') => ({
+      isRunning,
+      onToggle: handleTimerToggle,
+      onComplete: () => {
+        // Ensure we call handleComplete() without awaiting it here
+        // The return is a Promise<void> that can be handled by the caller if needed
+        handleComplete();
+      },
+      onAddTime: handleAddTime,
+      showAddTime: true,
+      size,
+      metrics,
+      pauseTimeLeft,
+    }),
+    [isRunning, handleTimerToggle, handleComplete, handleAddTime, metrics, pauseTimeLeft]
+  );
 
   return {
     getTimerCircleProps,

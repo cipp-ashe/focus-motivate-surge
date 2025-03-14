@@ -63,8 +63,8 @@ export const useTimerHandlers = ({
     reset: resetTimer,
     addTime: extendTimer,
     completeTimer: async () => {
-      // Call the timer complete function to get the metrics
-      timerComplete();
+      // Call the timer complete function and make sure it returns a Promise<void>
+      await timerComplete();
       // Return a resolved promise to match the Promise<void> return type
       return Promise.resolve();
     },
