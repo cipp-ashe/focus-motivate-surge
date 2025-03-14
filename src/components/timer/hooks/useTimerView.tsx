@@ -40,7 +40,7 @@ export const useTimerView = ({
     () => (size: 'normal' | 'large' = 'normal') => ({
       isRunning,
       onToggle: handleTimerToggle,
-      onComplete: () => {
+      onComplete: (): Promise<void> => {
         // Return the Promise from handleComplete
         return handleComplete();
       },
