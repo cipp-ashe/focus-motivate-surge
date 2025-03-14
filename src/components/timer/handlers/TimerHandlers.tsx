@@ -79,7 +79,7 @@ export const useTimerHandlers = ({
     metrics,
   });
 
-  // Complete timer
+  // Complete timer - ensure it matches the type of completeTimer (Promise<void>)
   const handleComplete = useTimerComplete({
     isRunning,
     pause,

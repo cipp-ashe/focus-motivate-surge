@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { TimerAction } from '@/types/timer';
 import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
@@ -47,7 +48,7 @@ export const useTimerActions = (
     }
   }, [props, isLegacyInterface]);
 
-  const resetTimer = useCallback(() => {
+  const resetTimer = useCallback(async (): Promise<void> => {
     if (isLegacyInterface) {
       const { updateTimeLeft, setIsRunning, updateMetrics } = props as TimerActionProps;
       setIsRunning(false);
@@ -63,9 +64,11 @@ export const useTimerActions = (
         isPaused: false,
         pausedTimeLeft: null
       });
+      return Promise.resolve();
     } else {
       const { dispatch } = props as UseTimerActionsProps;
       dispatch({ type: 'RESET' });
+      return Promise.resolve();
     }
   }, [props, isLegacyInterface]);
 
@@ -95,7 +98,7 @@ export const useTimerActions = (
     }
   }, [props, isLegacyInterface]);
 
-  const completeTimer = useCallback(() => {
+  const completeTimer = useCallback(async (): Promise<void> => {
     try {
       if (isLegacyInterface) {
         const { setIsRunning, updateMetrics, metrics } = props as TimerActionProps;
@@ -138,30 +141,16 @@ export const useTimerActions = (
         setIsRunning(false);
         updateMetrics(updatedMetrics);
         
-        // Return the complete metrics
-        return {
-          ...metrics,
-          ...updatedMetrics
-        };
+        // Return a resolved promise
+        return Promise.resolve();
       } else {
         const { dispatch } = props as UseTimerActionsProps;
         dispatch({ type: 'COMPLETE' });
-        return null;
+        return Promise.resolve();
       }
     } catch (error) {
       console.error("Error in completeTimer:", error);
-      
-      // Return basic metrics to prevent crashes
-      if (isLegacyInterface) {
-        const { metrics } = props as TimerActionProps;
-        return {
-          ...metrics,
-          completionDate: toISOString(new Date()),
-          endTime: new Date(),
-          isPaused: false
-        };
-      }
-      return null;
+      return Promise.reject(error);
     }
   }, [props, isLegacyInterface]);
 

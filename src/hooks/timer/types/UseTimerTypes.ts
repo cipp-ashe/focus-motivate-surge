@@ -19,10 +19,10 @@ export interface UseTimerReturn {
   metrics: TimerStateMetrics;
   startTimer: () => void;
   pauseTimer: () => void;
-  resetTimer: () => void;
+  resetTimer: () => Promise<void>;
   extendTimer: (minutes: number) => void;
   setMinutes: (minutes: number) => void;
-  completeTimer: () => void;
+  completeTimer: () => Promise<void>;
   updateMetrics: (updates: any) => void;
 }
 
@@ -34,10 +34,10 @@ export interface UseTimerActionsProps {
 export interface UseTimerActionsReturn {
   startTimer: () => void;
   pauseTimer: () => void;
-  resetTimer: () => void;
+  resetTimer: () => Promise<void>;
   extendTimer: (minutes: number) => void;
   setMinutes: (minutes: number) => void;
-  completeTimer: () => void;
+  completeTimer: () => Promise<void>;
   updateMetrics: (updates: any) => void;
 }
 

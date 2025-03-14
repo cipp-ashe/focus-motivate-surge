@@ -70,11 +70,11 @@ export const useTimerInitialization = ({
     pauseTimerRef,
   });
 
-  // Set up timer monitoring - ensures Promise is passed correctly
+  // Set up timer monitoring
   useTimerMonitoring({
     taskName,
     updateTimeLeft,
-    handleComplete: timerHandlers.handleComplete, // This now correctly returns Promise<void>
+    handleComplete: timerHandlers.handleComplete,
   });
 
   // Get view props
@@ -86,24 +86,24 @@ export const useTimerInitialization = ({
     isExpanded,
     pauseTimeLeft,
     handleToggle: timerHandlers.handleToggle,
-    handleComplete: timerHandlers.handleComplete, // This now correctly returns Promise<void>
+    handleComplete: timerHandlers.handleComplete,
     handleAddTime: timerHandlers.handleAddTime,
   });
 
-  // Use the auto-complete hook with correct Promise<void> return type
+  // Use the auto-complete hook
   const handleAutoComplete = useTimerAutoComplete({
     isRunning,
     pause: pauseTimer,
     playSound,
     metrics,
-    completeTimer: timerHandlers.handleComplete, // This now correctly returns Promise<void>
+    completeTimer: timerHandlers.handleComplete,
     onComplete,
     taskName,
     setCompletionMetrics,
     setShowCompletion,
   });
 
-  // Create an async wrapper for handleCloseCompletion to return Promise<void>
+  // Create an async wrapper for handleCloseCompletion
   const handleCloseCompletion = async (): Promise<void> => {
     setShowCompletion(false);
     setCompletionMetrics(null);
@@ -130,10 +130,9 @@ export const useTimerInitialization = ({
     // Handlers
     timerHandlers: {
       ...timerHandlers,
-      handleCloseCompletion, // Use the async version that returns Promise<void>
+      handleCloseCompletion,
       handleCloseTimer: timerHandlers.handleClose,
       handleAddTimeAndContinue: timerHandlers.handleAddTime,
-      handleComplete: timerHandlers.handleComplete,
     },
     
     // Props generators
