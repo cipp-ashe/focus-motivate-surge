@@ -20,11 +20,11 @@ export const useAutoComplete = ({
   playSound: () => void;
   metrics: TimerStateMetrics;
   completeTimer: () => Promise<void>;
-  onComplete?: ((metrics: TimerStateMetrics) => void);
+  onComplete?: (metrics: TimerStateMetrics) => void;
   taskName: string;
   setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
   setShowCompletion: (show: boolean) => void;
-}): () => Promise<void> { // Explicitly return Promise<void> type
+}): () => Promise<void> => { // Fixed the syntax error here - changed from { to =>
   return useCallback(async () => {
     if (isRunning) {
       pause();
