@@ -71,7 +71,7 @@ export interface TimerControlsProps {
   isRunning: boolean;
   isPaused?: boolean;
   onToggle: () => void;
-  onComplete: () => void;
+  onComplete: () => Promise<void>; // FIXED: Update to Promise<void>
   onAddTime?: (minutes: number) => void;
   showAddTime?: boolean;
   size?: 'normal' | 'large';

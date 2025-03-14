@@ -29,13 +29,15 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
   const iconSize = size === "large" ? "h-6 w-6" : "h-5 w-5";
   const gapSize = size === "large" ? "gap-4" : "gap-2";
 
-  // Handle complete click ensuring Promise is properly handled
-  const handleCompleteClick = () => {
+  // Handle complete click - ensuring we properly handle the Promise return type
+  const handleCompleteClick = async () => {
     if (onComplete) {
-      // Call the Promise-returning function and handle any errors
-      onComplete().catch(error => {
+      try {
+        // Explicitly await the Promise returned by onComplete
+        await onComplete();
+      } catch (error) {
         console.error("Error completing timer:", error);
-      });
+      }
     }
   };
 

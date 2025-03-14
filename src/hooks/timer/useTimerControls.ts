@@ -9,8 +9,8 @@ interface UseTimerControlsParams {
   metrics: TimerStateMetrics;
   onStart: () => void;
   onPause: () => void;
-  onComplete: () => void;
-  onAddTime?: (minutes: number) => void;  // Consistent signature
+  onComplete: () => Promise<void>;  // Make sure this returns Promise<void>
+  onAddTime?: (minutes: number) => void;
 }
 
 export const useTimerControls = ({
@@ -30,8 +30,9 @@ export const useTimerControls = ({
     }
   }, [isRunning, onPause, onStart]);
 
-  const handleComplete = useCallback(() => {
-    onComplete();
+  // Return a Promise here too
+  const handleComplete = useCallback(async (): Promise<void> => {
+    return onComplete();
   }, [onComplete]);
 
   // Consistently accepts a minutes parameter with default value
