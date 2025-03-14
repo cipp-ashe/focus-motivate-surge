@@ -1,7 +1,7 @@
-import { supabase } from '@/lib/supabase/client';
-import { Task } from '@/types/tasks';
-import { HabitDetail, ActiveTemplate } from '@/components/habits/types';
 import { toast } from 'sonner';
+import { taskStorage } from '@/lib/storage/taskStorage';
+import { Task } from '@/types/tasks';
+import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 
 /**
@@ -127,20 +127,72 @@ export const syncNotesToSupabase = async (userId: string): Promise<boolean> => {
 };
 
 /**
- * Synchronize all local data to Supabase
+ * Sync local data to Supabase after first login
+ * @param userId The user's ID from Supabase Auth
  */
-export const syncLocalDataToSupabase = async (userId: string): Promise<void> => {
-  toast.info('Syncing your data to the cloud...', { id: 'sync-data' });
+export const syncLocalDataToSupabase = async (userId: string) => {
+  console.log(`Syncing local data to Supabase for user ${userId}`);
   
-  // Sync all data types
-  const tasksSuccess = await syncTasksToSupabase(userId);
-  const habitsSuccess = await syncHabitsToSupabase(userId);
-  const notesSuccess = await syncNotesToSupabase(userId);
-  
-  if (tasksSuccess && habitsSuccess && notesSuccess) {
-    toast.success('All your data has been synced to the cloud!', { id: 'sync-data' });
-  } else {
-    toast.error('Some data could not be synced. Please try again later.', { id: 'sync-data' });
+  try {
+    const localTasks = taskStorage.loadTasks();
+    
+    if (localTasks.length === 0) {
+      console.log('No local tasks to sync');
+      return;
+    }
+    
+    toast.info(`Syncing ${localTasks.length} tasks to your account...`);
+    
+    // First check if user already has tasks in Supabase
+    const { data: existingTasks } = await supabase
+      .from('tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .limit(1);
+    
+    if (existingTasks && existingTasks.length > 0) {
+      console.log('User already has tasks in Supabase, skipping sync');
+      toast.info('Your account already has task data. Local tasks won\'t be synced to avoid duplicates.');
+      return;
+    }
+    
+    // Convert tasks to Supabase format
+    const tasksToInsert = localTasks.map(task => ({
+      id: task.id,
+      user_id: userId,
+      name: task.name,
+      description: task.description || '',
+      status: task.status || 'pending',
+      task_type: task.taskType || 'regular',
+      completed: !!task.completed,
+      completed_at: task.completedAt || null,
+      created_at: task.createdAt,
+      estimated_minutes: task.duration ? Math.floor(task.duration / 60) : null,
+      parent_id: null, // task.parentId is not in the Task type
+      priority: task.priority || 'medium',
+      tags: task.tags || [],
+      metrics: task.metrics ? JSON.stringify(task.metrics) : null,
+      relationships: task.relationships ? JSON.stringify(task.relationships) : null
+    }));
+    
+    // Insert in batches to avoid request size limits
+    const batchSize = 50;
+    for (let i = 0; i < tasksToInsert.length; i += batchSize) {
+      const batch = tasksToInsert.slice(i, i + batchSize);
+      const { error } = await supabase.from('tasks').insert(batch);
+      
+      if (error) {
+        console.error('Error syncing batch:', error);
+        toast.error('Error syncing some tasks');
+      }
+    }
+    
+    toast.success('Tasks successfully synced to your account!');
+    console.log('Local tasks synced to Supabase successfully');
+    
+  } catch (error) {
+    console.error('Error syncing local data to Supabase:', error);
+    toast.error('Error syncing tasks to your account');
   }
 };
 
