@@ -96,8 +96,8 @@ export const useTimerInitialization = ({
     pause: pauseTimer,
     playSound,
     metrics,
-    completeTimer: () => {
-      // Ensure we return the promise from handleComplete
+    completeTimer: async () => {
+      // Explicitly make this async and return the Promise from handleComplete
       return timerHandlers.handleComplete();
     },
     onComplete,

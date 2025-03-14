@@ -63,8 +63,10 @@ export const useTimerHandlers = ({
     reset: resetTimer,
     addTime: extendTimer,
     completeTimer: async () => {
-      const result = timerComplete();
-      return Promise.resolve(result);
+      // Call the timer complete function to get the metrics
+      const metrics = timerComplete();
+      // Discard the return value to match the Promise<void> return type
+      return Promise.resolve();
     },
     playSound,
     onAddTime,
