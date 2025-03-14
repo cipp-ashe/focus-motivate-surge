@@ -97,7 +97,7 @@ export const useTimerInitialization = ({
     playSound,
     metrics,
     completeTimer: () => {
-      // Use the extracted completeTimer function
+      // Ensure we return the promise from handleComplete
       return timerHandlers.handleComplete();
     },
     onComplete,
