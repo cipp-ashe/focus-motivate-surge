@@ -3,6 +3,7 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { Task } from '@/types/tasks';
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { ActiveTemplate } from '@/components/habits/types';
 
 /**
  * Synchronize local tasks to Supabase
