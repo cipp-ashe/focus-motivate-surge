@@ -1,3 +1,4 @@
+
 @import './styles/electron.css';
 
 @tailwind base;
@@ -30,11 +31,11 @@
   }
 
   .section-container {
-    @apply h-full flex flex-col bg-card/50 backdrop-blur-sm rounded-lg border border-border/50;
+    @apply h-full flex flex-col glass-effect rounded-xl shadow-glass border-border/40;
   }
 
   .scrollable-content {
-    @apply flex-1 overflow-y-auto px-4 py-2 space-y-2;
+    @apply flex-1 overflow-y-auto px-4 py-2 space-y-3;
   }
 
   .section-header {
@@ -48,7 +49,7 @@
   /* Mobile optimizations */
   @media (max-width: 640px) {
     .mobile-container {
-      @apply px-2 py-1;
+      @apply px-3 py-1.5;
     }
     
     .mobile-text {
@@ -56,22 +57,45 @@
     }
     
     .mobile-compact-padding {
-      @apply p-2;
+      @apply p-3;
     }
     
     .mobile-bottom-spacing {
-      @apply pb-16;
+      @apply pb-20;
     }
     
     .mobile-touch-target {
-      @apply min-h-10 min-w-10;
+      @apply min-h-11 min-w-11;
     }
+  }
+
+  /* Modern card styles */
+  .card-modern {
+    @apply bg-card/70 backdrop-blur-md rounded-xl border border-border/40 shadow-glass overflow-hidden transition-all duration-300;
+  }
+
+  .card-modern:hover {
+    @apply shadow-xl border-primary/20;
+  }
+
+  /* Button styles */
+  .btn-modern {
+    @apply rounded-lg px-4 py-2 font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98];
+  }
+
+  .btn-primary-modern {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  .btn-ghost-modern {
+    @apply bg-transparent hover:bg-primary/10 text-foreground;
   }
 }
 
 @layer utilities {
   .animate-gradient {
     animation: gradient 15s ease infinite;
+    background-size: 200% 200%;
   }
 
   .scrollbar-thin {
@@ -97,6 +121,19 @@
   
   ::-webkit-scrollbar-thumb {
     border-radius: 6px;
+  }
+  
+  /* Custom utilities */
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  .backdrop-blur-card {
+    backdrop-filter: blur(12px);
+  }
+  
+  .glass-card {
+    @apply bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-xl;
   }
   
   /* Mobile-specific utilities */

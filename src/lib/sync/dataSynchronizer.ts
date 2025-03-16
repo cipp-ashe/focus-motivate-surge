@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { Task } from '@/types/tasks';
@@ -170,7 +171,6 @@ export const syncLocalDataToSupabase = async (userId: string) => {
       created_at: task.createdAt,
       estimated_minutes: task.duration ? Math.floor(task.duration / 60) : null,
       parent_id: null, // task.parentId is not in the Task type
-      priority: task.priority || 'medium',
       tags: task.tags || [],
       metrics: task.metrics ? JSON.stringify(task.metrics) : null,
       relationships: task.relationships ? JSON.stringify(task.relationships) : null

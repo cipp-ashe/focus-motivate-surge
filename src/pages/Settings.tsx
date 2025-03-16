@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
-import { ArrowRight, LogIn } from 'lucide-react';
+import { ArrowRight, LogIn, MoonStar, Sun, User, PaintBucket, Info } from 'lucide-react';
 import { useTheme } from '@/components/theme-provider';
 
 const Settings = () => {
@@ -19,13 +19,16 @@ const Settings = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+    <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <h1 className="text-3xl font-bold mb-8 text-gradient-primary">Settings</h1>
       
       {/* Authentication Card */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Account</CardTitle>
+      <Card className="mb-8 card-hover-effect bg-card/60 backdrop-blur-md border border-primary/10">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            Account
+          </CardTitle>
           <CardDescription>
             {isAuthenticated 
               ? "Manage your account settings" 
@@ -34,13 +37,13 @@ const Settings = () => {
         </CardHeader>
         <CardContent>
           {isAuthenticated ? (
-            <div className="space-y-2">
+            <div className="space-y-3 p-4 rounded-lg bg-foreground/5">
               <p><span className="font-medium">Email:</span> {user?.email}</p>
               <p><span className="font-medium">Account ID:</span> <span className="text-xs text-muted-foreground">{user?.id}</span></p>
               <p><span className="font-medium">Last Sign In:</span> {user?.last_sign_in_at && new Date(user.last_sign_in_at).toLocaleString()}</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-4 p-4 rounded-lg bg-foreground/5">
               <p className="text-muted-foreground">
                 You're currently using Focus Notes without an account. Your data is stored locally on this device only.
               </p>
@@ -50,17 +53,17 @@ const Settings = () => {
             </div>
           )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="pt-2">
           {isAuthenticated ? (
-            <Button variant="destructive" onClick={signOut}>
+            <Button variant="destructive" onClick={signOut} className="w-full sm:w-auto">
               Sign Out
             </Button>
           ) : (
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto bg-primary hover:bg-primary/90 shadow button-glow">
               <Link to="/auth" className="flex items-center gap-2">
                 <LogIn className="h-4 w-4" />
                 Sign In / Create Account
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 ml-auto" />
               </Link>
             </Button>
           )}
@@ -68,15 +71,21 @@ const Settings = () => {
       </Card>
       
       {/* Theme Settings */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Appearance</CardTitle>
+      <Card className="mb-8 card-hover-effect bg-card/60 backdrop-blur-md border border-primary/10">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2">
+            <PaintBucket className="h-5 w-5 text-primary" />
+            Appearance
+          </CardTitle>
           <CardDescription>Customize the app's appearance</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="dark-mode">Dark Mode</Label>
+          <div className="flex items-center justify-between p-4 rounded-lg bg-foreground/5">
+            <div className="space-y-1">
+              <Label htmlFor="dark-mode" className="text-base font-medium flex items-center gap-2">
+                {isDark ? <MoonStar className="h-4 w-4 text-purple-400" /> : <Sun className="h-4 w-4 text-amber-400" />}
+                {isDark ? 'Dark Mode' : 'Light Mode'}
+              </Label>
               <p className="text-sm text-muted-foreground">
                 Switch between light and dark themes
               </p>
@@ -85,24 +94,30 @@ const Settings = () => {
               id="dark-mode"
               checked={isDark}
               onCheckedChange={toggleTheme}
+              className="data-[state=checked]:bg-primary"
             />
           </div>
         </CardContent>
       </Card>
       
       {/* About Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>About</CardTitle>
+      <Card className="bg-card/60 backdrop-blur-md border border-primary/10 card-hover-effect">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-primary" />
+            About
+          </CardTitle>
           <CardDescription>Focus Notes App</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Version 1.0.0
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            A productivity application for managing tasks, tracking time, and building habits.
-          </p>
+          <div className="p-4 rounded-lg bg-foreground/5 space-y-3">
+            <p className="text-sm font-medium">
+              Version 1.0.0
+            </p>
+            <p className="text-sm text-muted-foreground">
+              A productivity application for managing tasks, tracking time, and building habits.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

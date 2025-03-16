@@ -1,7 +1,7 @@
 
-/* Base theme styles */
+/* Base theme styles with modern design approach */
 #root {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0;
   text-align: center;
@@ -11,82 +11,129 @@
   overflow-y: auto;
 }
 
-/* Themed Scrollbars */
+/* Enhanced Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(124, 58, 237, 0.05);
-  border-radius: 4px;
+  background: rgba(124, 58, 237, 0.03);
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #7C3AED, #8B5CF6);
-  border-radius: 4px;
+  background: linear-gradient(to bottom, rgba(124, 58, 237, 0.5), rgba(139, 92, 246, 0.5));
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #6D28D9, #7C3AED);
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  background: linear-gradient(to bottom, rgba(109, 40, 217, 0.6), rgba(124, 58, 237, 0.6));
 }
 
 /* Enhanced shadows and glass effects */
 .shadow-glass {
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
 }
 
 .shadow-glow {
-  box-shadow: 0 0 15px -3px hsl(var(--primary) / 0.2);
+  box-shadow: 0 0 25px -5px hsl(var(--primary) / 0.25);
 }
 
 .glass-effect {
-  @apply backdrop-blur-lg bg-card/40 border border-white/10;
+  @apply backdrop-blur-xl bg-card/30 border border-white/10 dark:border-white/5;
+}
+
+.glass-card {
+  @apply backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/5 shadow-xl;
 }
 
 /* Text gradient effects */
 .text-gradient-primary {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400 dark:from-primary dark:to-purple-300;
 }
 
 .text-gradient-secondary {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-primary;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-primary dark:from-purple-300 dark:to-primary;
 }
 
-/* Button hover effects */
+/* Button styles and hover effects */
 .button-glow:hover {
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.4);
+  box-shadow: 0 0 15px hsl(var(--primary) / 0.5);
+  transform: translateY(-1px);
+}
+
+.button-scale {
+  @apply transition-all duration-200;
+}
+
+.button-scale:hover {
+  transform: scale(1.02);
+}
+
+.button-scale:active {
+  transform: scale(0.98);
 }
 
 /* Enhanced card styling */
 .card-hover-effect {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/5;
+  @apply transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:translate-y-[-2px];
 }
 
 /* Custom focus styles */
 .focus-ring:focus {
-  @apply outline-none ring-2 ring-primary/40 ring-offset-2;
+  @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
 }
 
 /* Form element styling */
 .input-bordered {
-  @apply border border-primary/20 focus:border-primary/30 focus:ring-1 focus:ring-primary/20;
+  @apply border border-primary/30 focus:border-primary/40 focus:ring-2 focus:ring-primary/20;
+}
+
+/* Animation utilities */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Responsive design utilities */
+.responsive-card {
+  @apply w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] p-4 sm:p-5;
+}
+
+.responsive-padding {
+  @apply px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4;
+}
+
+/* Enhanced container styles */
+.container-fancy {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  @apply bg-gradient-to-br from-violet-500/20 to-purple-500/20 dark:from-violet-800/20 dark:to-purple-900/20;
+}
+
+.bg-gradient-subtle {
+  @apply bg-gradient-to-tr from-background to-muted/50;
 }

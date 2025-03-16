@@ -1,15 +1,17 @@
+
 import React, { useState } from 'react';
-import { Task, Tag } from '@/types/tasks';
+import { Task } from '@/types/tasks';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow, format } from 'date-fns';
-import { Timer, Image, FileText, Calendar, BookOpen, CheckSquare, Mic, Plus } from 'lucide-react';
+import { Timer, Image, FileText, BookOpen, CheckSquare, Mic, Plus, X } from 'lucide-react';
 import { TaskTags } from './TaskTags';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { v4 as uuidv4 } from 'uuid';
 import { useTaskManager } from '@/hooks/tasks/useTaskManager';
 import { deleteTaskOperations } from '@/lib/operations/tasks/delete';
+import { Badge } from '@/components/ui/badge';
 
 interface TaskItemProps {
   task: Task;
@@ -100,36 +102,41 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
   return (
     <div
       className={cn(
-        'flex items-start gap-2 p-3 hover:bg-accent rounded-md cursor-pointer transition-colors relative group',
-        isSelected && 'bg-accent'
+        'flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all duration-200 group',
+        isSelected ? 'bg-accent shadow-md' : 'hover:bg-accent/50'
       )}
       onClick={() => onClick(task.id)}
     >
       <Checkbox
         checked={task.completed}
-        className="mt-1"
+        className="mt-1 border-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
         onClick={(e) => {
           e.stopPropagation();
         }}
       />
+      
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          {getTaskTypeIcon()}
-          <h3 className="font-medium text-sm truncate">{task.name}</h3>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 py-0.5">
+            {getTaskTypeIcon()}
+            <h3 className="font-medium text-sm truncate">{task.name}</h3>
+          </span>
+          
           {isFromHabit && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-green-100 text-green-800">
+            <Badge variant="outline" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800 text-xs px-2">
               habit
-            </span>
+            </Badge>
           )}
+          
           {formattedScheduledDate && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 text-xs px-2">
               {formattedScheduledDate}
-            </span>
+            </Badge>
           )}
         </div>
         
         {task.tags && task.tags.length > 0 && (
-          <div className="mt-1">
+          <div className="mt-2">
             <TaskTags 
               tags={task.tags} 
               readOnly={false} 
@@ -142,31 +149,36 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
         )}
         
         {showTagInput ? (
-          <div className="flex items-center gap-1 mt-1" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1 mt-2 bg-background/50 rounded-md p-1" onClick={(e) => e.stopPropagation()}>
             <Input
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
-              placeholder="Tag name"
-              className="h-7 text-xs"
+              placeholder="Add tag"
+              className="h-8 text-xs rounded-md border-border/50 focus:border-primary/50"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAddTag();
                 if (e.key === 'Escape') setShowTagInput(false);
               }}
             />
-            <Button size="sm" variant="outline" className="h-7 px-2" onClick={handleAddTag}>
-              Add
-            </Button>
+            <div className="flex gap-1">
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setShowTagInput(false)}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+              <Button size="sm" variant="default" className="h-8 px-3" onClick={handleAddTag}>
+                Add
+              </Button>
+            </div>
           </div>
         ) : (
           <>
             {taskDetails && (
-              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              <p className="text-xs text-muted-foreground mt-1.5 truncate">
                 {taskDetails}
               </p>
             )}
             
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-1">
               Created {formatDistanceToNow(createdDate, { addSuffix: true })}
             </p>
           </>
@@ -174,17 +186,19 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
       </div>
       
       {!showTagInput && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowTagInput(true);
-          }}
-        >
-          <Plus className="h-3 w-3" />
-        </Button>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-7 w-7 rounded-full hover:bg-primary/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowTagInput(true);
+            }}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       )}
     </div>
   );
