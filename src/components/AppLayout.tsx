@@ -1,16 +1,15 @@
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { Home, CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface AppLayoutProps {
-  children?: ReactNode;
+  children?: React.ReactNode;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile(1024);
-  const content = children || <Outlet />;
   
   return (
     <div className="flex flex-col min-h-screen bg-background dark:bg-gray-900 transition-colors duration-300">
@@ -80,7 +79,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {/* Main content */}
         <main className="flex-1 pb-16 md:pb-0">
           <div className="relative z-10 container mx-auto px-4 py-4">
-            {content}
+            {children || <Outlet />}
           </div>
         </main>
       </div>

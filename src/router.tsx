@@ -1,6 +1,5 @@
 
 import { createBrowserRouter } from "react-router-dom";
-import App from "./App";
 import Index from "./pages/Index";
 import TaskPage from "./pages/TaskPage";
 import Timer from "./pages/Timer";
@@ -13,12 +12,13 @@ import VoiceNotes from "./pages/VoiceNotes";
 import Screenshots from "./pages/Screenshots";
 import SecurityControlsPage from "./pages/SecurityControls";
 import { RequireAuth } from "./components/auth/RequireAuth";
+import AppLayout from "./components/AppLayout";
 
 // Create and export the router configuration
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <AppLayout />,
     children: [
       {
         index: true,

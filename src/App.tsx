@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Outlet, RouterProvider } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { setupGlobalErrorHandlers } from './utils/errorHandler';
 import { toast } from 'sonner';
@@ -38,7 +38,7 @@ function App() {
     );
   }
   
-  // Use RouterProvider instead of Outlet directly
+  // Provide the router
   return <RouterProvider router={router} />;
 }
 

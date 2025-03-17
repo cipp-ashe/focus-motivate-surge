@@ -36,6 +36,7 @@ const HabitsPage = () => {
               <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                 Habit Tracker
               </h1>
+              <p className="text-muted-foreground">Build consistent habits and track your progress</p>
             </div>
             
             <ErrorBoundary FallbackComponent={ErrorFallback}>
