@@ -2,5 +2,9 @@
 import { MutableRefObject } from "react";
 
 export interface TimerExpandedViewRef {
-  saveNotes: () => void;
+  expand: () => void;
+  collapse: () => void;
+  toggleExpansion: () => void;
+  isExpanded: boolean;
+  saveNotes?: () => void;
 }

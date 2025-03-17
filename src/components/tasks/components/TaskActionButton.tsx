@@ -1,19 +1,19 @@
+
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Pencil, Check, X, Trash } from 'lucide-react';
+import { MoreHorizontal, Check, X, Trash, Clock, Edit, PlayCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 export interface TaskActionButtonProps {
   task: Task;
-  onTaskAction?: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => void;
-  editingTaskId?: string | null;
-  inputValue?: string;
+  onTaskAction?: (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => void;
   dialogOpeners?: {
     checklist?: (taskId: string, taskName: string, items: any[]) => void;
     journal?: (taskId: string, taskName: string, entry: string) => void;
@@ -22,157 +22,118 @@ export interface TaskActionButtonProps {
   };
 }
 
-export const TaskActionButton: React.FC<TaskActionButtonProps> = ({ 
-  task, 
+export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
+  task,
   onTaskAction,
-  editingTaskId,
-  inputValue,
   dialogOpeners
 }) => {
-  // Determine if this task is currently being edited
-  const isEditing = editingTaskId === task.id;
-
-  // Check if there is task specific data
-  const hasJournalEntry = task.journalEntry && task.journalEntry.trim().length > 0;
-  const hasChecklist = task.checklistItems && task.checklistItems.length > 0;
-  const hasImage = task.imageUrl && task.imageUrl.trim().length > 0;
-  const hasAudio = task.voiceNoteUrl && task.voiceNoteUrl.trim().length > 0;
-
-  // Handle dropdown actions
-  const handleAction = (e: React.MouseEvent<HTMLDivElement>, actionType: string) => {
+  if (!onTaskAction) return null;
+  
+  const showPlayButton = task.taskType === 'voicenote' && task.voiceNoteUrl;
+  
+  const handleAction = (e: React.MouseEvent<HTMLButtonElement>, actionType: string) => {
     e.stopPropagation();
+    e.preventDefault();
+    
     if (onTaskAction) {
       onTaskAction(e, actionType);
     }
+    
+    // Handle special case for voice notes
+    if (actionType === 'play-voicenote' && task.voiceNoteUrl) {
+      const audio = new Audio(task.voiceNoteUrl);
+      audio.play().catch(err => console.error('Failed to play voice note:', err));
+    }
   };
-
-  if (isEditing) {
-    return (
-      <div className="flex items-center gap-1">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={(e) => onTaskAction?.(e, 'cancel')}
-          className="h-7 w-7 p-0"
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="default"
-          onClick={(e) => onTaskAction?.(e, 'save')}
-          className="h-7 w-7 p-0"
-          disabled={!inputValue || inputValue.trim() === ''}
-        >
-          <Check className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-    );
-  }
-
+  
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <div className="flex items-center gap-1">
+      {showPlayButton && (
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0"
-          onClick={(e) => e.stopPropagation()}
+          className="h-8 w-8 p-0"
+          onClick={(e) => handleAction(e, 'play-voicenote')}
         >
-          <MoreHorizontal className="h-4 w-4" />
+          <PlayCircle className="h-4 w-4" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        {/* Edit action */}
-        <DropdownMenuItem
-          onClick={(e) => handleAction(e, 'edit')}
-          className="flex items-center gap-2"
-        >
-          <Pencil className="h-4 w-4" />
-          <span>Edit</span>
-        </DropdownMenuItem>
-
-        {/* Special actions based on task type */}
-        {task.taskType === 'journal' && (
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, 'journal')}
-            className="flex items-center gap-2"
+      )}
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={(e) => e.stopPropagation()}
           >
-            <span>Open Journal</span>
-            {hasJournalEntry && (
-              <span className="ml-auto h-2 w-2 rounded-full bg-primary"></span>
-            )}
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-[160px]">
+          <DropdownMenuItem onClick={(e) => handleAction(e as any, 'edit')}>
+            <Edit className="mr-2 h-4 w-4" />
+            <span>Edit</span>
           </DropdownMenuItem>
-        )}
-
-        {task.taskType === 'checklist' && (
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, 'checklist')}
-            className="flex items-center gap-2"
+          
+          {task.taskType === 'timer' && (
+            <DropdownMenuItem onClick={(e) => handleAction(e as any, 'timer')}>
+              <Clock className="mr-2 h-4 w-4" />
+              <span>Set Timer</span>
+            </DropdownMenuItem>
+          )}
+          
+          {task.taskType === 'checklist' && dialogOpeners?.checklist && (
+            <DropdownMenuItem onClick={(e) => handleAction(e as any, 'checklist')}>
+              <Check className="mr-2 h-4 w-4" />
+              <span>Edit Checklist</span>
+            </DropdownMenuItem>
+          )}
+          
+          {task.taskType === 'journal' && dialogOpeners?.journal && (
+            <DropdownMenuItem onClick={(e) => handleAction(e as any, 'journal')}>
+              <Edit className="mr-2 h-4 w-4" />
+              <span>Edit Journal</span>
+            </DropdownMenuItem>
+          )}
+          
+          {task.taskType === 'screenshot' && task.imageUrl && dialogOpeners?.screenshot && (
+            <DropdownMenuItem onClick={(e) => handleAction(e as any, 'screenshot')}>
+              <Edit className="mr-2 h-4 w-4" />
+              <span>View Screenshot</span>
+            </DropdownMenuItem>
+          )}
+          
+          {task.taskType === 'voicenote' && dialogOpeners?.voicenote && (
+            <DropdownMenuItem onClick={(e) => handleAction(e as any, 'voicenote')}>
+              <Edit className="mr-2 h-4 w-4" />
+              <span>Voice Note</span>
+            </DropdownMenuItem>
+          )}
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={(e) => handleAction(e as any, 'complete')}>
+            <Check className="mr-2 h-4 w-4 text-green-600" />
+            <span>Complete</span>
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={(e) => handleAction(e as any, 'dismiss')}>
+            <X className="mr-2 h-4 w-4 text-amber-500" />
+            <span>Dismiss</span>
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem 
+            onClick={(e) => handleAction(e as any, 'delete')}
+            className="text-destructive focus:text-destructive"
           >
-            <span>Open Checklist</span>
-            {hasChecklist && (
-              <span className="ml-auto h-2 w-2 rounded-full bg-primary"></span>
-            )}
+            <Trash className="mr-2 h-4 w-4" />
+            <span>Delete</span>
           </DropdownMenuItem>
-        )}
-
-        {task.taskType === 'timer' && (
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, 'timer')}
-            className="flex items-center gap-2"
-          >
-            <span>Start Timer</span>
-          </DropdownMenuItem>
-        )}
-
-        {task.taskType === 'screenshot' && hasImage && (
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, 'screenshot')}
-            className="flex items-center gap-2"
-          >
-            <span>View Screenshot</span>
-          </DropdownMenuItem>
-        )}
-
-        {task.taskType === 'voicenote' && hasAudio && (
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, 'voicenote')}
-            className="flex items-center gap-2"
-          >
-            <span>Play Voice Note</span>
-          </DropdownMenuItem>
-        )}
-
-        {/* Complete action */}
-        <DropdownMenuItem
-          onClick={(e) => handleAction(e, 'complete')}
-          className="flex items-center gap-2 text-green-600"
-        >
-          <Check className="h-4 w-4" />
-          <span>Complete</span>
-        </DropdownMenuItem>
-
-        {/* Dismiss action */}
-        <DropdownMenuItem
-          onClick={(e) => handleAction(e, 'dismiss')}
-          className="flex items-center gap-2 text-amber-600"
-        >
-          <X className="h-4 w-4" />
-          <span>Dismiss</span>
-        </DropdownMenuItem>
-
-        {/* Delete action */}
-        <DropdownMenuItem
-          onClick={(e) => handleAction(e, 'delete')}
-          className="flex items-center gap-2 text-red-600"
-        >
-          <Trash className="h-4 w-4" />
-          <span>Delete</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };

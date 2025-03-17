@@ -2,7 +2,8 @@
 import React from "react";
 import { TimerCompactView } from "./TimerCompactView";
 import { TimerExpandedView } from "./TimerExpandedView";
-import { TimerExpandedViewRef, Quote, SoundOption } from "@/types/timer";
+import { TimerExpandedViewRef } from "@/types/timer/views";
+import { Quote, SoundOption } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 
 interface TimerRendererProps {
@@ -71,7 +72,11 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
       onSoundChange={setSelectedSound}
       onTestSound={testSound}
       isLoadingAudio={isLoadingAudio}
-      onCollapse={() => expandedViewRef.current?.collapse()}
+      onCollapse={() => {
+        if (expandedViewRef.current) {
+          expandedViewRef.current.collapse();
+        }
+      }}
       onLike={handleLike}
       handleCloseTimer={handleCloseTimer}
       favorites={favorites}
@@ -89,7 +94,11 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
       onSoundChange={setSelectedSound}
       onTestSound={testSound}
       isLoadingAudio={isLoadingAudio}
-      onExpand={() => expandedViewRef.current?.expand()}
+      onExpand={() => {
+        if (expandedViewRef.current) {
+          expandedViewRef.current.expand();
+        }
+      }}
       onLike={handleLike}
       favorites={favorites}
       setFavorites={setFavorites}

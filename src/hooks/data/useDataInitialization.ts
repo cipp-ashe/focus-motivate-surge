@@ -53,7 +53,9 @@ export const useDataInitialization = () => {
         // Use a short timeout and emit just once
         setTimeout(() => {
           console.log("Emitting initialization events (once)");
-          eventManager.emit('app:initialized', {});
+          eventManager.emit('app:initialized', {
+            timestamp: new Date().toISOString()
+          });
           window.dispatchEvent(new CustomEvent('force-task-update'));
         }, 100);
       }

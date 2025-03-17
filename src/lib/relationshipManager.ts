@@ -39,8 +39,10 @@ class RelationshipManager {
     
     // Handle tag relationships
     eventManager.on('tag:link', ({ tagId, entityId, entityType }) => {
-      if (entityType) {
-        this.createRelationship(tagId, 'tag' as EntityType, entityId, entityType, 'tag-entity');
+      if (entityType && typeof entityType === 'string') {
+        // Convert string to EntityType (type assertion)
+        const validEntityType = entityType as EntityType;
+        this.createRelationship(tagId, 'tag' as EntityType, entityId, validEntityType, 'tag-entity');
       }
     });
     
@@ -49,8 +51,11 @@ class RelationshipManager {
     });
     
     // Handle quote relationships
-    eventManager.on('quote:link-task', ({ quoteId, taskId }) => {
-      this.createRelationship(quoteId, 'quote' as EntityType, taskId, 'task' as EntityType, 'quote-task');
+    eventManager.on('quote:link-task', (payload) => {
+      if (payload && typeof payload === 'object' && 'quoteId' in payload && 'taskId' in payload) {
+        const { quoteId, taskId } = payload;
+        this.createRelationship(quoteId, 'quote' as EntityType, taskId, 'task' as EntityType, 'quote-task');
+      }
     });
     
     // Handle habit template relationships

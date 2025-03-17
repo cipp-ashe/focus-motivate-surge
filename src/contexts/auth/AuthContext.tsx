@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!initialAuthEventEmitted) {
         initialAuthEventEmitted = true;
         eventManager.emit('auth:state-change', { 
-          event: 'INITIAL_SESSION', 
+          userId: session?.user?.id || 'anonymous',
           user: session?.user ?? null 
         });
       }
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Skip 'INITIAL_SESSION' events as we've already emitted that
       if (_event !== 'INITIAL_SESSION') {
         eventManager.emit('auth:state-change', { 
-          event: _event, 
+          userId: session?.user?.id || 'anonymous',
           user: session?.user ?? null 
         });
       }
@@ -90,7 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         toast.success('Signed in successfully');
-        eventManager.emit('auth:signed-in', { user: session.user });
+        eventManager.emit('auth:signed-in', { 
+          userId: session.user.id 
+        });
       } else if (_event === 'SIGNED_OUT') {
         realtimeEnabledRef.current = false;
         eventManager.emit('auth:signed-out', {});

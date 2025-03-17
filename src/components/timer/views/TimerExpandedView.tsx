@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { QuoteDisplay } from "@/components/quotes/QuoteDisplay";
 import { TimerMetrics } from "../TimerMetrics";
 import { TimerStateMetrics } from "@/types/metrics";
-import { Quote, SoundOption } from "@/types/timer";
+import { Quote, SoundOption, TimerExpandedViewRef } from "@/types/timer";
 
 export interface TimerExpandedViewProps {
   taskName: string;
@@ -27,13 +27,6 @@ export interface TimerExpandedViewProps {
   handleCloseTimer: () => void;
   favorites?: Quote[];
   setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
-}
-
-export interface TimerExpandedViewRef {
-  expand: () => void;
-  collapse: () => void;
-  toggleExpansion: () => void;
-  isExpanded: boolean;
 }
 
 export const TimerExpandedView = forwardRef<TimerExpandedViewRef, TimerExpandedViewProps>(({
@@ -60,7 +53,11 @@ export const TimerExpandedView = forwardRef<TimerExpandedViewRef, TimerExpandedV
     expand: () => setIsExpanded(true),
     collapse: () => setIsExpanded(false),
     toggleExpansion: () => setIsExpanded(!isExpanded),
-    isExpanded
+    isExpanded,
+    saveNotes: () => {
+      // Placeholder for notes saving functionality
+      console.log('Notes saving not implemented');
+    }
   }));
 
   return (
@@ -103,7 +100,8 @@ export const TimerExpandedView = forwardRef<TimerExpandedViewRef, TimerExpandedV
             <div className="space-y-2">
               <QuoteDisplay 
                 onLike={onLike}
-                showRandomQuotes={true}
+                // Remove showRandomQuotes as it's not in the QuoteDisplay props
+                quote={{ text: "Focus on what matters most.", author: "Productivity Tip" }}
               />
             </div>
           </div>

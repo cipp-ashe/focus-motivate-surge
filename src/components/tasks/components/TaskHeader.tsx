@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
@@ -64,7 +65,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
                 className="h-6 px-2 py-0 text-xs"
                 onClick={onDurationClick}
               >
-                {formatTime(durationInMinutes * 60)}
+                {formatTime(durationInMinutes * 60, true)}
               </Button>
             )}
             

@@ -15,6 +15,7 @@ export interface QuoteDisplayProps {
   favorites?: Quote[];
   setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
   showAsOverlay?: boolean;
+  showRandomQuotes?: boolean;
   
   // For backward compatibility
   quote?: { text: string; author: string };
@@ -29,6 +30,7 @@ export const QuoteDisplay: React.FC<QuoteDisplayProps> = ({
   favorites = [],
   setFavorites,
   showAsOverlay = false,
+  showRandomQuotes = false,
   quote
 }) => {
   // Handle both direct text/author and quote object

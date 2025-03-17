@@ -52,7 +52,10 @@ export const NoteContextProvider = ({ children }: { children: React.ReactNode })
       if (success) {
         const updatedNote = notes.notes.find(note => note.id === noteId);
         if (updatedNote) {
-          eventManager.emit('note:update', updatedNote);
+          eventManager.emit('note:update', { 
+            id: noteId, 
+            updates: updatedNote 
+          });
         }
       }
       return success;
@@ -60,7 +63,7 @@ export const NoteContextProvider = ({ children }: { children: React.ReactNode })
     deleteNote: (noteId: string) => {
       const success = notes.deleteNote(noteId);
       if (success) {
-        eventManager.emit('note:deleted', { id: noteId });
+        eventManager.emit('note:deleted', { noteId });
       }
       return success;
     },
