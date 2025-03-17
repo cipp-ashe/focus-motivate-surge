@@ -2,12 +2,21 @@
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 
-// Task state module for centralized task state management
+export interface TaskInitialState {
+  items: Task[];
+  completed: Task[];
+  selected: string | null;
+  isLoaded: boolean;
+}
+
+/**
+ * Task state management utilities
+ */
 export const taskState = {
   /**
    * Get the initial state for the task reducer
    */
-  getInitialState: () => {
+  getInitialState: (): TaskInitialState => {
     return {
       items: [],
       completed: [],
@@ -15,18 +24,17 @@ export const taskState = {
       isLoaded: false
     };
   },
-
+  
   /**
    * Load tasks from storage
    */
   loadFromStorage: () => {
     try {
-      const items = taskStorage.loadTasks();
-      const completed = taskStorage.loadCompletedTasks();
+      const { active, completed } = taskStorage.loadAllTasks();
       
       return {
-        items,
-        completed
+        items: active || [],
+        completed: completed || []
       };
     } catch (error) {
       console.error('Error loading tasks from storage:', error);
@@ -36,44 +44,14 @@ export const taskState = {
       };
     }
   },
-
+  
   /**
-   * Save active tasks to storage
+   * Verify consistency between memory and storage
    */
-  saveActiveTasks: (tasks: Task[]) => {
+  verifyConsistency: (memoryTasks: Task[]): Task[] => {
     try {
-      return taskStorage.saveTasks(tasks);
-    } catch (error) {
-      console.error('Error saving active tasks:', error);
-      return false;
-    }
-  },
-
-  /**
-   * Save completed tasks to storage
-   */
-  saveCompletedTasks: (tasks: Task[]) => {
-    try {
-      return taskStorage.saveCompletedTasks(tasks);
-    } catch (error) {
-      console.error('Error saving completed tasks:', error);
-      return false;
-    }
-  },
-
-  /**
-   * Verify consistency between active tasks and storage
-   */
-  verifyConsistency: (activeTasks: Task[]) => {
-    try {
-      const storedTasks = taskStorage.loadTasks();
-      
-      // Find tasks in storage but not in active state
-      const missingTasks = storedTasks.filter(storedTask => 
-        !activeTasks.some(activeTask => activeTask.id === storedTask.id)
-      );
-      
-      return missingTasks;
+      // Find tasks that are in storage but not in memory
+      return taskStorage.findMissingTasks(memoryTasks);
     } catch (error) {
       console.error('Error verifying task consistency:', error);
       return [];

@@ -14,27 +14,27 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
     case 'LOAD_TASKS':
       return {
         ...state,
-        items: action.payload.items,
-        completed: action.payload.completed,
+        items: action.payload.items || [],
+        completed: action.payload.completed || [],
         isLoaded: true
       };
       
     case 'ADD_TASK':
       // Don't add if task already exists
-      if (state.items.some(task => task.id === action.payload.id)) {
+      if (state.items && state.items.some(task => task.id === action.payload.id)) {
         return state;
       }
       
       return {
         ...state,
-        items: [action.payload, ...state.items]
+        items: [action.payload, ...(state.items || [])]
       };
       
     case 'UPDATE_TASK': {
       const { taskId, updates } = action.payload;
       
       // Check if updating an active task
-      if (state.items.some(task => task.id === taskId)) {
+      if (state.items && state.items.some(task => task.id === taskId)) {
         return {
           ...state,
           items: state.items.map(task => 
@@ -44,7 +44,7 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
       }
       
       // Check if updating a completed task
-      if (state.completed.some(task => task.id === taskId)) {
+      if (state.completed && state.completed.some(task => task.id === taskId)) {
         return {
           ...state,
           completed: state.completed.map(task => 
@@ -61,15 +61,15 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
       
       return {
         ...state,
-        items: state.items.filter(task => task.id !== taskId),
-        completed: state.completed.filter(task => task.id !== taskId),
+        items: state.items ? state.items.filter(task => task.id !== taskId) : [],
+        completed: state.completed ? state.completed.filter(task => task.id !== taskId) : [],
         selected: state.selected === taskId ? null : state.selected
       };
     }
       
     case 'COMPLETE_TASK': {
       const { taskId, metrics } = action.payload;
-      const taskToComplete = state.items.find(task => task.id === taskId);
+      const taskToComplete = state.items ? state.items.find(task => task.id === taskId) : undefined;
       
       if (!taskToComplete) {
         return state;
@@ -85,8 +85,8 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
       
       return {
         ...state,
-        items: state.items.filter(task => task.id !== taskId),
-        completed: [completedTask, ...state.completed],
+        items: state.items ? state.items.filter(task => task.id !== taskId) : [],
+        completed: [completedTask, ...(state.completed || [])],
         selected: state.selected === taskId ? null : state.selected
       };
     }
