@@ -2,9 +2,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
-import { eventManager } from '@/lib/events/EventManager';
 
-// Global flag to track if task loader has initialized
+// Global flags for optimization
 let taskLoaderInitialized = false;
 let migrationRun = false;
 
@@ -19,92 +18,47 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(!taskLoaderInitialized);
   const initialCheckDoneRef = useRef(false);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Run task type migration only once when component first mounts
+  // Run task loading only once
   useEffect(() => {
-    // Skip if already run globally
-    if (migrationRun || taskLoaderInitialized) return;
-    
-    // Set flag immediately to prevent duplicate runs
-    migrationRun = true;
-    
-    try {
-      // Run the migration
-      const migratedCount = taskStorage.migrateTaskTypes();
-      
-      if (migratedCount > 0) {
-        // Force a UI update
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('force-task-update'));
-        }, 100);
-      }
-    } catch (error) {
-      console.error('Error in task migration:', error);
-      // Continue even if migration fails
-    }
-  }, []);
-  
-  // Check for pending habits and load tasks when component first mounts
-  useEffect(() => {
-    // Skip if already initialized globally or locally
-    if (initialCheckDoneRef.current || taskLoaderInitialized) {
+    // Skip if already initialized globally
+    if (taskLoaderInitialized) {
       setIsLoading(false);
       return;
     }
     
+    // Set flag to prevent duplicate runs
     initialCheckDoneRef.current = true;
     
-    // Ensure loading state starts as true
-    setIsLoading(true);
-    
     try {
-      // Load initial tasks from storage
+      // Fast, direct loading of tasks from storage
       const storedTasks = taskStorage.loadTasks();
       onTasksLoaded(storedTasks);
       
-      // Mark as globally initialized
+      // Mark as globally initialized immediately
       taskLoaderInitialized = true;
+      setIsLoading(false);
       
-      // Check for pending habits after a delay
-      const timeout = setTimeout(() => {
-        try {
-          // Only emit the event if we haven't initialized yet
-          if (!taskLoaderInitialized) {
-            eventManager.emit('habits:check-pending', {});
-          }
-          
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error in habits check:", error);
-          setIsLoading(false);
-        }
-      }, 100);
-      
-      return () => {
-        clearTimeout(timeout);
-      };
+      // Only run migration if not already done
+      if (!migrationRun) {
+        migrationRun = true;
+        taskStorage.migrateTaskTypes();
+      }
     } catch (error) {
       console.error("Error in initial task loading:", error);
       setIsLoading(false);
     }
   }, [onTasksLoaded]);
 
-  // Set up a loading timeout - this ensures we don't get stuck loading forever
+  // Add a short timeout to prevent infinite loading
   useEffect(() => {
-    if (isLoading && !loadingTimeoutRef.current) {
-      loadingTimeoutRef.current = setTimeout(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading) {
         setIsLoading(false);
-        loadingTimeoutRef.current = null;
-      }, 2000);
-    }
-    
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-        loadingTimeoutRef.current = null;
       }
-    };
+    }, 1000); // Reduced from 2000ms to 1000ms
+    
+    return () => clearTimeout(timeout);
   }, [isLoading]);
 
   // Add a loading state to prevent white screen

@@ -3,7 +3,7 @@ import { Task } from '@/types/tasks';
 import { constants } from './constants';
 import { utils } from './utils';
 
-// Flag to track initial load logging
+// Flag to prevent excessive logging
 let initialLoadLogged = false;
 
 /**
@@ -17,8 +17,8 @@ export const completedTasksStorage = {
     try {
       const tasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
       
-      // Only log on first load or if there are actually tasks
-      if (!initialLoadLogged || tasks.length > 0) {
+      // Only log on first load and only if there are tasks
+      if (!initialLoadLogged && tasks.length > 0) {
         initialLoadLogged = true;
         console.log(`completedTasksStorage: Loaded ${tasks.length} completed tasks from storage`);
       }

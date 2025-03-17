@@ -3,9 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { useEvent } from '@/hooks/useEvent';
-import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
-// Global flags to prevent duplicate event handling
+// Global flag to prevent duplicate event handling
 let eventHandlersInitialized = false;
 
 export interface TaskEventHandlerProps {
@@ -17,45 +16,31 @@ export interface TaskEventHandlerProps {
 }
 
 export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
-  tasks,
   onTaskCreate,
   onTaskUpdate,
   onTaskDelete,
   onForceUpdate
 }) => {
   const isMountedRef = useRef(true);
-  const isMobile = useIsMobile();
-  const lastUpdateTimeRef = useRef(0);
   
-  // Set up event handlers with the useEvent hook
+  // Set up event handlers with the useEvent hook - these are optimized to prevent duplicates
   useEvent('task:create', onTaskCreate);
   useEvent('task:update', onTaskUpdate);
   useEvent('task:delete', onTaskDelete);
   
-  // Handle UI refresh events - this is critical for immediate UI updates
+  // Handle UI refresh events - minimize the number of handlers and debounce actions
   useEffect(() => {
     if (eventHandlersInitialized) return;
     
     eventHandlersInitialized = true;
+    const lastUpdateTimeRef = { current: 0 };
     
-    const handleTaskUiRefresh = (event: CustomEvent) => {
-      if (!isMountedRef.current) return;
-      
-      const now = Date.now();
-      if (now - lastUpdateTimeRef.current < 500) {
-        return;
-      }
-      
-      lastUpdateTimeRef.current = now;
-      onForceUpdate();
-    };
-    
-    // Combined event handler for all force update events
+    // Single combined event handler with debouncing
     const handleForceUpdate = () => {
       if (!isMountedRef.current) return;
       
       const now = Date.now();
-      if (now - lastUpdateTimeRef.current < 500) {
+      if (now - lastUpdateTimeRef.current < 1000) {
         return;
       }
       
@@ -63,22 +48,17 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       onForceUpdate();
     };
     
-    // Register all event listeners
-    window.addEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
+    // Register only the essential event listeners
     window.addEventListener('force-task-update', handleForceUpdate);
-    window.addEventListener('task-submit-complete', handleForceUpdate);
     
     return () => {
-      // Clean up all event listeners
-      window.removeEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
+      isMountedRef.current = false;
       window.removeEventListener('force-task-update', handleForceUpdate);
-      window.removeEventListener('task-submit-complete', handleForceUpdate);
     };
   }, [onForceUpdate]);
   
   // Set up cleanup for mounted ref
   useEffect(() => {
-    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };

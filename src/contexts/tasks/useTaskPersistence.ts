@@ -7,9 +7,6 @@ import { supabase } from '@/lib/supabase/client';
 
 /**
  * Hook for persisting task state to storage
- * 
- * @param tasks Active tasks to persist
- * @param completedTasks Completed tasks to persist
  */
 export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = []) => {
   const { toast } = useToast();
@@ -19,22 +16,40 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const syncInProgressRef = useRef(false);
 
-  // Helper function to compare tasks and determine if they've changed
+  // Better task comparison function that avoids unnecessary saves
   const haveTasksChanged = useCallback((oldTasks: Task[], newTasks: Task[]) => {
+    // Quick length check
     if (oldTasks.length !== newTasks.length) return true;
-    
-    // Simple length check for most cases
     if (oldTasks.length === 0 && newTasks.length === 0) return false;
     
-    // If we have more than 10 tasks, just check length for performance
-    if (newTasks.length > 10) return true;
+    // For small lists, do a proper comparison
+    if (newTasks.length <= 5) {
+      const oldJson = JSON.stringify(oldTasks);
+      const newJson = JSON.stringify(newTasks);
+      return oldJson !== newJson;
+    }
     
-    // For smaller lists, check if any task has been modified
-    // by comparing stringified versions (simple approach)
-    return JSON.stringify(oldTasks) !== JSON.stringify(newTasks);
+    // For larger lists, check IDs and modification timestamps
+    const oldTaskMap = new Map(oldTasks.map(task => [task.id, task]));
+    
+    for (const newTask of newTasks) {
+      const oldTask = oldTaskMap.get(newTask.id);
+      
+      // If task is new or has different completion status, it has changed
+      if (!oldTask || oldTask.completed !== newTask.completed) {
+        return true;
+      }
+      
+      // If task status has changed, it has changed
+      if (oldTask.status !== newTask.status) {
+        return true;
+      }
+    }
+    
+    return false;
   }, []);
 
-  // Save tasks to storage only when they actually change in a meaningful way
+  // Save tasks to storage only when they actually change
   useEffect(() => {
     if (!tasks) return; // Guard against undefined tasks
     
@@ -46,22 +61,21 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
     // Update our reference copy
     previousTasksRef.current = [...tasks];
     
-    // Debounce the save operation
+    // Debounce the save operation with a longer timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
     
     saveTimeoutRef.current = setTimeout(() => {
       try {
-        // Always save to local storage for maximum reliability
+        // Save to local storage
         taskStorage.saveTasks(tasks);
-  
-        // If user is authenticated, also save to Supabase
+        
+        // Sync to Supabase only if authenticated and we have tasks to sync
         if (user && tasks.length > 0 && !syncInProgressRef.current) {
-          // Set the sync flag to prevent multiple simultaneous syncs
           syncInProgressRef.current = true;
           
-          // We'll do this asynchronously to avoid blocking the UI
+          // We'll handle this asynchronously
           const syncToSupabase = async () => {
             try {
               for (const task of tasks) {
@@ -79,12 +93,12 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
                   metrics: task.metrics ? JSON.stringify(task.metrics) : null,
                   relationships: task.relationships ? JSON.stringify(task.relationships) : null
                 };
-  
+                
                 // Upsert to database
                 const { error } = await supabase
                   .from('tasks')
                   .upsert(dbTask, { onConflict: 'id' });
-  
+                
                 if (error) {
                   console.error('Error syncing task to Supabase:', error);
                 }
@@ -98,7 +112,7 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
               syncInProgressRef.current = false;
             }
           };
-  
+          
           syncToSupabase();
         }
       } catch (error) {
@@ -109,7 +123,7 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
       } finally {
         saveTimeoutRef.current = null;
       }
-    }, 1000); // Debounce for 1 second
+    }, 2000); // Longer debounce of 2 seconds
     
     return () => {
       if (saveTimeoutRef.current) {
@@ -176,7 +190,6 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
               }
             } catch (error) {
               console.error('Error in Supabase completed tasks sync:', error);
-              // Use toast.error instead of calling toast directly
               toast.error("Error saving completed tasks", {
                 description: "There was a problem saving your completed tasks to the cloud."
               });

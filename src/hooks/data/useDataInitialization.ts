@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { eventBus } from "@/lib/eventBus";
 import { eventManager } from "@/lib/events/EventManager";
 
-// Global flag to prevent duplicate initialization across instances
+// Global flag to prevent duplicate initialization
 let globalInitialized = false;
 let eventsEmitted = false;
 
@@ -14,72 +14,50 @@ export const useDataInitialization = () => {
     isInitialized: boolean;
     error: string | null;
   }>({
-    isInitialized: globalInitialized, // Start with global state
+    isInitialized: globalInitialized,
     error: null
   });
   
   const initRunRef = useRef(false);
 
   useEffect(() => {
-    // First check the global flag
+    // Skip if already initialized globally
     if (globalInitialized) {
       setStatus({ isInitialized: true, error: null });
       return;
     }
     
-    // Then check the local ref
+    // Skip if already initialized locally
     if (initRunRef.current) return;
     initRunRef.current = true;
     
+    console.log("Starting data initialization check");
+    
     try {
-      const requiredKeys = [
-        'schema-version',
-        'entity-relations',
-        'tag-relations'
-      ];
-
+      // Fast check for required schema
+      const requiredKeys = ['schema-version', 'entity-relations', 'tag-relations'];
       const missingKeys = requiredKeys.filter(key => !localStorage.getItem(key));
       
       if (missingKeys.length > 0) {
-        try {
-          const initialized = initializeDataStore();
-          
-          if (!initialized) {
-            const error = `Failed to initialize: ${missingKeys.join(', ')}`;
-            console.error(error);
-            setStatus({ isInitialized: false, error });
-            return;
-          }
-        } catch (initError) {
-          console.error('Error during initializeDataStore:', initError);
-          setStatus({ 
-            isInitialized: false, 
-            error: initError instanceof Error ? initError.message : 'Unknown error during initialization' 
-          });
-          return;
-        }
+        initializeDataStore();
       }
 
-      // If we got here, initialization succeeded or wasn't needed
+      // Mark as initialized
       console.log("Data initialization complete");
       setStatus({ isInitialized: true, error: null });
       globalInitialized = true;
       
-      // Emit event to trigger task loading after initialization - do this only once globally
+      // Emit event to trigger task loading - do this only once globally
       if (!eventsEmitted) {
         eventsEmitted = true;
         
-        // Use a single timeout for all events and emit only once
+        // Use a short timeout and emit just once
         setTimeout(() => {
           console.log("Emitting initialization events (once)");
-          
-          // Use a single event instead of multiple
           eventBus.emit('app:initialized', {});
           eventManager.emit('app:initialized', {});
-          
-          // Dispatch this as a regular DOM event
-          window.dispatchEvent(new CustomEvent('force-task-update', { detail: { source: 'initialization' } }));
-        }, 200);
+          window.dispatchEvent(new CustomEvent('force-task-update'));
+        }, 100);
       }
     } catch (error) {
       console.error('Error during data initialization:', error);
@@ -93,21 +71,15 @@ export const useDataInitialization = () => {
   const clearStorage = () => {
     try {
       const keysToRemove = [
-        'schema-version',
-        'entity-relations',
-        'tag-relations',
-        'taskList',
-        'completedTasks',
-        'favoriteQuotes',
-        'habit-templates',
-        'lastSyncDate',
-        'notes'
+        'schema-version', 'entity-relations', 'tag-relations',
+        'taskList', 'completedTasks', 'favoriteQuotes',
+        'habit-templates', 'lastSyncDate', 'notes'
       ];
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
       toast.success('Application data cleared');
-      globalInitialized = false; // Reset the global initialization flag
-      eventsEmitted = false; // Reset events emitted flag
+      globalInitialized = false;
+      eventsEmitted = false;
       window.location.reload();
     } catch (error) {
       console.error('Error clearing storage:', error);

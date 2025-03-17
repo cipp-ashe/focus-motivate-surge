@@ -3,37 +3,29 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
 
-// Global initialization flag to prevent duplicate initialization across the entire app
+// Global flag to prevent duplicate initialization
 let globalInitialized = false;
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(globalInitialized);
   const [initError, setInitError] = useState<Error | null>(null);
   const initStartedRef = useRef(false);
-  const mountedRef = useRef(false);
   
-  // Initialize app once with stronger protection against double initialization
+  // Simplify initialization to be much faster
   useEffect(() => {
-    // Prevent duplicate effect execution with strict mounting check
-    if (mountedRef.current) {
-      return;
-    }
-    
-    mountedRef.current = true;
-    
-    // Check global flag first
+    // Skip if already initialized globally
     if (globalInitialized) {
       setIsInitialized(true);
       return;
     }
     
-    // Only run initialization logic once
+    // Only run initialization once
     if (!initStartedRef.current) {
       initStartedRef.current = true;
-      console.log("App component mounted, initializing...");
+      console.log("App initializing...");
       
+      // Fast synchronous initialization
       try {
-        // Simple initialization without any external service connections
         setIsInitialized(true);
         globalInitialized = true;
       } catch (error) {
@@ -41,6 +33,11 @@ function App() {
         setInitError(error instanceof Error ? error : new Error('Unknown error during initialization'));
       }
     }
+    
+    // Cleanup function
+    return () => {
+      console.log("App component unmounting");
+    };
   }, []);
   
   // Show a loading state while initializing
