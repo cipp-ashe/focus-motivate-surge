@@ -50,15 +50,15 @@ export const useDataInitialization = () => {
       console.log("Data initialization complete");
       setStatus({ isInitialized: true, error: null });
       
-      // Emit event to trigger task loading after initialization
-      setTimeout(() => {
-        console.log("Emitting force-task-update event after initialization");
+      // Emit event to trigger task loading after initialization - do this only once
+      const emitInitEvents = () => {
         window.dispatchEvent(new Event('force-task-update'));
-        
-        // Also emit via both event systems for maximum compatibility
         eventBus.emit('app:initialized', {});
         eventManager.emit('app:initialized', {});
-      }, 100);
+      };
+      
+      // Use a single timeout instead of multiple
+      setTimeout(emitInitEvents, 100);
     } catch (error) {
       console.error('Error during data initialization:', error);
       setStatus({ 

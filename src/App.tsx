@@ -2,28 +2,20 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { useEventSynchronizer } from './hooks/useEventSynchronizer';
-import { useSupabaseRealtime } from './hooks/useSupabaseRealtime';
-import { enableRealtimeForTables } from './lib/supabase/client';
 import AppLayout from './components/AppLayout';
 
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<Error | null>(null);
   
-  // Use our hooks for Supabase realtime and event synchronization
-  useSupabaseRealtime();
-  useEventSynchronizer();
-  
-  // Enable realtime for tables when the app starts
+  // Initialize app
   useEffect(() => {
     console.log("App component mounted, initializing...");
     try {
-      enableRealtimeForTables();
-      console.log("Realtime tables enabled successfully");
+      // Simple initialization without any external service connections
       setIsInitialized(true);
     } catch (error) {
-      console.error("Failed to initialize realtime tables:", error);
+      console.error("Failed to initialize:", error);
       setInitError(error instanceof Error ? error : new Error('Unknown error during initialization'));
     }
   }, []);
