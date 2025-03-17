@@ -1,7 +1,7 @@
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { Task } from '@/types/tasks';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { eventBus } from '@/lib/eventBus';
 
 interface TaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
@@ -11,66 +11,73 @@ interface TaskEventListenerProps {
   onTaskUpdate: (data: { taskId: string, updates: Partial<Task> }) => void;
 }
 
-export const TaskEventListener: React.FC<TaskEventListenerProps> = React.memo(({
+export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   onShowImage,
   onOpenChecklist,
   onOpenJournal,
   onOpenVoiceRecorder,
   onTaskUpdate
 }) => {
-  const { items: tasks } = useTaskContext();
-
-  // Handle specialized task media viewing
-  const handleShowImage = useCallback((data: { imageUrl: string, taskName: string }) => {
-    onShowImage(data.imageUrl, data.taskName);
-  }, [onShowImage]);
-
-  const handleOpenChecklist = useCallback((data: { taskId: string, taskName: string, items: any[] }) => {
-    onOpenChecklist(data.taskId, data.taskName, data.items);
-  }, [onOpenChecklist]);
-  
-  const handleOpenJournal = useCallback((data: { taskId: string, taskName: string, entry: string }) => {
-    onOpenJournal(data.taskId, data.taskName, data.entry);
-  }, [onOpenJournal]);
-  
-  const handleOpenVoiceNote = useCallback((data: { taskId: string, taskName: string }) => {
-    onOpenVoiceRecorder(data.taskId, data.taskName);
-  }, [onOpenVoiceRecorder]);
-  
-  const handleTaskSpecializedUpdate = useCallback((data: { taskId: string, updates: Partial<Task> }) => {
-    onTaskUpdate(data);
-  }, [onTaskUpdate]);
-
-  // Set up event listeners
   useEffect(() => {
-    const eventHandlers = [
-      { name: 'task:show-image', handler: handleShowImage },
-      { name: 'task:open-checklist', handler: handleOpenChecklist },
-      { name: 'task:open-journal', handler: handleOpenJournal },
-      { name: 'task:open-voicenote', handler: handleOpenVoiceNote },
-      { name: 'task:update-specialized', handler: handleTaskSpecializedUpdate }
-    ];
-    
-    // Add event listeners
-    eventHandlers.forEach(({ name, handler }) => {
-      window.addEventListener(name, handler as EventListener);
-    });
-    
-    // Remove event listeners
-    return () => {
-      eventHandlers.forEach(({ name, handler }) => {
-        window.removeEventListener(name, handler as EventListener);
-      });
+    // Type for custom events that we'll need to handle
+    type CustomEventWithDetail<T = any> = CustomEvent<T>;
+
+    // Handle show image event
+    const handleShowImage = (event: CustomEventWithDetail) => {
+      const { imageUrl, taskName } = event.detail || {};
+      if (imageUrl && taskName) {
+        onShowImage(imageUrl, taskName);
+      }
     };
-  }, [
-    handleShowImage, 
-    handleOpenChecklist, 
-    handleOpenJournal, 
-    handleOpenVoiceNote,
-    handleTaskSpecializedUpdate
-  ]);
 
+    // Handle open checklist event
+    const handleOpenChecklist = (event: CustomEventWithDetail) => {
+      const { taskId, taskName, items } = event.detail || {};
+      if (taskId && taskName && items) {
+        onOpenChecklist(taskId, taskName, items);
+      }
+    };
+
+    // Handle open journal event
+    const handleOpenJournal = (event: CustomEventWithDetail) => {
+      const { taskId, taskName, entry } = event.detail || {};
+      if (taskId && taskName) {
+        onOpenJournal(taskId, taskName, entry || '');
+      }
+    };
+
+    // Handle open voice recorder event
+    const handleOpenVoiceRecorder = (event: CustomEventWithDetail) => {
+      const { taskId, taskName } = event.detail || {};
+      if (taskId && taskName) {
+        onOpenVoiceRecorder(taskId, taskName);
+      }
+    };
+
+    // Handle task update event
+    const handleTaskUpdateEvent = (data: { taskId: string, updates: Partial<Task> }) => {
+      onTaskUpdate(data);
+    };
+
+    // Subscribe to events
+    eventBus.on('task:update', handleTaskUpdateEvent);
+
+    // Add event listeners for window events
+    window.addEventListener('show-image', handleShowImage as EventListener);
+    window.addEventListener('open-checklist', handleOpenChecklist as EventListener);
+    window.addEventListener('open-journal', handleOpenJournal as EventListener);
+    window.addEventListener('open-voice-recorder', handleOpenVoiceRecorder as EventListener);
+
+    // Clean up event listeners
+    return () => {
+      eventBus.off('task:update', handleTaskUpdateEvent);
+      window.removeEventListener('show-image', handleShowImage as EventListener);
+      window.removeEventListener('open-checklist', handleOpenChecklist as EventListener);
+      window.removeEventListener('open-journal', handleOpenJournal as EventListener);
+      window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder as EventListener);
+    };
+  }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder, onTaskUpdate]);
+
+  // This component doesn't render anything
   return null;
-});
-
-TaskEventListener.displayName = 'TaskEventListener';
+};

@@ -1,7 +1,6 @@
 
 import React, { useCallback } from 'react';
 import { Task } from '@/types/tasks';
-import { cn } from '@/lib/utils';
 import { TaskCheckbox } from './TaskCheckbox';
 import { TaskContentDisplay } from './TaskContentDisplay';
 import { TaskDetails } from './TaskDetails';
@@ -19,20 +18,20 @@ interface TaskContentProps {
   handleTaskAction: (e: React.MouseEvent<HTMLElement>, actionType?: string) => void;
 }
 
-export const TaskContent: React.FC<TaskContentProps> = ({
+export const TaskContent: React.FC<TaskContentProps> = React.memo(({
   task,
   isSelected,
   isTimerView = false,
   dialogOpeners,
   handleTaskAction
 }) => {
-  // Handle checkbox changes
+  // Handle checkbox changes with memoized callback
   const handleCheckboxChange = useCallback((checked: boolean) => {
-    handleTaskAction({} as React.MouseEvent<HTMLElement>, checked ? 'true' : 'false');
+    handleTaskAction({} as React.MouseEvent<HTMLElement>, checked ? 'complete' : 'uncomplete');
   }, [handleTaskAction]);
 
   return (
-    <div className="flex items-start gap-2">
+    <div className="flex items-start gap-2" data-testid="task-content">
       <TaskCheckbox 
         task={task} 
         isTimerView={isTimerView} 
@@ -48,4 +47,6 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       />
     </div>
   );
-};
+});
+
+TaskContent.displayName = 'TaskContent';

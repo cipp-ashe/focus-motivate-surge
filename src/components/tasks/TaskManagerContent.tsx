@@ -2,6 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { TaskItem } from './components/TaskItem';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 
 export interface TaskManagerContentProps {
   tasks: Task[];
@@ -45,7 +46,6 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
             <TaskItem
               key={task.id}
               task={task}
-              isSelected={task.id === selectedTaskId}
               onOpenTaskDialog={() => handleOpenTask(task.id)}
               isTimerView={isTimerView}
               dialogOpeners={dialogOpeners}
@@ -62,7 +62,6 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
               <TaskItem
                 key={task.id}
                 task={task}
-                isSelected={task.id === selectedTaskId}
                 onOpenTaskDialog={() => handleOpenTask(task.id)}
                 isTimerView={false}
                 dialogOpeners={dialogOpeners}

@@ -7,7 +7,7 @@ import { TaskActions } from './TaskActions';
 import { TaskContent } from './TaskContent';
 import { useTaskActionHandler } from './TaskActionHandler';
 
-interface TaskItemProps {
+export interface TaskItemProps {
   task: Task;
   onOpenTaskDialog?: () => void;
   isTimerView?: boolean;
