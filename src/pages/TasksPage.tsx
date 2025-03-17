@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { TaskInput } from '@/components/tasks/TaskInput';
 import { eventManager } from '@/lib/events/EventManager';
 import { TaskEventHandler } from '@/components/tasks/TaskEventHandler';
+import { TaskManagerContent } from '@/components/tasks/TaskManagerContent';
 
 const TasksPage: React.FC = () => {
   const taskContext = useTaskContext();
@@ -226,7 +227,18 @@ const TasksPage: React.FC = () => {
               />
             </div>
             
-            {/* Removed the duplicate TaskManager component that was displaying the task list twice */}
+            {/* Show completed tasks in the sidebar */}
+            <div className="p-4 bg-card rounded-lg border border-border">
+              <h3 className="text-lg font-medium mb-2">Recent Completed Tasks</h3>
+              <TaskManagerContent 
+                tasks={[]}
+                completedTasks={completedTasks.slice(0, 5)}
+                selectedTaskId={taskContext?.selected || null}
+                dialogOpeners={dialogOpeners}
+                onTaskAdd={handleAddTask}
+                onTasksAdd={handleAddMultipleTasks}
+              />
+            </div>
           </div>
         }
       />
