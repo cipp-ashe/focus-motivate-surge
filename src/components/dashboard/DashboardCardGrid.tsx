@@ -2,10 +2,20 @@
 import React from 'react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import { dashboardCards, iconMap, iconColorMap } from '@/components/dashboard/dashboardData';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
+import { cn } from '@/lib/utils';
 
 const DashboardCardGrid: React.FC = () => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-2">
+    <div 
+      className={cn(
+        "grid gap-4 sm:gap-6 px-2",
+        isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      )}
+      aria-label="Dashboard features"
+    >
       {dashboardCards.map((card, index) => (
         <DashboardCard
           key={index}

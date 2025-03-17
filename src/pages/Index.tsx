@@ -13,7 +13,7 @@ const IndexPage: React.FC = () => {
         description="Organize your work, improve your productivity, and build better habits"
       />
       
-      <main>
+      <main aria-labelledby="dashboard-title">
         <DashboardCardGrid />
       </main>
       
