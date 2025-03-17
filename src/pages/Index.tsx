@@ -5,17 +5,18 @@ import { useDataInitialization } from '@/hooks/data/useDataInitialization';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DashboardCardGrid from '@/components/dashboard/DashboardCardGrid';
-import { CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from 'react-error-boundary';
 
-const ErrorFallback = ({ error }: { error: Error }) => (
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
     <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">Dashboard Error</h2>
     <p className="mb-2">There was a problem loading the dashboard.</p>
-    <details className="text-sm text-gray-700 dark:text-gray-300">
+    <details className="text-sm text-gray-700 dark:text-gray-300 mb-4">
       <summary>Technical Details</summary>
       <p className="mt-1">{error.message}</p>
     </details>
+    <Button onClick={resetErrorBoundary}>Try Again</Button>
   </div>
 );
 
@@ -25,9 +26,28 @@ const DashboardContent: React.FC = () => {
   useEffect(() => {
     if (error) {
       console.error('Initialization error:', error);
-      toast.error('Failed to initialize application');
+      toast.error('Failed to initialize application: ' + error);
     }
   }, [error]);
+  
+  if (!isInitialized && error) {
+    return (
+      <div className="space-y-4">
+        <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
+          <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">Initialization Error</h2>
+          <p className="mb-2">There was a problem initializing the application.</p>
+          <details className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+            <summary>Technical Details</summary>
+            <p className="mt-1">{error}</p>
+          </details>
+          
+          <Button variant="destructive" onClick={clearStorage} className="mt-2">
+            Reset Application Data
+          </Button>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-8">
@@ -44,14 +64,15 @@ const DashboardContent: React.FC = () => {
       
       {showClearButton && (
         <div className="mt-8">
-          <button 
+          <Button 
             onClick={clearStorage}
-            className="bg-destructive hover:bg-destructive/90 text-white px-4 py-2 rounded"
+            variant="destructive"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
             Reset Application Data
-          </button>
+          </Button>
           <p className="text-sm text-muted-foreground mt-2">
-            Try resetting the application data if you're experiencing issues.
+            If you're experiencing issues, try resetting the application data.
           </p>
         </div>
       )}
@@ -68,7 +89,13 @@ const DashboardContent: React.FC = () => {
 
 const IndexPage: React.FC = () => {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={() => {
+        // Reset the state when the error boundary is reset
+        window.location.reload();
+      }}
+    >
       <DashboardLayout>
         <DashboardContent />
       </DashboardLayout>

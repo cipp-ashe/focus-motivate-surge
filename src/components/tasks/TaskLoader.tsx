@@ -27,58 +27,40 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     console.log('Running task type migration...');
     migrationRunRef.current = true;
     
-    // Run the migration
-    const migratedCount = taskStorage.migrateTaskTypes();
-    
-    if (migratedCount > 0) {
-      console.log(`Migrated ${migratedCount} tasks with invalid types`);
-      // Force a UI update
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('force-task-update'));
-      }, 100);
+    try {
+      // Run the migration
+      const migratedCount = taskStorage.migrateTaskTypes();
+      
+      if (migratedCount > 0) {
+        console.log(`Migrated ${migratedCount} tasks with invalid types`);
+        // Force a UI update
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('force-task-update'));
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error in task migration:', error);
+      // Continue even if migration fails
     }
   }, []);
-  
-  // Set up periodic task refreshes with more frequent updates
-  useEffect(() => {
-    const refreshInterval = setInterval(() => {
-      // Only refresh if we're not currently loading and enough time has passed
-      if (!isLoading && Date.now() - lastLoadTimeRef.current > 10000) { // Reduced from 15000 to 10000 ms
-        console.log("TaskLoader - Periodic refresh triggered");
-        reloadTasksFromStorage();
-      }
-    }, 20000); // Reduced from 30000 to 20000 ms
-    
-    return () => clearInterval(refreshInterval);
-  }, [isLoading]);
   
   // Function to reload tasks from storage
   const reloadTasksFromStorage = () => {
     try {
       const storedTasks = taskStorage.loadTasks();
-      console.log("TaskLoader - Reloading tasks from storage:", storedTasks);
-      
-      // Log task types for debugging
-      const tasksByType = {
-        timer: storedTasks.filter(t => t.taskType === 'timer').length,
-        journal: storedTasks.filter(t => t.taskType === 'journal').length,
-        checklist: storedTasks.filter(t => t.taskType === 'checklist').length,
-        screenshot: storedTasks.filter(t => t.taskType === 'screenshot').length,
-        voicenote: storedTasks.filter(t => t.taskType === 'voicenote').length,
-        regular: storedTasks.filter(t => !t.taskType || t.taskType === 'regular').length
-      };
-      console.log("TaskLoader - Tasks by type:", tasksByType);
+      console.log("TaskLoader - Reloading tasks from storage:", storedTasks.length);
       
       onTasksLoaded(storedTasks);
       lastLoadTimeRef.current = Date.now();
       
       // Force a UI update
       setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
+        window.dispatchEvent(new CustomEvent('force-task-update'));
       }, 100);
     } catch (error) {
       console.error("Error reloading tasks from storage:", error);
-      toast.error("Error refreshing tasks");
+      // Don't break the app if tasks can't be loaded - continue with empty array
+      onTasksLoaded([]);
     }
   };
   
@@ -92,40 +74,56 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     // Ensure loading state starts as true
     setIsLoading(true);
     
-    // Load initial tasks from storage
-    const storedTasks = taskStorage.loadTasks();
-    console.log("TaskLoader - Initial load from storage:", storedTasks);
-    onTasksLoaded(storedTasks);
-    lastLoadTimeRef.current = Date.now();
-    
-    // Check for pending habits on mount with a small delay
-    const timeout = setTimeout(() => {
-      eventManager.emit('habits:check-pending', {});
+    try {
+      // Load initial tasks from storage
+      const storedTasks = taskStorage.loadTasks();
+      console.log("TaskLoader - Initial load from storage:", storedTasks.length);
+      onTasksLoaded(storedTasks);
+      lastLoadTimeRef.current = Date.now();
       
-      // Force a UI update after a delay
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('force-task-update'));
-        setIsLoading(false);
-      }, 300);
-    }, 100);
-    
-    return () => {
-      clearTimeout(timeout);
-    };
+      // Check for pending habits on mount with a small delay
+      const timeout = setTimeout(() => {
+        try {
+          eventManager.emit('habits:check-pending', {});
+          
+          // Force a UI update after a delay
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('force-task-update'));
+            setIsLoading(false);
+          }, 300);
+        } catch (error) {
+          console.error("Error in habits check:", error);
+          // Don't let this prevent the app from loading
+          setIsLoading(false);
+        }
+      }, 100);
+      
+      return () => {
+        clearTimeout(timeout);
+      };
+    } catch (error) {
+      console.error("Error in initial task loading:", error);
+      // Don't break the app if tasks can't be loaded
+      setIsLoading(false);
+    }
   }, [onTasksLoaded]);
 
-  // Set up a loading timeout
+  // Set up a loading timeout - this ensures we don't get stuck loading forever
   useEffect(() => {
-    if (isLoading && !loadingTimeoutRef.current) {
+    if (isLoading) {
       loadingTimeoutRef.current = setTimeout(() => {
         console.log("TaskLoader - Loading timeout reached, forcing state to loaded");
         setIsLoading(false);
         
-        // Force an update from storage
-        reloadTasksFromStorage();
+        // Try to reload from storage, but don't break if it fails
+        try {
+          reloadTasksFromStorage();
+        } catch (error) {
+          console.error("Error in forced reload:", error);
+        }
         
         loadingTimeoutRef.current = null;
-      }, 800); // Reduced from 1000 to 800 ms
+      }, 3000); // Increased timeout for slower devices
     }
     
     return () => {

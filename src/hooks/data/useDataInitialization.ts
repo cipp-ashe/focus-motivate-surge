@@ -14,6 +14,7 @@ export const useDataInitialization = () => {
 
   useEffect(() => {
     try {
+      console.log("Starting data initialization check");
       const requiredKeys = [
         'schema-version',
         'entity-relations',
@@ -21,7 +22,7 @@ export const useDataInitialization = () => {
       ];
 
       const missingKeys = requiredKeys.filter(key => !localStorage.getItem(key));
-
+      
       if (missingKeys.length > 0) {
         console.log('Initializing missing data:', missingKeys);
         try {
@@ -30,7 +31,6 @@ export const useDataInitialization = () => {
           if (!initialized) {
             const error = `Failed to initialize: ${missingKeys.join(', ')}`;
             console.error(error);
-            toast.error(error);
             setStatus({ isInitialized: false, error });
             return;
           }
@@ -44,6 +44,8 @@ export const useDataInitialization = () => {
         }
       }
 
+      // If we got here, initialization succeeded or wasn't needed
+      console.log("Data initialization complete");
       setStatus({ isInitialized: true, error: null });
     } catch (error) {
       console.error('Error during data initialization:', error);
@@ -51,7 +53,6 @@ export const useDataInitialization = () => {
         isInitialized: false, 
         error: error instanceof Error ? error.message : 'Unknown error during initialization' 
       });
-      toast.error('Failed to initialize application data');
     }
   }, []);
 
@@ -82,6 +83,6 @@ export const useDataInitialization = () => {
     isInitialized: status.isInitialized,
     error: status.error,
     clearStorage,
-    showClearButton: !!status.error
+    showClearButton: true // Always show clear button to help users who are stuck
   };
 };
