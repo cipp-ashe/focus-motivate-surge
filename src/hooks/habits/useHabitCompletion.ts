@@ -6,6 +6,7 @@ import { useHabitRelationships } from './useHabitRelationships';
 import { habitTaskOperations } from '@/lib/operations/tasks/habit';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
+import { completeTaskOperations } from '@/lib/operations/tasks/complete';
 
 export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: ActiveTemplate[]) => {
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);
@@ -93,17 +94,15 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       const tasks = getRelatedTasks(habitId);
       if (tasks.length > 0) {
         tasks.forEach(task => {
-          if (habitTaskOperations.completeTask) {
-            habitTaskOperations.completeTask(task.id);
-          }
+          // Use completeTaskOperations instead of trying to access habitTaskOperations.completeTask
+          completeTaskOperations.completeTask(task.id);
         });
       }
       
       // Emit event for other components
       eventManager.emit('habit:complete', { 
         habitId, 
-        completed: true, 
-        date: today 
+        completed: true
       });
       
       return true;
