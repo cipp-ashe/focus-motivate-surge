@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { TaskInput } from './TaskInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,15 +24,17 @@ export const TimerView: React.FC<TimerViewProps> = ({
   onTaskAdd, 
   onTasksAdd
 }) => {
-  // Filter for timer tasks only
-  const timerTasks = tasks.filter(task => task.taskType === 'timer');
+  // Include both timer and focus tasks
+  const timerTasks = tasks.filter(task => 
+    task.taskType === 'timer' || task.taskType === 'focus'
+  );
   
   // State for duration input
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
   const [durationValues, setDurationValues] = useState<Record<string, string>>({});
   
   const handleTaskSelect = (task: Task) => {
-    console.log("TimerView: Selected task", task.id);
+    console.log("TimerView: Selected task", task.id, "of type", task.taskType);
     eventBus.emit('task:select', task.id);
     eventBus.emit('timer:set-task', task);
     toast.success(`Selected timer task: ${task.name}`);
@@ -113,7 +116,7 @@ export const TimerView: React.FC<TimerViewProps> = ({
         <div className="p-4 space-y-2">
           {timerTasks.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground border border-dashed rounded-lg">
-              No timer tasks found. Add a timer task to get started.
+              No timer or focus tasks found. Add a timer or focus task to get started.
             </div>
           ) : (
             timerTasks.map((task) => (
@@ -129,7 +132,7 @@ export const TimerView: React.FC<TimerViewProps> = ({
                 <CardContent className="p-3 flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-grow min-w-0">
                     <div className="flex-shrink-0">
-                      <TaskIcon taskType="timer" className="h-5 w-5" />
+                      <TaskIcon taskType={task.taskType} className="h-5 w-5" />
                     </div>
                     
                     <div className="truncate">

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import { ChecklistButton } from './components/buttons/ChecklistButton';
 import { TimerButton } from './components/buttons/TimerButton';
 import { ScreenshotButton } from './components/buttons/ScreenshotButton';
 import { VoiceNoteButton } from './components/buttons/VoiceNoteButton';
-import { TaskActionButton } from './components/TaskActionButton';
+import { TaskActionButton } from './components/buttons/TaskActionButton';
 import { TaskIcon } from './components/TaskIcon';
 import { useNavigate } from 'react-router-dom';
 

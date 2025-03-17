@@ -15,7 +15,10 @@ export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     
-    console.log(`Timer button clicked directly for task: ${task.id}`);
+    console.log(`Timer button clicked directly for task: ${task.id}, type: ${task.taskType}`);
+    
+    // Emit task select event before navigation to ensure it's selected
+    eventBus.emit('task:select', task.id);
     
     // First navigate to the timer route
     navigate('/timer');
@@ -28,7 +31,9 @@ export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) 
     }, 100);
     
     // Also call the normal task action
-    onTaskAction(e, 'timer');
+    if (onTaskAction) {
+      onTaskAction(e, 'timer');
+    }
   };
 
   return (

@@ -10,10 +10,10 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
   
   // Handler for timer task selection
   const handleTimerTaskSet = useCallback((task: Task) => {
-    console.log('TimerTaskHandler: Timer task set event received for', task.id);
+    console.log('TimerTaskHandler: Timer task set event received for', task.id, 'type:', task.taskType);
     
-    // Only handle timer tasks or convert regular tasks to timer tasks
-    if (task.taskType === 'timer') {
+    // Handle both timer and focus tasks
+    if (task.taskType === 'timer' || task.taskType === 'focus') {
       // Navigate to timer page if not already there
       if (!location.pathname.includes('/timer')) {
         navigate('/timer');
@@ -30,8 +30,8 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
       
       toast.success(`Timer set for: ${task.name}`);
     } else {
-      // If not a timer task, convert it to one
-      console.log('TimerTaskHandler: Converting non-timer task to timer:', task);
+      // If not a timer or focus task, convert it to a timer task
+      console.log('TimerTaskHandler: Converting task to timer:', task);
       
       // Create a timer version of the task
       const timerTask = {

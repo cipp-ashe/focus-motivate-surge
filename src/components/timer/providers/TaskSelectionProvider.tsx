@@ -129,8 +129,8 @@ export const TaskSelectionProvider: React.FC<TaskSelectionProviderProps> = ({ ch
             setSelectedTask(task);
             setTimerKey(Date.now());
             
-            // Only auto-convert to timer if on timer page
-            if (task.taskType !== 'timer') {
+            // Only auto-convert to timer if on timer page and not already a timer or focus task
+            if (task.taskType !== 'timer' && task.taskType !== 'focus') {
               console.log('Converting selected task to timer type');
               eventBus.emit('task:update', {
                 taskId: task.id,
