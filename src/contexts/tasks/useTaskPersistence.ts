@@ -1,44 +1,36 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 
 /**
- * Hook to handle persisting tasks to localStorage with debouncing, atomic updates, and error handling
+ * Hook for persisting task state to storage
+ * 
+ * @param tasks Active tasks to persist
+ * @param completedTasks Completed tasks to persist
  */
-export const useTaskPersistence = (
-  items: Task[],
-  completed: Task[]
-) => {
-  const isInitializingRef = useRef(true);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Persist changes to localStorage with debouncing and atomic updates
+export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = []) => {
+  // Save tasks to storage whenever they change
   useEffect(() => {
-    // Don't persist during initialization
-    if (isInitializingRef.current) {
-      isInitializingRef.current = false;
-      return;
+    if (!tasks) return; // Guard against undefined tasks
+    
+    try {
+      console.log(`TaskPersistence: Saving ${tasks.length} tasks to storage`);
+      taskStorage.saveTasks(tasks);
+    } catch (error) {
+      console.error('Error saving tasks to storage:', error);
     }
+  }, [tasks]);
+  
+  // Save completed tasks to storage whenever they change
+  useEffect(() => {
+    if (!completedTasks) return; // Guard against undefined completedTasks
     
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
+    try {
+      console.log(`TaskPersistence: Saving ${completedTasks.length} completed tasks to storage`);
+      taskStorage.saveCompletedTasks(completedTasks);
+    } catch (error) {
+      console.error('Error saving completed tasks to storage:', error);
     }
-    
-    // Debounce storage updates to avoid excessive writes
-    saveTimeoutRef.current = setTimeout(() => {
-      console.log(`TaskPersistence: Saving ${items.length} tasks to localStorage`);
-      
-      // Use the storage service to save both tasks and completed tasks
-      taskStorage.saveTasks(items);
-      taskStorage.saveCompletedTasks(completed);
-    }, 50);
-    
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [items, completed]);
+  }, [completedTasks]);
 };

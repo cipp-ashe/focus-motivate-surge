@@ -20,8 +20,8 @@ export interface TaskManagerContentProps {
 }
 
 export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
-  tasks,
-  completedTasks,
+  tasks = [], // Add default empty array
+  completedTasks = [], // Add default empty array
   selectedTaskId,
   isTimerView = false,
   dialogOpeners,
@@ -54,7 +54,7 @@ export const TaskManagerContent: React.FC<TaskManagerContentProps> = ({
         )}
       </div>
       
-      {completedTasks.length > 0 && (
+      {completedTasks && completedTasks.length > 0 && (
         <div className="mt-8">
           <h2 className="font-medium text-lg mb-2">Completed Tasks</h2>
           <div className="space-y-2">

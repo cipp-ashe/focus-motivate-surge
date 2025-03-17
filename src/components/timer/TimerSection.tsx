@@ -13,7 +13,7 @@ interface TimerSectionProps {
 }
 
 export const TimerSection: React.FC<TimerSectionProps> = ({ 
-  favorites, 
+  favorites = [], // Add default value
   setFavorites 
 }) => {
   const { selectedTask, timerKey } = useTaskSelection();

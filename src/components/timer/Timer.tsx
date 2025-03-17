@@ -30,7 +30,7 @@ export const Timer = ({
     logger.error('Timer', 'Timer missing required props:', { duration, taskName });
     return (
       <Card className="shadow-md border-border/20 overflow-hidden">
-        <TimerError />
+        <TimerError message="Missing required timer properties (duration or task name)" />
       </Card>
     );
   }
@@ -81,7 +81,7 @@ export const Timer = ({
     logger.error('Timer', "Fatal error in timer initialization:", error);
     return (
       <Card className="shadow-md border-border/20 overflow-hidden">
-        <TimerError message="Could not initialize timer" />
+        <TimerError message={`Could not initialize timer: ${error instanceof Error ? error.message : 'Unknown error'}`} />
       </Card>
     );
   }
