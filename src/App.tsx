@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 import { setupGlobalErrorHandlers } from './utils/errorHandler';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
+import { ThemeProvider } from './components/theme-provider';
+import { AuthProvider } from './contexts/auth/AuthContext';
 
 // Set up global error handling
 setupGlobalErrorHandlers();
@@ -38,8 +40,14 @@ function App() {
     );
   }
   
-  // Provide the router
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider defaultTheme="dark">
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <Toaster position="top-right" />
+      </AuthProvider>
+    </ThemeProvider>
+  );
 }
 
 export default App;

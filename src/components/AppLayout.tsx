@@ -44,38 +44,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
         </nav>
         
-        {/* Mobile bottom navigation */}
-        {isMobile && (
-          <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background z-10">
-            <div className="flex justify-around py-2">
-              <Link to="/" className="p-2 flex flex-col items-center">
-                <Home className="w-5 h-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Home</span>
-              </Link>
-              <Link to="/tasks" className="p-2 flex flex-col items-center">
-                <CalendarCheck className="w-5 h-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Tasks</span>
-              </Link>
-              <Link to="/timer" className="p-2 flex flex-col items-center">
-                <Timer className="w-5 h-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Timer</span>
-              </Link>
-              <Link to="/habits" className="p-2 flex flex-col items-center">
-                <BookHeart className="w-5 h-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Habits</span>
-              </Link>
-              <Link to="/notes" className="p-2 flex flex-col items-center">
-                <ScrollText className="w-5 h-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Notes</span>
-              </Link>
-              <Link to="/settings" className="p-2 flex flex-col items-center">
-                <Settings className="w-5 h-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Settings</span>
-              </Link>
-            </div>
-          </div>
-        )}
-        
         {/* Main content */}
         <main className="flex-1 pb-16 md:pb-0">
           <div className="relative z-10 container mx-auto px-4 py-4">
@@ -83,6 +51,38 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
         </main>
       </div>
+      
+      {/* Mobile bottom navigation - fixed to bottom */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background z-10">
+          <div className="flex justify-around py-2">
+            <Link to="/" className="p-2 flex flex-col items-center">
+              <Home className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Home</span>
+            </Link>
+            <Link to="/tasks" className="p-2 flex flex-col items-center">
+              <CalendarCheck className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Tasks</span>
+            </Link>
+            <Link to="/timer" className="p-2 flex flex-col items-center">
+              <Timer className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Timer</span>
+            </Link>
+            <Link to="/habits" className="p-2 flex flex-col items-center">
+              <BookHeart className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Habits</span>
+            </Link>
+            <Link to="/notes" className="p-2 flex flex-col items-center">
+              <ScrollText className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Notes</span>
+            </Link>
+            <Link to="/settings" className="p-2 flex flex-col items-center">
+              <Settings className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Settings</span>
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

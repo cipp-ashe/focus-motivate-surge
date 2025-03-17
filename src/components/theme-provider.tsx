@@ -54,7 +54,8 @@ export function ThemeProvider({
 
     root.classList.add(theme);
     root.setAttribute(attribute, theme);
-  }, [theme, attribute, enableSystem]);
+    localStorage.setItem(storageKey, theme);
+  }, [theme, attribute, enableSystem, storageKey]);
 
   const value = {
     theme,
