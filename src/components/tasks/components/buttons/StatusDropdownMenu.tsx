@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Task, TaskStatus } from "@/types/tasks";
 import { Button } from "@/components/ui/button";
@@ -90,12 +89,11 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
         completeTaskOperations.completeTask(task.id);
       } else if (newStatus === 'dismissed') {
         if (task.relationships?.habitId) {
-          // For habit dismissal, use the delete operation with dismissal flag
+          // For habit dismissal, use the delete operation with correct options
           deleteTaskOperations.deleteTask(task.id, {
-            isDismissal: true,
+            reason: 'dismissed',
             habitId: task.relationships.habitId,
-            date: task.relationships.date || new Date().toDateString(),
-            reason: 'dismissed'
+            date: task.relationships.date || new Date().toDateString()
           });
         } else {
           // For regular dismissal, don't suppress events - let the system handle it

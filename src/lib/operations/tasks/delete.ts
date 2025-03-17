@@ -15,7 +15,8 @@ const canDeleteTask = (task: Task): boolean => {
   // Don't allow deletion of tasks with active dependencies
   // This is a simple implementation - in a real app, we would check for specific 
   // relationships that prevent deletion
-  if (task.relationships && task.relationships.isProtected) {
+  if (task.relationships && task.relationships.habitId && !task.relationships.date) {
+    // Protect tasks that belong to habits but don't have a specific date (template tasks)
     return false;
   }
   
@@ -35,12 +36,16 @@ export const deleteTask = (
     reason?: string;
     showToast?: boolean;
     verifyDependencies?: boolean;
+    isDismissal?: boolean;
+    habitId?: string;
+    date?: string;
   } = {}
 ): boolean => {
   const {
     reason = 'user-delete',
     showToast = true,
-    verifyDependencies = true
+    verifyDependencies = true,
+    isDismissal = false
   } = options;
   
   if (!taskId) {

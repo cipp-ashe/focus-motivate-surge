@@ -82,7 +82,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, isSelected, onClick })
       console.log(`Dismissing habit task rather than deleting: ${task.id}`);
       
       deleteTaskOperations.deleteTask(task.id, {
-        isDismissal: true, 
+        reason: 'dismissed',
         habitId: task.relationships.habitId,
         date: task.relationships.date
       });

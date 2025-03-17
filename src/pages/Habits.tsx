@@ -11,7 +11,7 @@ import { useTodaysHabits } from '@/hooks/habits/useTodaysHabits';
 import { useHabitCompletion } from '@/hooks/habits/useHabitCompletion';
 import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
 import { ErrorBoundary } from 'react-error-boundary';
-import { HabitProvider } from '@/contexts/habits/HabitContext';
+import { HabitProvider, useHabitContext } from '@/contexts/habits/HabitContext';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -50,7 +50,7 @@ const HabitsPage = () => {
 
 // Separated component to prevent the entire page from crashing if there's an issue
 const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
-  const { templates } = useHabitState();
+  const { templates } = useHabitContext();
   const { todaysHabits, refreshHabits } = useTodaysHabits();
   
   // Use our custom hook for habit completion
