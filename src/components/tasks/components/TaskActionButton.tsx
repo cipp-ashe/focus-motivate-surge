@@ -1,173 +1,179 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Task } from '@/types/tasks';
-import { eventManager } from '@/lib/events/EventManager';
 import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
-  Check, 
-  Clock, 
-  Copy, 
-  Repeat, 
-  RefreshCw,
-  Trash2 
-} from 'lucide-react';
-import { toast } from 'sonner';
+import { MoreHorizontal, Pencil, Check, X, Trash } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-interface TaskActionButtonProps {
+export interface TaskActionButtonProps {
   task: Task;
-  actionType: 
-    | 'complete' 
-    | 'delete' 
-    | 'timer' 
-    | 'clone' 
-    | 'schedule' 
-    | 'repeat' 
-    | 'reset';
-  onActionComplete?: () => void;
+  onTaskAction?: (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => void;
+  editingTaskId?: string | null;
+  inputValue?: string;
+  dialogOpeners?: {
+    checklist?: (taskId: string, taskName: string, items: any[]) => void;
+    journal?: (taskId: string, taskName: string, entry: string) => void;
+    screenshot?: (imageUrl: string, taskName: string) => void;
+    voicenote?: (taskId: string, taskName: string) => void;
+  };
 }
 
-export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
-  task,
-  actionType,
-  onActionComplete
+export const TaskActionButton: React.FC<TaskActionButtonProps> = ({ 
+  task, 
+  onTaskAction,
+  editingTaskId,
+  inputValue,
+  dialogOpeners
 }) => {
-  // Define actions based on action type
-  const handleAction = useCallback(() => {
-    switch (actionType) {
-      case 'complete':
-        // Mark the task as completed
-        eventManager.emit('task:complete', { taskId: task.id });
-        toast.success(`Task completed: ${task.name}`);
-        break;
-        
-      case 'delete':
-        // Delete the task
-        eventManager.emit('task:delete', { taskId: task.id });
-        toast.success(`Task deleted: ${task.name}`);
-        break;
-        
-      case 'timer':
-        // Set task for timer
-        eventManager.emit('timer:set-task', { 
-          id: task.id, 
-          name: task.name 
-        });
-        toast.success(`Timer set for: ${task.name}`);
-        break;
-        
-      case 'clone':
-        // Create a clone of the task
-        const clonedTask = {
-          ...task,
-          id: crypto.randomUUID(),
-          name: `Copy of ${task.name}`,
-          completed: false,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Emit the event to create a new task
-        eventManager.emit('task:create', clonedTask);
-        toast.success(`Task cloned: ${task.name}`);
-        break;
-        
-      case 'schedule':
-        // For future implementation - schedule the task
-        toast.info('Schedule functionality coming soon');
-        break;
-        
-      case 'repeat':
-        // For future implementation - set task to repeat
-        toast.info('Repeat functionality coming soon');
-        break;
-        
-      case 'reset':
-        // Reset the task to initial state
-        eventManager.emit('task:update', {
-          taskId: task.id,
-          updates: {
-            completed: false,
-            progress: 0
-          }
-        });
-        toast.success(`Task reset: ${task.name}`);
-        break;
-        
-      default:
-        console.error(`Unknown action type: ${actionType}`);
-    }
-    
-    // Call the onActionComplete callback if provided
-    if (onActionComplete) {
-      onActionComplete();
-    }
-  }, [actionType, task, onActionComplete]);
-  
-  // Define button icon and variant based on action type
-  const getButtonProps = () => {
-    switch (actionType) {
-      case 'complete':
-        return { 
-          icon: <Check className="h-4 w-4" />, 
-          variant: 'success' as const,
-          label: 'Complete' 
-        };
-      case 'delete':
-        return { 
-          icon: <Trash2 className="h-4 w-4" />, 
-          variant: 'destructive' as const,
-          label: 'Delete' 
-        };
-      case 'timer':
-        return { 
-          icon: <Clock className="h-4 w-4" />, 
-          variant: 'default' as const,
-          label: 'Timer' 
-        };
-      case 'clone':
-        return { 
-          icon: <Copy className="h-4 w-4" />, 
-          variant: 'outline' as const,
-          label: 'Clone' 
-        };
-      case 'schedule':
-        return { 
-          icon: <Calendar className="h-4 w-4" />, 
-          variant: 'outline' as const,
-          label: 'Schedule' 
-        };
-      case 'repeat':
-        return { 
-          icon: <Repeat className="h-4 w-4" />, 
-          variant: 'outline' as const,
-          label: 'Repeat' 
-        };
-      case 'reset':
-        return { 
-          icon: <RefreshCw className="h-4 w-4" />, 
-          variant: 'secondary' as const,
-          label: 'Reset' 
-        };
-      default:
-        return { 
-          icon: null, 
-          variant: 'outline' as const,
-          label: 'Action' 
-        };
+  // Determine if this task is currently being edited
+  const isEditing = editingTaskId === task.id;
+
+  // Check if there is task specific data
+  const hasJournalEntry = task.journalEntry && task.journalEntry.trim().length > 0;
+  const hasChecklist = task.checklistItems && task.checklistItems.length > 0;
+  const hasImage = task.imageUrl && task.imageUrl.trim().length > 0;
+  const hasAudio = task.audioUrl && task.audioUrl.trim().length > 0;
+
+  // Handle dropdown actions
+  const handleAction = (e: React.MouseEvent<HTMLDivElement>, actionType: string) => {
+    e.stopPropagation();
+    if (onTaskAction) {
+      onTaskAction(e, actionType);
     }
   };
-  
-  const { icon, variant, label } = getButtonProps();
-  
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-1">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={(e) => onTaskAction?.(e, 'cancel')}
+          className="h-7 w-7 p-0"
+        >
+          <X className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="default"
+          onClick={(e) => onTaskAction?.(e, 'save')}
+          className="h-7 w-7 p-0"
+          disabled={!inputValue || inputValue.trim() === ''}
+        >
+          <Check className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <Button
-      variant={variant}
-      size="sm"
-      onClick={handleAction}
-      className="h-8 text-xs"
-    >
-      {icon}
-      <span className="ml-1">{label}</span>
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        {/* Edit action */}
+        <DropdownMenuItem
+          onClick={(e) => handleAction(e, 'edit')}
+          className="flex items-center gap-2"
+        >
+          <Pencil className="h-4 w-4" />
+          <span>Edit</span>
+        </DropdownMenuItem>
+
+        {/* Special actions based on task type */}
+        {task.taskType === 'journal' && (
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, 'journal')}
+            className="flex items-center gap-2"
+          >
+            <span>Open Journal</span>
+            {hasJournalEntry && (
+              <span className="ml-auto h-2 w-2 rounded-full bg-primary"></span>
+            )}
+          </DropdownMenuItem>
+        )}
+
+        {task.taskType === 'checklist' && (
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, 'checklist')}
+            className="flex items-center gap-2"
+          >
+            <span>Open Checklist</span>
+            {hasChecklist && (
+              <span className="ml-auto h-2 w-2 rounded-full bg-primary"></span>
+            )}
+          </DropdownMenuItem>
+        )}
+
+        {task.taskType === 'timer' && (
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, 'timer')}
+            className="flex items-center gap-2"
+          >
+            <span>Start Timer</span>
+          </DropdownMenuItem>
+        )}
+
+        {task.taskType === 'screenshot' && hasImage && (
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, 'screenshot')}
+            className="flex items-center gap-2"
+          >
+            <span>View Screenshot</span>
+          </DropdownMenuItem>
+        )}
+
+        {task.taskType === 'voicenote' && hasAudio && (
+          <DropdownMenuItem
+            onClick={(e) => handleAction(e, 'voicenote')}
+            className="flex items-center gap-2"
+          >
+            <span>Play Voice Note</span>
+          </DropdownMenuItem>
+        )}
+
+        {/* Complete action */}
+        <DropdownMenuItem
+          onClick={(e) => handleAction(e, 'complete')}
+          className="flex items-center gap-2 text-green-600"
+        >
+          <Check className="h-4 w-4" />
+          <span>Complete</span>
+        </DropdownMenuItem>
+
+        {/* Dismiss action */}
+        <DropdownMenuItem
+          onClick={(e) => handleAction(e, 'dismiss')}
+          className="flex items-center gap-2 text-amber-600"
+        >
+          <X className="h-4 w-4" />
+          <span>Dismiss</span>
+        </DropdownMenuItem>
+
+        {/* Delete action */}
+        <DropdownMenuItem
+          onClick={(e) => handleAction(e, 'delete')}
+          className="flex items-center gap-2 text-red-600"
+        >
+          <Trash className="h-4 w-4" />
+          <span>Delete</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

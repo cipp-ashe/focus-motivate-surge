@@ -1,75 +1,93 @@
 
 import React from 'react';
-import { Task } from "@/types/tasks";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import { TaskIcon } from "./TaskIcon";
-import { TaskActionButton } from "./TaskActionButton";
+import { Task } from '@/types/tasks';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
+import { TaskActionButton } from './TaskActionButton';
+import { formatTime } from '@/utils/dateUtils';
 
 interface TaskHeaderProps {
   task: Task;
   editingTaskId: string | null;
   inputValue: string;
-  onDelete: (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => void;
+  durationInMinutes: number;
   onTaskAction: (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => void;
   handleLocalChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleLocalBlur: () => void;
   handleLocalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
+  onDurationClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  dialogOpeners?: {
+    checklist?: (taskId: string, taskName: string, items: any[]) => void;
+    journal?: (taskId: string, taskName: string, entry: string) => void;
+    screenshot?: (imageUrl: string, taskName: string) => void;
+    voicenote?: (taskId: string, taskName: string) => void;
+  };
 }
 
-export const TaskHeader: React.FC<TaskHeaderProps> = ({
+const TaskHeader: React.FC<TaskHeaderProps> = ({
   task,
   editingTaskId,
   inputValue,
-  onDelete,
+  durationInMinutes,
   onTaskAction,
   handleLocalChange,
   handleLocalBlur,
   handleLocalKeyDown,
   preventPropagation,
+  onDurationClick,
+  dialogOpeners
 }) => {
-  const durationInMinutes = Math.round((task.duration || 1500) / 60);
-
+  const isEditing = editingTaskId === task.id;
+  
   return (
-    <div className="flex items-center justify-between w-full gap-3">
-      <div className="flex items-center gap-3 flex-1">
-        <div className="rounded-full bg-primary/10 p-1.5">
-          <TaskIcon taskType={task.taskType} />
-        </div>
-        <span className="text-foreground line-clamp-1 flex-1 font-medium">
-          {task.name}
-          {task.relationships?.habitId && (
-            <Badge variant="outline" className="ml-2 text-xs bg-green-500/10 text-green-500">
-              Habit
-            </Badge>
-          )}
-        </span>
+    <div className="flex items-center justify-between p-3 pb-1">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        {isEditing ? (
+          <input
+            type="text"
+            className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+            value={inputValue}
+            onChange={handleLocalChange}
+            onBlur={handleLocalBlur}
+            onKeyDown={handleLocalKeyDown}
+            onClick={preventPropagation}
+            autoFocus
+          />
+        ) : (
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <h3 className="font-semibold truncate">{task.name}</h3>
+            
+            {task.taskType === 'timer' && durationInMinutes > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="h-6 px-2 py-0 text-xs"
+                onClick={onDurationClick}
+              >
+                {formatTime(durationInMinutes * 60)}
+              </Button>
+            )}
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-2 h-7 w-7 p-0"
+              onClick={(e) => onTaskAction(e, 'edit')}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
       </div>
-      <div className="flex items-center gap-3">
-        <TaskActionButton
-          task={task}
-          editingTaskId={editingTaskId}
-          inputValue={inputValue}
-          durationInMinutes={durationInMinutes}
-          onTaskAction={onTaskAction}
-          handleLocalChange={handleLocalChange}
-          handleLocalBlur={handleLocalBlur}
-          handleLocalKeyDown={handleLocalKeyDown}
-          preventPropagation={preventPropagation}
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onDelete}
-          onTouchStart={onDelete}
-          className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors duration-200 touch-manipulation hover:bg-destructive/10"
-          data-action="true"
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
-      </div>
+      
+      <TaskActionButton 
+        task={task}
+        onTaskAction={onTaskAction}
+        dialogOpeners={dialogOpeners}
+      />
     </div>
   );
 };
+
+export default TaskHeader;

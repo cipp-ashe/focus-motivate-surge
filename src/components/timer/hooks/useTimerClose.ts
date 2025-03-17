@@ -13,7 +13,7 @@ export const useTimerClose = ({
 }: UseTimerCloseProps) => {
   // Handle timer close
   const handleClose = useCallback(() => {
-    // Use eventManager instead of a custom event
+    // Use eventManager to emit timer:close event
     eventManager.emit('timer:close', { taskName });
     
     // Reset the timer

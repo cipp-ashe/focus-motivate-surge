@@ -7,16 +7,10 @@ import { useHabitEventProcessor } from './processors/useHabitEventProcessor';
 import { useTaskCreationProcessor } from './processors/useTaskCreationProcessor';
 import { usePendingTaskProcessor } from './processors/usePendingTaskProcessor';
 import { useEvent } from '@/hooks/useEvent';
+import { EventPayloads } from '@/types/events';
 
 // Define proper types for the habit schedule event
-interface HabitScheduleEvent {
-  habitId: string;
-  templateId: string;
-  name: string;
-  duration: number;
-  date: string;
-  metricType?: string;
-}
+type HabitScheduleEvent = EventPayloads['habit:schedule'];
 
 /**
  * Hook for processing habit tasks with improved localStorage synchronization,
