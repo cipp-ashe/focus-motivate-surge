@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNoteActions, useNoteState, NoteContextProvider } from './hooks';
+import { NoteContextProvider, useNoteActions, useNoteState } from './hooks';
 import { useEvent } from '@/hooks/useEvent';
 import { AllEventTypes } from '@/types/events';
 

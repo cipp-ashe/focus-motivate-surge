@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { initializeDataStore } from "@/types/core";
 import { toast } from "sonner";
@@ -46,8 +47,9 @@ export const useDataInitialization = (options = {}) => {
       globalInitialized = true;
       
       // Emit initialization events with timestamp
+      const timestamp = new Date().toISOString();
       eventManager.emit('app:initialized', {
-        timestamp: new Date().toISOString()
+        timestamp
       });
       
       // Emit event to trigger task loading - do this only once globally

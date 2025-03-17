@@ -1,5 +1,3 @@
-// Fix the event payloads in the event emissions
-// Only showing the relevant parts to fix
 
 import React, { createContext, useContext, useEffect, useReducer, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
@@ -16,10 +14,14 @@ type AuthAction =
   | { type: 'SIGNED_OUT' }
   | { type: 'LOADING'; payload: boolean };
 
-interface AuthContextProps {
+export interface AuthContextProps {
   state: AuthState;
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
   signIn: (email: string) => Promise<boolean>;
   signOut: () => Promise<boolean>;
+  signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -55,20 +57,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (session && session.user) {
           dispatch({ type: 'SIGNED_IN', payload: session.user });
           
-          // Fixed payload structure to match expected type
+          // Fixed payload structure to include userId
           eventManager.emit('auth:state-change', { 
-            userId: session.user.id,
-            user: session.user
+            user: session.user,
+            userId: session.user.id
           });
           
           console.log('User signed in via auth state change', session.user);
         } else {
           dispatch({ type: 'SIGNED_OUT' });
           
-          // Fixed payload structure - include userId even when signing out
+          // Fixed payload structure - only include userId if we have it
           eventManager.emit('auth:state-change', { 
-            userId: state.user?.id || 'unknown',
-            user: null
+            user: null,
+            userId: state.user?.id || null
           });
           
           console.log('User signed out via auth state change');
@@ -90,6 +92,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       subscription?.unsubscribe();
     };
+  }, []);
+
+  const signInWithMagicLink = useCallback(async (email: string) => {
+    try {
+      dispatch({ type: 'LOADING', payload: true });
+      const { error } = await supabase.auth.signInWithOtp({ email });
+      return { error };
+    } catch (error) {
+      console.error('Unexpected error signing in with magic link:', error);
+      return { error: error instanceof Error ? error : new Error('Unknown error') };
+    } finally {
+      dispatch({ type: 'LOADING', payload: false });
+    }
   }, []);
 
   const signIn = useCallback(async (email: string) => {
@@ -120,9 +135,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false;
       }
       
-      // Fixed payload structure - use userId for consistency
+      // Fixed payload structure - include userId if available
       eventManager.emit('auth:signed-out', { 
-        userId: state.user?.id || 'unknown'
+        userId: state.user?.id || null
       });
       
       return true;
@@ -134,8 +149,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextProps = {
     state,
+    user: state.user,
+    isLoading: state.isLoading,
+    isAuthenticated: !!state.user,
     signIn,
     signOut,
+    signInWithMagicLink
   };
 
   return (

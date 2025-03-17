@@ -1,174 +1,221 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
 
-interface VoiceNote {
-  id: string;
-  url: string;
-  createdAt: string;
-  transcription?: string;
-  blob: Blob;
-}
+import React, { createContext, useContext, useReducer, useState, useCallback } from 'react';
+import { VoiceNote } from '@/types/voiceNotes';
+import { v4 as uuidv4 } from 'uuid';
+import { eventManager } from '@/lib/events/EventManager';
+import { toast } from 'sonner';
 
-interface VoiceNotesState {
-  voiceNotes: VoiceNote[];
+// Define state
+export interface VoiceNotesState {
+  notes: VoiceNote[];
   isRecording: boolean;
-  transcribing: { [key: string]: boolean };
+  currentTranscript: string;
 }
 
-type VoiceNotesAction =
-  | { type: 'CREATE_VOICE_NOTE'; payload: VoiceNote }
-  | { type: 'UPDATE_VOICE_NOTE'; payload: { id: string; updates: Partial<VoiceNote> } }
-  | { type: 'DELETE_VOICE_NOTE'; payload: string }
+// Define actions
+type VoiceNotesAction = 
+  | { type: 'ADD_NOTE'; payload: VoiceNote }
+  | { type: 'DELETE_NOTE'; payload: string }
+  | { type: 'TOGGLE_NOTE_COMPLETE'; payload: string }
+  | { type: 'UPDATE_NOTE_TEXT'; payload: { id: string; text: string } }
   | { type: 'SET_RECORDING'; payload: boolean }
-  | { type: 'SET_TRANSCRIBING'; payload: { id: string; isTranscribing: boolean } };
+  | { type: 'SET_TRANSCRIPT'; payload: string }
+  | { type: 'CLEAR_TRANSCRIPT' };
 
-const initialState: VoiceNotesState = {
-  voiceNotes: [],
-  isRecording: false,
-  transcribing: {},
-};
-
+// Create context
 const VoiceNotesContext = createContext<{
   state: VoiceNotesState;
   dispatch: React.Dispatch<VoiceNotesAction>;
-  createVoiceNote: (audioBlob: Blob) => Promise<string | null>;
+  createVoiceNote: (audioBlob: Blob) => Promise<string>;
   deleteVoiceNote: (id: string) => void;
   toggleRecording: () => void;
-  transcribe: (voiceNoteId: string) => Promise<string | null>;
-}>({
-  state: initialState,
-  dispatch: () => null,
-  createVoiceNote: async () => null,
-  deleteVoiceNote: () => {},
-  toggleRecording: () => {},
-  transcribe: async () => null,
-});
+  transcribe: (voiceNoteId: string) => Promise<string>;
+  // Add missing methods
+  notes: VoiceNote[];
+  addNote: (text: string) => void;
+  deleteNote: (id: string) => void;
+  toggleNoteComplete: (id: string) => void;
+  updateNoteText: (id: string, text: string) => void;
+  createNoteFromVoiceNote: (voiceNoteId: string) => void;
+} | undefined>(undefined);
 
-function voiceNotesReducer(state: VoiceNotesState, action: VoiceNotesAction): VoiceNotesState {
+// Reducer function
+const voiceNotesReducer = (state: VoiceNotesState, action: VoiceNotesAction): VoiceNotesState => {
   switch (action.type) {
-    case 'CREATE_VOICE_NOTE':
-      return { ...state, voiceNotes: [...state.voiceNotes, action.payload] };
-    case 'UPDATE_VOICE_NOTE':
+    case 'ADD_NOTE':
       return {
         ...state,
-        voiceNotes: state.voiceNotes.map(voiceNote =>
-          voiceNote.id === action.payload.id ? { ...voiceNote, ...action.payload.updates } : voiceNote
-        ),
+        notes: [action.payload, ...state.notes]
       };
-    case 'DELETE_VOICE_NOTE':
-      return { ...state, voiceNotes: state.voiceNotes.filter(voiceNote => voiceNote.id !== action.payload) };
-    case 'SET_RECORDING':
-      return { ...state, isRecording: action.payload };
-    case 'SET_TRANSCRIBING':
+    case 'DELETE_NOTE':
       return {
         ...state,
-        transcribing: { ...state.transcribing, [action.payload.id]: action.payload.isTranscribing },
+        notes: state.notes.filter(note => note.id !== action.payload)
+      };
+    case 'TOGGLE_NOTE_COMPLETE':
+      return {
+        ...state,
+        notes: state.notes.map(note => 
+          note.id === action.payload 
+            ? { ...note, isComplete: !note.isComplete } 
+            : note
+        )
+      };
+    case 'UPDATE_NOTE_TEXT':
+      return {
+        ...state,
+        notes: state.notes.map(note => 
+          note.id === action.payload.id 
+            ? { ...note, text: action.payload.text } 
+            : note
+        )
+      };
+    case 'SET_RECORDING':
+      return {
+        ...state,
+        isRecording: action.payload
+      };
+    case 'SET_TRANSCRIPT':
+      return {
+        ...state,
+        currentTranscript: action.payload
+      };
+    case 'CLEAR_TRANSCRIPT':
+      return {
+        ...state,
+        currentTranscript: ''
       };
     default:
       return state;
   }
-}
+};
 
+// Initial state
+const initialState: VoiceNotesState = {
+  notes: [],
+  isRecording: false,
+  currentTranscript: ''
+};
+
+// Provider component
 export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(voiceNotesReducer, initialState);
   
-  // Fixed function to properly handle async operations and avoid void truthiness checks
-  const createVoiceNote = useCallback(async (audioBlob: Blob) => {
+  // Create a new voice note
+  const createVoiceNote = useCallback(async (audioBlob: Blob): Promise<string> => {
     try {
-      // Generate a unique ID for the voice note
-      const id = crypto.randomUUID();
+      const id = uuidv4();
+      const audioUrl = URL.createObjectURL(audioBlob);
       
-      // Create an object URL for the audio blob
-      const url = URL.createObjectURL(audioBlob);
-      
-      // Save the voice note to state
-      const newVoiceNote = {
+      const newNote: VoiceNote = {
         id,
-        url,
-        createdAt: new Date().toISOString(),
-        blob: audioBlob,
+        text: state.currentTranscript || 'Voice note (no transcript)',
+        timestamp: new Date().toISOString(),
+        audioUrl,
+        isComplete: false
       };
       
-      dispatch({ type: 'CREATE_VOICE_NOTE', payload: newVoiceNote });
+      dispatch({ type: 'ADD_NOTE', payload: newNote });
+      dispatch({ type: 'CLEAR_TRANSCRIPT' });
       
-      // Return the created voice note ID
+      eventManager.emit('voice-note:created', { noteId: id });
+      
       return id;
     } catch (error) {
       console.error('Error creating voice note:', error);
-      return null;
+      return '';
     }
-  }, [dispatch]);
-
+  }, [state.currentTranscript]);
+  
+  // Delete a voice note
   const deleteVoiceNote = useCallback((id: string) => {
-    dispatch({ type: 'DELETE_VOICE_NOTE', payload: id });
-  }, [dispatch]);
-
+    const noteToDelete = state.notes.find(note => note.id === id);
+    if (noteToDelete?.audioUrl) {
+      URL.revokeObjectURL(noteToDelete.audioUrl);
+    }
+    
+    dispatch({ type: 'DELETE_NOTE', payload: id });
+    eventManager.emit('voice-note:deleted', { noteId: id });
+  }, [state.notes]);
+  
+  // Toggle recording state
   const toggleRecording = useCallback(() => {
     dispatch({ type: 'SET_RECORDING', payload: !state.isRecording });
-  }, [state.isRecording, dispatch]);
+  }, [state.isRecording]);
+  
+  // Transcribe a voice note (placeholder for actual implementation)
+  const transcribe = useCallback(async (voiceNoteId: string): Promise<string> => {
+    // Placeholder for actual transcription implementation
+    console.log(`Transcribing voice note ${voiceNoteId}`);
+    return 'Transcription not implemented';
+  }, []);
 
-  const transcribe = useCallback(async (voiceNoteId: string): Promise<string | null> => {
-    try {
-      // Find the voice note by ID
-      const voiceNote = state.voiceNotes.find(vn => vn.id === voiceNoteId);
+  // Add missing methods to match the components' expectations
+  const addNote = useCallback((text: string) => {
+    const newNote: VoiceNote = {
+      id: uuidv4(),
+      text,
+      timestamp: new Date().toISOString(),
+      isComplete: false
+    };
+    
+    dispatch({ type: 'ADD_NOTE', payload: newNote });
+  }, []);
+  
+  const deleteNote = useCallback((id: string) => {
+    deleteVoiceNote(id);
+  }, [deleteVoiceNote]);
+  
+  const toggleNoteComplete = useCallback((id: string) => {
+    dispatch({ type: 'TOGGLE_NOTE_COMPLETE', payload: id });
+  }, []);
+  
+  const updateNoteText = useCallback((id: string, text: string) => {
+    dispatch({ type: 'UPDATE_NOTE_TEXT', payload: { id, text } });
+  }, []);
+  
+  const createNoteFromVoiceNote = useCallback((voiceNoteId: string) => {
+    const voiceNote = state.notes.find(note => note.id === voiceNoteId);
+    if (voiceNote) {
+      // Emit event for note creation from voice note
+      eventManager.emit('note:create-from-voice', { 
+        content: voiceNote.text,
+        sourceId: voiceNote.id,
+        timestamp: new Date().toISOString()
+      });
       
-      if (!voiceNote) {
-        console.error(`Voice note with ID ${voiceNoteId} not found`);
-        return null;
-      }
-      
-      // Get the audio blob from the voice note
-      const audioBlob = voiceNote.blob;
-      
-      if (!audioBlob) {
-        console.error(`No audio blob found for voice note ${voiceNoteId}`);
-        return null;
-      }
-      
-      // Create a FormData object to send the audio file to the server
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.webm');
-      
-      // Set loading state for this voice note
-      dispatch({ type: 'SET_TRANSCRIBING', payload: { id: voiceNoteId, isTranscribing: true } });
-      
-      try {
-        // Make the API call to transcribe the audio
-        const response = await fetch('/api/transcribe', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        
-        // Update the voice note with the transcription
-        dispatch({
-          type: 'UPDATE_VOICE_NOTE',
-          payload: { id: voiceNoteId, updates: { transcription: data.text } },
-        });
-        
-        return data.text;
-      } finally {
-        // Always reset loading state, even if there was an error
-        dispatch({ type: 'SET_TRANSCRIBING', payload: { id: voiceNoteId, isTranscribing: false } });
-      }
-    } catch (error) {
-      console.error('Error transcribing voice note:', error);
-      toast.error('Failed to transcribe voice note');
-      return null;
+      toast.success("Note created from voice note");
     }
-  }, [state.voiceNotes, dispatch]);
+  }, [state.notes]);
 
+  const value = {
+    state,
+    dispatch,
+    createVoiceNote,
+    deleteVoiceNote,
+    toggleRecording,
+    transcribe,
+    // Added properties for components
+    notes: state.notes,
+    addNote,
+    deleteNote,
+    toggleNoteComplete,
+    updateNoteText,
+    createNoteFromVoiceNote
+  };
+  
   return (
-    <VoiceNotesContext.Provider value={{ state, dispatch, createVoiceNote, deleteVoiceNote, toggleRecording, transcribe }}>
+    <VoiceNotesContext.Provider value={value}>
       {children}
     </VoiceNotesContext.Provider>
   );
 };
 
+// Custom hook to use voice notes context
 export const useVoiceNotes = () => {
-  return useContext(VoiceNotesContext);
+  const context = useContext(VoiceNotesContext);
+  if (context === undefined) {
+    throw new Error('useVoiceNotes must be used within a VoiceNotesProvider');
+  }
+  return context;
 };

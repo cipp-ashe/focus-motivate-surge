@@ -1,14 +1,14 @@
 
 import { useCallback, createContext, useContext, useReducer, ReactNode } from 'react';
-import { Note } from '@/types/notes';
+import { Note, Tag, TagColor, isValidTagColor } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
-import { NoteEventType } from '@/lib/events/types';
 
 // Define the state type
 interface NoteState {
   notes: Note[];
   selected: Note | null;
   content: string;
+  items: Note[]; // Add this to fix the missing items property
 }
 
 // Define the action types
@@ -17,15 +17,14 @@ type NoteAction =
   | { type: 'UPDATE_NOTE'; payload: { id: string; updates: Partial<Note> } }
   | { type: 'DELETE_NOTE'; payload: string }
   | { type: 'SELECT_NOTE'; payload: Note | null }
-  | { type: 'UPDATE_CURRENT_CONTENT'; payload: string }
-  | { type: 'ADD_TAG_TO_NOTE'; payload: { noteId: string; tagName: string; tagColor?: string } }
-  | { type: 'REMOVE_TAG_FROM_NOTE'; payload: { noteId: string; tagId: string } };
+  | { type: 'UPDATE_CURRENT_CONTENT'; payload: string };
 
 // Initialize the state
 const initialState: NoteState = {
   notes: [],
   selected: null,
-  content: ''
+  content: '',
+  items: [] // Initialize items array
 };
 
 // Create the context
@@ -35,61 +34,38 @@ const NoteDispatchContext = createContext<React.Dispatch<NoteAction> | undefined
 // Create the reducer
 function noteReducer(state: NoteState, action: NoteAction): NoteState {
   switch (action.type) {
-    case 'ADD_NOTE':
-      return { ...state, notes: [action.payload, ...state.notes] };
-    case 'UPDATE_NOTE':
+    case 'ADD_NOTE': {
+      const newNotes = [action.payload, ...state.notes];
+      return { 
+        ...state, 
+        notes: newNotes,
+        items: newNotes // Update items as well
+      };
+    }
+    case 'UPDATE_NOTE': {
+      const updatedNotes = state.notes.map(note => 
+        note.id === action.payload.id 
+          ? { ...note, ...action.payload.updates } 
+          : note
+      );
       return {
         ...state,
-        notes: state.notes.map(note => 
-          note.id === action.payload.id 
-            ? { ...note, ...action.payload.updates } 
-            : note
-        )
+        notes: updatedNotes,
+        items: updatedNotes // Update items as well
       };
-    case 'DELETE_NOTE':
+    }
+    case 'DELETE_NOTE': {
+      const filteredNotes = state.notes.filter(note => note.id !== action.payload);
       return {
         ...state,
-        notes: state.notes.filter(note => note.id !== action.payload)
+        notes: filteredNotes,
+        items: filteredNotes // Update items as well
       };
+    }
     case 'SELECT_NOTE':
       return { ...state, selected: action.payload };
     case 'UPDATE_CURRENT_CONTENT':
       return { ...state, content: action.payload };
-    case 'ADD_TAG_TO_NOTE': {
-      const { noteId, tagName, tagColor = 'default' } = action.payload;
-      return {
-        ...state,
-        notes: state.notes.map(note => {
-          if (note.id === noteId) {
-            const tags = note.tags || [];
-            // Check if tag already exists
-            const tagExists = tags.some(tag => tag.name === tagName);
-            if (!tagExists) {
-              return {
-                ...note,
-                tags: [...tags, { name: tagName, color: tagColor }]
-              };
-            }
-          }
-          return note;
-        })
-      };
-    }
-    case 'REMOVE_TAG_FROM_NOTE': {
-      const { noteId, tagId } = action.payload;
-      return {
-        ...state,
-        notes: state.notes.map(note => {
-          if (note.id === noteId && note.tags) {
-            return {
-              ...note,
-              tags: note.tags.filter(tag => tag.name !== tagId)
-            };
-          }
-          return note;
-        })
-      };
-    }
     default:
       return state;
   }
@@ -99,8 +75,14 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
 export function NoteContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(noteReducer, initialState);
 
+  // Set items to be the same as notes for compatibility
+  const stateWithItems: NoteState = {
+    ...state,
+    items: state.notes
+  };
+
   return (
-    <NoteStateContext.Provider value={state}>
+    <NoteStateContext.Provider value={stateWithItems}>
       <NoteDispatchContext.Provider value={dispatch}>
         {children}
       </NoteDispatchContext.Provider>
@@ -138,7 +120,7 @@ export const useNoteActions = () => {
     
     // Also emit an event for other parts of the app
     eventManager.emit('note:view', { 
-      id: note.id,
+      noteId: note.id,
       title: note.title || 'Untitled Note'
     });
   }, [dispatch]);
@@ -146,6 +128,7 @@ export const useNoteActions = () => {
   const addNote = useCallback(() => {
     if (!content?.trim()) return;
 
+    // Ensure tag colors comply with TagColor type
     const newNote: Note = {
       id: crypto.randomUUID(),
       title: content.split('\n')[0]?.trim().replace(/^#+ /, '') || 'Untitled Note',
@@ -200,19 +183,53 @@ export const useNoteActions = () => {
     });
   }, [dispatch, selected?.id]);
 
-  const addTagToNote = useCallback((noteId: string, tagName: string, tagColor?: string) => {
-    dispatch({
-      type: 'ADD_TAG_TO_NOTE',
-      payload: { noteId, tagName, tagColor }
+  const addTagToNote = useCallback((noteId: string, tagName: string, tagColor: string = 'default') => {
+    // Validate the tag color
+    const color: TagColor = isValidTagColor(tagColor) ? tagColor as TagColor : 'default';
+    
+    const updates: Partial<Note> = {
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Get the current note to modify its tags
+    const currentNote = useNoteState().notes.find(note => note.id === noteId);
+    if (currentNote) {
+      const tags = [...(currentNote.tags || [])];
+      // Check if tag already exists
+      const existingTagIndex = tags.findIndex(tag => tag.name === tagName);
+      
+      if (existingTagIndex >= 0) {
+        // Update existing tag
+        tags[existingTagIndex] = { ...tags[existingTagIndex], color };
+      } else {
+        // Add new tag
+        tags.push({ name: tagName, color });
+      }
+      
+      updates.tags = tags;
+    }
+    
+    dispatch({ 
+      type: 'UPDATE_NOTE',
+      payload: { id: noteId, updates }
     });
-  }, [dispatch]);
+  }, []);
 
   const removeTagFromNote = useCallback((noteId: string, tagId: string) => {
-    dispatch({
-      type: 'REMOVE_TAG_FROM_NOTE',
-      payload: { noteId, tagId }
-    });
-  }, [dispatch]);
+    // Get the current note
+    const currentNote = useNoteState().notes.find(note => note.id === noteId);
+    if (currentNote && currentNote.tags) {
+      const updates: Partial<Note> = {
+        tags: currentNote.tags.filter(tag => tag.name !== tagId),
+        updatedAt: new Date().toISOString()
+      };
+      
+      dispatch({
+        type: 'UPDATE_NOTE',
+        payload: { id: noteId, updates }
+      });
+    }
+  }, []);
 
   const clearCurrentNote = useCallback(() => {
     dispatch({ type: 'SELECT_NOTE', payload: null });
