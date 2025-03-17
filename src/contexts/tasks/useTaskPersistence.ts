@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { useAuth } from '@/contexts/auth/AuthContext';
@@ -15,19 +15,31 @@ import { supabase } from '@/lib/supabase/client';
 export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = []) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const previousTasksLengthRef = useRef<number>(0);
+  const previousCompletedTasksLengthRef = useRef<number>(0);
 
-  // Save tasks to storage whenever they change
+  // Save tasks to storage only when they actually change in a meaningful way
   useEffect(() => {
     if (!tasks) return; // Guard against undefined tasks
     
+    // Skip saving if the array length hasn't changed and we've already saved before
+    if (tasks.length === 0 && previousTasksLengthRef.current === 0) {
+      return;
+    }
+    
+    // Update our reference of the previous length
+    previousTasksLengthRef.current = tasks.length;
+    
     try {
-      console.log(`TaskPersistence: Saving ${tasks.length} tasks to storage`);
+      if (tasks.length > 0) {
+        console.log(`TaskPersistence: Saving ${tasks.length} tasks to storage`);
+      }
       
       // Always save to local storage for maximum reliability
       taskStorage.saveTasks(tasks);
 
       // If user is authenticated, also save to Supabase
-      if (user) {
+      if (user && tasks.length > 0) {
         console.log(`TaskPersistence: User authenticated, syncing tasks to Supabase`);
         // We'll do this asynchronously to avoid blocking the UI
         const syncToSupabase = async () => {
@@ -77,16 +89,27 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
     }
   }, [tasks, user, toast]);
   
-  // Save completed tasks to storage whenever they change
+  // Save completed tasks to storage only when they actually change
   useEffect(() => {
     if (!completedTasks) return; // Guard against undefined completedTasks
     
+    // Skip saving if the array length hasn't changed and we've already saved before
+    if (completedTasks.length === 0 && previousCompletedTasksLengthRef.current === 0) {
+      return;
+    }
+    
+    // Update our reference of the previous length
+    previousCompletedTasksLengthRef.current = completedTasks.length;
+    
     try {
-      console.log(`TaskPersistence: Saving ${completedTasks.length} completed tasks to storage`);
+      if (completedTasks.length > 0) {
+        console.log(`TaskPersistence: Saving ${completedTasks.length} completed tasks to storage`);
+      }
+      
       taskStorage.saveCompletedTasks(completedTasks);
       
       // If user is authenticated, also save completed tasks to Supabase
-      if (user) {
+      if (user && completedTasks.length > 0) {
         console.log(`TaskPersistence: User authenticated, syncing completed tasks to Supabase`);
         // We'll do this asynchronously to avoid blocking the UI
         const syncCompletedToSupabase = async () => {

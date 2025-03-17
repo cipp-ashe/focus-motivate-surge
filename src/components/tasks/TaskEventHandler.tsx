@@ -5,6 +5,11 @@ import { eventManager } from '@/lib/events/EventManager';
 import { useEvent } from '@/hooks/useEvent';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
+// Global flags to prevent duplicate event handling
+let taskUiRefreshInitialized = false;
+let forceTaskUpdateInitialized = false;
+let taskSubmitCompleteInitialized = false;
+
 export interface TaskEventHandlerProps {
   tasks: Task[];
   onTaskCreate: (task: Task) => void;
@@ -26,6 +31,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   const isMountedRef = useRef(true);
   const isMobile = useIsMobile();
   const lastUpdateTimeRef = useRef(0);
+  const eventHandlersSetupRef = useRef(false);
   
   // Set up event handlers with the useEvent hook
   useEvent('task:create', onTaskCreate);
@@ -34,21 +40,23 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   
   // Handle our new custom UI refresh events - this is critical for immediate UI updates
   useEffect(() => {
+    if (eventHandlersSetupRef.current || taskUiRefreshInitialized) return;
+    
     const handleTaskUiRefresh = (event: CustomEvent) => {
       if (!isMountedRef.current) return;
       
       const now = Date.now();
       if (now - lastUpdateTimeRef.current < 500) {
-        console.log('TaskEventHandler: Skipping too frequent UI refresh');
         return;
       }
       
       lastUpdateTimeRef.current = now;
-      console.log('TaskEventHandler: Received task-ui-refresh event:', event.detail);
+      console.log('TaskEventHandler: Received task-ui-refresh event');
       onForceUpdate();
     };
     
     window.addEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
+    taskUiRefreshInitialized = true;
     
     return () => {
       window.removeEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
@@ -57,12 +65,13 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   
   // Also handle legacy force update events for backward compatibility
   useEffect(() => {
+    if (forceTaskUpdateInitialized) return;
+    
     const handleForceUpdate = () => {
       if (!isMountedRef.current) return;
       
       const now = Date.now();
       if (now - lastUpdateTimeRef.current < 500) {
-        console.log('TaskEventHandler: Skipping too frequent force update');
         return;
       }
       
@@ -72,6 +81,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
     };
     
     window.addEventListener('force-task-update', handleForceUpdate);
+    forceTaskUpdateInitialized = true;
     
     return () => {
       window.removeEventListener('force-task-update', handleForceUpdate);
@@ -80,6 +90,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   
   // Set up cleanup for mounted ref
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };
@@ -87,12 +98,13 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   
   // Additional handler for task submission completion
   useEffect(() => {
+    if (taskSubmitCompleteInitialized) return;
+    
     const handleTaskSubmitComplete = () => {
       if (!isMountedRef.current) return;
       
       const now = Date.now();
       if (now - lastUpdateTimeRef.current < 500) {
-        console.log('TaskEventHandler: Skipping too frequent task submit refresh');
         return;
       }
       
@@ -102,6 +114,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
     };
     
     window.addEventListener('task-submit-complete', handleTaskSubmitComplete);
+    taskSubmitCompleteInitialized = true;
     
     return () => {
       window.removeEventListener('task-submit-complete', handleTaskSubmitComplete);

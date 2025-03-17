@@ -33,7 +33,11 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
       
       try {
         const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
-        console.log("Initial templates loaded from localStorage:", templates);
+        
+        if (templates.length > 0) {
+          console.log("Initial templates loaded from localStorage:", templates.length);
+        }
+        
         dispatch({ type: 'LOAD_TEMPLATES', payload: templates });
         
         // Also load custom templates

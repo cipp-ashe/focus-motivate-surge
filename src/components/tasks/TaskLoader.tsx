@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
-import { toast } from 'sonner';
 
 // Global flag to track if task loader has initialized
 let taskLoaderInitialized = false;
@@ -17,11 +16,10 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
   onTasksLoaded, 
   children 
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!taskLoaderInitialized);
   const initialCheckDoneRef = useRef(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const migrationRunRef = useRef(false);
-  const lastLoadTimeRef = useRef<number>(0);
   
   // Run task type migration only once when component first mounts
   useEffect(() => {
@@ -48,29 +46,6 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     }
   }, []);
   
-  // Function to reload tasks from storage
-  const reloadTasksFromStorage = () => {
-    try {
-      const storedTasks = taskStorage.loadTasks();
-      console.log("TaskLoader - Reloading tasks from storage:", storedTasks.length);
-      
-      onTasksLoaded(storedTasks);
-      lastLoadTimeRef.current = Date.now();
-      
-      // Mark as globally initialized
-      taskLoaderInitialized = true;
-      
-      // Force a UI update
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('force-task-update'));
-      }, 100);
-    } catch (error) {
-      console.error("Error reloading tasks from storage:", error);
-      // Don't break the app if tasks can't be loaded - continue with empty array
-      onTasksLoaded([]);
-    }
-  };
-  
   // Check for pending habits and load tasks when component first mounts
   useEffect(() => {
     // Skip if already initialized globally or locally
@@ -88,9 +63,10 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     try {
       // Load initial tasks from storage
       const storedTasks = taskStorage.loadTasks();
-      console.log("TaskLoader - Initial load from storage:", storedTasks.length);
+      if (storedTasks.length > 0) {
+        console.log("TaskLoader - Initial load from storage:", storedTasks.length);
+      }
       onTasksLoaded(storedTasks);
-      lastLoadTimeRef.current = Date.now();
       
       // Mark as globally initialized
       taskLoaderInitialized = true;
@@ -128,14 +104,6 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
       loadingTimeoutRef.current = setTimeout(() => {
         console.log("TaskLoader - Loading timeout reached, forcing state to loaded");
         setIsLoading(false);
-        
-        // Try to reload from storage, but don't break if it fails
-        try {
-          reloadTasksFromStorage();
-        } catch (error) {
-          console.error("Error in forced reload:", error);
-        }
-        
         loadingTimeoutRef.current = null;
       }, 3000); // Increased timeout for slower devices
     }
