@@ -2,45 +2,27 @@
 import { useState, useEffect } from 'react';
 
 /**
- * A unified hook to detect mobile screen sizes with configurable breakpoint
- * This replaces multiple implementations of mobile detection across the app
- * 
- * @param breakpoint Optional custom breakpoint in pixels (defaults to 768)
- * @returns boolean indicating if the screen is mobile size
+ * Hook to detect if the current device is mobile based on screen width
+ * @returns boolean indicating if the device is mobile
  */
-export const useIsMobile = (breakpoint: number = 768): boolean => {
-  // Using null as initial state avoids hydration mismatch
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+export function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Initial check function
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < breakpoint);
-    };
+    // Handler to call on window resize
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
     
-    // Set initial value
-    checkMobile();
-
-    // Add event listener for window resize with throttling
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const handleResize = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        checkMobile();
-      }, 100); // Throttle to avoid excessive updates
-    };
+    // Initial check
+    handleResize();
     
+    // Set up event listener
     window.addEventListener('resize', handleResize);
     
-    // Clean up event listener on component unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [breakpoint]);
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return isMobile;
-};
-
-// Also export it as useMobile for backward compatibility
-export const useMobile = useIsMobile;
+}

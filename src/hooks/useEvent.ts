@@ -1,40 +1,21 @@
 
-import { useEffect, useRef, useCallback } from 'react';
-import { eventManager, EventType, EventPayloads } from '@/lib/events/EventManager';
+import { useEffect } from 'react';
+import { eventManager } from '@/lib/events/EventManager';
 
 /**
- * Hook to subscribe to a specific event and handle it
+ * Hook to simplify adding event listeners to the event manager
  * 
- * @param eventType - The event type to subscribe to
- * @param callback - The callback to run when the event is emitted
+ * @param eventName The name of the event to listen for
+ * @param callback The callback function to execute when the event is emitted
  */
-export function useEvent<T extends EventType>(
-  eventType: T,
-  callback: (payload: EventPayloads[T]) => void
-) {
-  // Keep track of the latest callback
-  const callbackRef = useRef(callback);
-  
-  // Update the ref whenever the callback changes
+export function useEvent(eventName: string, callback: (...args: any[]) => void) {
   useEffect(() => {
-    callbackRef.current = callback;
-  }, [callback]);
-  
-  // Create a stable wrapper function
-  const stableCallback = useCallback((payload: any) => {
-    callbackRef.current(payload as EventPayloads[T]);
-  }, []);
-  
-  useEffect(() => {
-    console.log(`[useEvent] Subscribing to event: ${eventType}`);
-    
-    // Subscribe to the event with the stable callback
-    const unsubscribe = eventManager.on(eventType, stableCallback);
+    // Register the event handler
+    eventManager.on(eventName, callback);
     
     // Return cleanup function
     return () => {
-      console.log(`[useEvent] Unsubscribing from event: ${eventType}`);
-      unsubscribe();
+      eventManager.off(eventName, callback);
     };
-  }, [eventType, stableCallback]);
+  }, [eventName, callback]);
 }

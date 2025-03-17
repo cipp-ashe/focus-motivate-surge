@@ -14,6 +14,7 @@ import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
 import { toast } from 'sonner';
 import { TaskInput } from '@/components/tasks/TaskInput';
 import { eventManager } from '@/lib/events/EventManager';
+import { TaskEventHandler } from '@/components/tasks/TaskEventHandler';
 
 const TasksPage: React.FC = () => {
   const taskContext = useTaskContext();
