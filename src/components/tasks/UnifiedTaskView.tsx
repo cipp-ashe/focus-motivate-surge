@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Timer, BookOpen, CheckSquare, Image, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
+import { TaskTabsList } from './tabs/TaskTabsList';
 
 interface UnifiedTaskViewProps {
   activeTasks: Task[];
@@ -71,8 +72,8 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full">
-      <TabsList className="grid grid-cols-2 mb-4">
+    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col h-full">
+      <TabsList className="grid grid-cols-2 mb-2">
         <TabsTrigger value="active">
           Active Tasks ({activeTasks.length})
         </TabsTrigger>
@@ -81,7 +82,10 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
         </TabsTrigger>
       </TabsList>
       
-      {/* Task type filters */}
+      {/* Task type filters - now using TaskTabsList component */}
+      <TaskTabsList taskCounts={taskCounts} />
+      
+      {/* Task type filters - original inline version */}
       <div className="flex justify-center mb-4 overflow-x-auto py-2 gap-1">
         <button
           onClick={() => setActiveTaskType('all')}
