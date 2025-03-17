@@ -59,6 +59,10 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
             }
           } catch (error) {
             console.error('Error in Supabase sync:', error);
+            // Use toast.error instead of calling toast directly
+            toast.error("Error saving tasks", {
+              description: "There was a problem saving your tasks to the cloud."
+            });
           }
         };
 
@@ -66,13 +70,12 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
       }
     } catch (error) {
       console.error('Error saving tasks to storage:', error);
-      toast({
-        title: "Error saving tasks",
-        description: "There was a problem saving your tasks.",
-        variant: "destructive"
+      // Use toast.error instead of calling toast directly
+      toast.error("Error saving tasks", {
+        description: "There was a problem saving your tasks."
       });
     }
-  }, [tasks, user]);
+  }, [tasks, user, toast]);
   
   // Save completed tasks to storage whenever they change
   useEffect(() => {
@@ -116,6 +119,10 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
             }
           } catch (error) {
             console.error('Error in Supabase completed tasks sync:', error);
+            // Use toast.error instead of calling toast directly
+            toast.error("Error saving completed tasks", {
+              description: "There was a problem saving your completed tasks to the cloud."
+            });
           }
         };
 
@@ -123,11 +130,10 @@ export const useTaskPersistence = (tasks: Task[] = [], completedTasks: Task[] = 
       }
     } catch (error) {
       console.error('Error saving completed tasks to storage:', error);
-      toast({
-        title: "Error saving completed tasks",
-        description: "There was a problem saving your completed tasks.",
-        variant: "destructive"
+      // Use toast.error instead of calling toast directly
+      toast.error("Error saving completed tasks", {
+        description: "There was a problem saving your completed tasks."
       });
     }
-  }, [completedTasks, user]);
+  }, [completedTasks, user, toast]);
 };
