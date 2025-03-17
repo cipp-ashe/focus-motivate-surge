@@ -1,29 +1,28 @@
 
-import { Task, TaskMetrics } from '@/types/tasks';
+import { Task } from '@/types/tasks';
 
 /**
- * State interface for TaskContext
+ * TaskContextState interface for the task context
  */
 export interface TaskContextState {
+  /** Array of active tasks */
   items: Task[];
+  /** Array of completed tasks */
   completed: Task[];
+  /** ID of the currently selected task, if any */
   selected: string | null;
+  /** Whether the tasks have been loaded */
   isLoaded: boolean;
-}
-
-/**
- * Action interface for task operations
- */
-export interface TaskContextActions {
-  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  
+  // Task operations
+  /** Add a new task */
+  addTask: (task: Task) => void;
+  /** Update an existing task */
   updateTask: (taskId: string, updates: Partial<Task>) => void;
+  /** Delete a task */
   deleteTask: (taskId: string, reason?: string) => void;
-  completeTask: (taskId: string, metrics?: TaskMetrics) => void;
+  /** Complete a task */
+  completeTask: (taskId: string, metrics?: any) => void;
+  /** Select a task */
   selectTask: (taskId: string | null) => void;
-  forceTasksReload: () => void;
 }
-
-/**
- * Combined type for full task context
- */
-export type TaskContext = TaskContextState & TaskContextActions;

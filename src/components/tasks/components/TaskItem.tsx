@@ -1,0 +1,83 @@
+
+import React, { useState, useCallback } from 'react';
+import { Task } from '@/types/tasks';
+import { cn } from '@/lib/utils';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { TaskActions } from './TaskActions';
+import { TaskContent } from './TaskContent';
+import { useTaskActionHandler } from './TaskActionHandler';
+
+interface TaskItemProps {
+  task: Task;
+  onOpenTaskDialog?: () => void;
+  isTimerView?: boolean;
+  dialogOpeners?: {
+    checklist?: (taskId: string, taskName: string, items: any[]) => void;
+    journal?: (taskId: string, taskName: string, entry: string) => void;
+    screenshot?: (imageUrl: string, taskName: string) => void;
+    voicenote?: (taskId: string, taskName: string) => void;
+  };
+}
+
+export const TaskItem: React.FC<TaskItemProps> = ({
+  task,
+  onOpenTaskDialog,
+  isTimerView = false,
+  dialogOpeners
+}) => {
+  const { selectTask, selected } = useTaskContext();
+  const [isHovered, setIsHovered] = useState(false);
+  const { handleTaskAction, handleDelete } = useTaskActionHandler(task, onOpenTaskDialog);
+  
+  const isSelected = selected === task.id;
+  
+  // Handle selecting a task
+  const handleSelectTask = useCallback(() => {
+    selectTask(isSelected ? null : task.id);
+  }, [selectTask, isSelected, task.id]);
+  
+  // Handle keyboard accessibility
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleSelectTask();
+    } else if (e.key === 'Delete') {
+      e.preventDefault();
+      handleDelete(e as any);
+    }
+  }, [handleSelectTask, handleDelete]);
+  
+  return (
+    <div
+      className={cn(
+        "relative rounded-md border p-3 transition-all",
+        isSelected ? "border-primary/50 bg-primary/5" : "border-border/50",
+        isHovered && !isSelected && "border-border bg-card/80"
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleSelectTask}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-pressed={isSelected}
+      aria-label={`Task: ${task.name}`}
+    >
+      <TaskContent
+        task={task}
+        isSelected={isSelected}
+        isTimerView={isTimerView}
+        dialogOpeners={dialogOpeners}
+        handleTaskAction={handleTaskAction}
+      />
+      
+      <TaskActions
+        task={task}
+        isHovered={isHovered}
+        isSelected={isSelected}
+        handleDelete={handleDelete}
+        handleTaskAction={handleTaskAction}
+      />
+    </div>
+  );
+};

@@ -1,12 +1,12 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { taskReducer } from './taskReducer';
 import { taskState } from './taskState';
 import { useTaskEvents } from './useTaskEvents';
 import { useTaskPersistence } from './useTaskPersistence';
 import { useTaskNavigation } from './useTaskNavigation';
-import { TaskContextState } from './types';
+import { TaskContextState, Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { taskStateVerifier } from '@/lib/verification/taskStateVerifier';
 
@@ -32,11 +32,6 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(taskReducer, taskState.getInitialState());
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Debug: Log state on changes
-  useEffect(() => {
-    console.log("TaskContext state updated:", state);
-  }, [state]);
-  
   // Set up event handling
   const { forceTasksReload } = useTaskEvents(state.items, state.completed, dispatch);
   
@@ -45,6 +40,46 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   
   // Set up navigation handling
   useTaskNavigation(forceTasksReload);
+
+  // Add callback functions for common task operations
+  const addTask = useCallback((task: Task) => {
+    dispatch({ type: 'ADD_TASK', payload: task });
+    window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
+      detail: { action: 'add', taskId: task.id }
+    }));
+  }, []);
+
+  const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
+    dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
+    window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
+      detail: { action: 'update', taskId, changes: updates }
+    }));
+  }, []);
+
+  const deleteTask = useCallback((taskId: string, reason: string = 'manual') => {
+    dispatch({ type: 'DELETE_TASK', payload: { taskId, reason } });
+    window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
+      detail: { action: 'delete', taskId }
+    }));
+  }, []);
+
+  const completeTask = useCallback((taskId: string, metrics?: any) => {
+    dispatch({ 
+      type: 'COMPLETE_TASK', 
+      payload: { 
+        taskId, 
+        completedAt: new Date().toISOString(),
+        metrics
+      } 
+    });
+    window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
+      detail: { action: 'complete', taskId }
+    }));
+  }, []);
+
+  const selectTask = useCallback((taskId: string | null) => {
+    dispatch({ type: 'SELECT_TASK', payload: taskId });
+  }, []);
   
   // Load initial data on mount
   useEffect(() => {
@@ -121,8 +156,18 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [state.isLoaded, state.items, isInitialized, forceTasksReload]);
 
+  // Create a combined context value with both state and operations
+  const contextValue = {
+    ...state,
+    addTask,
+    updateTask,
+    deleteTask,
+    completeTask,
+    selectTask
+  };
+
   return (
-    <TaskContext.Provider value={state}>
+    <TaskContext.Provider value={contextValue}>
       {children}
     </TaskContext.Provider>
   );
