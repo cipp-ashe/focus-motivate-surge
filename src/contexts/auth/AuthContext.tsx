@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase, enableRealtimeForTables } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -21,23 +21,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const authInitializedRef = useRef(false);
+  const realtimeEnabledRef = useRef(false);
+  const eventEmittedRef = useRef(false);
 
   useEffect(() => {
+    // Only run this effect once
+    if (authInitializedRef.current) return;
+    authInitializedRef.current = true;
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
       
-      // Enable realtime if user is authenticated
-      if (session?.user) {
+      // Enable realtime if user is authenticated (only once)
+      if (session?.user && !realtimeEnabledRef.current) {
+        realtimeEnabledRef.current = true;
         enableRealtimeForTables();
       }
       
-      // If user just logged in, sync localStorage data to Supabase
+      // If user just logged in, sync localStorage data to Supabase (only once)
       if (session?.user && localStorage.getItem('firstLogin') !== 'completed') {
         syncLocalDataToSupabase(session.user.id);
         localStorage.setItem('firstLogin', 'completed');
+      }
+      
+      // Emit auth state change event (only once)
+      if (!eventEmittedRef.current) {
+        eventEmittedRef.current = true;
+        eventManager.emit('auth:state-change', { 
+          event: 'INITIAL_SESSION', 
+          user: session?.user ?? null 
+        });
       }
     });
 
@@ -55,8 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // If user just logged in, sync localStorage data to Supabase
       if (session?.user && _event === 'SIGNED_IN') {
-        // Enable realtime features
-        enableRealtimeForTables();
+        // Enable realtime features (only if not already enabled)
+        if (!realtimeEnabledRef.current) {
+          realtimeEnabledRef.current = true;
+          enableRealtimeForTables();
+        }
         
         // Sync data if it's first login
         if (localStorage.getItem('firstLogin') !== 'completed') {
@@ -67,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.success('Signed in successfully');
         eventManager.emit('auth:signed-in', { user: session.user });
       } else if (_event === 'SIGNED_OUT') {
+        realtimeEnabledRef.current = false;
         eventManager.emit('auth:signed-out', {});
       }
     });

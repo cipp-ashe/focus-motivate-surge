@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { taskReducer } from './taskReducer';
 import { taskState } from './taskState';
@@ -32,6 +32,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   // Initialize with data from localStorage
   const [state, dispatch] = useReducer(taskReducer, taskState.getInitialState());
   const [isInitialized, setIsInitialized] = useState(false);
+  const initStartedRef = useRef(false);
+  const habitCheckRef = useRef(false);
   
   // Set up event handling
   const { forceTasksReload } = useTaskEvents(state.items, state.completed, dispatch);
@@ -83,6 +85,10 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   
   // Load initial data on mount
   useEffect(() => {
+    // Prevent duplicate initialization
+    if (initStartedRef.current) return;
+    initStartedRef.current = true;
+    
     try {
       const result = taskState.loadFromStorage();
       console.log("TaskContext initial load:", result);
@@ -95,9 +101,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         
         // Check for pending habits
         setTimeout(() => {
-          console.log("TaskContext: Initial load complete, checking for pending habits");
-          eventManager.emit('habits:check-pending', {});
-          setIsInitialized(true);
+          if (!habitCheckRef.current) {
+            habitCheckRef.current = true;
+            console.log("TaskContext: Initial load complete, checking for pending habits");
+            eventManager.emit('habits:check-pending', {});
+            setIsInitialized(true);
+          }
         }, 250);
       }, 100);
     } catch (error) {
@@ -131,12 +140,15 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const cleanupVerification = taskStateVerifier.setupPeriodicVerification(
       () => state.items,
       (missingTasks) => {
-        missingTasks.forEach(task => {
-          dispatch({ type: 'ADD_TASK', payload: task });
-        });
-        window.dispatchEvent(new Event('force-task-update'));
+        if (missingTasks.length > 0) {
+          console.log(`TaskContext: Found ${missingTasks.length} missing tasks during periodic verification`);
+          missingTasks.forEach(task => {
+            dispatch({ type: 'ADD_TASK', payload: task });
+          });
+          window.dispatchEvent(new Event('force-task-update'));
+        }
       },
-      30000 // Check every 30 seconds
+      60000 // Check every minute - reduced frequency from 30s to 60s
     );
     
     // Set up listener for page visibility changes to force reload on tab focus

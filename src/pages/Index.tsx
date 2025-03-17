@@ -1,6 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDataInitialization } from '@/hooks/data/useDataInitialization';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -30,10 +29,12 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
 
 const DashboardContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const { isInitialized, error, clearStorage, showClearButton } = useDataInitialization();
+  const { isInitialized, error, clearStorage } = useDataInitialization();
+  const renderCountRef = useRef(0);
   
   useEffect(() => {
-    console.log("Dashboard mounting, initialization status:", { isInitialized, error });
+    renderCountRef.current += 1;
+    console.log(`Dashboard content rendering #${renderCountRef.current}, initialization status:`, { isInitialized, error });
     
     if (error) {
       logError('Dashboard', 'Failed to initialize application', error);
@@ -106,7 +107,12 @@ const DashboardContent: React.FC = () => {
 };
 
 const IndexPage: React.FC = () => {
-  console.log("Rendering IndexPage component");
+  const renderCountRef = useRef(0);
+  
+  useEffect(() => {
+    renderCountRef.current += 1;
+    console.log(`Rendering IndexPage component #${renderCountRef.current}`);
+  }, []);
   
   return (
     <ErrorBoundary

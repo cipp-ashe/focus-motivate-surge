@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { habitReducer } from './habitReducer';
@@ -14,11 +14,17 @@ const HabitActionsContext = createContext<HabitContextActions | undefined>(undef
 
 export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
+  const loadedRef = useRef(false);
+  const habitsCheckedRef = useRef(false);
   
   // Load initial templates
   const { data, refetch } = useQuery({
     queryKey: ['habits'],
     queryFn: async () => {
+      // Prevent duplicate loading
+      if (loadedRef.current) return state.templates;
+      loadedRef.current = true;
+      
       try {
         const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
         console.log("Initial templates loaded from localStorage:", templates);
@@ -28,10 +34,13 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
         const customTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
         dispatch({ type: 'LOAD_CUSTOM_TEMPLATES', payload: customTemplates });
         
-        // Mark as loaded
+        // Mark as loaded and trigger habit processing once
         setTimeout(() => {
-          // Update habit processing
-          eventManager.emit('habits:check-pending', {});
+          if (!habitsCheckedRef.current) {
+            habitsCheckedRef.current = true;
+            // Update habit processing
+            eventManager.emit('habits:check-pending', {});
+          }
         }, 300);
         
         return templates;
@@ -62,12 +71,12 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Force periodic verification of habit tasks
+  // Force periodic verification of habit tasks but at a reasonable interval
   useEffect(() => {
     const checkInterval = setInterval(() => {
       console.log('HabitContext: Periodic habit check');
       eventManager.emit('habits:check-pending', {});
-    }, 60000); // Check every minute
+    }, 120000); // Check every 2 minutes instead of every minute
     
     return () => clearInterval(checkInterval);
   }, []);

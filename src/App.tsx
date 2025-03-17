@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import AppLayout from './components/AppLayout';
@@ -7,10 +7,18 @@ import AppLayout from './components/AppLayout';
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<Error | null>(null);
+  const initStartedRef = useRef(false);
   
-  // Initialize app
+  // Initialize app once
   useEffect(() => {
+    // Prevent double initialization
+    if (initStartedRef.current) {
+      return;
+    }
+    
+    initStartedRef.current = true;
     console.log("App component mounted, initializing...");
+    
     try {
       // Simple initialization without any external service connections
       setIsInitialized(true);

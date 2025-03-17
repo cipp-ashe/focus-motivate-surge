@@ -18,12 +18,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     }
   },
   global: {
-    fetch: (...args) => {
+    fetch: (url, options) => {
       // Log network activity in development mode only
       if (import.meta.env.DEV) {
-        console.debug('Supabase fetch:', args[0]);
+        console.debug('Supabase fetch:', url);
       }
-      return fetch(...args);
+      return fetch(url, options);
     }
   }
 });
@@ -33,11 +33,13 @@ export const onAuthStateChange = (callback: (event: string, session: any) => voi
   return supabase.auth.onAuthStateChange(callback);
 };
 
+// Single Realtime channel instance to prevent duplicate subscriptions
+let realtimeChannel: any = null;
+
 // Enable realtime for specific tables only when explicitly called
 export const enableRealtimeForTables = async () => {
   // Only set up the channel if it doesn't already exist
-  const existingChannels = supabase.getChannels();
-  if (existingChannels.some(c => c.topic === 'schema-db-changes')) {
+  if (realtimeChannel) {
     console.log('Realtime already enabled for tables');
     return;
   }
@@ -45,7 +47,7 @@ export const enableRealtimeForTables = async () => {
   try {
     console.log('Enabling realtime for tables...');
     // Create a single channel for all tables to minimize connections
-    await supabase.channel('schema-db-changes')
+    realtimeChannel = supabase.channel('schema-db-changes')
       .on('postgres_changes', { 
         event: '*',
         schema: 'public',
