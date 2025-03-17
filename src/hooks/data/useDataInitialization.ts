@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { initializeDataStore } from "@/types/core";
 import { toast } from "sonner";
+import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 
 export const useDataInitialization = () => {
   const [status, setStatus] = useState<{
@@ -47,6 +49,16 @@ export const useDataInitialization = () => {
       // If we got here, initialization succeeded or wasn't needed
       console.log("Data initialization complete");
       setStatus({ isInitialized: true, error: null });
+      
+      // Emit event to trigger task loading after initialization
+      setTimeout(() => {
+        console.log("Emitting force-task-update event after initialization");
+        window.dispatchEvent(new Event('force-task-update'));
+        
+        // Also emit via both event systems for maximum compatibility
+        eventBus.emit('app:initialized', {});
+        eventManager.emit('app:initialized', {});
+      }, 100);
     } catch (error) {
       console.error('Error during data initialization:', error);
       setStatus({ 

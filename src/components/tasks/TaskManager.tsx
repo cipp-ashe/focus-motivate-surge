@@ -1,9 +1,12 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { TaskEventHandler } from './TaskEventHandler';
 import { Task } from '@/types/tasks';
+import { eventManager } from '@/lib/events/EventManager';
+import { eventBus } from '@/lib/eventBus';
+import { toast } from 'sonner';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
@@ -24,25 +27,93 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   const completed = taskContext?.completed || [];
   const selectedTaskId = taskContext?.selected || null;
   const addTask = taskContext?.addTask;
+  const [forceUpdateCounter, setForceUpdateCounter] = useState(0);
   
   // Task management functionality
   const handleTaskAdd = useCallback((task: Task) => {
+    console.log("TaskManager: Adding task", task);
     if (addTask) {
       addTask(task);
+      
+      // Also emit via both event systems for maximum compatibility
+      eventBus.emit('task:create', task);
+      eventManager.emit('task:create', task);
+      
+      toast.success(`Task added: ${task.name}`);
+    } else {
+      console.error("TaskManager: addTask function is undefined");
+      toast.error("Failed to add task: Application error");
     }
   }, [addTask]);
   
   const handleTasksAdd = useCallback((tasks: Task[]) => {
+    console.log("TaskManager: Adding multiple tasks", tasks);
     if (addTask) {
-      tasks.forEach(task => addTask(task));
+      tasks.forEach(task => {
+        addTask(task);
+        
+        // Also emit via both event systems for maximum compatibility
+        eventBus.emit('task:create', task);
+        eventManager.emit('task:create', task);
+      });
+      
+      toast.success(`Added ${tasks.length} tasks`);
+    } else {
+      console.error("TaskManager: addTask function is undefined");
+      toast.error("Failed to add tasks: Application error");
     }
   }, [addTask]);
   
   // Force refresh handler to be passed to event handler
   const forceUpdate = useCallback(() => {
     console.log("TaskManager: Force update called - triggering UI refresh");
-    window.dispatchEvent(new CustomEvent('task-ui-refresh'));
+    setForceUpdateCounter(prev => prev + 1);
   }, []);
+  
+  // Set up refresh on UI refresh events
+  useEffect(() => {
+    const handleTaskUiRefresh = () => {
+      console.log("TaskManager: Received task-ui-refresh event");
+      forceUpdate();
+    };
+    
+    const handleForceUpdate = () => {
+      console.log("TaskManager: Received force-task-update event");
+      forceUpdate();
+    };
+    
+    window.addEventListener('task-ui-refresh', handleTaskUiRefresh);
+    window.addEventListener('force-task-update', handleForceUpdate);
+    
+    return () => {
+      window.removeEventListener('task-ui-refresh', handleTaskUiRefresh);
+      window.removeEventListener('force-task-update', handleForceUpdate);
+    };
+  }, [forceUpdate]);
+  
+  // Special handling for timer view
+  useEffect(() => {
+    if (isTimerView) {
+      console.log("TaskManager (Timer View): Setting up special timer task handlers");
+      
+      // This will ensure timer-related tasks are properly displayed
+      const refreshTimerTasks = () => {
+        console.log("TaskManager (Timer View): Refreshing timer tasks");
+        forceUpdate();
+      };
+      
+      eventBus.on('timer:task-set', refreshTimerTasks);
+      eventManager.on('timer:task-set', refreshTimerTasks);
+      
+      // Immediately trigger a refresh to ensure timer tasks are loaded
+      setTimeout(refreshTimerTasks, 200);
+      
+      return () => {
+        eventBus.off('timer:task-set', refreshTimerTasks);
+        eventManager.off('timer:task-set', refreshTimerTasks);
+      };
+    }
+  }, [isTimerView, forceUpdate]);
   
   return (
     <div className="space-y-4">
@@ -55,6 +126,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       />
       
       <TaskManagerContent
+        key={`task-manager-content-${forceUpdateCounter}`}
         tasks={items}
         completedTasks={completed}
         selectedTaskId={selectedTaskId}

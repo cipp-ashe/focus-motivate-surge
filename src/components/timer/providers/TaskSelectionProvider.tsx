@@ -1,163 +1,98 @@
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { Task } from '@/types/tasks';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventBus } from '@/lib/eventBus';
-import { toast } from 'sonner';
+import { eventManager } from '@/lib/events/EventManager';
+import { v4 as uuidv4 } from 'uuid';
 
-interface TaskSelectionContextType {
+interface TaskSelectionContextValue {
   selectedTask: Task | null;
-  setSelectedTask: React.Dispatch<React.SetStateAction<Task | null>>;
-  timerKey: number;
-  setTimerKey: React.Dispatch<React.SetStateAction<number>>;
+  timerKey: string;
+  selectTask: (task: Task | null) => void;
+  updateSelectedTask: (task: Task | null) => void;
 }
 
-// Create a default context with empty values but properly typed
-const defaultContextValue: TaskSelectionContextType = {
-  selectedTask: null,
-  setSelectedTask: () => {},
-  timerKey: 0,
-  setTimerKey: () => {}
-};
+const TaskSelectionContext = createContext<TaskSelectionContextValue | undefined>(undefined);
 
-const TaskSelectionContext = createContext<TaskSelectionContextType>(defaultContextValue);
-
-export const useTaskSelection = () => {
-  const context = useContext(TaskSelectionContext);
-  return context;
-};
-
-interface TaskSelectionProviderProps {
-  children: React.ReactNode;
-}
-
-export const TaskSelectionProvider: React.FC<TaskSelectionProviderProps> = ({ children }) => {
+export const TaskSelectionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [timerKey, setTimerKey] = useState(Date.now());
+  const [timerKey, setTimerKey] = useState(uuidv4());
+  const taskContext = useTaskContext();
   
-  // Listen for timer initialization events
+  // Reset the timer when the selected task changes
+  const resetTimer = useCallback(() => {
+    setTimerKey(uuidv4());
+  }, []);
+  
+  // Select a task and reset the timer
+  const selectTask = useCallback((task: Task | null) => {
+    console.log("TaskSelectionProvider: Selecting task", task?.id);
+    setSelectedTask(task);
+    resetTimer();
+    
+    // If a task was selected, also select it in the task context
+    if (task && taskContext) {
+      taskContext.selectTask(task.id);
+      
+      // Emit timer task set event using both event systems
+      const event = { taskId: task.id, task };
+      eventBus.emit('timer:task-set', event);
+      eventManager.emit('timer:task-set', event);
+      window.dispatchEvent(new CustomEvent('timer:set-task', { detail: event }));
+    }
+  }, [resetTimer, taskContext]);
+  
+  // Update the selected task without resetting the timer
+  const updateSelectedTask = useCallback((task: Task | null) => {
+    console.log("TaskSelectionProvider: Updating selected task", task?.id);
+    setSelectedTask(task);
+  }, []);
+  
+  // Listen for timer task selection events
   useEffect(() => {
-    const handleTimerInit = (event: CustomEvent) => {
-      try {
-        const { taskName, duration, taskId } = event.detail;
-        console.log(`TaskSelectionProvider - Received timer:init event for ${taskName} with duration ${duration}`);
-        
-        // If we have both taskId and taskName, try to find the task
-        if (taskId) {
-          try {
-            const taskList = JSON.parse(localStorage.getItem('taskList') || '[]');
-            const task = taskList.find((t: Task) => t.id === taskId);
-            
-            if (task) {
-              console.log('TaskSelectionProvider - Found task in storage:', task);
-              setSelectedTask(task);
-            } else {
-              // If task not found, create a simple object with the provided details
-              setSelectedTask({
-                id: taskId,
-                name: taskName,
-                duration: duration,
-                createdAt: new Date().toISOString(),
-                completed: false,
-                taskType: 'timer'
-              });
-            }
-          } catch (e) {
-            console.error('Error loading task from storage:', e);
-            // Fallback to simple object
-            setSelectedTask({
-              id: taskId || 'temp-' + Date.now(),
-              name: taskName,
-              duration: duration,
-              createdAt: new Date().toISOString(),
-              completed: false,
-              taskType: 'timer'
-            });
-          }
-        } else if (taskName) {
-          // Simple object with just the name and duration
-          setSelectedTask({
-            id: 'temp-' + Date.now(),
-            name: taskName,
-            duration: duration,
-            createdAt: new Date().toISOString(),
-            completed: false,
-            taskType: 'timer'
-          });
-        }
-        
-        setTimerKey(Date.now());
-      } catch (error) {
-        console.error('Error in handleTimerInit:', error);
-      }
-    };
-    
-    // Listen for direct task setting through new timer:set-task event
-    const handleTimerSetTask = (event: CustomEvent) => {
-      try {
-        const task = event.detail;
-        console.log('TaskSelectionProvider - Received direct task:', task);
-        
+    const handleTimerTaskSelect = (event: { taskId: string }) => {
+      // If we have a task context, find the task and select it
+      if (taskContext && event.taskId) {
+        const task = taskContext.items.find(t => t.id === event.taskId);
         if (task) {
-          setSelectedTask(task);
-          setTimerKey(Date.now());
-          toast.success(`Timer set for: ${task.name}`);
+          console.log("TaskSelectionProvider: Selecting task from event", task.id);
+          selectTask(task);
         }
-      } catch (error) {
-        console.error('Error in handleTimerSetTask:', error);
       }
     };
     
-    window.addEventListener('timer:init', handleTimerInit as EventListener);
-    window.addEventListener('timer:set-task', handleTimerSetTask as EventListener);
-    
-    // Also listen for task:select events from the event bus
-    const unsubscribe = eventBus.on('task:select', (taskId) => {
-      try {
-        console.log('TaskSelectionProvider - task:select event received for:', taskId);
-        
-        if (!taskId) {
-          console.warn('TaskSelectionProvider - Received null or undefined taskId');
-          return;
-        }
-        
-        try {
-          const taskList = JSON.parse(localStorage.getItem('taskList') || '[]');
-          const task = taskList.find((t: Task) => t.id === taskId);
-          
-          if (task) {
-            console.log('TaskSelectionProvider - Found task in storage:', task);
-            setSelectedTask(task);
-            setTimerKey(Date.now());
-            
-            // Only auto-convert to timer if on timer page and not already a timer or focus task
-            if (task.taskType !== 'timer' && task.taskType !== 'focus') {
-              console.log('Converting selected task to timer type');
-              eventBus.emit('task:update', {
-                taskId: task.id,
-                updates: { taskType: 'timer' }
-              });
-            }
-          } else {
-            console.warn('TaskSelectionProvider - Task not found in storage:', taskId);
-          }
-        } catch (e) {
-          console.error('Error processing task:select event:', e);
-        }
-      } catch (error) {
-        console.error('Error in task:select handler:', error);
-      }
-    });
+    // Listen to both event systems
+    eventBus.on('timer:select-task', handleTimerTaskSelect);
+    eventManager.on('timer:select-task', handleTimerTaskSelect);
     
     return () => {
-      window.removeEventListener('timer:init', handleTimerInit as EventListener);
-      window.removeEventListener('timer:set-task', handleTimerSetTask as EventListener);
-      unsubscribe();
+      eventBus.off('timer:select-task', handleTimerTaskSelect);
+      eventManager.off('timer:select-task', handleTimerTaskSelect);
     };
-  }, []);
-
+  }, [taskContext, selectTask]);
+  
+  // Value to provide to consumers
+  const value = {
+    selectedTask,
+    timerKey,
+    selectTask,
+    updateSelectedTask
+  };
+  
   return (
-    <TaskSelectionContext.Provider value={{ selectedTask, setSelectedTask, timerKey, setTimerKey }}>
+    <TaskSelectionContext.Provider value={value}>
       {children}
     </TaskSelectionContext.Provider>
   );
+};
+
+export const useTaskSelection = () => {
+  const context = useContext(TaskSelectionContext);
+  
+  if (context === undefined) {
+    throw new Error('useTaskSelection must be used within a TaskSelectionProvider');
+  }
+  
+  return context;
 };
