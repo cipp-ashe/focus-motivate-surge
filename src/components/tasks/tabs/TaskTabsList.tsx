@@ -27,7 +27,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <div className="flex w-full justify-between overflow-x-auto py-1 px-1 gap-1 bg-muted rounded-md">
+    <div className="flex w-full justify-between overflow-x-auto py-1 px-1 gap-1 rounded-md">
       <button
         onClick={() => onTaskTypeChange('all')}
         className={cn(

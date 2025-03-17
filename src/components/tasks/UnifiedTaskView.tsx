@@ -4,9 +4,6 @@ import { Task, TaskType } from '@/types/tasks';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { TaskList } from './TaskList';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, Timer, BookOpen, CheckSquare, Image, Mic } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { TaskTabsList } from './tabs/TaskTabsList';
 
 interface UnifiedTaskViewProps {
@@ -33,7 +30,6 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [activeTaskType, setActiveTaskType] = useState<'all' | TaskType>('all');
-  const isMobile = useIsMobile();
   
   // Task counts for filtering
   const [taskCounts, setTaskCounts] = useState({
