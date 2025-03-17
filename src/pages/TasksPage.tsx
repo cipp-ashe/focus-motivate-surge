@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { TaskInput } from '@/components/tasks/TaskInput';
 import { eventManager } from '@/lib/events/EventManager';
 import { TaskEventHandler } from '@/components/tasks/TaskEventHandler';
-import { TaskManagerContent } from '@/components/tasks/TaskManagerContent';
+import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
 
 const TasksPage: React.FC = () => {
   const taskContext = useTaskContext();
@@ -227,12 +227,11 @@ const TasksPage: React.FC = () => {
               />
             </div>
             
-            {/* Show completed tasks in the sidebar */}
+            {/* Replace the static completed tasks display with the unified task view */}
             <div className="p-4 bg-card rounded-lg border border-border">
-              <h3 className="text-lg font-medium mb-2">Recent Completed Tasks</h3>
-              <TaskManagerContent 
-                tasks={[]}
-                completedTasks={completedTasks.slice(0, 5)}
+              <UnifiedTaskView
+                activeTasks={tasks}
+                completedTasks={completedTasks}
                 selectedTaskId={taskContext?.selected || null}
                 dialogOpeners={dialogOpeners}
                 onTaskAdd={handleAddTask}
