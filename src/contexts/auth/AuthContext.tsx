@@ -17,13 +17,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Global flag to prevent duplicate event emissions
+let initialAuthEventEmitted = false;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const authInitializedRef = useRef(false);
   const realtimeEnabledRef = useRef(false);
-  const eventEmittedRef = useRef(false);
 
   useEffect(() => {
     // Only run this effect once
@@ -49,8 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       // Emit auth state change event (only once)
-      if (!eventEmittedRef.current) {
-        eventEmittedRef.current = true;
+      if (!initialAuthEventEmitted) {
+        initialAuthEventEmitted = true;
         eventManager.emit('auth:state-change', { 
           event: 'INITIAL_SESSION', 
           user: session?.user ?? null 
@@ -65,10 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
       
       // Emit an event that user authentication state has changed
-      eventManager.emit('auth:state-change', { 
-        event: _event, 
-        user: session?.user ?? null 
-      });
+      // Skip 'INITIAL_SESSION' events as we've already emitted that
+      if (_event !== 'INITIAL_SESSION') {
+        eventManager.emit('auth:state-change', { 
+          event: _event, 
+          user: session?.user ?? null 
+        });
+      }
       
       // If user just logged in, sync localStorage data to Supabase
       if (session?.user && _event === 'SIGNED_IN') {

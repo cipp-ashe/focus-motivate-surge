@@ -11,6 +11,28 @@ interface EventSubscription {
   unsubscribe: () => void;
 }
 
+// Implement log throttling for persistence messages
+const createThrottledLogger = () => {
+  const lastLogTime: Record<string, number> = {};
+  const logIntervals: Record<string, number> = {
+    'auth': 5000, // Only log auth messages every 5 seconds
+  };
+
+  return (message: string, category: string = 'default') => {
+    const now = Date.now();
+    const interval = logIntervals[category] || 1000;
+    
+    if (!lastLogTime[message] || (now - lastLogTime[message]) > interval) {
+      console.log(message);
+      lastLogTime[message] = now;
+      return true;
+    }
+    return false;
+  };
+};
+
+const throttledLog = createThrottledLogger();
+
 class EventManager {
   private listeners: Record<string, EventCallback[]>;
   
@@ -48,7 +70,15 @@ class EventManager {
    * Emit an event
    */
   emit<T extends TimerEventType>(event: T, payload: TimerEventPayloads[T]): void {
-    console.log(`Emitting event: ${event}`, payload);
+    // Only log non-frequent events to reduce noise
+    const nonFrequentEvents = [
+      'task:create', 'task:delete', 'habit:template-update',
+      'auth:signed-in', 'auth:signed-out', 'app:initialized'
+    ];
+    
+    if (nonFrequentEvents.includes(event)) {
+      console.log(`Emitting event: ${event}`, payload);
+    }
     
     // Call local listeners
     if (this.listeners[event]) {
@@ -92,7 +122,8 @@ class EventManager {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        console.log('User not authenticated, skipping event persistence');
+        // Use throttled logging to reduce duplicate messages
+        throttledLog('User not authenticated, skipping event persistence', 'auth');
         return;
       }
       
