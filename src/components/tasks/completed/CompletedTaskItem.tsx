@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Task } from '@/types/tasks';
 import { Badge } from '@/components/ui/badge';
@@ -118,7 +119,7 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
             {task.completedAt && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                {formatDate(task.completedAt, 'MMM d, yyyy')}
+                {formatDate(task.completedAt)}
               </span>
             )}
           </div>

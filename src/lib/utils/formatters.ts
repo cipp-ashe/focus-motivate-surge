@@ -28,16 +28,14 @@ export const calculateEfficiencyRatio = (
 export const determineCompletionStatus = (
   expectedSeconds: number,
   actualSeconds: number
-): string => {
-  if (expectedSeconds <= 0) return 'Completed';
+): 'Completed Early' | 'Completed On Time' | 'Completed Late' => {
+  if (expectedSeconds <= 0) return 'Completed On Time';
   
   const efficiency = calculateEfficiencyRatio(expectedSeconds, actualSeconds);
   
-  if (efficiency >= 1.5) return 'Completed Very Early';
-  if (efficiency >= 1.2) return 'Completed Early';
+  if (efficiency >= 1.5) return 'Completed Early';
   if (efficiency >= 0.8) return 'Completed On Time';
-  if (efficiency >= 0.5) return 'Completed Late';
-  return 'Completed Very Late';
+  return 'Completed Late';
 };
 
 /**
@@ -64,45 +62,53 @@ export const formatDuration = (durationInSeconds: number): string => {
 };
 
 /**
- * Formats a date to a relative time string (e.g., "2 days ago")
+ * Formats a value as a percentage (adds % sign)
  */
-export const formatRelativeTime = (date: Date | string): string => {
-  const now = new Date();
-  const targetDate = typeof date === 'string' ? new Date(date) : date;
-  const diffInMilliseconds = now.getTime() - targetDate.getTime();
+export const formatPercentage = (value: number): string => {
+  const percentage = Math.round(value * 100);
+  return `${percentage}%`;
+};
+
+/**
+ * Formats a timestamp to a more readable string
+ */
+export const formatTimestamp = (timestamp: string | Date): string => {
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
   
-  // Convert to seconds
-  const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
-  
-  if (diffInSeconds < 60) {
-    return 'just now';
-  }
-  
-  // Convert to minutes
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) {
-    return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
-  }
-  
-  // Convert to hours
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) {
-    return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
-  }
-  
-  // Convert to days
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 30) {
-    return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
-  }
-  
-  // Convert to months
-  const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) {
-    return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
-  }
-  
-  // Convert to years
-  const diffInYears = Math.floor(diffInMonths / 12);
-  return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+/**
+ * Formats a date based on the current locale
+ */
+export const formatDateLocalized = (date: Date | string, options?: Intl.DateTimeFormatOptions): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString(undefined, options);
+};
+
+/**
+ * Returns a CSS class based on completion status
+ */
+export const getCompletionTimingClass = (status: string): string => {
+  if (status.includes('Early')) return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200/30';
+  if (status.includes('On Time')) return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/30';
+  if (status.includes('Late')) return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/30';
+  return 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-200/30';
+};
+
+/**
+ * Alias for calculating efficiency ratio as a percentage
+ */
+export const calculateEfficiencyPercentage = (
+  expectedSeconds: number, 
+  actualSeconds: number
+): number => {
+  return calculateEfficiencyRatio(expectedSeconds, actualSeconds) * 100;
 };

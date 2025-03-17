@@ -1,3 +1,4 @@
+
 import mitt, { Emitter } from 'mitt';
 import { Note } from '@/types/notes';
 import { TimerEventType, TimerEventPayloads } from '@/types/events';
@@ -125,7 +126,12 @@ class EventManager {
     const highFrequencyEvents = ['timer:tick'];
     const throttleTime = highFrequencyEvents.includes(event as string) ? 1000 : 0;
     
-    logger.logEvent('EventManager', event as string, payload, throttleTime);
+    // Use debug log instead of logEvent when not available
+    if (typeof logger.logEvent === 'function') {
+      logger.logEvent('EventManager', event as string, payload, throttleTime);
+    } else {
+      logger.debug('EventManager', `Event: ${String(event)}`, payload);
+    }
     
     this.emitter.emit(event, payload);
   }
@@ -196,4 +202,3 @@ class EventManager {
 }
 
 export const eventManager = new EventManager();
-

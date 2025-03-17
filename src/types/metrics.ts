@@ -11,7 +11,7 @@ export interface TimerMetrics {
   extensionTime: number;
   netEffectiveTime: number;  // Computed as: actualDuration - pausedTime + extensionTime
   efficiencyRatio: number;   // Computed as: (expectedTime / netEffectiveTime) * 100
-  completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late';
+  completionStatus: 'Completed Early' | 'Completed On Time' | 'Completed Late' | 'Completed Very Early' | 'Completed Very Late';
   isPaused: boolean;
   pausedTimeLeft: number | null;
   completionDate?: string; // Added to match usage in ScreenshotTask

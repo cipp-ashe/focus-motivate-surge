@@ -25,6 +25,10 @@ const getLogLevel = (): number => {
   return DEFAULT_LOG_LEVEL;
 };
 
+// Track if event logging is enabled
+let eventLoggingEnabled = false;
+let moduleFilters: string[] = [];
+
 // Helper to format log messages
 const formatLogMessage = (component: string, message: string, data?: any): string => {
   const formattedMessage = `[${component}] ${message}`;
@@ -38,8 +42,30 @@ const formatLogMessage = (component: string, message: string, data?: any): strin
   return formattedMessage;
 };
 
+// Throttle function for high-frequency logs
+const throttle = (func: Function, limit: number) => {
+  let lastFunc: any;
+  let lastRan: number;
+  return function(this: any, ...args: any[]) {
+    if (!lastRan) {
+      func.apply(this, args);
+      lastRan = Date.now();
+    } else {
+      clearTimeout(lastFunc);
+      lastFunc = setTimeout(() => {
+        if ((Date.now() - lastRan) >= limit) {
+          func.apply(this, args);
+          lastRan = Date.now();
+        }
+      }, limit - (Date.now() - lastRan));
+    }
+  };
+};
+
 // Logger utility
 export const logger = {
+  LOG_LEVELS,
+  
   debug: (component: string, message: string, data?: any) => {
     if (getLogLevel() >= LOG_LEVELS.DEBUG) {
       console.log(formatLogMessage(component, message, data));
@@ -64,6 +90,28 @@ export const logger = {
     }
   },
   
+  // Log events with optional throttling
+  logEvent: (component: string, event: string, payload?: any, throttleTime: number = 0) => {
+    if (!eventLoggingEnabled) return;
+    
+    // If module filters exist, only log events for those modules
+    if (moduleFilters.length > 0 && !moduleFilters.some(filter => event.includes(filter))) {
+      return;
+    }
+    
+    const logFunc = () => {
+      console.groupCollapsed(`EVENT: ${event}`);
+      console.log('Payload:', payload);
+      console.groupEnd();
+    };
+    
+    if (throttleTime > 0) {
+      throttle(logFunc, throttleTime)();
+    } else {
+      logFunc();
+    }
+  },
+  
   // Set log level
   setLogLevel: (level: number) => {
     try {
@@ -71,6 +119,23 @@ export const logger = {
     } catch (e) {
       // Ignore localStorage errors
     }
+  },
+  
+  // Enable/disable event logging
+  setEventLogging: (enabled: boolean) => {
+    eventLoggingEnabled = enabled;
+  },
+  
+  // Add module filter
+  addModuleFilter: (filter: string) => {
+    if (!moduleFilters.includes(filter)) {
+      moduleFilters.push(filter);
+    }
+  },
+  
+  // Clear module filters
+  clearModuleFilters: () => {
+    moduleFilters = [];
   },
   
   // Get current log level

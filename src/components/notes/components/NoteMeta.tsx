@@ -12,11 +12,11 @@ export const NoteMeta = ({ createdAt, updatedAt, compact = false }: NoteMetaProp
   if (compact) {
     return (
       <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-        <time>{formatDate(createdAt, 'MMM d, HH:mm')}</time>
+        <time>{formatDate(createdAt)}</time>
         {updatedAt && (
           <>
             <span>•</span>
-            <time>Updated {formatDate(updatedAt, 'HH:mm')}</time>
+            <time>Updated {formatDate(updatedAt)}</time>
           </>
         )}
       </div>
@@ -25,11 +25,11 @@ export const NoteMeta = ({ createdAt, updatedAt, compact = false }: NoteMetaProp
 
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-      <time>{formatDate(createdAt, 'MMM d, yyyy HH:mm')}</time>
+      <time>{formatDate(createdAt)}</time>
       {updatedAt && (
         <>
           <span>•</span>
-          <time>Updated {formatDate(updatedAt, 'MMM d, yyyy HH:mm')}</time>
+          <time>Updated {formatDate(updatedAt)}</time>
         </>
       )}
     </div>

@@ -23,7 +23,7 @@ export const ScreenshotDetails: React.FC<ScreenshotDetailsProps> = ({ task }) =>
 
   const formatTaskDate = (dateString?: string) => {
     if (!dateString) return "Unknown";
-    return formatDate(dateString, "MMM d, yyyy 'at' HH:mm");
+    return formatDate(dateString);
   };
 
   return (
