@@ -1,19 +1,16 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase/client';
+import { supabase, enableRealtimeForTables } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { syncLocalDataToSupabase } from '@/lib/sync/dataSynchronizer';
 import { eventManager } from '@/lib/events/EventManager';
-import { enableRealtimeForTables } from '@/lib/supabase/client';
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null, user: User | null }>;
   signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -77,18 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      return { error: null };
-    } catch (error) {
-      console.error('Error signing in:', error);
-      toast.error(`Sign in failed: ${(error as Error).message}`);
-      return { error: error as Error };
-    }
-  };
-
   const signInWithMagicLink = async (email: string) => {
     try {
       const { error } = await supabase.auth.signInWithOtp({ 
@@ -108,23 +93,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
-      
-      toast.success('Account created successfully!', {
-        description: 'Check your email for the confirmation link.'
-      });
-      
-      return { error: null, user: data.user };
-    } catch (error) {
-      console.error('Error signing up:', error);
-      toast.error(`Sign up failed: ${(error as Error).message}`);
-      return { error: error as Error, user: null };
-    }
-  };
-
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -141,8 +109,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user, 
       isLoading, 
       isAuthenticated: !!user,
-      signIn, 
-      signUp,
       signInWithMagicLink,
       signOut 
     }}>

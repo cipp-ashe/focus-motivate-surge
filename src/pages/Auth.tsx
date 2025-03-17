@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { Loader2, MailCheck } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, signUp, signInWithMagicLink, user } = useAuth();
+  const [linkSent, setLinkSent] = useState(false);
+  const { signInWithMagicLink, user } = useAuth();
   const navigate = useNavigate();
 
   // If user is already logged in, redirect to main page
@@ -23,52 +23,6 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      toast.error('Please enter both email and password');
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const { error } = await signIn(email, password);
-      if (!error) {
-        navigate('/');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      toast.error('Please enter both email and password');
-      return;
-    }
-    
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      const { error } = await signUp(email, password);
-      if (!error) {
-        // Don't navigate, wait for email confirmation
-        toast.info('Please check your email to confirm your account');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -77,12 +31,17 @@ const Auth = () => {
       return;
     }
     
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       const { error } = await signInWithMagicLink(email);
       if (!error) {
-        toast.success('Magic link sent! Check your email');
+        setLinkSent(true);
       }
     } finally {
       setIsLoading(false);
@@ -90,135 +49,75 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Focus Notes</CardTitle>
-          <CardDescription className="text-center">
-            Sign in to access your tasks and notes
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 p-4">
+      <Card className="w-full max-w-md border-slate-700 bg-slate-900/50 backdrop-blur-md shadow-xl">
+        <CardHeader className="space-y-1 pb-2">
+          <CardTitle className="text-2xl font-bold text-center text-white">Focus Notes</CardTitle>
+          <CardDescription className="text-center text-slate-300">
+            Access your tasks and notes securely
           </CardDescription>
         </CardHeader>
         
-        <Tabs defaultValue="magic-link" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
-            <TabsTrigger value="signin">Password</TabsTrigger>
-            <TabsTrigger value="signup">Create Account</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="magic-link">
-            <form onSubmit={handleMagicLink}>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email-magic">Email</Label>
-                  <Input
-                    id="email-magic"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  We'll send you a magic link to your email. Click the link to sign in - no password needed!
-                </p>
-              </CardContent>
-              
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Sending magic link...' : 'Send Magic Link'}
-                </Button>
-              </CardFooter>
-            </form>
-          </TabsContent>
-          
-          <TabsContent value="signin">
-            <form onSubmit={handleSignIn}>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </CardContent>
-              
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </CardFooter>
-            </form>
-          </TabsContent>
-          
-          <TabsContent value="signup">
-            <form onSubmit={handleSignUp}>
-              <CardContent className="space-y-4 pt-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email</Label>
-                  <Input
-                    id="email-signup"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password</Label>
-                  <Input
-                    id="password-signup"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Password must be at least 6 characters
-                  </p>
-                </div>
-              </CardContent>
-              
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
-                </Button>
-              </CardFooter>
-            </form>
-          </TabsContent>
-        </Tabs>
+        {linkSent ? (
+          <CardContent className="space-y-4 pt-4">
+            <div className="flex flex-col items-center justify-center text-center space-y-4 py-4">
+              <div className="h-20 w-20 rounded-full bg-purple-100/10 flex items-center justify-center">
+                <MailCheck className="h-10 w-10 text-purple-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-white">Check your inbox</h2>
+              <p className="text-slate-300">
+                We've sent a magic link to <span className="font-medium text-purple-300">{email}</span>
+              </p>
+              <p className="text-slate-400 text-sm">
+                Click the link in the email to sign in to your account
+              </p>
+              <Button 
+                variant="outline" 
+                className="mt-4 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                onClick={() => setLinkSent(false)}
+              >
+                Use a different email
+              </Button>
+            </div>
+          </CardContent>
+        ) : (
+          <form onSubmit={handleMagicLink}>
+            <CardContent className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-slate-300">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                />
+              </div>
+              <p className="text-sm text-slate-400">
+                We'll send you a magic link to your email. Click the link to sign in - no password needed!
+              </p>
+            </CardContent>
+            
+            <CardFooter>
+              <Button 
+                type="submit" 
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending magic link...
+                  </>
+                ) : (
+                  'Send Magic Link'
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        )}
       </Card>
     </div>
   );
