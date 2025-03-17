@@ -51,7 +51,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
   }, []);
   
   // Mark a habit as complete
-  const completeHabit = useCallback((habitId: string, templateId: string) => {
+  const completeHabit = useCallback((habitId: string, templateId: string): boolean => {
     // Update UI state
     setCompletedHabits(prev => {
       if (!prev.includes(habitId)) {
@@ -93,14 +93,15 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       const tasks = getRelatedTasks(habitId);
       if (tasks.length > 0) {
         tasks.forEach(task => {
-          habitTaskOperations.completeTask(task.id);
+          if (habitTaskOperations.completeTask) {
+            habitTaskOperations.completeTask(task.id);
+          }
         });
       }
       
       // Emit event for other components
       eventManager.emit('habit:complete', { 
         habitId, 
-        templateId, 
         completed: true, 
         date: today 
       });
@@ -114,7 +115,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
   }, [getRelatedTasks]);
   
   // Mark a habit as dismissed
-  const dismissHabit = useCallback((habitId: string, templateId: string) => {
+  const dismissHabit = useCallback((habitId: string, templateId: string): boolean => {
     // Update UI state
     setDismissedHabits(prev => {
       if (!prev.includes(habitId)) {
@@ -148,8 +149,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
       
       // Emit event for other components
       eventManager.emit('habit:dismissed', { 
-        habitId, 
-        templateId, 
+        habitId,
         date: today 
       });
       
@@ -171,12 +171,103 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
     return dismissedHabits.includes(habitId);
   }, [dismissedHabits]);
   
+  // Function for UI to handle habit completion
+  const handleHabitComplete = useCallback((habitId: string, completed: boolean) => {
+    // Find the habit object
+    const habit = todaysHabits.find(h => h.id === habitId);
+    if (!habit) return;
+    
+    // Find the template for this habit
+    const template = templates.find(t => 
+      t.habits.some(h => h.id === habitId)
+    );
+    
+    if (!template) {
+      console.error("Could not find template for habit:", habitId);
+      toast.error("Error marking habit as complete");
+      return;
+    }
+
+    if (completed) {
+      completeHabit(habitId, template.templateId);
+    } else {
+      // Handle unchecking a habit if needed
+      setCompletedHabits(prev => prev.filter(id => id !== habitId));
+    }
+  }, [completeHabit, todaysHabits, templates]);
+  
+  // Function to add a habit as a task
+  const handleAddHabitToTasks = useCallback((habit: HabitDetail) => {
+    // Only timer-based habits can be added as tasks
+    if (habit.metrics.type !== 'timer') {
+      toast.error("Only timer-based habits can be added as tasks");
+      return;
+    }
+    
+    // Find template for this habit
+    const template = templates.find(t => 
+      t.habits.some(h => h.id === habit.id)
+    );
+    
+    if (!template) {
+      toast.error("Could not find template for habit");
+      return;
+    }
+    
+    // Create a new task for this habit
+    const today = new Date().toDateString();
+    const taskId = crypto.randomUUID();
+    const duration = habit.metrics.target || 1500; // Default to 25 minutes if no target set
+    
+    const task = {
+      id: taskId,
+      name: habit.name,
+      description: habit.description,
+      completed: false,
+      duration,
+      createdAt: new Date().toISOString(),
+      relationships: {
+        habitId: habit.id,
+        templateId: template.templateId,
+        date: today
+      }
+    };
+    
+    // Create the task via eventManager
+    eventManager.emit('task:create', task);
+    
+    // Add the Habit tag
+    eventManager.emit('tag:link', {
+      tagId: 'Habit',
+      entityId: taskId,
+      entityType: 'task'
+    });
+    
+    // Select the task and start the timer
+    eventManager.emit('task:select', taskId);
+    
+    // Send timer events
+    setTimeout(() => {
+      eventManager.emit('timer:start', { 
+        taskName: task.name, 
+        duration: task.duration
+      });
+      
+      // Expand timer view
+      eventManager.emit('timer:expand', { taskName: task.name });
+    }, 100);
+    
+    toast.success(`Added "${habit.name}" to tasks and started timer`);
+  }, [templates]);
+
   return {
+    completedHabits,
+    dismissedHabits,
     completeHabit,
     dismissHabit,
     isHabitCompleted,
     isHabitDismissed,
-    completedHabits,
-    dismissedHabits
+    handleHabitComplete,
+    handleAddHabitToTasks
   };
 };
