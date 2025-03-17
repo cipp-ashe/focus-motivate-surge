@@ -1,104 +1,112 @@
 
-import { useContext, createContext } from 'react';
-import { useNotes } from '@/hooks/useNotes';
-import { Note, Tag, TagColor } from '@/types/notes';
+import { useCallback } from 'react';
+import { useNoteState, useNoteDispatch } from './NoteContext';
+import { Note } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
+import { NoteEventType } from '@/lib/events/types';
 
-// Define the types for actions and state
-export interface NoteActions {
-  updateCurrentContent: (content: string) => void;
-  selectNoteForEdit: (note: Note) => void;
-  clearSelectedNote: () => void;
-  addNote: () => Note | null;
-  updateNote: (noteId: string, content: string) => boolean;
-  deleteNote: (noteId: string) => boolean;
-  addTagToNote: (noteId: string, tagName: string, color?: TagColor) => boolean;
-  removeTagFromNote: (noteId: string, tagName: string) => boolean;
-}
-
-export interface NoteState {
-  items: Note[];
-  selected: Note | null;
-  content: string;
-}
-
-// Create the context
-const NoteActionsContext = createContext<NoteActions | undefined>(undefined);
-const NoteStateContext = createContext<NoteState | undefined>(undefined);
-
-// Create wrapper component that provides notes context
-export const NoteContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const notes = useNotes();
-  
-  // Implement actions that utilize the event manager where appropriate
-  const actions: NoteActions = {
-    updateCurrentContent: notes.updateCurrentContent,
-    selectNoteForEdit: (note: Note) => {
-      notes.selectNoteForEdit(note);
-      // Emit event when a note is selected for viewing/editing
-      eventManager.emit('note:view', { noteId: note.id });
-    },
-    clearSelectedNote: notes.clearSelectedNote,
-    addNote: () => {
-      const newNote = notes.addNote();
-      if (newNote) {
-        // Event will be emitted by the useNotes hook
-        eventManager.emit('note:create', newNote);
-      }
-      return newNote;
-    },
-    updateNote: (noteId: string, content: string) => {
-      const success = notes.updateNote(noteId, content);
-      if (success) {
-        const updatedNote = notes.notes.find(note => note.id === noteId);
-        if (updatedNote) {
-          eventManager.emit('note:update', { 
-            id: noteId, 
-            updates: updatedNote 
-          });
-        }
-      }
-      return success;
-    },
-    deleteNote: (noteId: string) => {
-      const success = notes.deleteNote(noteId);
-      if (success) {
-        eventManager.emit('note:deleted', { noteId });
-      }
-      return success;
-    },
-    addTagToNote: notes.addTagToNote,
-    removeTagFromNote: notes.removeTagFromNote
-  };
-  
-  const state: NoteState = {
-    items: notes.notes,
-    selected: notes.selectedNote,
-    content: notes.currentContent
-  };
-  
-  return (
-    <NoteActionsContext.Provider value={actions}>
-      <NoteStateContext.Provider value={state}>
-        {children}
-      </NoteStateContext.Provider>
-    </NoteActionsContext.Provider>
-  );
-};
-
-// Custom hooks to use the note context
 export const useNoteActions = () => {
-  const context = useContext(NoteActionsContext);
-  if (context === undefined) {
-    throw new Error('useNoteActions must be used within a NoteContextProvider');
-  }
-  return context;
-};
+  const dispatch = useNoteDispatch();
+  const { selected, content } = useNoteState();
 
-export const useNoteState = () => {
-  const context = useContext(NoteStateContext);
-  if (context === undefined) {
-    throw new Error('useNoteState must be used within a NoteContextProvider');
-  }
-  return context;
+  const updateCurrentContent = useCallback((content: string) => {
+    dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: content });
+  }, [dispatch]);
+
+  const selectNoteForEdit = useCallback((note: Note) => {
+    dispatch({ type: 'SELECT_NOTE', payload: note });
+    
+    // Also emit an event for other parts of the app
+    eventManager.emit('note:view' as NoteEventType, { 
+      id: note.id,
+      title: note.title || 'Untitled Note'
+    });
+  }, [dispatch]);
+
+  const addNote = useCallback(() => {
+    if (!content?.trim()) return;
+
+    const newNote: Note = {
+      id: crypto.randomUUID(),
+      title: content.split('\n')[0]?.trim().replace(/^#+ /, '') || 'Untitled Note',
+      content,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      tags: []
+    };
+
+    dispatch({ type: 'ADD_NOTE', payload: newNote });
+    dispatch({ type: 'SELECT_NOTE', payload: null });
+    dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
+    
+    // Emit event for other components
+    eventManager.emit('note:create', { 
+      id: newNote.id, 
+      title: newNote.title, 
+      content: newNote.content 
+    });
+  }, [content, dispatch]);
+
+  const updateNote = useCallback((id: string, newContent: string) => {
+    if (!id || !newContent.trim()) return;
+
+    const updatedNote: Partial<Note> = {
+      content: newContent,
+      title: newContent.split('\n')[0]?.trim().replace(/^#+ /, '') || 'Untitled Note',
+      updatedAt: new Date().toISOString()
+    };
+
+    dispatch({ type: 'UPDATE_NOTE', payload: { id, updates: updatedNote } });
+    dispatch({ type: 'SELECT_NOTE', payload: null });
+    dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
+    
+    // Emit event for other components
+    eventManager.emit('note:update', { 
+      id, 
+      updates: updatedNote
+    });
+  }, [dispatch]);
+
+  const deleteNote = useCallback((id: string) => {
+    dispatch({ type: 'DELETE_NOTE', payload: id });
+    if (selected?.id === id) {
+      dispatch({ type: 'SELECT_NOTE', payload: null });
+      dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
+    }
+    
+    // Emit event for other components
+    eventManager.emit('note:deleted' as NoteEventType, { 
+      id 
+    });
+  }, [dispatch, selected?.id]);
+
+  const addTagToNote = useCallback((noteId: string, tagName: string, tagColor?: string) => {
+    dispatch({
+      type: 'ADD_TAG_TO_NOTE',
+      payload: { noteId, tagName, tagColor }
+    });
+  }, [dispatch]);
+
+  const removeTagFromNote = useCallback((noteId: string, tagId: string) => {
+    dispatch({
+      type: 'REMOVE_TAG_FROM_NOTE',
+      payload: { noteId, tagId }
+    });
+  }, [dispatch]);
+
+  const clearCurrentNote = useCallback(() => {
+    dispatch({ type: 'SELECT_NOTE', payload: null });
+    dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
+  }, [dispatch]);
+
+  return {
+    updateCurrentContent,
+    selectNoteForEdit,
+    addNote,
+    updateNote,
+    deleteNote,
+    addTagToNote,
+    removeTagFromNote,
+    clearCurrentNote
+  };
 };
