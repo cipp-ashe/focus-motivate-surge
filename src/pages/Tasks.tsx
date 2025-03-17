@@ -10,10 +10,18 @@ import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
 import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { ErrorBoundary } from 'react-error-boundary';
+
+const ErrorFallback = () => (
+  <div className="p-4 m-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md text-center">
+    <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">Error Loading Tasks</h2>
+    <p>There was a problem loading the task manager. Please try again later or refresh the page.</p>
+  </div>
+);
 
 const TaskPage = () => {
   const isMobile = useIsMobile();
-  const { updateTask } = useTaskContext();
+  const taskContext = useTaskContext();
   
   // Dialog state
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
@@ -91,14 +99,20 @@ const TaskPage = () => {
   const handleTaskUpdate = useCallback((data: { taskId: string, updates: Partial<Task> }) => {
     console.log('Tasks.tsx - Task update received:', data);
     
+    if (!taskContext || !taskContext.updateTask) {
+      console.error('Task context or updateTask function is undefined');
+      toast.error('Failed to update task: Application error');
+      return;
+    }
+    
     const updatesToForward = { ...data.updates };
     delete updatesToForward.journalEntry;
     delete updatesToForward.checklistItems;
     
     if (Object.keys(updatesToForward).length > 0) {
-      updateTask(data.taskId, updatesToForward);
+      taskContext.updateTask(data.taskId, updatesToForward);
     }
-  }, [updateTask]);
+  }, [taskContext]);
 
   const dialogOpeners = {
     checklist: handleOpenChecklist,
@@ -125,7 +139,9 @@ const TaskPage = () => {
           onTaskUpdate={handleTaskUpdate}
         />
         
-        <TaskManager dialogOpeners={dialogOpeners} />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <TaskManager dialogOpeners={dialogOpeners} />
+        </ErrorBoundary>
       </main>
       
       {/* Task-specific dialogs */}
