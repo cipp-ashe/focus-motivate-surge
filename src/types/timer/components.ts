@@ -27,8 +27,8 @@ export interface TimerProps {
   onComplete: (metrics: TimerMetrics) => void;
   onAddTime: (minutes: number) => void;
   onDurationChange?: (minutes: number) => void;
-  favorites: Quote[];
-  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  favorites?: Quote[];
+  setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
 export interface TimerHeaderProps {
@@ -53,8 +53,8 @@ export interface TimerBodyProps {
   updateMetrics: (updates: Partial<TimerMetrics>) => void;
   expandedViewRef: React.RefObject<any>;
   handleCloseTimer: () => void;
-  favorites: Quote[];
-  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  favorites?: Quote[];
+  setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
 export interface TimerCircleProps {
@@ -62,7 +62,7 @@ export interface TimerCircleProps {
   isRunning: boolean;
   timeLeft: number;
   minutes: number;
-  circumference: number;
+  circumference?: number;
   a11yProps?: TimerA11yProps;
   onClick?: () => void;
 }
@@ -71,7 +71,7 @@ export interface TimerControlsProps {
   isRunning: boolean;
   isPaused?: boolean;
   onToggle: () => void;
-  onComplete: () => Promise<void>; // FIXED: Update to Promise<void>
+  onComplete: () => Promise<void>;
   onAddTime?: (minutes: number) => void;
   showAddTime?: boolean;
   size?: 'normal' | 'large';
@@ -85,8 +85,8 @@ export interface TimerControlsProps {
 export interface MinutesInputProps {
   minutes: number;
   onMinutesChange: (minutes: number) => void;
-  minMinutes: number;
-  maxMinutes: number;
+  minMinutes?: number;
+  maxMinutes?: number;
   onBlur?: () => void;
 }
 
@@ -98,4 +98,12 @@ export interface SoundSelectorProps {
   onSoundChange: (sound: SoundOption) => void;
   onTestSound: () => void;
   isLoadingAudio?: boolean;
+}
+
+// Adding the missing TimerExpandedViewRef type
+export interface TimerExpandedViewRef {
+  expand: () => void;
+  collapse: () => void;
+  toggleExpansion: () => void;
+  isExpanded: boolean;
 }

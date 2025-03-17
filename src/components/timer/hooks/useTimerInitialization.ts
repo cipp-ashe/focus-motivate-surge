@@ -1,10 +1,11 @@
 
 import { useTimerCore } from "./initialization/useTimerCore";
-import { useTimerEvents } from "./initialization/useTimerEvents";
 import { useTimerHandlers } from "./initialization/useTimerHandlers";
-import { useTimerMonitoring } from "./initialization/useTimerMonitoring";
 import { useTimerViews, useTimerAutoComplete } from "./initialization/useTimerViews";
 import { TimerProps } from "@/types/timer";
+import { useEffect, useState } from "react";
+import { eventManager } from "@/lib/events/EventManager";
+import { logger } from "@/utils/logManager";
 
 export const useTimerInitialization = ({
   duration,
@@ -35,7 +36,7 @@ export const useTimerInitialization = ({
   } = useTimerCore(duration, taskName);
 
   // Destructure for easier access and readability
-  const { timeLeft, minutes, isRunning, metrics } = timerState;
+  const { timeLeft, minutes, isRunning, metrics, isMountedRef } = timerState;
   const { 
     isExpanded, selectedSound, showCompletion, showConfirmation, 
     completionMetrics, internalMinutes, pauseTimeLeft, isLoadingAudio 
@@ -45,10 +46,35 @@ export const useTimerInitialization = ({
   } = timerActions;
   const { testSound, playSound } = audioFunctions;
 
-  // Register timer events
-  useTimerEvents(taskName, duration);
+  // Register the component for timer events
+  useEffect(() => {
+    logger.debug('TimerInitialization', `Initializing timer for task: ${taskName} with duration: ${duration}`);
+    
+    // Emit initialization event
+    eventManager.emit('timer:init', {
+      taskName,
+      duration
+    });
+    
+    // Set up timer monitoring
+    const handleTick = (event: CustomEvent) => {
+      if (isMountedRef.current) {
+        const { timeLeft } = event.detail;
+        updateTimeLeft(timeLeft);
+      }
+    };
+    
+    // Listen for timer tick events
+    window.addEventListener('timer:tick', handleTick as EventListener);
+    
+    // Clean up on unmount
+    return () => {
+      logger.debug('TimerInitialization', `Cleaning up timer for task: ${taskName}`);
+      window.removeEventListener('timer:tick', handleTick as EventListener);
+    };
+  }, [taskName, duration, updateTimeLeft, isMountedRef]);
 
-  // Set up event listeners for the timer
+  // Set up timer event handlers
   const timerHandlers = useTimerHandlers({
     taskName,
     isRunning,
@@ -68,13 +94,6 @@ export const useTimerInitialization = ({
     updateMetrics,
     setPauseTimeLeft,
     pauseTimerRef,
-  });
-
-  // Set up timer monitoring
-  useTimerMonitoring({
-    taskName,
-    updateTimeLeft,
-    handleComplete: timerHandlers.handleComplete,
   });
 
   // Get view props

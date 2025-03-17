@@ -44,10 +44,13 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
 
   const [state, dispatch] = useReducer(timerReducer, initialState);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef<boolean>(true);
 
-  // Clear interval on unmount
+  // Set mounted ref to false on unmount
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
+      // Clear any interval on unmount
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -55,38 +58,43 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     };
   }, []);
 
-  // Start/stop timer logic
+  // Improved start/stop timer logic with better cleanup
   useEffect(() => {
     console.log(`Timer running state changed: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
     
-    if (state.isRunning) {
-      console.log("Setting up timer interval");
-      
-      // Clear any existing interval to prevent multiple intervals
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      
-      // Set up new interval to decrement time
-      intervalRef.current = setInterval(() => {
-        console.log(`Timer tick: ${state.timeLeft - 1}s`);
-        dispatch({ type: 'DECREMENT_TIME' });
-        
-        // Emit tick event for any listeners
-        if (typeof window !== 'undefined') {
-          const event = new CustomEvent('timer:tick', { 
-            detail: { timeLeft: state.timeLeft - 1 } 
-          });
-          window.dispatchEvent(event);
-        }
-      }, 1000);
-    } else if (intervalRef.current) {
-      console.log("Clearing timer interval");
+    // Clear any existing interval to prevent multiple intervals
+    if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    
+    if (state.isRunning && isMountedRef.current) {
+      console.log("Setting up timer interval");
+      
+      // Set up new interval to decrement time
+      intervalRef.current = setInterval(() => {
+        if (isMountedRef.current) {
+          console.log(`Timer tick: ${state.timeLeft - 1}s`);
+          dispatch({ type: 'DECREMENT_TIME' });
+          
+          // Emit tick event for any listeners
+          if (typeof window !== 'undefined') {
+            const event = new CustomEvent('timer:tick', { 
+              detail: { timeLeft: state.timeLeft - 1 } 
+            });
+            window.dispatchEvent(event);
+          }
+        } else {
+          // If component unmounted but interval somehow still running, clear it
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+        }
+      }, 1000);
+    }
   
+    // Clean up interval on effect cleanup or component unmount
     return () => {
       if (intervalRef.current) {
         console.log("Cleanup: clearing timer interval");
@@ -94,11 +102,11 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
         intervalRef.current = null;
       }
     };
-  }, [state.isRunning]);
+  }, [state.isRunning, state.timeLeft]);
 
   // Handle time up
   useEffect(() => {
-    if (state.timeLeft === 0 && onTimeUp) {
+    if (state.timeLeft === 0 && onTimeUp && isMountedRef.current) {
       console.log("Timer reached zero, calling onTimeUp");
       onTimeUp();
     }
@@ -108,5 +116,6 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     state,
     dispatch,
     intervalRef,
+    isMountedRef
   };
 };

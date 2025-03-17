@@ -26,7 +26,14 @@ export const useTimerActions = (
         isPaused: false
       });
     } else {
-      const { dispatch } = props as UseTimerActionsProps;
+      const { dispatch, intervalRef } = props as UseTimerActionsProps;
+      
+      // Clear any existing interval before starting
+      if (intervalRef?.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      
       console.log("useTimerActions: Starting timer (reducer)");
       dispatch({ type: 'START' });
       dispatch({ type: 'SET_START_TIME', payload: new Date() });
@@ -45,7 +52,14 @@ export const useTimerActions = (
         pausedTimeLeft: timeLeft
       });
     } else {
-      const { dispatch } = props as UseTimerActionsProps;
+      const { dispatch, intervalRef } = props as UseTimerActionsProps;
+      
+      // Clear interval when pausing
+      if (intervalRef?.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      
       console.log("useTimerActions: Pausing timer (reducer)");
       dispatch({ type: 'PAUSE' });
       dispatch({ type: 'SET_LAST_PAUSE_TIMESTAMP', payload: new Date() });
@@ -155,7 +169,14 @@ export const useTimerActions = (
         // Return a resolved promise
         return Promise.resolve();
       } else {
-        const { dispatch } = props as UseTimerActionsProps;
+        const { dispatch, intervalRef } = props as UseTimerActionsProps;
+        
+        // Clear any interval when completing
+        if (intervalRef?.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        
         console.log("useTimerActions: Completing timer (reducer)");
         dispatch({ type: 'COMPLETE' });
         return Promise.resolve();
@@ -166,23 +187,13 @@ export const useTimerActions = (
     }
   }, [props, isLegacyInterface]);
 
-  const updateMetrics = useCallback((updates: any) => {
-    if (isLegacyInterface) {
-      const { updateMetrics } = props as TimerActionProps;
-      updateMetrics(updates);
-    } else {
-      const { dispatch } = props as UseTimerActionsProps;
-      dispatch({ type: 'UPDATE_METRICS', payload: updates });
-    }
-  }, [props, isLegacyInterface]);
-
   return {
     startTimer,
     pauseTimer,
-    resetTimer,
-    extendTimer,
-    setMinutes,
+    resetTimer: props.resetTimer || resetTimer,
+    extendTimer: props.extendTimer || extendTimer,
+    setMinutes: props.setMinutes || setMinutes,
     completeTimer,
-    updateMetrics
+    updateMetrics: props.updateMetrics || updateMetrics
   };
 };

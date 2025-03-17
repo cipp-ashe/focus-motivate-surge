@@ -19,6 +19,9 @@ export const TaskCheckbox = React.memo(({
     return null;
   }
   
+  // Prepare accessible label
+  const accessibleLabel = `Mark task "${task.name}" as ${task.completed ? 'incomplete' : 'complete'}`;
+  
   // Handle checkbox change with memoized callback
   const handleCheckedChange = useCallback((checked: boolean | string) => {
     onCheck(!!checked);
@@ -26,6 +29,7 @@ export const TaskCheckbox = React.memo(({
   
   // Handle click with memoized callback
   const handleClick = useCallback((e: React.MouseEvent) => {
+    // Stop event propagation to prevent triggering parent click handlers
     e.stopPropagation();
   }, []);
   
@@ -33,10 +37,15 @@ export const TaskCheckbox = React.memo(({
     <Checkbox
       checked={task.completed}
       onCheckedChange={handleCheckedChange}
-      aria-label={`Mark task "${task.name}" as ${task.completed ? 'incomplete' : 'complete'}`}
+      aria-label={accessibleLabel}
       onClick={handleClick}
       className="mt-1"
       data-testid="task-checkbox"
+      id={`task-checkbox-${task.id}`}
+      title={accessibleLabel}
+      // Add proper aria attributes
+      aria-checked={task.completed}
+      role="checkbox"
     />
   );
 });

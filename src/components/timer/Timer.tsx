@@ -17,7 +17,7 @@ export const Timer = ({
   onAddTime,
   onDurationChange,
   favorites = [],
-  setFavorites
+  setFavorites = () => {}
 }: TimerProps) => {
   logger.debug('Timer', 'Timer component rendering with:', {
     duration,
