@@ -12,9 +12,8 @@ import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
 import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
 import { toast } from 'sonner';
-import { TaskInput } from '@/components/tasks/TaskInput'; // Changed import to use the full-featured TaskInput
+import { TaskInput } from '@/components/tasks/TaskInput';
 import { eventManager } from '@/lib/events/EventManager';
-import { TaskEventHandler } from '@/components/tasks/event-handlers/TaskEventHandler';
 
 const TasksPage: React.FC = () => {
   const taskContext = useTaskContext();
@@ -156,8 +155,13 @@ const TasksPage: React.FC = () => {
   
   return (
     <div className="min-h-screen">
+      {/* Include the TaskEventHandler to listen for task events */}
       <TaskEventHandler
         onForceUpdate={forceUpdateHandler}
+        onTaskCreate={task => taskContext.addTask(task)}
+        onTaskUpdate={({taskId, updates}) => taskContext.updateTask(taskId, updates)}
+        onTaskDelete={({taskId}) => taskContext.deleteTask(taskId)}
+        tasks={tasks}
       />
       
       <TaskLayout
