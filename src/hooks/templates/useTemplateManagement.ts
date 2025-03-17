@@ -1,7 +1,8 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 const STORAGE_KEY = 'habit-templates';
 
@@ -40,7 +41,7 @@ export const useTemplateManagement = () => {
         toast.success('Template added successfully');
         
         // Emit event for template addition with suppressToast to avoid duplicates
-        eventBus.emit('habit:template-update', {...newTemplate, suppressToast: true});
+        eventManager.emit('habit:template-update', {...newTemplate, suppressToast: true});
         
         return [...prev, newTemplate];
       }
@@ -56,7 +57,7 @@ export const useTemplateManagement = () => {
       toast.success('Template added successfully');
       
       // Emit event for template addition with suppressToast
-      eventBus.emit('habit:template-update', {...template, suppressToast: true});
+      eventManager.emit('habit:template-update', {...template, suppressToast: true});
       
       // Trigger UI update
       setTimeout(() => {
@@ -78,7 +79,7 @@ export const useTemplateManagement = () => {
       // Emit event for template update with suppressToast
       const updatedTemplate = updated.find(t => t.templateId === templateId);
       if (updatedTemplate) {
-        eventBus.emit('habit:template-update', {...updatedTemplate, suppressToast: true});
+        eventManager.emit('habit:template-update', {...updatedTemplate, suppressToast: true});
       }
       
       return updated;
@@ -96,7 +97,7 @@ export const useTemplateManagement = () => {
     
     // Emit event for template deletion - ensure it's properly propagated
     // This will trigger cleanup of both active and dismissed/completed tasks
-    eventBus.emit('habit:template-delete', { 
+    eventManager.emit('habit:template-delete', { 
       templateId, 
       suppressToast: true,
       isOriginatingAction: true // Flag to indicate this is the original deletion action
@@ -104,7 +105,7 @@ export const useTemplateManagement = () => {
     
     // Also explicitly trigger a task cleanup to ensure dismissed tasks are removed
     setTimeout(() => {
-      eventBus.emit('tasks:force-update', { timestamp: new Date().toISOString() });
+      eventManager.emit('tasks:force-update', { timestamp: new Date().toISOString() });
       window.dispatchEvent(new Event('force-task-update'));
     }, 100);
     
@@ -116,7 +117,7 @@ export const useTemplateManagement = () => {
     setActiveTemplates(templates);
     
     // Emit event for order update
-    eventBus.emit('habit:template-order-update', templates);
+    eventManager.emit('habit:template-order-update', templates);
   }, []);
 
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
@@ -130,7 +131,7 @@ export const useTemplateManagement = () => {
       // Emit event for days update with suppressToast
       const updatedTemplate = updated.find(t => t.templateId === templateId);
       if (updatedTemplate) {
-        eventBus.emit('habit:template-update', {...updatedTemplate, suppressToast: true});
+        eventManager.emit('habit:template-update', {...updatedTemplate, suppressToast: true});
       }
       
       return updated;

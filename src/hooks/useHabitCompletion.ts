@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useHabitProgress } from '@/components/habits/hooks/useHabitProgress';
 import { HabitDetail } from '@/components/habits/types';
 import { relationshipManager } from '@/lib/relationshipManager';
-import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { EntityType } from '@/types/core';
@@ -129,8 +128,9 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
       console.log(`Marked habit ${habitId} as dismissed for ${date}`);
     };
     
-    const unsubJournal = eventBus.on('habit:journal-deleted', handleJournalDeleted);
-    const unsubComplete = eventBus.on('task:complete', handleTaskComplete);
+    // Connect to eventManager instead of eventBus
+    const unsubJournal = eventManager.on('habit:journal-deleted', handleJournalDeleted);
+    const unsubComplete = eventManager.on('task:complete', handleTaskComplete);
     const unsubDismissed = eventManager.on('habit:dismissed', handleHabitDismissed);
     
     return () => {
@@ -225,18 +225,18 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
       }
     };
     
-    // Create the task
-    eventBus.emit('task:create', task);
+    // Create the task via eventManager
+    eventManager.emit('task:create', task);
     
     // Add the Habit tag
-    eventBus.emit('tag:link', {
+    eventManager.emit('tag:link', {
       tagId: 'Habit',
       entityId: taskId,
       entityType: 'task'
     });
     
     // Create relationship
-    eventBus.emit('relationship:create', {
+    eventManager.emit('relationship:create', {
       sourceId: habit.id,
       sourceType: EntityType.Habit,
       targetId: taskId,
@@ -245,17 +245,17 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: any[]
     });
     
     // Select the task and start the timer
-    eventBus.emit('task:select', taskId);
+    eventManager.emit('task:select', taskId);
     
     // Send timer events
     setTimeout(() => {
-      eventBus.emit('timer:start', { 
+      eventManager.emit('timer:start', { 
         taskName: task.name, 
         duration: task.duration
       });
       
       // Expand timer view
-      eventBus.emit('timer:expand', { taskName: task.name });
+      eventManager.emit('timer:expand', { taskName: task.name });
     }, 100);
     
     toast.success(`Added "${habit.name}" to tasks and started timer`);

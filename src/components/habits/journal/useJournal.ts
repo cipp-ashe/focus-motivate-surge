@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Note } from "@/types/notes";
 import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
 import { findExistingJournalNote, getJournalType, getTemplateForType } from "./utils";
 import { getJournalQuotes, getJournalTags } from "./constants";
@@ -76,8 +76,8 @@ export const useJournal = ({
         description: "Your journal entry has been updated"
       });
     } else {
-      // This note creation will be handled by the event bus
-      eventBus.emit('note:create-from-habit', {
+      // This note creation will be handled by the event system
+      eventManager.emit('note:create-from-habit', {
         habitId,
         habitName,
         description: description || '',

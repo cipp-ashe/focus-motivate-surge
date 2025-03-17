@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import { initializeDataStore } from "@/types/core";
 import { toast } from "sonner";
-import { eventBus } from "@/lib/eventBus";
 import { eventManager } from "@/lib/events/EventManager";
 
 // Global flags to prevent duplicate initialization and event emissions
@@ -54,7 +53,6 @@ export const useDataInitialization = () => {
         // Use a short timeout and emit just once
         setTimeout(() => {
           console.log("Emitting initialization events (once)");
-          // Use only one event system, prefer eventManager over eventBus
           eventManager.emit('app:initialized', {});
           window.dispatchEvent(new CustomEvent('force-task-update'));
         }, 100);

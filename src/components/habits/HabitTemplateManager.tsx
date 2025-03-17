@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { TemplateSelectionSheet } from '@/components/habits';
 import { habitTemplates } from '@/utils/habitTemplates';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { ActiveTemplate } from './types';
 
 interface HabitTemplateManagerProps {
@@ -86,8 +86,8 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     if (template) {
       console.log("Adding template:", template);
       
-      // Emit template-add event to context - WITH suppressToast flag to prevent duplicate toasts
-      eventBus.emit('habit:template-add', templateId);
+      // Emit template-add event using eventManager
+      eventManager.emit('habit:template-add', templateId);
       
       // Single toast notification from this component only
       toast.success(`Added template: ${template.name}`);

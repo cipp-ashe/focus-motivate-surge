@@ -6,7 +6,7 @@ import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
 import ActiveTemplateList from '@/components/habits/ActiveTemplateList';
 import HabitTemplateManager from '@/components/habits/HabitTemplateManager';
 import { DayOfWeek, ActiveTemplate, HabitTemplate } from './types';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { useHabitTaskIntegration } from '@/hooks/habits/useHabitTaskIntegration';
 
 /**
@@ -57,7 +57,7 @@ const HabitTracker: React.FC = () => {
         window.dispatchEvent(new Event('force-task-update'));
         
         // Check for pending habits
-        eventBus.emit('habits:check-pending', {});
+        eventManager.emit('habits:check-pending', {});
       }, 200);
     }, 100);
   }, [templates, syncHabitsWithTasks]);
@@ -113,8 +113,8 @@ const HabitTracker: React.FC = () => {
       }
     };
     
-    // Subscribe to events
-    const unsubAdd = eventBus.on('habit:template-add', handleTemplateAdd);
+    // Subscribe to events using eventManager
+    const unsubAdd = eventManager.on('habit:template-add', handleTemplateAdd);
     
     return () => {
       unsubAdd();
@@ -128,7 +128,7 @@ const HabitTracker: React.FC = () => {
     toast.success('Template removed');
     
     // Also remove all tasks from this template
-    eventBus.emit('habit:template-delete', { templateId });
+    eventManager.emit('habit:template-delete', { templateId });
   };
 
   // Track habit progress (placeholder for now)

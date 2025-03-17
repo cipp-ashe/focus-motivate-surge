@@ -1,6 +1,6 @@
 
 import { useTaskEvents } from './useTaskEvents';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 /**
  * A hook that provides task-related action methods
@@ -15,14 +15,14 @@ export const useTaskActions = () => {
     forceTaskUpdate();
     
     // Also emit a tags:force-update event for components that might be listening
-    eventBus.emit('tags:force-update' as any, {
+    eventManager.emit('tags:force-update', {
       timestamp: new Date().toISOString()
     });
   };
   
   const checkPendingHabits = () => {
     console.log("checkPendingHabits called, emitting habits:check-pending event");
-    eventBus.emit('habits:check-pending' as any, {});
+    eventManager.emit('habits:check-pending', {});
   };
   
   return {

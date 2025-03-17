@@ -1,6 +1,8 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
+import { trackEventBusUsage } from '@/utils/eventMigration';
 
 // Global flag to prevent duplicate initialization
 let globalInitialized = false;

@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { eventBus } from '@/lib/eventBus';
 import { eventManager } from '@/lib/events/EventManager';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -35,9 +34,8 @@ export const TaskSelectionProvider: React.FC<{ children: ReactNode }> = ({ child
     if (task && taskContext) {
       taskContext.selectTask(task.id);
       
-      // Emit timer task set event using both event systems
+      // Emit timer task set event
       const event = { taskId: task.id, task };
-      eventBus.emit('timer:task-set', event);
       eventManager.emit('timer:task-set', event);
       window.dispatchEvent(new CustomEvent('timer:set-task', { detail: event }));
     }
@@ -62,12 +60,10 @@ export const TaskSelectionProvider: React.FC<{ children: ReactNode }> = ({ child
       }
     };
     
-    // Listen to both event systems
-    eventBus.on('timer:select-task', handleTimerTaskSelect);
+    // Listen using eventManager
     eventManager.on('timer:select-task', handleTimerTaskSelect);
     
     return () => {
-      eventBus.off('timer:select-task', handleTimerTaskSelect);
       eventManager.off('timer:select-task', handleTimerTaskSelect);
     };
   }, [taskContext, selectTask]);

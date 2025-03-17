@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { logger } from '@/utils/logManager';
 
@@ -17,7 +17,7 @@ export const useTimerDebug = (enabled: boolean = false) => {
     // Setup debug event listeners
     const unsubs = [
       // Task events
-      eventBus.on('task:select' as any, (taskId) => {
+      eventManager.on('task:select', (taskId) => {
         if (!isSubscribed) return;
         if (!consoleDebounce.has(`select-${taskId}`)) {
           logger.debug('TimerDebug', '🔍 DEBUG: task:select event:', taskId);
@@ -30,7 +30,7 @@ export const useTimerDebug = (enabled: boolean = false) => {
         }
       }),
       
-      eventBus.on('task:update' as any, (data) => {
+      eventManager.on('task:update', (data) => {
         if (!isSubscribed) return;
         if (!consoleDebounce.has(`update-${data.taskId}`)) {
           logger.debug('TimerDebug', '🔍 DEBUG: task:update event:', data);
@@ -40,7 +40,7 @@ export const useTimerDebug = (enabled: boolean = false) => {
       }),
       
       // Timer events
-      eventBus.on('timer:set-task' as any, (task) => {
+      eventManager.on('timer:set-task', (task) => {
         if (!isSubscribed) return;
         if (!consoleDebounce.has(`set-task-${task.id}`)) {
           logger.debug('TimerDebug', '🔍 DEBUG: timer:set-task event:', task);
@@ -53,7 +53,7 @@ export const useTimerDebug = (enabled: boolean = false) => {
         }
       }),
       
-      eventBus.on('timer:start' as any, (data) => {
+      eventManager.on('timer:start', (data) => {
         if (!isSubscribed) return;
         if (!consoleDebounce.has('timer-start')) {
           logger.debug('TimerDebug', '🔍 DEBUG: timer:start event:', data);
@@ -62,7 +62,7 @@ export const useTimerDebug = (enabled: boolean = false) => {
         }
       }),
       
-      eventBus.on('timer:pause' as any, (data) => {
+      eventManager.on('timer:pause', (data) => {
         if (!isSubscribed) return;
         if (!consoleDebounce.has('timer-pause')) {
           logger.debug('TimerDebug', '🔍 DEBUG: timer:pause event:', data);
@@ -71,7 +71,7 @@ export const useTimerDebug = (enabled: boolean = false) => {
         }
       }),
       
-      eventBus.on('timer:complete' as any, (data) => {
+      eventManager.on('timer:complete', (data) => {
         if (!isSubscribed) return;
         if (!consoleDebounce.has('timer-complete')) {
           logger.debug('TimerDebug', '🔍 DEBUG: timer:complete event:', data);
@@ -81,7 +81,7 @@ export const useTimerDebug = (enabled: boolean = false) => {
       }),
       
       // Force update events
-      eventBus.on('task:reload' as any, () => {
+      eventManager.on('task:reload', () => {
         if (!isSubscribed) return;
         if (!consoleDebounce.has('task-reload')) {
           logger.debug('TimerDebug', '🔍 DEBUG: task:reload event received');

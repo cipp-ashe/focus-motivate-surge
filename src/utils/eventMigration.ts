@@ -1,34 +1,24 @@
 
 /**
- * Utility to help with migration from eventBus to eventManager
+ * Migration utility to help identify components that need to be updated
  * This file can be removed once migration is complete
  */
 
 import { eventManager } from '@/lib/events/EventManager';
 
 /**
- * Track eventBus usage to help with migration
+ * Track deprecated event usage patterns
  */
 export function trackEventBusUsage() {
-  const originalEmit = eventManager.emit;
-  const trackedEvents = new Set<string>();
+  console.warn(
+    "EVENT SYSTEM MIGRATION: eventBus has been completely removed. " +
+    "All components must use eventManager directly."
+  );
   
-  // Override emit to track usage coming through eventBus
-  eventManager.emit = function trackingEmit(event, payload) {
-    // Check if the call is coming through eventBus (via stack trace)
-    const stack = new Error().stack || '';
-    const isEventBus = stack.includes('eventBus.ts');
-    
-    if (isEventBus && !trackedEvents.has(String(event))) {
-      trackedEvents.add(String(event));
-      console.warn(
-        `MIGRATION NEEDED: eventBus.emit('${String(event)}') was called. ` +
-        `Please update to use eventManager.emit('${String(event)}') directly. ` +
-        `Stack trace: ${stack.split('\n').slice(2, 5).join('\n')}`
-      );
-    }
-    
-    // Call the original method
-    return originalEmit.call(this, event, payload);
-  };
+  // We can't track eventBus anymore since it's removed
+  // Instead, we'll check for potential migration issues in other ways
+  
+  // Log all the currently registered event handlers to help identify migration needs
+  const counts = eventManager.getListenerCounts();
+  console.log("Current eventManager listeners:", counts);
 }

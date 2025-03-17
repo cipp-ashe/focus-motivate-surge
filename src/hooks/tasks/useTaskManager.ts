@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { activeTasksStorage } from '@/lib/storage/task/activeTasksStorage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,7 +17,7 @@ export const useTaskManager = () => {
     activeTasksStorage.addTask(newTask);
     
     // Emit event
-    eventBus.emit('task:create', newTask);
+    eventManager.emit('task:create', newTask);
     
     return newTask;
   }, []);
@@ -39,7 +39,7 @@ export const useTaskManager = () => {
     activeTasksStorage.updateTask(taskId, updatedTask);
     
     // Emit event
-    eventBus.emit('task:update', { taskId, updates });
+    eventManager.emit('task:update', { taskId, updates });
     
     return updatedTask;
   }, []);
@@ -49,7 +49,7 @@ export const useTaskManager = () => {
     activeTasksStorage.removeTask(taskId);
     
     // Emit event
-    eventBus.emit('task:delete', { taskId, reason, suppressToast });
+    eventManager.emit('task:delete', { taskId, reason, suppressToast });
   }, []);
   
   return { createTask, updateTask, deleteTask };
