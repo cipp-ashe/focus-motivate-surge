@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tag } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
-import { EventType } from '@/lib/events/EventManager';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface TaskTagsProps {
   tags: Tag[];
@@ -43,7 +41,8 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
       console.log(`Tag clicked: ${tag.name}`);
       
       // Broadcast tag selection event - use as any as a workaround for now
-      eventBus.emit('tag:select' as any, { tagId: tag.id, tagName: tag.name });
+      // @ts-ignore - Custom event type
+      eventManager.emit('tag:select', { tagId: tag.id, tagName: tag.name });
     }
   };
   
@@ -62,7 +61,8 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
       setLocalTags(prev => prev.filter(t => t.id !== tagId));
       
       // Broadcast tag removal event - use as any as a workaround for now
-      eventBus.emit('tag:remove' as any, { tagId });
+      // @ts-ignore - Custom event type
+      eventManager.emit('tag:remove', { tagId });
     }
   };
   
@@ -73,17 +73,18 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
       console.log('TaskTags - Force update event received');
     };
     
-    // Subscribe to these events as EventType[]
-    const events = ['tags:force-update', 'tag:create', 'tag:delete'] as any[];
-    
-    // Add event listeners
-    const unsubscribers = events.map(eventName => 
-      eventBus.on(eventName as any, handleForceUpdate)
-    );
+    // Subscribe to these events with ts-ignore
+    // @ts-ignore - Custom event types
+    const unsubscribeForceUpdate = eventManager.on('tags:force-update', handleForceUpdate);
+    // @ts-ignore - Custom event types
+    const unsubscribeTagCreate = eventManager.on('tag:create', handleForceUpdate);
+    // @ts-ignore - Custom event types
+    const unsubscribeTagDelete = eventManager.on('tag:delete', handleForceUpdate);
     
     return () => {
-      // Clean up all event subscriptions
-      unsubscribers.forEach(unsub => unsub());
+      unsubscribeForceUpdate();
+      unsubscribeTagCreate();
+      unsubscribeTagDelete();
     };
   }, []);
 

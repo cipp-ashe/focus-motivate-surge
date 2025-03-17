@@ -2,6 +2,10 @@
 import { supabase } from '@/lib/supabase/client';
 import { TimerEventType, TimerEventPayloads } from '@/types/events';
 
+export type EventType = TimerEventType;
+export type EventPayloads = TimerEventPayloads;
+export type EventHandler<T extends EventType> = (payload: EventPayloads[T]) => void;
+
 type EventCallback<T = any> = (payload: T) => void;
 interface EventSubscription {
   unsubscribe: () => void;
@@ -59,6 +63,24 @@ class EventManager {
     
     // Persist to Supabase if user is authenticated
     this.persistEventToSupabase(event, payload);
+  }
+
+  /**
+   * For testing: Get listener counts
+   */
+  getListenerCounts(): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const event in this.listeners) {
+      counts[event] = this.listeners[event].length;
+    }
+    return counts;
+  }
+
+  /**
+   * For testing: Clear all event listeners
+   */
+  clear(): void {
+    this.listeners = {};
   }
 
   /**

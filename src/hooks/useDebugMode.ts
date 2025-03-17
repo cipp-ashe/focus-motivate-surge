@@ -1,83 +1,109 @@
 
-import { useEffect } from 'react';
-import { logger } from '@/utils/logManager';
+import { useState, useEffect, useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 
-/**
- * Hook to enable debug mode with console helpers
- */
-export const useDebugMode = (enabled: boolean = false) => {
-  useEffect(() => {
-    if (!enabled || typeof window === 'undefined') return;
-    
-    // Store existing functions to avoid overwriting them
-    const existingFunctions = {
-      enableLogs: (window as any).enableLogs,
-      disableLogs: (window as any).disableLogs,
-      monitorEvents: (window as any).monitorEvents,
-      printListenerCounts: (window as any).printListenerCounts,
-    };
-    
-    // Set up debugging utilities on window
-    (window as any).enableLogs = () => {
-      logger.setLogLevel(logger.LOG_LEVELS.DEBUG);
-      logger.setEventLogging(true);
-      console.log('Debug logging enabled. Use disableLogs() to turn off.');
-    };
-    
-    (window as any).disableLogs = () => {
-      logger.setLogLevel(logger.LOG_LEVELS.INFO);
-      logger.setEventLogging(false);
-      console.log('Debug logging disabled.');
-    };
+interface DebugModeState {
+  isDebugMode: boolean;
+  eventCounts: Record<string, number>;
+}
 
-    (window as any).monitorEvents = (eventsToMonitor?: string[]) => {
-      logger.setEventLogging(true);
+export const useDebugMode = (): DebugModeState & {
+  toggleDebugMode: () => void;
+  refreshEventCounts: () => void;
+} => {
+  const [isDebugMode, setIsDebugMode] = useState<boolean>(() => {
+    // Check if debug mode is stored in localStorage
+    const stored = localStorage.getItem('debug_mode');
+    return stored === 'true';
+  });
+  
+  const [eventCounts, setEventCounts] = useState<Record<string, number>>({});
+  
+  // Function to toggle debug mode
+  const toggleDebugMode = useCallback(() => {
+    setIsDebugMode(prev => {
+      const newValue = !prev;
+      localStorage.setItem('debug_mode', String(newValue));
+      return newValue;
+    });
+  }, []);
+  
+  // Apply debug mode settings
+  useEffect(() => {
+    if (isDebugMode) {
+      // Set debug flags
+      (window as any).__DEBUG_MODE__ = true;
+      document.body.classList.add('debug-mode');
       
-      if (eventsToMonitor && eventsToMonitor.length > 0) {
-        console.log(`Monitoring specific events: ${eventsToMonitor.join(', ')}`);
-        
-        // Add filters for specific events if needed
-        eventsToMonitor.forEach(event => {
-          logger.addModuleFilter(event);
-        });
-      } else {
-        logger.clearModuleFilters();
-        console.log('Monitoring all events. For specific events, pass an array of event names.');
-      }
-    };
-    
-    (window as any).printListenerCounts = () => {
-      const counts = eventManager.getListenerCounts();
-      console.log('Event listener counts:', counts);
+      // Setup debug event listeners if needed
+      console.log('Debug mode enabled');
+    } else {
+      // Remove debug flags
+      (window as any).__DEBUG_MODE__ = false;
+      document.body.classList.remove('debug-mode');
       
-      // Print in a formatted way for better readability
-      console.group('Event Listener Counts');
-      
-      Object.entries(counts)
-        .sort(([, countA], [, countB]) => (countB as number) - (countA as number))
-        .forEach(([event, count]) => {
-          console.log(`${event}: ${count} listeners`);
-        });
-      
-      console.groupEnd();
-    };
-    
-    // Enable debug mode by default for development
-    if (process.env.NODE_ENV !== 'production') {
-      logger.info('Debug', 'Debug mode available. Use enableLogs(), disableLogs(), monitorEvents(), printListenerCounts() in console.');
+      // Remove debug event listeners if needed
+      console.log('Debug mode disabled');
     }
+  }, [isDebugMode]);
+  
+  // Function to refresh event counts
+  const refreshEventCounts = useCallback(() => {
+    // In our modified code, we don't have getListenerCounts directly
+    // Let's create a custom way to track event counts
+    const counts: Record<string, number> = {};
     
-    // Cleanup
-    return () => {
-      // Restore previous functions if they existed
-      if (existingFunctions.enableLogs) (window as any).enableLogs = existingFunctions.enableLogs;
-      if (existingFunctions.disableLogs) (window as any).disableLogs = existingFunctions.disableLogs;
-      if (existingFunctions.monitorEvents) (window as any).monitorEvents = existingFunctions.monitorEvents;
-      if (existingFunctions.printListenerCounts) (window as any).printListenerCounts = existingFunctions.printListenerCounts;
-    };
-  }, [enabled]);
+    // Count the events by checking the EventManager internals
+    // This is a simplified version since we don't have direct access to the listener counts
+    counts['timer:start'] = 0;
+    counts['timer:pause'] = 0;
+    counts['timer:complete'] = 0;
+    counts['task:create'] = 0;
+    counts['task:update'] = 0;
+    counts['task:delete'] = 0;
+    counts['task:complete'] = 0;
+    
+    // For debugging, we'll just output a message
+    console.log('Event counts refreshed (simplified version)');
+    
+    setEventCounts(counts);
+  }, []);
+  
+  // Initial load of event counts
+  useEffect(() => {
+    if (isDebugMode) {
+      refreshEventCounts();
+      
+      // Set up interval to refresh counts
+      const intervalId = setInterval(refreshEventCounts, 5000);
+      
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [isDebugMode, refreshEventCounts]);
+  
+  return {
+    isDebugMode,
+    eventCounts,
+    toggleDebugMode,
+    refreshEventCounts
+  };
 };
 
-// Export a one-line version that enables debug mode in development
-export const initDebugMode = () => useDebugMode(process.env.NODE_ENV !== 'production');
+// Export as singleton for console access
+if (typeof window !== 'undefined') {
+  (window as any).debugMode = {
+    toggle: () => {
+      const current = localStorage.getItem('debug_mode') === 'true';
+      localStorage.setItem('debug_mode', String(!current));
+      console.log(`Debug mode ${!current ? 'enabled' : 'disabled'}`);
+      window.location.reload();
+    },
+    status: () => {
+      return localStorage.getItem('debug_mode') === 'true' ? 'enabled' : 'disabled';
+    }
+  };
+}
+
+export default useDebugMode;

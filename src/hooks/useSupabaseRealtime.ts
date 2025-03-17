@@ -71,15 +71,23 @@ export const useSupabaseRealtime = () => {
         filter: `user_id=eq.${user.id}`
       }, (payload) => {
         console.log('New template created:', payload);
-        const templateData = {
-          templateId: payload.new.id,
-          name: payload.new.name,
-          description: payload.new.description,
-          activeDays: payload.new.days,
-          isActive: payload.new.is_active,
-          habits: JSON.parse(payload.new.habits || '[]'),
-        };
-        eventManager.emit('habit:template-add', templateData);
+        // Convert to string format expected by the event payload
+        eventManager.emit('habit:template-add', payload.new.id);
+        
+        // Also emit a more detailed event that other parts of the app might use
+        // This is a custom event that's not in the standard TimerEventPayloads
+        // but is handled by specific components
+        const event = new CustomEvent('template-created', {
+          detail: {
+            templateId: payload.new.id,
+            name: payload.new.name,
+            description: payload.new.description,
+            activeDays: payload.new.days,
+            isActive: payload.new.is_active,
+            habits: JSON.parse(payload.new.habits || '[]'),
+          }
+        });
+        window.dispatchEvent(event);
       })
       .on('postgres_changes', {
         event: 'UPDATE',
@@ -136,7 +144,7 @@ export const useSupabaseRealtime = () => {
         filter: `user_id=eq.${user.id}`
       }, (payload) => {
         console.log('Note deleted:', payload);
-        eventManager.emit('note:delete', payload.old.id);
+        eventManager.emit('note:delete', { id: payload.old.id });
       })
       .subscribe();
 

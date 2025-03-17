@@ -27,6 +27,7 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
     };
     
     // Set up event listener
+    // @ts-ignore - We're using a custom event type not in TimerEventPayloads
     const unsubscribe = eventManager.on('habit:dismissed', handleHabitDismissed);
     
     // Check localStorage for any already dismissed habits for today
@@ -82,7 +83,20 @@ export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: Activ
     const templateId = habit.relationships?.templateId || '';
     
     // Emit event for habit completion
-    eventManager.emit('habit:complete', {
+    // Use CustomEvent for internal app communication
+    const habitCompleteEvent = new CustomEvent('habit-complete', {
+      detail: {
+        habitId,
+        completed,
+        date: new Date().toDateString(),
+        templateId
+      }
+    });
+    window.dispatchEvent(habitCompleteEvent);
+    
+    // Use a more generic event for persistence via eventBus
+    // @ts-ignore - We're using a custom event type not in TimerEventPayloads
+    eventManager.emit('habit:journal-complete', {
       habitId,
       completed,
       date: new Date().toDateString(),

@@ -54,6 +54,16 @@ jest.mock('@/lib/storage/taskStorage', () => ({
   }
 }));
 
+// Mock eventBus
+jest.mock('@/lib/eventBus', () => ({
+  eventBus: {
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+    clear: jest.fn() // Mock the clear method
+  }
+}));
+
 describe('useHabitTaskProcessor', () => {
   let mockDispatchEvent: jest.SpyInstance;
   
@@ -63,7 +73,7 @@ describe('useHabitTaskProcessor', () => {
     (taskStorage.loadTasks as jest.Mock).mockReset();
     
     // Reset eventBus
-    eventBus.clear();
+    (eventBus.clear as jest.Mock).mockReset();
     
     // Mock window.dispatchEvent
     mockDispatchEvent = jest.spyOn(window, 'dispatchEvent').mockImplementation();

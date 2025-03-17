@@ -1,5 +1,6 @@
+
 import { useEffect, useCallback } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { Task, TaskType } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { useDismissalHandler } from './taskIntegration/useDismissalHandler';
@@ -73,23 +74,29 @@ export const useHabitTaskIntegration = () => {
     loadDismissedHabits();
     
     // Listen for habit schedule events
-    const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
+    // @ts-ignore - We're using a custom event type not in TimerEventPayloads
+    const unsubscribeSchedule = eventManager.on('habit:schedule', handleHabitSchedule);
     
-    // Listen for habit complete events
-    const unsubscribeComplete = eventBus.on('habit:complete', (event) => {
+    // Listen for habit complete events using custom events
+    // Instead of using eventBus directly, we'll use the DOM event system
+    const handleHabitComplete = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
       // Find task for this habit
-      const task = taskStorage.taskExists(event.habitId, event.date || new Date().toDateString());
+      const task = taskStorage.taskExists(detail.habitId, detail.date || new Date().toDateString());
       
       if (task) {
         // Update task completion status
-        eventBus.emit('task:update', {
+        eventManager.emit('task:update', {
           taskId: task.id,
           updates: {
-            completed: event.completed
+            completed: detail.completed
           }
         });
       }
-    });
+    };
+    
+    // Add DOM event listener
+    window.addEventListener('habit-complete', handleHabitComplete);
     
     // Listen for habit task dismissed events
     window.addEventListener('habit-task-dismissed', handleHabitTaskDismissed as EventListener);
@@ -102,7 +109,7 @@ export const useHabitTaskIntegration = () => {
     
     return () => {
       unsubscribeSchedule();
-      unsubscribeComplete();
+      window.removeEventListener('habit-complete', handleHabitComplete);
       window.removeEventListener('habit-task-dismissed', handleHabitTaskDismissed as EventListener);
       clearInterval(intervalId);
     };

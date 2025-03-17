@@ -1,4 +1,6 @@
-import { eventManager, EventType, EventPayloads, EventHandler } from './EventManager';
+
+import { eventManager } from './EventManager';
+import { EventType, EventPayloads, EventHandler } from './EventManager';
 
 /**
  * Registry for managing and prioritizing event handlers

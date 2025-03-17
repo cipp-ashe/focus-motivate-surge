@@ -21,8 +21,11 @@ export const completeTask = async (task: Task): Promise<Task> => {
       status: 'completed'
     };
     
-    // Emit the completion event
-    eventManager.emit('task:complete', completedTask);
+    // Emit the completion event with the taskId for correct typing
+    eventManager.emit('task:complete', { 
+      taskId: task.id,
+      metrics: task.metrics
+    });
     
     return completedTask;
   } catch (error) {

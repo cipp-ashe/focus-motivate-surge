@@ -1,90 +1,86 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useTaskStorage } from '../useTaskStorage';
-import { eventBus } from '@/lib/eventBus';
+import { useLocalStorageData } from '../useLocalStorageData';
 
-describe('useTaskStorage', () => {
+// Mock localStorage
+const mockLocalStorage = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: jest.fn((key) => store[key] || null),
+    setItem: jest.fn((key, value) => { store[key] = value.toString(); }),
+    removeItem: jest.fn((key) => { delete store[key]; }),
+    clear: jest.fn(() => { store = {}; })
+  };
+})();
+Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+
+// Mock eventBus
+jest.mock('@/lib/eventBus', () => ({
+  eventBus: {
+    on: jest.fn(),
+    emit: jest.fn(),
+    off: jest.fn(),
+    clear: jest.fn() // add a mock for the clear method
+  }
+}));
+
+describe('useLocalStorageData', () => {
   beforeEach(() => {
-    localStorage.clear();
-    eventBus.clear();
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    mockLocalStorage.clear();
+  });
+
+  it('should load data from localStorage', () => {
+    mockLocalStorage.getItem.mockReturnValueOnce(JSON.stringify([{ id: 1, name: 'Task 1' }]));
     
-    // Mock the window.dispatchEvent
-    window.dispatchEvent = jest.fn();
-  });
-
-  it('should initialize with empty tasks', () => {
-    const { result } = renderHook(() => useTaskStorage());
-    expect(result.current.items).toEqual([]);
-    expect(result.current.completed).toEqual([]);
-  });
-
-  it('should handle task creation through event bus', () => {
-    const { result } = renderHook(() => useTaskStorage());
+    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', []));
     
-    act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
-    });
-
-    expect(result.current.items).toHaveLength(1);
-    expect(result.current.items[0].name).toBe('Test Task');
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('tasks');
+    expect(result.current.data).toEqual([{ id: 1, name: 'Task 1' }]);
   });
 
-  it('should handle task updates through event bus', () => {
-    const { result } = renderHook(() => useTaskStorage());
+  it('should use default value if localStorage is empty', () => {
+    mockLocalStorage.getItem.mockReturnValueOnce(null);
+    
+    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', [{ id: 2, name: 'Default Task' }]));
+    
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('tasks');
+    expect(result.current.data).toEqual([{ id: 2, name: 'Default Task' }]);
+  });
+
+  it('should update localStorage when data changes', () => {
+    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', []));
     
     act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
-
-      eventBus.emit('task:update', {
-        taskId: '1',
-        updates: { name: 'Updated Task' }
-      });
+      result.current.setData([{ id: 3, name: 'New Task' }]);
     });
-
-    expect(result.current.items[0].name).toBe('Updated Task');
+    
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('tasks', JSON.stringify([{ id: 3, name: 'New Task' }]));
   });
 
-  it('should handle task deletion', () => {
-    const { result } = renderHook(() => useTaskStorage());
+  it('should handle JSON parse errors gracefully', () => {
+    // Return invalid JSON
+    mockLocalStorage.getItem.mockReturnValueOnce('invalid json');
     
-    act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
-
-      eventBus.emit('task:delete', { taskId: '1', reason: 'manual' });
-    });
-
-    expect(result.current.items).toHaveLength(0);
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    
+    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', []));
+    
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(result.current.data).toEqual([]);
+    
+    consoleErrorSpy.mockRestore();
   });
 
-  it('should persist tasks to localStorage', () => {
-    const { result } = renderHook(() => useTaskStorage());
+  it('should clear data when clearData is called', () => {
+    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', [{ id: 1 }]));
     
     act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
+      result.current.clearData();
     });
-
-    const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-    expect(storedTasks).toHaveLength(1);
-    expect(storedTasks[0].name).toBe('Test Task');
+    
+    expect(result.current.data).toEqual([]);
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith('tasks', JSON.stringify([]));
   });
 });

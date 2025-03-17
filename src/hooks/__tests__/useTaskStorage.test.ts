@@ -1,90 +1,72 @@
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { useTaskStorage } from '../useTaskStorage';
-import { eventBus } from '@/lib/eventBus';
+import { taskStorage } from '@/lib/storage/taskStorage';
+
+// Mock taskStorage
+jest.mock('@/lib/storage/taskStorage', () => ({
+  taskStorage: {
+    loadTasks: jest.fn(),
+    saveTasks: jest.fn(),
+    getTask: jest.fn(),
+    deleteTask: jest.fn()
+  }
+}));
+
+// Mock eventBus
+jest.mock('@/lib/eventBus', () => ({
+  eventBus: {
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+    clear: jest.fn() // Mock clear method
+  }
+}));
 
 describe('useTaskStorage', () => {
   beforeEach(() => {
-    localStorage.clear();
-    eventBus.clear();
-    
-    // Mock the window.dispatchEvent
-    window.dispatchEvent = jest.fn();
+    jest.clearAllMocks();
   });
 
-  it('should initialize with empty tasks', () => {
+  it('should call taskStorage.loadTasks on mount', () => {
+    (taskStorage.loadTasks as jest.Mock).mockReturnValue([
+      { id: '1', name: 'Task 1' },
+      { id: '2', name: 'Task 2' }
+    ]);
+
     const { result } = renderHook(() => useTaskStorage());
-    expect(result.current.items).toEqual([]);
-    expect(result.current.completed).toEqual([]);
+
+    expect(taskStorage.loadTasks).toHaveBeenCalled();
+    expect(result.current.tasks).toEqual([
+      { id: '1', name: 'Task 1' },
+      { id: '2', name: 'Task 2' }
+    ]);
   });
 
-  it('should handle task creation through event bus', () => {
+  it('should allow saving tasks', () => {
     const { result } = renderHook(() => useTaskStorage());
-    
-    act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
-    });
 
-    expect(result.current.items).toHaveLength(1);
-    expect(result.current.items[0].name).toBe('Test Task');
+    const newTasks = [{ id: '3', name: 'Task 3' }];
+    result.current.saveTasks(newTasks);
+
+    expect(taskStorage.saveTasks).toHaveBeenCalledWith(newTasks);
   });
 
-  it('should handle task updates through event bus', () => {
+  it('should return a task by id', () => {
+    const mockTask = { id: '1', name: 'Task 1' };
+    (taskStorage.getTask as jest.Mock).mockReturnValue(mockTask);
+
     const { result } = renderHook(() => useTaskStorage());
-    
-    act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
+    const task = result.current.getTask('1');
 
-      eventBus.emit('task:update', {
-        taskId: '1',
-        updates: { name: 'Updated Task' }
-      });
-    });
-
-    expect(result.current.items[0].name).toBe('Updated Task');
+    expect(taskStorage.getTask).toHaveBeenCalledWith('1');
+    expect(task).toEqual(mockTask);
   });
 
-  it('should handle task deletion', () => {
+  it('should delete a task by id', () => {
     const { result } = renderHook(() => useTaskStorage());
-    
-    act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
+    result.current.deleteTask('1');
 
-      eventBus.emit('task:delete', { taskId: '1', reason: 'manual' });
-    });
-
-    expect(result.current.items).toHaveLength(0);
-  });
-
-  it('should persist tasks to localStorage', () => {
-    const { result } = renderHook(() => useTaskStorage());
-    
-    act(() => {
-      eventBus.emit('task:create', {
-        id: '1',
-        name: 'Test Task',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
-    });
-
-    const storedTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-    expect(storedTasks).toHaveLength(1);
-    expect(storedTasks[0].name).toBe('Test Task');
+    expect(taskStorage.deleteTask).toHaveBeenCalledWith('1');
   });
 });

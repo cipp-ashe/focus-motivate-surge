@@ -16,9 +16,9 @@ export const eventBus = new Proxy(eventManager, {
   }
 });
 
-// Re-export types for backward compatibility
-export type { 
-  EventType, 
+// Re-export types
+export {
+  EventType,
   EventHandler,
-  EventPayloads 
+  EventPayloads
 } from './events/EventManager';
