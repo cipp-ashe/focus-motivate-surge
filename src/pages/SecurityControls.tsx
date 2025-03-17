@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SecurityControlsReference } from '@/components/security/SecurityControlsReference';
-import { Shield, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 const SecurityControlsPage: React.FC = () => {

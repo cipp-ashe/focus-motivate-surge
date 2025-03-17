@@ -16,7 +16,14 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
-import { Search, Shield, ClipboardCheck, Users, Home, Server } from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Search, Shield, ClipboardCheck, Users, Home, Server, Info } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
@@ -70,6 +77,8 @@ const securityControls: SecurityControl[] = [
 export const SecurityControlsReference: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedControl, setSelectedControl] = useState<SecurityControl | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   
   const filteredControls = useMemo(() => {
@@ -118,6 +127,11 @@ export const SecurityControlsReference: React.FC = () => {
       default:
         return <Shield className="h-4 w-4" />;
     }
+  };
+
+  const handleRowClick = (control: SecurityControl) => {
+    setSelectedControl(control);
+    setDialogOpen(true);
   };
 
   return (
@@ -199,41 +213,43 @@ export const SecurityControlsReference: React.FC = () => {
                 </TableCaption>
                 <TableHeader className="bg-muted/30">
                   <TableRow>
-                    <TableHead className="w-[60px] sm:w-[100px]">ID</TableHead>
-                    {!isMobile && <TableHead className="w-[150px] sm:w-[200px]">Category</TableHead>}
-                    <TableHead className="w-[150px] sm:w-[250px]">Control</TableHead>
-                    {!isMobile && <TableHead>Description</TableHead>}
+                    <TableHead className="w-[60px]">ID</TableHead>
+                    <TableHead>Control</TableHead>
+                    <TableHead className="w-[100px] text-center">Category</TableHead>
+                    <TableHead className="w-[60px] text-center">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredControls.map((control) => (
-                    <TableRow key={control.id} className="hover:bg-muted/20 transition-colors">
+                    <TableRow 
+                      key={control.id} 
+                      className="hover:bg-muted/20 transition-colors cursor-pointer"
+                      onClick={() => handleRowClick(control)}
+                    >
                       <TableCell className="font-mono text-xs sm:text-sm font-medium">{control.id}</TableCell>
-                      {!isMobile && (
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getCategoryIcon(control.category)}
-                            <span>{control.category}</span>
-                          </div>
-                        </TableCell>
-                      )}
                       <TableCell className="font-medium text-xs sm:text-sm">
-                        <div className="flex flex-col">
-                          {control.title}
-                          {isMobile && (
-                            <span className="text-xs text-muted-foreground flex items-center mt-1">
-                              {getCategoryIcon(control.category)}
-                              <span className="ml-1">{control.category}</span>
-                            </span>
-                          )}
+                        {control.title}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center">
+                          <Badge variant="outline" className="flex items-center gap-1 px-2 py-1">
+                            {getCategoryIcon(control.category)}
+                            <span className="hidden xs:inline text-xs">{control.category}</span>
+                          </Badge>
                         </div>
                       </TableCell>
-                      {!isMobile && <TableCell className="text-xs sm:text-sm text-muted-foreground">{control.description}</TableCell>}
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <button className="p-1 rounded-full hover:bg-primary/10 transition-colors">
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                   {filteredControls.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={isMobile ? 2 : 4} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                         <div className="flex flex-col items-center justify-center">
                           <Search className="h-8 w-8 mb-2 opacity-40" />
                           <p>No controls found matching your search criteria.</p>
@@ -248,6 +264,55 @@ export const SecurityControlsReference: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Security Control Details Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+          {selectedControl && (
+            <>
+              <DialogHeader className="p-6 pb-2 space-y-3 border-b">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge className="px-2 py-1">
+                    {getCategoryIcon(selectedControl.category)}
+                    <span className="ml-1">{selectedControl.category}</span>
+                  </Badge>
+                  <div className="font-mono text-sm font-bold">{selectedControl.id}</div>
+                </div>
+                <DialogTitle className="text-xl">{selectedControl.title}</DialogTitle>
+              </DialogHeader>
+              <div className="p-6 pt-4">
+                <DialogDescription className="text-foreground text-sm leading-relaxed mb-4">
+                  {selectedControl.description}
+                </DialogDescription>
+                
+                <div className="mt-4 pt-4 border-t border-border/40">
+                  <h4 className="text-sm font-medium mb-2">Implementation Guidance</h4>
+                  <ul className="text-xs text-muted-foreground space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="rounded-full bg-primary/10 p-1 mt-0.5">
+                        <Shield className="h-3 w-3 text-primary" />
+                      </span>
+                      <span>Document and communicate the control implementation to all relevant stakeholders.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="rounded-full bg-primary/10 p-1 mt-0.5">
+                        <Shield className="h-3 w-3 text-primary" />
+                      </span>
+                      <span>Regularly review and update the control implementation as needed.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="rounded-full bg-primary/10 p-1 mt-0.5">
+                        <Shield className="h-3 w-3 text-primary" />
+                      </span>
+                      <span>Assign clear responsibility for maintaining and monitoring the control.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
