@@ -24,13 +24,22 @@ export const useDataInitialization = () => {
 
       if (missingKeys.length > 0) {
         console.log('Initializing missing data:', missingKeys);
-        const initialized = initializeDataStore();
-        
-        if (!initialized) {
-          const error = `Failed to initialize: ${missingKeys.join(', ')}`;
-          console.error(error);
-          toast.error(error);
-          setStatus({ isInitialized: false, error });
+        try {
+          const initialized = initializeDataStore();
+          
+          if (!initialized) {
+            const error = `Failed to initialize: ${missingKeys.join(', ')}`;
+            console.error(error);
+            toast.error(error);
+            setStatus({ isInitialized: false, error });
+            return;
+          }
+        } catch (initError) {
+          console.error('Error during initializeDataStore:', initError);
+          setStatus({ 
+            isInitialized: false, 
+            error: initError instanceof Error ? initError.message : 'Unknown error during initialization' 
+          });
           return;
         }
       }
