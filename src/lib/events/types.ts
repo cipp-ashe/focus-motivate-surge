@@ -11,7 +11,10 @@ import type {
   NavigationEventType,
   AuthEventType,
   NoteEventType,
-  TagEventType
+  TagEventType,
+  JournalEventType,
+  QuoteEventType,
+  VoiceNoteEventType
 } from '@/types/events';
 
 // Define the event handler type
@@ -31,7 +34,10 @@ export type {
   NavigationEventType,
   AuthEventType,
   NoteEventType,
-  TagEventType
+  TagEventType,
+  JournalEventType,
+  QuoteEventType,
+  VoiceNoteEventType
 };
 
 // Alias for EventType

@@ -7,7 +7,7 @@ import { useHabitEventProcessor } from './processors/useHabitEventProcessor';
 import { useTaskCreationProcessor } from './processors/useTaskCreationProcessor';
 import { usePendingTaskProcessor } from './processors/usePendingTaskProcessor';
 import { useEvent } from '@/hooks/useEvent';
-import { EventPayloads } from '@/types/events';
+import { AllEventTypes, EventPayloads } from '@/types/events';
 
 // Define proper types for the habit schedule event
 type HabitScheduleEvent = EventPayloads['habit:schedule'];
