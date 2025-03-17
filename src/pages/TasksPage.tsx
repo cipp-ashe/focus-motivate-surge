@@ -1,8 +1,5 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { TaskTabsList } from '@/components/tasks/tabs/TaskTabsList';
-import { TaskTypeTab } from '@/components/tasks/tabs/TaskTypeTab';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
@@ -22,7 +19,6 @@ const TasksPage: React.FC = () => {
   const completedTasks = taskContext?.completed || [];
   
   // State for dialogs
-  const [activeTab, setActiveTab] = useState('all');
   const [checklistDialogOpen, setChecklistDialogOpen] = useState(false);
   const [journalDialogOpen, setJournalDialogOpen] = useState(false);
   const [screenshotDialogOpen, setScreenshotDialogOpen] = useState(false);
@@ -46,43 +42,6 @@ const TasksPage: React.FC = () => {
     console.log("TasksPage mounted, taskContext:", taskContext);
     console.log("Tasks available:", tasks);
   }, [taskContext, tasks]);
-  
-  // Update task counts
-  const [taskCounts, setTaskCounts] = useState({
-    all: 0,
-    timer: 0,
-    screenshot: 0,
-    journal: 0,
-    checklist: 0,
-    voicenote: 0,
-    regular: 0
-  });
-  
-  // Calculate counts whenever tasks change
-  useEffect(() => {
-    if (!tasks) return;
-    
-    const counts = {
-      all: tasks.length,
-      timer: tasks.filter(t => t.taskType === 'timer').length,
-      screenshot: tasks.filter(t => t.taskType === 'screenshot').length,
-      journal: tasks.filter(t => t.taskType === 'journal').length,
-      checklist: tasks.filter(t => t.taskType === 'checklist').length,
-      voicenote: tasks.filter(t => t.taskType === 'voicenote').length,
-      regular: tasks.filter(t => t.taskType === 'regular' || !t.taskType).length
-    };
-    
-    setTaskCounts(counts);
-    console.log("Task counts updated:", counts);
-  }, [tasks]);
-  
-  // Filter tasks based on active tab
-  const getFilteredTasks = (): Task[] => {
-    if (!tasks) return [];
-    
-    if (activeTab === 'all') return tasks;
-    return tasks.filter(task => task.taskType === activeTab);
-  };
   
   // Dialog openers
   const dialogOpeners = {
@@ -116,12 +75,6 @@ const TasksPage: React.FC = () => {
       setVoiceNoteDialogOpen(true);
       toast.info(`Recording for: ${taskName}`);
     }
-  };
-  
-  // Handle tab change
-  const handleTabChange = (value: string) => {
-    console.log("Tab changed to:", value);
-    setActiveTab(value);
   };
   
   // Handle task creation using event manager
@@ -167,54 +120,18 @@ const TasksPage: React.FC = () => {
       
       <TaskLayout
         mainContent={
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="h-full flex flex-col">
-            <TaskTabsList taskCounts={taskCounts} />
-            
-            <div className="flex-1 overflow-hidden">
-              <TaskTypeTab 
-                value="all" 
-                tasks={getFilteredTasks()} 
+          <div className="flex flex-col h-full">
+            <div className="flex-1 overflow-hidden border border-border/20 rounded-lg">
+              <UnifiedTaskView
+                activeTasks={tasks}
+                completedTasks={completedTasks}
                 selectedTaskId={taskContext?.selected || null}
                 dialogOpeners={dialogOpeners}
-              />
-              <TaskTypeTab 
-                value="regular" 
-                tasks={getFilteredTasks()} 
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
-              />
-              <TaskTypeTab 
-                value="timer" 
-                tasks={getFilteredTasks()} 
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
-              />
-              <TaskTypeTab 
-                value="journal" 
-                tasks={getFilteredTasks()} 
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
-              />
-              <TaskTypeTab 
-                value="checklist" 
-                tasks={getFilteredTasks()} 
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
-              />
-              <TaskTypeTab 
-                value="screenshot" 
-                tasks={getFilteredTasks()} 
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
-              />
-              <TaskTypeTab 
-                value="voicenote" 
-                tasks={getFilteredTasks()} 
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
+                onTaskAdd={handleAddTask}
+                onTasksAdd={handleAddMultipleTasks}
               />
             </div>
-          </Tabs>
+          </div>
         }
         asideContent={
           <div className="space-y-4">
@@ -224,18 +141,6 @@ const TasksPage: React.FC = () => {
                 onTaskAdd={handleAddTask} 
                 onTasksAdd={handleAddMultipleTasks}
                 defaultTaskType="regular"
-              />
-            </div>
-            
-            {/* Replace the static completed tasks display with the unified task view */}
-            <div className="p-4 bg-card rounded-lg border border-border">
-              <UnifiedTaskView
-                activeTasks={tasks}
-                completedTasks={completedTasks}
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
-                onTaskAdd={handleAddTask}
-                onTasksAdd={handleAddMultipleTasks}
               />
             </div>
           </div>
