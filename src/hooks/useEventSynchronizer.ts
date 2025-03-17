@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { eventManager } from '@/lib/events/EventManager';
+import { TimerEventType } from '@/types/events';
 
 /**
  * Hook to synchronize events between local state and Supabase
@@ -35,8 +36,8 @@ export const useEventSynchronizer = () => {
           // Process each event
           for (const event of events) {
             try {
-              // Here we could re-emit the event locally or perform special processing
-              // For now, we'll just mark them as processed
+              // Emit the event locally
+              eventManager.emit(event.event_type as TimerEventType, event.payload);
               processedEventIds.push(event.id);
             } catch (err) {
               console.error(`Error processing event ${event.id}:`, err);

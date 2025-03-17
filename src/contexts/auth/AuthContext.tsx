@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { syncLocalDataToSupabase } from '@/lib/sync/dataSynchronizer';
 import { eventManager } from '@/lib/events/EventManager';
+import { enableRealtimeForTables } from '@/lib/supabase/client';
 
 interface AuthContextType {
   session: Session | null;
@@ -31,6 +32,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       setIsLoading(false);
       
+      // Enable realtime if user is authenticated
+      if (session?.user) {
+        enableRealtimeForTables();
+      }
+      
       // If user just logged in, sync localStorage data to Supabase
       if (session?.user && localStorage.getItem('firstLogin') !== 'completed') {
         syncLocalDataToSupabase(session.user.id);
@@ -51,9 +57,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       // If user just logged in, sync localStorage data to Supabase
-      if (session?.user && _event === 'SIGNED_IN' && localStorage.getItem('firstLogin') !== 'completed') {
-        syncLocalDataToSupabase(session.user.id);
-        localStorage.setItem('firstLogin', 'completed');
+      if (session?.user && _event === 'SIGNED_IN') {
+        // Enable realtime features
+        enableRealtimeForTables();
+        
+        // Sync data if it's first login
+        if (localStorage.getItem('firstLogin') !== 'completed') {
+          syncLocalDataToSupabase(session.user.id);
+          localStorage.setItem('firstLogin', 'completed');
+        }
+
+        toast.success('Signed in successfully');
+        eventManager.emit('auth:signed-in', { user: session.user });
+      } else if (_event === 'SIGNED_OUT') {
+        eventManager.emit('auth:signed-out', {});
       }
     });
 
