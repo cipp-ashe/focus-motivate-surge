@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -21,7 +20,6 @@ export const useTimerAddTime = ({
   timeLeft,
   isRunning,
 }: UseTimerAddTimeProps) => {
-  // Handle add time button click - explicitly accepting minutes parameter
   const handleAddTime = useCallback(
     (minutes: number = TIMER_CONSTANTS.ADD_TIME_MINUTES) => {
       console.log(`Adding ${minutes} minutes to timer`);
@@ -45,7 +43,7 @@ export const useTimerAddTime = ({
         onAddTime(minutes);
       }
       
-      // Emit event for adding time
+      // Updated to use the correct event type
       eventManager.emit('timer:metrics-update', {
         taskName,
         metrics: {

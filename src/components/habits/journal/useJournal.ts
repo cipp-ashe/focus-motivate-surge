@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Note } from "@/types/notes";
 import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
@@ -80,9 +79,8 @@ export const useJournal = ({
       eventManager.emit('note:create-from-habit', {
         habitId,
         habitName,
-        description: description || '',
-        templateId,
-        content
+        content,
+        templateId
       });
       
       // Mark as completed if not already

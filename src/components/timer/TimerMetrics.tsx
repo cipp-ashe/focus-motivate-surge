@@ -34,6 +34,7 @@ export const TimerMetrics: React.FC<TimerMetricsProps> = ({ metrics, taskName })
           effectiveTime: calculateEffectiveTime()
         };
         
+        // Use the updated event type that's now defined
         eventManager.emit('timer:metrics-update', {
           taskName,
           metrics: updatedMetrics

@@ -26,7 +26,8 @@ export type TimerEventType =
   | 'timer:state-update'
   | 'timer:expand'
   | 'timer:collapse'
-  | 'timer:close';
+  | 'timer:close'
+  | 'timer:metrics-update';  // Added missing event
 
 // Task related events
 export type TaskEventType = 
@@ -35,7 +36,8 @@ export type TaskEventType =
   | 'task:delete'
   | 'task:complete'
   | 'task:dismiss'
-  | 'task:reload';
+  | 'task:reload'
+  | 'task:select';  // Added missing event
 
 // Habit related events
 export type HabitEventType = 
@@ -49,7 +51,11 @@ export type HabitEventType =
   | 'habit:template-update'
   | 'habit:template-delete'
   | 'habit:custom-template-delete'
-  | 'habits:check-pending';
+  | 'habits:check-pending'
+  | 'habit:select'  // Added missing event
+  | 'habit:dismissed'  // Added missing event
+  | 'habit:task-deleted'  // Added missing event
+  | 'habit:journal-deleted';  // Added missing event
 
 // Relationship related events
 export type RelationshipEventType = 
@@ -72,7 +78,8 @@ export type NavigationEventType =
 // Auth events
 export type AuthEventType = 
   | 'auth:signed-in'
-  | 'auth:signed-out';
+  | 'auth:signed-out'
+  | 'auth:state-change';  // Added missing event
 
 // Note events
 export type NoteEventType = 
@@ -81,7 +88,11 @@ export type NoteEventType =
   | 'note:delete'
   | 'note:create-from-habit'
   | 'note:create-from-voice'
-  | 'journal:open';
+  | 'journal:open'
+  | 'note:view'  // Added missing event
+  | 'note:deleted'  // Added missing event
+  | 'note:format'  // Added missing event
+  | 'note:format-complete';  // Added missing event
 
 // Tag events
 export type TagEventType = 
@@ -91,6 +102,10 @@ export type TagEventType =
   | 'tag:link'
   | 'tag:unlink'
   | 'tags:force-update';
+
+// Quote events
+export type QuoteEventType = 
+  | 'quote:link-task';  // Added missing event
 
 // Union of all event types
 export type AllEventTypes = 
@@ -102,24 +117,26 @@ export type AllEventTypes =
   | NavigationEventType
   | AuthEventType
   | NoteEventType
-  | TagEventType;
+  | TagEventType
+  | QuoteEventType;  // Added missing category
 
 // Event payload types mapped to event names
 export interface EventPayloads {
   // Timer events
   'timer:start': { taskName: string; duration: number; currentTime?: number };
   'timer:pause': { taskName: string; timeLeft: number; metrics?: TimerStateMetrics };
-  'timer:resume': { taskName: string; timeLeft: number; metrics?: TimerStateMetrics };
+  'timer:resume': { taskName: string; timeLeft: number; currentTime?: number; metrics?: TimerStateMetrics };
   'timer:reset': { taskName: string; duration?: number };
   'timer:complete': { taskName: string; metrics: TimerStateMetrics };
   'timer:tick': { taskName: string; timeLeft: number; remaining?: number };
   'timer:init': { taskName: string; duration: number };
   'timer:set-task': Task | { id: string; name: string };
-  'timer:task-set': { taskId: string; taskName: string };
+  'timer:task-set': { taskId: string; taskName: string; duration?: number };
   'timer:state-update': { isRunning: boolean; secondsRemaining: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes?: boolean };
   'timer:close': { taskName: string };
+  'timer:metrics-update': { taskName: string; metrics: Partial<TimerStateMetrics> };
   
   // Task events
   'task:create': Task;
@@ -128,6 +145,7 @@ export interface EventPayloads {
   'task:complete': { taskId: string; metrics?: TaskMetrics };
   'task:dismiss': { taskId: string; habitId: string; date: string };
   'task:reload': Record<string, never>;
+  'task:select': string;
   
   // Habit events
   'habit:complete': { habitId: string; date: string };
@@ -138,9 +156,13 @@ export interface EventPayloads {
   'habit:schedule': { habitId: string; templateId: string; name: string; duration: number; date: string; metricType?: string };
   'habit:template-add': string | { id: string; [key: string]: any };
   'habit:template-update': { templateId: string; [key: string]: any };
-  'habit:template-delete': { templateId: string };
+  'habit:template-delete': { templateId: string; suppressToast?: boolean; isOriginatingAction?: boolean };
   'habit:custom-template-delete': { templateId: string };
   'habits:check-pending': Record<string, never>;
+  'habit:select': string;
+  'habit:dismissed': { habitId: string; date: string };
+  'habit:task-deleted': { habitId: string; date: string };
+  'habit:journal-deleted': { habitId: string; date: string };
   
   // Relationship events
   'relationship:create': { sourceId: string; sourceType: string; targetId: string; targetType: string; relationType: string };
@@ -158,16 +180,21 @@ export interface EventPayloads {
   'page:timer-ready': { timestamp: string };
   
   // Auth events
-  'auth:signed-in': { userId: string };
+  'auth:signed-in': { userId: string; user?: any };
   'auth:signed-out': Record<string, never>;
+  'auth:state-change': { user: any };
   
   // Note events
   'note:create': { id: string; title: string; content: string };
   'note:update': { id: string; updates: any };
   'note:delete': { id: string };
-  'note:create-from-habit': { habitId: string; habitName: string; templateId?: string };
+  'note:create-from-habit': { habitId: string; habitName: string; description?: string; templateId?: string; content?: string };
   'note:create-from-voice': { audioUrl: string; transcript?: string };
   'journal:open': { habitId: string; habitName: string; description?: string; templateId?: string };
+  'note:view': { noteId: string };
+  'note:deleted': { noteId: string };
+  'note:format': { noteId: string; action: string };
+  'note:format-complete': { noteId: string };
   
   // Tag events
   'tag:create': { name: string; color?: string };
@@ -177,6 +204,13 @@ export interface EventPayloads {
   'tag:unlink': { tagId: string; entityId: string };
   'tags:force-update': { timestamp: string };
   
+  // Quote events
+  'quote:link-task': { quoteId: string; taskId: string };
+  
   // Add any other event types and their payloads here
   [key: string]: any;
 }
+
+// Export types for core entities
+export type EntityType = 'task' | 'habit' | 'note' | 'tag' | 'template' | 'quote' | 'relationship';
+

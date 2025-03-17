@@ -1,11 +1,9 @@
 
 import React from "react";
+import { TimerCompactView } from "./TimerCompactView";
+import { TimerExpandedView } from "./TimerExpandedView";
+import { TimerExpandedViewRef, Quote, SoundOption } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
-import { TimerExpandedView, TimerExpandedViewRef } from "./TimerExpandedView";
-import { MainTimerView } from "./MainTimerView";
-import { SoundOption } from "@/types/timer";
-import { eventManager } from "@/lib/events/EventManager";
-import { Quote } from "@/types/timer";
 
 interface TimerRendererProps {
   isExpanded: boolean;
@@ -17,18 +15,18 @@ interface TimerRendererProps {
   internalMinutes: number;
   setInternalMinutes: (minutes: number) => void;
   selectedSound: SoundOption;
-  setSelectedSound: (sound: SoundOption) => void;
+  setSelectedSound: React.Dispatch<React.SetStateAction<SoundOption>>;
   testSound: () => void;
   isLoadingAudio: boolean;
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
   expandedViewRef: React.RefObject<TimerExpandedViewRef>;
   handleCloseTimer: () => void;
-  favorites: Quote[];
-  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
   showConfirmation: boolean;
   setShowConfirmation: (show: boolean) => void;
   handleAddTimeAndContinue: () => void;
-  handleComplete: () => Promise<void>; // Keep as Promise<void>
+  handleComplete: () => Promise<void>;
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
 export const TimerRenderer: React.FC<TimerRendererProps> = ({
@@ -37,7 +35,6 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
   timerCircleProps,
   timerControlsProps,
   metrics,
-  showCompletion,
   internalMinutes,
   setInternalMinutes,
   selectedSound,
@@ -48,77 +45,54 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
   expandedViewRef,
   handleCloseTimer,
   favorites,
-  setFavorites,
-  showConfirmation,
-  setShowConfirmation,
-  handleAddTimeAndContinue,
-  handleComplete,
+  setFavorites
 }) => {
-  // Don't show anything if the timer is completed and we're in completion view
-  if (showCompletion) {
-    return null;
-  }
+  const handleMinutesChange = (minutes: number) => {
+    setInternalMinutes(minutes);
+  };
 
-  return (
-    <div className="relative">
-      {/* Main timer view (collapsed state) - hide when fully expanded */}
-      <div 
-        className={`transition-all duration-500 ${
-          isExpanded 
-            ? 'opacity-0 pointer-events-none absolute inset-0 z-0 hidden' 
-            : 'opacity-100 z-10'
-        }`}
-      >
-        <MainTimerView
-          isExpanded={isExpanded}
-          setIsExpanded={() => eventManager.emit('timer:expand', { taskName })}
-          showCompletion={showCompletion}
-          taskName={taskName}
-          timerCircleProps={timerCircleProps}
-          timerControlsProps={timerControlsProps}
-          metrics={metrics}
-          internalMinutes={internalMinutes}
-          handleMinutesChange={setInternalMinutes}
-          selectedSound={selectedSound}
-          setSelectedSound={(sound: SoundOption) => setSelectedSound(sound)}
-          testSound={testSound}
-          isLoadingAudio={isLoadingAudio}
-          updateMetrics={updateMetrics}
-          expandedViewRef={expandedViewRef}
-          handleCloseTimer={handleCloseTimer}
-          favorites={favorites}
-          setFavorites={setFavorites}
-          showConfirmation={showConfirmation}
-          setShowConfirmation={setShowConfirmation}
-          handleAddTimeAndContinue={handleAddTimeAndContinue}
-          handleComplete={handleComplete} // Already Promise<void>
-        />
-      </div>
+  const handleLike = () => {
+    const currentFavorites = metrics.favoriteQuotes || [];
+    updateMetrics({
+      favoriteQuotes: [...currentFavorites, "New favorite quote"]
+    });
+  };
 
-      {/* Expanded timer view (fullscreen state) - only rendered when expanded */}
-      {isExpanded && (
-        <div className="fixed inset-0 w-full h-full bg-background/95 backdrop-blur-sm z-[9999]">
-          <TimerExpandedView
-            ref={expandedViewRef}
-            taskName={taskName}
-            timerCircleProps={timerCircleProps}
-            timerControlsProps={{
-              ...timerControlsProps,
-              size: "large"
-            }}
-            metrics={metrics}
-            onClose={() => eventManager.emit('timer:collapse', { taskName, saveNotes: true })}
-            onLike={() => {
-              const currentFavorites = Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [];
-              updateMetrics({ 
-                favoriteQuotes: [...currentFavorites, "New quote"]
-              });
-            }}
-            favorites={favorites}
-            setFavorites={setFavorites}
-          />
-        </div>
-      )}
-    </div>
+  return isExpanded ? (
+    <TimerExpandedView
+      ref={expandedViewRef}
+      taskName={taskName}
+      timerCircleProps={timerCircleProps}
+      timerControlsProps={timerControlsProps}
+      metrics={metrics}
+      internalMinutes={internalMinutes}
+      handleMinutesChange={handleMinutesChange}
+      selectedSound={selectedSound}
+      onSoundChange={setSelectedSound}
+      onTestSound={testSound}
+      isLoadingAudio={isLoadingAudio}
+      onCollapse={() => expandedViewRef.current?.collapse()}
+      onLike={handleLike}
+      handleCloseTimer={handleCloseTimer}
+      favorites={favorites}
+      setFavorites={setFavorites}
+    />
+  ) : (
+    <TimerCompactView
+      taskName={taskName}
+      timerCircleProps={timerCircleProps}
+      timerControlsProps={timerControlsProps}
+      metrics={metrics}
+      internalMinutes={internalMinutes}
+      handleMinutesChange={handleMinutesChange}
+      selectedSound={selectedSound}
+      onSoundChange={setSelectedSound}
+      onTestSound={testSound}
+      isLoadingAudio={isLoadingAudio}
+      onExpand={() => expandedViewRef.current?.expand()}
+      onLike={handleLike}
+      favorites={favorites}
+      setFavorites={setFavorites}
+    />
   );
 };

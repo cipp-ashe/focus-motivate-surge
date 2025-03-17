@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -50,7 +49,7 @@ export const useTimerToggle = ({
       
       // Determine if this is a resume or a fresh start
       if (metrics.isPaused) {
-        // Resume from pause - emit resume event
+        // Resume from pause - emit resume event with corrected payload
         console.log(`Resuming timer for ${taskName} with time left: ${timeLeft}`);
         
         // Update metrics to indicate no longer paused
@@ -62,7 +61,8 @@ export const useTimerToggle = ({
         eventManager.emit('timer:resume', { 
           taskName, 
           timeLeft,
-          currentTime: Date.now()
+          currentTime: Date.now(),
+          metrics
         });
       } else {
         // Fresh start - emit start event

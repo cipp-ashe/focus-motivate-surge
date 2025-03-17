@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
   const hasJournalEntry = task.journalEntry && task.journalEntry.trim().length > 0;
   const hasChecklist = task.checklistItems && task.checklistItems.length > 0;
   const hasImage = task.imageUrl && task.imageUrl.trim().length > 0;
-  const hasAudio = task.audioUrl && task.audioUrl.trim().length > 0;
+  const hasAudio = task.voiceNoteUrl && task.voiceNoteUrl.trim().length > 0;
 
   // Handle dropdown actions
   const handleAction = (e: React.MouseEvent<HTMLDivElement>, actionType: string) => {

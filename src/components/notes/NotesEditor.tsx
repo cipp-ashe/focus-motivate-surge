@@ -128,9 +128,12 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     console.log('Toolbar action detected:', action);
     setIsToolbarAction(true);
     
-    // Emit the format event for note formatting
+    // Emit the format event for note formatting, now using a properly defined event type
     if (selectedNote) {
-      eventManager.emit('note:format', { noteId: selectedNote.id, action });
+      eventManager.emit('note:format', { 
+        noteId: selectedNote.id, 
+        action 
+      });
     }
     
     if (toolbarActionTimeoutRef.current) {
@@ -142,9 +145,11 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       console.log('Resetting toolbar action flag');
       setIsToolbarAction(false);
       
-      // Signal that formatting is complete
+      // Signal that formatting is complete with updated event type
       if (selectedNote) {
-        eventManager.emit('note:format-complete', { noteId: selectedNote.id });
+        eventManager.emit('note:format-complete', { 
+          noteId: selectedNote.id 
+        });
       }
     }, 3000); // Extended to 3 seconds for better safety with complex formatting
   };

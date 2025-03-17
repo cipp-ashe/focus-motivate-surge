@@ -1,117 +1,91 @@
 
 import React from "react";
-import { TimerCircle } from "../components/TimerCircle";
-import { TimerControls } from "../components/TimerControls";
-import { TimerMinutesInput } from "../components/TimerMinutesInput";
-import { TimerTaskDisplay } from "../components/TimerTaskDisplay";
-import { TimerSoundSelector } from "../components/TimerSoundSelector";
-import { TimerMetrics } from "../TimerMetrics";
-import { TimerQuote } from "../components/TimerQuote";
-import { Card } from "@/components/ui/card";
-import { SoundOption } from "@/types/timer";
-import { TimerStateMetrics } from "@/types/metrics";
-import { Quote } from "@/types/timer";
 import { Button } from "@/components/ui/button";
-import { ArrowUp } from "lucide-react";
+import { TimerCircle } from "../TimerCircle";
+import { TimerControls } from "../controls/TimerControls";
+import { MinutesInput } from "@/components/minutes/MinutesInput";
+import { TimerHeader } from "../TimerHeader";
+import { SoundSelector } from "@/components/SoundSelector";
+import { Card, CardContent } from "@/components/ui/card";
+import { QuoteDisplay } from "@/components/quotes/QuoteDisplay";
+import { TimerStateMetrics } from "@/types/metrics";
+import { Quote, SoundOption } from "@/types/timer";
 
-interface TimerCompactViewProps {
-  isExpanded: boolean;
-  setIsExpanded: () => void;
-  showCompletion: boolean;
+export interface TimerCompactViewProps {
+  taskName: string;
   timerCircleProps: any;
   timerControlsProps: any;
+  metrics: TimerStateMetrics;
   internalMinutes: number;
   handleMinutesChange: (minutes: number) => void;
-  taskName: string;
-  metrics: TimerStateMetrics;
-  isRunning: boolean;
   selectedSound: SoundOption;
-  setSelectedSound: (sound: SoundOption) => void;
-  testSound: () => void;
+  onSoundChange: (sound: SoundOption) => void;
+  onTestSound: () => void;
   isLoadingAudio: boolean;
-  setShowConfirmation: (show: boolean) => void;
-  favorites: Quote[];
-  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
+  onExpand: () => void;
+  onLike: () => void;
+  favorites?: Quote[];
+  setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
 export const TimerCompactView: React.FC<TimerCompactViewProps> = ({
-  isExpanded,
-  setIsExpanded,
-  showCompletion,
+  taskName,
   timerCircleProps,
   timerControlsProps,
+  metrics,
   internalMinutes,
   handleMinutesChange,
-  taskName,
-  metrics,
-  isRunning,
   selectedSound,
-  setSelectedSound,
-  testSound,
+  onSoundChange,
+  onTestSound,
   isLoadingAudio,
-  setShowConfirmation,
+  onExpand,
+  onLike,
   favorites,
-  setFavorites,
+  setFavorites
 }) => {
-  // Don't render if expanded or in completion state
-  if (isExpanded || showCompletion) {
-    return null;
-  }
-
   return (
-    <div className="flex flex-col gap-4 py-2 px-4">
-      <div className="flex items-center">
-        <TimerTaskDisplay
-          taskName={taskName}
-          className="flex-1 text-xl font-semibold mt-2"
-        />
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={setIsExpanded}
-          title="Expand timer"
-          className="ml-2"
-        >
-          <ArrowUp className="h-4 w-4" />
-          <span className="sr-only">Expand</span>
-        </Button>
-      </div>
+    <CardContent className="p-4">
+      <div className="flex flex-col items-center gap-4">
+        <TimerHeader taskName={taskName} onCloseTimer={() => {}} />
+        
+        <div className="flex flex-col items-center w-full gap-4">
+          <TimerCircle {...timerCircleProps} />
+          
+          <div className="flex flex-col items-center gap-3 w-full">
+            <TimerControls {...timerControlsProps} />
+            
+            <div className="flex flex-col items-center gap-2 w-full">
+              <div className="flex items-center justify-center w-full gap-2">
+                <MinutesInput 
+                  minutes={Math.floor(internalMinutes)} 
+                  onMinutesChange={handleMinutesChange}
+                  minMinutes={1}
+                  maxMinutes={120}
+                />
 
-      <div className="flex flex-col md:flex-row gap-4 items-center">
-        <div className="w-full md:w-auto flex-1">
-          <TimerCircle
-            size={200}
-            strokeWidth={12}
-            className="mx-auto"
-            {...timerCircleProps}
-          />
-        </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onExpand}
+                  className="h-8"
+                >
+                  Expand
+                </Button>
+              </div>
+              
+              <SoundSelector
+                selectedSound={selectedSound}
+                onSoundChange={onSoundChange}
+                onTestSound={onTestSound}
+                isLoadingAudio={isLoadingAudio}
+              />
+            </div>
+          </div>
 
-        <div className="w-full md:w-auto flex flex-col gap-3 flex-1">
-          <Card className="p-4 bg-muted/40">
-            <TimerMinutesInput
-              value={internalMinutes}
-              onChange={handleMinutesChange}
-              disabled={isRunning}
-            />
-          </Card>
-
-          <TimerControls size="medium" {...timerControlsProps} />
-
-          <TimerSoundSelector
-            selectedSound={selectedSound}
-            setSelectedSound={setSelectedSound}
-            testSound={testSound}
-            isLoadingAudio={isLoadingAudio}
-          />
+          <QuoteDisplay onLike={onLike} />
         </div>
       </div>
-
-      <Card className="p-4 bg-muted/40">
-        <TimerQuote favorites={favorites} setFavorites={setFavorites} />
-      </Card>
-
-      <TimerMetrics metrics={metrics} taskName={taskName} />
-    </div>
+    </CardContent>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Timer } from './Timer';
 import { EmptyTimerState } from './EmptyTimerState';
@@ -50,11 +49,11 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
       if (task.id) {
         selectTask(task);
         
-        // Also emit event for other components listening
+        // Also emit event for other components listening - fixed payload
         eventManager.emit('timer:task-set', {
           taskId: task.id,
           taskName: task.name,
-          duration: task.duration || 1500
+          duration: task.duration || 1500  // Duration is now a valid property
         });
       }
     };
@@ -104,9 +103,11 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
       {selectedTaskState ? (
         <Timer 
           key={selectedTaskState.id}
-          task={selectedTaskState}
+          duration={selectedTaskState.duration || 1500}
+          taskName={selectedTaskState.name}
           onComplete={(metrics) => handleTaskCompleted(selectedTaskState.id, metrics)}
-          onReset={() => handleTaskReset(selectedTaskState.id)}
+          onAddTime={() => handleTaskReset(selectedTaskState.id)}
+          onDurationChange={undefined}
           favorites={favorites}
           setFavorites={setFavorites}
         />

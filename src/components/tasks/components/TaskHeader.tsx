@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { TaskActionButton } from './TaskActionButton';
-import { formatTime } from '@/utils/dateUtils';
+import { formatTime } from '@/lib/utils/dateUtils';
 
 interface TaskHeaderProps {
   task: Task;
