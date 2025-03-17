@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDataInitialization } from '@/hooks/data/useDataInitialization';
 import { toast } from 'sonner';
@@ -7,6 +7,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DashboardCardGrid from '@/components/dashboard/DashboardCardGrid';
 import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from 'react-error-boundary';
+import { logError } from '@/utils/errorHandler';
 
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -15,22 +16,54 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
     <details className="text-sm text-gray-700 dark:text-gray-300 mb-4">
       <summary>Technical Details</summary>
       <p className="mt-1">{error.message}</p>
+      {error.stack && (
+        <pre className="mt-2 p-2 bg-black/10 dark:bg-white/10 rounded text-xs overflow-auto">
+          {error.stack}
+        </pre>
+      )}
     </details>
     <Button onClick={resetErrorBoundary}>Try Again</Button>
   </div>
 );
 
 const DashboardContent: React.FC = () => {
-  const { isInitialized, error, clearStorage } = useDataInitialization();
+  const [loading, setLoading] = useState(true);
+  const { isInitialized, error, clearStorage, showClearButton } = useDataInitialization();
   
   useEffect(() => {
+    console.log("Dashboard mounting, initialization status:", { isInitialized, error });
+    
     if (error) {
-      console.error('Initialization error:', error);
-      toast.error('Failed to initialize application: ' + error);
+      logError('Dashboard', 'Failed to initialize application', error);
+      toast.error('Failed to initialize application');
     }
+    
+    // Set a timeout to show content even if initialization takes too long
+    const timer = setTimeout(() => {
+      setLoading(false);
+      console.log("Dashboard forced to show due to timeout");
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, [error]);
   
-  if (!isInitialized && error) {
+  useEffect(() => {
+    if (isInitialized) {
+      setLoading(false);
+      console.log("Dashboard initialized successfully");
+    }
+  }, [isInitialized]);
+  
+  if (loading && !isInitialized && !error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="mt-4">Initializing application...</p>
+      </div>
+    );
+  }
+  
+  if (error) {
     return (
       <div className="space-y-4">
         <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -62,10 +95,11 @@ const DashboardContent: React.FC = () => {
         <DashboardCardGrid />
       </ErrorBoundary>
       
-      {!isInitialized && !error && (
-        <div className="mt-8 flex flex-col items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="mt-4">Initializing application...</p>
+      {showClearButton && (
+        <div className="mt-4">
+          <Button variant="outline" onClick={clearStorage} size="sm">
+            Reset Application Data
+          </Button>
         </div>
       )}
     </div>
@@ -73,12 +107,17 @@ const DashboardContent: React.FC = () => {
 };
 
 const IndexPage: React.FC = () => {
+  console.log("Rendering IndexPage component");
+  
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onReset={() => {
-        // Reset the state when the error boundary is reset
+        console.log("Error boundary reset - reloading page");
         window.location.reload();
+      }}
+      onError={(error) => {
+        logError('IndexPage', 'Error caught by boundary', error);
       }}
     >
       <DashboardLayout>
