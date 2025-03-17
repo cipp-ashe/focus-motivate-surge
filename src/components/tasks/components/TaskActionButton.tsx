@@ -25,10 +25,10 @@ interface TaskActionButtonProps {
   onTaskAction: (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => void;
   /** Optional dialog openers for specific task types */
   dialogOpeners?: {
-    checklist: (taskId: string, taskName: string, items: any[]) => void;
-    journal: (taskId: string, taskName: string, entry: string) => void;
-    screenshot: (imageUrl: string, taskName: string) => void;
-    voicenote: (taskId: string, taskName: string) => void;
+    checklist?: (taskId: string, taskName: string, items: any[]) => void;
+    journal?: (taskId: string, taskName: string, entry: string) => void;
+    screenshot?: (imageUrl: string, taskName: string) => void;
+    voicenote?: (taskId: string, taskName: string) => void;
   };
   /** ID of the task currently being edited, if any */
   editingTaskId?: string | null;
@@ -80,7 +80,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
     setIsOpen(false);
     
     // Special handling for timer tasks
-    if (task.taskType === 'timer' && (actionType === 'open' || actionType === 'timer')) {
+    if ((task.taskType === 'timer' || task.taskType === 'focus') && (actionType === 'open' || actionType === 'timer')) {
       console.log(`Timer action triggered for task: ${task.id}`);
       
       // First navigate to the timer route if needed
@@ -126,7 +126,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px] bg-background/95 backdrop-blur-sm border-border/50">
         <DropdownMenuItem onClick={(e) => handleButtonClick(e as any, 'open')}>
-          {task.taskType === 'timer' && <Clock className="mr-2 h-4 w-4" />}
+          {(task.taskType === 'timer' || task.taskType === 'focus') && <Clock className="mr-2 h-4 w-4" />}
           {task.taskType === 'screenshot' && <Image className="mr-2 h-4 w-4" />}
           {task.taskType === 'journal' && <FileText className="mr-2 h-4 w-4" />}
           {task.taskType === 'checklist' && <List className="mr-2 h-4 w-4" />}

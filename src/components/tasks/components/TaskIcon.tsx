@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TaskType } from '@/types/tasks';
-import { Timer, FileText, BookOpen, CheckSquare, Image, Mic } from 'lucide-react';
+import { Timer, FileText, BookOpen, CheckSquare, Image, Mic, Focus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -28,7 +28,8 @@ const taskTypeColors: Record<TaskType, string> = {
   journal: 'text-amber-400',
   checklist: 'text-cyan-400',
   screenshot: 'text-blue-400',
-  voicenote: 'text-rose-400'
+  voicenote: 'text-rose-400',
+  focus: 'text-green-400'
 };
 
 /**
@@ -40,7 +41,8 @@ const taskTypeHoverColors: Record<TaskType, string> = {
   journal: 'group-hover:text-amber-600',
   checklist: 'group-hover:text-cyan-600',
   screenshot: 'group-hover:text-blue-600',
-  voicenote: 'group-hover:text-rose-600'
+  voicenote: 'group-hover:text-rose-600',
+  focus: 'group-hover:text-green-600'
 };
 
 /**
@@ -74,6 +76,8 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
       return <Image className={cn(colorClass, hoverColorClass, className)} size={size} />;
     case 'voicenote':
       return <Mic className={cn(colorClass, hoverColorClass, className)} size={size} />;
+    case 'focus':
+      return <Timer className={cn(colorClass, hoverColorClass, className)} size={size} />;
     case 'regular':
     default:
       return <FileText className={cn(colorClass, hoverColorClass, className)} size={size} />;

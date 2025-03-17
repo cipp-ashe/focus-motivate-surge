@@ -27,6 +27,7 @@ interface TaskTypeSelectorProps {
 const taskTypes: Array<{ type: TaskType; label: string }> = [
   { type: 'regular', label: 'Regular Task' },
   { type: 'timer', label: 'Focused Timer' },
+  { type: 'focus', label: 'Focus Session' },
   { type: 'journal', label: 'Journal Entry' },
   { type: 'checklist', label: 'Checklist' },
   { type: 'screenshot', label: 'Screenshot' },
