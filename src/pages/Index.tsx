@@ -3,7 +3,7 @@ import React from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarCheck, BookHeart, Timer, ScrollText } from 'lucide-react';
+import { ArrowRight, CalendarCheck, BookHeart, Timer, ScrollText, Image, Mic } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -68,6 +68,36 @@ const Index = () => {
               <div className="flex-1">
                 <h2 className="text-xl font-semibold">Notes</h2>
                 <p className="text-muted-foreground text-sm">Capture your thoughts</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+        
+        <Link to="/screenshots">
+          <Card className="p-6 hover:shadow-md transition-all card-hover-effect">
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/10 p-3 rounded-full">
+                <Image className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold">Screenshots</h2>
+                <p className="text-muted-foreground text-sm">Save visual references</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+        
+        <Link to="/voice-notes">
+          <Card className="p-6 hover:shadow-md transition-all card-hover-effect">
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/10 p-3 rounded-full">
+                <Mic className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold">Voice Notes</h2>
+                <p className="text-muted-foreground text-sm">Record voice memos</p>
               </div>
               <ArrowRight className="w-5 h-5 text-muted-foreground" />
             </div>

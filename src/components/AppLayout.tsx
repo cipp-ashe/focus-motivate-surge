@@ -78,29 +78,29 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background z-10">
           <div className="flex justify-around py-2">
-            <Link to="/" className="p-2 flex flex-col items-center">
-              <Home className="w-5 h-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Home</span>
+            <Link to="/" className={`p-2 flex flex-col items-center ${isActive('/')}`}>
+              <Home className="w-5 h-5" />
+              <span className="text-xs">Home</span>
             </Link>
-            <Link to="/tasks" className="p-2 flex flex-col items-center">
-              <CalendarCheck className="w-5 h-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Tasks</span>
+            <Link to="/tasks" className={`p-2 flex flex-col items-center ${isActive('/tasks')}`}>
+              <CalendarCheck className="w-5 h-5" />
+              <span className="text-xs">Tasks</span>
             </Link>
-            <Link to="/timer" className="p-2 flex flex-col items-center">
-              <Timer className="w-5 h-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Timer</span>
+            <Link to="/timer" className={`p-2 flex flex-col items-center ${isActive('/timer')}`}>
+              <Timer className="w-5 h-5" />
+              <span className="text-xs">Timer</span>
             </Link>
-            <Link to="/habits" className="p-2 flex flex-col items-center">
-              <BookHeart className="w-5 h-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Habits</span>
+            <Link to="/notes" className={`p-2 flex flex-col items-center ${isActive('/notes')}`}>
+              <ScrollText className="w-5 h-5" />
+              <span className="text-xs">Notes</span>
             </Link>
-            <Link to="/notes" className="p-2 flex flex-col items-center">
-              <ScrollText className="w-5 h-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Notes</span>
+            <Link to="/screenshots" className={`p-2 flex flex-col items-center ${isActive('/screenshots')}`}>
+              <Image className="w-5 h-5" />
+              <span className="text-xs">Screenshots</span>
             </Link>
-            <Link to="/settings" className="p-2 flex flex-col items-center">
-              <Settings className="w-5 h-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Settings</span>
+            <Link to="/voice-notes" className={`p-2 flex flex-col items-center ${isActive('/voice-notes')}`}>
+              <Mic className="w-5 h-5" />
+              <span className="text-xs">Voice</span>
             </Link>
           </div>
         </div>
