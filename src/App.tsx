@@ -7,7 +7,7 @@ import Auth from '@/pages/Auth';
 import AuthCallback from '@/pages/AuthCallback';
 import Layout from '@/components/layout/Layout';
 import IndexPage from '@/pages/Index';
-import TaskPage from '@/pages/Tasks';
+import TasksPage from '@/pages/TasksPage';
 import TimerPage from '@/pages/Timer';
 import NotesPage from '@/pages/Notes';
 import HabitsPage from '@/pages/Habits';
@@ -33,7 +33,6 @@ function App() {
             <NoteProvider>
               <HabitProvider>
                 <VoiceNotesProvider>
-                  {/* Removed the duplicate Router component */}
                   <Routes>
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
@@ -44,7 +43,7 @@ function App() {
                       </RequireAuth>
                     }>
                       <Route index element={<IndexPage />} />
-                      <Route path="tasks" element={<TaskPage />} />
+                      <Route path="tasks" element={<TasksPage />} />
                       <Route path="timer" element={<TimerPage />} />
                       <Route path="notes" element={<NotesPage />} />
                       <Route path="habits" element={<HabitsPage />} />

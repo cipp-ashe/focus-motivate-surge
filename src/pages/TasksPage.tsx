@@ -11,6 +11,7 @@ import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
 import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
 import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
+import { toast } from 'sonner';
 
 const TasksPage: React.FC = () => {
   const taskContext = useTaskContext();
@@ -30,6 +31,12 @@ const TasksPage: React.FC = () => {
   const [checklistItems, setChecklistItems] = useState<any[]>([]);
   const [journalEntry, setJournalEntry] = useState<string>('');
   const [screenshotUrl, setScreenshotUrl] = useState<string>('');
+  
+  // Debug: Log task context on component mount
+  useEffect(() => {
+    console.log("TasksPage mounted, taskContext:", taskContext);
+    console.log("Tasks available:", tasks);
+  }, [taskContext, tasks]);
   
   // Update task counts
   const [taskCounts, setTaskCounts] = useState({
@@ -57,6 +64,7 @@ const TasksPage: React.FC = () => {
     };
     
     setTaskCounts(counts);
+    console.log("Task counts updated:", counts);
   }, [tasks]);
   
   // Filter tasks based on active tab
@@ -70,33 +78,56 @@ const TasksPage: React.FC = () => {
   // Dialog openers
   const dialogOpeners = {
     checklist: (taskId: string, taskName: string, items: any[]) => {
+      console.log("Opening checklist dialog:", { taskId, taskName, items });
       setActiveTaskId(taskId);
       setActiveTaskName(taskName);
       setChecklistItems(items || []);
       setChecklistDialogOpen(true);
+      toast.info(`Opening checklist for: ${taskName}`);
     },
     journal: (taskId: string, taskName: string, entry: string) => {
+      console.log("Opening journal dialog:", { taskId, taskName, entry });
       setActiveTaskId(taskId);
       setActiveTaskName(taskName);
       setJournalEntry(entry || '');
       setJournalDialogOpen(true);
+      toast.info(`Opening journal for: ${taskName}`);
     },
     screenshot: (imageUrl: string, taskName: string) => {
+      console.log("Opening screenshot dialog:", { imageUrl, taskName });
       setScreenshotUrl(imageUrl);
       setActiveTaskName(taskName);
       setScreenshotDialogOpen(true);
+      toast.info(`Viewing image for: ${taskName}`);
     },
     voicenote: (taskId: string, taskName: string) => {
+      console.log("Opening voice note dialog:", { taskId, taskName });
       setActiveTaskId(taskId);
       setActiveTaskName(taskName);
       setVoiceNoteDialogOpen(true);
+      toast.info(`Recording for: ${taskName}`);
     }
   };
   
   // Handle tab change
   const handleTabChange = (value: string) => {
+    console.log("Tab changed to:", value);
     setActiveTab(value);
   };
+  
+  // If no task context, show loading or error
+  if (!taskContext) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          </div>
+          <p className="text-muted-foreground">Loading task context...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen">
