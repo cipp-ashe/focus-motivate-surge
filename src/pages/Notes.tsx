@@ -4,6 +4,7 @@ import { Notes } from '@/components/notes/Notes';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from "@/hooks/useTheme";
+import { NoteContextProvider } from '@/contexts/notes/hooks';
 
 export default function NotesPage() {
   const { isDark, toggleTheme } = useTheme();
@@ -56,7 +57,9 @@ export default function NotesPage() {
         </div>
 
         <div className="bg-card/90 backdrop-blur-md shadow-lg rounded-lg border border-primary/20 p-6">
-          <Notes />
+          <NoteContextProvider>
+            <Notes />
+          </NoteContextProvider>
         </div>
       </div>
     </div>

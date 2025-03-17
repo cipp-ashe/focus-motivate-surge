@@ -4,7 +4,7 @@ import { VoiceNote } from '@/types/voiceNotes';
 import { v4 as uuidv4 } from 'uuid';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
-import { AllEventTypes } from '@/types/events';
+import { AllEventTypes, VoiceNoteEventType } from '@/types/events';
 
 // Define state
 export interface VoiceNotesState {
@@ -111,7 +111,7 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const newNote: VoiceNote = {
         id,
         text: state.currentTranscript || 'Voice note (no transcript)',
-        timestamp: new Date().getTime(), // Fix: use number instead of string
+        timestamp: new Date().getTime(),
         audioUrl,
         isComplete: false
       };
@@ -119,8 +119,8 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       dispatch({ type: 'ADD_NOTE', payload: newNote });
       dispatch({ type: 'CLEAR_TRANSCRIPT' });
       
-      // Custom event, not in AllEventTypes - use any to bypass type check
-      eventManager.emit('voice-note:created' as any, { noteId: id });
+      // Emit voice note created event
+      eventManager.emit('voice-note:created' as VoiceNoteEventType, { noteId: id });
       
       return id;
     } catch (error) {
@@ -137,8 +137,8 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
     
     dispatch({ type: 'DELETE_NOTE', payload: id });
-    // Custom event, not in AllEventTypes - use any to bypass type check
-    eventManager.emit('voice-note:deleted' as any, { noteId: id });
+    // Emit voice note deleted event
+    eventManager.emit('voice-note:deleted' as VoiceNoteEventType, { noteId: id });
   }, [state.notes]);
   
   // Toggle recording state
@@ -158,7 +158,7 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const newNote: VoiceNote = {
       id: uuidv4(),
       text,
-      timestamp: new Date().getTime(), // Fix: use number instead of string
+      timestamp: new Date().getTime(),
       isComplete: false
     };
     
@@ -180,7 +180,7 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const createNoteFromVoiceNote = useCallback((voiceNoteId: string) => {
     const voiceNote = state.notes.find(note => note.id === voiceNoteId);
     if (voiceNote) {
-      // Fix: Use proper payload structure for note:create-from-voice event
+      // Emit note:create-from-voice event with the correct payload structure
       eventManager.emit('note:create-from-voice' as AllEventTypes, { 
         audioUrl: voiceNote.audioUrl || '',
         transcript: voiceNote.text

@@ -1,26 +1,15 @@
 
-import { EntityType } from '@/types/core';
+// Type definitions for voice notes
 
 export interface VoiceNote {
   id: string;
   text: string;
-  timestamp: number;
-  isComplete: boolean;
+  timestamp: number; // Changed from string to number
   audioUrl?: string;
-  duration?: number;
-  transcriptionStatus?: 'pending' | 'completed' | 'failed';
+  isComplete: boolean;
 }
 
-export interface VoiceNoteRelationship {
-  entityId: string;
-  entityType: EntityType;
-}
-
-export interface VoiceNoteContextType {
+export interface VoiceNoteState {
   notes: VoiceNote[];
-  addNote: (text: string, audioUrl?: string, duration?: number) => void;
-  deleteNote: (id: string) => void;
-  toggleNoteComplete: (id: string) => void;
-  updateNoteText: (id: string, text: string) => void;
-  createNoteFromVoiceNote?: (voiceNoteId: string) => void;
+  isRecording: boolean;
 }

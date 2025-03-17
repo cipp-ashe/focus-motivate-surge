@@ -38,8 +38,14 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('New task created:', payload);
-          // Fix: Cast payload to ensure required Task properties
-          const taskData = payload.new as Task;
+          // Create a properly typed Task object with required fields
+          const taskData: Task = {
+            id: payload.new.id,
+            name: payload.new.name || 'Untitled Task',
+            completed: payload.new.completed || false,
+            createdAt: payload.new.createdAt || new Date().toISOString(),
+            ...payload.new
+          };
           eventManager.emit('task:create', taskData);
         })
         .on('postgres_changes', {
@@ -74,8 +80,11 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('New template created:', payload);
-          // Fix: Provide the templateId property explicitly
-          eventManager.emit('habit:template-add', { templateId: payload.new.id });
+          // Fix: Use the correct payload format with id field
+          eventManager.emit('habit:template-add', { 
+            id: payload.new.id,
+            templateId: payload.new.id
+          });
         })
         .on('postgres_changes', {
           event: 'UPDATE',
@@ -84,7 +93,12 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('Template updated:', payload);
-          eventManager.emit('habit:template-update', payload.new);
+          // Ensure the payload has a templateId property
+          const updatedTemplate = {
+            ...payload.new,
+            templateId: payload.new.id
+          };
+          eventManager.emit('habit:template-update', updatedTemplate);
         })
         .on('postgres_changes', {
           event: 'DELETE',
@@ -106,7 +120,7 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('New note created:', payload);
-          // Fix: Ensure required properties are present
+          // Ensure the payload includes all required properties
           eventManager.emit('note:create', {
             id: payload.new.id,
             title: payload.new.title || 'Untitled',
