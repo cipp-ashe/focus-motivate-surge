@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { TaskList } from './TaskList';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskTabsList } from './tabs/TaskTabsList';
+import { cn } from '@/lib/utils';
 
 interface UnifiedTaskViewProps {
   activeTasks: Task[];
@@ -68,9 +69,9 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col h-full">
-      {/* Task type filters - ABOVE TABS */}
-      <div className="mb-2">
+    <div className="flex flex-col h-full rounded-lg overflow-hidden bg-card/50 backdrop-blur-sm border border-border/20 shadow-sm">
+      {/* Task type filters */}
+      <div className="flex-none">
         <TaskTabsList 
           taskCounts={taskCounts} 
           activeTaskType={activeTaskType} 
@@ -78,38 +79,46 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
         />
       </div>
       
-      <TabsList className="grid grid-cols-2 mb-2">
-        <TabsTrigger value="active">
-          Active Tasks ({activeTasks.length})
-        </TabsTrigger>
-        <TabsTrigger value="completed">
-          Completed Tasks ({completedTasks.length})
-        </TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="active" className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="p-4">
-            <TaskList
-              tasks={getFilteredTasks()}
-              selectedTaskId={selectedTaskId}
-              dialogOpeners={dialogOpeners}
-            />
-          </div>
-        </ScrollArea>
-      </TabsContent>
-      
-      <TabsContent value="completed" className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="p-4">
-            <TaskList
-              tasks={getFilteredTasks()}
-              selectedTaskId={selectedTaskId}
-              dialogOpeners={dialogOpeners}
-            />
-          </div>
-        </ScrollArea>
-      </TabsContent>
-    </Tabs>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col h-full">
+        <TabsList className="grid grid-cols-2 bg-card/80 border-b border-border/10 rounded-none px-0.5">
+          <TabsTrigger value="active" className={cn(
+            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
+            "data-[state=active]:text-primary font-medium transition-all duration-200"
+          )}>
+            Active Tasks ({activeTasks.length})
+          </TabsTrigger>
+          <TabsTrigger value="completed" className={cn(
+            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
+            "data-[state=active]:text-primary font-medium transition-all duration-200"
+          )}>
+            Completed Tasks ({completedTasks.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="active" className="flex-1 overflow-hidden p-0 m-0 data-[state=active]:border-0">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <TaskList
+                tasks={getFilteredTasks()}
+                selectedTaskId={selectedTaskId}
+                dialogOpeners={dialogOpeners}
+              />
+            </div>
+          </ScrollArea>
+        </TabsContent>
+        
+        <TabsContent value="completed" className="flex-1 overflow-hidden p-0 m-0 data-[state=active]:border-0">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <TaskList
+                tasks={getFilteredTasks()}
+                selectedTaskId={selectedTaskId}
+                dialogOpeners={dialogOpeners}
+              />
+            </div>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
