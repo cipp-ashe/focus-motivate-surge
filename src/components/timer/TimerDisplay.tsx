@@ -24,6 +24,21 @@ export const TimerDisplay = memo(({
     }
   };
 
+  // Enhanced accessibility attributes
+  const a11yAttributes = {
+    role: "button",
+    tabIndex: 0,
+    "aria-label": isRunning ? "Expand timer view" : "Timer display",
+    "aria-live": isRunning ? "polite" : "off" as "polite" | "off",
+    "aria-atomic": "true",
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if ((e.key === 'Enter' || e.key === ' ') && isRunning && onClick) {
+        e.preventDefault();
+        onClick();
+      }
+    }
+  };
+
   return (
     <div 
       className={cn(
@@ -33,9 +48,7 @@ export const TimerDisplay = memo(({
       )}
       onClick={handleClick}
       onTouchEnd={handleClick}
-      role="button"
-      tabIndex={0}
-      aria-label={isRunning ? "Expand timer view" : "Timer display"}
+      {...a11yAttributes}
     >
       <TimerCircle 
         size={size}
@@ -43,7 +56,10 @@ export const TimerDisplay = memo(({
       />
       
       {isRunning && onClick && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div 
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          aria-hidden="true"
+        >
           <Maximize2 className="h-5 w-5 text-primary/80" />
         </div>
       )}

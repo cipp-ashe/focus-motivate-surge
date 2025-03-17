@@ -57,9 +57,11 @@ export const useTimerActions = (
   const resetTimer = useCallback(async (): Promise<void> => {
     if (isLegacyInterface) {
       const { updateTimeLeft, setIsRunning, updateMetrics } = props as TimerActionProps;
+      const legacyProps = props as TimerActionProps;
+      
       console.log("useTimerActions: Resetting timer (legacy)");
       setIsRunning(false);
-      updateTimeLeft((props as TimerActionProps).metrics.expectedTime);
+      updateTimeLeft(legacyProps.metrics.expectedTime);
       updateMetrics({
         startTime: null,
         endTime: null,

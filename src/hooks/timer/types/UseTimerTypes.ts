@@ -28,7 +28,7 @@ export interface UseTimerReturn {
 
 export interface UseTimerActionsProps {
   dispatch: React.Dispatch<TimerAction>;
-  intervalRef: React.MutableRefObject<NodeJS.Timeout | null>;
+  intervalRef?: React.MutableRefObject<NodeJS.Timeout | null>;
 }
 
 export interface UseTimerActionsReturn {

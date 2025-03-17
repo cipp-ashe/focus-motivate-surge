@@ -35,11 +35,11 @@ export const Timer = ({
     );
   }
 
-  // Wrap onComplete to ensure it receives valid metrics
+  // Wrap onComplete to ensure it receives valid metrics and handle errors gracefully
   const handleComplete = React.useCallback((metrics: any) => {
-    logger.debug('Timer', "Timer: handleComplete with metrics:", metrics);
-    
     try {
+      logger.debug('Timer', "Timer: handleComplete with metrics:", metrics);
+      
       // Ensure we have valid metrics with all required fields
       const validatedMetrics = {
         ...metrics,
@@ -61,14 +61,30 @@ export const Timer = ({
     }
   }, [onComplete]);
 
-  // Initialize the timer
-  const timerProps = useTimerInitialization({
-    duration,
-    taskName,
-    onComplete: handleComplete,
-    onAddTime,
-    onDurationChange,
-  });
+  // Error handling for initialization
+  const handleInitializationError = React.useCallback((error: any) => {
+    logger.error('Timer', "Error initializing timer:", error);
+    toast.error("Could not initialize timer. Please try again.");
+  }, []);
+
+  // Initialize the timer with error handling
+  let timerProps; 
+  try {
+    timerProps = useTimerInitialization({
+      duration,
+      taskName,
+      onComplete: handleComplete,
+      onAddTime,
+      onDurationChange,
+    });
+  } catch (error) {
+    logger.error('Timer', "Fatal error in timer initialization:", error);
+    return (
+      <Card className="shadow-md border-border/20 overflow-hidden">
+        <TimerError message="Could not initialize timer" />
+      </Card>
+    );
+  }
 
   return (
     <TimerErrorBoundary>
