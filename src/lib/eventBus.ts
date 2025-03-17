@@ -11,6 +11,10 @@ console.warn(
 // Create a proxy to forward all calls to eventManager
 export const eventBus = new Proxy(eventManager, {
   get(target, prop) {
+    console.warn(
+      `WARNING: Using deprecated eventBus.${String(prop)}. ` +
+      `Please update your code to use eventManager.${String(prop)} directly.`
+    );
     // Forward all property accesses to the target
     return target[prop];
   }

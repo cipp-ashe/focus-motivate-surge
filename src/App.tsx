@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
@@ -32,6 +31,11 @@ function App() {
         console.error("Failed to initialize:", error);
         setInitError(error instanceof Error ? error : new Error('Unknown error during initialization'));
       }
+    }
+    
+    // Initialize event migration tracking in development
+    if (process.env.NODE_ENV === 'development') {
+      trackEventBusUsage();
     }
     
     // Cleanup function

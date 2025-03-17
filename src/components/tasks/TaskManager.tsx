@@ -5,7 +5,6 @@ import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { TaskEventHandler } from './TaskEventHandler';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { eventBus } from '@/lib/eventBus';
 import { toast } from 'sonner';
 
 interface TaskManagerProps {
@@ -35,8 +34,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
     if (addTask) {
       addTask(task);
       
-      // Also emit via both event systems for maximum compatibility
-      eventBus.emit('task:create', task);
+      // Emit via event manager (removed eventBus.emit)
       eventManager.emit('task:create', task);
       
       toast.success(`Task added: ${task.name}`);
@@ -52,8 +50,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       tasks.forEach(task => {
         addTask(task);
         
-        // Also emit via both event systems for maximum compatibility
-        eventBus.emit('task:create', task);
+        // Emit via event manager (removed eventBus.emit)
         eventManager.emit('task:create', task);
       });
       
@@ -102,14 +99,13 @@ const TaskManager: React.FC<TaskManagerProps> = ({
         forceUpdate();
       };
       
-      eventBus.on('timer:task-set', refreshTimerTasks);
+      // Use only eventManager instead of both systems
       eventManager.on('timer:task-set', refreshTimerTasks);
       
       // Immediately trigger a refresh to ensure timer tasks are loaded
       setTimeout(refreshTimerTasks, 200);
       
       return () => {
-        eventBus.off('timer:task-set', refreshTimerTasks);
         eventManager.off('timer:task-set', refreshTimerTasks);
       };
     }
