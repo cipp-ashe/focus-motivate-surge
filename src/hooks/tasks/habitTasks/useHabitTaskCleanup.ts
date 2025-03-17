@@ -24,15 +24,11 @@ export const useHabitTaskCleanup = () => {
       console.log(`Deleting habit task for habit ${habitId} on ${date}`);
       
       // First, emit the habit:task-deleted event with the corrected payload structure
-      const payload: { habitId: string; date: string; taskId?: string } = { 
+      const payload: { habitId: string; date: string; taskId: string } = { 
         habitId, 
-        date
+        date,
+        taskId: taskId || '' // Ensure taskId is always provided
       };
-      
-      // Only add taskId to payload if it's defined
-      if (taskId) {
-        payload.taskId = taskId;
-      }
       
       eventManager.emit('habit:task-deleted', payload);
       

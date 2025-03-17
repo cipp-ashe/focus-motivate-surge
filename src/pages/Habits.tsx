@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { useHabitState } from '@/contexts/habits/HabitContext';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { cn } from '@/lib/utils';
 import { 
@@ -12,6 +11,7 @@ import { useTodaysHabits } from '@/hooks/habits/useTodaysHabits';
 import { useHabitCompletion } from '@/hooks/habits/useHabitCompletion';
 import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
 import { ErrorBoundary } from 'react-error-boundary';
+import { HabitProvider } from '@/contexts/habits/HabitContext';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -29,19 +29,21 @@ const HabitsPage = () => {
   
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <HabitsPanelProvider>
-        <div className="container mx-auto py-4 px-4">
-          <div className="mb-5">
-            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-              Habit Tracker
-            </h1>
+      <HabitProvider>
+        <HabitsPanelProvider>
+          <div className="container mx-auto py-4 px-4">
+            <div className="mb-5">
+              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                Habit Tracker
+              </h1>
+            </div>
+            
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <HabitsContent isMobile={isMobile} />
+            </ErrorBoundary>
           </div>
-          
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <HabitsContent isMobile={isMobile} />
-          </ErrorBoundary>
-        </div>
-      </HabitsPanelProvider>
+        </HabitsPanelProvider>
+      </HabitProvider>
     </ErrorBoundary>
   );
 };

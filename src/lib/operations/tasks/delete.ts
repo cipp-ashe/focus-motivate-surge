@@ -3,8 +3,24 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { getTaskStorage } from '@/lib/storage/taskStorage';
-import { canDeleteTask } from '@/lib/verification/taskVerification';
+import { taskStorage } from '@/lib/storage/taskStorage';
+
+/**
+ * Checks if a task can be deleted based on its relationships and dependencies
+ */
+const canDeleteTask = (task: Task): boolean => {
+  // If no task provided, it cannot be deleted
+  if (!task) return false;
+  
+  // Don't allow deletion of tasks with active dependencies
+  // This is a simple implementation - in a real app, we would check for specific 
+  // relationships that prevent deletion
+  if (task.relationships && task.relationships.isProtected) {
+    return false;
+  }
+  
+  return true;
+};
 
 /**
  * Delete a task by ID
@@ -34,10 +50,10 @@ export const deleteTask = (
   
   try {
     // Get storage instance
-    const storage = getTaskStorage();
+    const storage = taskStorage;
     
     // Try to find the task
-    const task = storage.findTaskById(taskId);
+    const task = storage.getTaskById(taskId);
     if (!task) {
       console.warn(`Task with ID ${taskId} not found for deletion`);
       return false;
@@ -94,4 +110,9 @@ export const deleteTask = (
     }
     return false;
   }
+};
+
+// Create a deleteTaskOperations object for the operations module
+export const deleteTaskOperations = {
+  deleteTask
 };
