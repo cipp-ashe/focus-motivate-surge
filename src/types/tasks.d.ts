@@ -1,9 +1,8 @@
-
 /**
  * Task type enum for type checking
  * Defines the different types of tasks supported by the application
  */
-export type TaskType = 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote';
+export type TaskType = 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote' | 'focus';
 
 /**
  * Task status to track progress

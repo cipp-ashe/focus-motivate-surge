@@ -43,7 +43,7 @@ export const migrateTaskTypes = () => {
  * Check if a taskType is valid according to the TaskType enum
  */
 const isValidTaskType = (taskType: string): taskType is TaskType => {
-  const validTypes: TaskType[] = ['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote'];
+  const validTypes: TaskType[] = ['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'focus'];
   return validTypes.includes(taskType as TaskType);
 };
 
