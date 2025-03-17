@@ -157,7 +157,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <Link to={to} className="block h-full">
+    <Link to={to} className="block h-full group">
       <Card className={cn(
         "transition-all duration-300 h-full",
         "bg-card/80 backdrop-blur-sm border-border/30 card-hover-effect hover:border-primary/20",
@@ -172,7 +172,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
               "rounded-xl p-2.5 flex-shrink-0", 
               "bg-background/50 backdrop-blur-sm shadow-sm border border-border/20"
             )}>
-              <Icon className={cn("w-6 h-6", iconColor)} />
+              <Icon className={cn("w-6 h-6", iconColor)} aria-hidden="true" />
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-semibold mb-1">{title}</h2>
@@ -183,8 +183,8 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
           {metrics && metrics.length > 0 && (
             <div className="mt-auto pt-3 grid grid-cols-2 gap-3 text-sm border-t border-border/10">
               {metrics.map((metric, index) => (
-                <div key={index} className="flex items-center gap-1.5">
-                  <metric.icon className="w-3.5 h-3.5 text-primary/70" />
+                <div key={index} className="flex items-center gap-1.5 bg-background/30 p-1.5 rounded-md">
+                  <metric.icon className="w-3.5 h-3.5 text-primary/70" aria-hidden="true" />
                   <span className="text-muted-foreground">{metric.label}:</span>
                   <span className="font-medium">{metric.value}</span>
                 </div>
@@ -192,8 +192,8 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
             </div>
           )}
           
-          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowRight className="h-4 w-4 text-primary/70" />
+          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <ArrowRight className="h-5 w-5 text-primary" />
           </div>
         </CardContent>
       </Card>
