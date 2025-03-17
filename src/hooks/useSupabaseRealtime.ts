@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase/client';
 import { eventManager } from '@/lib/events/EventManager';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { AllEventTypes, NoteEventType } from '@/lib/events/types';
+import { Task } from '@/types/tasks';
 
 export const useSupabaseRealtime = () => {
   const { user } = useAuth();
@@ -37,7 +38,9 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('New task created:', payload);
-          eventManager.emit('task:create', payload.new);
+          // Fix: Cast payload to ensure required Task properties
+          const taskData = payload.new as Task;
+          eventManager.emit('task:create', taskData);
         })
         .on('postgres_changes', {
           event: 'UPDATE',
@@ -71,7 +74,8 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('New template created:', payload);
-          eventManager.emit('habit:template-add', payload.new.id);
+          // Fix: Provide the templateId property explicitly
+          eventManager.emit('habit:template-add', { templateId: payload.new.id });
         })
         .on('postgres_changes', {
           event: 'UPDATE',
@@ -102,7 +106,12 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('New note created:', payload);
-          eventManager.emit('note:create', payload.new);
+          // Fix: Ensure required properties are present
+          eventManager.emit('note:create', {
+            id: payload.new.id,
+            title: payload.new.title || 'Untitled',
+            content: payload.new.content || ''
+          });
         })
         .on('postgres_changes', {
           event: 'UPDATE',
@@ -111,8 +120,9 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('Note updated:', payload);
+          // Fix: Use proper id property
           eventManager.emit('note:update', { 
-            noteId: payload.new.id, 
+            id: payload.new.id, 
             updates: payload.new 
           });
         })

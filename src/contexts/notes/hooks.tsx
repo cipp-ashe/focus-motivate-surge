@@ -177,9 +177,9 @@ export const useNoteActions = () => {
       dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
     }
     
-    // Emit event for other components
+    // Fix: Use correct payload structure for note:deleted event
     eventManager.emit('note:deleted', { 
-      noteId: id 
+      id 
     });
   }, [dispatch, selected?.id]);
 

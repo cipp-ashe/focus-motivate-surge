@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useReducer, useCallback } 
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { eventManager } from '@/lib/events/EventManager';
+import { AuthEventType } from '@/types/events';
 
 interface AuthState {
   user: User | null;
@@ -57,20 +58,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (session && session.user) {
           dispatch({ type: 'SIGNED_IN', payload: session.user });
           
-          // Fixed payload structure to include userId
-          eventManager.emit('auth:state-change', { 
-            user: session.user,
-            userId: session.user.id
+          // Fix: Use proper payload structure without userId
+          eventManager.emit('auth:state-change' as AuthEventType, { 
+            user: session.user
           });
           
           console.log('User signed in via auth state change', session.user);
         } else {
           dispatch({ type: 'SIGNED_OUT' });
           
-          // Fixed payload structure - only include userId if we have it
-          eventManager.emit('auth:state-change', { 
-            user: null,
-            userId: state.user?.id || null
+          // Fix: Use proper payload structure without userId
+          eventManager.emit('auth:state-change' as AuthEventType, { 
+            user: null
           });
           
           console.log('User signed out via auth state change');
@@ -135,17 +134,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false;
       }
       
-      // Fixed payload structure - include userId if available
-      eventManager.emit('auth:signed-out', { 
-        userId: state.user?.id || null
-      });
+      // Fix: Use correct payload type for auth:signed-out event
+      eventManager.emit('auth:signed-out' as AuthEventType, {});
       
       return true;
     } catch (error) {
       console.error('Unexpected error signing out:', error);
       return false;
     }
-  }, [state.user?.id]);
+  }, []);
 
   const value: AuthContextProps = {
     state,

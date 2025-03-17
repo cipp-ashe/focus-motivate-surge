@@ -1,4 +1,3 @@
-
 // Import and re-export all event types for convenience
 import type { 
   Task, 
@@ -94,6 +93,11 @@ export type NoteEventType =
   | 'note:format'  // Added missing event
   | 'note:format-complete';  // Added missing event
 
+// Voice Note events
+export type VoiceNoteEventType =
+  | 'voice-note:created'
+  | 'voice-note:deleted';
+
 // Tag events
 export type TagEventType = 
   | 'tag:create'
@@ -118,7 +122,8 @@ export type AllEventTypes =
   | AuthEventType
   | NoteEventType
   | TagEventType
-  | QuoteEventType;  // Added missing category
+  | QuoteEventType  // Added missing category
+  | VoiceNoteEventType;  // Added voice note events
 
 // Event payload types mapped to event names
 export interface EventPayloads {
@@ -192,9 +197,13 @@ export interface EventPayloads {
   'note:create-from-voice': { audioUrl: string; transcript?: string };
   'journal:open': { habitId: string; habitName: string; description?: string; templateId?: string };
   'note:view': { noteId: string };
-  'note:deleted': { noteId: string };
+  'note:deleted': { id: string };
   'note:format': { noteId: string; action: string };
   'note:format-complete': { noteId: string };
+  
+  // Voice Note events
+  'voice-note:created': { noteId: string };
+  'voice-note:deleted': { noteId: string };
   
   // Tag events
   'tag:create': { name: string; color?: string };
@@ -213,4 +222,3 @@ export interface EventPayloads {
 
 // Export types for core entities
 export type EntityType = 'task' | 'habit' | 'note' | 'tag' | 'template' | 'quote' | 'relationship';
-
