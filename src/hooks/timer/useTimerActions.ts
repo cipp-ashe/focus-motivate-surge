@@ -26,13 +26,7 @@ export const useTimerActions = (
         isPaused: false
       });
     } else {
-      const { dispatch, intervalRef } = props as UseTimerActionsProps;
-      
-      // Clear any existing interval before starting
-      if (intervalRef?.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      const { dispatch } = props as UseTimerActionsProps;
       
       console.log("useTimerActions: Starting timer (reducer)");
       dispatch({ type: 'START' });
@@ -52,13 +46,7 @@ export const useTimerActions = (
         pausedTimeLeft: timeLeft
       });
     } else {
-      const { dispatch, intervalRef } = props as UseTimerActionsProps;
-      
-      // Clear interval when pausing
-      if (intervalRef?.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      const { dispatch } = props as UseTimerActionsProps;
       
       console.log("useTimerActions: Pausing timer (reducer)");
       dispatch({ type: 'PAUSE' });
@@ -169,13 +157,7 @@ export const useTimerActions = (
         // Return a resolved promise
         return Promise.resolve();
       } else {
-        const { dispatch, intervalRef } = props as UseTimerActionsProps;
-        
-        // Clear any interval when completing
-        if (intervalRef?.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
+        const { dispatch } = props as UseTimerActionsProps;
         
         console.log("useTimerActions: Completing timer (reducer)");
         dispatch({ type: 'COMPLETE' });
@@ -186,14 +168,25 @@ export const useTimerActions = (
       return Promise.reject(error);
     }
   }, [props, isLegacyInterface]);
+  
+  // Create update metrics function for interface completeness
+  const updateMetricsFunc = useCallback((updates: any) => {
+    if (isLegacyInterface) {
+      const { updateMetrics } = props as TimerActionProps;
+      updateMetrics(updates);
+    } else {
+      const { dispatch } = props as UseTimerActionsProps;
+      dispatch({ type: 'UPDATE_METRICS', payload: updates });
+    }
+  }, [props, isLegacyInterface]);
 
   return {
     startTimer,
     pauseTimer,
-    resetTimer: props.resetTimer || resetTimer,
-    extendTimer: props.extendTimer || extendTimer,
-    setMinutes: props.setMinutes || setMinutes,
+    resetTimer,
+    extendTimer,
+    setMinutes,
     completeTimer,
-    updateMetrics: props.updateMetrics || updateMetrics
+    updateMetrics: updateMetricsFunc
   };
 };
