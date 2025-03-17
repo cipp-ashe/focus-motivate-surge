@@ -73,7 +73,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col h-full">
-      {/* Task type filters - MOVED ABOVE TABS */}
+      {/* Task type filters - ABOVE TABS */}
       <div className="mb-2">
         <TaskTabsList 
           taskCounts={taskCounts} 
