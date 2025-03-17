@@ -1,6 +1,13 @@
 
 import { useState, useEffect } from 'react';
 
+/**
+ * A simple hook for storing and retrieving data from localStorage with type safety.
+ * This hook follows the useState pattern of [value, setValue].
+ * 
+ * For more advanced localStorage needs with multiple data types,
+ * see the useLocalStorageData hook in src/hooks/useLocalStorageData.ts
+ */
 export function useLocalStorageData<T>(
   key: string, 
   initialValue: T
