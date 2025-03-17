@@ -21,7 +21,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
 );
 
 const DashboardContent: React.FC = () => {
-  const { isInitialized, error, clearStorage, showClearButton } = useDataInitialization();
+  const { isInitialized, error, clearStorage } = useDataInitialization();
   
   useEffect(() => {
     if (error) {
@@ -61,21 +61,6 @@ const DashboardContent: React.FC = () => {
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <DashboardCardGrid />
       </ErrorBoundary>
-      
-      {showClearButton && (
-        <div className="mt-8">
-          <Button 
-            onClick={clearStorage}
-            variant="destructive"
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-          >
-            Reset Application Data
-          </Button>
-          <p className="text-sm text-muted-foreground mt-2">
-            If you're experiencing issues, try resetting the application data.
-          </p>
-        </div>
-      )}
       
       {!isInitialized && !error && (
         <div className="mt-8 flex flex-col items-center">
