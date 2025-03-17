@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/auth/AuthContext';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import Auth from '@/pages/Auth';
@@ -33,27 +33,26 @@ function App() {
             <NoteProvider>
               <HabitProvider>
                 <VoiceNotesProvider>
-                  <Router>
-                    <Routes>
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/auth/callback" element={<AuthCallback />} />
-                      
-                      <Route path="/" element={
-                        <RequireAuth requireAuth={false}>
-                          <Layout />
-                        </RequireAuth>
-                      }>
-                        <Route index element={<IndexPage />} />
-                        <Route path="tasks" element={<TaskPage />} />
-                        <Route path="timer" element={<TimerPage />} />
-                        <Route path="notes" element={<NotesPage />} />
-                        <Route path="habits" element={<HabitsPage />} />
-                        <Route path="settings" element={<SettingsPage />} />
-                        <Route path="screenshots" element={<ScreenshotsPage />} />
-                        <Route path="voice-notes" element={<VoiceNotesPage />} />
-                      </Route>
-                    </Routes>
-                  </Router>
+                  {/* Removed the duplicate Router component */}
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    
+                    <Route path="/" element={
+                      <RequireAuth requireAuth={false}>
+                        <Layout />
+                      </RequireAuth>
+                    }>
+                      <Route index element={<IndexPage />} />
+                      <Route path="tasks" element={<TaskPage />} />
+                      <Route path="timer" element={<TimerPage />} />
+                      <Route path="notes" element={<NotesPage />} />
+                      <Route path="habits" element={<HabitsPage />} />
+                      <Route path="settings" element={<SettingsPage />} />
+                      <Route path="screenshots" element={<ScreenshotsPage />} />
+                      <Route path="voice-notes" element={<VoiceNotesPage />} />
+                    </Route>
+                  </Routes>
                 </VoiceNotesProvider>
               </HabitProvider>
             </NoteProvider>
