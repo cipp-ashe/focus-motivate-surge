@@ -27,21 +27,19 @@ export const useTimerEvents = () => {
     });
   }, []);
 
-  // Pause a timer session
-  const pauseTimerSession = useCallback((taskName: string, timeLeft: number, metrics: any) => {
+  // Pause a timer session with correct payload structure
+  const pauseTimerSession = useCallback((taskName: string, timeLeft: number) => {
     eventManager.emit('timer:pause', {
       taskName,
-      timeLeft,
-      metrics
+      timeLeft
     });
   }, []);
 
-  // Resume a timer session
-  const resumeTimerSession = useCallback((taskName: string, timeLeft: number, metrics: any) => {
+  // Resume a timer session with correct payload structure
+  const resumeTimerSession = useCallback((taskName: string, timeLeft: number) => {
     eventManager.emit('timer:resume', {
       taskName,
-      timeLeft,
-      metrics
+      timeLeft
     });
   }, []);
 

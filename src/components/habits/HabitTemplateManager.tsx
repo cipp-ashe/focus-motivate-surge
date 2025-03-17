@@ -86,8 +86,11 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     if (template) {
       console.log("Adding template:", template);
       
-      // Emit template-add event using eventManager
-      eventManager.emit('habit:template-add', templateId);
+      // Emit template-add event using eventManager with correct payload format
+      eventManager.emit('habit:template-add', { 
+        id: template.id,
+        templateId: templateId 
+      });
       
       // Single toast notification from this component only
       toast.success(`Added template: ${template.name}`);

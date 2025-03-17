@@ -46,11 +46,9 @@ export const useTemplateEventHandlers = (
   // Handle template delete - modified to handle originating action
   const handleTemplateDelete = (data: { 
     templateId: string; 
-    suppressToast?: boolean;
     isOriginatingAction?: boolean;
   }) => {
     console.log("Event received: habit:template-delete", data.templateId, {
-      suppressToast: data.suppressToast, 
       isOriginatingAction: data.isOriginatingAction
     });
     
@@ -61,18 +59,16 @@ export const useTemplateEventHandlers = (
     const updatedTemplates = templates.filter(t => t.templateId !== data.templateId);
     localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
     
-    // Only show toast if this is the originating action and not suppressed
-    if (data.isOriginatingAction && data.suppressToast !== true) {
+    // Only show toast if this is the originating action
+    if (data.isOriginatingAction) {
       toast.success('Template deleted successfully');
     }
     
-    // Always emit follow-up event for task cleanup with toast suppressed
-    // This ensures tasks are deleted but no additional toast appears
+    // Always emit follow-up event for task cleanup but suppress toast
     if (data.isOriginatingAction) {
       setTimeout(() => {
         eventManager.emit('habit:template-delete', { 
-          templateId: data.templateId, 
-          suppressToast: true, 
+          templateId: data.templateId,
           isOriginatingAction: false 
         });
       }, 50);

@@ -118,10 +118,9 @@ export const useNoteActions = () => {
   const selectNoteForEdit = useCallback((note: Note) => {
     dispatch({ type: 'SELECT_NOTE', payload: note });
     
-    // Also emit an event for other parts of the app
+    // Also emit an event for other parts of the app with correct event payload
     eventManager.emit('note:view', { 
-      noteId: note.id,
-      title: note.title || 'Untitled Note'
+      id: note.id,
     });
   }, [dispatch]);
 
@@ -142,7 +141,7 @@ export const useNoteActions = () => {
     dispatch({ type: 'SELECT_NOTE', payload: null });
     dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
     
-    // Emit event for other components
+    // Emit event for other components with correct payload structure
     eventManager.emit('note:create', { 
       id: newNote.id, 
       title: newNote.title, 
@@ -163,7 +162,7 @@ export const useNoteActions = () => {
     dispatch({ type: 'SELECT_NOTE', payload: null });
     dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
     
-    // Emit event for other components
+    // Emit event for other components with correct payload structure
     eventManager.emit('note:update', { 
       id, 
       updates: updatedNote
@@ -177,7 +176,7 @@ export const useNoteActions = () => {
       dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
     }
     
-    // Fix: Use correct payload structure for note:deleted event
+    // Emit event with correct payload structure
     eventManager.emit('note:deleted', { 
       id 
     });

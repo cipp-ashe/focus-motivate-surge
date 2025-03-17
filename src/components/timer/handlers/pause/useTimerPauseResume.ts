@@ -40,11 +40,10 @@ export const useTimerPauseResume = ({
     // Actually pause the timer
     pause();
     
-    // Emit pause event
+    // Emit pause event with correct payload structure
     eventManager.emit('timer:pause', {
       taskName,
-      timeLeft,
-      metrics
+      timeLeft
     });
   }, [pause, setPauseTimeLeft, metrics, updateMetrics, taskName, timeLeft]);
 
@@ -74,14 +73,10 @@ export const useTimerPauseResume = ({
     // Start the timer
     start();
     
-    // Emit resume event
+    // Emit resume event with correct payload structure
     eventManager.emit('timer:resume', {
       taskName,
-      timeLeft,
-      metrics: {
-        ...metrics,
-        pausedTime
-      }
+      timeLeft
     });
   }, [start, updateMetrics, taskName, timeLeft, metrics]);
 

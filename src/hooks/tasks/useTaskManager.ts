@@ -44,12 +44,12 @@ export const useTaskManager = () => {
     return updatedTask;
   }, []);
   
-  const deleteTask = useCallback((taskId: string, reason?: string, suppressToast?: boolean) => {
+  const deleteTask = useCallback((taskId: string, reason?: string) => {
     // Remove from storage
     activeTasksStorage.removeTask(taskId);
     
-    // Emit event
-    eventManager.emit('task:delete', { taskId, reason, suppressToast });
+    // Emit event with updated payload structure
+    eventManager.emit('task:delete', { taskId, reason });
   }, []);
   
   return { createTask, updateTask, deleteTask };

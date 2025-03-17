@@ -23,8 +23,7 @@ export const useHabitTaskCleanup = () => {
     try {
       console.log(`Deleting habit task for habit ${habitId} on ${date}`);
       
-      // First, emit the habit:task-deleted event so any components tracking this task
-      // know it's being deleted
+      // First, emit the habit:task-deleted event with the corrected payload structure
       const payload: { habitId: string; date: string; taskId?: string } = { 
         habitId, 
         date

@@ -1,105 +1,97 @@
 
-import { taskStorage } from '@/lib/storage/task';
-import { eventManager } from '@/lib/events/EventManager';
+import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { Task } from '@/types/tasks';
+import { eventManager } from '@/lib/events/EventManager';
+import { getTaskStorage } from '@/lib/storage/taskStorage';
+import { canDeleteTask } from '@/lib/verification/taskVerification';
 
 /**
- * Operations related to deleting tasks
+ * Delete a task by ID
+ * 
+ * @param taskId The ID of the task to delete
+ * @param options Optional settings for deletion behavior
+ * @returns True if task was deleted, false if not
  */
-export const deleteTaskOperations = {
-  /**
-   * Delete a task with proper storage and event emission
-   * @param taskId The ID of the task to delete
-   * @param options Additional options for task deletion
-   */
-  deleteTask(
-    taskId: string,
-    options: {
-      reason?: string;
-      suppressToast?: boolean;
-      isDismissal?: boolean;
-      habitId?: string;
-      date?: string;
-    } = {}
-  ): void {
-    console.log(`TaskOperations: Deleting task ${taskId}`, options);
+export const deleteTask = (
+  taskId: string,
+  options: { 
+    reason?: string;
+    showToast?: boolean;
+    verifyDependencies?: boolean;
+  } = {}
+): boolean => {
+  const {
+    reason = 'user-delete',
+    showToast = true,
+    verifyDependencies = true
+  } = options;
+  
+  if (!taskId) {
+    console.error('Cannot delete task: No taskId provided');
+    return false;
+  }
+  
+  try {
+    // Get storage instance
+    const storage = getTaskStorage();
     
-    try {
-      // Get task before deleting to show name in toast
-      const task = taskStorage.getTaskById(taskId);
-      
-      if (!task) {
-        console.warn(`Task ${taskId} not found for deletion`);
-        return;
-      }
-      
-      // If this is a dismissal (habit task being skipped for today)
-      if (options.isDismissal && task.relationships?.habitId && task.relationships?.date) {
-        console.log(`TaskOperations: Dismissing habit task ${taskId} for ${task.relationships.habitId} on ${task.relationships.date}`);
+    // Try to find the task
+    const task = storage.findTaskById(taskId);
+    if (!task) {
+      console.warn(`Task with ID ${taskId} not found for deletion`);
+      return false;
+    }
+    
+    // Check if task can be deleted (no dependencies)
+    if (verifyDependencies && !canDeleteTask(task)) {
+      // Special case for habit tasks that need dismissal instead of deletion
+      if (task.relationships?.habitId) {
+        console.log(`Task ${taskId} is a habit task, dismissing instead of deleting`);
         
-        // Create a dismissal event with all required data
-        eventManager.emit('task:dismiss', { 
-          taskId,
-          habitId: task.relationships.habitId, 
-          date: task.relationships.date
-        });
-        
-        // Also dispatch a custom event that can be captured by the habits system
-        window.dispatchEvent(new CustomEvent('habit-task-dismissed', { 
-          detail: { 
-            habitId: task.relationships.habitId, 
-            taskId,
-            date: task.relationships.date 
+        // Dismiss the task using the habit:dismissed event
+        if (task.relationships?.habitId && task.relationships?.date) {
+          eventManager.emit('task:dismiss', {
+            taskId: task.id,
+            habitId: task.relationships.habitId,
+            date: task.relationships.date
+          });
+          
+          if (showToast) {
+            toast.info('Habit task dismissed');
           }
-        }));
-        
-        // Update task status to dismissed
-        taskStorage.updateTask(taskId, {
-          ...task,
-          status: 'dismissed',
-          dismissedAt: new Date().toISOString()
-        });
-        
-        // We need to also remove it from active storage or complete it
-        // This is the key fix - we need to also remove it from active tasks
-        taskStorage.removeTask(taskId);
-        
-        // Show toast for dismissal
-        if (!options.suppressToast) {
-          toast.success(`Dismissed task: ${task.name}`);
+          
+          return true;
         }
-        
-        // Force UI refresh
-        setTimeout(() => {
-          window.dispatchEvent(new Event('force-task-update'));
-        }, 100);
-        
-        return;
       }
       
-      // Regular task deletion - remove from active storage
-      taskStorage.removeTask(taskId);
-      console.log(`TaskOperations: Removed active task ${taskId}`);
-      
-      // Emit task deletion event
-      eventManager.emit('task:delete', { 
-        taskId, 
-        reason: options.reason || 'user-action',
-        suppressToast: options.suppressToast 
+      if (showToast) {
+        toast.error(`Cannot delete task with active dependencies`);
+      }
+      return false;
+    }
+    
+    // Actually delete the task
+    const deleted = storage.removeTask(taskId);
+    
+    if (deleted) {
+      // Emit delete event with correct payload structure
+      eventManager.emit('task:delete', {
+        taskId,
+        reason
       });
       
-      // Show toast unless suppressed
-      if (!options.suppressToast) {
-        toast.success(`Deleted task${task ? ': ' + task.name : ''}`);
+      if (showToast) {
+        toast.success('Task deleted successfully');
       }
-      
-      // Force UI refresh
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-task-update'));
-      }, 100);
-    } catch (error) {
-      console.error('Error deleting task:', error);
+    }
+    
+    return deleted;
+  } catch (error) {
+    console.error(`Error deleting task ${taskId}:`, error);
+    if (showToast) {
       toast.error('Failed to delete task');
     }
+    return false;
   }
 };

@@ -103,28 +103,28 @@ export interface EventPayloads {
   // Task events
   'task:create': any;
   'task:update': { taskId: string; updates: any };
-  'task:delete': { taskId: string; reason?: string };
+  'task:delete': { taskId: string; reason?: string; suppressToast?: boolean };
   'task:complete': { taskId: string; metrics?: any };
   'task:select': string;
   'task:reload': any;
-  'task:dismiss': { taskId: string; habitId: string; date: string };
+  'task:dismiss': { taskId: string; habitId: string; date: string; suppressToast?: boolean };
 
   // Habit events
   'habit:complete': { habitId: string; completed: boolean };
   'habit:template-add': { id: string; templateId: string };
   'habit:template-update': any;
-  'habit:template-delete': { templateId: string; isOriginatingAction?: boolean };
+  'habit:template-delete': { templateId: string; isOriginatingAction?: boolean; suppressToast?: boolean };
   'habits:check-pending': any;
   'habit:schedule': any;
   'habit:dismissed': { habitId: string; date: string };
   'habit:journal-deleted': { habitId: string };
-  'habit:task-deleted': { habitId: string; taskId: string };
+  'habit:task-deleted': { habitId: string; date: string; taskId?: string };
   'habit:select': string;
 
   // Timer events
-  'timer:start': { taskName: string; duration: number };
-  'timer:pause': { taskName: string; timeLeft?: number };
-  'timer:resume': { taskName: string; timeLeft?: number };
+  'timer:start': { taskName: string; duration: number; currentTime?: number };
+  'timer:pause': { taskName: string; timeLeft?: number; metrics?: any };
+  'timer:resume': { taskName: string; timeLeft?: number; metrics?: any; currentTime?: number };
   'timer:reset': { taskName: string; duration?: number };
   'timer:complete': { taskName: string; metrics: any };
   'timer:task-set': any;
@@ -141,8 +141,8 @@ export interface EventPayloads {
   'note:update': { id: string; updates: any };
   'note:deleted': { id: string };
   'note:view': { id: string };
-  'note:format': { id: string; format: string };
-  'note:format-complete': { id: string; format: string };
+  'note:format': { id: string; format: string; action?: string };
+  'note:format-complete': { id: string; format?: string };
   'note:create-from-habit': any;
   'note:create-from-voice': { audioUrl: string; transcript?: string };
 

@@ -8,6 +8,7 @@ import HabitTemplateManager from '@/components/habits/HabitTemplateManager';
 import { DayOfWeek, ActiveTemplate, HabitTemplate } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import { useHabitTaskIntegration } from '@/hooks/habits/useHabitTaskIntegration';
+import { EventHandler } from '@/lib/events/types';
 
 /**
  * Main component for habit tracking and template management
@@ -64,8 +65,10 @@ const HabitTracker: React.FC = () => {
   
   // Event listeners for template management
   useEffect(() => {
-    const handleTemplateAdd = (templateId: string) => {
-      console.log("HabitTracker: Detected template add event for", templateId);
+    // Handler for template add events
+    const handleTemplateAdd: EventHandler<'habit:template-add'> = (payload) => {
+      console.log("HabitTracker: Detected template add event for", payload);
+      const templateId = payload.templateId;
       
       // Prevent duplicate processing of the same template
       if (processingTemplateId === templateId) {
@@ -128,7 +131,7 @@ const HabitTracker: React.FC = () => {
     toast.success('Template removed');
     
     // Also remove all tasks from this template
-    eventManager.emit('habit:template-delete', { templateId });
+    eventManager.emit('habit:template-delete', { templateId, isOriginatingAction: true });
   };
 
   // Track habit progress (placeholder for now)
