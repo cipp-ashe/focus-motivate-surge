@@ -1,9 +1,129 @@
 
-import { useCallback } from 'react';
-import { useNoteState, useNoteDispatch } from './NoteContext';
+import { useCallback, createContext, useContext, useReducer, ReactNode } from 'react';
 import { Note } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
 import { NoteEventType } from '@/lib/events/types';
+
+// Define the state type
+interface NoteState {
+  notes: Note[];
+  selected: Note | null;
+  content: string;
+}
+
+// Define the action types
+type NoteAction = 
+  | { type: 'ADD_NOTE'; payload: Note }
+  | { type: 'UPDATE_NOTE'; payload: { id: string; updates: Partial<Note> } }
+  | { type: 'DELETE_NOTE'; payload: string }
+  | { type: 'SELECT_NOTE'; payload: Note | null }
+  | { type: 'UPDATE_CURRENT_CONTENT'; payload: string }
+  | { type: 'ADD_TAG_TO_NOTE'; payload: { noteId: string; tagName: string; tagColor?: string } }
+  | { type: 'REMOVE_TAG_FROM_NOTE'; payload: { noteId: string; tagId: string } };
+
+// Initialize the state
+const initialState: NoteState = {
+  notes: [],
+  selected: null,
+  content: ''
+};
+
+// Create the context
+const NoteStateContext = createContext<NoteState | undefined>(undefined);
+const NoteDispatchContext = createContext<React.Dispatch<NoteAction> | undefined>(undefined);
+
+// Create the reducer
+function noteReducer(state: NoteState, action: NoteAction): NoteState {
+  switch (action.type) {
+    case 'ADD_NOTE':
+      return { ...state, notes: [action.payload, ...state.notes] };
+    case 'UPDATE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.map(note => 
+          note.id === action.payload.id 
+            ? { ...note, ...action.payload.updates } 
+            : note
+        )
+      };
+    case 'DELETE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.filter(note => note.id !== action.payload)
+      };
+    case 'SELECT_NOTE':
+      return { ...state, selected: action.payload };
+    case 'UPDATE_CURRENT_CONTENT':
+      return { ...state, content: action.payload };
+    case 'ADD_TAG_TO_NOTE': {
+      const { noteId, tagName, tagColor = 'default' } = action.payload;
+      return {
+        ...state,
+        notes: state.notes.map(note => {
+          if (note.id === noteId) {
+            const tags = note.tags || [];
+            // Check if tag already exists
+            const tagExists = tags.some(tag => tag.name === tagName);
+            if (!tagExists) {
+              return {
+                ...note,
+                tags: [...tags, { name: tagName, color: tagColor }]
+              };
+            }
+          }
+          return note;
+        })
+      };
+    }
+    case 'REMOVE_TAG_FROM_NOTE': {
+      const { noteId, tagId } = action.payload;
+      return {
+        ...state,
+        notes: state.notes.map(note => {
+          if (note.id === noteId && note.tags) {
+            return {
+              ...note,
+              tags: note.tags.filter(tag => tag.name !== tagId)
+            };
+          }
+          return note;
+        })
+      };
+    }
+    default:
+      return state;
+  }
+}
+
+// Create the provider component
+export function NoteContextProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(noteReducer, initialState);
+
+  return (
+    <NoteStateContext.Provider value={state}>
+      <NoteDispatchContext.Provider value={dispatch}>
+        {children}
+      </NoteDispatchContext.Provider>
+    </NoteStateContext.Provider>
+  );
+}
+
+// Create the hooks
+export function useNoteState() {
+  const context = useContext(NoteStateContext);
+  if (context === undefined) {
+    throw new Error('useNoteState must be used within a NoteContextProvider');
+  }
+  return context;
+}
+
+export function useNoteDispatch() {
+  const context = useContext(NoteDispatchContext);
+  if (context === undefined) {
+    throw new Error('useNoteDispatch must be used within a NoteContextProvider');
+  }
+  return context;
+}
 
 export const useNoteActions = () => {
   const dispatch = useNoteDispatch();
@@ -17,7 +137,7 @@ export const useNoteActions = () => {
     dispatch({ type: 'SELECT_NOTE', payload: note });
     
     // Also emit an event for other parts of the app
-    eventManager.emit('note:view' as NoteEventType, { 
+    eventManager.emit('note:view', { 
       id: note.id,
       title: note.title || 'Untitled Note'
     });
@@ -75,8 +195,8 @@ export const useNoteActions = () => {
     }
     
     // Emit event for other components
-    eventManager.emit('note:deleted' as NoteEventType, { 
-      id 
+    eventManager.emit('note:deleted', { 
+      noteId: id 
     });
   }, [dispatch, selected?.id]);
 

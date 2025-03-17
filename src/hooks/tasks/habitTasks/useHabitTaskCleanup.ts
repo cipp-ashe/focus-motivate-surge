@@ -28,7 +28,8 @@ export const useHabitTaskCleanup = () => {
       eventManager.emit('habit:task-deleted', { 
         habitId, 
         date,
-        taskId 
+        // Only include taskId if it's provided
+        ...(taskId ? { taskId } : {})
       });
       
       // If we have the taskId, also trigger the standard task deletion process

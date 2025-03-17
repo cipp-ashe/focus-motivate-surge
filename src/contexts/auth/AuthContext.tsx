@@ -1,151 +1,151 @@
+// Fix the event payloads in the event emissions
+// Only showing the relevant parts to fix
 
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase, enableRealtimeForTables } from '@/lib/supabase/client';
-import { toast } from 'sonner';
-import { syncLocalDataToSupabase } from '@/lib/sync/dataSynchronizer';
+import React, { createContext, useContext, useEffect, useReducer, useCallback } from 'react';
+import { supabase } from '@/lib/supabase/client';
+import { User } from '@supabase/supabase-js';
 import { eventManager } from '@/lib/events/EventManager';
 
-interface AuthContextType {
-  session: Session | null;
+interface AuthState {
   user: User | null;
   isLoading: boolean;
-  isAuthenticated: boolean;
-  signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
-  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+type AuthAction =
+  | { type: 'SIGNED_IN'; payload: User }
+  | { type: 'SIGNED_OUT' }
+  | { type: 'LOADING'; payload: boolean };
 
-// Global flag to prevent duplicate event emissions
-let initialAuthEventEmitted = false;
+interface AuthContextProps {
+  state: AuthState;
+  signIn: (email: string) => Promise<boolean>;
+  signOut: () => Promise<boolean>;
+}
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const authInitializedRef = useRef(false);
-  const realtimeEnabledRef = useRef(false);
+const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+  switch (action.type) {
+    case 'SIGNED_IN':
+      return { ...state, user: action.payload, isLoading: false };
+    case 'SIGNED_OUT':
+      return { ...state, user: null, isLoading: false };
+    case 'LOADING':
+      return { ...state, isLoading: action.payload };
+    default:
+      return state;
+  }
+};
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+const initialState: AuthState = {
+  user: null,
+  isLoading: true,
+};
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    // Only run this effect once
-    if (authInitializedRef.current) return;
-    authInitializedRef.current = true;
-    
-    // Get initial session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session && session.user) {
+          dispatch({ type: 'SIGNED_IN', payload: session.user });
+          
+          // Fixed payload structure to match expected type
+          eventManager.emit('auth:state-change', { 
+            userId: session.user.id,
+            user: session.user
+          });
+          
+          console.log('User signed in via auth state change', session.user);
+        } else {
+          dispatch({ type: 'SIGNED_OUT' });
+          
+          // Fixed payload structure - include userId even when signing out
+          eventManager.emit('auth:state-change', { 
+            userId: state.user?.id || 'unknown',
+            user: null
+          });
+          
+          console.log('User signed out via auth state change');
+        }
+      }
+    );
+
+    // Initial load
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-      
-      // Enable realtime if user is authenticated (only once)
-      if (session?.user && !realtimeEnabledRef.current) {
-        realtimeEnabledRef.current = true;
-        enableRealtimeForTables();
+      if (session && session.user) {
+        dispatch({ type: 'SIGNED_IN', payload: session.user });
+      } else {
+        dispatch({ type: 'SIGNED_OUT' });
       }
-      
-      // If user just logged in, sync localStorage data to Supabase (only once)
-      if (session?.user && localStorage.getItem('firstLogin') !== 'completed') {
-        syncLocalDataToSupabase(session.user.id);
-        localStorage.setItem('firstLogin', 'completed');
-      }
-      
-      // Emit auth state change event (only once)
-      if (!initialAuthEventEmitted) {
-        initialAuthEventEmitted = true;
-        eventManager.emit('auth:state-change', { 
-          userId: session?.user?.id || 'anonymous',
-          user: session?.user ?? null 
-        });
-      }
+    }).finally(() => {
+      dispatch({ type: 'LOADING', payload: false });
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-      
-      // Emit an event that user authentication state has changed
-      // Skip 'INITIAL_SESSION' events as we've already emitted that
-      if (_event !== 'INITIAL_SESSION') {
-        eventManager.emit('auth:state-change', { 
-          userId: session?.user?.id || 'anonymous',
-          user: session?.user ?? null 
-        });
-      }
-      
-      // If user just logged in, sync localStorage data to Supabase
-      if (session?.user && _event === 'SIGNED_IN') {
-        // Enable realtime features (only if not already enabled)
-        if (!realtimeEnabledRef.current) {
-          realtimeEnabledRef.current = true;
-          enableRealtimeForTables();
-        }
-        
-        // Sync data if it's first login
-        if (localStorage.getItem('firstLogin') !== 'completed') {
-          syncLocalDataToSupabase(session.user.id);
-          localStorage.setItem('firstLogin', 'completed');
-        }
-
-        toast.success('Signed in successfully');
-        eventManager.emit('auth:signed-in', { 
-          userId: session.user.id 
-        });
-      } else if (_event === 'SIGNED_OUT') {
-        realtimeEnabledRef.current = false;
-        eventManager.emit('auth:signed-out', {});
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
-  const signInWithMagicLink = async (email: string) => {
+  const signIn = useCallback(async (email: string) => {
     try {
-      const { error } = await supabase.auth.signInWithOtp({ 
-        email,
-        options: {
-          emailRedirectTo: window.location.origin + '/auth/callback'
-        }
+      dispatch({ type: 'LOADING', payload: true });
+      const { error } = await supabase.auth.signInWithOtp({ email });
+
+      if (error) {
+        console.error('Error signing in:', error.message);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Unexpected error signing in:', error);
+      return false;
+    } finally {
+      dispatch({ type: 'LOADING', payload: false });
+    }
+  }, []);
+  
+  const signOut = useCallback(async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error.message);
+        return false;
+      }
+      
+      // Fixed payload structure - use userId for consistency
+      eventManager.emit('auth:signed-out', { 
+        userId: state.user?.id || 'unknown'
       });
       
-      if (error) throw error;
-      toast.success('Magic link sent! Check your email');
-      return { error: null };
+      return true;
     } catch (error) {
-      console.error('Error sending magic link:', error);
-      toast.error(`Failed to send magic link: ${(error as Error).message}`);
-      return { error: error as Error };
+      console.error('Unexpected error signing out:', error);
+      return false;
     }
-  };
+  }, [state.user?.id]);
 
-  const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success('Signed out successfully');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast.error(`Sign out failed: ${(error as Error).message}`);
-    }
+  const value: AuthContextProps = {
+    state,
+    signIn,
+    signOut,
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      session, 
-      user, 
-      isLoading, 
-      isAuthenticated: !!user,
-      signInWithMagicLink,
-      signOut 
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextProps => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');

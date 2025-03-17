@@ -1,11 +1,31 @@
-
 // This is a minimal stub for Timer.tsx to fix the initialization event timestamp
 
-// Update this to emit the app:initialized event with a timestamp
 import React, { useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
+import { TimerSection } from '@/components/timer/TimerSection';
+import { useState } from 'react';
+import { Quote } from '@/types/timer';
 
-// This is just a stub to fix the missing timestamp in the app:initialized event
+// Timer page component with default export
+export default function TimerPage() {
+  const [favorites, setFavorites] = useState<Quote[]>([]);
+
+  // Fix the initialization event with a timestamp
+  useEffect(() => {
+    eventManager.emit('app:initialized', {
+      timestamp: new Date().toISOString()
+    });
+  }, []);
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Timer</h1>
+      <TimerSection favorites={favorites} setFavorites={setFavorites} />
+    </div>
+  );
+}
+
+// Keep the existing function for backward compatibility
 export const fixTimerPageEmission = () => {
   useEffect(() => {
     // Fix the initialization event with a timestamp

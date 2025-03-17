@@ -1,4 +1,3 @@
-
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect, useRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -88,18 +87,15 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       // Otherwise handle saving internally using the note actions from context
       if (selectedNote) {
         // Update existing note
-        const success = noteActions.updateNote(selectedNote.id, content);
-        if (success) {
-          // Event is emitted by the updateNote action
-          if (!isToolbarAction) {
-            toast.success("Note updated ✨", { duration: 1500 });
-          }
+        noteActions.updateNote(selectedNote.id, content);
+        // No need to check return value since this doesn't return a boolean
+        if (!isToolbarAction) {
+          toast.success("Note updated ✨", { duration: 1500 });
         }
       } else {
-        // Add new note
-        // The event is emitted by the addNote action
-        const newNote = noteActions.addNote();
-        if (newNote && !isToolbarAction) {
+        // Add new note - don't check return value for truthiness
+        noteActions.addNote();
+        if (!isToolbarAction) {
           toast.success("Note saved ✨", { duration: 1500 });
         }
       }
