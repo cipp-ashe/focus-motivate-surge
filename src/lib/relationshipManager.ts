@@ -1,5 +1,5 @@
 
-import { eventBus } from './eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { EntityType } from '@/types/core';
 import type { RelationType } from '@/types/state';
 import type { ActiveTemplate } from '@/components/habits/types';
@@ -32,29 +32,29 @@ class RelationshipManager {
   }
 
   private setupEventListeners() {
-    eventBus.on('relationship:create', this.createRelationship.bind(this));
-    eventBus.on('relationship:delete', this.deleteRelationship.bind(this));
-    eventBus.on('relationship:update', this.updateRelationship.bind(this));
-    eventBus.on('relationship:batch-update', this.batchUpdateRelationships.bind(this));
+    eventManager.on('relationship:create', this.createRelationship.bind(this));
+    eventManager.on('relationship:delete', this.deleteRelationship.bind(this));
+    eventManager.on('relationship:update', this.updateRelationship.bind(this));
+    eventManager.on('relationship:batch-update', this.batchUpdateRelationships.bind(this));
     
     // Handle tag relationships
-    eventBus.on('tag:link', ({ tagId, entityId, entityType }) => {
+    eventManager.on('tag:link', ({ tagId, entityId, entityType }) => {
       if (entityType) {
         this.createRelationship(tagId, 'tag' as EntityType, entityId, entityType, 'tag-entity');
       }
     });
     
-    eventBus.on('tag:unlink', ({ tagId, entityId }) => {
+    eventManager.on('tag:unlink', ({ tagId, entityId }) => {
       this.deleteRelationship(tagId, entityId);
     });
     
     // Handle quote relationships
-    eventBus.on('quote:link-task', ({ quoteId, taskId }) => {
+    eventManager.on('quote:link-task', ({ quoteId, taskId }) => {
       this.createRelationship(quoteId, 'quote' as EntityType, taskId, 'task' as EntityType, 'quote-task');
     });
     
     // Handle habit template relationships
-    eventBus.on('habit:template-update', (template: ActiveTemplate) => {
+    eventManager.on('habit:template-update', (template: ActiveTemplate) => {
       if (template.relationships?.habitId) {
         this.createRelationship(template.templateId, 'template' as EntityType, template.relationships.habitId, 'habit' as EntityType, 'template-habit');
       }

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { startOfDay, isToday } from "date-fns";
 import type { Task } from "@/types/tasks";
 import { toast } from "sonner";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 
 interface DailySyncManagerProps {
   lastSyncDate: Date;
@@ -48,7 +48,7 @@ export const DailySyncManager = ({
       // Trigger habit checks to ensure all habit tasks are created for today
       setTimeout(() => {
         console.log('DailySyncManager: Triggering habit checks for the new day');
-        eventBus.emit('habits:check-pending', {});
+        eventManager.emit('habits:check-pending', {});
         window.dispatchEvent(new Event('force-habits-update'));
         window.dispatchEvent(new Event('force-task-update'));
       }, 300);

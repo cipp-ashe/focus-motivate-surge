@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) => {
   // Handle task deletion
@@ -11,7 +11,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
     console.log("Deleting task:", task.id);
     
     // Emit deletion event
-    eventBus.emit('task:delete', { taskId: task.id });
+    eventManager.emit('task:delete', { taskId: task.id });
     
     // Show toast notification
     toast.success(`Task "${task.name}" deleted`);
@@ -27,12 +27,12 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
     // Handle different action types
     switch (actionType) {
       case 'complete':
-        eventBus.emit('task:complete', { taskId: task.id });
+        eventManager.emit('task:complete', { taskId: task.id });
         toast.success(`Task "${task.name}" completed`);
         break;
         
       case 'dismiss':
-        eventBus.emit('task:dismiss', { 
+        eventManager.emit('task:dismiss', { 
           taskId: task.id, 
           habitId: task.relationships?.habitId || 'none',
           date: task.relationships?.date || new Date().toISOString()
@@ -41,7 +41,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'delete':
-        eventBus.emit('task:delete', { taskId: task.id });
+        eventManager.emit('task:delete', { taskId: task.id });
         toast.info(`Task "${task.name}" deleted`);
         break;
         
