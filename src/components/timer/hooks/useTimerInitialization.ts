@@ -1,6 +1,6 @@
 
 import { useTimerCore } from "./initialization/useTimerCore";
-import { useTimerHandlers } from "../handlers/TimerHandlers";
+import { useTimerHandlers } from "./initialization/useTimerHandlers";
 import { useTimerViews } from "./initialization/useTimerViews";
 import { useTimerAutoComplete } from "./initialization/useTimerViews";
 import { TimerProps } from "@/types/timer";
