@@ -12,6 +12,8 @@ import TimerPage from '@/pages/Timer';
 import NotesPage from '@/pages/Notes';
 import HabitsPage from '@/pages/Habits';
 import SettingsPage from '@/pages/Settings';
+import ScreenshotsPage from '@/pages/Screenshots';
+import VoiceNotesPage from '@/pages/VoiceNotes';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TaskProvider } from '@/contexts/tasks/TaskContext';
 import { NoteProvider } from '@/contexts/notes/NoteContext';
@@ -38,6 +40,8 @@ function App() {
                   <Route path="notes" element={<NotesPage />} />
                   <Route path="habits" element={<HabitsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
+                  <Route path="screenshots" element={<ScreenshotsPage />} />
+                  <Route path="voice-notes" element={<VoiceNotesPage />} />
                 </Route>
               </Routes>
             </Router>
