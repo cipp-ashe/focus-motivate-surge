@@ -53,6 +53,8 @@ export interface TimerEventPayloads {
     timestamp: string;
   };
   'timer:set-task': { id: string; name: string; duration?: number } | any;
+  'timer:task-set': { taskId: string; task: any }; // Adding missing event type
+  'timer:select-task': { taskId: string }; // Adding missing event type
   
   // Task-related UI events
   'show-image': { taskId: string; imageUrl: string; taskName: string };
@@ -139,6 +141,7 @@ export interface TimerEventPayloads {
   
   // App events
   'app:initialization-complete': any;
+  'app:initialized': any; // Adding missing event type
   'page:timer-ready': any;
 }
 

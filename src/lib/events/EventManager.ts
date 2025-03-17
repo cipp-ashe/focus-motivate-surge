@@ -19,6 +19,8 @@ type Events = {
   'timer:metrics-update': { taskName: string; metrics: any };
   'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
   'timer:set-task': { id: string; name: string; duration?: number } | any;
+  'timer:task-set': { taskId: string; task: any }; // Adding missing event type
+  'timer:select-task': { taskId: string }; // Adding missing event type
   'note:create': Note;
   'note:update': Note;
   'note:delete': { id: string };
@@ -95,6 +97,7 @@ type Events = {
   'habits:processed': any;
   'nav:route-change': { from: string; to: string };
   'app:initialization-complete': any;
+  'app:initialized': any; // Adding missing event type
 };
 
 // Export event type and handler for use in other modules

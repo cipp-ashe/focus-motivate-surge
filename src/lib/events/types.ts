@@ -15,10 +15,18 @@ export type HabitEventType =
   | 'habit:task-deleted'
   | 'habit:dismissed';
 
+export type TimerEventTypes =
+  | 'timer:task-set'
+  | 'timer:select-task'
+  | 'timer:set-task';
+
+export type AppEventTypes =
+  | 'app:initialization-complete'
+  | 'app:initialized';
+
 export type NavigationEventType = 
   | 'nav:route-change'
-  | 'app:initialization-complete'
   | 'page:timer-ready';
 
 // Making sure all events are properly typed for the event system
-export type AdditionalEventTypes = HabitEventType | NavigationEventType;
+export type AdditionalEventTypes = HabitEventType | NavigationEventType | TimerEventTypes | AppEventTypes;

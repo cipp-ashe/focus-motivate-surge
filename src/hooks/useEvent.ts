@@ -8,16 +8,16 @@ import { eventManager } from '@/lib/events/EventManager';
  * @param eventName The name of the event to listen for
  * @param callback The callback function to execute when the event is emitted
  */
-export function useEvent(eventName: string, callback: (...args: any[]) => void) {
+export function useEvent<T = any>(eventName: string, callback: (data: T) => void) {
   useEffect(() => {
     // Register the event handler
     // @ts-ignore - We're allowing string event names for flexibility
-    eventManager.on(eventName, callback);
+    const unsubscribe = eventManager.on(eventName as any, callback as any);
     
     // Return cleanup function
     return () => {
       // @ts-ignore - We're allowing string event names for flexibility
-      eventManager.off(eventName, callback);
+      eventManager.off(eventName as any, callback as any);
     };
   }, [eventName, callback]);
 }

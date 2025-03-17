@@ -12,7 +12,8 @@ import { eventManager } from '@/lib/events/EventManager';
 export function useEvent<T = any>(eventName: string, callback: (data: T) => void) {
   useEffect(() => {
     // Register the event listener
-    const unsubscribe = eventManager.on(eventName, callback);
+    // @ts-ignore - We're allowing string event names for flexibility
+    const unsubscribe = eventManager.on(eventName as any, callback as any);
     
     // Return cleanup function to unsubscribe when component unmounts
     return () => {
