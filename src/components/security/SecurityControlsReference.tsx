@@ -19,6 +19,7 @@ import {
 import { Search, Shield, ClipboardCheck, Users, Home, Server } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface SecurityControl {
   id: string;
@@ -69,6 +70,7 @@ const securityControls: SecurityControl[] = [
 export const SecurityControlsReference: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const isMobile = useIsMobile();
   
   const filteredControls = useMemo(() => {
     return securityControls.filter(control => {
@@ -119,17 +121,17 @@ export const SecurityControlsReference: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col space-y-4">
-        <h2 className="text-2xl font-semibold">Security Controls Reference</h2>
-        <p className="text-muted-foreground">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col space-y-3 sm:space-y-4">
+        <h2 className="text-xl sm:text-2xl font-semibold">Security Controls Reference</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Browse the security controls specified in ISO/IEC 27001:2022 Annex A.
         </p>
         
         <div className="relative w-full max-w-lg">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search controls by ID, title or description..." 
+            placeholder={isMobile ? "Search controls..." : "Search controls by ID, title or description..."} 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 bg-background border-border focus-ring"
@@ -138,75 +140,111 @@ export const SecurityControlsReference: React.FC = () => {
       </div>
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4 w-full justify-start overflow-x-auto p-0 flex">
-          <TabsTrigger value="all" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-            <Shield className="mr-2 h-4 w-4" />
-            All Controls
-            <Badge variant="outline" className="ml-2 bg-primary/5">{controlCounts.all}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="Organizational" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-            <ClipboardCheck className="mr-2 h-4 w-4" />
-            Organizational
-            <Badge variant="outline" className="ml-2 bg-primary/5">{controlCounts.Organizational}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="People" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-            <Users className="mr-2 h-4 w-4" />
-            People
-            <Badge variant="outline" className="ml-2 bg-primary/5">{controlCounts.People}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="Physical" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-            <Home className="mr-2 h-4 w-4" />
-            Physical
-            <Badge variant="outline" className="ml-2 bg-primary/5">{controlCounts.Physical}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="Technological" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
-            <Server className="mr-2 h-4 w-4" />
-            Technological
-            <Badge variant="outline" className="ml-2 bg-primary/5">{controlCounts.Technological}</Badge>
-          </TabsTrigger>
-        </TabsList>
+        <div className="mb-4 w-full overflow-x-auto pb-1 no-scrollbar">
+          <TabsList className="justify-start p-0 flex h-auto bg-transparent space-x-1">
+            <TabsTrigger 
+              value="all" 
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-2 sm:px-3 py-1 sm:py-2 h-auto text-xs sm:text-sm"
+            >
+              <Shield className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">All Controls</span>
+              <span className="xs:hidden">All</span>
+              <Badge variant="outline" className="ml-1 sm:ml-2 bg-primary/5 text-xs">{controlCounts.all}</Badge>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="Organizational" 
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-2 sm:px-3 py-1 sm:py-2 h-auto text-xs sm:text-sm"
+            >
+              <ClipboardCheck className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Organizational</span>
+              <span className="xs:hidden">Org</span>
+              <Badge variant="outline" className="ml-1 sm:ml-2 bg-primary/5 text-xs">{controlCounts.Organizational}</Badge>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="People" 
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-2 sm:px-3 py-1 sm:py-2 h-auto text-xs sm:text-sm"
+            >
+              <Users className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">People</span>
+              <span className="xs:hidden">People</span>
+              <Badge variant="outline" className="ml-1 sm:ml-2 bg-primary/5 text-xs">{controlCounts.People}</Badge>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="Physical" 
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-2 sm:px-3 py-1 sm:py-2 h-auto text-xs sm:text-sm"
+            >
+              <Home className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Physical</span>
+              <span className="xs:hidden">Phys</span>
+              <Badge variant="outline" className="ml-1 sm:ml-2 bg-primary/5 text-xs">{controlCounts.Physical}</Badge>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="Technological" 
+              className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-2 sm:px-3 py-1 sm:py-2 h-auto text-xs sm:text-sm"
+            >
+              <Server className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Technological</span>
+              <span className="xs:hidden">Tech</span>
+              <Badge variant="outline" className="ml-1 sm:ml-2 bg-primary/5 text-xs">{controlCounts.Technological}</Badge>
+            </TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value={activeTab} className="mt-0">
           <div className="rounded-md border shadow-sm overflow-hidden bg-card">
-            <Table>
-              <TableCaption>
-                ISO/IEC 27001:2022 Information Security Controls
-              </TableCaption>
-              <TableHeader className="bg-muted/30">
-                <TableRow>
-                  <TableHead className="w-[100px]">ID</TableHead>
-                  <TableHead className="w-[200px]">Category</TableHead>
-                  <TableHead className="w-[250px]">Control</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredControls.map((control) => (
-                  <TableRow key={control.id} className="hover:bg-muted/20 transition-colors">
-                    <TableCell className="font-mono font-medium">{control.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getCategoryIcon(control.category)}
-                        <span>{control.category}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{control.title}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{control.description}</TableCell>
-                  </TableRow>
-                ))}
-                {filteredControls.length === 0 && (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableCaption>
+                  ISO/IEC 27001:2022 Information Security Controls
+                </TableCaption>
+                <TableHeader className="bg-muted/30">
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                      <div className="flex flex-col items-center justify-center">
-                        <Search className="h-8 w-8 mb-2 opacity-40" />
-                        <p>No controls found matching your search criteria.</p>
-                        <p className="text-sm">Try adjusting your search terms or category filter.</p>
-                      </div>
-                    </TableCell>
+                    <TableHead className="w-[60px] sm:w-[100px]">ID</TableHead>
+                    {!isMobile && <TableHead className="w-[150px] sm:w-[200px]">Category</TableHead>}
+                    <TableHead className="w-[150px] sm:w-[250px]">Control</TableHead>
+                    {!isMobile && <TableHead>Description</TableHead>}
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredControls.map((control) => (
+                    <TableRow key={control.id} className="hover:bg-muted/20 transition-colors">
+                      <TableCell className="font-mono text-xs sm:text-sm font-medium">{control.id}</TableCell>
+                      {!isMobile && (
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {getCategoryIcon(control.category)}
+                            <span>{control.category}</span>
+                          </div>
+                        </TableCell>
+                      )}
+                      <TableCell className="font-medium text-xs sm:text-sm">
+                        <div className="flex flex-col">
+                          {control.title}
+                          {isMobile && (
+                            <span className="text-xs text-muted-foreground flex items-center mt-1">
+                              {getCategoryIcon(control.category)}
+                              <span className="ml-1">{control.category}</span>
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      {!isMobile && <TableCell className="text-xs sm:text-sm text-muted-foreground">{control.description}</TableCell>}
+                    </TableRow>
+                  ))}
+                  {filteredControls.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={isMobile ? 2 : 4} className="text-center py-8 text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center">
+                          <Search className="h-8 w-8 mb-2 opacity-40" />
+                          <p>No controls found matching your search criteria.</p>
+                          <p className="text-sm">Try adjusting your search terms or category filter.</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
