@@ -75,10 +75,15 @@ export const useTimerActions = (
       });
       return Promise.resolve();
     } else {
-      const { dispatch } = props as UseTimerActionsProps;
+      const { dispatch, resetTimer: propsResetTimer } = props as UseTimerActionsProps;
       console.log("useTimerActions: Resetting timer (reducer)");
-      dispatch({ type: 'RESET' });
-      return Promise.resolve();
+      
+      if (propsResetTimer) {
+        return propsResetTimer();
+      } else {
+        dispatch({ type: 'RESET' });
+        return Promise.resolve();
+      }
     }
   }, [props, isLegacyInterface]);
 
@@ -92,10 +97,15 @@ export const useTimerActions = (
         extensionTime: (props as TimerActionProps).metrics.extensionTime + seconds
       });
     } else {
-      const { dispatch } = props as UseTimerActionsProps;
+      const { dispatch, extendTimer: propsExtendTimer } = props as UseTimerActionsProps;
       console.log(`useTimerActions: Extending timer by ${minutes} minutes (reducer)`);
-      dispatch({ type: 'EXTEND', payload: seconds });
-      dispatch({ type: 'SET_EXTENSION_TIME', payload: seconds });
+      
+      if (propsExtendTimer) {
+        propsExtendTimer(minutes);
+      } else {
+        dispatch({ type: 'EXTEND', payload: seconds });
+        dispatch({ type: 'SET_EXTENSION_TIME', payload: seconds });
+      }
     }
   }, [props, isLegacyInterface]);
 
@@ -106,9 +116,14 @@ export const useTimerActions = (
       console.log(`useTimerActions: Setting timer to ${minutes} minutes (legacy)`);
       updateTimeLeft(seconds);
     } else {
-      const { dispatch } = props as UseTimerActionsProps;
+      const { dispatch, setMinutes: propsSetMinutes } = props as UseTimerActionsProps;
       console.log(`useTimerActions: Setting timer to ${minutes} minutes (reducer)`);
-      dispatch({ type: 'INIT', payload: { duration: seconds } });
+      
+      if (propsSetMinutes) {
+        propsSetMinutes(minutes);
+      } else {
+        dispatch({ type: 'INIT', payload: { duration: seconds } });
+      }
     }
   }, [props, isLegacyInterface]);
 
@@ -177,8 +192,12 @@ export const useTimerActions = (
       const { updateMetrics } = props as TimerActionProps;
       updateMetrics(updates);
     } else {
-      const { dispatch } = props as UseTimerActionsProps;
-      dispatch({ type: 'UPDATE_METRICS', payload: updates });
+      const { dispatch, updateMetrics: propsUpdateMetrics } = props as UseTimerActionsProps;
+      if (propsUpdateMetrics) {
+        propsUpdateMetrics(updates);
+      } else {
+        dispatch({ type: 'UPDATE_METRICS', payload: updates });
+      }
     }
   }, [props, isLegacyInterface]);
 

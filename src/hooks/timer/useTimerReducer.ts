@@ -1,6 +1,12 @@
 
 import { TimerState, TimerAction } from '@/types/timer';
+import { toISOString } from '@/lib/utils/dateUtils';
+import { 
+  determineCompletionStatus, 
+  calculateEfficiencyRatio 
+} from '@/lib/utils/formatters';
 
+// Timer reducer to handle all timer state changes
 export const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
   switch (action.type) {
     case 'INIT':
@@ -12,30 +18,28 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
           expectedTime: action.payload.duration
         }
       };
+      
     case 'START':
-      // Start the timer if it's not already running
       return {
         ...state,
         isRunning: true,
-        isPaused: false,
-        metrics: {
-          ...state.metrics,
-          isPaused: false
-        }
+        isPaused: false
       };
+
     case 'PAUSE':
-      // Pause the timer if it's running
       return {
         ...state,
+        isRunning: false,
         isPaused: true,
         metrics: {
           ...state.metrics,
           pauseCount: state.metrics.pauseCount + 1,
-          isPaused: true
+          isPaused: true,
+          pausedTimeLeft: state.timeLeft
         }
       };
+
     case 'RESET':
-      // Reset the timer
       return {
         ...state,
         timeLeft: state.metrics.expectedTime,
@@ -48,14 +52,25 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
           startTime: null,
           endTime: null,
           pauseCount: 0,
+          actualDuration: 0,
           pausedTime: 0,
           lastPauseTimestamp: null,
           extensionTime: 0,
-          isPaused: false
+          isPaused: false,
+          pausedTimeLeft: null
         }
       };
-    case 'COMPLETE':
-      // Complete the timer
+
+    case 'COMPLETE': {
+      const now = new Date();
+      const startTime = state.metrics.startTime || new Date(now.getTime() - (state.metrics.expectedTime * 1000));
+      const actualDuration = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+      const pausedTime = state.metrics.pausedTime || 0;
+      const extensionTime = state.metrics.extensionTime || 0;
+      const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
+      const efficiencyRatio = calculateEfficiencyRatio(state.metrics.expectedTime, netEffectiveTime);
+      const completionStatus = determineCompletionStatus(state.metrics.expectedTime, netEffectiveTime);
+
       return {
         ...state,
         isRunning: false,
@@ -63,14 +78,27 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
         showCompletion: true,
         metrics: {
           ...state.metrics,
-          isPaused: false
+          startTime,
+          endTime: now,
+          actualDuration,
+          pausedTime,
+          extensionTime,
+          netEffectiveTime,
+          efficiencyRatio,
+          completionStatus,
+          isPaused: false,
+          pausedTimeLeft: null,
+          completionDate: toISOString(now)
         }
       };
+    }
+
     case 'CELEBRATE':
       return {
         ...state,
         completionCelebrated: true
       };
+
     case 'UPDATE_METRICS':
       return {
         ...state,
@@ -79,9 +107,10 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
           ...action.payload
         }
       };
+
     case 'DECREMENT_TIME':
-      if (state.timeLeft <= 1) {
-        // Auto-complete when time is up
+      // Don't go below zero
+      if (state.timeLeft <= 0) {
         return {
           ...state,
           timeLeft: 0,
@@ -89,11 +118,11 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
           showCompletion: true
         };
       }
-      
       return {
         ...state,
         timeLeft: state.timeLeft - 1
       };
+
     case 'SET_START_TIME':
       return {
         ...state,
@@ -102,6 +131,7 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
           startTime: action.payload
         }
       };
+
     case 'SET_LAST_PAUSE_TIMESTAMP':
       return {
         ...state,
@@ -110,19 +140,22 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
           lastPauseTimestamp: action.payload
         }
       };
+
     case 'SET_EXTENSION_TIME':
       return {
         ...state,
         metrics: {
           ...state.metrics,
-          extensionTime: state.metrics.extensionTime + action.payload
+          extensionTime: (state.metrics.extensionTime || 0) + action.payload
         }
       };
+
     case 'EXTEND':
       return {
         ...state,
         timeLeft: state.timeLeft + action.payload
       };
+
     default:
       return state;
   }

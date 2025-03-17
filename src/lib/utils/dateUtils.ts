@@ -1,108 +1,95 @@
-/**
- * Central utility for standardized date handling across the application
- */
-import { format, formatDistanceToNow, isDate } from 'date-fns';
-
-// CONSTANTS
-export const ISO_DATE_FORMAT = 'yyyy-MM-dd';
-export const ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-export const DATE_DISPLAY_FORMAT = 'MMM d, yyyy';
-export const TIME_DISPLAY_FORMAT = 'HH:mm';
-export const DATE_TIME_DISPLAY_FORMAT = 'MMM d, yyyy HH:mm';
 
 /**
- * Safely converts any date-like value to an ISO string
- * Always returns a string, never a Date object
+ * Converts a Date object to a properly formatted ISO string
+ * This ensures that we always have consistent date formatting
  */
-export const toISOString = (date: Date | string | number | null | undefined): string => {
-  if (!date) return new Date().toISOString();
+export const toISOString = (date: Date | string | undefined): string => {
+  if (!date) {
+    return new Date().toISOString();
+  }
   
-  try {
-    // If it's already a string that looks like an ISO string, return it
-    if (typeof date === 'string' && date.includes('T') && date.includes('Z')) {
+  if (typeof date === 'string') {
+    // Check if already in ISO format
+    if (date.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/)) {
       return date;
     }
     
-    // Otherwise convert to Date and then to ISO string
-    const dateObj = typeof date === 'string' || typeof date === 'number' 
-      ? new Date(date) 
-      : date;
-      
-    return isDate(dateObj) ? dateObj.toISOString() : new Date().toISOString();
-  } catch (error) {
-    console.error('Error converting date to ISO string:', error);
-    return new Date().toISOString();
+    try {
+      return new Date(date).toISOString();
+    } catch (e) {
+      console.error("Invalid date string:", date);
+      return new Date().toISOString();
+    }
   }
-};
-
-/**
- * Safely parses any date-like value to a Date object
- * Returns null if parsing fails
- */
-export const toDateObject = (date: Date | string | number | null | undefined): Date | null => {
-  if (!date) return null;
   
-  try {
-    if (isDate(date)) return date as Date;
-    
-    const dateObj = new Date(date);
-    return isNaN(dateObj.getTime()) ? null : dateObj;
-  } catch (error) {
-    console.error('Error parsing date:', error);
-    return null;
-  }
+  return date.toISOString();
 };
 
 /**
- * Formats a date for display
+ * Formats a date to local date string (e.g., "Jan 1, 2023")
  */
-export const formatDate = (
-  date: Date | string | number | null | undefined, 
-  formatStr: string = DATE_DISPLAY_FORMAT
-): string => {
-  const dateObj = toDateObject(date);
-  if (!dateObj) return 'Invalid date';
+export const formatDate = (date: Date | string | undefined): string => {
+  if (!date) return '';
   
-  try {
-    return format(dateObj, formatStr);
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'Invalid date';
-  }
-};
-
-/**
- * Formats a date as a relative time (e.g., "2 hours ago")
- */
-export const formatRelativeTime = (date: Date | string | number | null | undefined): string => {
-  const dateObj = toDateObject(date);
-  if (!dateObj) return 'Unknown time';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
   
-  try {
-    return formatDistanceToNow(dateObj, { addSuffix: true });
-  } catch (error) {
-    console.error('Error formatting relative time:', error);
-    return 'Unknown time';
-  }
+  return dateObj.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 };
 
 /**
- * Returns the current date and time as ISO string
+ * Formats a date to local time string (e.g., "2:30 PM")
  */
-export const getCurrentISOString = (): string => {
-  return new Date().toISOString();
-};
-
-/**
- * Validates if a string is a valid ISO format date
- */
-export const isValidISOString = (dateString: string): boolean => {
-  if (typeof dateString !== 'string') return false;
+export const formatTime = (date: Date | string | undefined): string => {
+  if (!date) return '';
   
-  try {
-    const d = new Date(dateString);
-    return !isNaN(d.getTime()) && dateString.includes('T');
-  } catch (error) {
-    return false;
-  }
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  return dateObj.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+/**
+ * Get the start of the current day
+ */
+export const getStartOfDay = (date: Date = new Date()): Date => {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  return startOfDay;
+};
+
+/**
+ * Get the end of the current day
+ */
+export const getEndOfDay = (date: Date = new Date()): Date => {
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+  return endOfDay;
+};
+
+/**
+ * Check if a date is today
+ */
+export const isToday = (date: Date | string): boolean => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const today = new Date();
+  
+  return (
+    dateObj.getDate() === today.getDate() &&
+    dateObj.getMonth() === today.getMonth() &&
+    dateObj.getFullYear() === today.getFullYear()
+  );
+};
+
+/**
+ * Get a formatted date string for use in task relationships
+ */
+export const getDateString = (date: Date = new Date()): string => {
+  return date.toDateString();
 };

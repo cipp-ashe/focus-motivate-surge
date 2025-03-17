@@ -29,6 +29,10 @@ export interface UseTimerReturn {
 export interface UseTimerActionsProps {
   dispatch: React.Dispatch<TimerAction>;
   intervalRef?: React.MutableRefObject<NodeJS.Timeout | null>;
+  resetTimer?: () => Promise<void>;
+  extendTimer?: (minutes: number) => void;
+  setMinutes?: (minutes: number) => void;
+  updateMetrics?: (updates: any) => void;
 }
 
 export interface UseTimerActionsReturn {

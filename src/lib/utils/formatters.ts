@@ -1,117 +1,108 @@
 
-// Consolidated time and formatting utilities
-import { formatDate as formatDateHelper, formatRelativeTime } from './dateUtils';
+/**
+ * Formats a number of seconds into a display string (MM:SS)
+ */
+export const formatTime = (timeInSeconds: number): string => {
+  const minutes = Math.floor(timeInSeconds / 60);
+  const seconds = timeInSeconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
 
-// Duration formatting (seconds to human-readable)
-export const formatDuration = (seconds: number): string => {
-  if (!seconds || seconds === 0) return '0s';
+/**
+ * Calculates efficiency ratio based on expected vs actual time
+ */
+export const calculateEfficiencyRatio = (
+  expectedSeconds: number, 
+  actualSeconds: number
+): number => {
+  if (expectedSeconds <= 0) return 1;
   
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes > 0 ? `${minutes}m` : ''} ${remainingSeconds > 0 ? `${remainingSeconds}s` : ''}`.trim();
-  }
-  if (minutes > 0) {
-    return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
-  }
-  return `${remainingSeconds}s`;
+  // Cap efficiency at reasonable limits
+  const ratio = expectedSeconds / Math.max(1, actualSeconds);
+  return Math.min(Math.max(ratio, 0.1), 2);
 };
 
-// Convert seconds to MM:SS format
-export const formatTime = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-};
-
-// Legacy formatDate that now uses our new utility (for backwards compatibility)
-export const formatDate = (dateString?: string): string => {
-  if (!dateString) return '';
-  return formatDateHelper(dateString, 'MMM d, HH:mm');
-};
-
-// Format date with localized display
-export const formatDateLocalized = (date: Date | string): string => {
-  return formatDateHelper(date, 'MMM d, yyyy');
-};
-
-// Legacy formatTimestamp that now uses our new utility (for backwards compatibility)
-export const formatTimestamp = (dateString: string): string => {
-  try {
-    return formatDateHelper(dateString, 'MMM d, HH:mm');
-  } catch (error) {
-    console.error('Error formatting timestamp:', error);
-    return dateString;
-  }
-};
-
-// Format a number as a percentage
-export const formatPercentage = (value: number): string => {
-  const percentage = value * 100;
-  return `${Math.round(percentage)}%`;
-};
-
-// Timer efficiency calculations
-export const calculateEfficiencyRatio = (expectedTime: number, netEffectiveTime: number): number => {
-  if (netEffectiveTime === 0 || expectedTime === 0) return 0;
-  return netEffectiveTime / expectedTime;
-};
-
-export const calculateEfficiencyPercentage = (expectedTime: number, netEffectiveTime: number): number => {
-  if (netEffectiveTime === 0 || expectedTime === 0) return 0;
-  const ratio = (netEffectiveTime / expectedTime) * 100;
-  return Math.min(ratio, 100);
-};
-
-// Determine the completion status based on efficiency ratio
+/**
+ * Determines a qualitative completion status based on efficiency
+ */
 export const determineCompletionStatus = (
-  expectedTime: number, 
-  netEffectiveTime: number
-): 'Completed Early' | 'Completed On Time' | 'Completed Late' => {
-  const ratio = calculateEfficiencyRatio(expectedTime, netEffectiveTime);
-  if (ratio < 0.8) return 'Completed Early';
-  if (ratio > 1.2) return 'Completed Late';
-  return 'Completed On Time';
+  expectedSeconds: number,
+  actualSeconds: number
+): string => {
+  if (expectedSeconds <= 0) return 'Completed';
+  
+  const efficiency = calculateEfficiencyRatio(expectedSeconds, actualSeconds);
+  
+  if (efficiency >= 1.5) return 'Completed Very Early';
+  if (efficiency >= 1.2) return 'Completed Early';
+  if (efficiency >= 0.8) return 'Completed On Time';
+  if (efficiency >= 0.5) return 'Completed Late';
+  return 'Completed Very Late';
 };
 
-// Visual styles for task completion status
-export const getCompletionStatusColor = (status: string) => {
-  switch (status) {
-    case 'Completed Early':
-      return 'text-green-500';
-    case 'Completed On Time':
-      return 'text-blue-500';
-    case 'Completed Late':
-      return 'text-yellow-500';
-    default:
-      return 'text-muted-foreground';
+/**
+ * Formats a duration in seconds to a human-readable string
+ */
+export const formatDuration = (durationInSeconds: number): string => {
+  if (durationInSeconds < 60) {
+    return `${durationInSeconds} seconds`;
   }
+  
+  const minutes = Math.floor(durationInSeconds / 60);
+  if (minutes < 60) {
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+  }
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (remainingMinutes === 0) {
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  }
+  
+  return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}`;
 };
 
-export const getCompletionIcon = (status: string) => {
-  switch (status) {
-    case 'Completed Early':
-      return 'CheckCircle2';
-    case 'Completed On Time':
-      return 'Timer';
-    case 'Completed Late':
-      return 'AlertTriangle';
-    default:
-      return 'Timer';
+/**
+ * Formats a date to a relative time string (e.g., "2 days ago")
+ */
+export const formatRelativeTime = (date: Date | string): string => {
+  const now = new Date();
+  const targetDate = typeof date === 'string' ? new Date(date) : date;
+  const diffInMilliseconds = now.getTime() - targetDate.getTime();
+  
+  // Convert to seconds
+  const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
+  
+  if (diffInSeconds < 60) {
+    return 'just now';
   }
-};
-
-export const getCompletionTimingClass = (status: 'Completed Early' | 'Completed On Time' | 'Completed Late' | string): string => {
-  switch (status) {
-    case 'Completed Early':
-      return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200/30';
-    case 'Completed On Time':
-      return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/30';
-    case 'Completed Late':
-      return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/30';
-    default:
-      return 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-200/30';
+  
+  // Convert to minutes
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
   }
+  
+  // Convert to hours
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+  }
+  
+  // Convert to days
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) {
+    return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+  }
+  
+  // Convert to months
+  const diffInMonths = Math.floor(diffInDays / 30);
+  if (diffInMonths < 12) {
+    return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
+  }
+  
+  // Convert to years
+  const diffInYears = Math.floor(diffInMonths / 12);
+  return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
 };

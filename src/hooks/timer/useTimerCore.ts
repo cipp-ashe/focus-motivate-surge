@@ -43,6 +43,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
   };
 
   const [state, dispatch] = useReducer(timerReducer, initialState);
+  // Using MutableRefObject to fix the TypeScript error
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef<boolean>(true);
 
