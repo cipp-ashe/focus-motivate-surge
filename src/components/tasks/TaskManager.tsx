@@ -19,7 +19,11 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   isTimerView = false,
   dialogOpeners
 }) => {
-  const { items = [], completed = [], selected: selectedTaskId, addTask } = useTaskContext() || { items: [], completed: [], selected: null };
+  const taskContext = useTaskContext();
+  const items = taskContext?.items || [];
+  const completed = taskContext?.completed || [];
+  const selectedTaskId = taskContext?.selected || null;
+  const addTask = taskContext?.addTask;
   
   // Task management functionality
   const handleTaskAdd = useCallback((task: Task) => {
