@@ -26,8 +26,27 @@ const TasksPage: React.FC = () => {
   
   // State for UI updates
   const [, setForceUpdate] = useState(0);
+  
+  // Force update handler with debouncing to prevent excessive re-renders
+  const forceUpdateHandlerRef = React.useRef<NodeJS.Timeout | null>(null);
   const forceUpdateHandler = useCallback(() => {
-    setForceUpdate(prev => prev + 1);
+    if (forceUpdateHandlerRef.current) {
+      clearTimeout(forceUpdateHandlerRef.current);
+    }
+    
+    forceUpdateHandlerRef.current = setTimeout(() => {
+      setForceUpdate(prev => prev + 1);
+      forceUpdateHandlerRef.current = null;
+    }, 50);
+  }, []);
+  
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (forceUpdateHandlerRef.current) {
+        clearTimeout(forceUpdateHandlerRef.current);
+      }
+    };
   }, []);
   
   // Dialog content state
@@ -77,21 +96,31 @@ const TasksPage: React.FC = () => {
     }
   };
   
-  // Handle task creation using event manager
-  const handleAddTask = (task: Task) => {
-    console.log("Emitting task:create event:", task);
-    eventManager.emit('task:create', task);
-    toast.success(`Task created: ${task.name}`);
-  };
-  
-  // Handle multiple tasks addition
-  const handleAddMultipleTasks = (tasks: Task[]) => {
-    console.log("Adding multiple tasks:", tasks);
-    tasks.forEach(task => {
+  // Handle task creation using event manager with proper error handling
+  const handleAddTask = useCallback((task: Task) => {
+    try {
+      console.log("Emitting task:create event:", task);
       eventManager.emit('task:create', task);
-    });
-    toast.success(`Added ${tasks.length} tasks`);
-  };
+      toast.success(`Task created: ${task.name}`);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Failed to create task");
+    }
+  }, []);
+  
+  // Handle multiple tasks addition with error handling
+  const handleAddMultipleTasks = useCallback((tasks: Task[]) => {
+    try {
+      console.log("Adding multiple tasks:", tasks);
+      tasks.forEach(task => {
+        eventManager.emit('task:create', task);
+      });
+      toast.success(`Added ${tasks.length} tasks`);
+    } catch (error) {
+      console.error("Error adding multiple tasks:", error);
+      toast.error("Failed to add tasks");
+    }
+  }, []);
   
   // If no task context, show loading or error
   if (!taskContext) {

@@ -73,6 +73,15 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col h-full">
+      {/* Task type filters - MOVED ABOVE TABS */}
+      <div className="mb-2">
+        <TaskTabsList 
+          taskCounts={taskCounts} 
+          activeTaskType={activeTaskType} 
+          onTaskTypeChange={type => setActiveTaskType(type as 'all' | TaskType)}
+        />
+      </div>
+      
       <TabsList className="grid grid-cols-2 mb-2">
         <TabsTrigger value="active">
           Active Tasks ({activeTasks.length})
@@ -81,15 +90,6 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
           Completed Tasks ({completedTasks.length})
         </TabsTrigger>
       </TabsList>
-      
-      {/* Task type filters */}
-      <div className="mb-4">
-        <TaskTabsList 
-          taskCounts={taskCounts} 
-          activeTaskType={activeTaskType} 
-          onTaskTypeChange={type => setActiveTaskType(type as 'all' | TaskType)}
-        />
-      </div>
       
       <TabsContent value="active" className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
