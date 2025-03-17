@@ -1,7 +1,6 @@
 
 // UI utility hooks
-export { useMobile } from './useMobile';
-export { useIsMobile } from './useIsMobile';
+export { useMobile, useIsMobile } from './useIsMobile';
 export { useTransition } from './useTransition';
 export { useWindowSize } from './useWindowSize';
 export { useFocusTrap } from './useFocusTrap';

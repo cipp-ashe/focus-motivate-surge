@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { cn } from '@/lib/utils';
 import { 
   HabitTracker,

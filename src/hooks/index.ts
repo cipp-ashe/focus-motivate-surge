@@ -1,8 +1,9 @@
 
 // Re-export hooks for easier imports
-import { useIsMobile } from './use-mobile';
+import { useIsMobile, useMobile } from './ui/useIsMobile';
 
-// Fix the export name to useIsMobile instead of useMobile
+// Export both for proper naming
 export {
-  useIsMobile
+  useIsMobile,
+  useMobile
 };

@@ -41,3 +41,6 @@ export const useIsMobile = (breakpoint: number = 768): boolean => {
 
   return isMobile;
 };
+
+// Also export it as useMobile for backward compatibility
+export const useMobile = useIsMobile;
