@@ -1,5 +1,5 @@
+
 import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { habitReducer } from './habitReducer';
 import { HabitState, HabitContextActions, initialState } from './types';
@@ -21,55 +21,51 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const habitsCheckedRef = useRef(false);
   const periodicCheckRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Load initial templates
-  const { data, refetch } = useQuery({
-    queryKey: ['habits'],
-    queryFn: async () => {
-      // Prevent duplicate loading using both global and local flags
-      if (habitsInitialized || loadedRef.current) return state.templates;
+  // Load initial templates on mount
+  useEffect(() => {
+    // Prevent duplicate loading using both global and local flags
+    if (habitsInitialized || loadedRef.current) return;
+    
+    // Set flags immediately to prevent duplicate processing
+    loadedRef.current = true;
+    habitsInitialized = true;
+    
+    try {
+      const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
       
-      // Set flags immediately to prevent duplicate processing
-      loadedRef.current = true;
-      habitsInitialized = true;
+      dispatch({ type: 'LOAD_TEMPLATES', payload: templates });
       
-      try {
-        const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
-        
-        dispatch({ type: 'LOAD_TEMPLATES', payload: templates });
-        
-        // Also load custom templates
-        const customTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
-        dispatch({ type: 'LOAD_CUSTOM_TEMPLATES', payload: customTemplates });
-        
-        // Mark as loaded and trigger habit processing once
-        if (!habitsChecked && !habitsCheckedRef.current) {
-          setTimeout(() => {
-            habitsCheckedRef.current = true;
-            habitsChecked = true;
-            // Update habit processing
-            eventManager.emit('habits:check-pending', {});
-          }, 300);
-        }
-        
-        return templates;
-      } catch (error) {
-        console.error('Error loading habits:', error);
-        toast.error('Failed to load habits');
-        return [];
+      // Also load custom templates
+      const customTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
+      dispatch({ type: 'LOAD_CUSTOM_TEMPLATES', payload: customTemplates });
+      
+      // Mark as loaded and trigger habit processing once
+      if (!habitsChecked && !habitsCheckedRef.current) {
+        setTimeout(() => {
+          habitsCheckedRef.current = true;
+          habitsChecked = true;
+          // Update habit processing
+          eventManager.emit('habits:check-pending', {});
+        }, 300);
       }
+    } catch (error) {
+      console.error('Error loading habits:', error);
+      toast.error('Failed to load habits');
     }
-  });
+  }, []);
 
   // Set up event handlers with the current templates
   // Pass state.templates to avoid circular dependency
   const eventHandlers = useHabitEvents(state.templates);
 
-  // Create action handlers with refetch capability
+  // Create action handlers
   const baseActions = createHabitActions(state, dispatch);
   const actions: HabitContextActions = {
     ...baseActions,
     reloadTemplates: () => {
-      refetch();
+      // Reset the loaded flag to allow reloading
+      loadedRef.current = false;
+      habitsInitialized = false;
       
       // Trigger events with debounce to ensure task synchronization
       const checkTimeout = setTimeout(() => {

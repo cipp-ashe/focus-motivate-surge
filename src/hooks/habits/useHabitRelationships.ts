@@ -1,72 +1,54 @@
 
 import { useCallback } from 'react';
-import { eventBus } from '@/lib/eventBus';
-import { HabitDetail } from '@/components/habits/types';
-import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
+import { taskStorage } from '@/lib/storage/taskStorage';
+import { Task } from '@/types/tasks';
 
-// Define the event payload type
-interface JournalOpenEventPayload {
-  habitId: string;
-  habitName: string;
-  templateId: string;
+interface HabitRelationshipsReturn {
+  getRelatedTasks: (habitId: string, date?: string) => Task[];
+  getRelatedHabit: (taskId: string) => string | null;
 }
 
 /**
- * Hook to manage relationships between habits and other entities like tasks and journal entries
+ * Hook to manage relationships between habits and tasks
  */
-export const useHabitRelationships = () => {
+export const useHabitRelationships = (): HabitRelationshipsReturn => {
   /**
-   * Create a task from a habit
+   * Get tasks related to a specific habit
    */
-  const createTaskFromHabit = useCallback((habit: HabitDetail, templateId: string) => {
-    // Fix comparison error: check if habit metrics type is not 'timer'
-    if (habit.metrics?.type !== 'timer') {
-      console.warn('Cannot create a task for non-timer habit');
-      return null;
-    }
+  const getRelatedTasks = useCallback((habitId: string, date?: string): Task[] => {
+    if (!habitId) return [];
     
-    const today = new Date().toDateString();
-    const taskId = uuidv4();
-    const duration = habit.metrics?.target || 1500; // Default to 25 minutes
+    // Use today's date if not specified
+    const targetDate = date || new Date().toDateString();
     
-    // Schedule task creation via event bus
-    eventBus.emit('habit:schedule', {
-      habitId: habit.id,
-      templateId,
-      name: habit.name,
-      duration,
-      date: today
-    });
+    // Get all tasks
+    const allTasks = taskStorage.loadTasks();
     
-    toast.success(`Added habit "${habit.name}" to tasks`);
-    
-    return taskId;
+    // Filter tasks related to this habit on the specified date
+    return allTasks.filter(task => 
+      task.relationships?.habitId === habitId && 
+      (!date || task.relationships?.date === targetDate)
+    );
   }, []);
   
   /**
-   * Create a journal entry from a habit
+   * Get the habitId related to a specific task
    */
-  const createJournalFromHabit = useCallback((habit: HabitDetail, templateId: string) => {
-    if (habit.metrics?.type !== 'journal') {
-      console.warn('Cannot create a journal for non-journal habit');
-      return null;
-    }
+  const getRelatedHabit = useCallback((taskId: string): string | null => {
+    if (!taskId) return null;
     
-    // Fix error: Add templateId to the journal:open event payload
-    const payload: JournalOpenEventPayload = {
-      habitId: habit.id,
-      habitName: habit.name,
-      templateId // Add templateId to the payload
-    };
+    // Get all tasks
+    const allTasks = taskStorage.loadTasks();
     
-    eventBus.emit('journal:open', payload);
+    // Find the task
+    const task = allTasks.find(t => t.id === taskId);
     
-    return true;
+    // Return the habitId if found
+    return task?.relationships?.habitId || null;
   }, []);
   
   return {
-    createTaskFromHabit,
-    createJournalFromHabit
+    getRelatedTasks,
+    getRelatedHabit
   };
 };

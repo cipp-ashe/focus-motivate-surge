@@ -10,196 +10,173 @@ import { toast } from 'sonner';
 export const useHabitCompletion = (todaysHabits: HabitDetail[], templates: ActiveTemplate[]) => {
   const [completedHabits, setCompletedHabits] = useState<string[]>([]);
   const [dismissedHabits, setDismissedHabits] = useState<string[]>([]);
-  const { createTaskFromHabit, createJournalFromHabit } = useHabitRelationships();
+  const { getRelatedTasks } = useHabitRelationships();
   
-  // Listen for habit dismissed events
+  // Load completion status on mount
   useEffect(() => {
-    // When a habit task is dismissed, mark the habit as dismissed
-    const handleHabitDismissed = (payload: { habitId: string; date: string }) => {
-      const { habitId } = payload;
-      console.log(`Marking habit ${habitId} as dismissed`);
+    // Load from stored progress
+    try {
+      const progressMap = JSON.parse(localStorage.getItem('habit-progress') || '{}');
+      const today = new Date().toISOString().split('T')[0];
       
-      // Update dismissed habits list
-      setDismissedHabits(prev => {
-        if (prev.includes(habitId)) return prev;
-        return [...prev, habitId];
-      });
-    };
-    
-    // Set up event listener
-    // @ts-ignore - We're using a custom event type not in TimerEventPayloads
-    const unsubscribe = eventManager.on('habit:dismissed', handleHabitDismissed);
-    
-    // Check localStorage for any already dismissed habits for today
-    const storedDismissed = localStorage.getItem('dismissedHabitTasks');
-    if (storedDismissed) {
-      try {
-        const dismissed = JSON.parse(storedDismissed);
-        const today = new Date().toDateString();
+      const completed: string[] = [];
+      const dismissed: string[] = [];
+      
+      // Process each template's habits
+      Object.keys(progressMap).forEach(templateId => {
+        const templateData = progressMap[templateId];
         
-        // Find habits dismissed today
-        Object.entries(dismissed).forEach(([key, _]) => {
-          if (key.includes(today)) {
-            const [habitId] = key.split('-');
-            if (habitId && todaysHabits.some(h => h.id === habitId)) {
-              setDismissedHabits(prev => {
-                if (prev.includes(habitId)) return prev;
-                return [...prev, habitId];
-              });
+        Object.keys(templateData).forEach(habitId => {
+          const habitData = templateData[habitId];
+          
+          // Check today's status
+          if (habitData[today]) {
+            if (habitData[today].completed) {
+              completed.push(habitId);
+            }
+            
+            if (habitData[today].dismissed) {
+              dismissed.push(habitId);
             }
           }
         });
-      } catch (error) {
-        console.error('Error loading dismissed habits:', error);
-      }
+      });
+      
+      setCompletedHabits(completed);
+      setDismissedHabits(dismissed);
+      
+    } catch (error) {
+      console.error('Error loading habit completion status:', error);
     }
-    
-    return () => {
-      unsubscribe();
-    };
-  }, [todaysHabits]);
+  }, []);
   
-  // Handle marking a habit as complete
-  const handleHabitComplete = useCallback((habitId: string, completed: boolean) => {
-    // Don't allow changing dismissed habits
-    if (dismissedHabits.includes(habitId)) {
-      return;
-    }
-    
+  // Mark a habit as complete
+  const completeHabit = useCallback((habitId: string, templateId: string) => {
+    // Update UI state
     setCompletedHabits(prev => {
-      const updated = new Set(prev);
-      if (completed) {
-        updated.add(habitId);
-      } else {
-        updated.delete(habitId);
+      if (!prev.includes(habitId)) {
+        return [...prev, habitId];
       }
-      return [...updated];
+      return prev;
     });
     
-    // Find the habit and its template
-    const habit = todaysHabits.find(h => h.id === habitId);
-    if (!habit) return;
-    
-    const templateId = habit.relationships?.templateId || '';
-    
-    // Emit event for habit completion
-    // Use CustomEvent for internal app communication
-    const habitCompleteEvent = new CustomEvent('habit-complete', {
-      detail: {
-        habitId,
-        completed,
-        date: new Date().toDateString(),
-        templateId
+    // Update storage
+    try {
+      const progressMap = JSON.parse(localStorage.getItem('habit-progress') || '{}');
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Initialize nested structure if needed
+      if (!progressMap[templateId]) {
+        progressMap[templateId] = {};
       }
-    });
-    window.dispatchEvent(habitCompleteEvent);
-    
-    // Use a more generic event for persistence via eventBus
-    // @ts-ignore - We're using a custom event type not in TimerEventPayloads
-    eventManager.emit('habit:journal-complete', {
-      habitId,
-      completed,
-      date: new Date().toDateString(),
-      templateId
-    });
-    
-    toast.success(`Habit ${completed ? 'completed' : 'uncompleted'}: ${habit.name}`);
-  }, [todaysHabits, dismissedHabits]);
+      
+      if (!progressMap[templateId][habitId]) {
+        progressMap[templateId][habitId] = {};
+      }
+      
+      // Get previous streak or start at 0
+      const prevStreak = progressMap[templateId][habitId][today]?.streak || 0;
+      
+      // Update for today
+      progressMap[templateId][habitId][today] = {
+        value: true,
+        streak: prevStreak + 1,
+        date: today,
+        completed: true,
+        dismissed: false
+      };
+      
+      // Save back to storage
+      localStorage.setItem('habit-progress', JSON.stringify(progressMap));
+      
+      // Update related tasks
+      const tasks = getRelatedTasks(habitId);
+      if (tasks.length > 0) {
+        tasks.forEach(task => {
+          habitTaskOperations.completeTask(task.id);
+        });
+      }
+      
+      // Emit event for other components
+      eventManager.emit('habit:complete', { 
+        habitId, 
+        templateId, 
+        completed: true, 
+        date: today 
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error completing habit:', error);
+      toast.error('Failed to update habit progress');
+      return false;
+    }
+  }, [getRelatedTasks]);
   
-  // Handle adding a habit to tasks
-  const handleAddHabitToTasks = useCallback((habit: HabitDetail) => {
-    // Get template ID from habit relationship
-    const templateId = habit.relationships?.templateId || '';
+  // Mark a habit as dismissed
+  const dismissHabit = useCallback((habitId: string, templateId: string) => {
+    // Update UI state
+    setDismissedHabits(prev => {
+      if (!prev.includes(habitId)) {
+        return [...prev, habitId];
+      }
+      return prev;
+    });
     
-    // Determine which type of task to create based on habit metrics type
-    if (habit.metrics?.type === 'timer') {
-      // Create a timer task
-      const taskId = habitTaskOperations.createHabitTask(
-        habit.id,
-        templateId,
-        habit.name,
-        habit.metrics.target || 1500, // Default to 25 minutes if no target
-        new Date().toDateString(),
-        { 
-          selectAfterCreate: true,
-          taskType: 'timer' // Use timer task type
-        }
-      );
+    // Update storage
+    try {
+      const progressMap = JSON.parse(localStorage.getItem('habit-progress') || '{}');
+      const today = new Date().toISOString().split('T')[0];
       
-      if (taskId) {
-        toast.success(`Added habit "${habit.name}" to timer tasks`);
+      // Initialize nested structure if needed
+      if (!progressMap[templateId]) {
+        progressMap[templateId] = {};
       }
-      return;
-    } 
-    else if (habit.metrics?.type === 'journal') {
-      // Handle journal type habits
-      createJournalFromHabit(habit, templateId);
-      return;
-    }
-    // Fix type comparison - don't compare string literal 'checklist' with the habit metrics type
-    else if (habit.metrics?.type && ['checklist', 'todo'].includes(habit.metrics.type)) {
-      // Create a checklist task
-      const taskId = habitTaskOperations.createHabitTask(
-        habit.id,
-        templateId,
-        habit.name,
-        0, // No duration needed
-        new Date().toDateString(),
-        { 
-          selectAfterCreate: true,
-          taskType: 'checklist'
-        }
-      );
       
-      if (taskId) {
-        toast.success(`Added habit "${habit.name}" to checklist tasks`);
+      if (!progressMap[templateId][habitId]) {
+        progressMap[templateId][habitId] = {};
       }
-      return;
-    }
-    // Fix type comparison - don't compare string literal 'voicenote' with the habit metrics type
-    else if (habit.metrics?.type && ['voicenote', 'audio'].includes(habit.metrics.type)) {
-      // Create a voice note task
-      const taskId = habitTaskOperations.createHabitTask(
-        habit.id,
-        templateId,
-        habit.name,
-        0, // No duration needed
-        new Date().toDateString(),
-        { 
-          selectAfterCreate: true,
-          taskType: 'voicenote'
-        }
-      );
       
-      if (taskId) {
-        toast.success(`Added habit "${habit.name}" to voice note tasks`);
-      }
-      return;
-    }
-    else {
-      // For other habit types, create a regular task
-      const taskId = habitTaskOperations.createHabitTask(
-        habit.id,
-        templateId,
-        habit.name,
-        0, // No duration for regular tasks
-        new Date().toDateString(),
-        { 
-          selectAfterCreate: true,
-          taskType: 'regular' // Use regular task type as default
-        }
-      );
+      // Update for today
+      progressMap[templateId][habitId][today] = {
+        ...progressMap[templateId][habitId][today],
+        dismissed: true
+      };
       
-      if (taskId) {
-        toast.success(`Added habit "${habit.name}" to your regular tasks`);
-      }
+      // Save back to storage
+      localStorage.setItem('habit-progress', JSON.stringify(progressMap));
+      
+      // Emit event for other components
+      eventManager.emit('habit:dismissed', { 
+        habitId, 
+        templateId, 
+        date: today 
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error dismissing habit:', error);
+      toast.error('Failed to dismiss habit');
+      return false;
     }
-  }, [createJournalFromHabit]);
+  }, []);
+  
+  // Check if a habit is completed
+  const isHabitCompleted = useCallback((habitId: string) => {
+    return completedHabits.includes(habitId);
+  }, [completedHabits]);
+  
+  // Check if a habit is dismissed
+  const isHabitDismissed = useCallback((habitId: string) => {
+    return dismissedHabits.includes(habitId);
+  }, [dismissedHabits]);
   
   return {
+    completeHabit,
+    dismissHabit,
+    isHabitCompleted,
+    isHabitDismissed,
     completedHabits,
-    dismissedHabits,
-    handleHabitComplete,
-    handleAddHabitToTasks
+    dismissedHabits
   };
 };
