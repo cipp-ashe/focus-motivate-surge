@@ -6,7 +6,8 @@ import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 export const Header = () => {
   const location = useLocation();
-  const isMobile = useIsMobile();
+  // Use a higher breakpoint to switch to mobile view earlier
+  const isMobile = useIsMobile(1024);
   
   const isActive = (path: string) => {
     return location.pathname === path ? 'text-primary' : 'text-muted-foreground hover:text-primary';

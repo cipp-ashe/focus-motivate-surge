@@ -14,3 +14,27 @@
     @apply min-h-12 min-w-12 flex items-center justify-center;
   }
 }
+
+/* Navigation breakpoints - hide text labels gradually */
+@media (max-width: 1024px) {
+  .nav-text {
+    display: none;
+  }
+  
+  .nav-icon-only {
+    padding: 0.5rem;
+  }
+}
+
+/* Improve spacing in constrained viewports */
+@media (max-width: 768px) {
+  .compact-spacing {
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  .icon-size-sm {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+}

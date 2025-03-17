@@ -2,12 +2,16 @@
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Home, CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic, Settings } from 'lucide-react';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  // Use a higher breakpoint for better responsiveness
+  const isMobile = useIsMobile(1024);
+  
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-1">

@@ -12,7 +12,8 @@ interface AppLayoutProps {
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
   const { isDark, mounted } = useTheme();
-  const isMobile = useIsMobile();
+  // Use a higher breakpoint for the overall layout
+  const isMobile = useIsMobile(1024);
   
   // Only hide header on the main dashboard page
   const showHeader = location.pathname !== '/';
