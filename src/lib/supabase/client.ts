@@ -19,7 +19,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     fetch: (url, options) => {
-      // Log network activity in development mode only
+      // Only log in development mode
       if (import.meta.env.DEV) {
         console.debug('Supabase fetch:', url);
       }

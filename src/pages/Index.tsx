@@ -27,12 +27,22 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   </div>
 );
 
+// Flag to track if dashboard content has been rendered
+let dashboardContentRendered = false;
+
 const DashboardContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { isInitialized, error, clearStorage } = useDataInitialization();
   const renderCountRef = useRef(0);
+  const mountedRef = useRef(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
+    // Prevent duplicate mount effects
+    if (mountedRef.current) return;
+    mountedRef.current = true;
+    
+    // Update render count
     renderCountRef.current += 1;
     console.log(`Dashboard content rendering #${renderCountRef.current}, initialization status:`, { isInitialized, error });
     
@@ -42,20 +52,55 @@ const DashboardContent: React.FC = () => {
     }
     
     // Set a timeout to show content even if initialization takes too long
-    const timer = setTimeout(() => {
-      setLoading(false);
-      console.log("Dashboard forced to show due to timeout");
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        console.log("Dashboard forced to show due to timeout");
+      }
+      timeoutRef.current = null;
     }, 2000);
     
-    return () => clearTimeout(timer);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [error]);
   
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && loading) {
       setLoading(false);
       console.log("Dashboard initialized successfully");
     }
-  }, [isInitialized]);
+  }, [isInitialized, loading]);
+  
+  // Already rendered - just return the dashboard
+  if (dashboardContentRendered) {
+    return (
+      <div className="space-y-8">
+        <header className="space-y-2 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold">Welcome to Focus Notes</h1>
+            <p className="text-muted-foreground">
+              Organize your tasks, notes, and habits in one place
+            </p>
+          </div>
+          <Link to="/settings" className="p-2 rounded-full hover:bg-accent transition-colors" title="Settings">
+            <Settings className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+          </Link>
+        </header>
+        
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <DashboardCardGrid />
+        </ErrorBoundary>
+      </div>
+    );
+  }
   
   if (loading && !isInitialized && !error) {
     return (
@@ -85,6 +130,9 @@ const DashboardContent: React.FC = () => {
     );
   }
   
+  // Set rendered flag to true
+  dashboardContentRendered = true;
+  
   return (
     <div className="space-y-8">
       <header className="space-y-2 flex justify-between items-start">
@@ -106,10 +154,17 @@ const DashboardContent: React.FC = () => {
   );
 };
 
+// Simple cache to prevent multiple IndexPage renderings
+let indexPageMounted = false;
+
 const IndexPage: React.FC = () => {
   const renderCountRef = useRef(0);
   
   useEffect(() => {
+    // Prevent duplicate mount effects
+    if (indexPageMounted) return;
+    indexPageMounted = true;
+    
     renderCountRef.current += 1;
     console.log(`Rendering IndexPage component #${renderCountRef.current}`);
   }, []);

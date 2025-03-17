@@ -4,6 +4,9 @@ import { Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import AppLayout from './components/AppLayout';
 
+// Global initialization flag to prevent duplicate initialization across the entire app
+let globalInitialized = false;
+
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<Error | null>(null);
@@ -19,6 +22,13 @@ function App() {
     
     mountedRef.current = true;
     
+    // Check global flag first
+    if (globalInitialized) {
+      console.log("App already initialized globally, skipping");
+      setIsInitialized(true);
+      return;
+    }
+    
     // Only run initialization logic once
     if (!initStartedRef.current) {
       initStartedRef.current = true;
@@ -27,6 +37,7 @@ function App() {
       try {
         // Simple initialization without any external service connections
         setIsInitialized(true);
+        globalInitialized = true;
       } catch (error) {
         console.error("Failed to initialize:", error);
         setInitError(error instanceof Error ? error : new Error('Unknown error during initialization'));

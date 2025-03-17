@@ -20,6 +20,7 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
   const loadedRef = useRef(false);
   const habitsCheckedRef = useRef(false);
+  const periodicCheckRef = useRef<NodeJS.Timeout | null>(null);
   
   // Load initial templates
   const { data, refetch } = useQuery({
@@ -81,12 +82,23 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
 
   // Force periodic verification of habit tasks but at a reasonable interval and only one timer
   useEffect(() => {
-    const checkInterval = setInterval(() => {
+    // Clear any existing interval on re-render
+    if (periodicCheckRef.current) {
+      clearInterval(periodicCheckRef.current);
+    }
+    
+    // Set up a single interval for all checks
+    periodicCheckRef.current = setInterval(() => {
       console.log('HabitContext: Periodic habit check');
       eventManager.emit('habits:check-pending', {});
     }, 300000); // Check every 5 minutes instead of every 2 minutes
     
-    return () => clearInterval(checkInterval);
+    return () => {
+      if (periodicCheckRef.current) {
+        clearInterval(periodicCheckRef.current);
+        periodicCheckRef.current = null;
+      }
+    };
   }, []);
 
   return (

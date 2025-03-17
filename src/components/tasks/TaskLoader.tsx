@@ -5,6 +5,9 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
+// Global flag to track if task loader has initialized
+let taskLoaderInitialized = false;
+
 interface TaskLoaderProps {
   onTasksLoaded: (tasks: Task[]) => void;
   children: React.ReactNode;
@@ -22,7 +25,8 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
   
   // Run task type migration only once when component first mounts
   useEffect(() => {
-    if (migrationRunRef.current) return;
+    // Skip if already run or if we've initialized globally
+    if (migrationRunRef.current || taskLoaderInitialized) return;
     
     console.log('Running task type migration...');
     migrationRunRef.current = true;
@@ -53,6 +57,9 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
       onTasksLoaded(storedTasks);
       lastLoadTimeRef.current = Date.now();
       
+      // Mark as globally initialized
+      taskLoaderInitialized = true;
+      
       // Force a UI update
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('force-task-update'));
@@ -66,7 +73,11 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
   
   // Check for pending habits and load tasks when component first mounts
   useEffect(() => {
-    if (initialCheckDoneRef.current) return;
+    // Skip if already initialized globally or locally
+    if (initialCheckDoneRef.current || taskLoaderInitialized) {
+      setIsLoading(false);
+      return;
+    }
     
     console.log('TaskLoader mounted, performing initial tasks load and habits check');
     initialCheckDoneRef.current = true;
@@ -80,6 +91,9 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
       console.log("TaskLoader - Initial load from storage:", storedTasks.length);
       onTasksLoaded(storedTasks);
       lastLoadTimeRef.current = Date.now();
+      
+      // Mark as globally initialized
+      taskLoaderInitialized = true;
       
       // Check for pending habits on mount with a small delay
       const timeout = setTimeout(() => {
@@ -110,7 +124,7 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
 
   // Set up a loading timeout - this ensures we don't get stuck loading forever
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading && !loadingTimeoutRef.current) {
       loadingTimeoutRef.current = setTimeout(() => {
         console.log("TaskLoader - Loading timeout reached, forcing state to loaded");
         setIsLoading(false);
