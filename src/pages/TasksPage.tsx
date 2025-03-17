@@ -160,33 +160,42 @@ const TasksPage: React.FC = () => {
       
       {/* Dialogs */}
       <ChecklistDialog
-        open={checklistDialogOpen}
+        isOpen={checklistDialogOpen}
         onOpenChange={setChecklistDialogOpen}
-        taskId={activeTaskId}
-        taskName={activeTaskName}
-        initialItems={checklistItems}
+        currentTask={{
+          taskId: activeTaskId,
+          taskName: activeTaskName,
+          items: checklistItems
+        }}
       />
       
       <JournalDialog
-        open={journalDialogOpen}
+        isOpen={journalDialogOpen}
         onOpenChange={setJournalDialogOpen}
-        taskId={activeTaskId}
-        taskName={activeTaskName}
-        initialEntry={journalEntry}
+        currentTask={{
+          taskId: activeTaskId,
+          taskName: activeTaskName,
+          entry: journalEntry
+        }}
       />
       
       <ScreenshotDialog
-        open={screenshotDialogOpen}
+        isOpen={screenshotDialogOpen}
         onOpenChange={setScreenshotDialogOpen}
-        imageUrl={screenshotUrl}
-        taskName={activeTaskName}
+        task={{
+          id: activeTaskId,
+          name: activeTaskName,
+          imageUrl: screenshotUrl
+        } as Task}
       />
       
       <VoiceNoteDialog
-        open={voiceNoteDialogOpen}
+        isOpen={voiceNoteDialogOpen}
         onOpenChange={setVoiceNoteDialogOpen}
-        taskId={activeTaskId}
-        taskName={activeTaskName}
+        task={{
+          id: activeTaskId,
+          name: activeTaskName
+        } as Task}
       />
     </div>
   );
