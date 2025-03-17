@@ -20,7 +20,7 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
       };
       
     case 'ADD_TASK':
-      // Don't add if task already exists
+      // Don't add if task already exists - safe check for undefined items
       if (state.items && state.items.some(task => task.id === action.payload.id)) {
         return state;
       }
@@ -33,7 +33,7 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
     case 'UPDATE_TASK': {
       const { taskId, updates } = action.payload;
       
-      // Check if updating an active task
+      // Check if updating an active task - safe check for undefined items
       if (state.items && state.items.some(task => task.id === taskId)) {
         return {
           ...state,
@@ -43,7 +43,7 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
         };
       }
       
-      // Check if updating a completed task
+      // Check if updating a completed task - safe check for undefined completed
       if (state.completed && state.completed.some(task => task.id === taskId)) {
         return {
           ...state,
@@ -69,7 +69,11 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
       
     case 'COMPLETE_TASK': {
       const { taskId, metrics } = action.payload;
-      const taskToComplete = state.items ? state.items.find(task => task.id === taskId) : undefined;
+      
+      // Safe check for undefined items
+      const taskToComplete = state.items && state.items.length > 0 
+        ? state.items.find(task => task.id === taskId) 
+        : undefined;
       
       if (!taskToComplete) {
         return state;

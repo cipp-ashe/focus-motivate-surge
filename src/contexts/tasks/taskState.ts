@@ -18,8 +18,8 @@ export const taskState = {
    */
   getInitialState: (): TaskInitialState => {
     return {
-      items: [],
-      completed: [],
+      items: [],  // Initialize as empty array, not undefined
+      completed: [],  // Initialize as empty array, not undefined
       selected: null,
       isLoaded: false
     };
@@ -33,8 +33,8 @@ export const taskState = {
       const { active, completed } = taskStorage.loadAllTasks();
       
       return {
-        items: active || [],
-        completed: completed || []
+        items: active || [],  // Ensure we always return an array
+        completed: completed || []  // Ensure we always return an array
       };
     } catch (error) {
       console.error('Error loading tasks from storage:', error);

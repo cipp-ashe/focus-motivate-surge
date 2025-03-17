@@ -71,6 +71,23 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
     };
   }, []);
   
+  // Additional handler for task submission completion
+  useEffect(() => {
+    const handleTaskSubmitComplete = () => {
+      if (isMountedRef.current) {
+        console.log('TaskEventHandler: Task submission completed');
+        // Force refresh to ensure UI is updated properly
+        onForceUpdate();
+      }
+    };
+    
+    window.addEventListener('task-submit-complete', handleTaskSubmitComplete);
+    
+    return () => {
+      window.removeEventListener('task-submit-complete', handleTaskSubmitComplete);
+    };
+  }, [onForceUpdate]);
+  
   // This component doesn't render anything
   return null;
 };

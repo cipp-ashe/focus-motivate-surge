@@ -63,15 +63,24 @@ export const useTaskCreation = ({
       tags: tags.map(tag => ({ id: uuidv4(), name: tag }))
     };
     
-    // Call the parent handler
-    onTaskAdd(newTask);
-    
-    // Also emit an event to ensure all components are notified
-    eventBus.emit('task:create', newTask);
-    
-    console.log('Task created and emitted:', newTask);
-    
-    resetForm();
+    try {
+      // Call the parent handler
+      onTaskAdd(newTask);
+      
+      // Also emit an event to ensure all components are notified
+      eventBus.emit('task:create', newTask);
+      
+      console.log('Task created and emitted:', newTask);
+      
+      // Trigger UI update events
+      window.dispatchEvent(new CustomEvent('task-ui-refresh'));
+      window.dispatchEvent(new Event('task-submit-complete'));
+      
+      resetForm();
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast.error("Failed to create task. Please try again.");
+    }
   };
   
   const handleAddMultipleTasks = () => {
@@ -92,17 +101,26 @@ export const useTaskCreation = ({
       tags: tags.map(tag => ({ id: uuidv4(), name: tag }))
     }));
     
-    // Call the parent handler
-    onTasksAdd(newTasks);
-    
-    // Also emit events for each task
-    newTasks.forEach(task => {
-      eventBus.emit('task:create', task);
-      console.log('Multiple task created and emitted:', task);
-    });
-    
-    resetForm();
-    setIsAddingMultiple(false);
+    try {
+      // Call the parent handler
+      onTasksAdd(newTasks);
+      
+      // Also emit events for each task
+      newTasks.forEach(task => {
+        eventBus.emit('task:create', task);
+        console.log('Multiple task created and emitted:', task);
+      });
+      
+      // Trigger UI update events
+      window.dispatchEvent(new CustomEvent('task-ui-refresh'));
+      window.dispatchEvent(new Event('task-submit-complete'));
+      
+      resetForm();
+      setIsAddingMultiple(false);
+    } catch (error) {
+      console.error('Error creating multiple tasks:', error);
+      toast.error("Failed to create tasks. Please try again.");
+    }
   };
 
   const resetForm = () => {
