@@ -22,8 +22,6 @@ export const useHabitTaskProcessor = () => {
   // Set up event listeners with the new event system
   useEffect(() => {
     console.log("useHabitTaskProcessor: Setting up event listeners");
-    
-    // No cleanup needed for event listeners as they're handled by useEvent
   }, []);
   
   // Handle habit schedule events
@@ -36,7 +34,7 @@ export const useHabitTaskProcessor = () => {
     processPendingTasks();
   });
   
-  // Handle habit schedule events from the event bus with prioritization
+  // Handle habit schedule events with prioritization
   const handleHabitSchedule = useCallback((event: {
     habitId: string;
     templateId: string;

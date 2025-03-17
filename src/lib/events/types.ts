@@ -1,34 +1,38 @@
 
-// Import EventManager types 
-import type { EventType, EventHandler, EventPayloads } from './EventManager';
+// Import and re-export all event types from the main events.ts
+import type { 
+  AllEventTypes, 
+  EventPayloads, 
+  TimerEventType,
+  TaskEventType,
+  HabitEventType,
+  RelationshipEventType,
+  AppEventType,
+  NavigationEventType,
+  AuthEventType,
+  NoteEventType,
+  TagEventType
+} from '@/types/events';
 
-// Re-export for convenience
-export type { EventType, EventHandler, EventPayloads };
+// Define the event handler type
+export interface EventHandler<T extends AllEventTypes> {
+  (payload: EventPayloads[T]): void;
+}
 
-// Export tag event types
-export type TagEventType = 'tag:select' | 'tag:remove' | 'tags:force-update' | 'tag:create' | 'tag:delete';
+// Re-export all event types for convenience
+export type { 
+  AllEventTypes, 
+  EventPayloads,
+  TimerEventType,
+  TaskEventType,
+  HabitEventType,
+  RelationshipEventType,
+  AppEventType,
+  NavigationEventType,
+  AuthEventType,
+  NoteEventType,
+  TagEventType
+};
 
-// Additional event types
-export type HabitEventType = 
-  | 'habits:check-pending'
-  | 'habits:processed'
-  | 'habit:journal-complete'
-  | 'habit:progress-update'
-  | 'habit:task-deleted'
-  | 'habit:dismissed';
-
-export type TimerEventTypes =
-  | 'timer:task-set'
-  | 'timer:select-task'
-  | 'timer:set-task';
-
-export type AppEventTypes =
-  | 'app:initialization-complete'
-  | 'app:initialized';
-
-export type NavigationEventType = 
-  | 'nav:route-change'
-  | 'page:timer-ready';
-
-// Making sure all events are properly typed for the event system
-export type AdditionalEventTypes = HabitEventType | NavigationEventType | TimerEventTypes | AppEventTypes;
+// Alias for EventType
+export type EventType = AllEventTypes;

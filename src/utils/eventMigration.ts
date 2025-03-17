@@ -5,6 +5,7 @@
  */
 
 import { eventManager } from '@/lib/events/EventManager';
+import { logMigrationIssue, reportEventBusImport } from '@/lib/events/migrationUtils';
 
 /**
  * Track deprecated event usage patterns
@@ -22,3 +23,19 @@ export function trackEventBusUsage() {
   const counts = eventManager.getListenerCounts();
   console.log("Current eventManager listeners:", counts);
 }
+
+/**
+ * Mock version of eventBus that throws errors for any component still trying to use it
+ */
+export const eventBus = {
+  on: (eventName: string, callback: Function) => {
+    reportEventBusImport('Unknown component');
+    return () => {};
+  },
+  emit: (eventName: string, data: any) => {
+    reportEventBusImport('Unknown component');
+  },
+  off: (eventName: string, callback: Function) => {
+    reportEventBusImport('Unknown component');
+  }
+};

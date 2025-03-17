@@ -38,9 +38,8 @@ export const useTimerCountdown = ({
         // Emit a tick event
         lastTickTimeRef.current = Date.now();
         eventManager.emit('timer:tick', {
-          taskName,
-          remaining: timeLeftRef.current,
-          timeLeft: timeLeftRef.current
+          timeLeft: timeLeftRef.current,
+          taskName
         });
       }
     });

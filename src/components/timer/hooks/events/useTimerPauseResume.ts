@@ -42,9 +42,8 @@ export const useTimerPauseResume = ({
         if (now - lastTickTimeRef.current > 1000) {
           lastTickTimeRef.current = now;
           eventManager.emit('timer:tick', {
-            taskName,
-            remaining: timeLeftRef.current,
-            timeLeft: timeLeftRef.current
+            timeLeft: timeLeftRef.current,
+            taskName
           });
         }
       }
@@ -67,9 +66,8 @@ export const useTimerPauseResume = ({
         if (now - lastTickTimeRef.current > 1000) {
           lastTickTimeRef.current = now;
           eventManager.emit('timer:tick', {
-            taskName,
-            remaining: timeLeftRef.current,
-            timeLeft: timeLeftRef.current
+            timeLeft: timeLeftRef.current,
+            taskName
           });
         }
       }

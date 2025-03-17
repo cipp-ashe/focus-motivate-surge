@@ -1,10 +1,9 @@
 
 import { supabase } from '@/lib/supabase/client';
-import { AllEventTypes, TimerEventType, TimerEventPayloads } from '@/types/events';
+import { AllEventTypes, EventPayloads } from '@/types/events';
 
 export type EventType = AllEventTypes;
-export type EventPayloads = TimerEventPayloads;
-export type EventHandler<T extends EventType> = (payload: any) => void;
+export type EventHandler<T extends EventType> = (payload: EventPayloads[T]) => void;
 
 type EventCallback<T = any> = (payload: T) => void;
 interface EventSubscription {
@@ -43,7 +42,7 @@ class EventManager {
   /**
    * Subscribe to an event
    */
-  on<T extends TimerEventType>(event: T, callback: EventCallback<TimerEventPayloads[T]>): () => void {
+  on<T extends EventType>(event: T, callback: EventHandler<T>): () => void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
@@ -51,13 +50,13 @@ class EventManager {
     this.listeners[event].push(callback as EventCallback);
     
     // Return unsubscribe function
-    return () => this.off(event, callback as EventCallback);
+    return () => this.off(event, callback);
   }
 
   /**
    * Unsubscribe from an event
    */
-  off<T extends TimerEventType>(event: T, callback: EventCallback<TimerEventPayloads[T]>): void {
+  off<T extends EventType>(event: T, callback: EventHandler<T>): void {
     if (!this.listeners[event]) return;
     
     const index = this.listeners[event].indexOf(callback as EventCallback);
@@ -69,7 +68,7 @@ class EventManager {
   /**
    * Emit an event
    */
-  emit<T extends TimerEventType>(event: T, payload: TimerEventPayloads[T]): void {
+  emit<T extends EventType>(event: T, payload: EventPayloads[T]): void {
     // Only log non-frequent events to reduce noise
     const nonFrequentEvents = [
       'task:create', 'task:delete', 'habit:template-update',
@@ -116,7 +115,7 @@ class EventManager {
   /**
    * Persist event to Supabase for cross-device synchronization
    */
-  private async persistEventToSupabase<T extends TimerEventType>(event: T, payload: TimerEventPayloads[T]): Promise<void> {
+  private async persistEventToSupabase<T extends EventType>(event: T, payload: EventPayloads[T]): Promise<void> {
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();

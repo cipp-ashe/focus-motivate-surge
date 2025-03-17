@@ -1,6 +1,7 @@
 
 import { useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
+import { EventType, EventPayloads } from '@/types/events';
 
 /**
  * Hook to simplify adding event listeners to the event manager
@@ -8,16 +9,14 @@ import { eventManager } from '@/lib/events/EventManager';
  * @param eventName The name of the event to listen for
  * @param callback The callback function to execute when the event is emitted
  */
-export function useEvent<T = any>(eventName: string, callback: (data: T) => void) {
+export function useEvent<T extends EventType>(eventName: T, callback: (data: EventPayloads[T]) => void) {
   useEffect(() => {
     // Register the event handler
-    // @ts-ignore - We're allowing string event names for flexibility
-    const unsubscribe = eventManager.on(eventName as any, callback as any);
+    const unsubscribe = eventManager.on(eventName, callback);
     
     // Return cleanup function
     return () => {
-      // @ts-ignore - We're allowing string event names for flexibility
-      eventManager.off(eventName as any, callback as any);
+      unsubscribe();
     };
   }, [eventName, callback]);
 }
