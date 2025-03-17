@@ -2,7 +2,7 @@
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { cn } from '@/lib/utils';
-import { TaskTypeIcon } from './TaskTypeIcon';
+import { TaskIcon } from '../components/TaskIcon';
 
 interface TaskContentDisplayProps {
   task: Task;
@@ -16,7 +16,7 @@ export const TaskContentDisplay = React.memo(({ task, handleTaskAction }: TaskCo
   return (
     <div className="flex-1 min-w-0" data-testid="task-content-display">
       <div className="flex items-center gap-1.5">
-        <TaskTypeIcon taskType={taskType || 'regular'} />
+        <TaskIcon taskType={taskType || 'regular'} />
         
         <h3 
           className={cn(
