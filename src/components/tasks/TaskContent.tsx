@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,9 +8,10 @@ import { JournalButton } from './components/buttons/JournalButton';
 import { ChecklistButton } from './components/buttons/ChecklistButton';
 import { TimerButton } from './components/buttons/TimerButton';
 import { ScreenshotButton } from './components/buttons/ScreenshotButton';
-import { VoiceNoteButton } from './components/buttons/VoiceNoteButton';
-import { TaskActionButton } from './components/TaskActionButton';
+import { VoiceNoteButton } from './components/VoiceNoteButton';
+import { TaskActionButton } from './TaskActionButton';
 import { TaskIcon } from './components/TaskIcon';
+import { useNavigate } from 'react-router-dom';
 
 interface TaskContentProps {
   task: Task;
@@ -47,11 +47,30 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   onKeyDown,
   preventPropagation
 }) => {
+  const navigate = useNavigate();
+  
   const handleTaskAction = (e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
     e.stopPropagation();
     console.log("TaskContent: Action", actionType, "clicked for task", task.id, "of type", task.taskType);
     
     if (!actionType) return;
+    
+    // Special handling for timer tasks
+    if (task.taskType === 'timer' && actionType === 'timer') {
+      console.log("Timer action from TaskContent for task:", task.id);
+      
+      // Navigate to timer page
+      navigate('/timer');
+      
+      // After a small delay to ensure navigation happens
+      setTimeout(() => {
+        // Emit the timer event with task details
+        eventBus.emit('timer:set-task', task);
+        toast.success(`Timer set for: ${task.name}`);
+      }, 100);
+      
+      return;
+    }
     
     // Don't handle status change actions here anymore - StatusDropdownMenu emits events directly
     if (actionType.startsWith('status-')) {
@@ -118,7 +137,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       return;
     }
     
-    if (task.taskType === 'timer' && actionType === 'timer') {
+    if (task.taskType === 'timer' && actionType === 'true') {
       console.log("Setting timer task:", task.id);
       // Handle timer task action
       eventBus.emit('timer:set-task', task);

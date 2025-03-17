@@ -1,17 +1,21 @@
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Task } from '@/types/tasks';
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction, useLocation } from 'react-router-dom';
+import { eventBus } from '@/lib/eventBus';
+import { toast } from 'sonner';
 
 export const useTimerTaskHandler = (navigate: NavigateFunction) => {
+  const location = useLocation();
+  
   // Handler for timer task selection
   const handleTimerTaskSet = useCallback((task: Task) => {
     console.log('TimerTaskHandler: Timer task set event received for', task.id);
     
-    // Only handle timer tasks
+    // Only handle timer tasks or convert regular tasks to timer tasks
     if (task.taskType === 'timer') {
       // Navigate to timer page if not already there
-      if (!window.location.pathname.includes('/timer')) {
+      if (!location.pathname.includes('/timer')) {
         navigate('/timer');
       }
       
@@ -19,11 +23,58 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
       setTimeout(() => {
         const event = new CustomEvent('timer:set-task', { detail: task });
         window.dispatchEvent(event);
+        
+        // Also use eventBus as a backup mechanism
+        eventBus.emit('timer:set-task', task);
       }, 300);
+      
+      toast.success(`Timer set for: ${task.name}`);
     } else {
-      console.log('TimerTaskHandler: Ignoring non-timer task for timer page:', task);
+      // If not a timer task, convert it to one
+      console.log('TimerTaskHandler: Converting non-timer task to timer:', task);
+      
+      // Create a timer version of the task
+      const timerTask = {
+        ...task,
+        taskType: 'timer',
+        duration: 1500 // Default 25 minutes
+      };
+      
+      // Navigate to timer page if not already there
+      if (!location.pathname.includes('/timer')) {
+        navigate('/timer');
+      }
+      
+      // Send the timer task
+      setTimeout(() => {
+        const event = new CustomEvent('timer:set-task', { detail: timerTask });
+        window.dispatchEvent(event);
+        
+        // Also use eventBus
+        eventBus.emit('timer:set-task', timerTask);
+        
+        // Update the task type in the system
+        eventBus.emit('task:update', {
+          taskId: task.id,
+          updates: { taskType: 'timer', duration: 1500 }
+        });
+      }, 300);
+      
+      toast.success(`Timer set for: ${task.name}`);
     }
-  }, [navigate]);
+  }, [navigate, location.pathname]);
+
+  // Setup event listeners
+  useEffect(() => {
+    // Listen for timer:set-task events from eventBus
+    const unsubscribe = eventBus.on('timer:set-task', (task) => {
+      handleTimerTaskSet(task);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [handleTimerTaskSet]);
 
   return { handleTimerTaskSet };
 };

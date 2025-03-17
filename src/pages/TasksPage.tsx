@@ -12,11 +12,17 @@ import { TaskInput } from '@/components/tasks/TaskInput';
 import { eventManager } from '@/lib/events/EventManager';
 import { TaskEventHandler } from '@/components/tasks/TaskEventHandler';
 import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
+import { useNavigate } from 'react-router-dom';
+import { useTimerTaskHandler } from '@/components/tasks/event-handlers/TimerTaskHandler';
 
 const TasksPage: React.FC = () => {
   const taskContext = useTaskContext();
+  const navigate = useNavigate();
   const tasks = taskContext?.items || [];
   const completedTasks = taskContext?.completed || [];
+  
+  // Initialize the timer task handler
+  const { handleTimerTaskSet } = useTimerTaskHandler(navigate);
   
   // State for dialogs
   const [checklistDialogOpen, setChecklistDialogOpen] = useState(false);
@@ -61,6 +67,21 @@ const TasksPage: React.FC = () => {
     console.log("TasksPage mounted, taskContext:", taskContext);
     console.log("Tasks available:", tasks);
   }, [taskContext, tasks]);
+  
+  // Setup timer event listeners
+  useEffect(() => {
+    const handleTimerEvent = (event: CustomEvent) => {
+      if (event.detail) {
+        handleTimerTaskSet(event.detail);
+      }
+    };
+    
+    window.addEventListener('timer:set-task', handleTimerEvent as EventListener);
+    
+    return () => {
+      window.removeEventListener('timer:set-task', handleTimerEvent as EventListener);
+    };
+  }, [handleTimerTaskSet]);
   
   // Dialog openers
   const dialogOpeners = {

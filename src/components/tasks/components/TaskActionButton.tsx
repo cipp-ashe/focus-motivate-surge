@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { eventBus } from '@/lib/eventBus';
 
 /**
  * Props for the TaskActionButton component
@@ -68,6 +70,7 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
   preventPropagation
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>, actionType: string) => {
     e.stopPropagation();
@@ -75,6 +78,23 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
     
     // Close dropdown immediately
     setIsOpen(false);
+    
+    // Special handling for timer tasks
+    if (task.taskType === 'timer' && (actionType === 'open' || actionType === 'timer')) {
+      console.log(`Timer action triggered for task: ${task.id}`);
+      
+      // First navigate to the timer route if needed
+      navigate('/timer');
+      
+      // Wait a small delay to ensure navigation happens before sending task
+      setTimeout(() => {
+        // Emit the event for timer to pick up the task
+        eventBus.emit('timer:set-task', task);
+        toast.success(`Timer set for: ${task.name}`);
+      }, 100);
+      
+      return;
+    }
     
     // Call the parent handler for most actions
     onTaskAction(e, actionType);
@@ -91,9 +111,6 @@ export const TaskActionButton: React.FC<TaskActionButtonProps> = ({
         dialogOpeners.screenshot(task.imageUrl, task.name);
       } else if (task.taskType === 'voicenote' && dialogOpeners?.voicenote) {
         dialogOpeners.voicenote(task.id, task.name);
-      } else if (task.taskType === 'timer') {
-        // For timer, we just trigger the action
-        onTaskAction(e, 'true');
       } else {
         console.warn(`No dialog opener provided for ${task.taskType} task: ${task.id}`);
       }
