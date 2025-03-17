@@ -5,7 +5,7 @@ import { Settings2 } from "lucide-react";
 import ConfigurationDialog from '../habits/ConfigurationDialog';
 import { ActiveTemplate, DayOfWeek, HabitDetail } from './types';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface TemplateManagerProps {
   templateToEdit: ActiveTemplate;
@@ -40,7 +40,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
     };
     
     setCurrentTemplate(updatedTemplate);
-    eventBus.emit('habit:template-update', updatedTemplate);
+    eventManager.emit('habit:template-update', updatedTemplate);
     return updatedTemplate;
   };
 

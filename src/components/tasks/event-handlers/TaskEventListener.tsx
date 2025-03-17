@@ -1,7 +1,8 @@
 
 import React, { useEffect } from 'react';
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
+import { useEvent } from '@/hooks/useEvent';
 
 interface TaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
@@ -18,6 +19,9 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   onOpenVoiceRecorder,
   onTaskUpdate
 }) => {
+  // Use our new useEvent hook to subscribe to task:update events
+  useEvent('task:update', onTaskUpdate);
+
   useEffect(() => {
     // Type for custom events that we'll need to handle
     type CustomEventWithDetail<T = any> = CustomEvent<T>;
@@ -54,14 +58,6 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
       }
     };
 
-    // Handle task update event
-    const handleTaskUpdateEvent = (data: { taskId: string, updates: Partial<Task> }) => {
-      onTaskUpdate(data);
-    };
-
-    // Subscribe to events
-    eventBus.on('task:update', handleTaskUpdateEvent);
-
     // Add event listeners for window events
     window.addEventListener('show-image', handleShowImage as EventListener);
     window.addEventListener('open-checklist', handleOpenChecklist as EventListener);
@@ -70,13 +66,12 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
 
     // Clean up event listeners
     return () => {
-      eventBus.off('task:update', handleTaskUpdateEvent);
       window.removeEventListener('show-image', handleShowImage as EventListener);
       window.removeEventListener('open-checklist', handleOpenChecklist as EventListener);
       window.removeEventListener('open-journal', handleOpenJournal as EventListener);
       window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder as EventListener);
     };
-  }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder, onTaskUpdate]);
+  }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder]);
 
   // This component doesn't render anything
   return null;

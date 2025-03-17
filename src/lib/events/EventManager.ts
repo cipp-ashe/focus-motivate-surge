@@ -1,10 +1,10 @@
 
 import { supabase } from '@/lib/supabase/client';
-import { TimerEventType, TimerEventPayloads } from '@/types/events';
+import { AllEventTypes, TimerEventType, TimerEventPayloads } from '@/types/events';
 
-export type EventType = TimerEventType;
+export type EventType = AllEventTypes;
 export type EventPayloads = TimerEventPayloads;
-export type EventHandler<T extends EventType> = (payload: EventPayloads[T]) => void;
+export type EventHandler<T extends EventType> = (payload: any) => void;
 
 type EventCallback<T = any> = (payload: T) => void;
 interface EventSubscription {

@@ -1,6 +1,6 @@
 
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { ActiveTemplate } from '@/components/habits/types';
 
 export const useTemplateEventHandlers = (
@@ -70,7 +70,7 @@ export const useTemplateEventHandlers = (
     // This ensures tasks are deleted but no additional toast appears
     if (data.isOriginatingAction) {
       setTimeout(() => {
-        eventBus.emit('habit:template-delete', { 
+        eventManager.emit('habit:template-delete', { 
           templateId: data.templateId, 
           suppressToast: true, 
           isOriginatingAction: false 

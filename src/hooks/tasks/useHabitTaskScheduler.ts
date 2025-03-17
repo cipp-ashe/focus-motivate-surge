@@ -1,6 +1,6 @@
 
 import { useEffect, useCallback } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
 import { 
   useHabitTaskTracker,
@@ -41,8 +41,8 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
   useEffect(() => {
     console.log('Setting up habit task scheduler with improved reliability');
     
-    // Subscribe to habit:schedule events
-    const unsubscribeSchedule = eventBus.on('habit:schedule', handleHabitSchedule);
+    // Set up event listeners using the eventManager
+    const unsubscribeSchedule = eventManager.on('habit:schedule', handleHabitSchedule);
     
     // Set up daily cleanup
     const cleanupTimeoutId = setupDailyCleanup();
@@ -52,7 +52,7 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
     
     // Initial check
     timeouts.push(setTimeout(() => {
-      eventBus.emit('habits:check-pending', {});
+      eventManager.emit('habits:check-pending', {});
       console.log('Checking for pending habits on task scheduler mount (initial)');
     }, 300));
     
@@ -90,7 +90,7 @@ export const useHabitTaskScheduler = (tasks: Task[]): HabitTaskSchedulerReturn =
 
   // Setup task deletion listener
   useEffect(() => {
-    const unsubscribeTaskDelete = eventBus.on('task:delete', handleTaskDelete);
+    const unsubscribeTaskDelete = eventManager.on('task:delete', handleTaskDelete);
     
     return () => {
       unsubscribeTaskDelete();

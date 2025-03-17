@@ -1,7 +1,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { useTaskEventListeners } from './events/useTaskEventListeners';
 import { useTemplateHandler } from './events/useTemplateHandler';

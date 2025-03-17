@@ -1,8 +1,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { taskStorage } from '@/lib/storage/taskStorage';
-import { eventBus } from '@/lib/eventBus';
 import { Task } from '@/types/tasks';
+import { eventManager } from '@/lib/events/EventManager';
+import { useEvent } from '@/hooks/useEvent';
 
 export const useTaskReload = (
   dispatch: React.Dispatch<any>,
@@ -37,6 +38,9 @@ export const useTaskReload = (
     }
   }, [dispatch]);
 
+  // Set up event handlers using the useEvent hook
+  useEvent('task:reload', reloadTasks);
+  
   // Set up event handlers
   useEffect(() => {
     // Initial load on mount if required
@@ -45,7 +49,7 @@ export const useTaskReload = (
       setIsInitialLoad(false);
     }
     
-    // Handle task:reload event
+    // Handle task:reload DOM event
     const handleTaskReload = () => {
       // Don't reload if we just did
       const now = Date.now();
@@ -54,17 +58,15 @@ export const useTaskReload = (
         return;
       }
       
-      console.log('TaskReload: Handling task:reload event');
+      console.log('TaskReload: Handling force-task-update event');
       reloadTasks();
     };
     
-    // Subscribe to events
-    eventBus.on('task:reload', handleTaskReload);
+    // Subscribe to DOM event
     window.addEventListener('force-task-update', handleTaskReload);
     
     // Clean up
     return () => {
-      eventBus.off('task:reload', handleTaskReload);
       window.removeEventListener('force-task-update', handleTaskReload);
     };
   }, [reloadTasks, lastReloadTime, shouldReloadOnMount]);

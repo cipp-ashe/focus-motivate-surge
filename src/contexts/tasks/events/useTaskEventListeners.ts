@@ -1,8 +1,9 @@
 
 import { useEffect } from 'react';
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { taskVerification } from '@/lib/verification/taskVerification';
+import { useEvent } from '@/hooks/useEvent';
 
 /**
  * Hook for setting up task event listeners
@@ -24,34 +25,18 @@ export const useTaskEventListeners = (
   lastForceUpdateTime: number,
   setLastForceUpdateTime: (time: number) => void
 ) => {
-  // Set up event listeners
+  // Set up event listeners using the useEvent hook
+  useEvent('task:create', eventHandlers.handleTaskCreate);
+  useEvent('task:complete', eventHandlers.handleTaskComplete);
+  useEvent('task:delete', eventHandlers.handleTaskDelete);
+  useEvent('task:update', eventHandlers.handleTaskUpdate);
+  useEvent('task:select', eventHandlers.handleTaskSelect);
+  useEvent('habit:template-delete', eventHandlers.handleTemplateDelete);
+  useEvent('habits:check-pending', eventHandlers.handleHabitCheck);
+  useEvent('task:dismiss', eventHandlers.handleTaskDismiss);
+  
+  // Handle window events that aren't migrated to eventManager yet
   useEffect(() => {
-    const unsubscribers = [
-      // Handle task creation
-      eventBus.on('task:create', eventHandlers.handleTaskCreate),
-      
-      // Handle task completion
-      eventBus.on('task:complete', eventHandlers.handleTaskComplete),
-      
-      // Handle task deletion
-      eventBus.on('task:delete', eventHandlers.handleTaskDelete),
-      
-      // Handle task updates
-      eventBus.on('task:update', eventHandlers.handleTaskUpdate),
-      
-      // Handle task selection
-      eventBus.on('task:select', eventHandlers.handleTaskSelect),
-      
-      // Handle template deletion - make sure all related tasks are removed
-      eventBus.on('habit:template-delete', eventHandlers.handleTemplateDelete),
-      
-      // Handle habit checking
-      eventBus.on('habits:check-pending', eventHandlers.handleHabitCheck),
-      
-      // Handle task dismissal
-      eventBus.on('task:dismiss', eventHandlers.handleTaskDismiss),
-    ];
-    
     // Handle force update events from window with debouncing
     const handleForceUpdate = () => {
       const now = Date.now();
@@ -82,7 +67,6 @@ export const useTaskEventListeners = (
     );
     
     return () => {
-      unsubscribers.forEach(unsub => unsub());
       window.removeEventListener('force-task-update', handleForceUpdate);
       window.removeEventListener('templates-tasks-cleaned', handleForceUpdate);
       verificationCleanup();
@@ -91,7 +75,6 @@ export const useTaskEventListeners = (
     dispatch, 
     forceTasksReload, 
     items, 
-    eventHandlers, 
     lastForceUpdateTime, 
     setLastForceUpdateTime
   ]);

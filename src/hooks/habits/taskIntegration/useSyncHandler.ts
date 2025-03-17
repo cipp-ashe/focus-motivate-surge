@@ -1,8 +1,7 @@
 
 import { useCallback, useRef } from 'react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { taskStorage } from '@/lib/storage/taskStorage';
-import { Task } from '@/types/tasks';
 
 /**
  * Hook for synchronizing habits with tasks
@@ -43,7 +42,7 @@ export const useSyncHandler = () => {
     console.log(`[Sync #${syncId}] Starting habit-task synchronization for ${today}`);
     
     // Emit events to check for pending habits
-    eventBus.emit('habits:check-pending', {});
+    eventManager.emit('habits:check-pending', {});
     
     // Load all tasks to check what exists
     const allTasks = taskStorage.loadTasks();

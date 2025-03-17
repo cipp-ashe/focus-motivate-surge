@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { ScreenshotHeader } from "./components/ScreenshotHeader";
 import { ScreenshotContent } from "./components/ScreenshotContent";
 import { ScreenshotFooter } from "./components/ScreenshotFooter";
@@ -26,7 +26,7 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
         try {
           const metadata = await extractImageMetadata(task.imageUrl);
           
-          eventBus.emit('task:update', { 
+          eventManager.emit('task:update', { 
             taskId: task.id, 
             updates: { imageMetadata: metadata }
           });
@@ -40,7 +40,7 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
   }, [task.id, task.imageUrl, task.imageMetadata]);
 
   const handleDelete = () => {
-    eventBus.emit('task:delete', { taskId: task.id });
+    eventManager.emit('task:delete', { taskId: task.id });
     toast.success("Screenshot deleted");
   };
 
@@ -55,7 +55,7 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
       description: editedDescription.trim()
     };
 
-    eventBus.emit('task:update', { 
+    eventManager.emit('task:update', { 
       taskId: task.id, 
       updates 
     });
