@@ -4,7 +4,6 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { TaskTabsList } from '@/components/tasks/tabs/TaskTabsList';
 import { TaskTypeTab } from '@/components/tasks/tabs/TaskTypeTab';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
-import TaskManager from '@/components/tasks/TaskManager';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
 import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
@@ -227,9 +226,7 @@ const TasksPage: React.FC = () => {
               />
             </div>
             
-            <TaskManager 
-              dialogOpeners={dialogOpeners}
-            />
+            {/* Removed the duplicate TaskManager component that was displaying the task list twice */}
           </div>
         }
       />
