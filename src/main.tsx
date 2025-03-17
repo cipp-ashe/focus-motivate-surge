@@ -1,25 +1,23 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth/AuthContext';
 import { TaskProvider } from '@/contexts/tasks/TaskContext';
-import App from './App';
+import { router } from './router';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <AuthProvider>
-          <TaskProvider>
-            <App />
-            <Toaster />
-          </TaskProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <AuthProvider>
+        <TaskProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </TaskProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );
