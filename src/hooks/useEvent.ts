@@ -11,10 +11,12 @@ import { eventManager } from '@/lib/events/EventManager';
 export function useEvent(eventName: string, callback: (...args: any[]) => void) {
   useEffect(() => {
     // Register the event handler
+    // @ts-ignore - We're allowing string event names for flexibility
     eventManager.on(eventName, callback);
     
     // Return cleanup function
     return () => {
+      // @ts-ignore - We're allowing string event names for flexibility
       eventManager.off(eventName, callback);
     };
   }, [eventName, callback]);

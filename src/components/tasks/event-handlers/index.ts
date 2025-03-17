@@ -1,6 +1,3 @@
 
-// Export all event handlers from a central file
-export * from './TaskEventHandler';
-export * from './MediaEventHandlers';
-export * from './TaskUpdateHandler';
-export * from './TimerTaskHandler';
+// Re-export the TaskEventHandler from its main location
+export { TaskEventHandler, useTaskQueue } from '../TaskEventHandler';

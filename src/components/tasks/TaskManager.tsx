@@ -2,7 +2,7 @@
 import React, { useCallback, useState } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { TaskEventHandler } from './event-handlers/TaskEventHandler';
+import { TaskEventHandler } from './TaskEventHandler';
 import { Task } from '@/types/tasks';
 
 interface TaskManagerProps {
@@ -46,7 +46,13 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   
   return (
     <div className="space-y-4">
-      <TaskEventHandler onForceUpdate={forceUpdate} />
+      <TaskEventHandler 
+        onForceUpdate={forceUpdate}
+        onTaskCreate={handleTaskAdd}
+        onTaskUpdate={({taskId, updates}) => taskContext?.updateTask(taskId, updates)}
+        onTaskDelete={({taskId}) => taskContext?.deleteTask(taskId)}
+        tasks={items}
+      />
       
       <TaskManagerContent
         tasks={items}
