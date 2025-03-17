@@ -1,8 +1,9 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { TaskEventHandler } from './event-handlers/TaskEventHandler';
+import { Task } from '@/types/tasks';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
@@ -18,7 +19,16 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   isTimerView = false,
   dialogOpeners
 }) => {
-  const { items: tasks, completed: completedTasks, selected: selectedTaskId } = useTaskContext();
+  const { items: tasks, completed: completedTasks, selected: selectedTaskId, addTask } = useTaskContext();
+  
+  // Task management functionality
+  const handleTaskAdd = useCallback((task: Task) => {
+    addTask(task);
+  }, [addTask]);
+  
+  const handleTasksAdd = useCallback((tasks: Task[]) => {
+    tasks.forEach(task => addTask(task));
+  }, [addTask]);
   
   // Force refresh handler to be passed to event handler
   const forceUpdate = useCallback(() => {
@@ -36,6 +46,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({
         selectedTaskId={selectedTaskId}
         isTimerView={isTimerView}
         dialogOpeners={dialogOpeners}
+        onTaskAdd={handleTaskAdd}
+        onTasksAdd={handleTasksAdd}
       />
     </div>
   );

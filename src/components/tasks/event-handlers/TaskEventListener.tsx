@@ -1,57 +1,76 @@
 
-import React, { useEffect } from 'react';
-import { eventManager } from '@/lib/events/EventManager';
-import { ChecklistItem, Task } from '@/types/tasks';
+import React, { useEffect, useCallback } from 'react';
+import { Task } from '@/types/tasks';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 
 interface TaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
-  onOpenChecklist: (taskId: string, taskName: string, items: ChecklistItem[]) => void;
+  onOpenChecklist: (taskId: string, taskName: string, items: any[]) => void;
   onOpenJournal: (taskId: string, taskName: string, entry: string) => void;
   onOpenVoiceRecorder: (taskId: string, taskName: string) => void;
   onTaskUpdate: (data: { taskId: string, updates: Partial<Task> }) => void;
 }
 
-export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
+export const TaskEventListener: React.FC<TaskEventListenerProps> = React.memo(({
   onShowImage,
   onOpenChecklist,
   onOpenJournal,
   onOpenVoiceRecorder,
   onTaskUpdate
 }) => {
-  useEffect(() => {
-    // Set up event listeners for task-specific dialogs
-    const handleShowImage = (data: { imageUrl: string, taskName: string }) => {
-      onShowImage(data.imageUrl, data.taskName);
-    };
-    
-    const handleOpenChecklist = (data: { taskId: string, taskName: string, items: ChecklistItem[] }) => {
-      onOpenChecklist(data.taskId, data.taskName, data.items);
-    };
-    
-    const handleOpenJournal = (data: { taskId: string, taskName: string, entry: string }) => {
-      onOpenJournal(data.taskId, data.taskName, data.entry);
-    };
-    
-    const handleOpenVoiceRecorder = (data: { taskId: string, taskName: string }) => {
-      onOpenVoiceRecorder(data.taskId, data.taskName);
-    };
-    
-    // Register event listeners
-    eventManager.on('task:show-image', handleShowImage);
-    eventManager.on('task:open-checklist', handleOpenChecklist);
-    eventManager.on('task:open-journal', handleOpenJournal);
-    eventManager.on('task:open-voicenote', handleOpenVoiceRecorder);
-    eventManager.on('task:update-specialized', onTaskUpdate);
-    
-    // Clean up
-    return () => {
-      eventManager.off('task:show-image', handleShowImage);
-      eventManager.off('task:open-checklist', handleOpenChecklist);
-      eventManager.off('task:open-journal', handleOpenJournal);
-      eventManager.off('task:open-voicenote', handleOpenVoiceRecorder);
-      eventManager.off('task:update-specialized', onTaskUpdate);
-    };
-  }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder, onTaskUpdate]);
+  const { items: tasks } = useTaskContext();
+
+  // Handle specialized task media viewing
+  const handleShowImage = useCallback((data: { imageUrl: string, taskName: string }) => {
+    onShowImage(data.imageUrl, data.taskName);
+  }, [onShowImage]);
+
+  const handleOpenChecklist = useCallback((data: { taskId: string, taskName: string, items: any[] }) => {
+    onOpenChecklist(data.taskId, data.taskName, data.items);
+  }, [onOpenChecklist]);
   
+  const handleOpenJournal = useCallback((data: { taskId: string, taskName: string, entry: string }) => {
+    onOpenJournal(data.taskId, data.taskName, data.entry);
+  }, [onOpenJournal]);
+  
+  const handleOpenVoiceNote = useCallback((data: { taskId: string, taskName: string }) => {
+    onOpenVoiceRecorder(data.taskId, data.taskName);
+  }, [onOpenVoiceRecorder]);
+  
+  const handleTaskSpecializedUpdate = useCallback((data: { taskId: string, updates: Partial<Task> }) => {
+    onTaskUpdate(data);
+  }, [onTaskUpdate]);
+
+  // Set up event listeners
+  useEffect(() => {
+    const eventHandlers = [
+      { name: 'task:show-image', handler: handleShowImage },
+      { name: 'task:open-checklist', handler: handleOpenChecklist },
+      { name: 'task:open-journal', handler: handleOpenJournal },
+      { name: 'task:open-voicenote', handler: handleOpenVoiceNote },
+      { name: 'task:update-specialized', handler: handleTaskSpecializedUpdate }
+    ];
+    
+    // Add event listeners
+    eventHandlers.forEach(({ name, handler }) => {
+      window.addEventListener(name, handler as EventListener);
+    });
+    
+    // Remove event listeners
+    return () => {
+      eventHandlers.forEach(({ name, handler }) => {
+        window.removeEventListener(name, handler as EventListener);
+      });
+    };
+  }, [
+    handleShowImage, 
+    handleOpenChecklist, 
+    handleOpenJournal, 
+    handleOpenVoiceNote,
+    handleTaskSpecializedUpdate
+  ]);
+
   return null;
-};
+});
+
+TaskEventListener.displayName = 'TaskEventListener';

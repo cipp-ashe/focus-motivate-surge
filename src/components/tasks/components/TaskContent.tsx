@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { cn } from '@/lib/utils';
-import { Checkbox } from '@/components/ui/checkbox';
-import { TaskTypeIcon } from './TaskTypeIcon';
+import { TaskCheckbox } from './TaskCheckbox';
+import { TaskContentDisplay } from './TaskContentDisplay';
 import { TaskDetails } from './TaskDetails';
 
 interface TaskContentProps {
@@ -26,41 +26,26 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   dialogOpeners,
   handleTaskAction
 }) => {
+  // Handle checkbox changes
+  const handleCheckboxChange = useCallback((checked: boolean) => {
+    handleTaskAction({} as React.MouseEvent<HTMLElement>, checked ? 'true' : 'false');
+  }, [handleTaskAction]);
+
   return (
     <div className="flex items-start gap-2">
-      {/* Skip checkbox for timer tasks in timer view */}
-      {!(isTimerView && task.taskType === 'timer') && (
-        <Checkbox
-          checked={task.completed}
-          onCheckedChange={(checked) => {
-            handleTaskAction({} as any, checked ? 'true' : 'false');
-          }}
-          aria-label={`Mark task "${task.name}" as ${task.completed ? 'incomplete' : 'complete'}`}
-          onClick={(e) => e.stopPropagation()}
-          className="mt-1"
-        />
-      )}
+      <TaskCheckbox 
+        task={task} 
+        isTimerView={isTimerView} 
+        onCheck={handleCheckboxChange} 
+      />
       
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <TaskTypeIcon taskType={task.taskType} />
-          
-          <h3 
-            className={cn(
-              "font-medium break-words line-clamp-2",
-              task.completed && "line-through text-muted-foreground"
-            )}
-          >
-            {task.name}
-          </h3>
-        </div>
-        
-        <TaskDetails
-          task={task}
-          isSelected={isSelected}
-          dialogOpeners={dialogOpeners}
-        />
-      </div>
+      <TaskContentDisplay task={task} handleTaskAction={handleTaskAction} />
+      
+      <TaskDetails
+        task={task}
+        isSelected={isSelected}
+        dialogOpeners={dialogOpeners}
+      />
     </div>
   );
 };

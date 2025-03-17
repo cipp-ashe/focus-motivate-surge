@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { eventManager } from '@/lib/events/EventManager';
@@ -79,7 +79,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   return null;
 };
 
-// Simplified task queue hook with better typing
+// Simplified task queue hook with proper typing
 export const useTaskQueue = () => {
   const { addTask } = useTaskContext();
   const queueRef = useRef<Array<any>>([]);

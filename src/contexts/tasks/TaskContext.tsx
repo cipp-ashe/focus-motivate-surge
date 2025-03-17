@@ -6,7 +6,8 @@ import { taskState } from './taskState';
 import { useTaskEvents } from './useTaskEvents';
 import { useTaskPersistence } from './useTaskPersistence';
 import { useTaskNavigation } from './useTaskNavigation';
-import { TaskContextState, Task } from '@/types/tasks';
+import { Task } from '@/types/tasks';
+import { TaskContextState } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import { taskStateVerifier } from '@/lib/verification/taskStateVerifier';
 
@@ -67,8 +68,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     dispatch({ 
       type: 'COMPLETE_TASK', 
       payload: { 
-        taskId, 
-        completedAt: new Date().toISOString(),
+        taskId,
         metrics
       } 
     });

@@ -26,3 +26,14 @@ export interface TaskContextState {
   /** Select a task */
   selectTask: (taskId: string | null) => void;
 }
+
+/**
+ * Task action types for the reducer
+ */
+export type TaskAction =
+  | { type: 'LOAD_TASKS'; payload: { items: Task[]; completed: Task[] } }
+  | { type: 'ADD_TASK'; payload: Task }
+  | { type: 'UPDATE_TASK'; payload: { taskId: string; updates: Partial<Task> } }
+  | { type: 'DELETE_TASK'; payload: { taskId: string; reason?: string } }
+  | { type: 'COMPLETE_TASK'; payload: { taskId: string; metrics?: any } }
+  | { type: 'SELECT_TASK'; payload: string | null };
