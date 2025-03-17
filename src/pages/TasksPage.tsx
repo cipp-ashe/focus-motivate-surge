@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { TaskTabsList } from '@/components/tasks/tabs/TaskTabsList';
@@ -11,7 +12,7 @@ import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
 import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
 import { toast } from 'sonner';
-import TaskInput from '@/components/tasks/components/TaskInput';
+import { TaskInput } from '@/components/tasks/TaskInput'; // Changed import to use the full-featured TaskInput
 import { eventManager } from '@/lib/events/EventManager';
 import { TaskEventHandler } from '@/components/tasks/event-handlers/TaskEventHandler';
 
@@ -130,6 +131,15 @@ const TasksPage: React.FC = () => {
     toast.success(`Task created: ${task.name}`);
   };
   
+  // Handle multiple tasks addition
+  const handleAddMultipleTasks = (tasks: Task[]) => {
+    console.log("Adding multiple tasks:", tasks);
+    tasks.forEach(task => {
+      eventManager.emit('task:create', task);
+    });
+    toast.success(`Added ${tasks.length} tasks`);
+  };
+  
   // If no task context, show loading or error
   if (!taskContext) {
     return (
@@ -205,7 +215,11 @@ const TasksPage: React.FC = () => {
           <div className="space-y-4">
             <div className="mb-4 p-4 bg-card rounded-lg border border-border">
               <h3 className="text-lg font-medium mb-2">Add New Task</h3>
-              <TaskInput onTaskAdd={handleAddTask} />
+              <TaskInput 
+                onTaskAdd={handleAddTask} 
+                onTasksAdd={handleAddMultipleTasks}
+                defaultTaskType="regular"
+              />
             </div>
             
             <TaskManager 
