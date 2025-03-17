@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -28,15 +27,13 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     queryFn: async () => {
       // Prevent duplicate loading using both global and local flags
       if (habitsInitialized || loadedRef.current) return state.templates;
+      
+      // Set flags immediately to prevent duplicate processing
       loadedRef.current = true;
       habitsInitialized = true;
       
       try {
         const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
-        
-        if (templates.length > 0) {
-          console.log("Initial templates loaded from localStorage:", templates.length);
-        }
         
         dispatch({ type: 'LOAD_TEMPLATES', payload: templates });
         
@@ -76,7 +73,6 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
       
       // Trigger events with debounce to ensure task synchronization
       const checkTimeout = setTimeout(() => {
-        console.log('HabitContext: Triggering habit check from reloadTemplates');
         eventManager.emit('habits:check-pending', {});
         window.dispatchEvent(new CustomEvent('force-habits-update'));
         clearTimeout(checkTimeout);
@@ -86,16 +82,13 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
 
   // Force periodic verification of habit tasks but at a reasonable interval and only one timer
   useEffect(() => {
-    // Clear any existing interval on re-render
-    if (periodicCheckRef.current) {
-      clearInterval(periodicCheckRef.current);
-    }
+    // Skip setting up if we already have a periodic check
+    if (periodicCheckRef.current) return;
     
-    // Set up a single interval for all checks
+    // Set up a single interval for all checks - much less frequent
     periodicCheckRef.current = setInterval(() => {
-      console.log('HabitContext: Periodic habit check');
       eventManager.emit('habits:check-pending', {});
-    }, 300000); // Check every 5 minutes instead of every 2 minutes
+    }, 900000); // Check every 15 minutes instead of every 5 minutes
     
     return () => {
       if (periodicCheckRef.current) {

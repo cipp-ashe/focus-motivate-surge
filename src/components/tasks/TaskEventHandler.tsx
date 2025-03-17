@@ -6,9 +6,7 @@ import { useEvent } from '@/hooks/useEvent';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 // Global flags to prevent duplicate event handling
-let taskUiRefreshInitialized = false;
-let forceTaskUpdateInitialized = false;
-let taskSubmitCompleteInitialized = false;
+let eventHandlersInitialized = false;
 
 export interface TaskEventHandlerProps {
   tasks: Task[];
@@ -25,22 +23,20 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   onTaskDelete,
   onForceUpdate
 }) => {
-  // Process task queue with staggered timing to prevent race conditions
-  const processingRef = useRef(false);
-  const taskQueueRef = useRef<Task[]>([]);
   const isMountedRef = useRef(true);
   const isMobile = useIsMobile();
   const lastUpdateTimeRef = useRef(0);
-  const eventHandlersSetupRef = useRef(false);
   
   // Set up event handlers with the useEvent hook
   useEvent('task:create', onTaskCreate);
   useEvent('task:update', onTaskUpdate);
   useEvent('task:delete', onTaskDelete);
   
-  // Handle our new custom UI refresh events - this is critical for immediate UI updates
+  // Handle UI refresh events - this is critical for immediate UI updates
   useEffect(() => {
-    if (eventHandlersSetupRef.current || taskUiRefreshInitialized) return;
+    if (eventHandlersInitialized) return;
+    
+    eventHandlersInitialized = true;
     
     const handleTaskUiRefresh = (event: CustomEvent) => {
       if (!isMountedRef.current) return;
@@ -51,22 +47,10 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       }
       
       lastUpdateTimeRef.current = now;
-      console.log('TaskEventHandler: Received task-ui-refresh event');
       onForceUpdate();
     };
     
-    window.addEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
-    taskUiRefreshInitialized = true;
-    
-    return () => {
-      window.removeEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
-    };
-  }, [onForceUpdate]);
-  
-  // Also handle legacy force update events for backward compatibility
-  useEffect(() => {
-    if (forceTaskUpdateInitialized) return;
-    
+    // Combined event handler for all force update events
     const handleForceUpdate = () => {
       if (!isMountedRef.current) return;
       
@@ -76,15 +60,19 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       }
       
       lastUpdateTimeRef.current = now;
-      console.log('TaskEventHandler: Received force-task-update event');
       onForceUpdate();
     };
     
+    // Register all event listeners
+    window.addEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
     window.addEventListener('force-task-update', handleForceUpdate);
-    forceTaskUpdateInitialized = true;
+    window.addEventListener('task-submit-complete', handleForceUpdate);
     
     return () => {
+      // Clean up all event listeners
+      window.removeEventListener('task-ui-refresh', handleTaskUiRefresh as EventListener);
       window.removeEventListener('force-task-update', handleForceUpdate);
+      window.removeEventListener('task-submit-complete', handleForceUpdate);
     };
   }, [onForceUpdate]);
   
@@ -95,31 +83,6 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       isMountedRef.current = false;
     };
   }, []);
-  
-  // Additional handler for task submission completion
-  useEffect(() => {
-    if (taskSubmitCompleteInitialized) return;
-    
-    const handleTaskSubmitComplete = () => {
-      if (!isMountedRef.current) return;
-      
-      const now = Date.now();
-      if (now - lastUpdateTimeRef.current < 500) {
-        return;
-      }
-      
-      lastUpdateTimeRef.current = now;
-      console.log('TaskEventHandler: Task submission completed');
-      onForceUpdate();
-    };
-    
-    window.addEventListener('task-submit-complete', handleTaskSubmitComplete);
-    taskSubmitCompleteInitialized = true;
-    
-    return () => {
-      window.removeEventListener('task-submit-complete', handleTaskSubmitComplete);
-    };
-  }, [onForceUpdate]);
   
   // This component doesn't render anything
   return null;

@@ -3,6 +3,9 @@ import { Task } from '@/types/tasks';
 import { constants } from './constants';
 import { utils } from './utils';
 
+// Flag to track initial load logging
+let initialLoadLogged = false;
+
 /**
  * Service for managing completed tasks storage
  */
@@ -13,7 +16,13 @@ export const completedTasksStorage = {
   loadCompletedTasks: (): Task[] => {
     try {
       const tasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
-      console.log(`completedTasksStorage: Loaded ${tasks.length} completed tasks from storage`);
+      
+      // Only log on first load or if there are actually tasks
+      if (!initialLoadLogged || tasks.length > 0) {
+        initialLoadLogged = true;
+        console.log(`completedTasksStorage: Loaded ${tasks.length} completed tasks from storage`);
+      }
+      
       return tasks;
     } catch (error) {
       console.error('Error loading completed tasks from storage:', error);

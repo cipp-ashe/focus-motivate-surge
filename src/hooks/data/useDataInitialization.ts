@@ -7,18 +7,18 @@ import { eventManager } from "@/lib/events/EventManager";
 
 // Global flag to prevent duplicate initialization across instances
 let globalInitialized = false;
+let eventsEmitted = false;
 
 export const useDataInitialization = () => {
   const [status, setStatus] = useState<{
     isInitialized: boolean;
     error: string | null;
   }>({
-    isInitialized: false,
+    isInitialized: globalInitialized, // Start with global state
     error: null
   });
   
   const initRunRef = useRef(false);
-  const eventsEmittedRef = useRef(false);
 
   useEffect(() => {
     // First check the global flag
@@ -32,7 +32,6 @@ export const useDataInitialization = () => {
     initRunRef.current = true;
     
     try {
-      console.log("Starting data initialization check");
       const requiredKeys = [
         'schema-version',
         'entity-relations',
@@ -42,7 +41,6 @@ export const useDataInitialization = () => {
       const missingKeys = requiredKeys.filter(key => !localStorage.getItem(key));
       
       if (missingKeys.length > 0) {
-        console.log('Initializing missing data:', missingKeys);
         try {
           const initialized = initializeDataStore();
           
@@ -68,8 +66,8 @@ export const useDataInitialization = () => {
       globalInitialized = true;
       
       // Emit event to trigger task loading after initialization - do this only once globally
-      if (!eventsEmittedRef.current) {
-        eventsEmittedRef.current = true;
+      if (!eventsEmitted) {
+        eventsEmitted = true;
         
         // Use a single timeout for all events and emit only once
         setTimeout(() => {
@@ -109,6 +107,7 @@ export const useDataInitialization = () => {
       keysToRemove.forEach(key => localStorage.removeItem(key));
       toast.success('Application data cleared');
       globalInitialized = false; // Reset the global initialization flag
+      eventsEmitted = false; // Reset events emitted flag
       window.location.reload();
     } catch (error) {
       console.error('Error clearing storage:', error);

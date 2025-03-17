@@ -6,6 +6,7 @@ import { eventManager } from '@/lib/events/EventManager';
 
 // Global flag to track if task loader has initialized
 let taskLoaderInitialized = false;
+let migrationRun = false;
 
 interface TaskLoaderProps {
   onTasksLoaded: (tasks: Task[]) => void;
@@ -19,22 +20,20 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
   const [isLoading, setIsLoading] = useState(!taskLoaderInitialized);
   const initialCheckDoneRef = useRef(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const migrationRunRef = useRef(false);
   
   // Run task type migration only once when component first mounts
   useEffect(() => {
-    // Skip if already run or if we've initialized globally
-    if (migrationRunRef.current || taskLoaderInitialized) return;
+    // Skip if already run globally
+    if (migrationRun || taskLoaderInitialized) return;
     
-    console.log('Running task type migration...');
-    migrationRunRef.current = true;
+    // Set flag immediately to prevent duplicate runs
+    migrationRun = true;
     
     try {
       // Run the migration
       const migratedCount = taskStorage.migrateTaskTypes();
       
       if (migratedCount > 0) {
-        console.log(`Migrated ${migratedCount} tasks with invalid types`);
         // Force a UI update
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('force-task-update'));
@@ -54,7 +53,6 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
       return;
     }
     
-    console.log('TaskLoader mounted, performing initial tasks load and habits check');
     initialCheckDoneRef.current = true;
     
     // Ensure loading state starts as true
@@ -63,27 +61,22 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
     try {
       // Load initial tasks from storage
       const storedTasks = taskStorage.loadTasks();
-      if (storedTasks.length > 0) {
-        console.log("TaskLoader - Initial load from storage:", storedTasks.length);
-      }
       onTasksLoaded(storedTasks);
       
       // Mark as globally initialized
       taskLoaderInitialized = true;
       
-      // Check for pending habits on mount with a small delay
+      // Check for pending habits after a delay
       const timeout = setTimeout(() => {
         try {
-          eventManager.emit('habits:check-pending', {});
+          // Only emit the event if we haven't initialized yet
+          if (!taskLoaderInitialized) {
+            eventManager.emit('habits:check-pending', {});
+          }
           
-          // Force a UI update after a delay
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('force-task-update'));
-            setIsLoading(false);
-          }, 300);
+          setIsLoading(false);
         } catch (error) {
           console.error("Error in habits check:", error);
-          // Don't let this prevent the app from loading
           setIsLoading(false);
         }
       }, 100);
@@ -93,7 +86,6 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
       };
     } catch (error) {
       console.error("Error in initial task loading:", error);
-      // Don't break the app if tasks can't be loaded
       setIsLoading(false);
     }
   }, [onTasksLoaded]);
@@ -102,10 +94,9 @@ export const TaskLoader: React.FC<TaskLoaderProps> = ({
   useEffect(() => {
     if (isLoading && !loadingTimeoutRef.current) {
       loadingTimeoutRef.current = setTimeout(() => {
-        console.log("TaskLoader - Loading timeout reached, forcing state to loaded");
         setIsLoading(false);
         loadingTimeoutRef.current = null;
-      }, 3000); // Increased timeout for slower devices
+      }, 2000);
     }
     
     return () => {

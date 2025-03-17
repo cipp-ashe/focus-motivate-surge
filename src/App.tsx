@@ -1,14 +1,13 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Toaster } from 'sonner';
 import AppLayout from './components/AppLayout';
 
 // Global initialization flag to prevent duplicate initialization across the entire app
 let globalInitialized = false;
 
 function App() {
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(globalInitialized);
   const [initError, setInitError] = useState<Error | null>(null);
   const initStartedRef = useRef(false);
   const mountedRef = useRef(false);
@@ -24,7 +23,6 @@ function App() {
     
     // Check global flag first
     if (globalInitialized) {
-      console.log("App already initialized globally, skipping");
       setIsInitialized(true);
       return;
     }
@@ -43,12 +41,6 @@ function App() {
         setInitError(error instanceof Error ? error : new Error('Unknown error during initialization'));
       }
     }
-    
-    // Cleanup function
-    return () => {
-      // This will run when the component unmounts
-      console.log("App component unmounting, cleaning up...");
-    };
   }, []);
   
   // Show a loading state while initializing
