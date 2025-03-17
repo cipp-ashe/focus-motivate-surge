@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { taskStorage } from '@/lib/storage/taskStorage';
 
 /**
@@ -35,7 +35,7 @@ export const useHabitTaskCleanup = (tasks: Task[]) => {
       
       // Emit an event to indicate this habit task is no longer active
       // This can be useful for habit progress tracking
-      eventBus.emit('habit:task-deleted', {
+      eventManager.emit('habit:task-deleted', {
         habitId: task.relationships.habitId,
         taskId: task.id,
         date: task.relationships.date
@@ -106,7 +106,7 @@ export const useHabitTaskCleanup = (tasks: Task[]) => {
       
       // Delete old tasks
       oldTasks.forEach((task: Task) => {
-        eventBus.emit('task:delete', { 
+        eventManager.emit('task:delete', { 
           taskId: task.id, 
           reason: 'automated-cleanup' 
         });

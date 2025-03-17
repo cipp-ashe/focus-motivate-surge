@@ -4,7 +4,7 @@ import { TimerStateMetrics } from "@/types/metrics";
 import { TimerExpandedView, TimerExpandedViewRef } from "./TimerExpandedView";
 import { MainTimerView } from "./MainTimerView";
 import { SoundOption } from "@/types/timer";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { Quote } from "@/types/timer";
 
 interface TimerRendererProps {
@@ -71,7 +71,7 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
       >
         <MainTimerView
           isExpanded={isExpanded}
-          setIsExpanded={() => eventBus.emit('timer:expand', { taskName })}
+          setIsExpanded={() => eventManager.emit('timer:expand', { taskName })}
           showCompletion={showCompletion}
           taskName={taskName}
           timerCircleProps={timerCircleProps}
@@ -107,7 +107,7 @@ export const TimerRenderer: React.FC<TimerRendererProps> = ({
               size: "large"
             }}
             metrics={metrics}
-            onClose={() => eventBus.emit('timer:collapse', { taskName, saveNotes: true })}
+            onClose={() => eventManager.emit('timer:collapse', { taskName, saveNotes: true })}
             onLike={() => {
               const currentFavorites = Array.isArray(metrics.favoriteQuotes) ? metrics.favoriteQuotes : [];
               updateMetrics({ 

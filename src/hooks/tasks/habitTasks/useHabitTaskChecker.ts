@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
 /**
@@ -68,7 +68,7 @@ export const useHabitTaskChecker = (tasks: Task[]) => {
         // Add missing tasks to memory via task:create events
         missingTasks.forEach((task: Task) => {
           console.log(`HabitTaskChecker: Adding missing task to memory: ${task.name} (${task.id})`);
-          eventBus.emit('task:create', task);
+          eventManager.emit('task:create', task);
         });
         
         // Force UI update

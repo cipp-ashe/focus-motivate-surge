@@ -19,7 +19,8 @@ export type TimerEventType =
   | 'timer:expand'
   | 'timer:collapse'
   | 'timer:metrics-update'
-  | 'timer:set-task';
+  | 'timer:set-task'
+  | 'timer:close';
 
 // Define payloads for each timer event type
 export interface TimerEventPayloads {
@@ -38,6 +39,7 @@ export interface TimerEventPayloads {
   'timer:collapse': { taskName: string; saveNotes?: boolean };
   'timer:metrics-update': { taskName?: string; metrics: any };
   'timer:set-task': { id: string; name: string };
+  'timer:close': { taskName: string };
 }
 
 // Task events
@@ -109,7 +111,8 @@ export type NoteEventType =
   | 'note:view'
   | 'note:format'
   | 'note:format-complete'
-  | 'note:create-from-habit';
+  | 'note:create-from-habit'
+  | 'note:create-from-voice';
 
 // Tag events
 export type TagEventType =

@@ -2,7 +2,7 @@
 import { useCallback, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { NavigateFunction, useLocation } from 'react-router-dom';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
 export const useTimerTaskHandler = (navigate: NavigateFunction) => {
@@ -24,8 +24,11 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
         const event = new CustomEvent('timer:set-task', { detail: task });
         window.dispatchEvent(event);
         
-        // Also use eventBus as a backup mechanism
-        eventBus.emit('timer:set-task', task);
+        // Also use eventManager
+        eventManager.emit('timer:set-task', { 
+          id: task.id, 
+          name: task.name 
+        });
       }, 300);
       
       toast.success(`Timer set for: ${task.name}`);
@@ -50,11 +53,14 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
         const event = new CustomEvent('timer:set-task', { detail: timerTask });
         window.dispatchEvent(event);
         
-        // Also use eventBus
-        eventBus.emit('timer:set-task', timerTask);
+        // Also use eventManager
+        eventManager.emit('timer:set-task', { 
+          id: timerTask.id, 
+          name: timerTask.name 
+        });
         
         // Update the task type in the system
-        eventBus.emit('task:update', {
+        eventManager.emit('task:update', {
           taskId: task.id,
           updates: { taskType: 'timer', duration: 1500 }
         });
@@ -66,9 +72,20 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
 
   // Setup event listeners
   useEffect(() => {
-    // Listen for timer:set-task events from eventBus
-    const unsubscribe = eventBus.on('timer:set-task', (task) => {
-      handleTimerTaskSet(task);
+    // Listen for timer:set-task events from eventManager
+    const unsubscribe = eventManager.on('timer:set-task', (task) => {
+      // This expects to get an object with id and name
+      if (task && task.id) {
+        const fullTask = {
+          id: task.id,
+          name: task.name,
+          // Add minimum required properties for a Task
+          completed: false,
+          createdAt: new Date().toISOString()
+        } as Task;
+        
+        handleTimerTaskSet(fullTask);
+      }
     });
     
     return () => {

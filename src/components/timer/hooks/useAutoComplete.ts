@@ -1,7 +1,7 @@
 
 import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
 
 export const useAutoComplete = ({
@@ -54,7 +54,7 @@ export const useAutoComplete = ({
       
       if (habitTask) {
         console.log('Completing timer task for habit:', habitTask);
-        eventBus.emit('task:complete', { 
+        eventManager.emit('task:complete', { 
           taskId: habitTask.id,
           metrics: completionMetrics
         });
