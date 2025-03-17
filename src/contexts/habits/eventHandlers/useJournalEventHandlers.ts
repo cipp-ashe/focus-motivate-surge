@@ -1,4 +1,5 @@
-import { eventBus } from '@/lib/eventBus';
+
+import { eventManager } from '@/lib/events/EventManager';
 import { relationshipManager } from '@/lib/relationshipManager';
 import { ActiveTemplate } from '@/components/habits/types';
 import { EntityType } from '@/types/core';

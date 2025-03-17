@@ -8,6 +8,16 @@ import { useTaskCreationProcessor } from './processors/useTaskCreationProcessor'
 import { usePendingTaskProcessor } from './processors/usePendingTaskProcessor';
 import { useEvent } from '@/hooks/useEvent';
 
+// Define proper types for the habit schedule event
+interface HabitScheduleEvent {
+  habitId: string;
+  templateId: string;
+  name: string;
+  duration: number;
+  date: string;
+  metricType?: string;
+}
+
 /**
  * Hook for processing habit tasks with improved localStorage synchronization,
  * error handling, and debouncing
@@ -24,8 +34,8 @@ export const useHabitTaskProcessor = () => {
     console.log("useHabitTaskProcessor: Setting up event listeners");
   }, []);
   
-  // Handle habit schedule events
-  useEvent('habit:schedule', (event) => {
+  // Handle habit schedule events with correct typing
+  useEvent('habit:schedule', (event: HabitScheduleEvent) => {
     handleHabitSchedule(event);
   });
   
@@ -35,14 +45,7 @@ export const useHabitTaskProcessor = () => {
   });
   
   // Handle habit schedule events with prioritization
-  const handleHabitSchedule = useCallback((event: {
-    habitId: string;
-    templateId: string;
-    name: string;
-    duration: number;
-    date: string;
-    metricType?: string;
-  }) => {
+  const handleHabitSchedule = useCallback((event: HabitScheduleEvent) => {
     // Process and validate the event data
     const validatedEvent = processHabitScheduleEvent(event);
     

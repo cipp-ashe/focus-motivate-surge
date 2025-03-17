@@ -6,7 +6,7 @@ import { habitTemplates } from '../../utils/habitTemplates';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
 import ConfigurationDialog from './ConfigurationDialog';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { cn } from '@/lib/utils';
 
 interface TemplateListProps {
@@ -75,7 +75,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
     if (!editingTemplate) return;
     
     // Save changes to template through event system
-    eventBus.emit('habit:template-update', editingTemplate);
+    eventManager.emit('habit:template-update', editingTemplate);
     toast.success('Template updated successfully');
     handleCloseConfig();
   };

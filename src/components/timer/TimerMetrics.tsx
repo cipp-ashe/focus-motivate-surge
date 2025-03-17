@@ -1,136 +1,88 @@
+
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { secondsToMinutes } from '@/utils/formatters';
-import { TimerMetricsProps } from './types';
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
-import { useEvent } from '@/hooks/useEvent'; 
+import { Card } from '@/components/ui/card';
+import { eventManager } from '@/lib/events/EventManager';
+import { formatTime } from '@/utils/timeUtils';
+import { TimerStateMetrics } from '@/types/metrics';
+import { Clock, BarChart } from 'lucide-react';
 
-export function TimerMetrics({ metrics, showExtended = false }: TimerMetricsProps) {
-  // Only render if we have metrics
-  if (!metrics || Object.keys(metrics).length === 0) {
-    return (
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle>Timer Metrics</CardTitle>
-          <CardDescription>No metrics available yet</CardDescription>
-        </CardHeader>
-        <CardContent className="h-[200px] flex items-center justify-center">
-          <div className="text-center text-muted-foreground">
-            <ExclamationCircleIcon className="mx-auto h-12 w-12 mb-2" />
-            <p>Complete a timer session to see metrics</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+export interface TimerMetricsProps {
+  metrics: TimerStateMetrics;
+  taskName: string;
+}
 
-  // Generate chart data from the metrics
-  const focusData = generateFocusData(metrics);
-  const efficiencyData = [
-    { name: 'Expected', value: metrics.expectedTime ? secondsToMinutes(metrics.expectedTime) : 0 },
-    { name: 'Actual', value: metrics.actualDuration ? secondsToMinutes(metrics.actualDuration) : 0 },
-    { name: 'Effective', value: metrics.netEffectiveTime ? secondsToMinutes(metrics.netEffectiveTime) : 0 }
-  ];
+export const TimerMetrics: React.FC<TimerMetricsProps> = ({ metrics, taskName }) => {
+  // Calculate the effective time (actual working time excluding pauses)
+  const calculateEffectiveTime = () => {
+    if (!metrics.startTime) return 0;
+    
+    const startTime = new Date(metrics.startTime);
+    const now = new Date();
+    const totalElapsed = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+    const pausedTime = metrics.pausedTime || 0;
+    
+    return Math.max(0, totalElapsed - pausedTime);
+  };
 
-  // Event to share metrics with parent (using useEvent hook)
-  useEvent('metrics:share', () => metrics);
+  // Update metrics on a timer
+  React.useEffect(() => {
+    const updateInterval = setInterval(() => {
+      // Emit metrics update events with latest data
+      if (taskName) {
+        const updatedMetrics = {
+          ...metrics,
+          effectiveTime: calculateEffectiveTime()
+        };
+        
+        eventManager.emit('timer:metrics-update', {
+          taskName,
+          metrics: updatedMetrics
+        });
+      }
+    }, 1000);
+    
+    return () => clearInterval(updateInterval);
+  }, [metrics, taskName]);
+
+  // Format values for display
+  const formatValue = (seconds: number) => {
+    return formatTime(seconds);
+  };
 
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle>Timer Metrics</CardTitle>
-        <CardDescription>
-          {metrics.completionStatus} - {metrics.completionDate ? new Date(metrics.completionDate).toLocaleDateString() : 'N/A'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {showExtended && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Focus Over Time</CardTitle>
-                <CardDescription>Focus level every 5 minutes</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={focusData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="focus" stroke="#8884d8" fill="#8884d8" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Time Efficiency</CardTitle>
-                <CardDescription>Comparison of expected, actual, and effective time</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={efficiencyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pauses</CardTitle>
-              <CardDescription>Number of pauses during the session</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{metrics.pauseCount}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Efficiency Ratio</CardTitle>
-              <CardDescription>Ratio of effective time to actual time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{(metrics.efficiencyRatio || 0).toFixed(2)}</p>
-            </CardContent>
-          </Card>
+    <Card className="p-4 my-2 bg-muted/40">
+      <h4 className="text-sm font-semibold mb-2 flex items-center">
+        <BarChart className="h-4 w-4 mr-1" /> 
+        Timer Metrics
+      </h4>
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <span className="text-muted-foreground">Expected:</span>
+          <div className="font-mono">{formatValue(metrics.expectedTime)}</div>
         </div>
-      </CardContent>
+        
+        <div>
+          <span className="text-muted-foreground">Effective:</span>
+          <div className="font-mono">{formatValue(calculateEffectiveTime())}</div>
+        </div>
+        
+        <div>
+          <span className="text-muted-foreground">Paused:</span>
+          <div className="font-mono">{formatValue(metrics.pausedTime || 0)}</div>
+        </div>
+
+        <div>
+          <span className="text-muted-foreground">Started:</span>
+          <div className="font-mono">
+            {metrics.startTime
+              ? new Date(metrics.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : 'Not started'}
+          </div>
+        </div>
+      </div>
     </Card>
   );
-}
+};
 
-function generateFocusData(metrics: any) {
-  // Create focus data points every 5 minutes
-  const focusData = [];
-  
-  if (metrics.startTime && metrics.endTime) {
-    const startTime = new Date(metrics.startTime).getTime();
-    const endTime = new Date(metrics.endTime).getTime();
-    const duration = endTime - startTime;
-    const interval = 5 * 60 * 1000; // 5 minutes in milliseconds
-    
-    for (let i = 0; i < duration; i += interval) {
-      const time = new Date(startTime + i);
-      const focusLevel = Math.random() * 100; // Generate a random focus level for demonstration
-      focusData.push({
-        name: time.toLocaleTimeString(),
-        focus: focusLevel.toFixed(0)
-      });
-    }
-  }
-  
-  return focusData;
-}
+// Export a separate display component for compact/expanded views
+export const TimerMetricsDisplay = TimerMetrics;

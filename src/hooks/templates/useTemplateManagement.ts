@@ -1,152 +1,118 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
-import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
+import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
+import { useTaskActions } from '@/hooks/tasks/useTaskActions';
+import { HabitTemplate, HabitTemplateWithId } from '@/types/habits';
+import { DBService } from '@/lib/storage/DBService';
+import { useTemplateStorage } from './useTemplateStorage';
+import { TaskEventType } from '@/lib/events/types';
 
-const STORAGE_KEY = 'habit-templates';
-
+/**
+ * Custom hook for managing templates with synchronization
+ */
 export const useTemplateManagement = () => {
-  const [activeTemplates, setActiveTemplates] = useState<ActiveTemplate[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const { forceTaskUpdate } = useTaskActions();
+  const { saveCustomTemplate, deleteCustomTemplate, getCustomTemplates } = useTemplateStorage();
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTemplates));
-    // Dispatch event when templates are updated
-    window.dispatchEvent(new Event('templatesUpdated'));
-  }, [activeTemplates]);
-
-  const addTemplate = useCallback((template: HabitTemplate | ActiveTemplate) => {
-    setActiveTemplates(prev => {
-      // Handle predefined template (HabitTemplate)
-      if ('id' in template && 'defaultHabits' in template) {
-        const exists = prev.some(t => t.templateId === template.id);
-        if (exists) {
-          toast.error('Template already exists');
-          return prev;
+  /**
+   * Create a new custom template
+   */
+  const createTemplate = useCallback(async (template: HabitTemplate): Promise<string | null> => {
+    try {
+      // Generate a new ID for the template
+      const id = `custom-${crypto.randomUUID()}`;
+      
+      // Save to storage
+      const templateWithId: HabitTemplateWithId = {
+        ...template,
+        id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      await saveCustomTemplate(templateWithId);
+      
+      // Save to database if user is authenticated
+      try {
+        const { data: { user } } = await DBService.getAuthUser();
+        if (user) {
+          const { error } = await DBService.saveTemplate({
+            ...templateWithId,
+            user_id: user.id
+          });
+          
+          if (error) {
+            console.error('Error saving template to database:', error);
+          }
         }
-        
-        const newTemplate: ActiveTemplate = {
-          templateId: template.id,
-          habits: template.defaultHabits,
-          activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
-          customized: false,
-          name: template.name,
-          description: template.description,
-        };
-        
-        // Single toast here - only one source of truth for user feedback
-        toast.success('Template added successfully');
-        
-        // Emit event for template addition with suppressToast to avoid duplicates
-        eventManager.emit('habit:template-update', {...newTemplate, suppressToast: true});
-        
-        return [...prev, newTemplate];
+      } catch (dbError) {
+        console.error('Database error saving template:', dbError);
       }
       
-      // Handle custom template (ActiveTemplate)
-      const exists = prev.some(t => t.templateId === template.templateId);
-      if (exists) {
-        toast.error('Template already exists');
-        return prev;
+      // Force task update
+      forceTaskUpdate();
+      
+      return id;
+    } catch (error) {
+      console.error('Error creating template:', error);
+      return null;
+    }
+  }, [saveCustomTemplate, forceTaskUpdate]);
+
+  /**
+   * Delete a template
+   */
+  const deleteTemplate = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      if (!id) return false;
+      
+      console.log(`Deleting template: ${id}`);
+      await deleteCustomTemplate(id);
+      
+      // Also delete from database if user is authenticated
+      try {
+        const { data: { user } } = await DBService.getAuthUser();
+        if (user) {
+          const { error } = await DBService.deleteTemplate(id);
+          if (error) {
+            console.error('Error deleting template from database:', error);
+          }
+        }
+      } catch (dbError) {
+        console.error('Database error deleting template:', dbError);
       }
       
-      // Single toast here
-      toast.success('Template added successfully');
+      // Emit event for other components
+      eventManager.emit('habit:template-delete', { 
+        templateId: id,
+        isOriginatingAction: true
+      });
       
-      // Emit event for template addition with suppressToast
-      eventManager.emit('habit:template-update', {...template, suppressToast: true});
+      // Force task update
+      eventManager.emit('task:reload' as TaskEventType, {});
       
-      // Trigger UI update
-      setTimeout(() => {
-        window.dispatchEvent(new Event('force-habits-update'));
-      }, 100);
-      
-      return [...prev, template];
-    });
-  }, []);
+      return true;
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      return false;
+    }
+  }, [deleteCustomTemplate]);
 
-  const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
-    setActiveTemplates(prev => {
-      const updated = prev.map(template =>
-        template.templateId === templateId
-          ? { ...template, ...updates, customized: true }
-          : template
-      );
-      
-      // Emit event for template update with suppressToast
-      const updatedTemplate = updated.find(t => t.templateId === templateId);
-      if (updatedTemplate) {
-        eventManager.emit('habit:template-update', {...updatedTemplate, suppressToast: true});
-      }
-      
-      return updated;
-    });
-    
-    // Single toast here
-    toast.success('Template updated successfully');
-  }, []);
-
-  const removeTemplate = useCallback((templateId: string) => {
-    // Remove template from active templates
-    setActiveTemplates(prev => 
-      prev.filter(template => template.templateId !== templateId)
-    );
-    
-    // Emit event for template deletion - ensure it's properly propagated
-    // This will trigger cleanup of both active and dismissed/completed tasks
-    eventManager.emit('habit:template-delete', { 
-      templateId, 
-      suppressToast: true,
-      isOriginatingAction: true // Flag to indicate this is the original deletion action
-    });
-    
-    // Also explicitly trigger a task cleanup to ensure dismissed tasks are removed
-    setTimeout(() => {
-      eventManager.emit('tasks:force-update', { timestamp: new Date().toISOString() });
-      window.dispatchEvent(new Event('force-task-update'));
-    }, 100);
-    
-    // Single toast here
-    toast.success('Template removed');
-  }, []);
-
-  const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
-    setActiveTemplates(templates);
-    
-    // Emit event for order update
-    eventManager.emit('habit:template-order-update', templates);
-  }, []);
-
-  const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
-    setActiveTemplates(prev => {
-      const updated = prev.map(template =>
-        template.templateId === templateId
-          ? { ...template, activeDays: days, customized: true }
-          : template
-      );
-      
-      // Emit event for days update with suppressToast
-      const updatedTemplate = updated.find(t => t.templateId === templateId);
-      if (updatedTemplate) {
-        eventManager.emit('habit:template-update', {...updatedTemplate, suppressToast: true});
-      }
-      
-      return updated;
-    });
-    
-    // Single toast here
-    toast.success('Template days updated successfully');
-  }, []);
+  /**
+   * Get all custom templates
+   */
+  const getAllCustomTemplates = useCallback(async (): Promise<HabitTemplateWithId[]> => {
+    try {
+      return await getCustomTemplates();
+    } catch (error) {
+      console.error('Error getting custom templates:', error);
+      return [];
+    }
+  }, [getCustomTemplates]);
 
   return {
-    activeTemplates,
-    addTemplate,
-    updateTemplate,
-    removeTemplate,
-    updateTemplateOrder,
-    updateTemplateDays,
+    createTemplate,
+    deleteTemplate,
+    getAllCustomTemplates
   };
 };

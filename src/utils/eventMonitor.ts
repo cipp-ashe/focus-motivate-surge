@@ -1,6 +1,7 @@
 
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayloads } from '@/lib/events/EventManager';
+import { EventType } from '@/lib/events/EventManager';
+import { EventPayloads, AllEventTypes } from '@/lib/events/types';
 
 type EventRecord = {
   timestamp: number;
@@ -29,30 +30,21 @@ export class EventMonitor {
     this.eventLog = [];
     
     // Subscribe to all events using a wildcard approach
-    const monitorEvent = <T extends EventType>(type: T, payload: EventPayloads[T]) => {
+    const monitorEvent = <T extends AllEventTypes>(type: T, payload: EventPayloads[T]) => {
       this.recordEvent(type, payload);
     };
     
     // Task events
-    // @ts-ignore - Custom event types 
     this.unsubscribers.push(eventManager.on('task:create', payload => monitorEvent('task:create', payload)));
-    // @ts-ignore - Custom event types
     this.unsubscribers.push(eventManager.on('task:update', payload => monitorEvent('task:update', payload)));
-    // @ts-ignore - Custom event types
     this.unsubscribers.push(eventManager.on('task:delete', payload => monitorEvent('task:delete', payload)));
-    // @ts-ignore - Custom event types
     this.unsubscribers.push(eventManager.on('task:select', payload => monitorEvent('task:select', payload)));
-    // @ts-ignore - Custom event types
     this.unsubscribers.push(eventManager.on('task:complete', payload => monitorEvent('task:complete', payload)));
     
     // Habit events
-    // @ts-ignore - Custom event types
     this.unsubscribers.push(eventManager.on('habit:schedule', payload => monitorEvent('habit:schedule', payload)));
-    // @ts-ignore - Custom event types 
     this.unsubscribers.push(eventManager.on('habit:template-add', payload => monitorEvent('habit:template-add', payload)));
-    // @ts-ignore - Custom event types
     this.unsubscribers.push(eventManager.on('habit:template-update', payload => monitorEvent('habit:template-update', payload)));
-    // @ts-ignore - Custom event types
     this.unsubscribers.push(eventManager.on('habit:template-delete', payload => monitorEvent('habit:template-delete', payload)));
     
     // Timer events
@@ -80,7 +72,7 @@ export class EventMonitor {
   /**
    * Record an event
    */
-  private recordEvent<T extends EventType>(eventType: T, payload: EventPayloads[T]): void {
+  private recordEvent<T extends AllEventTypes>(eventType: T, payload: EventPayloads[T]): void {
     this.eventLog.push({
       timestamp: Date.now(),
       eventType: eventType as string,
@@ -120,7 +112,7 @@ export class EventMonitor {
   /**
    * Filter the log by event type
    */
-  filterByEventType(eventType: EventType): EventRecord[] {
+  filterByEventType(eventType: AllEventTypes): EventRecord[] {
     return this.eventLog.filter(record => record.eventType === eventType);
   }
   

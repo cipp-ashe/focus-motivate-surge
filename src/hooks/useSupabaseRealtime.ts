@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { eventManager } from '@/lib/events/EventManager';
 import { useAuth } from '@/contexts/auth/AuthContext';
-import { TimerEventType } from '@/types/events';
+import { AllEventTypes, NoteEventType } from '@/lib/events/types';
 
 export const useSupabaseRealtime = () => {
   const { user } = useAuth();
@@ -123,7 +123,8 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('Note deleted:', payload);
-          eventManager.emit('note:delete', { id: payload.old.id });
+          // Use 'note:deleted' which is the correct event name in our types
+          eventManager.emit('note:deleted' as NoteEventType, { id: payload.old.id });
         })
         // Events
         .on('postgres_changes', {
@@ -136,8 +137,8 @@ export const useSupabaseRealtime = () => {
           try {
             const eventData = payload.new;
             if (!eventData.processed) {
-              // Emit the event locally
-              eventManager.emit(eventData.event_type as TimerEventType, eventData.payload);
+              // Emit the event locally - cast to AllEventTypes to maintain type safety
+              eventManager.emit(eventData.event_type as AllEventTypes, eventData.payload);
               
               // Mark as processed
               supabase

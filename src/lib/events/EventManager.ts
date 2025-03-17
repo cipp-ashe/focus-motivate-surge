@@ -1,6 +1,6 @@
 
 import { supabase } from '@/lib/supabase/client';
-import { AllEventTypes, EventPayloads } from '@/types/events';
+import { AllEventTypes, EventPayloads } from '@/lib/events/types';
 
 export type EventType = AllEventTypes;
 export type EventHandler<T extends EventType> = (payload: EventPayloads[T]) => void;
@@ -214,3 +214,6 @@ class EventManager {
 
 // Create singleton instance
 export const eventManager = new EventManager();
+
+// Export the EventPayloads type for use in other files
+export type { EventPayloads };

@@ -48,7 +48,8 @@ export type TaskEventType =
   | 'task:complete'
   | 'task:select'
   | 'task:dismiss'
-  | 'task:reload';
+  | 'task:reload'
+  | 'tasks:force-update';
 
 // Habit events
 export type HabitEventType =
@@ -66,6 +67,13 @@ export type HabitEventType =
   | 'habit:template-add'
   | 'habit:select'
   | 'habit:journal-deleted';
+
+// Journal events
+export type JournalEventType =
+  | 'journal:open'
+  | 'journal:save'
+  | 'journal:update'
+  | 'journal:delete';
 
 // Relationship events
 export type RelationshipEventType =
@@ -121,7 +129,8 @@ export type AllEventTypes =
   | NavigationEventType
   | AuthEventType
   | NoteEventType
-  | TagEventType;
+  | TagEventType
+  | JournalEventType;
 
 // Create a union type of all event payloads for use in the EventManager
 export type EventPayloads = TimerEventPayloads & {
