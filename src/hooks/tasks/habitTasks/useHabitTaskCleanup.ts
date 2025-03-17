@@ -29,7 +29,8 @@ export const useHabitTaskCleanup = () => {
       // First, emit the habit:task-deleted event with the corrected payload structure
       const payload = { 
         habitId, 
-        taskId: finalTaskId
+        taskId: finalTaskId,
+        date
       };
       
       eventManager.emit('habit:task-deleted', payload);

@@ -11,7 +11,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Settings from "./pages/Settings";
 import VoiceNotes from "./pages/VoiceNotes";
 import Screenshots from "./pages/Screenshots";
-import SecurityControls from "./pages/SecurityControls";
+import SecurityControlsPage from "./pages/SecurityControls";
 import { RequireAuth } from "./components/auth/RequireAuth";
 
 // Create and export the router configuration
@@ -73,10 +73,10 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "security",
+        path: "security-controls",
         element: (
           <RequireAuth>
-            <SecurityControls />
+            <SecurityControlsPage />
           </RequireAuth>
         ),
       },
