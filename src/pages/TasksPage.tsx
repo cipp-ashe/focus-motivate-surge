@@ -12,6 +12,7 @@ import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
 import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
 import { toast } from 'sonner';
+import TaskInput from '@/components/tasks/components/TaskInput';
 
 const TasksPage: React.FC = () => {
   const taskContext = useTaskContext();
@@ -115,6 +116,18 @@ const TasksPage: React.FC = () => {
     setActiveTab(value);
   };
   
+  // Handler for adding a task
+  const handleAddTask = (task: Task) => {
+    if (taskContext?.addTask) {
+      console.log("Adding new task:", task);
+      taskContext.addTask(task);
+      toast.success(`Task created: ${task.name}`);
+    } else {
+      console.error("Task context or addTask function is undefined");
+      toast.error("Failed to create task. Please try again.");
+    }
+  };
+  
   // If no task context, show loading or error
   if (!taskContext) {
     return (
@@ -183,9 +196,17 @@ const TasksPage: React.FC = () => {
           </Tabs>
         }
         asideContent={
-          <TaskManager 
-            dialogOpeners={dialogOpeners}
-          />
+          <div className="space-y-4">
+            {/* Add Task Input component at the top */}
+            <div className="mb-4 p-4 bg-card rounded-lg border border-border">
+              <h3 className="text-lg font-medium mb-2">Add New Task</h3>
+              <TaskInput onTaskAdd={handleAddTask} />
+            </div>
+            
+            <TaskManager 
+              dialogOpeners={dialogOpeners}
+            />
+          </div>
         }
       />
       
@@ -216,7 +237,9 @@ const TasksPage: React.FC = () => {
         task={{
           id: activeTaskId,
           name: activeTaskName,
-          imageUrl: screenshotUrl
+          imageUrl: screenshotUrl,
+          createdAt: new Date().toISOString(),
+          completed: false
         } as Task}
       />
       
@@ -225,7 +248,9 @@ const TasksPage: React.FC = () => {
         onOpenChange={setVoiceNoteDialogOpen}
         task={{
           id: activeTaskId,
-          name: activeTaskName
+          name: activeTaskName,
+          createdAt: new Date().toISOString(),
+          completed: false
         } as Task}
       />
     </div>
