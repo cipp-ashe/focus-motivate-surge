@@ -20,6 +20,16 @@ export const taskStorage = {
     return { active, completed };
   },
   
+  // Alias getTaskById for backward compatibility
+  getTaskById: (taskId: string): Task | null => {
+    return activeTasksStorage.getTaskById(taskId);
+  },
+  
+  // For backward compatibility
+  removeTask: (taskId: string): boolean => {
+    return activeTasksStorage.removeTask(taskId);
+  },
+  
   // For testing
   ACTIVE_TASKS_KEY: constants.ACTIVE_TASKS_KEY,
   COMPLETED_TASKS_KEY: constants.COMPLETED_TASKS_KEY,

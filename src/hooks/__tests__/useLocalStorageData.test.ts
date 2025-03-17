@@ -34,26 +34,26 @@ describe('useLocalStorageData', () => {
   it('should load data from localStorage', () => {
     mockLocalStorage.getItem.mockReturnValueOnce(JSON.stringify([{ id: 1, name: 'Task 1' }]));
     
-    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', []));
+    const { result } = renderHook(() => useLocalStorageData('tasks', []));
     
     expect(mockLocalStorage.getItem).toHaveBeenCalledWith('tasks');
-    expect(result.current.data).toEqual([{ id: 1, name: 'Task 1' }]);
+    expect(result.current[0]).toEqual([{ id: 1, name: 'Task 1' }]);
   });
 
   it('should use default value if localStorage is empty', () => {
     mockLocalStorage.getItem.mockReturnValueOnce(null);
     
-    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', [{ id: 2, name: 'Default Task' }]));
+    const { result } = renderHook(() => useLocalStorageData('tasks', [{ id: 2, name: 'Default Task' }]));
     
     expect(mockLocalStorage.getItem).toHaveBeenCalledWith('tasks');
-    expect(result.current.data).toEqual([{ id: 2, name: 'Default Task' }]);
+    expect(result.current[0]).toEqual([{ id: 2, name: 'Default Task' }]);
   });
 
   it('should update localStorage when data changes', () => {
-    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', []));
+    const { result } = renderHook(() => useLocalStorageData('tasks', []));
     
     act(() => {
-      result.current.setData([{ id: 3, name: 'New Task' }]);
+      result.current[1]([{ id: 3, name: 'New Task' }]);
     });
     
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('tasks', JSON.stringify([{ id: 3, name: 'New Task' }]));
@@ -65,22 +65,23 @@ describe('useLocalStorageData', () => {
     
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     
-    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', []));
+    const { result } = renderHook(() => useLocalStorageData('tasks', []));
     
     expect(consoleErrorSpy).toHaveBeenCalled();
-    expect(result.current.data).toEqual([]);
+    expect(result.current[0]).toEqual([]);
     
     consoleErrorSpy.mockRestore();
   });
 
-  it('should clear data when clearData is called', () => {
-    const { result } = renderHook(() => useLocalStorageData<any[]>('tasks', [{ id: 1 }]));
+  it('should clear data by setting empty value', () => {
+    const { result } = renderHook(() => useLocalStorageData('tasks', [{ id: 1 }]));
     
     act(() => {
-      result.current.clearData();
+      // Set empty array to clear data
+      result.current[1]([]);
     });
     
-    expect(result.current.data).toEqual([]);
+    expect(result.current[0]).toEqual([]);
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith('tasks', JSON.stringify([]));
   });
 });

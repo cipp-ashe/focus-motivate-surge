@@ -16,8 +16,8 @@ export const eventBus = new Proxy(eventManager, {
   }
 });
 
-// Re-export types
-export {
+// Re-export types with proper type syntax for isolatedModules
+export type { 
   EventType,
   EventHandler,
   EventPayloads

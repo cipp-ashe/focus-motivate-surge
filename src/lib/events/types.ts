@@ -1,9 +1,9 @@
 
 // Import EventManager types 
-import { EventType, EventHandler, EventPayloads } from './EventManager';
+import type { EventType, EventHandler, EventPayloads } from './EventManager';
 
 // Re-export for convenience
-export { EventType, EventHandler, EventPayloads };
+export type { EventType, EventHandler, EventPayloads };
 
 // Export tag event types
 export type TagEventType = 'tag:select' | 'tag:remove' | 'tags:force-update' | 'tag:create' | 'tag:delete';
