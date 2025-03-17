@@ -4,8 +4,7 @@ import { Task, TaskType } from '@/types/tasks';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { useToast } from '@/hooks/use-toast';
-import { Tag } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface UseTaskCreationProps {
   onTaskAdd: (task: Task) => void;
@@ -64,13 +63,12 @@ export const useTaskCreation = ({
     };
     
     try {
-      // Call the parent handler
+      // Directly call the parent handler to update the context
+      console.log("useTaskCreation: Created new task, calling onTaskAdd", newTask);
       onTaskAdd(newTask);
       
       // Also emit an event to ensure all components are notified
-      eventBus.emit('task:create', newTask);
-      
-      console.log('Task created and emitted:', newTask);
+      eventManager.emit('task:create', newTask);
       
       // Trigger UI update events
       window.dispatchEvent(new CustomEvent('task-ui-refresh'));
@@ -102,13 +100,13 @@ export const useTaskCreation = ({
     }));
     
     try {
-      // Call the parent handler
+      // Call the parent handler directly
+      console.log("useTaskCreation: Created multiple tasks, calling onTasksAdd", newTasks);
       onTasksAdd(newTasks);
       
       // Also emit events for each task
       newTasks.forEach(task => {
-        eventBus.emit('task:create', task);
-        console.log('Multiple task created and emitted:', task);
+        eventManager.emit('task:create', task);
       });
       
       // Trigger UI update events

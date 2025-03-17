@@ -96,31 +96,41 @@ const TasksPage: React.FC = () => {
     }
   };
   
-  // Handle task creation using event manager with proper error handling
+  // Handle task creation using taskContext directly 
   const handleAddTask = useCallback((task: Task) => {
     try {
-      console.log("Emitting task:create event:", task);
-      eventManager.emit('task:create', task);
-      toast.success(`Task created: ${task.name}`);
+      console.log("Adding task to context:", task);
+      if (taskContext && taskContext.addTask) {
+        taskContext.addTask(task);
+        toast.success(`Task created: ${task.name}`);
+      } else {
+        console.error("Task context or addTask function is undefined");
+        toast.error("Failed to create task: Application error");
+      }
     } catch (error) {
       console.error("Error creating task:", error);
       toast.error("Failed to create task");
     }
-  }, []);
+  }, [taskContext]);
   
   // Handle multiple tasks addition with error handling
   const handleAddMultipleTasks = useCallback((tasks: Task[]) => {
     try {
       console.log("Adding multiple tasks:", tasks);
-      tasks.forEach(task => {
-        eventManager.emit('task:create', task);
-      });
-      toast.success(`Added ${tasks.length} tasks`);
+      if (taskContext && taskContext.addTask) {
+        tasks.forEach(task => {
+          taskContext.addTask(task);
+        });
+        toast.success(`Added ${tasks.length} tasks`);
+      } else {
+        console.error("Task context or addTask function is undefined");
+        toast.error("Failed to add tasks: Application error");
+      }
     } catch (error) {
       console.error("Error adding multiple tasks:", error);
       toast.error("Failed to add tasks");
     }
-  }, []);
+  }, [taskContext]);
   
   // If no task context, show loading or error
   if (!taskContext) {
