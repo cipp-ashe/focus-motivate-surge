@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { useAuth } from '@/contexts/auth/AuthContext';
-import { useToast } from '@/hooks/use-toast'; // Fixed import path
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase/client';
 
 /**

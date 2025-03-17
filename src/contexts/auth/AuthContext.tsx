@@ -4,6 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { syncLocalDataToSupabase } from '@/lib/sync/dataSynchronizer';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface AuthContextType {
   session: Session | null;
@@ -43,6 +44,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       setIsLoading(false);
       
+      // Emit an event that user authentication state has changed
+      eventManager.emit('auth:state-change', { 
+        event: _event, 
+        user: session?.user ?? null 
+      });
+      
       // If user just logged in, sync localStorage data to Supabase
       if (session?.user && _event === 'SIGNED_IN' && localStorage.getItem('firstLogin') !== 'completed') {
         syncLocalDataToSupabase(session.user.id);
@@ -75,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) throw error;
+      toast.success('Magic link sent! Check your email');
       return { error: null };
     } catch (error) {
       console.error('Error sending magic link:', error);

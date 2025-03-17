@@ -1,8 +1,8 @@
-
 import mitt, { Emitter } from 'mitt';
 import { Note } from '@/types/notes';
 import { TimerEventType, TimerEventPayloads } from '@/types/events';
 import { logger } from '@/utils/logManager';
+import { supabase } from '@/lib/supabase/client';
 
 // Define all possible events for the application
 // This should be synchronized with TimerEventPayloads in types/events.ts
@@ -19,8 +19,8 @@ type Events = {
   'timer:metrics-update': { taskName: string; metrics: any };
   'timer:state-update': { taskName: string; timeLeft?: number; isRunning?: boolean; state?: any; metrics?: any };
   'timer:set-task': { id: string; name: string; duration?: number } | any;
-  'timer:task-set': { taskId: string; task: any }; // Adding missing event type
-  'timer:select-task': { taskId: string }; // Adding missing event type
+  'timer:task-set': { taskId: string; task: any };
+  'timer:select-task': { taskId: string };
   'note:create': Note;
   'note:update': Note;
   'note:delete': { id: string };
@@ -97,7 +97,13 @@ type Events = {
   'habits:processed': any;
   'nav:route-change': { from: string; to: string };
   'app:initialization-complete': any;
-  'app:initialized': any; // Adding missing event type
+  'app:initialized': any;
+  'auth:state-change': { event: string, user: any | null };
+  'auth:signed-in': { user: any };
+  'auth:signed-out': void;
+  'sync:start': { type: string };
+  'sync:complete': { type: string, count: number };
+  'sync:error': { type: string, error: any };
 };
 
 // Export event type and handler for use in other modules
@@ -111,6 +117,7 @@ class EventManager {
   private emitter: Emitter<Events>;
   private static instanceCount: number = 0;
   private id: number;
+  private user: any | null = null;
   
   // Map to prevent duplicate event registrations with same handler
   private registeredHandlers: Map<string, Set<Function>> = new Map();
@@ -122,9 +129,25 @@ class EventManager {
     this.emitter = mitt<Events>();
     this.id = ++EventManager.instanceCount;
     logger.info('EventManager', `EventManager instance #${this.id} created`);
+    
+    // Listen for auth state changes
+    this.setupAuthListener();
+  }
+  
+  private setupAuthListener() {
+    // Register auth change listener
+    supabase.auth.onAuthStateChange((event, session) => {
+      this.user = session?.user ?? null;
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        this.emit('auth:signed-in', { user: session.user });
+      } else if (event === 'SIGNED_OUT') {
+        this.emit('auth:signed-out', undefined);
+      }
+    });
   }
 
-  emit<K extends keyof Events>(event: K, payload: Events[K]) {
+  async emit<K extends keyof Events>(event: K, payload: Events[K]) {
     // Log the event with throttling for high-frequency events like timer:tick
     const highFrequencyEvents = ['timer:tick'];
     const throttleTime = highFrequencyEvents.includes(event as string) ? 1000 : 0;
@@ -136,7 +159,29 @@ class EventManager {
       logger.debug('EventManager', `Event: ${String(event)}`, payload);
     }
     
+    // Emit locally
     this.emitter.emit(event, payload);
+    
+    // Store in Supabase if appropriate
+    try {
+      if (this.user && !highFrequencyEvents.includes(event as string)) {
+        // Don't store high frequency events
+        const { error } = await supabase
+          .from('events')
+          .insert([{
+            user_id: this.user.id,
+            event_type: event as string,
+            payload: payload as any, // Will be converted to JSON
+            processed: false
+          }]);
+          
+        if (error) {
+          console.error('Error storing event in Supabase:', error);
+        }
+      }
+    } catch (err) {
+      console.error('Error storing event:', err);
+    }
   }
 
   on<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void) {
@@ -201,6 +246,55 @@ class EventManager {
   // Debugging method to get listener counts
   getListenerCounts() {
     return Object.fromEntries(this.listenerCounts.entries());
+  }
+  
+  // Method to fetch events from Supabase
+  async fetchEvents(limit = 100, includeProcessed = false) {
+    if (!this.user) return [];
+    
+    try {
+      let query = supabase
+        .from('events')
+        .select('*')
+        .eq('user_id', this.user.id)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+        
+      if (!includeProcessed) {
+        query = query.eq('processed', false);
+      }
+        
+      const { data, error } = await query;
+        
+      if (error) {
+        console.error('Error fetching events:', error);
+        return [];
+      }
+        
+      return data;
+    } catch (err) {
+      console.error('Error in fetchEvents:', err);
+      return [];
+    }
+  }
+  
+  // Method to mark events as processed
+  async markEventsAsProcessed(eventIds: string[]) {
+    if (!this.user || !eventIds.length) return;
+    
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({ processed: true })
+        .in('id', eventIds)
+        .eq('user_id', this.user.id);
+        
+      if (error) {
+        console.error('Error marking events as processed:', error);
+      }
+    } catch (err) {
+      console.error('Error in markEventsAsProcessed:', err);
+    }
   }
 }
 

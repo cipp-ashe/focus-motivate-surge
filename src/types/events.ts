@@ -1,4 +1,3 @@
-
 export interface TimerEventPayloads {
   // Habit events
   'habit:schedule': {
@@ -143,6 +142,16 @@ export interface TimerEventPayloads {
   'app:initialization-complete': any;
   'app:initialized': any; // Adding missing event type
   'page:timer-ready': any;
+  
+  // Auth events
+  'auth:state-change': { event: string, user: any | null };
+  'auth:signed-in': { user: any };
+  'auth:signed-out': any;
+  
+  // Sync events
+  'sync:start': { type: string };
+  'sync:complete': { type: string, count: number };
+  'sync:error': { type: string, error: any };
 }
 
 export type TimerEventType = keyof TimerEventPayloads;
