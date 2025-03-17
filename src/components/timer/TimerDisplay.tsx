@@ -30,7 +30,7 @@ export const TimerDisplay = memo(({
     tabIndex: 0,
     "aria-label": isRunning ? "Expand timer view" : "Timer display",
     "aria-live": isRunning ? "polite" : "off" as "polite" | "off",
-    "aria-atomic": "true",
+    "aria-atomic": "true" as any, // Fix the type error by using 'any' for now
     onKeyDown: (e: React.KeyboardEvent) => {
       if ((e.key === 'Enter' || e.key === ' ') && isRunning && onClick) {
         e.preventDefault();
