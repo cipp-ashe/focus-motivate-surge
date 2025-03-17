@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Clock, HomeIcon, ListTodo, Notebook, ActivitySquare, Image, Mic } from 'lucide-react';
+import { Clock, HomeIcon, ListTodo, Notebook, ActivitySquare, Image, Mic, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 export const Header = () => {
@@ -50,6 +50,10 @@ export const Header = () => {
           <Link to="/voice-notes" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/voice-notes')}`} aria-label="Voice Notes">
             <Mic className="h-5 w-5" />
             {!isMobile && <span>Voice</span>}
+          </Link>
+          <Link to="/settings" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/settings')}`} aria-label="Settings">
+            <Settings className="h-5 w-5" />
+            {!isMobile && <span>Settings</span>}
           </Link>
         </nav>
       </div>
