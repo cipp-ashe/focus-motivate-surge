@@ -8,6 +8,8 @@ import DashboardCardGrid from '@/components/dashboard/DashboardCardGrid';
 import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from 'react-error-boundary';
 import { logError } from '@/utils/errorHandler';
+import { Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -84,24 +86,21 @@ const DashboardContent: React.FC = () => {
   
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold">Welcome to Focus Notes</h1>
-        <p className="text-muted-foreground">
-          Organize your tasks, notes, and habits in one place
-        </p>
+      <header className="space-y-2 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome to Focus Notes</h1>
+          <p className="text-muted-foreground">
+            Organize your tasks, notes, and habits in one place
+          </p>
+        </div>
+        <Link to="/settings" className="p-2 rounded-full hover:bg-accent transition-colors" title="Settings">
+          <Settings className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+        </Link>
       </header>
       
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <DashboardCardGrid />
       </ErrorBoundary>
-      
-      {showClearButton && (
-        <div className="mt-4">
-          <Button variant="outline" onClick={clearStorage} size="sm">
-            Reset Application Data
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
