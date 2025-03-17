@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { eventBus } from "@/lib/eventBus";
 import { eventManager } from "@/lib/events/EventManager";
 
+// Global flag to prevent duplicate initialization across instances
+let globalInitialized = false;
+
 export const useDataInitialization = () => {
   const [status, setStatus] = useState<{
     isInitialized: boolean;
@@ -18,7 +21,13 @@ export const useDataInitialization = () => {
   const eventsEmittedRef = useRef(false);
 
   useEffect(() => {
-    // Prevent duplicate initialization
+    // First check the global flag
+    if (globalInitialized) {
+      setStatus({ isInitialized: true, error: null });
+      return;
+    }
+    
+    // Then check the local ref
     if (initRunRef.current) return;
     initRunRef.current = true;
     
@@ -56,18 +65,23 @@ export const useDataInitialization = () => {
       // If we got here, initialization succeeded or wasn't needed
       console.log("Data initialization complete");
       setStatus({ isInitialized: true, error: null });
+      globalInitialized = true;
       
-      // Emit event to trigger task loading after initialization - do this only once
+      // Emit event to trigger task loading after initialization - do this only once globally
       if (!eventsEmittedRef.current) {
         eventsEmittedRef.current = true;
         
-        // Use a single timeout for all events
+        // Use a single timeout for all events and emit only once
         setTimeout(() => {
-          console.log("Emitting initialization events");
-          window.dispatchEvent(new Event('force-task-update'));
+          console.log("Emitting initialization events (once)");
+          
+          // Use a single event instead of multiple
           eventBus.emit('app:initialized', {});
           eventManager.emit('app:initialized', {});
-        }, 100);
+          
+          // Dispatch this as a regular DOM event
+          window.dispatchEvent(new CustomEvent('force-task-update', { detail: { source: 'initialization' } }));
+        }, 200);
       }
     } catch (error) {
       console.error('Error during data initialization:', error);
@@ -94,6 +108,7 @@ export const useDataInitialization = () => {
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
       toast.success('Application data cleared');
+      globalInitialized = false; // Reset the global initialization flag
       window.location.reload();
     } catch (error) {
       console.error('Error clearing storage:', error);
@@ -105,6 +120,6 @@ export const useDataInitialization = () => {
     isInitialized: status.isInitialized,
     error: status.error,
     clearStorage,
-    showClearButton: true // Always show clear button to help users who are stuck
+    showClearButton: true
   };
 };

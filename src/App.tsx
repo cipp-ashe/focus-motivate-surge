@@ -8,24 +8,36 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<Error | null>(null);
   const initStartedRef = useRef(false);
+  const mountedRef = useRef(false);
   
-  // Initialize app once
+  // Initialize app once with stronger protection against double initialization
   useEffect(() => {
-    // Prevent double initialization
-    if (initStartedRef.current) {
+    // Prevent duplicate effect execution with strict mounting check
+    if (mountedRef.current) {
       return;
     }
     
-    initStartedRef.current = true;
-    console.log("App component mounted, initializing...");
+    mountedRef.current = true;
     
-    try {
-      // Simple initialization without any external service connections
-      setIsInitialized(true);
-    } catch (error) {
-      console.error("Failed to initialize:", error);
-      setInitError(error instanceof Error ? error : new Error('Unknown error during initialization'));
+    // Only run initialization logic once
+    if (!initStartedRef.current) {
+      initStartedRef.current = true;
+      console.log("App component mounted, initializing...");
+      
+      try {
+        // Simple initialization without any external service connections
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Failed to initialize:", error);
+        setInitError(error instanceof Error ? error : new Error('Unknown error during initialization'));
+      }
     }
+    
+    // Cleanup function
+    return () => {
+      // This will run when the component unmounts
+      console.log("App component unmounting, cleaning up...");
+    };
   }, []);
   
   // Show a loading state while initializing

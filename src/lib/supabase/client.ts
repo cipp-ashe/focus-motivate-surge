@@ -35,14 +35,17 @@ export const onAuthStateChange = (callback: (event: string, session: any) => voi
 
 // Single Realtime channel instance to prevent duplicate subscriptions
 let realtimeChannel: any = null;
+let realtimeEnabled = false;
 
 // Enable realtime for specific tables only when explicitly called
 export const enableRealtimeForTables = async () => {
   // Only set up the channel if it doesn't already exist
-  if (realtimeChannel) {
+  if (realtimeChannel || realtimeEnabled) {
     console.log('Realtime already enabled for tables');
     return;
   }
+  
+  realtimeEnabled = true;
   
   try {
     console.log('Enabling realtime for tables...');
@@ -68,10 +71,23 @@ export const enableRealtimeForTables = async () => {
         schema: 'public',
         table: 'events'
       }, () => {})
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
     
     console.log('Realtime enabled for tables');
   } catch (error) {
     console.error('Error enabling realtime:', error);
+    realtimeEnabled = false;
+  }
+};
+
+// Helper to clean up realtime connection when not needed
+export const disableRealtime = () => {
+  if (realtimeChannel) {
+    realtimeChannel.unsubscribe();
+    realtimeChannel = null;
+    realtimeEnabled = false;
+    console.log('Realtime disabled for tables');
   }
 };

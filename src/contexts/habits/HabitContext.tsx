@@ -12,6 +12,10 @@ import { eventManager } from '@/lib/events/EventManager';
 const HabitContext = createContext<HabitState | undefined>(undefined);
 const HabitActionsContext = createContext<HabitContextActions | undefined>(undefined);
 
+// Track habit initialization globally
+let habitsInitialized = false;
+let habitsChecked = false;
+
 export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
   const loadedRef = useRef(false);
@@ -21,9 +25,10 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
   const { data, refetch } = useQuery({
     queryKey: ['habits'],
     queryFn: async () => {
-      // Prevent duplicate loading
-      if (loadedRef.current) return state.templates;
+      // Prevent duplicate loading using both global and local flags
+      if (habitsInitialized || loadedRef.current) return state.templates;
       loadedRef.current = true;
+      habitsInitialized = true;
       
       try {
         const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
@@ -35,13 +40,14 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
         dispatch({ type: 'LOAD_CUSTOM_TEMPLATES', payload: customTemplates });
         
         // Mark as loaded and trigger habit processing once
-        setTimeout(() => {
-          if (!habitsCheckedRef.current) {
+        if (!habitsChecked && !habitsCheckedRef.current) {
+          setTimeout(() => {
             habitsCheckedRef.current = true;
+            habitsChecked = true;
             // Update habit processing
             eventManager.emit('habits:check-pending', {});
-          }
-        }, 300);
+          }, 300);
+        }
         
         return templates;
       } catch (error) {
@@ -63,20 +69,22 @@ export const HabitProvider = ({ children }: { children: ReactNode }) => {
     reloadTemplates: () => {
       refetch();
       
-      // Also trigger events to ensure task synchronization
-      setTimeout(() => {
+      // Trigger events with debounce to ensure task synchronization
+      const checkTimeout = setTimeout(() => {
+        console.log('HabitContext: Triggering habit check from reloadTemplates');
         eventManager.emit('habits:check-pending', {});
-        window.dispatchEvent(new Event('force-habits-update'));
-      }, 100);
+        window.dispatchEvent(new CustomEvent('force-habits-update'));
+        clearTimeout(checkTimeout);
+      }, 200);
     }
   };
 
-  // Force periodic verification of habit tasks but at a reasonable interval
+  // Force periodic verification of habit tasks but at a reasonable interval and only one timer
   useEffect(() => {
     const checkInterval = setInterval(() => {
       console.log('HabitContext: Periodic habit check');
       eventManager.emit('habits:check-pending', {});
-    }, 120000); // Check every 2 minutes instead of every minute
+    }, 300000); // Check every 5 minutes instead of every 2 minutes
     
     return () => clearInterval(checkInterval);
   }, []);
