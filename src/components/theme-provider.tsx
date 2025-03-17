@@ -28,7 +28,7 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
   storageKey = "vite-ui-theme",
-  attribute = "data-theme",
+  attribute = "class", // Changed to "class" for better Tailwind compatibility
   enableSystem = true,
   ...props
 }: ThemeProviderProps) {
@@ -56,6 +56,27 @@ export function ThemeProvider({
     root.setAttribute(attribute, theme);
     localStorage.setItem(storageKey, theme);
   }, [theme, attribute, enableSystem, storageKey]);
+
+  // Listen for system theme changes and update if using system theme
+  useEffect(() => {
+    if (!enableSystem) return;
+    
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = () => {
+      if (theme === "system") {
+        const root = window.document.documentElement;
+        const systemTheme = mediaQuery.matches ? "dark" : "light";
+        
+        root.classList.remove("light", "dark");
+        root.classList.add(systemTheme);
+        root.setAttribute(attribute, systemTheme);
+      }
+    };
+    
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [attribute, enableSystem, theme]);
 
   const value = {
     theme,

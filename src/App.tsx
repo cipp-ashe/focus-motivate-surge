@@ -41,7 +41,7 @@ function App() {
   }
   
   return (
-    <ThemeProvider defaultTheme="dark">
+    <ThemeProvider defaultTheme="dark" attribute="class">
       <AuthProvider>
         <RouterProvider router={router} />
         <Toaster position="top-right" />

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
  * @returns boolean indicating if the device is mobile
  */
 export function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(() => {
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.innerWidth < breakpoint;
   });

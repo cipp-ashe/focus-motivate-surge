@@ -10,6 +10,7 @@ import { ArrowRight, LogIn, MoonStar, Sun, User, PaintBucket, Info, AlertTriangl
 import { useTheme } from '@/components/theme-provider';
 import { useDataInitialization } from '@/hooks/data/useDataInitialization';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const Settings = () => {
   const { user, isAuthenticated, signOut } = useAuth();
@@ -18,7 +19,9 @@ const Settings = () => {
   const isDark = theme === 'dark';
 
   const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark');
+    const newTheme = isDark ? 'light' : 'dark';
+    setTheme(newTheme);
+    toast.success(`Switched to ${newTheme} mode`);
   };
 
   return (
@@ -135,7 +138,10 @@ const Settings = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={clearStorage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  <AlertDialogAction onClick={() => {
+                    clearStorage();
+                    toast.success("Application data has been reset");
+                  }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                     Yes, Reset Everything
                   </AlertDialogAction>
                 </AlertDialogFooter>

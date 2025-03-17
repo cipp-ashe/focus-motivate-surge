@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Home, CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
@@ -10,40 +10,62 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile(1024);
+  const location = useLocation();
+  
+  const isActive = (path: string) => {
+    return location.pathname === path ? 'text-primary' : 'text-muted-foreground hover:text-primary';
+  };
   
   return (
-    <div className="flex flex-col min-h-screen bg-background dark:bg-gray-900 transition-colors duration-300">
-      <div className="flex flex-1">
-        {/* Navigation sidebar */}
-        <nav className="hidden md:flex flex-col w-14 bg-background border-r border-border">
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <Link to="/" className="p-2 hover:bg-accent rounded-md transition-colors" title="Home">
-              <Home className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-            </Link>
-            <Link to="/tasks" className="p-2 hover:bg-accent rounded-md transition-colors" title="Tasks">
-              <CalendarCheck className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-            </Link>
-            <Link to="/timer" className="p-2 hover:bg-accent rounded-md transition-colors" title="Timer">
-              <Timer className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-            </Link>
-            <Link to="/habits" className="p-2 hover:bg-accent rounded-md transition-colors" title="Habits">
-              <BookHeart className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-            </Link>
-            <Link to="/notes" className="p-2 hover:bg-accent rounded-md transition-colors" title="Notes">
-              <ScrollText className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-            </Link>
-            <Link to="/screenshots" className="p-2 hover:bg-accent rounded-md transition-colors" title="Screenshots">
-              <Image className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-            </Link>
-            <Link to="/voice-notes" className="p-2 hover:bg-accent rounded-md transition-colors" title="Voice Notes">
-              <Mic className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-            </Link>
-            <Link to="/settings" className="p-2 hover:bg-accent rounded-md transition-colors" title="Settings">
-              <Settings className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+    <div className="flex flex-col min-h-screen bg-background transition-colors duration-300">
+      {/* Header navigation for all devices */}
+      <header className="border-b border-border/40 bg-background/95 backdrop-blur sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center">
+            <Link to="/" className={`text-xl font-bold flex items-center ${isMobile ? 'gap-1' : 'gap-2'} text-primary`}>
+              <Timer className="h-5 w-5" />
+              {!isMobile && <span>TaskTimer</span>}
             </Link>
           </div>
-        </nav>
-        
+          
+          <nav className={`flex ${isMobile ? 'space-x-4' : 'space-x-6'}`}>
+            <Link to="/" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/')}`} aria-label="Home">
+              <Home className="h-5 w-5" />
+              {!isMobile && <span>Home</span>}
+            </Link>
+            <Link to="/tasks" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/tasks')}`} aria-label="Tasks">
+              <CalendarCheck className="h-5 w-5" />
+              {!isMobile && <span>Tasks</span>}
+            </Link>
+            <Link to="/timer" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/timer')}`} aria-label="Timer">
+              <Timer className="h-5 w-5" />
+              {!isMobile && <span>Timer</span>}
+            </Link>
+            <Link to="/notes" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/notes')}`} aria-label="Notes">
+              <ScrollText className="h-5 w-5" />
+              {!isMobile && <span>Notes</span>}
+            </Link>
+            <Link to="/habits" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/habits')}`} aria-label="Habits">
+              <BookHeart className="h-5 w-5" />
+              {!isMobile && <span>Habits</span>}
+            </Link>
+            <Link to="/screenshots" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/screenshots')}`} aria-label="Screenshots">
+              <Image className="h-5 w-5" />
+              {!isMobile && <span>Screenshots</span>}
+            </Link>
+            <Link to="/voice-notes" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/voice-notes')}`} aria-label="Voice Notes">
+              <Mic className="h-5 w-5" />
+              {!isMobile && <span>Voice</span>}
+            </Link>
+            <Link to="/settings" className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive('/settings')}`} aria-label="Settings">
+              <Settings className="h-5 w-5" />
+              {!isMobile && <span>Settings</span>}
+            </Link>
+          </nav>
+        </div>
+      </header>
+      
+      <div className="flex flex-1">
         {/* Main content */}
         <main className="flex-1 pb-16 md:pb-0">
           <div className="relative z-10 container mx-auto px-4 py-4">
