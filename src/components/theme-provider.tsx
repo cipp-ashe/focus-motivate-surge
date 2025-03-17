@@ -48,12 +48,10 @@ export function ThemeProvider({
         : "light";
 
       root.classList.add(systemTheme);
-      root.setAttribute(attribute, systemTheme);
       return;
     }
 
     root.classList.add(theme);
-    root.setAttribute(attribute, theme);
     localStorage.setItem(storageKey, theme);
   }, [theme, attribute, enableSystem, storageKey]);
 
@@ -70,13 +68,12 @@ export function ThemeProvider({
         
         root.classList.remove("light", "dark");
         root.classList.add(systemTheme);
-        root.setAttribute(attribute, systemTheme);
       }
     };
     
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [attribute, enableSystem, theme]);
+  }, [enableSystem, theme]);
 
   const value = {
     theme,
