@@ -51,6 +51,22 @@ export const logError = (
   }
   
   console.groupEnd();
+  
+  // Show toast for visible errors in development
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      const toastModule = require('sonner');
+      if (toastModule && toastModule.toast) {
+        toastModule.toast.error(`Error: ${message}`, {
+          description: errorObj.message,
+          duration: 5000,
+        });
+      }
+    } catch (e) {
+      // Toast module not available, just continue
+      console.log('Toast module not available for error notification');
+    }
+  }
 };
 
 // Setup global error handlers

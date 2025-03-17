@@ -1,48 +1,89 @@
 
-import React, { ReactNode, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Header } from './layout/Header';
-import { useTheme } from '@/hooks/useTheme';
+import React, { ReactNode } from 'react';
+import { Link, Outlet } from 'react-router-dom';
+import { Home, CalendarCheck, Timer, BookHeart, ScrollText, Image, Mic, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface AppLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
-export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const location = useLocation();
-  const { isDark, mounted } = useTheme();
-  // Use a higher breakpoint for the overall layout
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile(1024);
+  const content = children || <Outlet />;
   
-  // Only hide header on the main dashboard page
-  const showHeader = location.pathname !== '/';
-  
-  // Apply theme class to document when component mounts and whenever isDark changes
-  useEffect(() => {
-    if (!mounted) return;
-    
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark, mounted]);
-
   return (
-    <div className="min-h-screen bg-background dark:bg-gray-900 transition-colors duration-300 relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-[10%] w-72 h-72 bg-primary/10 rounded-full filter blur-3xl opacity-40 animate-float"></div>
-        <div className="absolute bottom-[20%] right-[5%] w-80 h-80 bg-purple-500/10 rounded-full filter blur-3xl opacity-30" style={{ animationDelay: '2s', animationDuration: '7s' }}></div>
-        <div className="absolute top-[40%] right-[20%] w-64 h-64 bg-violet-400/10 rounded-full filter blur-3xl opacity-20" style={{ animationDelay: '1s', animationDuration: '8s' }}></div>
+    <div className="flex flex-col min-h-screen bg-background dark:bg-gray-900 transition-colors duration-300">
+      <div className="flex flex-1">
+        {/* Navigation sidebar */}
+        <nav className="hidden md:flex flex-col w-14 bg-background border-r border-border">
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <Link to="/" className="p-2 hover:bg-accent rounded-md transition-colors" title="Home">
+              <Home className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link to="/tasks" className="p-2 hover:bg-accent rounded-md transition-colors" title="Tasks">
+              <CalendarCheck className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link to="/timer" className="p-2 hover:bg-accent rounded-md transition-colors" title="Timer">
+              <Timer className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link to="/habits" className="p-2 hover:bg-accent rounded-md transition-colors" title="Habits">
+              <BookHeart className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link to="/notes" className="p-2 hover:bg-accent rounded-md transition-colors" title="Notes">
+              <ScrollText className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link to="/screenshots" className="p-2 hover:bg-accent rounded-md transition-colors" title="Screenshots">
+              <Image className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link to="/voice-notes" className="p-2 hover:bg-accent rounded-md transition-colors" title="Voice Notes">
+              <Mic className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+            <Link to="/settings" className="p-2 hover:bg-accent rounded-md transition-colors" title="Settings">
+              <Settings className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </Link>
+          </div>
+        </nav>
+        
+        {/* Mobile bottom navigation */}
+        {isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background z-10">
+            <div className="flex justify-around py-2">
+              <Link to="/" className="p-2 flex flex-col items-center">
+                <Home className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Home</span>
+              </Link>
+              <Link to="/tasks" className="p-2 flex flex-col items-center">
+                <CalendarCheck className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Tasks</span>
+              </Link>
+              <Link to="/timer" className="p-2 flex flex-col items-center">
+                <Timer className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Timer</span>
+              </Link>
+              <Link to="/habits" className="p-2 flex flex-col items-center">
+                <BookHeart className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Habits</span>
+              </Link>
+              <Link to="/notes" className="p-2 flex flex-col items-center">
+                <ScrollText className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Notes</span>
+              </Link>
+              <Link to="/settings" className="p-2 flex flex-col items-center">
+                <Settings className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Settings</span>
+              </Link>
+            </div>
+          </div>
+        )}
+        
+        {/* Main content */}
+        <main className="flex-1 pb-16 md:pb-0">
+          <div className="relative z-10 container mx-auto px-4 py-4">
+            {content}
+          </div>
+        </main>
       </div>
-      
-      {showHeader && <Header />}
-      
-      <main className={`relative z-10 ${isMobile ? 'max-w-full px-3 py-3 pb-20' : 'max-w-5xl mx-auto px-5 py-6'}`}>
-        {children}
-      </main>
     </div>
   );
 };
