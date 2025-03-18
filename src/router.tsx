@@ -1,6 +1,7 @@
 
 import { createBrowserRouter } from "react-router-dom";
 import Index from "./pages/Index";
+import IndexAlternative from "./pages/IndexAlternative";
 import TaskPage from "./pages/TaskPage";
 import Timer from "./pages/Timer";
 import Notes from "./pages/Notes";
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <Index />,
+      },
+      {
+        path: "alternative",
+        element: <IndexAlternative />,
       },
       {
         path: "tasks",
