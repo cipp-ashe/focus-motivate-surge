@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskTabsList } from './tabs/TaskTabsList';
 import { cn } from '@/lib/utils';
 import { TaskTypeFilters } from './filters/TaskTypeFilters';
+import { eventBus } from '@/lib/eventBus';
 
 interface UnifiedTaskViewProps {
   activeTasks: Task[];
@@ -44,6 +45,23 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     regular: 0,
     focus: 0
   });
+  
+  // Task event handlers
+  const handleTaskSelect = (taskId: string) => {
+    eventBus.emit('task:select', taskId);
+  };
+
+  const handleTaskDelete = (data: { taskId: string }) => {
+    eventBus.emit('task:delete', data);
+  };
+
+  const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
+    eventBus.emit('task:update', data);
+  };
+
+  const handleTaskComplete = (data: { taskId: string; metrics?: any }) => {
+    eventBus.emit('task:complete', data);
+  };
   
   // Calculate counts whenever tasks change
   useEffect(() => {
@@ -106,6 +124,10 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
                 tasks={getFilteredTasks()}
                 selectedTaskId={selectedTaskId}
                 dialogOpeners={dialogOpeners}
+                handleTaskSelect={handleTaskSelect}
+                handleDelete={handleTaskDelete}
+                handleTaskUpdate={handleTaskUpdate}
+                handleTaskComplete={handleTaskComplete}
               />
             </div>
           </ScrollArea>
@@ -118,6 +140,10 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
                 tasks={getFilteredTasks()}
                 selectedTaskId={selectedTaskId}
                 dialogOpeners={dialogOpeners}
+                handleTaskSelect={handleTaskSelect}
+                handleDelete={handleTaskDelete}
+                handleTaskUpdate={handleTaskUpdate}
+                handleTaskComplete={handleTaskComplete}
               />
             </div>
           </ScrollArea>

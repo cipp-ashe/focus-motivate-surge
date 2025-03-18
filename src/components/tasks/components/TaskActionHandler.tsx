@@ -6,7 +6,7 @@ import { eventManager } from '@/lib/events/EventManager';
 
 export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) => {
   // Handle task deletion
-  const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+  const handleDelete = useCallback((e: React.MouseEvent<Element>) => {
     e.stopPropagation();
     console.log("Deleting task:", task.id);
     
@@ -18,7 +18,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
   }, [task.id, task.name]);
   
   // Handle task action
-  const handleTaskAction = useCallback((e: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLElement>, actionType?: string) => {
+  const handleTaskAction = useCallback((e: React.MouseEvent<Element>, actionType?: string) => {
     e.stopPropagation();
     console.log("Task action:", actionType, "for task:", task.id);
     

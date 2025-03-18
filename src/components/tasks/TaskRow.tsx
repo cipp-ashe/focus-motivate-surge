@@ -22,7 +22,7 @@ interface TaskRowProps {
   /** Callback when the task duration is changed */
   onDurationChange: (taskId: string, newDuration: string) => void;
   /** Callback when the duration element is clicked */
-  onDurationClick: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, taskId: string) => void;
+  onDurationClick: (e: React.MouseEvent<HTMLElement>, taskId: string) => void;
   /** Callback when an input field loses focus */
   onInputBlur: () => void;
   /** Dialog openers for specific task types */
@@ -67,7 +67,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
   }, [task.duration, task.id]);
 
   // Prevent click events from bubbling up from interactive elements
-  const preventPropagation = (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
+  const preventPropagation = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
   };
 
@@ -114,7 +114,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
   };
 
   // Handle task deletion
-  const handleDelete = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+  const handleDelete = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     e.preventDefault();
     eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });

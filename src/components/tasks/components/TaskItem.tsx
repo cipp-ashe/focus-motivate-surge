@@ -84,7 +84,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         isSelected={taskIsSelected}
         isTimerView={isTimerView}
         dialogOpeners={dialogOpeners}
-        handleTaskAction={handleTaskAction}
+        handleTaskAction={(e: React.MouseEvent<Element>) => handleTaskAction(e)}
       />
       
       <TaskActions
@@ -92,7 +92,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         isHovered={isHovered}
         isSelected={taskIsSelected}
         handleDelete={handleDeleteClick}
-        handleTaskAction={handleTaskAction}
+        handleTaskAction={(e, actionType) => handleTaskAction(e as React.MouseEvent<Element>, actionType)}
       />
     </div>
   );

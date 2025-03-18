@@ -125,7 +125,7 @@ export const useTimerInitialization = ({
     });
 
     // Use the auto-complete hook for automatic timer completion
-    const handleAutoComplete = useTimerAutoComplete({
+    const handleAutoCompleteWrapper = useTimerAutoComplete({
       isRunning,
       pause: pauseTimer,
       playSound,
@@ -179,7 +179,7 @@ export const useTimerInitialization = ({
       isLoadingAudio,
       
       // Auto complete handler
-      handleAutoComplete,
+      handleAutoComplete: handleAutoCompleteWrapper,
       
       // Pass through taskName to satisfy TypeScript
       taskName,

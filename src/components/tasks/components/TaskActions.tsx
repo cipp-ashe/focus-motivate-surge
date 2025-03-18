@@ -9,8 +9,8 @@ interface TaskActionsProps {
   task: Task;
   isHovered: boolean;
   isSelected: boolean;
-  handleDelete: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  handleTaskAction: (e: React.MouseEvent<HTMLElement>, actionType?: string) => void;
+  handleDelete: () => void;
+  handleTaskAction: (e: React.MouseEvent<Element>, actionType?: string) => void;
 }
 
 export const TaskActions: React.FC<TaskActionsProps> = ({
@@ -42,7 +42,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
       {(isHovered || isSelected) && (
         <TaskStatusDropdown 
           task={task} 
-          onStatusChange={(status) => handleTaskAction({} as any, `status-${status}`)} 
+          onStatusChange={(status) => handleTaskAction({} as React.MouseEvent<Element>, `status-${status}`)} 
         />
       )}
       
@@ -52,7 +52,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
           variant="ghost"
           size="icon"
           className="h-7 w-7 text-muted-foreground hover:text-destructive"
-          onClick={handleDelete}
+          onClick={() => handleDelete()}
           aria-label="Delete task"
         >
           <X className="h-4 w-4" />

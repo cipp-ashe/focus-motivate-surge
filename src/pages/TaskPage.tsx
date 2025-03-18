@@ -6,6 +6,7 @@ import { TaskInput } from '@/components/tasks/TaskInput';
 import { ErrorBoundary } from 'react-error-boundary';
 import { TaskProvider, useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
+import { eventBus } from '@/lib/eventBus';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -37,6 +38,23 @@ const TaskContent = () => {
     }
   };
 
+  // Event handlers for TaskList
+  const handleTaskSelect = (taskId: string) => {
+    eventBus.emit('task:select', taskId);
+  };
+
+  const handleTaskDelete = (data: { taskId: string }) => {
+    eventBus.emit('task:delete', data);
+  };
+
+  const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
+    eventBus.emit('task:update', data);
+  };
+
+  const handleTaskComplete = (data: { taskId: string; metrics?: any }) => {
+    eventBus.emit('task:complete', data);
+  };
+
   // Function to handle adding multiple tasks
   const addTasks = (newTasks: Task[]) => {
     if (newTasks && newTasks.length > 0 && addTask) {
@@ -57,6 +75,10 @@ const TaskContent = () => {
           tasks={tasks} 
           selectedTaskId={selectedTaskId} 
           dialogOpeners={dialogOpeners}
+          handleTaskSelect={handleTaskSelect}
+          handleDelete={handleTaskDelete}
+          handleTaskUpdate={handleTaskUpdate}
+          handleTaskComplete={handleTaskComplete}
         />
       }
     />

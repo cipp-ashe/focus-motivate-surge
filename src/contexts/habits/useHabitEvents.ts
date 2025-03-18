@@ -14,12 +14,13 @@ export const useHabitEvents = (templates: ActiveTemplate[] = []) => {
   const { saveNote } = useNotes();
   
   // Listen for journal open events using the useEvent hook
-  useEvent('journal:open', (data: {
-    habitId: string;
-    habitName: string;
-    description?: string;
-    templateId?: string;
-  }) => {
+  useEvent('journal:open', (data: any) => {
+    // Make sure the data contains required fields
+    if (!data || !data.habitId || !data.habitName) {
+      console.error('Missing required data for journal:open event');
+      return;
+    }
+    
     // Create a note for the journal
     try {
       console.log("Creating note from habit journal:", data);

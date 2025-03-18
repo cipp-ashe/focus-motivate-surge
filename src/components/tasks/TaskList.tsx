@@ -7,10 +7,10 @@ import { eventBus } from '@/lib/eventBus';
 interface TaskListProps {
   tasks: Task[];
   selectedTaskId?: string | null;
-  handleTaskSelect: (taskId: string) => void;
-  handleDelete: (data: { taskId: string }) => void;
-  handleTaskUpdate: (data: { taskId: string; updates: Partial<Task> }) => void;
-  handleTaskComplete: (data: { taskId: string; metrics?: any }) => void;
+  handleTaskSelect?: (taskId: string) => void;
+  handleDelete?: (data: { taskId: string }) => void;
+  handleTaskUpdate?: (data: { taskId: string; updates: Partial<Task> }) => void;
+  handleTaskComplete?: (data: { taskId: string; metrics?: any }) => void;
   onForceUpdate?: () => void;
   isLoading?: boolean;
   loadingCount?: number;
@@ -44,6 +44,15 @@ export const TaskList: React.FC<TaskListProps> = ({
     }
   };
 
+  const selectTaskHandler = (taskId: string) => {
+    if (handleTaskSelect) {
+      handleTaskSelect(taskId);
+    } else {
+      // Default behavior - emit the event via the event bus
+      eventBus.emit('task:select', taskId);
+    }
+  };
+
   return (
     <div className="space-y-2">
       {tasks.length === 0 ? (
@@ -57,7 +66,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             task={task}
             isSelected={task.id === selectedTaskId}
             dialogOpeners={dialogOpeners}
-            onSelect={() => handleTaskSelect(task.id)}
+            onSelect={() => selectTaskHandler(task.id)}
             onDelete={() => deleteTaskHandler(task.id)}
           />
         ))
