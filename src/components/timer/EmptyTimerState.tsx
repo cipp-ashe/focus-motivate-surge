@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, Play, Timer } from 'lucide-react';
+import { Clock, Timer } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -27,26 +27,17 @@ export const EmptyTimerState = () => {
             className="text-primary hover:underline focus:outline-none"
           >
             Create an instant timer
-          </button> or select a task from the list on the right.
+          </button> or select a task from the list below.
         </p>
       </div>
       
-      <Card className="bg-card border-primary/10 w-full max-w-md">
-        <CardContent className="p-6">
-          <Button 
-            onClick={handleStartInstantTimer}
-            className="w-full gap-2"
-            size="lg"
-          >
-            <Play className="h-4 w-4" />
-            Start Instant Timer
-          </Button>
-          
-          <div className="text-center text-sm text-muted-foreground mt-4">
-            <p>Or select a timer task from the list on the right →</p>
-          </div>
-        </CardContent>
-      </Card>
+      <Button 
+        onClick={handleStartInstantTimer}
+        className="gap-2 w-full max-w-md"
+        size="lg"
+      >
+        Start Instant Timer
+      </Button>
     </div>
   );
 };
