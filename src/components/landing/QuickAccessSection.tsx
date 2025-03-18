@@ -28,11 +28,11 @@ const QuickAccessItem: React.FC<QuickAccessItemProps> = ({
   iconColorClass 
 }) => {
   return (
-    <Link to={to} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-primary/5">
+    <Link to={to} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-900/30 backdrop-blur-md border border-gray-800/40 shadow-lg transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:bg-gray-800/40">
       <div className={cn("rounded-full p-3 mb-1", bgColorClass)}>
         <Icon className={cn("w-5 h-5", iconColorClass)} />
       </div>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-sm font-medium text-gray-200">{label}</span>
     </Link>
   );
 };
@@ -43,52 +43,52 @@ const QuickAccessSection: React.FC = () => {
       to: "/tasks",
       icon: ListTodo,
       label: "Tasks",
-      bgColorClass: "bg-primary/10",
+      bgColorClass: "bg-primary/20",
       iconColorClass: "text-primary"
     },
     {
       to: "/timer",
       icon: Timer,
       label: "Timer",
-      bgColorClass: "bg-[#9b87f5]/10",
+      bgColorClass: "bg-[#9b87f5]/20",
       iconColorClass: "text-[#9b87f5]"
     },
     {
       to: "/habits",
       icon: Activity,
       label: "Habits",
-      bgColorClass: "bg-amber-400/10",
-      iconColorClass: "text-amber-500"
+      bgColorClass: "bg-amber-400/20",
+      iconColorClass: "text-amber-400"
     },
     {
       to: "/screenshots",
       icon: Image,
       label: "Screenshots",
-      bgColorClass: "bg-blue-400/10",
+      bgColorClass: "bg-blue-400/20",
       iconColorClass: "text-blue-400"
     },
     {
       to: "/notes",
       icon: BookOpen,
       label: "Notes",
-      bgColorClass: "bg-green-400/10",
+      bgColorClass: "bg-green-400/20",
       iconColorClass: "text-green-400"
     },
     {
       to: "/voice-notes",
       icon: Mic,
       label: "Voice",
-      bgColorClass: "bg-rose-400/10",
+      bgColorClass: "bg-rose-400/20",
       iconColorClass: "text-rose-400"
     }
   ];
 
   return (
     <section className="mb-16">
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-        <LayoutDashboard className="h-5 w-5 text-primary/70" />
-        Quick Access
-      </h2>
+      <div className="flex items-center gap-3 mb-6">
+        <LayoutDashboard className="h-6 w-6 text-purple-400" />
+        <h2 className="text-2xl font-bold text-white">Quick Access</h2>
+      </div>
       
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
         {quickAccessItems.map((item, index) => (

@@ -10,12 +10,12 @@ const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen py-8 px-4 relative overflow-hidden">
+    <div className="min-h-screen py-8 px-4 relative overflow-hidden bg-gradient-to-b from-gray-900 to-gray-950">
       {/* Background decorative elements */}
       <BackgroundDecorations />
       
       <div className="max-w-7xl mx-auto">
-        {/* Hero Section - now includes the Features Section */}
+        {/* Hero Section */}
         <HeroSection />
         
         {/* Privacy Section */}
