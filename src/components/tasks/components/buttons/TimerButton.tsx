@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { TimerIcon } from 'lucide-react';
 import { TaskButtonProps } from './ButtonTypes';
 import { useNavigate } from 'react-router-dom';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
 export interface TimerButtonProps extends TaskButtonProps {}
@@ -18,7 +18,7 @@ export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) 
     console.log(`Timer button clicked directly for task: ${task.id}, type: ${task.taskType}`);
     
     // Emit task select event before navigation to ensure it's selected
-    eventBus.emit('task:select', task.id);
+    eventManager.emit('task:select', task.id);
     
     // First navigate to the timer route
     navigate('/timer');
@@ -26,7 +26,7 @@ export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) 
     // After a small delay to ensure navigation happens
     setTimeout(() => {
       // Emit the timer event with task details
-      eventBus.emit('timer:set-task', task);
+      eventManager.emit('timer:set-task', task);
       toast.success(`Timer set for: ${task.name}`);
     }, 100);
     
