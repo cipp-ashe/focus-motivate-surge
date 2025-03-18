@@ -11,8 +11,8 @@ const DashboardCardGrid: React.FC = () => {
   return (
     <div 
       className={cn(
-        "grid gap-4 sm:gap-6 px-2",
-        isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        "grid gap-6 px-2 max-w-7xl mx-auto",
+        isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
       )}
       aria-label="Dashboard features"
     >
