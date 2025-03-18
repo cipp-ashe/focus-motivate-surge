@@ -56,22 +56,24 @@ export const useTimerComplete = ({
       const startTimeDate = typeof startTime === 'string' ? new Date(startTime) : startTime;
       
       // Calculate actual duration in seconds
-      const actualDuration = Math.floor((now.getTime() - startTimeDate.getTime()) / 1000);
+      const actualDuration = Math.floor((now.getTime() - (startTimeDate instanceof Date ? startTimeDate.getTime() : new Date(startTimeDate).getTime())) / 1000);
       
       // Calculate effective working time (accounting for pauses)
       const pausedTime = metrics.pausedTime || 0;
       const extensionTime = metrics.extensionTime || 0;
       const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
       
-      // Update metrics with completion information - all dates as strings
+      // Update metrics with completion information - all dates as strings for serialization
       const calculatedMetrics = {
         ...metrics,
         startTime,
         endTime: nowISO,
         completionDate: nowISO,
-        actualDuration: actualDuration,
-        netEffectiveTime: netEffectiveTime,
+        actualDuration,
+        netEffectiveTime,
         lastPauseTimestamp,
+        pausedTime,
+        extensionTime,
         // Ensure we have valid fields for completed timer
         isPaused: false,
         pausedTimeLeft: null

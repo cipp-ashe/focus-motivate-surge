@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
 import { logger } from "@/utils/logManager";
+import { toISOString } from "@/lib/utils/dateUtils";
 
 /**
  * Hook for handling timer completion
@@ -21,13 +22,20 @@ export const useTimerComplete = ({
   // Handle timer completion
   const completeTimer = useCallback(async (): Promise<void> => {
     try {
-      // Ensure metrics has a completionDate as a string
+      // Convert dates to ISO strings for serialization
       const finalMetrics = {
         ...metrics,
-        // Always ensure there's a completionDate string
-        completionDate: new Date().toISOString(),
-        // Make sure we have an endTime - keep as Date object for calculations
-        endTime: metrics.endTime || new Date()
+        // Ensure we have properly formatted dates as strings
+        startTime: metrics.startTime ? 
+          (typeof metrics.startTime === 'string' ? metrics.startTime : toISOString(metrics.startTime)) : 
+          toISOString(new Date()),
+        endTime: metrics.endTime ? 
+          (typeof metrics.endTime === 'string' ? metrics.endTime : toISOString(metrics.endTime)) : 
+          toISOString(new Date()),
+        completionDate: metrics.completionDate || toISOString(new Date()),
+        lastPauseTimestamp: metrics.lastPauseTimestamp ? 
+          (typeof metrics.lastPauseTimestamp === 'string' ? metrics.lastPauseTimestamp : toISOString(metrics.lastPauseTimestamp)) :
+          null
       };
       
       logger.debug("TimerComplete", "Completing timer with metrics:", finalMetrics);

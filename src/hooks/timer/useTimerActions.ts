@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { TimerAction } from '@/types/timer';
 import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
@@ -8,14 +7,11 @@ import {
 } from '@/lib/utils/formatters';
 import { toISOString } from '@/lib/utils/dateUtils';
 
-// This function supports both the new interface (dispatch-based) and the legacy interface (direct update methods)
 export const useTimerActions = (
   props: UseTimerActionsProps | TimerActionProps
 ): UseTimerActionsReturn => {
-  // Determine which interface we're using
   const isLegacyInterface = 'timeLeft' in props;
   
-  // Wrap based on interface type
   const startTimer = useCallback(() => {
     if (isLegacyInterface) {
       const { setIsRunning, updateMetrics } = props as TimerActionProps;
@@ -138,7 +134,7 @@ export const useTimerActions = (
         const startTime = metrics.startTime || new Date(now.getTime() - (metrics.expectedTime * 1000));
         
         // Calculate actual duration in seconds
-        const actualDuration = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+        const actualDuration = Math.floor((now.getTime() - (startTime instanceof Date ? startTime.getTime() : new Date(startTime).getTime())) / 1000);
         
         // Calculate effective working time (accounting for pauses)
         const pausedTime = metrics.pausedTime || 0;
@@ -150,10 +146,10 @@ export const useTimerActions = (
         const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime) as 
           "Completed Early" | "Completed On Time" | "Completed Late" | "Completed Very Early" | "Completed Very Late";
         
-        // Create a properly formatted completion metrics object
+        // Create a properly formatted completion metrics object with serializable dates
         const updatedMetrics = {
-          startTime: startTime,
-          endTime: now,
+          startTime: startTime instanceof Date ? toISOString(startTime) : startTime,
+          endTime: toISOString(now),
           actualDuration,
           pausedTime,
           extensionTime,
@@ -187,7 +183,6 @@ export const useTimerActions = (
     }
   }, [props, isLegacyInterface]);
   
-  // Create update metrics function for interface completeness
   const updateMetricsFunc = useCallback((updates: any) => {
     if (isLegacyInterface) {
       const { updateMetrics } = props as TimerActionProps;

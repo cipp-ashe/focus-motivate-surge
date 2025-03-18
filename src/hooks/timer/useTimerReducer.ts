@@ -63,8 +63,11 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
 
     case 'COMPLETE': {
       const now = new Date();
+      // Ensure we have a valid startTime, handle both Date and string types
       const startTime = state.metrics.startTime || new Date(now.getTime() - (state.metrics.expectedTime * 1000));
-      const actualDuration = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+      // Calculate elapsed time correctly whether startTime is a Date or string
+      const startTimeMs = startTime instanceof Date ? startTime.getTime() : new Date(startTime).getTime();
+      const actualDuration = Math.floor((now.getTime() - startTimeMs) / 1000);
       const pausedTime = state.metrics.pausedTime || 0;
       const extensionTime = state.metrics.extensionTime || 0;
       const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
@@ -78,8 +81,9 @@ export const timerReducer = (state: TimerState, action: TimerAction): TimerState
         showCompletion: true,
         metrics: {
           ...state.metrics,
-          startTime,
-          endTime: now,
+          // Ensure all dates are serialized to ISO strings
+          startTime: startTime instanceof Date ? toISOString(startTime) : startTime,
+          endTime: toISOString(now),
           actualDuration,
           pausedTime,
           extensionTime,

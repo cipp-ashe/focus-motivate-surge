@@ -1,13 +1,13 @@
 
 export interface TimerMetrics {
-  startTime: Date | null;
-  endTime: Date | null;
+  startTime: Date | string | null;
+  endTime: Date | string | null;
   pauseCount: number;
   expectedTime: number;  // Renamed from originalDuration for clarity
   actualDuration: number;
   favoriteQuotes: string[]; // Changed from number to string[] to match TaskMetrics
   pausedTime: number;
-  lastPauseTimestamp: Date | null;
+  lastPauseTimestamp: Date | string | null;
   extensionTime: number;
   netEffectiveTime: number;  // Computed as: actualDuration - pausedTime + extensionTime
   efficiencyRatio: number;   // Computed as: (expectedTime / netEffectiveTime) * 100
