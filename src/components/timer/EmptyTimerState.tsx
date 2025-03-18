@@ -2,15 +2,8 @@
 import React from 'react';
 import { Clock, ArrowRight, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { eventManager } from '@/lib/events/EventManager';
 
 export const EmptyTimerState = () => {
-  const handleNavigateToTasks = () => {
-    // Emit an event to change the tab to tasks
-    eventManager.emit('timer:switch-tab', 'tasks');
-  };
-
   return (
     <div className="flex flex-col items-center justify-center text-center h-full p-6">
       <div className="mb-6">
@@ -28,7 +21,7 @@ export const EmptyTimerState = () => {
           <CardContent className="p-4">
             <div className="flex items-center mb-2">
               <ArrowRight className="h-4 w-4 mr-2 text-purple-500 flex-shrink-0" />
-              <h3 className="font-medium text-sm">Choose a task from the Tasks tab</h3>
+              <h3 className="font-medium text-sm">Choose a task from the panel</h3>
             </div>
             <p className="text-xs text-muted-foreground pl-6">
               Select an existing timer task from the panel on the right.
@@ -47,14 +40,6 @@ export const EmptyTimerState = () => {
             </p>
           </CardContent>
         </Card>
-        
-        <Button 
-          variant="outline" 
-          className="w-full mt-2"
-          onClick={handleNavigateToTasks}
-        >
-          Go to Tasks
-        </Button>
       </div>
     </div>
   );
