@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, Activity, Timer, FileText, Clock, CalendarCheck, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import FeaturesSection from '@/components/landing/FeaturesSection';
 
 const HeroSection: React.FC = () => {
   return <section className="mb-16 md:mb-24">
@@ -21,6 +23,11 @@ const HeroSection: React.FC = () => {
             <Link to="/tasks">Get Started</Link>
           </Button>
         </div>
+      </div>
+      
+      {/* Features Section - Now moved ABOVE Habit Automation */}
+      <div className="mb-12">
+        <FeaturesSection />
       </div>
       
       <HabitAutomationShowcase />

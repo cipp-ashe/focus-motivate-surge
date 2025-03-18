@@ -3,7 +3,6 @@ import React from 'react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import HeroSection from '@/components/landing/HeroSection';
 import PrivacySection from '@/components/landing/PrivacySection';
-import FeaturesSection from '@/components/landing/FeaturesSection';
 import QuickAccessSection from '@/components/landing/QuickAccessSection';
 import BackgroundDecorations from '@/components/landing/BackgroundDecorations';
 
@@ -16,11 +15,8 @@ const Index = () => {
       <BackgroundDecorations />
       
       <div className="max-w-7xl mx-auto">
-        {/* Hero Section */}
+        {/* Hero Section - now includes the Features Section */}
         <HeroSection />
-        
-        {/* Features Section - Now moved above Privacy Section */}
-        <FeaturesSection />
         
         {/* Privacy Section */}
         <PrivacySection />
