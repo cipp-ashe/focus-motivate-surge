@@ -1,0 +1,77 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 225 25% 95%;
+    --foreground: 225 25% 10%;
+    --card: 225 25% 98%;
+    --card-foreground: 225 25% 10%;
+    --popover: 225 25% 98%;
+    --popover-foreground: 225 25% 10%;
+    --primary: 280 85% 60%;
+    --primary-foreground: 225 25% 98%;
+    --secondary: 225 25% 90%;
+    --secondary-foreground: 225 25% 10%;
+    --muted: 225 25% 90%;
+    --muted-foreground: 225 25% 40%;
+    --accent: 280 85% 60%;
+    --accent-foreground: 225 25% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 225 25% 98%;
+    --border: 225 25% 85%;
+    --input: 225 25% 85%;
+    --ring: 280 85% 60%;
+    --radius: 0.375rem;
+  }
+
+  .dark {
+    --background: 225 25% 12%;
+    --foreground: 225 25% 98%;
+    --card: 225 25% 15%;
+    --card-foreground: 225 25% 98%;
+    --popover: 225 25% 15%;
+    --popover-foreground: 225 25% 98%;
+    --primary: 280 85% 60%;
+    --primary-foreground: 225 25% 98%;
+    --secondary: 225 25% 25%;
+    --secondary-foreground: 225 25% 98%;
+    --muted: 225 25% 25%;
+    --muted-foreground: 225 25% 60%;
+    --accent: 280 85% 60%;
+    --accent-foreground: 225 25% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 225 25% 98%;
+    --border: 225 25% 30%;
+    --input: 225 25% 30%;
+    --ring: 280 85% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground overflow-x-hidden;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  html {
+    @apply overflow-x-hidden;
+  }
+}

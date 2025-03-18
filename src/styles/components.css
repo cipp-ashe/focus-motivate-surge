@@ -1,0 +1,75 @@
+
+@layer components {
+  .app-container {
+    @apply min-h-screen h-full flex flex-col;
+  }
+
+  .main-layout {
+    @apply flex-1 h-[calc(100vh-4rem)] overflow-hidden;
+  }
+
+  .content-grid {
+    @apply grid h-full w-full transition-all duration-300 ease-in-out gap-4;
+  }
+
+  .section-container {
+    @apply h-full flex flex-col glass-effect rounded-md shadow-glass border-border/40;
+  }
+
+  .scrollable-content {
+    @apply flex-1 overflow-y-auto px-4 py-2 space-y-3;
+  }
+
+  .section-header {
+    @apply flex-none p-4 border-b border-border/50;
+  }
+
+  .section-footer {
+    @apply flex-none p-4 border-t border-border/50;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .mobile-container {
+      @apply px-3 py-1.5;
+    }
+    
+    .mobile-text {
+      @apply text-sm;
+    }
+    
+    .mobile-compact-padding {
+      @apply p-3;
+    }
+    
+    .mobile-bottom-spacing {
+      @apply pb-20;
+    }
+    
+    .mobile-touch-target {
+      @apply min-h-11 min-w-11;
+    }
+  }
+
+  /* Modern card styles */
+  .card-modern {
+    @apply bg-card/70 backdrop-blur-md rounded-md border border-border/40 shadow-glass overflow-hidden transition-all duration-300;
+  }
+
+  .card-modern:hover {
+    @apply shadow-lg border-primary/20;
+  }
+
+  /* Button styles */
+  .btn-modern {
+    @apply rounded-md px-4 py-2 font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98];
+  }
+
+  .btn-primary-modern {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md hover:-translate-y-0.5;
+  }
+
+  .btn-ghost-modern {
+    @apply bg-transparent hover:bg-primary/10 text-foreground;
+  }
+}

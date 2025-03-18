@@ -1,0 +1,52 @@
+
+/* Task item animations and styling */
+.task-list-item {
+  @apply transform transition-all duration-200 hover:scale-102 hover:translate-x-1;
+}
+
+.completed-task-enter {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.completed-task-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Timer circle and animations for tasks */
+@keyframes countdown {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 100;
+  }
+}
+
+.timer-circle {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.timer-circle {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: all 0.3s ease;
+}
+
+.timer-circle.active {
+  filter: drop-shadow(0 0 10px hsl(var(--primary)));
+}
+
+.timer-expand-enter {
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+.timer-expand-enter-active {
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.3s, opacity 0.3s;
+}
