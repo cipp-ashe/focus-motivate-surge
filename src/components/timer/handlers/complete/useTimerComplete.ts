@@ -2,6 +2,7 @@
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
+import { toISOString } from "@/lib/utils/dateUtils";
 
 interface UseTimerCompleteProps {
   isRunning: boolean;
@@ -38,27 +39,39 @@ export const useTimerComplete = ({
         pause();
       }
       
-      // Ensure we have a valid start time
-      const startTime = metrics.startTime || new Date(Date.now() - (metrics.expectedTime * 1000));
+      // Ensure we have a valid start time - convert to ISO string for proper serialization
+      const startTime = metrics.startTime ? 
+        (typeof metrics.startTime === 'string' ? metrics.startTime : toISOString(metrics.startTime)) : 
+        toISOString(new Date(Date.now() - (metrics.expectedTime * 1000)));
+      
       const now = new Date();
+      const nowISO = toISOString(now);
+      
+      // Convert lastPauseTimestamp to ISO string if it exists
+      const lastPauseTimestamp = metrics.lastPauseTimestamp ? 
+        (typeof metrics.lastPauseTimestamp === 'string' ? metrics.lastPauseTimestamp : toISOString(metrics.lastPauseTimestamp)) : 
+        null;
+      
+      // Parse dates for calculations
+      const startTimeDate = typeof startTime === 'string' ? new Date(startTime) : startTime;
       
       // Calculate actual duration in seconds
-      const actualDuration = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+      const actualDuration = Math.floor((now.getTime() - startTimeDate.getTime()) / 1000);
       
       // Calculate effective working time (accounting for pauses)
       const pausedTime = metrics.pausedTime || 0;
       const extensionTime = metrics.extensionTime || 0;
       const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
       
-      // Update metrics with completion information
+      // Update metrics with completion information - all dates as strings
       const calculatedMetrics = {
         ...metrics,
         startTime,
-        endTime: now,
-        // Ensure completionDate is a string
-        completionDate: now.toISOString(),
+        endTime: nowISO,
+        completionDate: nowISO,
         actualDuration: actualDuration,
         netEffectiveTime: netEffectiveTime,
+        lastPauseTimestamp,
         // Ensure we have valid fields for completed timer
         isPaused: false,
         pausedTimeLeft: null
@@ -91,7 +104,7 @@ export const useTimerComplete = ({
         }
       }
       
-      // Emit completion event for integration with other components
+      // Emit completion event for integration with other components - use serializable metrics
       eventManager.emit('timer:complete', { 
         taskName, 
         metrics: calculatedMetrics 

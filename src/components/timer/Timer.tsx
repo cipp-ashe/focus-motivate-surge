@@ -44,10 +44,15 @@ export const Timer = ({
       const validatedMetrics = {
         ...metrics,
         // Make sure we have these required fields with default values if needed
-        startTime: metrics.startTime || new Date(),
-        endTime: metrics.endTime || new Date(),
+        startTime: metrics.startTime || toISOString(new Date()),
+        endTime: metrics.endTime || toISOString(new Date()),
         // Ensure completionDate is a properly formatted ISO string
-        completionDate: toISOString(metrics.completionDate || new Date())
+        completionDate: metrics.completionDate || toISOString(new Date()),
+        // Ensure numeric values are actually numbers
+        actualDuration: typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 0,
+        pausedTime: typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0,
+        extensionTime: typeof metrics.extensionTime === 'number' ? metrics.extensionTime : 0,
+        netEffectiveTime: typeof metrics.netEffectiveTime === 'number' ? metrics.netEffectiveTime : 0
       };
       
       logger.debug('Timer', "Timer: Validated metrics:", validatedMetrics);
