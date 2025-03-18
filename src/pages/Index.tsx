@@ -10,7 +10,8 @@ import {
   Settings,
   CalendarCheck,
   Activity,
-  Image
+  Image,
+  Mic
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
