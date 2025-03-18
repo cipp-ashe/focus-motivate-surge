@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -228,7 +227,7 @@ const Index = () => {
           <Clock className="w-4 h-4 mr-2 text-primary/70" />
           Quick Access
         </h3>
-        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 md:gap-3">
           <Link to="/tasks" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-primary/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
             <div className="bg-primary/10 rounded-full p-2 mb-1.5">
               <ListTodo className="w-3.5 h-3.5 text-primary" />
@@ -269,20 +268,6 @@ const Index = () => {
               <Mic className="w-3.5 h-3.5 text-rose-400" />
             </div>
             <span className="text-xs font-medium">Voice</span>
-          </Link>
-          
-          <Link to="/settings" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-gray-400/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-gray-400/10 rounded-full p-2 mb-1.5">
-              <Settings className="w-3.5 h-3.5 text-gray-500" />
-            </div>
-            <span className="text-xs font-medium">Settings</span>
-          </Link>
-          
-          <Link to="/tasks" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-cyan-400/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-cyan-400/10 rounded-full p-2 mb-1.5">
-              <CalendarCheck className="w-3.5 h-3.5 text-cyan-500" />
-            </div>
-            <span className="text-xs font-medium">Today</span>
           </Link>
         </div>
       </div>

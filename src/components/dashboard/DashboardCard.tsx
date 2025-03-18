@@ -47,14 +47,14 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           <div className="flex items-start mb-3">
             <div 
               className={cn(
-                "rounded-xl p-2.5 flex-shrink-0 mr-3 mt-0", 
+                "rounded-xl p-2.5 flex-shrink-0 mr-3", 
                 "bg-background/50 backdrop-blur-sm shadow-sm border border-border/20"
               )}
               aria-hidden="true"
             >
               <Icon className={cn("w-6 h-6", iconColor)} />
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl font-semibold" id={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}>
                 {title}
               </h2>
