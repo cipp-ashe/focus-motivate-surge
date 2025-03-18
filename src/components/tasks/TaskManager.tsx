@@ -1,12 +1,14 @@
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { TaskEventHandler } from './TaskEventHandler';
-import { Task } from '@/types/tasks';
+import { Task, Tag } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
@@ -46,7 +48,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       }
       
       // If task has tags but not taskType, check for timer tags
-      if (!task.taskType && task.tags && task.tags.includes('timer')) {
+      if (!task.taskType && task.tags && task.tags.some(tag => 
+        typeof tag === 'object' && tag.name === 'timer')) {
         task.taskType = 'timer';
       }
       
@@ -81,7 +84,8 @@ const TaskManager: React.FC<TaskManagerProps> = ({
         }
         
         // If task has tags but not taskType, check for timer tags
-        if (!task.taskType && task.tags && task.tags.includes('timer')) {
+        if (!task.taskType && task.tags && task.tags.some(tag => 
+          typeof tag === 'object' && tag.name === 'timer')) {
           task.taskType = 'timer';
         }
         

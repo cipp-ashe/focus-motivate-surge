@@ -6,6 +6,7 @@ import { TaskList } from './TaskList';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskTabsList } from './tabs/TaskTabsList';
 import { cn } from '@/lib/utils';
+import { TaskTypeFilters } from './filters/TaskTypeFilters';
 
 interface UnifiedTaskViewProps {
   activeTasks: Task[];
@@ -40,7 +41,8 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     journal: 0,
     checklist: 0,
     voicenote: 0,
-    regular: 0
+    regular: 0,
+    focus: 0
   });
   
   // Calculate counts whenever tasks change
@@ -54,6 +56,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
       journal: currentTasks.filter(t => t.taskType === 'journal').length,
       checklist: currentTasks.filter(t => t.taskType === 'checklist').length,
       voicenote: currentTasks.filter(t => t.taskType === 'voicenote').length,
+      focus: currentTasks.filter(t => t.taskType === 'focus').length,
       regular: currentTasks.filter(t => t.taskType === 'regular' || !t.taskType).length
     };
     
@@ -72,10 +75,11 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     <div className="flex flex-col h-full rounded-lg overflow-hidden bg-card/50 backdrop-blur-sm border border-border/20 shadow-sm">
       {/* Task type filters */}
       <div className="flex-none">
-        <TaskTabsList 
-          taskCounts={taskCounts} 
-          activeTaskType={activeTaskType} 
-          onTaskTypeChange={type => setActiveTaskType(type as 'all' | TaskType)}
+        <TaskTypeFilters
+          activeFilter={activeTaskType}
+          onFilterChange={(type) => setActiveTaskType(type)}
+          counts={taskCounts}
+          className="border-b border-border/10 bg-card/30"
         />
       </div>
       

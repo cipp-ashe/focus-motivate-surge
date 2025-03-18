@@ -15,6 +15,7 @@ export const useTaskEvents = (
 ) => {
   const [pendingTaskUpdates, setPendingTaskUpdates] = useState<Task[]>([]);
   const lastNavigationRef = useRef<number>(Date.now());
+  const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Force reload tasks from storage to ensure our state is consistent
   const forceTasksReload = useCallback(() => {
@@ -63,18 +64,30 @@ export const useTaskEvents = (
     // Add to pending updates and dispatch
     setPendingTaskUpdates(prev => [...prev, task]);
     dispatch({ type: 'ADD_TASK', payload: task });
+    
+    // Ensure changes are saved to storage
+    taskStorage.addTask(task);
   });
   
   // Handle task update events
   useEvent('task:update', ({ taskId, updates }: { taskId: string, updates: Partial<Task> }) => {
     console.log("TaskEvents: Handling task update for", taskId, updates);
     dispatch({ type: 'UPDATE_TASK', payload: { taskId, updates } });
+    
+    // Update in storage to ensure consistency
+    const task = items.find(t => t.id === taskId);
+    if (task) {
+      taskStorage.updateTask(taskId, { ...task, ...updates });
+    }
   });
   
   // Handle task delete events
   useEvent('task:delete', ({ taskId }: { taskId: string }) => {
     console.log("TaskEvents: Handling task delete for", taskId);
     dispatch({ type: 'DELETE_TASK', payload: { taskId, reason: 'event' } });
+    
+    // Delete from storage as well
+    taskStorage.removeTask(taskId);
   });
   
   // Handle task completion events
@@ -99,12 +112,52 @@ export const useTaskEvents = (
   useEffect(() => {
     const handlePopState = () => {
       console.log("TaskEvents: Detected navigation via popstate");
-      setTimeout(forceTasksReload, 100);
+      
+      // Small delay for stability
+      if (reloadTimeoutRef.current) {
+        clearTimeout(reloadTimeoutRef.current);
+      }
+      
+      reloadTimeoutRef.current = setTimeout(forceTasksReload, 100);
     };
     
     window.addEventListener('popstate', handlePopState);
+    
+    // Listen for route changes
+    const handleRouteChange = () => {
+      console.log("TaskEvents: Detected route change");
+      
+      // Small delay to ensure everything is loaded
+      if (reloadTimeoutRef.current) {
+        clearTimeout(reloadTimeoutRef.current);
+      }
+      
+      reloadTimeoutRef.current = setTimeout(forceTasksReload, 100);
+    };
+    
+    window.addEventListener('routechange', handleRouteChange);
+    
+    // Reload tasks when visibility changes (user returns to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log("TaskEvents: Page became visible, reloading tasks");
+        forceTasksReload();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Force a reload when component mounts
+    forceTasksReload();
+    
     return () => {
       window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('routechange', handleRouteChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      if (reloadTimeoutRef.current) {
+        clearTimeout(reloadTimeoutRef.current);
+      }
     };
   }, [forceTasksReload]);
   

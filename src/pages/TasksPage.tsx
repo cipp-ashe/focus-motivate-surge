@@ -66,6 +66,11 @@ const TasksPage: React.FC = () => {
   useEffect(() => {
     console.log("TasksPage mounted, taskContext:", taskContext);
     console.log("Tasks available:", tasks);
+    
+    // Force a reload of tasks when we mount to ensure we have the latest
+    setTimeout(() => {
+      eventManager.emit('task:reload', {});
+    }, 100);
   }, [taskContext, tasks]);
   
   // Setup timer event listeners
