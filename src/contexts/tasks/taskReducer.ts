@@ -1,3 +1,4 @@
+
 import { Task } from '@/types/tasks';
 import { TaskAction } from './types';
 
@@ -44,7 +45,7 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
             ...updates, 
             completed: true,
             completedAt: updates.completedAt || new Date().toISOString(),
-            status: 'completed'
+            status: 'completed' as const // Use const assertion to ensure correct type
           };
           
           return {
@@ -146,3 +147,4 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
       return state;
   }
 };
+

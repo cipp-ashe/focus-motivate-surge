@@ -100,15 +100,13 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
           // For regular dismissal, don't suppress events - let the system handle it
           updateTaskOperations.updateTask(task.id, { 
             status: 'dismissed', 
-            dismissedAt: new Date().toISOString(),
-            suppressToast: false  // Make sure this is not suppressed
+            dismissedAt: new Date().toISOString()
           });
         }
       } else {
         // For other statuses, use updateTask without suppressing events
         updateTaskOperations.updateTask(task.id, { 
-          status: newStatus,
-          suppressToast: false  // Make sure this is not suppressed
+          status: newStatus
         });
       }
       

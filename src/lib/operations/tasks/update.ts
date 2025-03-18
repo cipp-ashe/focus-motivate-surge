@@ -5,6 +5,14 @@ import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 
 /**
+ * Options for updating a task
+ */
+interface UpdateTaskOptions {
+  suppressToast?: boolean;
+  suppressEvent?: boolean;
+}
+
+/**
  * Operations related to updating tasks
  */
 export const updateTaskOperations = {
@@ -17,10 +25,7 @@ export const updateTaskOperations = {
   updateTask(
     taskId: string,
     updates: Partial<Task>,
-    options: {
-      suppressToast?: boolean;
-      suppressEvent?: boolean;
-    } = {}
+    options: UpdateTaskOptions = {}
   ): void {
     console.log(`TaskOperations: Updating task ${taskId}`, updates);
     
