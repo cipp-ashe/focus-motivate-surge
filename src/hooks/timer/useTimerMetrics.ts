@@ -4,7 +4,7 @@ import { TimerStateMetrics } from '@/types/metrics';
 import { 
   calculateEfficiencyRatio, 
   determineCompletionStatus, 
-  formatTime 
+  formatTimeDisplay 
 } from '@/lib/utils/formatters';
 
 export const useTimerMetrics = (initialDurationSeconds: number) => {
@@ -38,22 +38,22 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
     console.group('Timer Metrics');
     console.log('Expected Time:', {
       seconds: metrics.expectedTime,
-      formatted: formatTime(metrics.expectedTime)
+      formatted: formatTimeDisplay(metrics.expectedTime)
     });
     if (metrics.actualDuration) {
       console.log('Total Elapsed Time:', {
         seconds: metrics.actualDuration,
-        formatted: formatTime(metrics.actualDuration)
+        formatted: formatTimeDisplay(metrics.actualDuration)
       });
     }
     console.log('Paused Time:', {
       seconds: metrics.pausedTime,
-      formatted: formatTime(metrics.pausedTime)
+      formatted: formatTimeDisplay(metrics.pausedTime)
     });
     if (metrics.netEffectiveTime) {
       console.log('Active Working Time:', {
         seconds: metrics.netEffectiveTime,
-        formatted: formatTime(metrics.netEffectiveTime)
+        formatted: formatTimeDisplay(metrics.netEffectiveTime)
       });
     }
     if (metrics.startTime) console.log('Start Time:', metrics.startTime.toISOString());

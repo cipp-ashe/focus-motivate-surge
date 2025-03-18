@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Quote, QuoteCategory } from "../types/timer";
 import { toast } from "sonner";
@@ -60,7 +61,7 @@ export const useQuoteManager = ({
 
   const getContextualQuotes = useCallback((allQuotes: Quote[], taskCategories: QuoteCategory[]): Quote[] => {
     let matchingQuotes = allQuotes.filter(quote => 
-      quote.categories.some(category => taskCategories.includes(category))
+      quote.category.some(category => taskCategories.includes(category))
     );
 
     if (matchingQuotes.length === 0) {

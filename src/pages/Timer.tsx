@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { Quote } from '@/types/timer';
@@ -11,7 +10,7 @@ import { TimerSection } from '@/components/timer/TimerSection';
 import { TimerView } from '@/components/tasks/TimerView';
 import { Clock, BarChart, Plus, History } from 'lucide-react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { TimerMetricsDisplay } from '@/components/timer/TimerMetricsDisplay';
+import { TimerMetricsDisplay as TimerMetricsDisplayComponent } from '@/components/timer/TimerMetricsDisplay';
 
 export default function TimerPage() {
   const [favorites, setFavorites] = useState<Quote[]>([]);
@@ -70,7 +69,7 @@ export default function TimerPage() {
                 <TabsContent value="metrics" className="m-0">
                   <Card className="border-0 shadow-none">
                     <CardContent className="p-0">
-                      <TimerMetricsDisplay />
+                      <TimerMetricsDisplayComponent />
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -117,31 +116,6 @@ function TimerTasksPanel() {
         onTaskAdd={handleTaskAdd}
         onTasksAdd={handleTasksAdd}
       />
-    </div>
-  );
-}
-
-// Timer Metrics Display
-function TimerMetricsDisplay() {
-  return (
-    <div className="p-4 space-y-4 h-[500px] overflow-y-auto">
-      <h3 className="text-lg font-medium">Focus Metrics</h3>
-      <Separator />
-      
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <MetricCard title="Focus Time" value="4h 32m" icon={<Clock className="h-4 w-4" />} />
-        <MetricCard title="Tasks Completed" value="12" icon={<Plus className="h-4 w-4" />} />
-      </div>
-      
-      <h4 className="text-md font-medium mb-2">Weekly Progress</h4>
-      <div className="h-40 bg-accent/10 rounded-md flex items-center justify-center">
-        <p className="text-muted-foreground">Chart Visualization Placeholder</p>
-      </div>
-      
-      <h4 className="text-md font-medium mb-2 mt-6">Focus Distribution</h4>
-      <div className="h-40 bg-accent/10 rounded-md flex items-center justify-center">
-        <p className="text-muted-foreground">Distribution Chart Placeholder</p>
-      </div>
     </div>
   );
 }

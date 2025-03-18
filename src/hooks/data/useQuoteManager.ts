@@ -18,7 +18,7 @@ export const useQuoteManager = () => {
   // Get a random quote, optionally filtered by category
   const getRandomQuote = useCallback((category?: QuoteCategory) => {
     const filteredQuotes = category
-      ? quotes.filter(quote => quote.categories.includes(category))
+      ? quotes.filter(quote => quote.category.includes(category))
       : quotes;
     
     if (filteredQuotes.length === 0) return null;

@@ -101,7 +101,7 @@ describe('Timer Component', () => {
     const favorites: Quote[] = [{
       text: 'Test quote',
       author: 'Test Author',
-      categories: ['motivation'],
+      category: ['motivation'],
     }];
     
     render(<Timer {...{...mockProps, favorites}} />);
@@ -110,4 +110,3 @@ describe('Timer Component', () => {
     expect(screen.getByText('Test quote')).toBeInTheDocument();
   });
 });
-

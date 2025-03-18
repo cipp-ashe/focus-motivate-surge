@@ -147,7 +147,8 @@ export const useTimerActions = (
         
         // Calculate efficiency metrics
         const efficiencyRatio = calculateEfficiencyRatio(metrics.expectedTime, netEffectiveTime);
-        const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime);
+        const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime) as 
+          "Completed Early" | "Completed On Time" | "Completed Late" | "Completed Very Early" | "Completed Very Late";
         
         // Create a properly formatted completion metrics object
         const updatedMetrics = {

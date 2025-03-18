@@ -22,8 +22,8 @@ export const getJournalQuotes = (journalType: string): Quote[] => {
   const relevantCategories = categoryMap[journalType] || ['motivation', 'growth'];
   
   return quotes.filter(quote => 
-    quote.categories.some(category => 
-      relevantCategories.includes(category)
+    quote.category.some(cat => 
+      relevantCategories.includes(cat)
     )
   );
 };
