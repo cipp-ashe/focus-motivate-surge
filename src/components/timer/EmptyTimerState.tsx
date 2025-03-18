@@ -22,7 +22,12 @@ export const EmptyTimerState = () => {
         </div>
         <h2 className="text-xl font-semibold mb-2">Start a Focus Session</h2>
         <p className="text-muted-foreground max-w-md mx-auto mb-4">
-          Create an instant timer or select a task from the list on the right.
+          <button 
+            onClick={handleStartInstantTimer}
+            className="text-primary hover:underline focus:outline-none"
+          >
+            Create an instant timer
+          </button> or select a task from the list on the right.
         </p>
       </div>
       
