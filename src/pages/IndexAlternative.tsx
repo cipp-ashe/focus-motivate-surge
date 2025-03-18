@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -45,7 +44,7 @@ const IndexAlternative = () => {
               Organize Your Work, Automate Your Habits
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mb-8">
-              TaskTimer combines task management, habit automation, and focused work sessions
+              FlowTime combines task management, habit automation, and focused work sessions
               in one powerful, privacy-focused application.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">

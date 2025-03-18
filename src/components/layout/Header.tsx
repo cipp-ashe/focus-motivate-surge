@@ -19,7 +19,7 @@ export const Header = () => {
         <div className="flex items-center">
           <Link to="/" className={`text-xl font-bold flex items-center ${isMobile ? 'gap-1' : 'gap-2'} text-primary`}>
             <Clock className="h-5 w-5" />
-            {!isMobile && <span>TaskTimer</span>}
+            {!isMobile && <span>FlowTime</span>}
           </Link>
         </div>
         
