@@ -1,8 +1,13 @@
-import React, { useCallback } from 'react';
+
+import React from 'react';
 import { Task } from '@/types/tasks';
-import { TaskCheckbox } from './TaskCheckbox';
-import { TaskContentDisplay } from './TaskContentDisplay';
-import { TaskDetails } from './TaskDetails';
+import { formatDistanceToNow } from 'date-fns';
+import { Check, Clock, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { getHumanReadableDuration } from '@/utils/timeUtils';
 
 export interface TaskContentProps {
   task: Task;
@@ -31,7 +36,9 @@ export const TaskContent: React.FC<TaskContentProps> = React.memo(({
   isSelected,
   isTimerView = false,
   dialogOpeners,
-  handleTaskAction
+  handleTaskAction,
+  preventPropagation,
+  onDelete
 }) => {
   const formattedDate = task.createdAt 
     ? formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })

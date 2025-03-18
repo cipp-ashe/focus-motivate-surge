@@ -120,6 +120,21 @@ export const TaskRow: React.FC<TaskRowProps> = ({
     eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
   };
 
+  // Handle task actions
+  const handleTaskAction = (e: React.MouseEvent<HTMLElement>, actionType?: string) => {
+    e.stopPropagation();
+    if (actionType === 'complete') {
+      eventBus.emit('task:complete', { taskId: task.id });
+    } else if (actionType === 'uncomplete') {
+      eventBus.emit('task:update', { 
+        taskId: task.id, 
+        updates: { completed: false, completedAt: null } 
+      });
+    } else if (actionType === 'delete') {
+      handleDelete(e);
+    }
+  };
+
   // Handle clicks on the task row
   const handleTaskClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Check for clicks on interactive elements to prevent task selection
@@ -176,6 +191,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
         onKeyDown={handleKeyDown}
         preventPropagation={preventPropagation}
         dialogOpeners={dialogOpeners}
+        handleTaskAction={handleTaskAction}
       />
     </Card>
   );
