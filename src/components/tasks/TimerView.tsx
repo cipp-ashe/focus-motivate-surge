@@ -33,7 +33,7 @@ export const TimerView: React.FC<TimerViewProps> = ({
   // Load tasks initially, including from storage to ensure we don't miss any
   useEffect(() => {
     const loadTasks = () => {
-      // Get tasks from context first
+      // Get all tasks from context first
       const contextTasks = taskContext?.items || [];
       
       // Also check storage to ensure we have all tasks
@@ -50,9 +50,13 @@ export const TimerView: React.FC<TimerViewProps> = ({
         }
       });
       
-      // Filter to only timer and focus tasks
+      // Filter to only timer and focus tasks, but also include any task that
+      // might have been tagged as timer on the task page but doesn't have taskType set
       const filteredTasks = mergedTasks.filter(task => 
-        task.taskType === 'timer' || task.taskType === 'focus'
+        task.taskType === 'timer' || 
+        task.taskType === 'focus' ||
+        // Include tasks that are tagged with timer in their tags array
+        (task.tags && task.tags.includes('timer'))
       );
       
       console.log(`TimerView: Loaded ${filteredTasks.length} timer/focus tasks`);
@@ -73,6 +77,9 @@ export const TimerView: React.FC<TimerViewProps> = ({
     
     // Also listen for the tasksUpdated event from taskStorage
     window.addEventListener('tasksUpdated', handleTaskUpdate);
+    
+    // Force a reload when this component mounts to ensure we have fresh data
+    eventManager.emit('task:reload', {});
     
     return () => {
       window.removeEventListener('task-ui-refresh', handleTaskUpdate);

@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useState } from 'react';
 import { TaskManagerContent } from './TaskManagerContent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -7,6 +6,7 @@ import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
+import { useLocation } from 'react-router-dom';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
@@ -28,13 +28,25 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   const selectedTaskId = taskContext?.selected || null;
   const addTask = taskContext?.addTask;
   const [forceUpdateCounter, setForceUpdateCounter] = useState(0);
+  const location = useLocation();
   
   // Task management functionality
   const handleTaskAdd = useCallback((task: Task) => {
     console.log("TaskManager: Adding task", task);
     if (addTask) {
       // Ensure the task has an appropriate taskType based on the current view
+      // and route
       if (isTimerView && !task.taskType) {
+        task.taskType = 'timer';
+      }
+      
+      // If we're on the timer route, ensure timer taskType regardless of view
+      if (location.pathname.includes('/timer') && !task.taskType) {
+        task.taskType = 'timer';
+      }
+      
+      // If task has tags but not taskType, check for timer tags
+      if (!task.taskType && task.tags && task.tags.includes('timer')) {
         task.taskType = 'timer';
       }
       
@@ -51,14 +63,25 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       console.error("TaskManager: addTask function is undefined");
       toast.error("Failed to add task: Application error");
     }
-  }, [addTask, isTimerView]);
+  }, [addTask, isTimerView, location.pathname]);
   
   const handleTasksAdd = useCallback((tasks: Task[]) => {
     console.log("TaskManager: Adding multiple tasks", tasks);
     if (addTask) {
       tasks.forEach(task => {
         // Ensure the task has an appropriate taskType based on the current view
+        // and route
         if (isTimerView && !task.taskType) {
+          task.taskType = 'timer';
+        }
+        
+        // If we're on the timer route, ensure timer taskType regardless of view
+        if (location.pathname.includes('/timer') && !task.taskType) {
+          task.taskType = 'timer';
+        }
+        
+        // If task has tags but not taskType, check for timer tags
+        if (!task.taskType && task.tags && task.tags.includes('timer')) {
           task.taskType = 'timer';
         }
         
@@ -76,7 +99,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       console.error("TaskManager: addTask function is undefined");
       toast.error("Failed to add tasks: Application error");
     }
-  }, [addTask, isTimerView]);
+  }, [addTask, isTimerView, location.pathname]);
   
   // Force refresh handler to be passed to event handler
   const forceUpdate = useCallback(() => {
@@ -145,6 +168,21 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       };
     }
   }, [isTimerView, forceUpdate]);
+  
+  // Force refresh when route changes to ensure consistent tasks
+  useEffect(() => {
+    console.log("TaskManager: Route changed to", location.pathname);
+    
+    // Force a reload of tasks when we navigate to ensure consistency
+    const timeout = setTimeout(() => {
+      forceUpdate();
+      
+      // Also reload tasks from storage to ensure we have the latest
+      eventManager.emit('task:reload', {});
+    }, 100);
+    
+    return () => clearTimeout(timeout);
+  }, [location.pathname]);
   
   return (
     <div className="space-y-4">

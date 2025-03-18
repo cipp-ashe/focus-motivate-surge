@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { taskReducer } from './taskReducer';
@@ -137,7 +136,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     dispatch({ type: 'SELECT_TASK', payload: taskId });
   }, []);
   
-  // Load initial data on mount with optimization
+  // Load initial data on mount with optimization, with additional reload on page change
   useEffect(() => {
     // Skip if already initialized
     if (taskContextInitialized || initStartedRef.current) return;
@@ -171,7 +170,21 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error in initial task loading:', error);
       toast.error('Failed to load tasks');
     }
-  }, []);
+    
+    // Set up a listener for the page visibility to reload tasks when the user comes back to the app
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log("TaskContext: Page became visible, reloading tasks");
+        forceTasksReload();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [forceTasksReload]);
 
   // Set up verification with much less frequent checks
   useEffect(() => {
