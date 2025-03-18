@@ -6,7 +6,7 @@ import { taskState } from './taskState';
 import { useTaskEvents } from './useTaskEvents';
 import { useTaskPersistence } from './useTaskPersistence';
 import { useTaskNavigation } from './useTaskNavigation';
-import { Task } from '@/types/tasks';
+import { Task, TaskStatus } from '@/types/tasks';
 import { TaskContextState } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import { taskStateVerifier } from '@/lib/verification/taskStateVerifier';
@@ -110,11 +110,11 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     // Also update in storage
     const task = state.items.find(t => t.id === taskId);
     if (task) {
-      const completedTask = {
+      const completedTask: Task = {
         ...task,
         completed: true,
         completedAt: new Date().toISOString(),
-        status: 'completed',
+        status: 'completed' as TaskStatus,
         metrics: metrics ? { ...(task.metrics || {}), ...metrics } : task.metrics
       };
       
