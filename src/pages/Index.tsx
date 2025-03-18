@@ -100,19 +100,19 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Habits & Screenshots section */}
+        {/* Configuration section (Habits & Settings combined) */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-amber-400/20 p-2 md:p-3 rounded-full">
-              <CalendarCheck className="w-5 h-5 md:w-6 md:h-6 text-amber-500" aria-hidden="true" />
+              <Settings className="w-5 h-5 md:w-6 md:h-6 text-amber-500" aria-hidden="true" />
             </div>
             <Button asChild variant="ghost" size="sm" className="text-amber-500 hover:text-amber-500/80 hover:bg-amber-500/10 px-2 py-1 text-sm">
-              <Link to="/habits">View Habits</Link>
+              <Link to="/habits">View Config</Link>
             </Button>
           </div>
-          <h2 className="text-lg md:text-xl font-semibold mb-2">Habits & Work</h2>
+          <h2 className="text-lg md:text-xl font-semibold mb-2">Configuration</h2>
           <p className="text-muted-foreground text-sm md:text-base mb-4 flex-grow">
-            Track daily habits and capture work progress with screenshots.
+            Customize your habits and preferences to optimize your workflow.
           </p>
           <div className="grid grid-cols-2 gap-2 mt-auto">
             <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
@@ -121,8 +121,8 @@ const Index = () => {
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
-              <Link to="/screenshots">
-                <Image className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Screenshots
+              <Link to="/settings">
+                <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Settings
               </Link>
             </Button>
           </div>
@@ -151,49 +151,72 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Quick access section with task type tabs restoration */}
+      {/* More compact quick access section */}
       <div className="mb-8">
         <h3 className="text-md md:text-lg font-medium mb-3 flex items-center">
           <Clock className="w-4 h-4 mr-2 text-primary/70" />
           Quick Access
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Link to="/tasks" className="glass-card p-3 md:p-4 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:bg-primary/5">
-            <div className="bg-primary/10 rounded-full p-2.5 mb-2">
-              <ListTodo className="w-4 h-4 text-primary" />
+        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
+          <Link to="/tasks" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-primary/5 p-2">
+            <div className="bg-primary/10 rounded-full p-2 mb-1.5">
+              <ListTodo className="w-3.5 h-3.5 text-primary" />
             </div>
-            <h3 className="font-medium text-sm">Tasks</h3>
+            <span className="text-xs font-medium">Tasks</span>
           </Link>
           
-          <Link to="/timer" className="glass-card p-3 md:p-4 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:bg-[#9b87f5]/5">
-            <div className="bg-[#9b87f5]/10 rounded-full p-2.5 mb-2">
-              <Timer className="w-4 h-4 text-[#9b87f5]" />
+          <Link to="/timer" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-[#9b87f5]/5 p-2">
+            <div className="bg-[#9b87f5]/10 rounded-full p-2 mb-1.5">
+              <Timer className="w-3.5 h-3.5 text-[#9b87f5]" />
             </div>
-            <h3 className="font-medium text-sm">Timer</h3>
+            <span className="text-xs font-medium">Timer</span>
           </Link>
           
-          <Link to="/habits" className="glass-card p-3 md:p-4 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:bg-amber-400/5">
-            <div className="bg-amber-400/10 rounded-full p-2.5 mb-2">
-              <Activity className="w-4 h-4 text-amber-500" />
+          <Link to="/habits" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-amber-400/5 p-2">
+            <div className="bg-amber-400/10 rounded-full p-2 mb-1.5">
+              <Activity className="w-3.5 h-3.5 text-amber-500" />
             </div>
-            <h3 className="font-medium text-sm">Habits</h3>
+            <span className="text-xs font-medium">Habits</span>
           </Link>
           
-          <Link to="/screenshots" className="glass-card p-3 md:p-4 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:bg-blue-400/5">
-            <div className="bg-blue-400/10 rounded-full p-2.5 mb-2">
-              <Image className="w-4 h-4 text-blue-400" />
+          <Link to="/screenshots" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-blue-400/5 p-2">
+            <div className="bg-blue-400/10 rounded-full p-2 mb-1.5">
+              <Image className="w-3.5 h-3.5 text-blue-400" />
             </div>
-            <h3 className="font-medium text-sm">Screenshots</h3>
+            <span className="text-xs font-medium">Screenshots</span>
+          </Link>
+          
+          <Link to="/notes" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-green-400/5 p-2">
+            <div className="bg-green-400/10 rounded-full p-2 mb-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-green-400" />
+            </div>
+            <span className="text-xs font-medium">Notes</span>
+          </Link>
+          
+          <Link to="/voice-notes" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-rose-400/5 p-2">
+            <div className="bg-rose-400/10 rounded-full p-2 mb-1.5">
+              <Mic className="w-3.5 h-3.5 text-rose-400" />
+            </div>
+            <span className="text-xs font-medium">Voice</span>
+          </Link>
+          
+          <Link to="/settings" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-gray-400/5 p-2">
+            <div className="bg-gray-400/10 rounded-full p-2 mb-1.5">
+              <Settings className="w-3.5 h-3.5 text-gray-500" />
+            </div>
+            <span className="text-xs font-medium">Settings</span>
+          </Link>
+          
+          <Link to="/tasks" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-cyan-400/5 p-2">
+            <div className="bg-cyan-400/10 rounded-full p-2 mb-1.5">
+              <CalendarCheck className="w-3.5 h-3.5 text-cyan-500" />
+            </div>
+            <span className="text-xs font-medium">Today</span>
           </Link>
         </div>
       </div>
       
-      {/* Using DashboardCardGrid for additional organization if needed */}
-      <div className="mb-8">
-        <DashboardCardGrid />
-      </div>
-      
-      {/* Simple footer with no marketing language */}
+      {/* Simple footer */}
       <DashboardFooter
         linkTo="/tasks"
         text="Go to Tasks"
