@@ -72,13 +72,29 @@ export const useTimerCore = (duration: number, taskName: string) => {
     logger.debug('TimerAudio', `Playing completion sound: ${selectedSound}`);
     try {
       // Create an audio element and play the selected sound
-      const audio = new Audio(`/sounds/${selectedSound}.mp3`);
+      // Use a fully qualified URL to ensure the sound can be found
+      const soundUrl = `${window.location.origin}/sounds/${selectedSound}.mp3`;
+      const audio = new Audio(soundUrl);
       audio.volume = 0.7;
+      
+      // Add error handling for better debugging
+      audio.addEventListener('error', (e) => {
+        console.error('Error playing sound:', e);
+        logger.error('TimerAudio', `Failed to load sound: ${soundUrl}`, e);
+      });
+      
+      // Add success logging
+      audio.addEventListener('canplaythrough', () => {
+        logger.debug('TimerAudio', `Successfully loaded sound: ${soundUrl}`);
+      });
+      
       audio.play().catch(error => {
         console.error('Error playing sound:', error);
+        logger.error('TimerAudio', `Error playing sound: ${error.message}`);
       });
     } catch (error) {
       console.error('Error creating audio element:', error);
+      logger.error('TimerAudio', `Error creating audio element: ${error}`);
     }
   };
 

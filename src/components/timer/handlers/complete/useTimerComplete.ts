@@ -41,99 +41,100 @@ export const useTimerComplete = ({
       
       // Ensure we have a valid start time - convert to ISO string for proper serialization
       const startTime = metrics.startTime ? 
-        (typeof metrics.startTime === 'string' ? metrics.startTime : toISOString(metrics.startTime)) : 
-        toISOString(new Date(Date.now() - (metrics.expectedTime * 1000)));
+        (typeof metrics.startTime === 'string' ? metrics.startTime : toISOString(metrics.startTime)) 
+        : toISOString(new Date(Date.now() - 1500 * 1000)); // Default to 25 minutes ago
       
-      const now = new Date();
-      const nowISO = toISOString(now);
+      // Calculate end time
+      const endTime = toISOString(new Date());
       
-      // Convert lastPauseTimestamp to ISO string if it exists
-      const lastPauseTimestamp = metrics.lastPauseTimestamp ? 
-        (typeof metrics.lastPauseTimestamp === 'string' ? metrics.lastPauseTimestamp : toISOString(metrics.lastPauseTimestamp)) : 
-        null;
+      // Calculate actual duration if we have a start time
+      const startDate = new Date(startTime);
+      const endDate = new Date(endTime);
+      const actualDuration = Math.floor((endDate.getTime() - startDate.getTime()) / 1000);
       
-      // Parse dates for calculations
-      const startTimeDate = typeof startTime === 'string' ? new Date(startTime) : startTime;
+      // Calculate final metrics
+      const netEffectiveTime = actualDuration - (metrics.pausedTime || 0) + (metrics.extensionTime || 0);
       
-      // Calculate actual duration in seconds
-      const actualDuration = Math.floor((now.getTime() - (startTimeDate instanceof Date ? startTimeDate.getTime() : new Date(startTimeDate).getTime())) / 1000);
-      
-      // Calculate effective working time (accounting for pauses)
-      const pausedTime = metrics.pausedTime || 0;
-      const extensionTime = metrics.extensionTime || 0;
-      const netEffectiveTime = Math.max(0, actualDuration - pausedTime + extensionTime);
-      
-      // Update metrics with completion information - all dates as strings for serialization
-      const calculatedMetrics = {
-        ...metrics,
-        startTime,
-        endTime: nowISO,
-        completionDate: nowISO,
-        actualDuration,
-        netEffectiveTime,
-        lastPauseTimestamp,
-        pausedTime,
-        extensionTime,
-        // Ensure we have valid fields for completed timer
-        isPaused: false,
-        pausedTimeLeft: null
-      };
-      
-      console.log("TimerHandlers: Calculated completion metrics:", calculatedMetrics);
-      
-      // Play completion sound
-      playSound();
-      
-      // Update metrics state
-      setCompletionMetrics(calculatedMetrics);
-      
-      // Show completion screen
-      setShowCompletion(true);
-      
-      // Close expanded view if open
-      setIsExpanded(false);
-      
-      // Complete the timer
-      await completeTimer();
-      
-      // Call the onComplete callback if provided
-      if (onComplete) {
-        try {
-          console.log("TimerHandlers: Calling onComplete with metrics:", calculatedMetrics);
-          onComplete(calculatedMetrics);
-        } catch (callbackError) {
-          console.error("Error in onComplete callback:", callbackError);
-        }
+      // Determine completion status based on expected vs actual time
+      let completionStatus = "Completed On Time";
+      if (netEffectiveTime < metrics.expectedTime * 0.8) {
+        completionStatus = "Completed Early";
+      } else if (netEffectiveTime > metrics.expectedTime * 1.2) {
+        completionStatus = "Completed Late";
       }
       
-      // Emit completion event for integration with other components - use serializable metrics
-      eventManager.emit('timer:complete', { 
-        taskName, 
-        metrics: calculatedMetrics 
+      // Calculate efficiency ratio
+      const efficiencyRatio = metrics.expectedTime > 0 ? 
+        Math.round((netEffectiveTime / metrics.expectedTime) * 100) / 100 : 0;
+      
+      // Compile complete metrics
+      const completeMetrics: TimerStateMetrics = {
+        ...metrics,
+        startTime,
+        endTime,
+        actualDuration,
+        pausedTime: metrics.pausedTime || 0,
+        extensionTime: metrics.extensionTime || 0,
+        netEffectiveTime,
+        efficiencyRatio,
+        completionStatus,
+        isPaused: false,
+        pausedTimeLeft: null,
+        completionDate: endTime
+      };
+      
+      console.log("TimerHandlers: Calculated completion metrics:", completeMetrics);
+      
+      // Set the completion metrics for the UI
+      setCompletionMetrics(completeMetrics);
+      
+      // Show the completion view
+      setShowCompletion(true);
+      
+      // Expand the timer view to show completion details
+      setIsExpanded(true);
+      
+      // Play sound to indicate completion
+      setTimeout(() => {
+        playSound();
+      }, 300);
+      
+      // Emit completion event
+      eventManager.emit('timer:complete', {
+        taskId: metrics.taskId,
+        taskName,
+        metrics: completeMetrics
       });
       
-      console.log("Timer completed with metrics:", calculatedMetrics);
+      // Call completion callback if provided
+      if (onComplete) {
+        console.log("TimerHandlers: Calling onComplete with metrics:", completeMetrics);
+        onComplete(completeMetrics);
+      }
       
-      return Promise.resolve(); // Explicitly return a Promise
+      // Complete timer in state
+      await completeTimer();
       
+      return Promise.resolve();
     } catch (error) {
-      console.error("Error completing timer:", error);
-      // Even in case of error, try to show completion
-      setShowCompletion(true);
-      return Promise.reject(error); // Return rejected promise in case of error
+      console.error("Error during timer completion:", error);
+      return Promise.reject(error);
     }
   }, [
     isRunning,
     pause,
     metrics,
-    playSound,
     setCompletionMetrics,
-    onComplete,
     setShowCompletion,
     setIsExpanded,
     completeTimer,
-    taskName,
+    onComplete,
+    playSound,
+    taskName
   ]);
 
-  return handleComplete;
+  return {
+    handleComplete,
+    completeTimer
+  };
 };

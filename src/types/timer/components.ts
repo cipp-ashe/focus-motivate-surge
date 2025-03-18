@@ -24,6 +24,7 @@ export interface ButtonA11yProps {
 export interface TimerProps {
   duration: number;
   taskName: string;
+  taskId?: string;
   onComplete: (metrics: TimerMetrics) => void;
   onAddTime: (minutes: number) => void;
   onDurationChange?: (minutes: number) => void;

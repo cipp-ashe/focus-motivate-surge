@@ -13,15 +13,17 @@ import { logger } from "@/utils/logManager";
 export const Timer = ({
   duration,
   taskName,
+  taskId,
   onComplete,
   onAddTime,
   onDurationChange,
   favorites = [],
   setFavorites = () => {}
-}: TimerProps) => {
+}: TimerProps & { taskId?: string }) => {
   logger.debug('Timer', 'Timer component rendering with:', {
     duration,
     taskName,
+    taskId,
     isValid: Boolean(duration && taskName)
   });
 
@@ -52,7 +54,9 @@ export const Timer = ({
         actualDuration: typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 0,
         pausedTime: typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0,
         extensionTime: typeof metrics.extensionTime === 'number' ? metrics.extensionTime : 0,
-        netEffectiveTime: typeof metrics.netEffectiveTime === 'number' ? metrics.netEffectiveTime : 0
+        netEffectiveTime: typeof metrics.netEffectiveTime === 'number' ? metrics.netEffectiveTime : 0,
+        // Add taskId to metrics if available
+        taskId: taskId || metrics.taskId
       };
       
       logger.debug('Timer', "Timer: Validated metrics:", validatedMetrics);
@@ -64,7 +68,7 @@ export const Timer = ({
       logger.error('Timer', "Error in timer completion callback:", error);
       toast.error("Error completing timer");
     }
-  }, [onComplete]);
+  }, [onComplete, taskId]);
 
   // Error handling for initialization
   const handleInitializationError = React.useCallback((error: any) => {
@@ -78,6 +82,7 @@ export const Timer = ({
     timerProps = useTimerInitialization({
       duration,
       taskName,
+      taskId,
       onComplete: handleComplete,
       onAddTime,
       onDurationChange,

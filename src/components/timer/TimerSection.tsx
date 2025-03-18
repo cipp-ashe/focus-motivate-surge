@@ -134,6 +134,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
           onDurationChange={undefined}
           favorites={favorites}
           setFavorites={setFavorites}
+          taskId={selectedTaskState.id} // Pass the task ID to the Timer
         />
       ) : (
         <EmptyTimerState />

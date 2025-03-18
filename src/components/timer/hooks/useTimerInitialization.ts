@@ -14,7 +14,8 @@ export const useTimerInitialization = ({
   onComplete,
   onAddTime,
   onDurationChange,
-}: Pick<TimerProps, "duration" | "taskName" | "onComplete" | "onAddTime" | "onDurationChange">) => {
+  taskId
+}: Pick<TimerProps, "duration" | "taskName" | "onComplete" | "onAddTime" | "onDurationChange"> & { taskId?: string }) => {
   if (!duration || !taskName) {
     throw new Error('Timer initialization requires valid duration and taskName');
   }
@@ -56,10 +57,16 @@ export const useTimerInitialization = ({
     useEffect(() => {
       logger.debug('TimerInitialization', `Initializing timer for task: ${taskName} with duration: ${duration}`);
       
+      // Add taskId to metrics if available
+      if (taskId) {
+        updateMetrics({ taskId });
+      }
+      
       // Emit initialization event
       eventManager.emit('timer:init', {
         taskName,
-        duration
+        duration,
+        taskId
       });
       
       // Set up timer monitoring
@@ -78,7 +85,7 @@ export const useTimerInitialization = ({
         logger.debug('TimerInitialization', `Cleaning up timer for task: ${taskName}`);
         window.removeEventListener('timer:tick', handleTick as EventListener);
       };
-    }, [taskName, duration, updateTimeLeft, isMountedRef]);
+    }, [taskName, duration, updateTimeLeft, isMountedRef, taskId, updateMetrics]);
 
     // Set up timer event handlers
     const timerHandlers = useTimerHandlers({
