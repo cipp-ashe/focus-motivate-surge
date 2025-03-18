@@ -3,6 +3,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { Header } from '@/components/layout/Header';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -24,6 +25,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
         </main>
       </div>
+      
+      {/* Bottom navigation for mobile */}
+      <BottomNav />
     </div>
   );
 };

@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { TaskList } from '@/components/tasks/TaskList';
 import { TaskInput } from '@/components/tasks/TaskInput';
 import { ErrorBoundary } from 'react-error-boundary';
-import { TaskProvider } from '@/contexts/tasks/TaskContext';
+import { TaskProvider, useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
+import { Task } from '@/types/tasks';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -18,10 +19,40 @@ const ErrorFallback = ({ error }: { error: Error }) => (
 );
 
 const TaskContent = () => {
+  const { tasks, selectedTaskId } = useTaskState();
+  const { addTask, addTasks } = useTaskActions();
+  
+  // Dialog openers for task actions
+  const dialogOpeners = {
+    checklist: (taskId: string, taskName: string, items: any[]) => {
+      console.log("Open checklist for", taskId, taskName, items);
+    },
+    journal: (taskId: string, taskName: string, entry: string) => {
+      console.log("Open journal for", taskId, taskName, entry);
+    },
+    screenshot: (imageUrl: string, taskName: string) => {
+      console.log("Open screenshot", imageUrl, taskName);
+    },
+    voicenote: (taskId: string, taskName: string) => {
+      console.log("Open voice note for", taskId, taskName);
+    }
+  };
+
   return (
     <TaskLayout
-      asideContent={<TaskInput />}
-      mainContent={<TaskList />}
+      asideContent={
+        <TaskInput 
+          onTaskAdd={addTask} 
+          onTasksAdd={addTasks} 
+        />
+      }
+      mainContent={
+        <TaskList 
+          tasks={tasks} 
+          selectedTaskId={selectedTaskId} 
+          dialogOpeners={dialogOpeners}
+        />
+      }
     />
   );
 };
