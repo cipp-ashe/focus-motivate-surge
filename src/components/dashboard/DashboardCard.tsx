@@ -44,7 +44,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           "flex flex-col h-full",
           isMobile ? "p-4" : "p-5 sm:p-6"
         )}>
-          <div className="flex items-start mb-3">
+          <div className="flex items-center mb-3">
             <div 
               className={cn(
                 "rounded-xl p-2.5 flex-shrink-0 mr-3", 
