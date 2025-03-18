@@ -4,7 +4,6 @@ import { ArrowRight, Zap, Activity, Timer, FileText, Clock, CalendarCheck, Tag, 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
 const HeroSection: React.FC = () => {
   return <section className="mb-16 md:mb-24">
       <div className="flex flex-col items-center text-center mb-12">
@@ -16,7 +15,7 @@ const HeroSection: React.FC = () => {
       </div>
       
       {/* Text section from FeaturesSection - Title part */}
-      <div className="text-center mb-10">
+      <div className="text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">Everything You Need</h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">FlowTime combines task management, habit automation, and focused work sessions in one powerful, privacy-focused application.</p>
         
@@ -29,59 +28,17 @@ const HeroSection: React.FC = () => {
       {/* Features Section - Feature cards come first */}
       <div className="mb-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <FeatureCard 
-            icon={ListTodo} 
-            iconClass="bg-primary/10" 
-            iconColor="text-primary" 
-            title="Task Management" 
-            description="Organize all your work in one place" 
-            features={["Smart task organization", "Integrated with timers", "Tagging system"]} 
-            buttonLabel="Go to Tasks" 
-            buttonLink="/tasks" 
-            cardClass="from-blue-50/50 dark:from-blue-950/20" 
-            iconBgClass="bg-primary/10" 
-            iconFeatureClass="bg-primary/20" 
-            iconFeatureColor="text-primary" 
-            buttonStyle={{}}
-          />
+          <FeatureCard icon={ListTodo} iconClass="bg-primary/10" iconColor="text-primary" title="Task Management" description="Organize all your work in one place" features={["Smart task organization", "Integrated with timers", "Tagging system"]} buttonLabel="Go to Tasks" buttonLink="/tasks" cardClass="from-blue-50/50 dark:from-blue-950/20" iconBgClass="bg-primary/10" iconFeatureClass="bg-primary/20" iconFeatureColor="text-primary" buttonStyle={{}} />
           
-          <FeatureCard 
-            icon={Timer} 
-            iconClass="bg-[#9b87f5]/10" 
-            iconColor="text-[#9b87f5]" 
-            title="Focus Timers" 
-            description="Track time spent on tasks" 
-            features={["Customizable timers", "Session tracking", "Productivity metrics"]} 
-            buttonLabel="Use Timer" 
-            buttonLink="/timer" 
-            cardClass="from-purple-50/50 dark:from-purple-950/20" 
-            iconBgClass="bg-[#9b87f5]/10" 
-            iconFeatureClass="bg-[#9b87f5]/20" 
-            iconFeatureColor="text-[#9b87f5]" 
-            buttonStyle={{
-              backgroundColor: "#9b87f5",
-              borderColor: "#9b87f5"
-            }}
-          />
+          <FeatureCard icon={Timer} iconClass="bg-[#9b87f5]/10" iconColor="text-[#9b87f5]" title="Focus Timers" description="Track time spent on tasks" features={["Customizable timers", "Session tracking", "Productivity metrics"]} buttonLabel="Use Timer" buttonLink="/timer" cardClass="from-purple-50/50 dark:from-purple-950/20" iconBgClass="bg-[#9b87f5]/10" iconFeatureClass="bg-[#9b87f5]/20" iconFeatureColor="text-[#9b87f5]" buttonStyle={{
+          backgroundColor: "#9b87f5",
+          borderColor: "#9b87f5"
+        }} />
           
-          <FeatureCard 
-            icon={BookOpen} 
-            iconClass="bg-green-400/10" 
-            iconColor="text-green-500" 
-            title="Notes & Journals" 
-            description="Capture ideas and reflections" 
-            features={["Written notes", "Voice recordings", "Journal templates"]} 
-            buttonLabel="View Notes" 
-            buttonLink="/notes" 
-            cardClass="from-green-50/50 dark:from-green-950/20" 
-            iconBgClass="bg-green-400/10" 
-            iconFeatureClass="bg-green-400/20" 
-            iconFeatureColor="text-green-500" 
-            buttonStyle={{
-              backgroundColor: "rgb(74, 222, 128)",
-              borderColor: "rgb(74, 222, 128)"
-            }}
-          />
+          <FeatureCard icon={BookOpen} iconClass="bg-green-400/10" iconColor="text-green-500" title="Notes & Journals" description="Capture ideas and reflections" features={["Written notes", "Voice recordings", "Journal templates"]} buttonLabel="View Notes" buttonLink="/notes" cardClass="from-green-50/50 dark:from-green-950/20" iconBgClass="bg-green-400/10" iconFeatureClass="bg-green-400/20" iconFeatureColor="text-green-500" buttonStyle={{
+          backgroundColor: "rgb(74, 222, 128)",
+          borderColor: "rgb(74, 222, 128)"
+        }} />
         </div>
       </div>
       
@@ -89,7 +46,6 @@ const HeroSection: React.FC = () => {
       <HabitAutomationShowcase />
     </section>;
 };
-
 const HabitAutomationShowcase: React.FC = () => {
   return <div className="bg-gradient-to-br from-amber-50/90 via-amber-50/40 to-transparent dark:from-amber-950/30 dark:via-amber-950/10 dark:to-transparent border border-amber-100/50 dark:border-amber-800/30 rounded-xl overflow-hidden shadow-xl mb-12 backdrop-blur-sm">
       <div className="p-6 md:p-8">
@@ -119,7 +75,6 @@ const HabitAutomationShowcase: React.FC = () => {
       </div>
     </div>;
 };
-
 interface HabitExampleCardProps {
   icon: React.ElementType;
   iconClass: string;
@@ -133,7 +88,6 @@ interface HabitExampleCardProps {
   description: string;
   borderColor: string;
 }
-
 const HabitExampleCard: React.FC<HabitExampleCardProps> = ({
   icon: Icon,
   iconClass,
@@ -171,7 +125,6 @@ const HabitExampleCard: React.FC<HabitExampleCardProps> = ({
       </div>
     </div>;
 };
-
 interface FeatureCardProps {
   icon: React.ElementType;
   iconClass: string;
@@ -187,7 +140,6 @@ interface FeatureCardProps {
   iconFeatureColor: string;
   buttonStyle: React.CSSProperties;
 }
-
 const FeatureCard: React.FC<FeatureCardProps> = ({
   icon: Icon,
   iconClass,
@@ -230,5 +182,4 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       </CardFooter>
     </Card>;
 };
-
 export default HeroSection;
