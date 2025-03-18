@@ -56,8 +56,18 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
         formatted: formatTimeDisplay(metrics.netEffectiveTime)
       });
     }
-    if (metrics.startTime) console.log('Start Time:', metrics.startTime.toISOString());
-    if (metrics.endTime) console.log('End Time:', metrics.endTime.toISOString());
+    if (metrics.startTime) {
+      const startTimeStr = typeof metrics.startTime === 'string' 
+        ? metrics.startTime 
+        : metrics.startTime.toISOString();
+      console.log('Start Time:', startTimeStr);
+    }
+    if (metrics.endTime) {
+      const endTimeStr = typeof metrics.endTime === 'string' 
+        ? metrics.endTime 
+        : metrics.endTime.toISOString();
+      console.log('End Time:', endTimeStr);
+    }
     console.groupEnd();
   }, []);
 
@@ -68,8 +78,12 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
       let updatedPausedTime = prev.pausedTime;
       if (prev.lastPauseTimestamp && updates.lastPauseTimestamp === null) {
         const now = new Date();
+        const pauseTimestamp = typeof prev.lastPauseTimestamp === 'string' 
+          ? new Date(prev.lastPauseTimestamp) 
+          : prev.lastPauseTimestamp;
+        
         const pauseDuration = Math.floor(
-          (now.getTime() - prev.lastPauseTimestamp.getTime()) / 1000
+          (now.getTime() - pauseTimestamp.getTime()) / 1000
         );
         updatedPausedTime += pauseDuration;
       }
@@ -98,10 +112,22 @@ export const useTimerMetrics = (initialDurationSeconds: number) => {
           return prev;
         }
 
-        const totalElapsedMs = completionTime.getTime() - prev.startTime.getTime();
-        const finalPausedTime = prev.lastPauseTimestamp
-          ? prev.pausedTime + Math.floor((completionTime.getTime() - prev.lastPauseTimestamp.getTime()) / 1000)
-          : prev.pausedTime;
+        const startTime = typeof prev.startTime === 'string' 
+          ? new Date(prev.startTime) 
+          : prev.startTime;
+        
+        const totalElapsedMs = completionTime.getTime() - startTime.getTime();
+        
+        let finalPausedTime = prev.pausedTime;
+        if (prev.lastPauseTimestamp) {
+          const pauseTimestamp = typeof prev.lastPauseTimestamp === 'string' 
+            ? new Date(prev.lastPauseTimestamp) 
+            : prev.lastPauseTimestamp;
+          
+          finalPausedTime += Math.floor(
+            (completionTime.getTime() - pauseTimestamp.getTime()) / 1000
+          );
+        }
         
         const totalElapsedSeconds = Math.floor(totalElapsedMs / 1000);
         const actualWorkingTime = Math.max(0, totalElapsedSeconds - finalPausedTime);

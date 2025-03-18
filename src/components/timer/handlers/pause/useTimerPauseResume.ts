@@ -55,8 +55,12 @@ export const useTimerPauseResume = ({
     let pausedTime = metrics.pausedTime || 0;
     if (metrics.lastPauseTimestamp) {
       const now = new Date();
+      const pauseTimestamp = typeof metrics.lastPauseTimestamp === 'string' 
+        ? new Date(metrics.lastPauseTimestamp) 
+        : metrics.lastPauseTimestamp;
+      
       const pauseDuration = Math.floor(
-        (now.getTime() - metrics.lastPauseTimestamp.getTime()) / 1000
+        (now.getTime() - pauseTimestamp.getTime()) / 1000
       );
       pausedTime += pauseDuration;
       console.log(`Added ${pauseDuration}s to paused time, total: ${pausedTime}s`);
