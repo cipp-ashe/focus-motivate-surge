@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
   // Handle task completion
   const handleTaskComplete = useCallback(({ taskId, metrics }) => {
-    console.log("TaskEvents: Completing task", taskId);
+    console.log("TaskEvents: Completing task", taskId, "with metrics:", metrics);
     dispatch({ type: 'COMPLETE_TASK', payload: { taskId, metrics } });
   }, [dispatch]);
   
@@ -51,7 +51,6 @@ export const useTaskUpdateHandler = (dispatch: React.Dispatch<any>) => {
       return;
     }
     
-    // Important: prevent status infinite loops by checking before dispatch
     dispatch({ 
       type: 'UPDATE_TASK', 
       payload: { taskId, updates }

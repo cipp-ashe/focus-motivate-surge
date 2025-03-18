@@ -4,7 +4,7 @@ import { Task } from '@/types/tasks';
 import { cn } from '@/lib/utils';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { TaskActions } from './TaskActions';
-import { TaskContent } from './TaskContent';
+import { TaskContent } from '../TaskContent';
 import { useTaskActionHandler } from './TaskActionHandler';
 
 export interface TaskItemProps {
@@ -66,9 +66,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       <TaskContent
         task={task}
         isSelected={isSelected}
-        isTimerView={isTimerView}
         dialogOpeners={dialogOpeners}
-        handleTaskAction={handleTaskAction}
+        onDelete={handleDelete}
+        preventPropagation={(e) => e.stopPropagation()}
       />
       
       <TaskActions

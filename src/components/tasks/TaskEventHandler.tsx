@@ -12,6 +12,7 @@ export interface TaskEventHandlerProps {
   onTaskCreate: (task: Task) => void;
   onTaskUpdate: (data: { taskId: string, updates: Partial<Task> }) => void;
   onTaskDelete: (data: { taskId: string }) => void;
+  onTaskComplete: (data: { taskId: string, metrics?: any }) => void;
   onForceUpdate: () => void;
 }
 
@@ -19,6 +20,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   onTaskCreate,
   onTaskUpdate,
   onTaskDelete,
+  onTaskComplete,
   onForceUpdate
 }) => {
   const isMountedRef = useRef(true);
@@ -27,6 +29,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   useEvent('task:create', onTaskCreate);
   useEvent('task:update', onTaskUpdate);
   useEvent('task:delete', onTaskDelete);
+  useEvent('task:complete', onTaskComplete);
   
   // Handle UI refresh events - minimize the number of handlers and debounce actions
   useEffect(() => {
@@ -51,9 +54,20 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
     // Register only the essential event listeners
     window.addEventListener('force-task-update', handleForceUpdate);
     
+    // Event handler for timer task setting
+    const timerTaskHandler = (event: CustomEvent) => {
+      console.log('TaskEventHandler: Received timer:set-task event', event.detail);
+      
+      // Force a reload to ensure UI consistency
+      setTimeout(onForceUpdate, 100);
+    };
+    
+    window.addEventListener('timer:set-task', timerTaskHandler as EventListener);
+    
     return () => {
       isMountedRef.current = false;
       window.removeEventListener('force-task-update', handleForceUpdate);
+      window.removeEventListener('timer:set-task', timerTaskHandler as EventListener);
     };
   }, [onForceUpdate]);
   

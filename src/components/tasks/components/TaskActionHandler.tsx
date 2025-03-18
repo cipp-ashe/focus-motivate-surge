@@ -10,7 +10,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
     e.stopPropagation();
     console.log("Deleting task:", task.id);
     
-    // Emit deletion event
+    // Emit deletion event with the correct payload structure
     eventManager.emit('task:delete', { taskId: task.id });
     
     // Show toast notification
@@ -51,9 +51,27 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         }
         break;
         
+      case 'timer':
+        eventManager.emit('timer:set-task', { 
+          id: task.id, 
+          name: task.name,
+          duration: task.duration || 1500
+        });
+        toast.info(`Timer set for task: ${task.name}`);
+        break;
+        
       default:
+        // For status changes
+        if (actionType.startsWith('status-')) {
+          const status = actionType.replace('status-', '');
+          eventManager.emit('task:update', { 
+            taskId: task.id, 
+            updates: { status } 
+          });
+          toast.info(`Task "${task.name}" status changed to ${status}`);
+        }
         // For specific task types, pass to parent component
-        if (onOpenTaskDialog) {
+        else if (onOpenTaskDialog) {
           onOpenTaskDialog();
         }
         break;

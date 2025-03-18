@@ -13,21 +13,25 @@ interface TaskTaskProps {
 export const TaskTask: React.FC<TaskTaskProps> = ({ task, onEdit }) => {
   // Handler for completing a task
   const handleComplete = useCallback(() => {
+    console.log("TaskTask: Completing task:", task.id);
     eventManager.emit('task:complete', { taskId: task.id });
     toast.success(`Task completed: ${task.name}`);
   }, [task]);
 
   // Handler for deleting a task
   const handleDelete = useCallback(() => {
+    console.log("TaskTask: Deleting task:", task.id);
     eventManager.emit('task:delete', { taskId: task.id });
     toast.success(`Task deleted: ${task.name}`);
   }, [task]);
 
   // Handler for setting a task for the timer
   const handleSetForTimer = useCallback(() => {
+    console.log("TaskTask: Setting timer for task:", task.id);
     eventManager.emit('timer:set-task', { 
       id: task.id, 
-      name: task.name 
+      name: task.name,
+      duration: task.duration || 1500 
     });
     toast.success(`Timer set for: ${task.name}`);
   }, [task]);
