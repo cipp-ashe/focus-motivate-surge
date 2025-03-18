@@ -28,5 +28,5 @@ export function useIsMobile(breakpoint = 768) {
   return isMobile;
 }
 
-// For backward compatibility and aliasing
+// For backward compatibility
 export const useMobile = useIsMobile;
