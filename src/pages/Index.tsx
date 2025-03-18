@@ -33,7 +33,7 @@ const Index = () => {
       
       {/* Main feature cards - preserving original functionality */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
-        {/* Tasks section */}
+        {/* Tasks section with prominent Timer and Screenshots buttons */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-primary/20 p-2 md:p-3 rounded-full">
@@ -47,21 +47,29 @@ const Index = () => {
           <p className="text-muted-foreground text-sm md:text-base mb-4 flex-grow">
             Manage your daily tasks with optional timers, checklists, and more.
           </p>
-          <div className={cn(
-            "grid gap-2 mt-auto",
-            isMobile ? "grid-cols-2" : "grid-cols-2"
-          )}>
-            <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
-              <Link to="/tasks">
-                <ListTodo className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Tasks
+          
+          {/* Highlighted Timer and Screenshots buttons */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-600 dark:text-blue-400">
+              <Link to="/timer">
+                <Timer className="h-5 w-5 md:h-6 md:w-6 mb-1" />
+                <span className="text-xs md:text-sm font-medium">Timer</span>
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
-              <Link to="/timer">
-                <Timer className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Timer
+            
+            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-blue-400/10 hover:bg-blue-400/20 border-blue-400/30 text-blue-500 dark:text-blue-300">
+              <Link to="/screenshots">
+                <Image className="h-5 w-5 md:h-6 md:w-6 mb-1" />
+                <span className="text-xs md:text-sm font-medium">Screenshots</span>
               </Link>
             </Button>
           </div>
+          
+          <Button asChild variant="default" size="sm" className="w-full rounded-md bg-primary/90 hover:bg-primary">
+            <Link to="/tasks" className="flex items-center justify-center">
+              View All Tasks <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            </Link>
+          </Button>
         </div>
         
         {/* Notes section */}
