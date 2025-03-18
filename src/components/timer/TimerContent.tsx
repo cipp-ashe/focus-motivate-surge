@@ -75,9 +75,9 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
   const handleAddTimeAndContinue = timerHandlers?.handleAddTimeAndContinue || (() => console.log('Add time and continue'));
   const handleComplete = timerHandlers?.handleComplete || (async () => Promise.resolve());
 
-  // Get props objects
-  const timerCircleProps = getTimerCircleProps();
-  const timerControlsProps = getTimerControlsProps();
+  // Get props objects - ensure they're functions before calling them
+  const timerCircleProps = typeof getTimerCircleProps === 'function' ? getTimerCircleProps() : {};
+  const timerControlsProps = typeof getTimerControlsProps === 'function' ? getTimerControlsProps() : {};
 
   // Show completion view if timer is complete and we have completion metrics
   if (showCompletion && completionMetrics) {
@@ -128,4 +128,3 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
     </>
   );
 };
-

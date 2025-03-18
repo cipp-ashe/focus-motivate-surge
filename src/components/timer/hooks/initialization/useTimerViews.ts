@@ -26,6 +26,7 @@ export const useTimerViews = ({
   handleComplete,
   handleAddTime
 }: UseTimerViewsProps) => {
+  // Use the timerview hook to generate props for timer components
   const { getTimerCircleProps, getTimerControlsProps } = useTimerView({
     isRunning,
     timeLeft,
@@ -39,8 +40,8 @@ export const useTimerViews = ({
   });
 
   return {
-    getTimerCircleProps,
-    getTimerControlsProps
+    getTimerCircleProps: useCallback(() => getTimerCircleProps(), [getTimerCircleProps]),
+    getTimerControlsProps: useCallback(() => getTimerControlsProps(), [getTimerControlsProps])
   };
 };
 
