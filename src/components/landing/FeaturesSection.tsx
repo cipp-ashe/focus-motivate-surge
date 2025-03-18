@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ListTodo, BookOpen, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
 const FeaturesSection: React.FC = () => {
   return <section className="mb-16">
       <div className="text-center mb-10">
@@ -30,6 +32,7 @@ const FeaturesSection: React.FC = () => {
       </div>
     </section>;
 };
+
 interface FeatureCardProps {
   icon: React.ElementType;
   iconClass: string;
@@ -45,6 +48,7 @@ interface FeatureCardProps {
   iconFeatureColor: string;
   buttonStyle: React.CSSProperties;
 }
+
 const FeatureCard: React.FC<FeatureCardProps> = ({
   icon: Icon,
   iconClass,
@@ -62,10 +66,12 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 }) => {
   return <Card className={`border-primary/10 bg-gradient-to-br ${cardClass} to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm`}>
       <CardHeader>
-        <div className="">
-          <Icon className={`h-6 w-6 ${iconColor}`} />
+        <div className="flex items-center gap-3 mb-1">
+          <div className={`p-2 rounded-md ${iconBgClass}`}>
+            <Icon className={`h-6 w-6 ${iconColor}`} />
+          </div>
+          <CardTitle>{title}</CardTitle>
         </div>
-        <CardTitle className="text-left">{title}</CardTitle>
         <CardDescription className="text-left">{description}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -85,4 +91,5 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       </CardFooter>
     </Card>;
 };
+
 export default FeaturesSection;
