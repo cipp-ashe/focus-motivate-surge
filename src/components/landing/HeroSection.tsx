@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, Activity, Timer, FileText, Clock, CalendarCheck, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+
 const HeroSection: React.FC = () => {
   return <section className="mb-16 md:mb-24">
       <div className="flex flex-col items-center text-center mb-12">
@@ -17,7 +18,7 @@ const HeroSection: React.FC = () => {
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
           <Button asChild size="lg" className="rounded-full px-8 shadow-glow button-glow">
-            
+            <Link to="/tasks">Get Started</Link>
           </Button>
         </div>
       </div>
@@ -25,6 +26,7 @@ const HeroSection: React.FC = () => {
       <HabitAutomationShowcase />
     </section>;
 };
+
 const HabitAutomationShowcase: React.FC = () => {
   return <div className="bg-gradient-to-br from-amber-50/90 via-amber-50/40 to-transparent dark:from-amber-950/30 dark:via-amber-950/10 dark:to-transparent border border-amber-100/50 dark:border-amber-800/30 rounded-xl overflow-hidden shadow-xl mb-12 backdrop-blur-sm">
       <div className="p-6 md:p-8">
@@ -54,6 +56,7 @@ const HabitAutomationShowcase: React.FC = () => {
       </div>
     </div>;
 };
+
 interface HabitExampleCardProps {
   icon: React.ElementType;
   iconClass: string;
@@ -67,6 +70,7 @@ interface HabitExampleCardProps {
   description: string;
   borderColor: string;
 }
+
 const HabitExampleCard: React.FC<HabitExampleCardProps> = ({
   icon: Icon,
   iconClass,
@@ -104,4 +108,5 @@ const HabitExampleCard: React.FC<HabitExampleCardProps> = ({
       </div>
     </div>;
 };
+
 export default HeroSection;

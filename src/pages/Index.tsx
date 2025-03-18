@@ -19,11 +19,11 @@ const Index = () => {
         {/* Hero Section */}
         <HeroSection />
         
+        {/* Features Section - Now moved above Privacy Section */}
+        <FeaturesSection />
+        
         {/* Privacy Section */}
         <PrivacySection />
-        
-        {/* Main Features Section */}
-        <FeaturesSection />
         
         {/* Quick Access Section */}
         <QuickAccessSection />
