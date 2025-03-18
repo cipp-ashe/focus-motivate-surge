@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ActiveTemplate, HabitTemplate } from './types';
 import ConfigurationDialog from './ConfigurationDialog';
 import TabSection from './ManageTemplatesDialog/TabSection';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { eventBus } from '@/lib/eventBus';
 
 interface TemplateSelectionSheetProps {

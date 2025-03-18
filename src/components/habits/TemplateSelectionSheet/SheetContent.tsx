@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { ActiveTemplate, HabitTemplate } from '../types';
 import TabSection from '../ManageTemplatesDialog/TabSection';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { eventBus } from '@/lib/eventBus';
 
 interface SheetContentProps {
