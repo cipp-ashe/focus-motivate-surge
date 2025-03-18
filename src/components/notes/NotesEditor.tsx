@@ -1,4 +1,3 @@
-
 import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect, useRef } from 'react';
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -128,8 +127,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
     // Emit the format event for note formatting, now using a properly defined event type
     if (selectedNote) {
       eventManager.emit('note:format', { 
-        id: selectedNote.id, 
-        format: action
+        contentType: action 
       });
     }
     
@@ -145,7 +143,7 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
       // Signal that formatting is complete with updated event type
       if (selectedNote) {
         eventManager.emit('note:format-complete', { 
-          id: selectedNote.id 
+          formattedContent: content 
         });
       }
     }, 3000); // Extended to 3 seconds for better safety with complex formatting

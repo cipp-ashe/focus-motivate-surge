@@ -33,9 +33,10 @@ export const TaskSelectionProvider: React.FC<TaskSelectionProviderProps> = ({ ch
     
     // Emit task selection event with proper types
     eventManager.emit('timer:task-set', { 
-      taskId: task.id, 
-      taskName: task.name,
-      duration: task.duration || 1500 // Default to 25 minutes if no duration
+      id: task.id, 
+      name: task.name,
+      duration: task.duration || 1500, // Default to 25 minutes if no duration
+      taskId: task.id
     });
     
     // Also emit the more general select event

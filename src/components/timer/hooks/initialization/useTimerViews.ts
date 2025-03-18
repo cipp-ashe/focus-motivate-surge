@@ -1,7 +1,6 @@
 
 import { useCallback } from "react";
 import { useTimerView } from "../useTimerView";
-import { useAutoComplete } from "../useAutoComplete";
 import { TimerStateMetrics } from "@/types/metrics";
 
 interface UseTimerViewsProps {
@@ -68,19 +67,33 @@ export const useTimerAutoComplete = ({
   setCompletionMetrics,
   setShowCompletion
 }: UseAutoCompleteProps): () => Promise<void> => {
-  const handleAutoComplete = useCallback(async (): Promise<void> => {
+  return useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();
     }
     
+    playSound();
+    
+    const completionMetrics: TimerStateMetrics = {
+      ...metrics,
+      completionStatus: "Completed On Time"
+    };
+    
     try {
+      // Await the Promise from completeTimer
       await completeTimer();
+      
+      setCompletionMetrics(completionMetrics);
+      setShowCompletion(true);
+      
+      if (onComplete) {
+        onComplete(completionMetrics);
+      }
+      
       return Promise.resolve();
     } catch (error) {
-      console.error("Error in autoComplete:", error);
+      console.error("Error completing timer:", error);
       return Promise.reject(error);
     }
-  }, [isRunning, pause, completeTimer]);
-  
-  return handleAutoComplete;
+  }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName, setCompletionMetrics, setShowCompletion]);
 };

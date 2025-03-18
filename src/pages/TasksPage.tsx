@@ -1,7 +1,7 @@
+
 import React, { useState, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { TaskProvider } from '@/contexts/tasks/TaskContext';
-import { TaskStats } from '@/components/tasks/TaskStats';
 import { TaskManager } from '@/components/tasks/TaskManager';
 import { Card, CardContent } from '@/components/ui/card';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -53,10 +53,25 @@ export default function TasksPage() {
   return (
     <div className="container max-w-6xl mx-auto p-4">
       
-      
       <TaskProvider>
         <div className="mb-6">
-          <TaskStats />
+          <div className="bg-card rounded-md p-4">
+            <h2 className="text-xl font-semibold mb-2">Task Statistics</h2>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-muted/50 p-3 rounded-md">
+                <h3 className="text-sm font-medium">Total Tasks</h3>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+              <div className="bg-muted/50 p-3 rounded-md">
+                <h3 className="text-sm font-medium">Completed</h3>
+                <p className="text-2xl font-bold text-green-500">0</p>
+              </div>
+              <div className="bg-muted/50 p-3 rounded-md">
+                <h3 className="text-sm font-medium">Pending</h3>
+                <p className="text-2xl font-bold text-amber-500">0</p>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 gap-6">

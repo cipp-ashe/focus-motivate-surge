@@ -1,6 +1,5 @@
-
 import React, { useState, useCallback } from 'react';
-import TaskManager from '@/components/tasks/TaskManager';
+import { TaskManager } from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { ChecklistItem, Task } from '@/types/tasks';
