@@ -8,9 +8,9 @@ export const useHabitCompletion = () => {
     try {
       // Emit event to create relationship
       eventManager.emit('tag:link', {
-        id: crypto.randomUUID(),
-        type,
-        sourceId,
+        tagId: crypto.randomUUID(), // Fix: changed 'id' to 'tagId'
+        entityId: sourceId,
+        entityType: type,
         targetId
       });
       
@@ -37,8 +37,8 @@ export const useHabitCompletion = () => {
     try {
       // Emit event to expand timer
       eventManager.emit('timer:expand', {
-        taskId,
-        taskName
+        id: taskId, // Fix: changed 'taskId' to 'id'
+        name: taskName
       });
       return true;
     } catch (error) {

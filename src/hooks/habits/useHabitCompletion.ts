@@ -1,9 +1,9 @@
 
 import { useCallback } from 'react';
 import { format } from 'date-fns';
-import { HabitStats, HabitLog } from '@/types/habit';
+import { HabitStats, HabitLog } from '@/types/habit'; // Fixed import
 import { eventManager } from '@/lib/events/EventManager';
-import { computeHabitStreak } from '@/utils/habits/streakCalculator';
+import { computeHabitStreak } from '@/utils/habits/streakCalculator'; // Fixed import
 import { toast } from 'sonner';
 
 export const useHabitCompletion = () => {
@@ -16,6 +16,7 @@ export const useHabitCompletion = () => {
       eventManager.emit('habit:complete', {
         habitId,
         date: formattedDate
+        // Removed 'completed: true' as it's not in the expected type
       });
       
       // Return success

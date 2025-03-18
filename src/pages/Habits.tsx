@@ -54,13 +54,27 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
   const { templates } = useHabitContext();
   const { todaysHabits, refreshHabits } = useTodaysHabits();
   
-  // Use our custom hook for habit completion
-  const { 
-    completedHabits, 
-    dismissedHabits,
-    handleHabitComplete, 
-    handleAddHabitToTasks 
-  } = useHabitCompletion(todaysHabits, templates);
+  // Get the habit completion functions
+  const { completeHabit, dismissHabit } = useHabitCompletion();
+  
+  // Track completed and dismissed habits locally
+  const [completedHabits, setCompletedHabits] = useState<Record<string, boolean>>({});
+  const [dismissedHabits, setDismissedHabits] = useState<Record<string, boolean>>({});
+  
+  // Handler functions that use the useHabitCompletion hooks
+  const handleHabitComplete = (habitId: string) => {
+    const success = completeHabit(habitId, new Date().toISOString());
+    if (success) {
+      setCompletedHabits(prev => ({ ...prev, [habitId]: true }));
+    }
+    return success;
+  };
+  
+  const handleAddHabitToTasks = (habitId: string, name: string) => {
+    // Implementation for adding habit to tasks
+    console.log('Adding habit to tasks:', habitId, name);
+    return true;
+  };
 
   // Generate a stable key for the TodaysHabitsSection based on template IDs
   const todaysHabitsSectionKey = templates

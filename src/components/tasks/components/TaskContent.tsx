@@ -5,10 +5,20 @@ import { TaskCheckbox } from './TaskCheckbox';
 import { TaskContentDisplay } from './TaskContentDisplay';
 import { TaskDetails } from './TaskDetails';
 
-interface TaskContentProps {
+export interface TaskContentProps {
   task: Task;
   isSelected: boolean;
   isTimerView?: boolean;
+  // Add the missing properties that are being passed
+  onSelect?: () => void;
+  editingTaskId?: string | null;
+  inputValue?: string;
+  onDelete?: (e: React.MouseEvent<Element, MouseEvent> | React.TouchEvent<Element>) => void;
+  onDurationClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  preventPropagation?: (e: React.MouseEvent | React.TouchEvent) => void;
   dialogOpeners?: {
     checklist?: (taskId: string, taskName: string, items: any[]) => void;
     journal?: (taskId: string, taskName: string, entry: string) => void;
