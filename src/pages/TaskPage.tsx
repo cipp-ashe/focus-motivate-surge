@@ -4,7 +4,7 @@ import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { TaskList } from '@/components/tasks/TaskList';
 import { TaskInput } from '@/components/tasks/TaskInput';
 import { ErrorBoundary } from 'react-error-boundary';
-import { TaskProvider, useTaskState, useTaskActions } from '@/contexts/tasks/TaskContext';
+import { TaskProvider, useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
@@ -19,8 +19,7 @@ const ErrorFallback = ({ error }: { error: Error }) => (
 );
 
 const TaskContent = () => {
-  const { tasks, selectedTaskId } = useTaskState();
-  const { addTask, addTasks } = useTaskActions();
+  const { items: tasks, selected: selectedTaskId, addTask } = useTaskContext();
   
   // Dialog openers for task actions
   const dialogOpeners = {
@@ -35,6 +34,13 @@ const TaskContent = () => {
     },
     voicenote: (taskId: string, taskName: string) => {
       console.log("Open voice note for", taskId, taskName);
+    }
+  };
+
+  // Function to handle adding multiple tasks
+  const addTasks = (newTasks: Task[]) => {
+    if (newTasks && newTasks.length > 0 && addTask) {
+      newTasks.forEach(task => addTask(task));
     }
   };
 
