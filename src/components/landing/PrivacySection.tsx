@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 const PrivacySection: React.FC = () => {
   return (
-    <section className="mb-12 transition-all">
+    <section className="mt-8 mb-8 transition-all">
       <div className="bg-gradient-to-br from-gray-900/40 to-gray-900/20 dark:from-gray-900/60 dark:to-gray-800/30 backdrop-blur-md border border-gray-800/30 rounded-xl p-6 shadow-lg transform transition-all duration-300 hover:shadow-xl">
         <div className="flex flex-col md:flex-row gap-6 items-center">
           <div className="flex-shrink-0 bg-purple-500/20 p-4 rounded-full">
