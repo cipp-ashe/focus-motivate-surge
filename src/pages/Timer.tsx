@@ -89,7 +89,7 @@ export default function TimerPage() {
                     </TabsContent>
                     
                     <TabsContent value="metrics" className="m-0 h-[500px]">
-                      <TimerMetricsDisplayComponent />
+                      <TimerMetricsDisplay />
                     </TabsContent>
                   </Tabs>
                 </CardContent>
