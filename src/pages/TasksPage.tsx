@@ -1,255 +1,85 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { TaskLayout } from '@/components/tasks/TaskLayout';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import React, { useState, useCallback } from 'react';
 import { Task } from '@/types/tasks';
-import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
-import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
-import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
-import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
-import { toast } from 'sonner';
-import { TaskInput } from '@/components/tasks/TaskInput';
-import { eventManager } from '@/lib/events/EventManager';
+import { TaskProvider } from '@/contexts/tasks/TaskContext';
+import { TaskStats } from '@/components/tasks/TaskStats';
+import { TaskManager } from '@/components/tasks/TaskManager';
+import { Card, CardContent } from '@/components/ui/card';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { TaskEventHandler } from '@/components/tasks/TaskEventHandler';
-import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
-import { useNavigate } from 'react-router-dom';
-import { useTimerTaskHandler } from '@/components/tasks/event-handlers/TimerTaskHandler';
 
-const TasksPage: React.FC = () => {
-  const taskContext = useTaskContext();
-  const navigate = useNavigate();
-  const tasks = taskContext?.items || [];
-  const completedTasks = taskContext?.completed || [];
+export default function TasksPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const selectedTag = searchParams.get('tag');
   
-  const { handleTimerTaskSet } = useTimerTaskHandler(navigate);
+  const onForceUpdate = useCallback(() => {
+    console.log('TasksPage: Force update');
+    router.refresh();
+  }, [router]);
   
-  const [checklistDialogOpen, setChecklistDialogOpen] = useState(false);
-  const [journalDialogOpen, setJournalDialogOpen] = useState(false);
-  const [screenshotDialogOpen, setScreenshotDialogOpen] = useState(false);
-  const [voiceNoteDialogOpen, setVoiceNoteDialogOpen] = useState(false);
-  
-  const [, setForceUpdate] = useState(0);
-  
-  const forceUpdateHandlerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const forceUpdateHandler = useCallback(() => {
-    if (forceUpdateHandlerRef.current) {
-      clearTimeout(forceUpdateHandlerRef.current);
-    }
-    
-    forceUpdateHandlerRef.current = setTimeout(() => {
-      setForceUpdate(prev => prev + 1);
-      forceUpdateHandlerRef.current = null;
-    }, 50);
-  }, []);
-  
-  useEffect(() => {
-    return () => {
-      if (forceUpdateHandlerRef.current) {
-        clearTimeout(forceUpdateHandlerRef.current);
-      }
-    };
-  }, []);
-  
-  const [activeTaskId, setActiveTaskId] = useState<string>('');
-  const [activeTaskName, setActiveTaskName] = useState<string>('');
-  const [checklistItems, setChecklistItems] = useState<any[]>([]);
-  const [journalEntry, setJournalEntry] = useState<string>('');
-  const [screenshotUrl, setScreenshotUrl] = useState<string>('');
-  
-  useEffect(() => {
-    console.log("TasksPage mounted, taskContext:", taskContext);
-    console.log("Tasks available:", tasks);
-    
+  const onTaskCreate = useCallback((task: Task) => {
+    console.log('TasksPage: Task created', task);
+    // Refresh the task list
     setTimeout(() => {
-      eventManager.emit('task:reload', {});
+      window.dispatchEvent(new Event('task-ui-refresh'));
     }, 100);
-  }, [taskContext, tasks]);
+  }, []);
   
-  useEffect(() => {
-    const handleTimerEvent = (event: CustomEvent) => {
-      if (event.detail) {
-        handleTimerTaskSet(event.detail);
-      }
-    };
-    
-    window.addEventListener('timer:set-task', handleTimerEvent as EventListener);
-    
-    return () => {
-      window.removeEventListener('timer:set-task', handleTimerEvent as EventListener);
-    };
-  }, [handleTimerTaskSet]);
+  const onTaskUpdate = useCallback(({ taskId, updates }: { taskId: string; updates: Partial<Task> }) => {
+    console.log('TasksPage: Task updated', taskId, updates);
+    // Refresh the task list
+    setTimeout(() => {
+      window.dispatchEvent(new Event('task-ui-refresh'));
+    }, 100);
+  }, []);
   
-  const dialogOpeners = {
-    checklist: (taskId: string, taskName: string, items: any[]) => {
-      console.log("Opening checklist dialog:", { taskId, taskName, items });
-      setActiveTaskId(taskId);
-      setActiveTaskName(taskName);
-      setChecklistItems(items || []);
-      setChecklistDialogOpen(true);
-      toast.info(`Opening checklist for: ${taskName}`);
-    },
-    journal: (taskId: string, taskName: string, entry: string) => {
-      console.log("Opening journal dialog:", { taskId, taskName, entry });
-      setActiveTaskId(taskId);
-      setActiveTaskName(taskName);
-      setJournalEntry(entry || '');
-      setJournalDialogOpen(true);
-      toast.info(`Opening journal for: ${taskName}`);
-    },
-    screenshot: (imageUrl: string, taskName: string) => {
-      console.log("Opening screenshot dialog:", { imageUrl, taskName });
-      setScreenshotUrl(imageUrl);
-      setActiveTaskName(taskName);
-      setScreenshotDialogOpen(true);
-      toast.info(`Viewing image for: ${taskName}`);
-    },
-    voicenote: (taskId: string, taskName: string) => {
-      console.log("Opening voice note dialog:", { taskId, taskName });
-      setActiveTaskId(taskId);
-      setActiveTaskName(taskName);
-      setVoiceNoteDialogOpen(true);
-      toast.info(`Recording for: ${taskName}`);
-    }
-  };
+  const onTaskDelete = useCallback(({ taskId }: { taskId: string }) => {
+    console.log('TasksPage: Task deleted', taskId);
+    // Refresh the task list
+    setTimeout(() => {
+      window.dispatchEvent(new Event('task-ui-refresh'));
+    }, 100);
+  }, []);
   
-  const handleAddTask = useCallback((task: Task) => {
-    try {
-      console.log("Adding task to context:", task);
-      if (taskContext && taskContext.addTask) {
-        taskContext.addTask(task);
-        toast.success(`Task created: ${task.name}`);
-      } else {
-        console.error("Task context or addTask function is undefined");
-        toast.error("Failed to create task: Application error");
-      }
-    } catch (error) {
-      console.error("Error creating task:", error);
-      toast.error("Failed to create task");
-    }
-  }, [taskContext]);
-  
-  const handleAddMultipleTasks = useCallback((tasks: Task[]) => {
-    try {
-      console.log("Adding multiple tasks:", tasks);
-      if (taskContext && taskContext.addTask) {
-        tasks.forEach(task => {
-          taskContext.addTask(task);
-        });
-        toast.success(`Added ${tasks.length} tasks`);
-      } else {
-        console.error("Task context or addTask function is undefined");
-        toast.error("Failed to add tasks: Application error");
-      }
-    } catch (error) {
-      console.error("Error adding multiple tasks:", error);
-      toast.error("Failed to add tasks");
-    }
-  }, [taskContext]);
-  
-  const handleTaskComplete = useCallback(({ taskId, metrics }) => {
-    console.log("TasksPage: Completing task", taskId, "with metrics:", metrics);
-    if (taskContext?.completeTask) {
-      taskContext.completeTask(taskId, metrics);
-      toast.success(`Task completed!`);
-    }
-  }, [taskContext]);
-  
-  if (!taskContext) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          </div>
-          <p className="text-muted-foreground">Loading task context...</p>
-        </div>
-      </div>
-    );
+  // Add the missing onTaskComplete function
+  function onTaskComplete({ taskId, metrics }: { taskId: string; metrics?: any }) {
+    console.log('TasksPage: Task complete', taskId, metrics);
+    // Refresh the task list
+    setTimeout(() => {
+      window.dispatchEvent(new Event('task-ui-refresh'));
+    }, 100);
   }
-  
+
   return (
-    <div className="min-h-screen">
-      <TaskEventHandler
-        onForceUpdate={forceUpdateHandler}
-        onTaskCreate={task => taskContext.addTask(task)}
-        onTaskUpdate={({taskId, updates}) => taskContext.updateTask(taskId, updates)}
-        onTaskDelete={({taskId}) => taskContext.deleteTask(taskId)}
-        onTaskComplete={handleTaskComplete}
-        tasks={tasks}
-      />
+    <div className="container max-w-6xl mx-auto p-4">
       
-      <TaskLayout
-        mainContent={
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-hidden border border-border/20 rounded-lg">
-              <UnifiedTaskView
-                activeTasks={tasks}
-                completedTasks={completedTasks}
-                selectedTaskId={taskContext?.selected || null}
-                dialogOpeners={dialogOpeners}
-                onTaskAdd={handleAddTask}
-                onTasksAdd={handleAddMultipleTasks}
+      
+      <TaskProvider>
+        <div className="mb-6">
+          <TaskStats />
+        </div>
+        
+        <div className="grid grid-cols-1 gap-6">
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <TaskManager 
+                initialFilter={selectedTag ? 'tag' : 'all'}
+                initialTag={selectedTag}
+                hasTasks={true}
               />
-            </div>
-          </div>
-        }
-        asideContent={
-          <div className="space-y-4">
-            <div className="mb-4 p-4 bg-card rounded-lg border border-border">
-              <h3 className="text-lg font-medium mb-2">Add New Task</h3>
-              <TaskInput 
-                onTaskAdd={handleAddTask} 
-                onTasksAdd={handleAddMultipleTasks}
-                defaultTaskType="regular"
-              />
-            </div>
-          </div>
-        }
-      />
-      
-      <ChecklistDialog
-        isOpen={checklistDialogOpen}
-        onOpenChange={setChecklistDialogOpen}
-        currentTask={{
-          taskId: activeTaskId,
-          taskName: activeTaskName,
-          items: checklistItems
-        }}
-      />
-      
-      <JournalDialog
-        isOpen={journalDialogOpen}
-        onOpenChange={setJournalDialogOpen}
-        currentTask={{
-          taskId: activeTaskId,
-          taskName: activeTaskName,
-          entry: journalEntry
-        }}
-      />
-      
-      <ScreenshotDialog
-        isOpen={screenshotDialogOpen}
-        onOpenChange={setScreenshotDialogOpen}
-        task={{
-          id: activeTaskId,
-          name: activeTaskName,
-          imageUrl: screenshotUrl,
-          createdAt: new Date().toISOString(),
-          completed: false
-        } as Task}
-      />
-      
-      <VoiceNoteDialog
-        isOpen={voiceNoteDialogOpen}
-        onOpenChange={setVoiceNoteDialogOpen}
-        task={{
-          id: activeTaskId,
-          name: activeTaskName,
-          createdAt: new Date().toISOString(),
-          completed: false
-        } as Task}
-      />
+            </CardContent>
+          </Card>
+        </div>
+        
+        <TaskEventHandler
+          onForceUpdate={onForceUpdate}
+          onTaskCreate={onTaskCreate}
+          onTaskUpdate={onTaskUpdate}
+          onTaskDelete={onTaskDelete}
+          onTaskComplete={onTaskComplete}
+          tasks={[]} // Empty array as placeholder
+        />
+      </TaskProvider>
     </div>
   );
-};
-
-export default TasksPage;
+}

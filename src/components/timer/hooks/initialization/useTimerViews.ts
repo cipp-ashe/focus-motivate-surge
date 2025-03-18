@@ -68,7 +68,7 @@ export const useTimerAutoComplete = ({
   setCompletionMetrics,
   setShowCompletion
 }: UseAutoCompleteProps): () => Promise<void> => {
-  return useCallback(async (): Promise<void> => {
+  const handleAutoComplete = useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();
     }
@@ -81,4 +81,6 @@ export const useTimerAutoComplete = ({
       return Promise.reject(error);
     }
   }, [isRunning, pause, completeTimer]);
+  
+  return handleAutoComplete;
 };

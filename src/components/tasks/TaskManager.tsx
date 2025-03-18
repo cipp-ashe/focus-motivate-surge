@@ -1,185 +1,121 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { TaskManagerContent } from './TaskManagerContent';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Task } from '@/types/tasks';
+import { TaskList } from './TaskList';
+import { TaskForm } from './TaskForm';
+import { TaskStats } from './TaskStats';
+import { TaskFilters } from './TaskFilters';
+import { TaskActionsBar } from './TaskActionsBar';
+import { TaskEmptyState } from './TaskEmptyState';
 import { TaskEventHandler } from './TaskEventHandler';
-import { Task, Tag } from '@/types/tasks';
-import { eventManager } from '@/lib/events/EventManager';
-import { toast } from 'sonner';
-import { taskStorage } from '@/lib/storage/taskStorage';
-import { useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { Card, CardContent } from '@/components/ui/card';
+import { useTaskActions } from '@/hooks/tasks/useTaskActions';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
+import { useTasksNavigation } from '@/hooks/tasks/useTasksNavigation';
+import { useTasksTasks } from '@/hooks/tasks/useTasksTasks';
+import { useTaskFilter } from '@/hooks/tasks/useTaskFilter';
+import { useTaskSearch } from '@/hooks/tasks/useTaskSearch';
+import { useTaskSort } from '@/hooks/tasks/useTaskSort';
+import { useTaskCompletion } from '@/hooks/tasks/useTaskCompletion';
+import { useTaskDeletion } from '@/hooks/tasks/useTaskDeletion';
+import { useTaskCreation } from '@/hooks/tasks/useTaskCreation';
+import { useTaskUpdate } from '@/hooks/tasks/useTaskUpdate';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TaskManagerProps {
-  isTimerView?: boolean;
-  dialogOpeners?: {
-    checklist?: (taskId: string, taskName: string, items: any[]) => void;
-    journal?: (taskId: string, taskName: string, entry: string) => void;
-    screenshot?: (imageUrl: string, taskName: string) => void;
-    voicenote?: (taskId: string, taskName: string) => void;
-  };
+  initialFilter?: 'all' | 'today' | 'week' | 'tag';
+  initialTag?: string | null;
+  hasTasks?: boolean;
 }
 
-const TaskManager: React.FC<TaskManagerProps> = ({
-  isTimerView = false,
-  dialogOpeners
+export const TaskManager: React.FC<TaskManagerProps> = ({
+  initialFilter = 'all',
+  initialTag = null,
+  hasTasks = false
 }) => {
-  const taskContext = useTaskContext();
-  const items = taskContext?.items || [];
-  const completed = taskContext?.completed || [];
-  const selectedTaskId = taskContext?.selected || null;
-  const addTask = taskContext?.addTask;
-  const [forceUpdateCounter, setForceUpdateCounter] = useState(0);
-  const location = useLocation();
+  const { items } = useTaskContext();
+  const [loading, setLoading] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [forceUpdate, setForceUpdate] = useState(0);
   
-  const handleTaskAdd = useCallback((task: Task) => {
-    console.log("TaskManager: Adding task", task);
-    if (addTask) {
-      if (isTimerView && !task.taskType) {
-        task.taskType = 'timer';
-      }
-      if (location.pathname.includes('/timer') && !task.taskType) {
-        task.taskType = 'timer';
-      }
-      if (!task.taskType && task.tags && task.tags.some(tag => 
-        typeof tag === 'object' && tag.name === 'timer')) {
-        task.taskType = 'timer';
-      }
-      addTask(task);
-      eventManager.emit('task:create', task);
-      window.dispatchEvent(new Event('force-task-update'));
-      toast.success(`Task added: ${task.name}`);
-    } else {
-      console.error("TaskManager: addTask function is undefined");
-      toast.error("Failed to add task: Application error");
-    }
-  }, [addTask, isTimerView, location.pathname]);
+  // Task Actions
+  const { handleComplete } = useTaskCompletion();
+  const { handleTaskDelete } = useTaskDeletion();
+  const { handleTaskCreate } = useTaskCreation();
+  const { handleTaskUpdate } = useTaskUpdate();
   
-  const handleTasksAdd = useCallback((tasks: Task[]) => {
-    console.log("TaskManager: Adding multiple tasks", tasks);
-    if (addTask) {
-      tasks.forEach(task => {
-        if (isTimerView && !task.taskType) {
-          task.taskType = 'timer';
-        }
-        if (location.pathname.includes('/timer') && !task.taskType) {
-          task.taskType = 'timer';
-        }
-        if (!task.taskType && task.tags && task.tags.some(tag => 
-          typeof tag === 'object' && tag.name === 'timer')) {
-          task.taskType = 'timer';
-        }
-        addTask(task);
-        eventManager.emit('task:create', task);
-      });
-      window.dispatchEvent(new Event('force-task-update'));
-      toast.success(`Added ${tasks.length} tasks`);
-    } else {
-      console.error("TaskManager: addTask function is undefined");
-      toast.error("Failed to add tasks: Application error");
-    }
-  }, [addTask, isTimerView, location.pathname]);
+  // Task Events
+  const { forceTaskUpdate } = useTaskEvents();
   
-  const forceUpdate = useCallback(() => {
-    console.log("TaskManager: Force update called - triggering UI refresh");
-    setForceUpdateCounter(prev => prev + 1);
+  // Task Navigation
+  const { handleTaskSelect } = useTasksNavigation();
+  
+  // Task Filtering
+  const { filter, setFilter, filteredTasks, taskCountInfo } = useTaskFilter(initialFilter, initialTag);
+  
+  // Task Search
+  const { searchTerm, setSearchTerm, searchedTasks } = useTaskSearch(filteredTasks);
+  
+  // Task Sorting
+  const { sortOrder, setSortOrder, sortedTasks } = useTaskSort(searchedTasks);
+  
+  const handleAction = useCallback((action: string, taskId: string) => {
+    console.log(`TaskManager: Handling action ${action} for task ${taskId}`);
     
-    const storedTasks = taskStorage.loadTasks();
-    if (storedTasks.length > 0 && (!items || items.length < storedTasks.length)) {
-      console.log("TaskManager: Found missing tasks in memory, refreshing from storage");
-      eventManager.emit('task:reload', {});
-    }
-  }, [items]);
+    // Handle task selection
+    handleTaskSelect(taskId);
+  }, [handleTaskSelect]);
   
-  useEffect(() => {
-    const handleTaskUiRefresh = () => {
-      console.log("TaskManager: Received task-ui-refresh event");
-      forceUpdate();
-    };
-    
-    const handleForceUpdate = () => {
-      console.log("TaskManager: Received force-task-update event");
-      forceUpdate();
-    };
-    
-    window.addEventListener('task-ui-refresh', handleTaskUiRefresh);
-    window.addEventListener('force-task-update', handleForceUpdate);
-    
-    return () => {
-      window.removeEventListener('task-ui-refresh', handleTaskUiRefresh);
-      window.removeEventListener('force-task-update', handleForceUpdate);
-    };
-  }, [forceUpdate]);
-  
-  useEffect(() => {
-    if (isTimerView) {
-      console.log("TaskManager (Timer View): Setting up special timer task handlers");
-      
-      const refreshTimerTasks = () => {
-        console.log("TaskManager (Timer View): Refreshing timer tasks");
-        
-        const storedTasks = taskStorage.loadTasks();
-        const timerTasks = storedTasks.filter(task => 
-          task.taskType === 'timer' || task.taskType === 'focus'
-        );
-        
-        if (timerTasks.length > 0) {
-          console.log(`TaskManager (Timer View): Found ${timerTasks.length} timer tasks in storage`);
-          forceUpdate();
-        }
-      };
-      
-      eventManager.on('timer:task-set', refreshTimerTasks);
-      setTimeout(refreshTimerTasks, 200);
-      
-      return () => {
-        eventManager.off('timer:task-set', refreshTimerTasks);
-      };
-    }
-  }, [isTimerView, forceUpdate]);
-  
-  useEffect(() => {
-    console.log("TaskManager: Route changed to", location.pathname);
-    
-    const timeout = setTimeout(() => {
-      forceUpdate();
-      
-      eventManager.emit('task:reload', {});
-    }, 100);
-    
-    return () => clearTimeout(timeout);
-  }, [location.pathname]);
-  
-  const handleTaskComplete = useCallback(({ taskId, metrics }) => {
-    console.log("TaskManager: Completing task", taskId, "with metrics:", metrics);
-    if (taskContext?.completeTask) {
-      taskContext.completeTask(taskId, metrics);
-      toast.success(`Task completed!`);
-    }
-  }, [taskContext]);
-  
+  const dialogOptions = {
+    checklist: undefined, // Make these all explicitly undefined instead of optional
+    journal: undefined,
+    screenshot: undefined,
+    voicenote: undefined
+  };
+
+  const handleForceUpdate = () => {
+    setForceUpdate(prev => prev + 1);
+  };
+
   return (
-    <div className="space-y-4">
-      <TaskEventHandler 
-        onForceUpdate={forceUpdate}
-        onTaskCreate={handleTaskAdd}
-        onTaskUpdate={({taskId, updates}) => taskContext?.updateTask(taskId, updates)}
-        onTaskDelete={({taskId}) => taskContext?.deleteTask(taskId)}
-        onTaskComplete={handleTaskComplete}
-        tasks={items}
+    <div className="h-full flex flex-col">
+      <div className="px-4 py-2 flex items-center justify-between">
+        <TaskActionsBar
+          selectedTasks={selectedTasks}
+          onTasksDelete={() => {
+            selectedTasks.forEach(handleTaskDelete);
+            setSelectedTasks([]);
+          }}
+          onTasksComplete={() => {
+            selectedTasks.forEach(handleComplete);
+            setSelectedTasks([]);
+          }}
+          hasTasks={hasTasks}
+        />
+      </div>
+      
+      <TaskList
+        tasks={sortedTasks}
+        onTaskAction={handleAction}
+        onTaskUpdate={handleTaskUpdate}
+        onTaskDelete={handleTaskDelete}
+        onForceUpdate={handleForceUpdate}
+        onTaskComplete={handleComplete}
+        isLoading={loading}
+        loadingCount={3}
+        emptyState={<TaskEmptyState />}
+        dialogOpeners={dialogOptions}
+        taskCountInfo={taskCountInfo}
       />
       
-      <TaskManagerContent
-        key={`task-manager-content-${forceUpdateCounter}`}
-        tasks={items}
-        completedTasks={completed}
-        selectedTaskId={selectedTaskId}
-        isTimerView={isTimerView}
-        dialogOpeners={dialogOpeners}
-        onTaskAdd={handleTaskAdd}
-        onTasksAdd={handleTasksAdd}
+      <TaskEventHandler
+        onForceUpdate={handleForceUpdate}
+        onTaskCreate={handleTaskCreate}
+        onTaskUpdate={handleTaskUpdate}
+        onTaskDelete={handleTaskDelete}
+        onTaskComplete={handleComplete}
+        tasks={sortedTasks}
       />
     </div>
   );
 };
-
-export default TaskManager;

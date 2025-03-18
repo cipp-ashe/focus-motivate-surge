@@ -12,10 +12,10 @@ export interface TaskItemProps {
   onOpenTaskDialog?: () => void;
   isTimerView?: boolean;
   dialogOpeners?: {
-    checklist?: ((taskId: string, taskName: string, items: any[]) => void) | undefined;
-    journal?: ((taskId: string, taskName: string, entry: string) => void) | undefined;
-    screenshot?: ((imageUrl: string, taskName: string) => void) | undefined;
-    voicenote?: ((taskId: string, taskName: string) => void) | undefined;
+    checklist?: ((taskId: string, taskName: string, items: any[]) => void);
+    journal?: ((taskId: string, taskName: string, entry: string) => void);
+    screenshot?: ((imageUrl: string, taskName: string) => void);
+    voicenote?: ((taskId: string, taskName: string) => void);
   };
 }
 

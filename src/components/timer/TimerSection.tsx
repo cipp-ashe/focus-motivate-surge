@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Timer } from './Timer';
 import { EmptyTimerState } from './EmptyTimerState';
 import { useTaskSelection } from './providers/TaskSelectionProvider';
-import { Quote } from '@/types/timer';
+import { Quote, Task } from '@/types/timer';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { useEvent } from '@/hooks/useEvent';
@@ -62,13 +62,23 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
       
       // Use the taskSelection context to set the task
       if (task.id) {
-        selectTask(task);
+        // Create a valid Task object
+        const taskObject: Task = {
+          id: task.id,
+          name: task.name,
+          duration: task.duration || 1500,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
         
-        // Also emit event for other components listening - fixed payload
+        selectTask(taskObject);
+        
+        // Also emit event for other components listening
         eventManager.emit('timer:task-set', {
-          taskId: task.id,
-          taskName: task.name,
-          duration: task.duration || 1500  // Duration is now a valid property
+          id: task.id,
+          name: task.name,
+          duration: task.duration || 1500,
+          taskId: task.id
         });
       }
     };
@@ -80,7 +90,16 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
     const unsubscribe = eventManager.on('timer:set-task', (task) => {
       console.log('TimerSection: Received timer:set-task from eventManager', task);
       if (task && task.id) {
-        selectTask(task);
+        // Create a valid Task object
+        const taskObject: Task = {
+          id: task.id,
+          name: task.name,
+          duration: task.duration || 1500,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        selectTask(taskObject);
       }
     });
     
