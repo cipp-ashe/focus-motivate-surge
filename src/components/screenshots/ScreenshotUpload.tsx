@@ -1,5 +1,4 @@
-
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Upload, ImageIcon, Camera, Paperclip } from "lucide-react";
@@ -21,13 +20,8 @@ export const ScreenshotUpload = ({ onImageUpload }: ScreenshotUploadProps) => {
   const { createTask } = useTaskManager();
   const isMobile = useIsMobile();
 
-  // Create a reference to the file input element
-  const fileInputRef = useCallback((node: HTMLInputElement | null) => {
-    if (node) {
-      fileInputRef.current = node;
-    }
-  }, []);
-  fileInputRef.current = null;
+  // Create a proper React ref for the file input element
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePaste = useCallback(
     async (e: ClipboardEvent) => {
