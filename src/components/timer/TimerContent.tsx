@@ -68,13 +68,12 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
     isRunning,
   } = props;
 
-  // Extract handlers for readability
-  const {
-    handleCloseCompletion,
-    handleCloseTimer,
-    handleAddTimeAndContinue,
-    handleComplete
-  } = timerHandlers;
+  // Extract handlers with safer destructuring
+  // If timerHandlers is undefined or missing properties, provide fallback functions
+  const handleCloseCompletion = timerHandlers?.handleCloseCompletion || (() => console.log('Close completion'));
+  const handleCloseTimer = timerHandlers?.handleCloseTimer || (() => console.log('Close timer'));
+  const handleAddTimeAndContinue = timerHandlers?.handleAddTimeAndContinue || (() => console.log('Add time and continue'));
+  const handleComplete = timerHandlers?.handleComplete || (async () => Promise.resolve());
 
   // Get props objects
   const timerCircleProps = getTimerCircleProps();
@@ -129,3 +128,4 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
     </>
   );
 };
+

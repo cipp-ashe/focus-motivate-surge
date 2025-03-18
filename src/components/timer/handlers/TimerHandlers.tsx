@@ -110,15 +110,32 @@ export const useTimerHandlers = ({
     taskName,
   });
 
+  // Add handler for closing completion view
+  const handleCloseCompletion = () => {
+    setShowCompletion(false);
+    setCompletionMetrics(null);
+  };
+
+  // Add handler for adding time and continuing
+  const handleAddTimeAndContinue = () => {
+    // Add 5 minutes by default
+    handleAddTime(5);
+    setShowConfirmation(false);
+  };
+
   return {
     handleToggle,
     handleAddTime,
     handleReset,
     handleComplete,
     handleClose,
+    handleCloseCompletion,
+    handleCloseTimer: handleClose,
+    handleAddTimeAndContinue,
     showResetConfirmation,
     handlePause,
     handleResume,
     isPaused: metrics.isPaused || false
   };
 };
+
