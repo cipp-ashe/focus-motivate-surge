@@ -43,7 +43,11 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" attribute="class">
       <AuthProvider>
-        <RouterProvider router={router} />
+        <RouterProvider router={router} fallbackElement={
+          <div className="flex items-center justify-center h-screen">
+            <p className="text-lg">Loading application...</p>
+          </div>
+        } />
         <Toaster position="top-right" />
       </AuthProvider>
     </ThemeProvider>
