@@ -25,11 +25,9 @@ const Screenshots = () => {
   const { createTask } = useTaskManager();
   const isMobile = useIsMobile();
 
-  // Load existing screenshot tasks when the component mounts
   useEffect(() => {
     loadScreenshotTasks();
     
-    // Set up event listeners to keep the list in sync
     const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
       setTasks(prev => prev.map(task => 
         task.id === data.taskId ? { ...task, ...data.updates } : task
@@ -40,11 +38,9 @@ const Screenshots = () => {
       setTasks(prev => prev.filter(task => task.id !== data.taskId));
     };
 
-    // Subscribe to events - using the newer eventManager API
     const unsubscribeUpdate = eventManager.on('task:update', handleTaskUpdate);
     const unsubscribeDelete = eventManager.on('task:delete', handleTaskDelete);
     
-    // Listen for storage changes from other tabs/windows
     const handleStorageChange = () => {
       loadScreenshotTasks();
     };
@@ -74,21 +70,17 @@ const Screenshots = () => {
     type?: "screenshot" | "image"
   ) => {
     try {
-      // Convert base64 to blob for validation
       const response = await fetch(imageData);
       const blob = await response.blob();
       
-      // Validate the image
       const validation = validateImage(blob);
       if (!validation.isValid) {
         toast.error(validation.error || "Invalid image");
         return;
       }
 
-      // Sanitize filename
       const sanitizedFileName = fileName ? sanitizeFileName(fileName) : "Screenshot";
 
-      // Create new task
       const task = createTask({
         name: sanitizedFileName,
         description: "Screenshot captured " + new Date().toLocaleString(),
@@ -100,14 +92,13 @@ const Screenshots = () => {
       });
 
       toast.success("Screenshot saved");
-      loadScreenshotTasks(); // Reload from storage to ensure consistency
+      loadScreenshotTasks();
     } catch (error) {
       console.error("Error processing image:", error);
       toast.error("Failed to process image");
     }
   };
 
-  // Mobile instructions content
   const MobileInstructions = () => (
     <Card className="mb-4">
       <CardContent className="pt-6">
@@ -131,7 +122,6 @@ const Screenshots = () => {
     </Card>
   );
 
-  // Mobile-specific layout (simplified)
   if (isMobile) {
     return (
       <div className="container mx-auto py-4 px-3">
@@ -193,7 +183,6 @@ const Screenshots = () => {
     );
   }
 
-  // Desktop layout (original layout with refinements)
   return (
     <div className="container mx-auto py-6 px-4">
       <h1 className="text-2xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
