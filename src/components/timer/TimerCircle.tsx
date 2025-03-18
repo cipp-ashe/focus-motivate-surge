@@ -14,11 +14,11 @@ const formatTime = (seconds: number): string => {
 };
 
 export const TimerCircle = memo(({
-  size,
+  size = 'normal',
   isRunning,
   timeLeft,
   minutes,
-  circumference,
+  circumference = 282.74, // Default value based on r=45
   a11yProps,
   onClick
 }: TimerCircleProps) => {
@@ -93,6 +93,9 @@ export const TimerCircle = memo(({
     ? 'w-64 h-64 sm:w-72 sm:h-72' 
     : 'w-52 h-52 sm:w-56 sm:h-56';
 
+  // Calculate percentage completion for the gradient
+  const percentComplete = ((minutes * 60 - timeLeft) / (minutes * 60)) * 100;
+
   return (
     <div 
       className={cn(
@@ -111,23 +114,30 @@ export const TimerCircle = memo(({
         viewBox="0 0 100 100"
         aria-hidden="true"
       >
+        {/* Background gradient */}
+        <defs>
+          <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#9b87f5" />
+            <stop offset="100%" stopColor="#8b5cf6" />
+          </linearGradient>
+        </defs>
+        
         {/* Background circle */}
         <circle
-          className="text-muted-foreground/10 dark:text-muted-foreground/5 stroke-current"
+          className="dark:text-slate-800 text-slate-200 stroke-current"
           strokeWidth="4"
           fill="transparent"
           r="45"
           cx="50"
           cy="50"
         />
+        
         {/* Progress circle */}
         <circle
           ref={progressRef}
           className={cn(
-            "stroke-current transition-colors",
-            isRunning
-              ? "text-primary filter drop-shadow-lg"
-              : "text-primary/70"
+            "transition-all duration-300",
+            isRunning ? "filter drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" : ""
           )}
           strokeWidth="5"
           fill="transparent"
@@ -135,11 +145,13 @@ export const TimerCircle = memo(({
           cx="50"
           cy="50"
           strokeLinecap="round"
+          stroke="url(#circleGradient)"
           strokeDasharray={circumference}
           strokeDashoffset={circumference * ((minutes * 60 - timeLeft) / (minutes * 60))}
           style={prefersReducedMotion ? { transition: 'none' } : undefined}
         />
       </svg>
+      
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span 
           ref={textRef}
@@ -152,7 +164,20 @@ export const TimerCircle = memo(({
         >
           {formatTime(timeLeft)}
         </span>
+        
+        {/* Add a subtle label */}
+        <span className="text-xs text-muted-foreground mt-2 font-medium">
+          {isRunning ? "FOCUS TIME" : "READY"}
+        </span>
+        
+        {/* Add a subtle glow effect behind the timer when running */}
+        {isRunning && (
+          <div className="absolute inset-0 rounded-full bg-purple-500/5 blur-xl -z-10" />
+        )}
       </div>
+      
+      {/* Subtle circle decoration */}
+      <div className="absolute -inset-1 rounded-full border border-purple-200/20 dark:border-purple-800/20 -z-10" />
     </div>
   );
 });

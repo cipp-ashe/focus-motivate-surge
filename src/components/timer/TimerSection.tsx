@@ -8,6 +8,7 @@ import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { useEvent } from '@/hooks/useEvent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface TimerSectionProps {
   favorites: Quote[];
@@ -15,7 +16,7 @@ interface TimerSectionProps {
 }
 
 export const TimerSection: React.FC<TimerSectionProps> = ({ 
-  favorites = [], // Add default value
+  favorites = [], 
   setFavorites 
 }) => {
   const { selectedTask, selectTask, clearSelectedTask } = useTaskSelection();
@@ -122,7 +123,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full p-6">
       {selectedTaskState ? (
         <Timer 
           key={selectedTaskState.id}

@@ -7,7 +7,7 @@
 }
 
 .timer-circle.active {
-  filter: drop-shadow(0 0 10px hsl(var(--primary)));
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
 }
 
 .task-list-item {
@@ -28,11 +28,14 @@
 
 /* Quote display animations */
 .quote-container {
-  transition: opacity 2s ease-in-out;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 1;
 }
 
 .quote-card {
-  transition: opacity 2s ease-in-out;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .timer-expand-enter {
@@ -43,7 +46,7 @@
 .timer-expand-enter-active {
   transform: scale(1);
   opacity: 1;
-  transition: transform 0.3s, opacity 0.3s;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Task item hover effects */
@@ -73,6 +76,7 @@
   @apply transform transition-all duration-200 active:scale-95 bg-card hover:bg-accent/20;
   @apply border border-primary/20 text-foreground/90 hover:text-foreground;
   @apply focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2;
+  @apply shadow-sm hover:shadow-md;
 }
 
 .timer-button:focus-visible {
@@ -83,7 +87,7 @@
 .minutes-display {
   @apply px-3 py-1.5 bg-card/80 border border-primary/20 rounded-md text-lg font-medium;
   @apply focus:border-primary/40 focus:ring-1 focus:ring-primary/30 focus:outline-none;
-  @apply transition-all duration-200 text-center;
+  @apply transition-all duration-200 text-center shadow-sm;
 }
 
 /* Timer metrics styling */
@@ -107,4 +111,41 @@
 
 .metric-highlight {
   @apply text-primary font-semibold;
+}
+
+/* Add a subtle pulsing animation for the active timer */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+.timer-button-pulse {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Glass morphism effects */
+.glass-panel {
+  @apply bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10;
+  @apply rounded-xl shadow-xl;
+}
+
+/* Focus mode overlay */
+.focus-mode-overlay {
+  @apply fixed inset-0 bg-black/70 backdrop-blur-sm z-50;
+  @apply flex items-center justify-center;
+  @apply transition-all duration-500;
+}
+
+/* Progress indicator */
+.progress-indicator {
+  @apply h-1 bg-gradient-to-r from-purple-400 to-pink-500;
+  @apply rounded-full absolute bottom-0 left-0;
+  @apply transition-all duration-300 ease-out;
 }
