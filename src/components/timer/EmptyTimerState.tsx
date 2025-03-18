@@ -1,13 +1,9 @@
 
 import React from 'react';
 import { Clock, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const EmptyTimerState = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="flex flex-col items-center justify-center text-center h-full p-4">
       <div className="p-4 rounded-full bg-purple-100 dark:bg-purple-900/30 mb-6">
@@ -30,16 +26,6 @@ export const EmptyTimerState = () => {
           </p>
         </CardContent>
       </Card>
-      
-      <div className="mt-4">
-        <Button 
-          variant="outline" 
-          className="border-purple-300 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30"
-          onClick={() => navigate('/tasks')}
-        >
-          Go to Tasks Page
-        </Button>
-      </div>
     </div>
   );
 };
