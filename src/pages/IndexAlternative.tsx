@@ -34,7 +34,7 @@ const IndexAlternative = () => {
       </div>
       
       <div className="max-w-7xl mx-auto">
-        {/* Hero Section - Enhanced with more modern styling */}
+        {/* Hero Section */}
         <section className="mb-16 md:mb-24">
           <div className="flex flex-col items-center text-center mb-12">
             <Badge variant="outline" className="mb-4 px-3 py-1 bg-primary/10 text-primary border-primary/20 backdrop-blur-sm">
@@ -57,7 +57,7 @@ const IndexAlternative = () => {
             </div>
           </div>
           
-          {/* Hero Habit Automation Showcase - Enhanced with sleeker styling */}
+          {/* Hero Habit Automation Showcase */}
           <div className="bg-gradient-to-br from-amber-50/90 via-amber-50/40 to-transparent dark:from-amber-950/30 dark:via-amber-950/10 dark:to-transparent border border-amber-100/50 dark:border-amber-800/30 rounded-xl overflow-hidden shadow-xl mb-12 backdrop-blur-sm">
             <div className="p-6 md:p-8">
               <div className="flex items-center gap-4 mb-6">
@@ -133,7 +133,7 @@ const IndexAlternative = () => {
           </div>
         </section>
         
-        {/* Main Features Section - Enhanced with sleeker styling */}
+        {/* Main Features Section */}
         <section className="mb-16">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">Everything You Need</h2>
@@ -143,7 +143,7 @@ const IndexAlternative = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Tasks Card - Enhanced styling */}
+            {/* Tasks Card */}
             <Card className="border-primary/10 bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20 dark:to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm">
               <CardHeader>
                 <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-3">
@@ -181,7 +181,7 @@ const IndexAlternative = () => {
               </CardFooter>
             </Card>
             
-            {/* Timer Card - Enhanced styling */}
+            {/* Timer Card */}
             <Card className="border-primary/10 bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-950/20 dark:to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm">
               <CardHeader>
                 <div className="bg-[#9b87f5]/10 w-12 h-12 rounded-full flex items-center justify-center mb-3">
@@ -219,7 +219,7 @@ const IndexAlternative = () => {
               </CardFooter>
             </Card>
             
-            {/* Notes Card - Enhanced styling */}
+            {/* Notes Card */}
             <Card className="border-primary/10 bg-gradient-to-br from-green-50/50 to-transparent dark:from-green-950/20 dark:to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm">
               <CardHeader>
                 <div className="bg-green-400/10 w-12 h-12 rounded-full flex items-center justify-center mb-3">
@@ -259,14 +259,14 @@ const IndexAlternative = () => {
           </div>
         </section>
         
-        {/* Quick Access Section - Enhanced with sleeker styling */}
+        {/* Quick Access Section - Modified to remove "Today" and "Settings" */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <LayoutDashboard className="h-5 w-5 text-primary/70" />
             Quick Access
           </h2>
           
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
             <Link to="/tasks" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-primary/5">
               <div className="bg-primary/10 rounded-full p-3 mb-1">
                 <ListTodo className="w-5 h-5 text-primary" />
@@ -308,24 +308,10 @@ const IndexAlternative = () => {
               </div>
               <span className="text-sm font-medium">Voice</span>
             </Link>
-            
-            <Link to="/tasks" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-cyan-400/5">
-              <div className="bg-cyan-400/10 rounded-full p-3 mb-1">
-                <CalendarCheck className="w-5 h-5 text-cyan-500" />
-              </div>
-              <span className="text-sm font-medium">Today</span>
-            </Link>
-            
-            <Link to="/settings" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-gray-400/5">
-              <div className="bg-gray-400/10 rounded-full p-3 mb-1">
-                <Mic className="w-5 h-5 text-gray-500" />
-              </div>
-              <span className="text-sm font-medium">Settings</span>
-            </Link>
           </div>
         </section>
         
-        {/* Privacy Section - Enhanced with sleeker styling */}
+        {/* Privacy Section */}
         <section className="mb-16">
           <div className="bg-gradient-to-r from-gray-50 to-transparent dark:from-gray-900/30 dark:to-transparent border border-gray-100 dark:border-gray-800/30 rounded-xl p-6 shadow-lg backdrop-blur-sm">
             <div className="flex flex-col md:flex-row gap-6 items-center">
@@ -351,7 +337,7 @@ const IndexAlternative = () => {
           </div>
         </section>
         
-        {/* Footer - Enhanced with sleeker styling */}
+        {/* Footer */}
         <footer className="text-center mt-16 mb-8">
           <Button 
             asChild 
@@ -370,4 +356,3 @@ const IndexAlternative = () => {
 };
 
 export default IndexAlternative;
-
