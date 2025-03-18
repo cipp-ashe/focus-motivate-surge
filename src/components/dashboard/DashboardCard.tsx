@@ -44,7 +44,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           "flex flex-col h-full",
           isMobile ? "p-4" : "p-5 sm:p-6"
         )}>
-          <div className="flex items-start gap-4 mb-3">
+          <div className="flex items-center gap-3 mb-2">
             <div 
               className={cn(
                 "rounded-xl p-2.5 flex-shrink-0", 
@@ -54,16 +54,17 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
             >
               <Icon className={cn("w-6 h-6", iconColor)} />
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold mb-1" id={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}>{title}</h2>
-              <p 
-                className="text-sm text-muted-foreground"
-                aria-labelledby={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {description}
-              </p>
-            </div>
+            <h2 className="text-xl font-semibold" id={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+              {title}
+            </h2>
           </div>
+          
+          <p 
+            className="text-sm text-muted-foreground mb-3"
+            aria-labelledby={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}
+          >
+            {description}
+          </p>
           
           {metrics && metrics.length > 0 && (
             <div 

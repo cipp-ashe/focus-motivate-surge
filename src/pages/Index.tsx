@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -11,7 +12,8 @@ import {
   Activity,
   Image,
   Mic,
-  Tag
+  Tag,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
