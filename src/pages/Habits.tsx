@@ -58,21 +58,23 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
   const { completeHabit, dismissHabit } = useHabitCompletion();
   
   // Track completed and dismissed habits locally
-  const [completedHabits, setCompletedHabits] = useState<Record<string, boolean>>({});
-  const [dismissedHabits, setDismissedHabits] = useState<Record<string, boolean>>({});
+  // Changed to arrays of strings to match expected type in TodaysHabitsSection
+  const [completedHabits, setCompletedHabits] = useState<string[]>([]);
+  const [dismissedHabits, setDismissedHabits] = useState<string[]>([]);
   
   // Handler functions that use the useHabitCompletion hooks
   const handleHabitComplete = (habitId: string) => {
     const success = completeHabit(habitId, new Date().toISOString());
     if (success) {
-      setCompletedHabits(prev => ({ ...prev, [habitId]: true }));
+      setCompletedHabits(prev => prev.includes(habitId) ? prev : [...prev, habitId]);
     }
     return success;
   };
   
-  const handleAddHabitToTasks = (habitId: string, name: string) => {
+  // Update the signature to receive a HabitDetail object
+  const handleAddHabitToTasks = (habit: any) => {
     // Implementation for adding habit to tasks
-    console.log('Adding habit to tasks:', habitId, name);
+    console.log('Adding habit to tasks:', habit.id, habit.name);
     return true;
   };
 

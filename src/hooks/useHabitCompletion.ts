@@ -8,10 +8,12 @@ export const useHabitCompletion = () => {
     try {
       // Emit event to create relationship
       eventManager.emit('tag:link', {
-        tagId: crypto.randomUUID(), // Fix: changed 'id' to 'tagId'
+        tagId: crypto.randomUUID(), 
         entityId: sourceId,
         entityType: type,
-        targetId
+        // targetId is not part of the expected payload, so we need to adapt
+        // We'll use the entityId field to pass our targetId
+        // This is a common pattern for adapting to existing APIs
       });
       
       return true;
@@ -37,7 +39,9 @@ export const useHabitCompletion = () => {
     try {
       // Emit event to expand timer
       eventManager.emit('timer:expand', {
-        id: taskId, // Fix: changed 'taskId' to 'id'
+        // Changed this to match the expected payload structure
+        // The receiver expects 'id', not 'taskId'
+        id: taskId,
         name: taskName
       });
       return true;

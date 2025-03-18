@@ -9,10 +9,10 @@ import { taskStorage } from '@/lib/storage/taskStorage';
 
 interface TodaysHabitsSectionProps {
   todaysHabits: HabitDetail[];
-  completedHabits: string[];
-  dismissedHabits?: string[];
-  onHabitComplete: (habitId: string, completed: boolean) => void;
-  onAddHabitToTasks: (habit: HabitDetail) => void;
+  completedHabits: string[]; // Changed to string array
+  dismissedHabits?: string[]; // Changed to string array
+  onHabitComplete: (habitId: string) => boolean; // Updated signature
+  onAddHabitToTasks: (habit: HabitDetail) => void; // Updated signature
   templateId?: string;
 }
 
@@ -110,7 +110,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
                 habit={habit}
                 completed={completedHabits.includes(habit.id)}
                 dismissed={dismissedHabits.includes(habit.id)}
-                onComplete={(completed) => onHabitComplete(habit.id, completed)}
+                onComplete={() => onHabitComplete(habit.id)}
                 onAddToTasks={() => handleAddToTasks(habit)}
                 hasTask={habitTaskStatus[habit.id] || false}
               />
@@ -124,7 +124,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
                 habit={habit}
                 completed={completedHabits.includes(habit.id)}
                 dismissed={dismissedHabits.includes(habit.id)}
-                onComplete={(completed) => onHabitComplete(habit.id, completed)}
+                onComplete={() => onHabitComplete(habit.id)}
                 onAddToTasks={() => handleAddToTasks(habit)}
                 hasTask={habitTaskStatus[habit.id] || false}
               />
@@ -138,7 +138,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
                 habit={habit}
                 completed={completedHabits.includes(habit.id)}
                 dismissed={dismissedHabits.includes(habit.id)}
-                onComplete={(completed) => onHabitComplete(habit.id, completed)}
+                onComplete={() => onHabitComplete(habit.id)}
                 onAddToTasks={() => handleAddToTasks(habit)}
                 hasTask={habitTaskStatus[habit.id] || false}
               />
