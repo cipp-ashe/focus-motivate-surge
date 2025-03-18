@@ -113,10 +113,10 @@ const SheetContent: React.FC<SheetContentProps> = ({
   return (
     <div className={`${isMobile ? 'w-[100vw]' : 'w-[400px] sm:w-[540px]'} p-0`}>
       <div className="flex flex-col h-full">
-        <div className="p-6 pb-0">
+        <div className="p-5 pb-0">
           <SheetHeader>
-            <SheetTitle>Configure Templates</SheetTitle>
-            <SheetDescription>
+            <SheetTitle className="text-xl font-semibold">Configure Templates</SheetTitle>
+            <SheetDescription className="text-sm text-muted-foreground">
               Select or create templates to add to your habit tracker
             </SheetDescription>
           </SheetHeader>
@@ -131,7 +131,7 @@ const SheetContent: React.FC<SheetContentProps> = ({
           onCreateTemplate={onCreateTemplate}
         />
         
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-border/20">
           <SheetClose asChild>
             <Button variant="outline" className="w-full">Close</Button>
           </SheetClose>

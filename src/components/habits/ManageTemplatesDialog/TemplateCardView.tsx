@@ -24,14 +24,14 @@ const TemplateCardView: React.FC<TemplateCardViewProps> = ({
   return (
     <Card 
       className={cn(
-        "bg-card border-border transition-all duration-200 hover:shadow-md",
-        isActive ? "border-primary ring-1 ring-primary/20" : "hover:border-primary/50"
+        "bg-card border-border/60 transition-all duration-200 hover:shadow-md",
+        isActive ? "border-primary/60 ring-1 ring-primary/10" : "hover:border-primary/30"
       )}
     >
       <CardHeader className={cn("pb-2", isCustom && "flex flex-row items-start justify-between")}>
         <div>
-          <CardTitle className="text-lg">{template.name}</CardTitle>
-          <CardDescription>{template.description}</CardDescription>
+          <CardTitle className="text-base font-medium">{template.name}</CardTitle>
+          <CardDescription className="text-xs">{template.description}</CardDescription>
         </div>
         {isCustom && onDelete && (
           <Button
@@ -41,18 +41,18 @@ const TemplateCardView: React.FC<TemplateCardViewProps> = ({
               e.stopPropagation();
               onDelete();
             }}
-            className="h-8 w-8 -mt-1 -mr-1 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+            className="h-7 w-7 -mt-1 -mr-1 text-destructive/80 hover:text-destructive/90 hover:bg-destructive/10"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         )}
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-2">Includes:</p>
-        <ul className="space-y-1.5 text-sm mb-1.5">
+        <p className="text-xs text-muted-foreground mb-2">Includes:</p>
+        <ul className="space-y-1 text-xs mb-1">
           {template.defaultHabits.map((habit) => (
             <li key={habit.id} className="flex items-start">
-              <Check className="h-4 w-4 mr-2 mt-0.5 text-primary" />
+              <Check className="h-3.5 w-3.5 mr-1.5 mt-0.5 text-primary/80" />
               <span>{habit.name}</span>
             </li>
           ))}
@@ -64,16 +64,16 @@ const TemplateCardView: React.FC<TemplateCardViewProps> = ({
           size="sm"
           className={cn(
             "w-full", 
-            !isActive && "bg-primary hover:bg-primary/90",
-            "text-xs sm:text-sm whitespace-normal h-auto py-2"
+            !isActive && "bg-primary/90 hover:bg-primary/95",
+            "text-xs whitespace-normal h-auto py-1.5"
           )}
           onClick={onSelect}
           disabled={isActive}
         >
           {isActive ? (
-            <Check className="h-4 w-4 mr-1.5 flex-shrink-0" />
+            <Check className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
           ) : (
-            <Plus className="h-4 w-4 mr-1.5 flex-shrink-0" />
+            <Plus className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
           )}
           <span>{isActive ? "Already Added" : "Add Template"}</span>
         </Button>
