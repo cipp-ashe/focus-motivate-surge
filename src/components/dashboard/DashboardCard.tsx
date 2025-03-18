@@ -44,27 +44,28 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           "flex flex-col h-full",
           isMobile ? "p-4" : "p-5 sm:p-6"
         )}>
-          <div className="flex items-center mb-2">
+          <div className="flex items-start mb-3">
             <div 
               className={cn(
-                "rounded-xl p-2.5 flex-shrink-0 mr-3", 
+                "rounded-xl p-2.5 flex-shrink-0 mr-3 mt-0", 
                 "bg-background/50 backdrop-blur-sm shadow-sm border border-border/20"
               )}
               aria-hidden="true"
             >
               <Icon className={cn("w-6 h-6", iconColor)} />
             </div>
-            <h2 className="text-xl font-semibold" id={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-              {title}
-            </h2>
+            <div>
+              <h2 className="text-xl font-semibold" id={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+                {title}
+              </h2>
+              <p 
+                className="text-sm text-muted-foreground mt-1"
+                aria-labelledby={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                {description}
+              </p>
+            </div>
           </div>
-          
-          <p 
-            className="text-sm text-muted-foreground mb-3"
-            aria-labelledby={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}
-          >
-            {description}
-          </p>
           
           {metrics && metrics.length > 0 && (
             <div 
