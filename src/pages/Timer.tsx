@@ -5,6 +5,7 @@ import { TimerSection } from '@/components/timer/TimerSection';
 import { useState } from 'react';
 import { Quote } from '@/types/timer';
 import { TaskSelectionProvider } from '@/components/timer/providers/TaskSelectionProvider';
+import { TaskManager } from '@/contexts/tasks/TaskContext';
 
 // Timer page component with default export
 export default function TimerPage() {
@@ -20,9 +21,11 @@ export default function TimerPage() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Timer</h1>
-      <TaskSelectionProvider>
-        <TimerSection favorites={favorites} setFavorites={setFavorites} />
-      </TaskSelectionProvider>
+      <TaskManager>
+        <TaskSelectionProvider>
+          <TimerSection favorites={favorites} setFavorites={setFavorites} />
+        </TaskSelectionProvider>
+      </TaskManager>
     </div>
   );
 }
