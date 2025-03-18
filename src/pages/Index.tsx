@@ -338,19 +338,7 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Footer */}
-        <footer className="text-center mt-16 mb-8">
-          <Button 
-            asChild 
-            variant="outline" 
-            className="bg-card/80 backdrop-blur-sm rounded-full px-6 shadow-glass border-primary/20 hover:bg-primary/10 button-scale"
-          >
-            <Link to="/tasks" className="flex items-center gap-2">
-              Start Organizing Your Tasks
-              <ArrowRight className="h-4 w-4 arrow-slide-right" />
-            </Link>
-          </Button>
-        </footer>
+        {/* Footer section has been removed as requested */}
       </div>
     </div>
   );
