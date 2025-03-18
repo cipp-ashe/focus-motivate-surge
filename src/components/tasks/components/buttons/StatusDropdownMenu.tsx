@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Task, TaskStatus } from "@/types/tasks";
 import { Button } from "@/components/ui/button";
@@ -99,13 +100,22 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
           // For regular dismissal, don't suppress events - let the system handle it
           updateTaskOperations.updateTask(task.id, { 
             status: 'dismissed', 
-            dismissedAt: new Date().toISOString() 
+            dismissedAt: new Date().toISOString(),
+            suppressToast: false  // Make sure this is not suppressed
           });
         }
       } else {
-        // For other statuses, don't suppress events - let the system handle it
-        updateTaskOperations.updateTask(task.id, { status: newStatus });
+        // For other statuses, use updateTask without suppressing events
+        updateTaskOperations.updateTask(task.id, { 
+          status: newStatus,
+          suppressToast: false  // Make sure this is not suppressed
+        });
       }
+      
+      // Dispatch custom event to refresh the UI
+      window.dispatchEvent(new CustomEvent('task-ui-refresh', { 
+        detail: { action: 'update', taskId: task.id, status: newStatus } 
+      }));
       
       toast.success(`Task status updated to ${getStatusInfo(newStatus).label}`);
     } catch (error) {

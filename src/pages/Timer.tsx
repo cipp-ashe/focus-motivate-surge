@@ -91,6 +91,20 @@ export default function TimerPage() {
 // Timer Tasks Panel component
 function TimerTasksPanel() {
   const taskContext = useTaskContext();
+  const [forceUpdate, setForceUpdate] = useState(0);
+  
+  // Listen for task status updates
+  useEffect(() => {
+    const handleTaskUpdate = (event: CustomEvent) => {
+      // Force refresh list when tasks are updated
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    window.addEventListener('task-ui-refresh', handleTaskUpdate as EventListener);
+    return () => {
+      window.removeEventListener('task-ui-refresh', handleTaskUpdate as EventListener);
+    };
+  }, []);
   
   const handleTaskAdd = (task: any) => {
     if (taskContext?.addTask) {
@@ -109,6 +123,7 @@ function TimerTasksPanel() {
   return (
     <div className="h-full flex flex-col">
       <TimerView 
+        key={`timer-view-${forceUpdate}`} // Force re-render when tasks are updated
         tasks={taskContext?.items || []} 
         selectedTaskId={taskContext?.selected || null}
         onTaskAdd={handleTaskAdd}
@@ -121,7 +136,21 @@ function TimerTasksPanel() {
 // Recent Sessions List Component - Shows actual completed timer tasks
 function RecentSessionsList() {
   const taskContext = useTaskContext();
+  const [forceUpdate, setForceUpdate] = useState(0);
   const completedTasks = taskContext?.completed || [];
+  
+  // Listen for task completion events
+  useEffect(() => {
+    const handleTaskComplete = () => {
+      // Force refresh list when tasks are completed
+      setForceUpdate(prev => prev + 1);
+    };
+    
+    window.addEventListener('task-ui-refresh', handleTaskComplete as EventListener);
+    return () => {
+      window.removeEventListener('task-ui-refresh', handleTaskComplete as EventListener);
+    };
+  }, []);
   
   // Filter to only get timer type tasks
   const completedTimerTasks = completedTasks.filter(
