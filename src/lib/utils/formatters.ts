@@ -1,114 +1,51 @@
 
-/**
- * Formats a number of seconds into a display string (MM:SS)
- */
-export const formatTime = (timeInSeconds: number): string => {
-  const minutes = Math.floor(timeInSeconds / 60);
-  const seconds = timeInSeconds % 60;
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-};
+import { calculateEfficiencyRatio, determineCompletionStatus } from '@/utils/timeUtils';
 
 /**
- * Calculates efficiency ratio based on expected vs actual time
+ * Format seconds into a human-readable time string
+ * @param seconds Number of seconds to format
+ * @returns Formatted time string (HH:MM:SS or MM:SS)
  */
-export const calculateEfficiencyRatio = (
-  expectedSeconds: number, 
-  actualSeconds: number
-): number => {
-  if (expectedSeconds <= 0) return 1;
+export const formatTimeDisplay = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) return '00:00';
   
-  // Cap efficiency at reasonable limits
-  const ratio = expectedSeconds / Math.max(1, actualSeconds);
-  return Math.min(Math.max(ratio, 0.1), 2);
-};
-
-/**
- * Determines a qualitative completion status based on efficiency
- */
-export const determineCompletionStatus = (
-  expectedSeconds: number,
-  actualSeconds: number
-): 'Completed Early' | 'Completed On Time' | 'Completed Late' => {
-  if (expectedSeconds <= 0) return 'Completed On Time';
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
   
-  const efficiency = calculateEfficiencyRatio(expectedSeconds, actualSeconds);
-  
-  if (efficiency >= 1.5) return 'Completed Early';
-  if (efficiency >= 0.8) return 'Completed On Time';
-  return 'Completed Late';
-};
-
-/**
- * Formats a duration in seconds to a human-readable string
- */
-export const formatDuration = (durationInSeconds: number): string => {
-  if (durationInSeconds < 60) {
-    return `${durationInSeconds} seconds`;
+  // Format with or without hours
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
   
-  const minutes = Math.floor(durationInSeconds / 60);
-  if (minutes < 60) {
-    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
-  }
-  
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  
-  if (remainingMinutes === 0) {
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  }
-  
-  return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}`;
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
 /**
- * Formats a value as a percentage (adds % sign)
+ * Format a date to a readable string
+ * @param date Date string or Date object
+ * @param showTime Whether to include time
+ * @returns Formatted date string
  */
-export const formatPercentage = (value: number): string => {
-  const percentage = Math.round(value * 100);
-  return `${percentage}%`;
-};
-
-/**
- * Formats a timestamp to a more readable string
- */
-export const formatTimestamp = (timestamp: string | Date): string => {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+export const formatDateDisplay = (date: string | Date, showTime: boolean = true): string => {
+  if (!date) return 'N/A';
   
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
     month: 'short',
     day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
-};
-
-/**
- * Formats a date based on the current locale
- */
-export const formatDateLocalized = (date: Date | string, options?: Intl.DateTimeFormatOptions): string => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+    year: 'numeric',
+  };
+  
+  if (showTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+  }
+  
   return dateObj.toLocaleDateString(undefined, options);
 };
 
-/**
- * Returns a CSS class based on completion status
- */
-export const getCompletionTimingClass = (status: string): string => {
-  if (status.includes('Early')) return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200/30';
-  if (status.includes('On Time')) return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/30';
-  if (status.includes('Late')) return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/30';
-  return 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-200/30';
-};
-
-/**
- * Alias for calculating efficiency ratio as a percentage
- */
-export const calculateEfficiencyPercentage = (
-  expectedSeconds: number, 
-  actualSeconds: number
-): number => {
-  return calculateEfficiencyRatio(expectedSeconds, actualSeconds) * 100;
-};
+// Re-export these functions to avoid import duplication
+export { calculateEfficiencyRatio, determineCompletionStatus };

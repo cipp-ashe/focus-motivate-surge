@@ -1,19 +1,11 @@
 
-export type QuoteCategory = 
-  | 'motivation' 
-  | 'focus' 
-  | 'creativity' 
-  | 'learning' 
-  | 'persistence' 
-  | 'growth'
-  | 'gratitude'
-  | 'mindfulness'
-  | 'reflection';
+// Types for quotes used in the timer
+export type QuoteCategory = 'motivation' | 'focus' | 'productivity' | 'success' | 'general';
 
 export interface Quote {
+  id: string;
   text: string;
   author: string;
-  categories: QuoteCategory[];
-  timestamp?: string;
-  task?: string;
+  category: QuoteCategory;
+  isFavorite?: boolean;
 }
