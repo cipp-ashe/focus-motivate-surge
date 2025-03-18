@@ -123,29 +123,18 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime
   });
 
-  // Set up timer monitoring
+  // Set up timer monitoring - Fix: pass required parameters
   useTimerMonitoring({
-    isRunning,
-    timeLeft,
-    setIsRunning,
+    taskName,
     updateTimeLeft,
-    metrics,
-    updateMetrics,
-    isMountedRef
+    handleComplete: timerHandlers.handleComplete
   });
 
-  // Set up timer event listeners
-  useTimerEvents({
-    expandedViewRef,
-    isExpanded,
-    setIsExpanded,
-    internalMinutes,
-    setInternalMinutes,
-    onDurationChange,
-    updateMetrics
-  });
+  // Set up timer event listeners - Fix: pass all required arguments
+  useTimerEvents(taskName, duration);
 
   // Handle auto-complete function
+  // Fix: Return the function directly instead of an object
   const autoComplete = useTimerAutoComplete({
     isRunning,
     pause: pauseTimer,
