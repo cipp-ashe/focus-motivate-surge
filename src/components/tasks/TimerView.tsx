@@ -8,8 +8,9 @@ import { TaskIcon } from './components/TaskIcon';
 import { StatusDropdownMenu } from './components/buttons/StatusDropdownMenu';
 import { Input } from '@/components/ui/input';
 import { Clock } from 'lucide-react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 
 interface TimerViewProps {
   tasks: Task[];
@@ -19,15 +20,43 @@ interface TimerViewProps {
 }
 
 export const TimerView: React.FC<TimerViewProps> = ({ 
-  tasks, 
+  tasks: propTasks, 
   selectedTaskId, 
   onTaskAdd, 
   onTasksAdd
 }) => {
-  // Include both timer and focus tasks
-  const timerTasks = tasks.filter(task => 
-    task.taskType === 'timer' || task.taskType === 'focus'
-  );
+  // Use the task context to ensure we always have the latest tasks
+  const taskContext = useTaskContext();
+  const [localTasks, setLocalTasks] = useState<Task[]>(propTasks);
+  
+  // Update local tasks whenever tasks change in props or context
+  useEffect(() => {
+    const allTasks = taskContext?.items || propTasks || [];
+    
+    // Include both timer and focus tasks
+    const timerTasks = allTasks.filter(task => 
+      task.taskType === 'timer' || task.taskType === 'focus'
+    );
+    
+    setLocalTasks(timerTasks);
+    
+    // Also listen for task updates/additions
+    const handleTaskUpdate = () => {
+      const updatedTasks = taskContext?.items || [];
+      const updatedTimerTasks = updatedTasks.filter(task => 
+        task.taskType === 'timer' || task.taskType === 'focus'
+      );
+      setLocalTasks(updatedTimerTasks);
+    };
+    
+    window.addEventListener('task-ui-refresh', handleTaskUpdate);
+    window.addEventListener('force-task-update', handleTaskUpdate);
+    
+    return () => {
+      window.removeEventListener('task-ui-refresh', handleTaskUpdate);
+      window.removeEventListener('force-task-update', handleTaskUpdate);
+    };
+  }, [propTasks, taskContext?.items]);
   
   // State for duration input
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
@@ -35,8 +64,14 @@ export const TimerView: React.FC<TimerViewProps> = ({
   
   const handleTaskSelect = (task: Task) => {
     console.log("TimerView: Selected task", task.id, "of type", task.taskType);
-    eventBus.emit('task:select', task.id);
-    eventBus.emit('timer:set-task', task);
+    
+    // Use eventManager directly instead of eventBus
+    eventManager.emit('task:select', task.id);
+    eventManager.emit('timer:set-task', task);
+    
+    // Also dispatch window event for backward compatibility
+    window.dispatchEvent(new CustomEvent('timer:set-task', { detail: task }));
+    
     toast.success(`Selected timer task: ${task.name}`);
   };
   
@@ -69,7 +104,8 @@ export const TimerView: React.FC<TimerViewProps> = ({
       // Convert minutes to seconds and update task
       const durationInSeconds = finalValue * 60;
       
-      eventBus.emit('task:update', {
+      // Use eventManager instead of eventBus
+      eventManager.emit('task:update', {
         taskId,
         updates: { duration: durationInSeconds }
       });
@@ -101,6 +137,9 @@ export const TimerView: React.FC<TimerViewProps> = ({
     // Otherwise calculate from the task itself
     return Math.round((task.duration || 1500) / 60).toString();
   };
+  
+  // Make sure we're using the local tasks instead of the filtered prop tasks
+  const timerTasks = localTasks;
   
   return (
     <div className="flex flex-col h-full">

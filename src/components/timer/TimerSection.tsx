@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Timer } from './Timer';
 import { EmptyTimerState } from './EmptyTimerState';
@@ -6,6 +7,7 @@ import { Quote } from '@/types/timer';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { useEvent } from '@/hooks/useEvent';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 
 interface TimerSectionProps {
   favorites: Quote[];
@@ -18,6 +20,18 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
 }) => {
   const { selectedTask, selectTask, clearSelectedTask } = useTaskSelection();
   const [selectedTaskState, setSelectedTaskState] = useState(selectedTask);
+  const taskContext = useTaskContext();
+  
+  // Check for selected task in tasks context if not already selected
+  useEffect(() => {
+    if (!selectedTask && taskContext?.selected) {
+      const selectedTaskFromContext = taskContext.items.find(task => task.id === taskContext.selected);
+      if (selectedTaskFromContext) {
+        console.log("TimerSection: Found selected task in context:", selectedTaskFromContext.name);
+        selectTask(selectedTaskFromContext);
+      }
+    }
+  }, [taskContext?.selected, taskContext?.items, selectedTask, selectTask]);
   
   // Update local state when selectedTask changes
   useEffect(() => {
@@ -37,7 +51,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
     }
   });
   
-  // Listen for timer:set-task events from window API
+  // Listen for timer:set-task events from window and event manager
   useEffect(() => {
     const handleSetTask = (event: CustomEvent) => {
       const task = event.detail;
@@ -58,11 +72,20 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
       }
     };
     
-    // Add event listener
+    // Add event listener for window events
     window.addEventListener('timer:set-task', handleSetTask as EventListener);
+    
+    // Also listen with event manager
+    const unsubscribe = eventManager.on('timer:set-task', (task) => {
+      console.log('TimerSection: Received timer:set-task from eventManager', task);
+      if (task && task.id) {
+        selectTask(task);
+      }
+    });
     
     return () => {
       window.removeEventListener('timer:set-task', handleSetTask as EventListener);
+      unsubscribe();
     };
   }, [selectTask]);
   
