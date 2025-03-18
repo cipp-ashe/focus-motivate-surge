@@ -20,6 +20,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DashboardCardGrid from '@/components/dashboard/DashboardCardGrid';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -34,7 +35,7 @@ const Index = () => {
       
       {/* Main feature cards - preserving original functionality */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
-        {/* Tasks section with prominent Timer and Screenshots buttons */}
+        {/* Tasks section with direct action links */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-primary/20 p-2 md:p-3 rounded-full">
@@ -49,31 +50,30 @@ const Index = () => {
             Manage your daily tasks with optional timers, checklists, and more.
           </p>
           
-          {/* Highlighted Timer and Screenshots buttons */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-600 dark:text-blue-400">
               <Link to="/timer">
                 <Timer className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">Timer</span>
+                <span className="text-xs md:text-sm font-medium">View Timer</span>
               </Link>
             </Button>
             
             <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-blue-400/10 hover:bg-blue-400/20 border-blue-400/30 text-blue-500 dark:text-blue-300">
               <Link to="/screenshots">
                 <Image className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">Screenshots</span>
+                <span className="text-xs md:text-sm font-medium">View Screenshots</span>
               </Link>
             </Button>
           </div>
           
           <Button asChild variant="default" size="sm" className="w-full rounded-md bg-primary/90 hover:bg-primary">
             <Link to="/tasks" className="flex items-center justify-center">
-              View All Tasks <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              All Tasks <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Link>
           </Button>
         </div>
         
-        {/* Notes section */}
+        {/* Notes section - simplified with direct links */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-[#9b87f5]/20 p-2 md:p-3 rounded-full">
@@ -87,50 +87,77 @@ const Index = () => {
           <p className="text-muted-foreground text-sm md:text-base mb-4 flex-grow">
             Record written notes or voice memos for your ideas and thoughts.
           </p>
-          <div className="grid grid-cols-2 gap-2 mt-auto">
-            <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 border-[#9b87f5]/30 text-[#9b87f5]">
               <Link to="/notes">
-                <BookOpen className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Journal
+                <BookOpen className="h-5 w-5 md:h-6 md:w-6 mb-1" />
+                <span className="text-xs md:text-sm font-medium">All Notes</span>
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
+            
+            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-rose-400/10 hover:bg-rose-400/20 border-rose-400/30 text-rose-500">
               <Link to="/voice-notes">
-                <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Voice Notes
+                <Mic className="h-5 w-5 md:h-6 md:w-6 mb-1" />
+                <span className="text-xs md:text-sm font-medium">Voice Notes</span>
               </Link>
             </Button>
           </div>
+          
+          <Button asChild variant="default" size="sm" className="w-full rounded-md bg-[#9b87f5]/90 hover:bg-[#9b87f5]">
+            <Link to="/notes" className="flex items-center justify-center">
+              Browse Notes <ArrowRight className="h-3.5 w-3.5 ml-1" />
+            </Link>
+          </Button>
         </div>
         
-        {/* Configuration section (Habits & Settings combined) */}
+        {/* Habits feature component - highlighting automation */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-amber-400/20 p-2 md:p-3 rounded-full">
-              <Settings className="w-5 h-5 md:w-6 md:h-6 text-amber-500" aria-hidden="true" />
+              <Activity className="w-5 h-5 md:w-6 md:h-6 text-amber-500" aria-hidden="true" />
             </div>
             <Button asChild variant="ghost" size="sm" className="text-amber-500 hover:text-amber-500/80 hover:bg-amber-500/10 px-2 py-1 text-sm">
-              <Link to="/habits">View Config</Link>
+              <Link to="/habits">Configure</Link>
             </Button>
           </div>
-          <h2 className="text-lg md:text-xl font-semibold mb-2">Configuration</h2>
-          <p className="text-muted-foreground text-sm md:text-base mb-4 flex-grow">
-            Customize your habits and preferences to optimize your workflow.
+          <h2 className="text-lg md:text-xl font-semibold mb-2">Habit Automation</h2>
+          <p className="text-muted-foreground text-sm md:text-base mb-4">
+            Automate your task list with habit templates. Create recurring tasks that appear automatically.
           </p>
-          <div className="grid grid-cols-2 gap-2 mt-auto">
-            <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
+          
+          {/* Sample habit task visual */}
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-3 mb-3 border border-dashed border-amber-300 flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full bg-green-400/30 flex items-center justify-center">
+              <Activity className="h-2.5 w-2.5 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <div className="text-xs font-medium">Morning Meditation</div>
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded-sm text-[10px]">habit</span>
+                <span>Auto-generated daily</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-amber-400/10 hover:bg-amber-400/20 border-amber-400/30 text-amber-600">
               <Link to="/habits">
-                <Activity className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Habits
+                <Activity className="h-5 w-5 md:h-6 md:w-6 mb-1" />
+                <span className="text-xs md:text-sm font-medium">Habits</span>
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="flex items-center gap-1 bg-background/50 text-xs md:text-sm">
+            
+            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-gray-400/10 hover:bg-gray-400/20 border-gray-400/30 text-gray-500">
               <Link to="/settings">
-                <Settings className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Settings
+                <Settings className="h-5 w-5 md:h-6 md:w-6 mb-1" />
+                <span className="text-xs md:text-sm font-medium">Settings</span>
               </Link>
             </Button>
           </div>
         </div>
       </div>
       
-      {/* Info section about local storage - helping users understand persistence */}
+      {/* Info section about local storage with call to action for cross-device access */}
       <div className="mb-6">
         <div className="glass-card p-4 md:p-5">
           <div className="flex flex-col md:flex-row items-center gap-4">
@@ -140,7 +167,7 @@ const Index = () => {
             <div className="flex-1 text-center md:text-left">
               <h3 className="text-lg font-semibold mb-2">Your Data is Stored Locally</h3>
               <p className="text-muted-foreground text-sm mb-3">
-                TaskTimer saves your data to your browser's local storage. Visit the settings page to export your data or adjust preferences.
+                TaskTimer saves your data to your browser's local storage. For access across multiple devices, register with a magic link on the settings page.
               </p>
               <Button asChild variant="outline" size="sm" className="rounded-full border-primary/20 hover:bg-primary/10">
                 <Link to="/settings" className="flex items-center gap-1">
@@ -152,7 +179,7 @@ const Index = () => {
         </div>
       </div>
       
-      {/* More compact quick access section */}
+      {/* Compact quick access section */}
       <div className="mb-8">
         <h3 className="text-md md:text-lg font-medium mb-3 flex items-center">
           <Clock className="w-4 h-4 mr-2 text-primary/70" />
