@@ -58,15 +58,28 @@ export const useTimerCore = (duration: number, taskName: string) => {
   const testSound = () => {
     logger.debug('TimerAudio', `Testing sound: ${selectedSound}`);
     setIsLoadingAudio(true);
-    // Simulate sound playing
+    // Play the actual sound
+    playSound();
+    // Reset loading state after a short delay
     setTimeout(() => {
       setIsLoadingAudio(false);
     }, 500);
   };
   
   const playSound = () => {
+    if (selectedSound === 'none') return;
+    
     logger.debug('TimerAudio', `Playing completion sound: ${selectedSound}`);
-    // Play sound implementation
+    try {
+      // Create an audio element and play the selected sound
+      const audio = new Audio(`/sounds/${selectedSound}.mp3`);
+      audio.volume = 0.7;
+      audio.play().catch(error => {
+        console.error('Error playing sound:', error);
+      });
+    } catch (error) {
+      console.error('Error creating audio element:', error);
+    }
   };
 
   return {
