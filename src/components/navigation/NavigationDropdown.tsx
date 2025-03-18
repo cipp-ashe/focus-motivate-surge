@@ -39,6 +39,14 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
   position = 'top',
   className
 }) => {
+  // Add a handler to close the dropdown when an item is clicked
+  const handleItemClick = (onToggle: () => void) => {
+    // Close the dropdown by calling onToggle if it's open
+    if (isOpen) {
+      setTimeout(() => onToggle(), 50);
+    }
+  };
+
   return (
     <div className="relative">
       <Collapsible open={isOpen}>
@@ -68,6 +76,7 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
                   "flex items-center space-x-2 px-3 py-2 rounded-md transition-colors",
                   isActiveItem(item.path) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
+                onClick={() => handleItemClick(onToggle)}
               >
                 <item.icon className="h-4 w-4" />
                 <span className="text-sm">{item.label}</span>

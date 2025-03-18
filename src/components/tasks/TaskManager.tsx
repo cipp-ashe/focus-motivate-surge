@@ -6,6 +6,7 @@ import { TaskEventHandler } from './TaskEventHandler';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
+import { taskStorage } from '@/lib/storage/taskStorage';
 
 interface TaskManagerProps {
   isTimerView?: boolean;
@@ -32,40 +33,63 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   const handleTaskAdd = useCallback((task: Task) => {
     console.log("TaskManager: Adding task", task);
     if (addTask) {
+      // Ensure the task has an appropriate taskType based on the current view
+      if (isTimerView && !task.taskType) {
+        task.taskType = 'timer';
+      }
+      
       addTask(task);
       
-      // Emit via event manager (removed eventBus.emit)
+      // Emit via event manager
       eventManager.emit('task:create', task);
+      
+      // Force a global task state update to ensure all views are updated
+      window.dispatchEvent(new Event('force-task-update'));
       
       toast.success(`Task added: ${task.name}`);
     } else {
       console.error("TaskManager: addTask function is undefined");
       toast.error("Failed to add task: Application error");
     }
-  }, [addTask]);
+  }, [addTask, isTimerView]);
   
   const handleTasksAdd = useCallback((tasks: Task[]) => {
     console.log("TaskManager: Adding multiple tasks", tasks);
     if (addTask) {
       tasks.forEach(task => {
+        // Ensure the task has an appropriate taskType based on the current view
+        if (isTimerView && !task.taskType) {
+          task.taskType = 'timer';
+        }
+        
         addTask(task);
         
-        // Emit via event manager (removed eventBus.emit)
+        // Emit via event manager
         eventManager.emit('task:create', task);
       });
+      
+      // Force a global task state update
+      window.dispatchEvent(new Event('force-task-update'));
       
       toast.success(`Added ${tasks.length} tasks`);
     } else {
       console.error("TaskManager: addTask function is undefined");
       toast.error("Failed to add tasks: Application error");
     }
-  }, [addTask]);
+  }, [addTask, isTimerView]);
   
   // Force refresh handler to be passed to event handler
   const forceUpdate = useCallback(() => {
     console.log("TaskManager: Force update called - triggering UI refresh");
     setForceUpdateCounter(prev => prev + 1);
-  }, []);
+    
+    // Also verify tasks from storage to ensure consistency
+    const storedTasks = taskStorage.loadTasks();
+    if (storedTasks.length > 0 && (!items || items.length < storedTasks.length)) {
+      console.log("TaskManager: Found missing tasks in memory, refreshing from storage");
+      eventManager.emit('task:reload', {});
+    }
+  }, [items]);
   
   // Set up refresh on UI refresh events
   useEffect(() => {
@@ -88,7 +112,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
     };
   }, [forceUpdate]);
   
-  // Special handling for timer view
+  // Special handling for timer view - ensure proper task filtering based on task type
   useEffect(() => {
     if (isTimerView) {
       console.log("TaskManager (Timer View): Setting up special timer task handlers");
@@ -96,7 +120,18 @@ const TaskManager: React.FC<TaskManagerProps> = ({
       // This will ensure timer-related tasks are properly displayed
       const refreshTimerTasks = () => {
         console.log("TaskManager (Timer View): Refreshing timer tasks");
-        forceUpdate();
+        
+        // Check if we need to reload tasks from storage
+        const storedTasks = taskStorage.loadTasks();
+        const timerTasks = storedTasks.filter(task => 
+          task.taskType === 'timer' || task.taskType === 'focus'
+        );
+        
+        if (timerTasks.length > 0) {
+          console.log(`TaskManager (Timer View): Found ${timerTasks.length} timer tasks in storage`);
+          // Force update to refresh the UI
+          forceUpdate();
+        }
       };
       
       // Use only eventManager instead of both systems

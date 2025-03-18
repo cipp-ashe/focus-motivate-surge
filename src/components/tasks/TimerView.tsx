@@ -11,6 +11,7 @@ import { Clock } from 'lucide-react';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { taskStorage } from '@/lib/storage/taskStorage';
 
 interface TimerViewProps {
   tasks: Task[];
@@ -27,36 +28,58 @@ export const TimerView: React.FC<TimerViewProps> = ({
 }) => {
   // Use the task context to ensure we always have the latest tasks
   const taskContext = useTaskContext();
-  const [localTasks, setLocalTasks] = useState<Task[]>(propTasks);
+  const [localTasks, setLocalTasks] = useState<Task[]>([]);
   
-  // Update local tasks whenever tasks change in props or context
+  // Load tasks initially, including from storage to ensure we don't miss any
   useEffect(() => {
-    const allTasks = taskContext?.items || propTasks || [];
-    
-    // Include both timer and focus tasks
-    const timerTasks = allTasks.filter(task => 
-      task.taskType === 'timer' || task.taskType === 'focus'
-    );
-    
-    setLocalTasks(timerTasks);
-    
-    // Also listen for task updates/additions
-    const handleTaskUpdate = () => {
-      const updatedTasks = taskContext?.items || [];
-      const updatedTimerTasks = updatedTasks.filter(task => 
+    const loadTasks = () => {
+      // Get tasks from context first
+      const contextTasks = taskContext?.items || [];
+      
+      // Also check storage to ensure we have all tasks
+      const storedTasks = taskStorage.loadTasks();
+      
+      // Create a merged set of tasks, prioritizing context tasks but including any from storage
+      // that might be missing from context
+      const mergedTasks = [...contextTasks];
+      
+      // Add any stored tasks that aren't already in the context
+      storedTasks.forEach(storedTask => {
+        if (!contextTasks.some(t => t.id === storedTask.id)) {
+          mergedTasks.push(storedTask);
+        }
+      });
+      
+      // Filter to only timer and focus tasks
+      const filteredTasks = mergedTasks.filter(task => 
         task.taskType === 'timer' || task.taskType === 'focus'
       );
-      setLocalTasks(updatedTimerTasks);
+      
+      console.log(`TimerView: Loaded ${filteredTasks.length} timer/focus tasks`);
+      setLocalTasks(filteredTasks);
     };
     
+    // Load tasks immediately
+    loadTasks();
+    
+    // Set up refresh handlers
+    const handleTaskUpdate = () => {
+      loadTasks();
+    };
+    
+    // Listen for updates
     window.addEventListener('task-ui-refresh', handleTaskUpdate);
     window.addEventListener('force-task-update', handleTaskUpdate);
+    
+    // Also listen for the tasksUpdated event from taskStorage
+    window.addEventListener('tasksUpdated', handleTaskUpdate);
     
     return () => {
       window.removeEventListener('task-ui-refresh', handleTaskUpdate);
       window.removeEventListener('force-task-update', handleTaskUpdate);
+      window.removeEventListener('tasksUpdated', handleTaskUpdate);
     };
-  }, [propTasks, taskContext?.items]);
+  }, [taskContext?.items, propTasks]);
   
   // State for duration input
   const [editingDuration, setEditingDuration] = useState<string | null>(null);
@@ -145,20 +168,40 @@ export const TimerView: React.FC<TimerViewProps> = ({
     <div className="flex flex-col h-full">
       <div className="p-4 border-b">
         <TaskInput 
-          onTaskAdd={onTaskAdd} 
-          onTasksAdd={onTasksAdd}
+          onTaskAdd={(task) => {
+            // Ensure the task is marked as a timer task
+            const timerTask = {
+              ...task,
+              taskType: task.taskType || 'timer'
+            };
+            onTaskAdd(timerTask);
+            
+            // Update local state immediately
+            setLocalTasks(prev => [timerTask, ...prev]);
+          }} 
+          onTasksAdd={(tasks) => {
+            // Ensure all tasks are marked as timer tasks
+            const timerTasks = tasks.map(task => ({
+              ...task,
+              taskType: task.taskType || 'timer'
+            }));
+            onTasksAdd(timerTasks);
+            
+            // Update local state immediately
+            setLocalTasks(prev => [...timerTasks, ...prev]);
+          }}
           defaultTaskType="timer"
         />
       </div>
       
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-2">
-          {timerTasks.length === 0 ? (
+          {localTasks.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground border border-dashed rounded-lg">
               No timer or focus tasks found. Add a timer or focus task to get started.
             </div>
           ) : (
-            timerTasks.map((task) => (
+            localTasks.map((task) => (
               <Card 
                 key={task.id}
                 className={`cursor-pointer transition-all duration-200 ${
