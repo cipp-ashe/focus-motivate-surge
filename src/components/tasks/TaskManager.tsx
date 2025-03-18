@@ -28,7 +28,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   hasTasks = false,
   dialogOpeners
 }) => {
-  const { items, selected } = useTaskContext();
+  const { items, selected, completeTask } = useTaskContext();
   const [loading, setLoading] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -66,13 +66,35 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   
   const handleComplete = useCallback((taskId: string, metrics?: any) => {
     console.log(`TaskManager: Completing task ${taskId}`);
-    if (taskContext && taskContext.completeTask) {
-      taskContext.completeTask(taskId, metrics);
+    if (completeTask) {
+      completeTask(taskId, metrics);
     }
-  }, []);
+  }, [completeTask]);
   
   const handleForceUpdate = () => {
     setForceUpdate(prev => prev + 1);
+  };
+
+  // Wrapper functions to adapt to the expected parameter format for event handlers
+  const handleTaskUpdateWrapper = (data: { taskId: string; updates: Partial<Task> }) => {
+    console.log('TaskManager: Handling task update wrapper', data);
+    if (updateTask) {
+      updateTask(data.taskId, data.updates);
+    }
+  };
+
+  const handleTaskDeleteWrapper = (data: { taskId: string }) => {
+    console.log('TaskManager: Handling task delete wrapper', data);
+    if (deleteTask) {
+      deleteTask(data.taskId);
+    }
+  };
+
+  const handleTaskCompleteWrapper = (data: { taskId: string; metrics?: any }) => {
+    console.log('TaskManager: Handling task complete wrapper', data);
+    if (completeTask) {
+      completeTask(data.taskId, data.metrics);
+    }
   };
 
   return (
@@ -84,15 +106,20 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       <TaskList
         tasks={filteredTasks}
         selectedTaskId={selected}
-        onTaskAction={handleAction}
-        onTaskUpdate={updateTask}
-        onTaskDelete={deleteTask}
+        handleTaskSelect={handleTaskSelect}
+        handleDelete={handleTaskDeleteWrapper}
+        handleTaskUpdate={handleTaskUpdateWrapper}
         onForceUpdate={handleForceUpdate}
-        onTaskComplete={handleComplete}
+        handleTaskComplete={handleTaskCompleteWrapper}
         isLoading={loading}
         loadingCount={3}
         emptyState={<div>No tasks found. Create your first task!</div>}
-        dialogOpeners={dialogOpeners}
+        dialogOpeners={dialogOpeners || {
+          checklist: undefined,
+          journal: undefined,
+          screenshot: undefined,
+          voicenote: undefined
+        }}
         taskCountInfo={{
           total: items.length,
           completed: items.filter(t => t.completed).length
@@ -102,9 +129,9 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       <TaskEventHandler
         onForceUpdate={handleForceUpdate}
         onTaskCreate={createTask}
-        onTaskUpdate={updateTask}
-        onTaskDelete={deleteTask}
-        onTaskComplete={handleComplete}
+        onTaskUpdate={handleTaskUpdateWrapper}
+        onTaskDelete={handleTaskDeleteWrapper}
+        onTaskComplete={handleTaskCompleteWrapper}
         tasks={filteredTasks}
       />
     </div>

@@ -18,6 +18,8 @@ export interface TaskItemProps {
     screenshot?: ((imageUrl: string, taskName: string) => void);
     voicenote?: ((taskId: string, taskName: string) => void);
   };
+  onSelect?: () => void;
+  onDelete?: () => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -25,17 +27,23 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onOpenTaskDialog,
   isTimerView = false,
   isSelected = false,
-  dialogOpeners
+  dialogOpeners,
+  onSelect,
+  onDelete
 }) => {
   const { selectTask, selected } = useTaskContext();
   const [isHovered, setIsHovered] = useState(false);
-  const { handleTaskAction, handleDelete } = useTaskActionHandler(task, onOpenTaskDialog);
+  const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
   
   const taskIsSelected = isSelected || selected === task.id;
   
   const handleSelectTask = useCallback(() => {
-    selectTask(taskIsSelected ? null : task.id);
-  }, [selectTask, taskIsSelected, task.id]);
+    if (onSelect) {
+      onSelect();
+    } else {
+      selectTask(taskIsSelected ? null : task.id);
+    }
+  }, [selectTask, taskIsSelected, task.id, onSelect]);
   
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -43,9 +51,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       handleSelectTask();
     } else if (e.key === 'Delete') {
       e.preventDefault();
-      handleDelete(e);
+      if (onDelete) {
+        onDelete();
+      }
     }
-  }, [handleSelectTask, handleDelete]);
+  }, [handleSelectTask, onDelete]);
+  
+  const handleDeleteClick = useCallback(() => {
+    if (onDelete) {
+      onDelete();
+    }
+  }, [onDelete]);
   
   return (
     <div
@@ -75,7 +91,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         task={task}
         isHovered={isHovered}
         isSelected={taskIsSelected}
-        handleDelete={handleDelete}
+        handleDelete={handleDeleteClick}
         handleTaskAction={handleTaskAction}
       />
     </div>

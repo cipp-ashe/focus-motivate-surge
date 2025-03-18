@@ -7,50 +7,40 @@ import { eventBus } from '@/lib/eventBus';
 interface TaskListProps {
   tasks: Task[];
   selectedTaskId?: string | null;
+  handleTaskSelect: (taskId: string) => void;
+  handleDelete: (data: { taskId: string }) => void;
+  handleTaskUpdate: (data: { taskId: string; updates: Partial<Task> }) => void;
+  handleTaskComplete: (data: { taskId: string; metrics?: any }) => void;
+  onForceUpdate?: () => void;
+  isLoading?: boolean;
+  loadingCount?: number;
+  emptyState?: React.ReactNode;
   dialogOpeners?: {
     checklist?: (taskId: string, taskName: string, items: any[]) => void;
     journal?: (taskId: string, taskName: string, entry: string) => void;
     screenshot?: (imageUrl: string, taskName: string) => void;
     voicenote?: (taskId: string, taskName: string) => void;
   };
-  onTaskAction?: (action: string, taskId: string) => void;
-  onTaskUpdate?: (data: { taskId: string; updates: Partial<Task> }) => void;
-  onTaskDelete?: (taskId: string) => void;
-  onForceUpdate?: () => void;
-  onTaskComplete?: (taskId: string, metrics?: any) => void;
-  isLoading?: boolean;
-  loadingCount?: number;
-  emptyState?: React.ReactNode;
   taskCountInfo?: any;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({ 
   tasks, 
   selectedTaskId,
+  handleTaskSelect,
+  handleDelete,
+  handleTaskUpdate,
+  handleTaskComplete,
+  onForceUpdate,
+  isLoading,
+  loadingCount,
+  emptyState,
   dialogOpeners,
-  onTaskAction,
-  onTaskUpdate,
-  onTaskDelete,
-  onTaskComplete,
-  emptyState
+  taskCountInfo
 }) => {
-  const handleTaskSelect = (taskId: string) => {
-    if (onTaskAction) {
-      onTaskAction('select', taskId);
-    } else {
-      eventBus.emit('task:select', taskId);
-    }
-  };
-
-  const handleTaskDelete = (taskId: string) => {
-    if (onTaskDelete) {
-      onTaskDelete(taskId);
-    }
-  };
-
-  const handleTaskAction = (e: React.MouseEvent<HTMLElement>, action?: string, taskId?: string) => {
-    if (taskId && action && onTaskAction) {
-      onTaskAction(action, taskId);
+  const deleteTaskHandler = (taskId: string) => {
+    if (handleDelete) {
+      handleDelete({ taskId });
     }
   };
 
@@ -67,7 +57,8 @@ export const TaskList: React.FC<TaskListProps> = ({
             task={task}
             isSelected={task.id === selectedTaskId}
             dialogOpeners={dialogOpeners}
-            onOpenTaskDialog={undefined}
+            onSelect={() => handleTaskSelect(task.id)}
+            onDelete={() => deleteTaskHandler(task.id)}
           />
         ))
       )}

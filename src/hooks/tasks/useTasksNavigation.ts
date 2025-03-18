@@ -11,7 +11,7 @@ export const useTasksNavigation = () => {
   }, []);
   
   const navigateToHabit = useCallback((habitId: string) => {
-    eventManager.emit('habit:select', habitId);
+    eventManager.emit('habit:select', { habitId });
   }, []);
   
   return {
