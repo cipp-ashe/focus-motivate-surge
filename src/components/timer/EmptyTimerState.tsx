@@ -19,33 +19,19 @@ export const EmptyTimerState = () => {
         Select a task from the list on the right to start a focus timer session.
       </p>
       
-      <div className="space-y-4 w-full max-w-md">
-        <Card className="bg-accent/5 border-primary/10">
-          <CardContent className="p-4">
-            <h3 className="font-medium flex items-center text-sm mb-2">
-              <ArrowRight className="h-4 w-4 mr-2 text-purple-500" />
-              Choose a task from the tasks tab
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Pick an existing task from your task list to focus on.
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-accent/5 border-primary/10">
-          <CardContent className="p-4">
-            <h3 className="font-medium flex items-center text-sm mb-2">
-              <ArrowRight className="h-4 w-4 mr-2 text-purple-500" />
-              Create a new timer task
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Add a new task directly from the tasks tab.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="bg-accent/5 border-primary/10 max-w-md w-full mb-4">
+        <CardContent className="p-4">
+          <div className="flex items-center mb-2">
+            <ArrowRight className="h-4 w-4 mr-2 text-purple-500 flex-shrink-0" />
+            <h3 className="font-medium text-sm">Choose a task from the Tasks tab</h3>
+          </div>
+          <p className="text-xs text-muted-foreground pl-6">
+            Select an existing timer task from the panel on the right.
+          </p>
+        </CardContent>
+      </Card>
       
-      <div className="mt-8">
+      <div className="mt-4">
         <Button 
           variant="outline" 
           className="border-purple-300 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30"
