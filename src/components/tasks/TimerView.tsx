@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Task } from '@/types/tasks';
+import { Task, Tag } from '@/types/tasks';
 import { TaskInput } from './TaskInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
@@ -56,7 +55,9 @@ export const TimerView: React.FC<TimerViewProps> = ({
         task.taskType === 'timer' || 
         task.taskType === 'focus' ||
         // Include tasks that are tagged with timer in their tags array
-        (task.tags && task.tags.includes('timer'))
+        (task.tags && task.tags.some(tag => 
+          typeof tag === 'object' && tag.name === 'timer'
+        ))
       );
       
       console.log(`TimerView: Loaded ${filteredTasks.length} timer/focus tasks`);
