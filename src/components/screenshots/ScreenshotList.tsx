@@ -4,6 +4,7 @@ import { Task } from "@/types/tasks";
 import { ScreenshotTask } from "./ScreenshotTask";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useIsMobile } from "@/hooks/ui/useIsMobile";
 
 interface ScreenshotListProps {
   tasks: Task[];
@@ -11,6 +12,7 @@ interface ScreenshotListProps {
 
 export const ScreenshotList: React.FC<ScreenshotListProps> = ({ tasks }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const isMobile = useIsMobile();
   
   const filteredTasks = tasks.filter(task => 
     task.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -31,11 +33,23 @@ export const ScreenshotList: React.FC<ScreenshotListProps> = ({ tasks }) => {
       </div>
       
       {filteredTasks.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-8 text-muted-foreground">
           <p>No screenshots found</p>
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm("")}
+              className="text-primary text-sm mt-2 underline underline-offset-2"
+            >
+              Clear search
+            </button>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className={`grid gap-4 ${
+          isMobile 
+            ? "grid-cols-1" 
+            : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+        }`}>
           {filteredTasks.map((task) => (
             <ScreenshotTask key={task.id} task={task} />
           ))}

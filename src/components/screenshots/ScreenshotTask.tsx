@@ -8,6 +8,7 @@ import { ScreenshotHeader } from "./components/ScreenshotHeader";
 import { ScreenshotContent } from "./components/ScreenshotContent";
 import { ScreenshotFooter } from "./components/ScreenshotFooter";
 import { extractImageMetadata } from "@/utils/imageUtils";
+import { useIsMobile } from "@/hooks/ui/useIsMobile";
 
 interface ScreenshotTaskProps {
   task: Task;
@@ -18,6 +19,14 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(task.name);
   const [editedDescription, setEditedDescription] = useState(task.description || "");
+  const isMobile = useIsMobile();
+
+  // On mobile, auto-expand the first screenshot if there's only one
+  useEffect(() => {
+    if (isMobile) {
+      setIsExpanded(true);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     // Extract and update image metadata if it doesn't exist
@@ -75,7 +84,7 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
   };
 
   return (
-    <Card className="overflow-hidden transition-all duration-200 h-full">
+    <Card className={`overflow-hidden transition-all duration-200 h-full ${isMobile ? 'shadow-sm' : 'shadow'}`}>
       <ScreenshotHeader 
         task={task}
         isEditing={isEditing}
@@ -83,6 +92,7 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
         editedDescription={editedDescription}
         setEditedName={setEditedName}
         setEditedDescription={setEditedDescription}
+        isMobile={isMobile}
       />
       
       <ScreenshotContent 
@@ -99,6 +109,7 @@ export const ScreenshotTask: React.FC<ScreenshotTaskProps> = ({ task }) => {
         onSave={handleSaveEdit}
         onCancel={handleCancelEdit}
         onDelete={handleDelete}
+        isMobile={isMobile}
       />
     </Card>
   );

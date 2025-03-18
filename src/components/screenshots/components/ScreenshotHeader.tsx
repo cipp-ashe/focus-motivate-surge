@@ -1,11 +1,7 @@
 
 import React from "react";
 import { Task } from "@/types/tasks";
-import {
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -16,6 +12,7 @@ interface ScreenshotHeaderProps {
   editedDescription: string;
   setEditedName: (name: string) => void;
   setEditedDescription: (description: string) => void;
+  isMobile?: boolean;
 }
 
 export const ScreenshotHeader: React.FC<ScreenshotHeaderProps> = ({
@@ -25,34 +22,37 @@ export const ScreenshotHeader: React.FC<ScreenshotHeaderProps> = ({
   editedDescription,
   setEditedName,
   setEditedDescription,
+  isMobile = false,
 }) => {
   return (
-    <CardHeader className="p-4 pb-0">
+    <CardHeader className={`p-4 pb-0 ${isMobile ? 'py-3 px-3' : ''}`}>
       {isEditing ? (
         <div className="space-y-2">
           <Input
             value={editedName}
             onChange={(e) => setEditedName(e.target.value)}
             placeholder="Screenshot name"
-            className="font-medium"
+            className="w-full h-9"
             autoFocus
           />
           <Textarea
             value={editedDescription}
             onChange={(e) => setEditedDescription(e.target.value)}
-            placeholder="Add a description"
-            className="min-h-[60px] text-sm"
+            placeholder="Add description (optional)"
+            className="resize-none min-h-[60px]"
           />
         </div>
       ) : (
-        <>
-          <CardTitle className="text-base font-medium line-clamp-1">
+        <div>
+          <h3 className={`font-semibold truncate ${isMobile ? 'text-base' : 'text-lg'}`}>
             {task.name}
-          </CardTitle>
-          <CardDescription className="line-clamp-1">
-            {task.description || "No description"}
-          </CardDescription>
-        </>
+          </h3>
+          {task.description && (
+            <p className={`text-muted-foreground line-clamp-2 ${isMobile ? 'text-xs mt-0.5' : 'text-sm mt-1'}`}>
+              {task.description}
+            </p>
+          )}
+        </div>
       )}
     </CardHeader>
   );
