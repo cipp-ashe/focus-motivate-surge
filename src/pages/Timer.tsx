@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { Quote } from '@/types/timer';
@@ -14,7 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { TimerMetricsDisplay } from '@/components/timer/TimerMetricsDisplay';
+import TimerMetricsDisplay from '@/components/timer/TimerMetricsDisplay';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
