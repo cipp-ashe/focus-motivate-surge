@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -52,12 +51,7 @@ const IndexAlternative = () => {
             <div className="flex flex-wrap gap-4 justify-center">
               <Button asChild size="lg" className="rounded-full px-8 shadow-glow button-glow">
                 <Link to="/tasks">
-                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full px-8 border-primary/20 bg-card/50 backdrop-blur-sm hover:bg-primary/10">
-                <Link to="/habits">
-                  Explore Habits <Activity className="ml-2 h-5 w-5" />
+                  Start Inputting Your Tasks <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
@@ -365,7 +359,7 @@ const IndexAlternative = () => {
             className="bg-card/80 backdrop-blur-sm rounded-full px-6 shadow-glass border-primary/20 hover:bg-primary/10 button-scale"
           >
             <Link to="/tasks" className="flex items-center gap-2">
-              Get Started
+              Start Organizing Your Tasks
               <ArrowRight className="h-4 w-4 arrow-slide-right" />
             </Link>
           </Button>
@@ -376,3 +370,4 @@ const IndexAlternative = () => {
 };
 
 export default IndexAlternative;
+
