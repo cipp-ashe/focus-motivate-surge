@@ -44,10 +44,10 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           "flex flex-col h-full",
           isMobile ? "p-4" : "p-5 sm:p-6"
         )}>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center mb-2">
             <div 
               className={cn(
-                "rounded-xl p-2.5 flex-shrink-0", 
+                "rounded-xl p-2.5 flex-shrink-0 mr-3", 
                 "bg-background/50 backdrop-blur-sm shadow-sm border border-border/20"
               )}
               aria-hidden="true"
