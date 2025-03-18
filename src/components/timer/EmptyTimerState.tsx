@@ -1,44 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Clock, Play, Timer } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { createTaskOperations } from '@/lib/operations/tasks/create';
-import { eventManager } from '@/lib/events/EventManager';
-import { toast } from 'sonner';
-import { MinutesInput } from '@/components/minutes/MinutesInput';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { useTimerModal } from '@/hooks/timer/useTimerModal';
 
 export const EmptyTimerState = () => {
-  const [taskName, setTaskName] = useState('');
-  const [minutes, setMinutes] = useState(25);
   const taskContext = useTaskContext();
+  const { openTimerModal } = useTimerModal();
   
   const handleStartInstantTimer = () => {
-    // If no task name is provided, use a default name
-    const name = taskName.trim() || `Quick Timer (${minutes} min)`;
-    
-    // Create a new timer task
-    const newTask = createTaskOperations.createTask({
-      name,
-      taskType: 'timer',
-      duration: minutes * 60,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      status: 'pending',
-      tags: []
-    }, {
-      suppressToast: true,
-      selectAfterCreate: true
-    });
-    
-    // Emit event to select and start the timer
-    eventManager.emit('timer:set-task', newTask);
-    
-    toast.success(`Starting ${minutes} minute timer`, {
-      description: `"${name}" timer started`
-    });
+    openTimerModal();
   };
 
   return (
@@ -54,44 +27,17 @@ export const EmptyTimerState = () => {
       </div>
       
       <Card className="bg-card border-primary/10 w-full max-w-md">
-        <CardContent className="p-6 space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="task-name" className="text-sm font-medium text-left block">
-              Task Name (optional)
-            </label>
-            <Input
-              id="task-name"
-              placeholder="What are you focusing on?"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-left block">
-              Timer Duration
-            </label>
-            <div className="flex justify-center py-2">
-              <MinutesInput
-                minutes={minutes}
-                onMinutesChange={setMinutes}
-                minMinutes={1}
-                maxMinutes={120}
-              />
-            </div>
-          </div>
-          
+        <CardContent className="p-6">
           <Button 
             onClick={handleStartInstantTimer}
             className="w-full gap-2"
             size="lg"
           >
             <Play className="h-4 w-4" />
-            Start Timer
+            Start Instant Timer
           </Button>
           
-          <div className="text-center text-sm text-muted-foreground mt-2">
+          <div className="text-center text-sm text-muted-foreground mt-4">
             <p>Or select a timer task from the list on the right →</p>
           </div>
         </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { Quote } from '@/types/timer';
@@ -18,10 +17,13 @@ import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import TimerMetricsDisplay from '@/components/timer/TimerMetricsDisplay';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { TimerConfigModal } from '@/components/timer/TimerConfigModal';
+import { useTimerModal } from '@/hooks/timer/useTimerModal';
 
 export default function TimerPage() {
   const [favorites, setFavorites] = useState<Quote[]>([]);
   const [activeTab, setActiveTab] = useState('tasks');
+  const { isOpen, setIsOpen } = useTimerModal();
 
   // Emit initialization event
   useEffect(() => {
@@ -82,6 +84,9 @@ export default function TimerPage() {
               </Card>
             </div>
           </div>
+          
+          {/* Timer Configuration Modal */}
+          <TimerConfigModal open={isOpen} onOpenChange={setIsOpen} />
         </TaskSelectionProvider>
       </TaskProvider>
     </div>
