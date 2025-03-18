@@ -39,10 +39,8 @@ export const useHabitCompletion = () => {
     try {
       // Emit event to expand timer
       eventManager.emit('timer:expand', {
-        // Changed this to match the expected payload structure
-        // The receiver expects 'id', not 'taskId'
-        id: taskId,
-        name: taskName
+        // Fix the payload structure to match what's expected
+        taskName: taskName
       });
       return true;
     } catch (error) {

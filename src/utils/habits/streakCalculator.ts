@@ -1,5 +1,5 @@
 
-import { HabitLog } from '@/types/habit';
+import { HabitLog } from '@/types/habits';
 import { isSameDay, differenceInDays, parseISO } from 'date-fns';
 
 /**

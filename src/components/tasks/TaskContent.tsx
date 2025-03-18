@@ -1,33 +1,37 @@
-
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Task } from '@/types/tasks';
-import { formatDistanceToNow } from 'date-fns';
-import { Check, Clock, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { getHumanReadableDuration } from '@/utils/timeUtils';
+import { TaskCheckbox } from './TaskCheckbox';
+import { TaskContentDisplay } from './TaskContentDisplay';
+import { TaskDetails } from './TaskDetails';
 
-interface TaskContentProps {
+export interface TaskContentProps {
   task: Task;
   isSelected: boolean;
-  onDelete: (e: React.MouseEvent) => void;
-  preventPropagation: (e: React.MouseEvent) => void;
+  isTimerView?: boolean;
+  onSelect?: () => void;
+  editingTaskId?: string | null;
+  inputValue?: string;
+  onDelete?: (e: React.MouseEvent<Element, MouseEvent> | React.TouchEvent<Element>) => void;
+  onDurationClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  preventPropagation?: (e: React.MouseEvent | React.TouchEvent) => void;
   dialogOpeners?: {
-    checklist?: ((taskId: string, taskName: string, items: any[]) => void);
-    journal?: ((taskId: string, taskName: string, entry: string) => void);
-    screenshot?: ((imageUrl: string, taskName: string) => void);
-    voicenote?: ((taskId: string, taskName: string) => void);
+    checklist?: (taskId: string, taskName: string, items: any[]) => void;
+    journal?: (taskId: string, taskName: string, entry: string) => void;
+    screenshot?: (imageUrl: string, taskName: string) => void;
+    voicenote?: (taskId: string, taskName: string) => void;
   };
+  handleTaskAction: (e: React.MouseEvent<HTMLElement>, actionType?: string) => void;
 }
 
-export const TaskContent: React.FC<TaskContentProps> = ({
+export const TaskContent: React.FC<TaskContentProps> = React.memo(({
   task,
   isSelected,
-  onDelete,
-  preventPropagation,
-  dialogOpeners
+  isTimerView = false,
+  dialogOpeners,
+  handleTaskAction
 }) => {
   const formattedDate = task.createdAt 
     ? formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })
@@ -106,4 +110,6 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       )}
     </div>
   );
-};
+});
+
+TaskContent.displayName = 'TaskContent';

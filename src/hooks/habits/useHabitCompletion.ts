@@ -1,8 +1,7 @@
 
 import { useCallback } from 'react';
 import { format } from 'date-fns';
-// Fix the import paths
-import { HabitStats, HabitLog } from '@/types/habits'; 
+import { HabitLog, HabitStats } from '@/types/habits'; 
 import { eventManager } from '@/lib/events/EventManager';
 import { computeHabitStreak } from '@/utils/habits/streakCalculator'; 
 import { toast } from 'sonner';
