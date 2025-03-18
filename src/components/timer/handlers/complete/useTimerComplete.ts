@@ -57,8 +57,13 @@ export const useTimerComplete = ({
       
       // Determine completion status based on expected vs actual time
       let completionStatus: "Completed Early" | "Completed On Time" | "Completed Late" | "Completed Very Early" | "Completed Very Late" = "Completed On Time";
-      if (netEffectiveTime < metrics.expectedTime * 0.8) {
+      
+      if (netEffectiveTime < metrics.expectedTime * 0.5) {
+        completionStatus = "Completed Very Early";
+      } else if (netEffectiveTime < metrics.expectedTime * 0.8) {
         completionStatus = "Completed Early";
+      } else if (netEffectiveTime > metrics.expectedTime * 1.5) {
+        completionStatus = "Completed Very Late";
       } else if (netEffectiveTime > metrics.expectedTime * 1.2) {
         completionStatus = "Completed Late";
       }
@@ -80,7 +85,8 @@ export const useTimerComplete = ({
         completionStatus,
         isPaused: false,
         pausedTimeLeft: null,
-        completionDate: endTime
+        completionDate: endTime,
+        taskId: metrics.taskId
       };
       
       console.log("TimerHandlers: Calculated completion metrics:", completeMetrics);

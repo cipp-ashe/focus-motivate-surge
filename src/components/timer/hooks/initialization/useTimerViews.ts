@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { useTimerView } from "../useTimerView";
 import { useAutoComplete } from "../useAutoComplete";
@@ -66,7 +67,7 @@ export const useTimerAutoComplete = ({
   taskName,
   setCompletionMetrics,
   setShowCompletion
-}: UseAutoCompleteProps) => {
+}: UseAutoCompleteProps): () => Promise<void> => {
   return useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();

@@ -1,8 +1,7 @@
 
 import { useTimerCore } from "./initialization/useTimerCore";
 import { useTimerHandlers } from "./initialization/useTimerHandlers";
-import { useTimerViews } from "./initialization/useTimerViews";
-import { useTimerAutoComplete } from "./initialization/useTimerViews";
+import { useTimerViews, useTimerAutoComplete } from "./initialization/useTimerViews";
 import { TimerProps } from "@/types/timer";
 import { useEffect, useState } from "react";
 import { eventManager } from "@/lib/events/EventManager";
@@ -60,7 +59,7 @@ export const useTimerInitialization = ({
       // Add taskId to metrics if available
       if (taskId) {
         // Update metrics to include the taskId
-        updateMetrics((prev) => ({ ...prev, taskId }));
+        updateMetrics({ taskId });
       }
       
       // Emit initialization event

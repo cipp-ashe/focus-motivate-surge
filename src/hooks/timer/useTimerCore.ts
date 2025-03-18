@@ -38,14 +38,15 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
       completionStatus: 'Completed On Time',
       isPaused: false,
       pausedTimeLeft: null,
-      completionDate: undefined
+      completionDate: undefined,
+      taskId: undefined
     }
   };
 
   const [state, dispatch] = useReducer(timerReducer, initialState);
-  // Using MutableRefObject to fix the TypeScript error
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef<boolean>(true);
+  const lastTickTime = useRef<number>(Date.now());
 
   // Set mounted ref to false on unmount
   useEffect(() => {
@@ -71,11 +72,29 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     
     if (state.isRunning && isMountedRef.current) {
       console.log("Setting up timer interval");
+      lastTickTime.current = Date.now(); // Track when the interval starts
       
       // Set up new interval to decrement time
       intervalRef.current = setInterval(() => {
-        if (isMountedRef.current) {
-          console.log(`Timer tick: ${state.timeLeft - 1}s`);
+        // Ensure we're mounted before updating state
+        if (!isMountedRef.current) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+          return;
+        }
+        
+        // Ensure we're only decrementing once per second, regardless of CPU load
+        const now = Date.now();
+        const elapsed = now - lastTickTime.current;
+        if (elapsed >= 1000) { // Only tick if at least 1 second has passed
+          lastTickTime.current = now;
+          
+          // Debug logging
+          console.log(`Timer tick: ${state.timeLeft - 1}s remaining`);
+          
+          // Decrement the timer
           dispatch({ type: 'DECREMENT_TIME' });
           
           // Emit tick event for any listeners
@@ -85,14 +104,8 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
             });
             window.dispatchEvent(event);
           }
-        } else {
-          // If component unmounted but interval somehow still running, clear it
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
         }
-      }, 1000);
+      }, 100); // Run more frequently but only update when 1 second has passed
     }
   
     // Clean up interval on effect cleanup or component unmount
