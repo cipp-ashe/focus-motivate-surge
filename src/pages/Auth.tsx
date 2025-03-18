@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, MailCheck } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
-  const { signInWithMagicLink, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +44,14 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signInWithMagicLink(email);
+      // Use our custom edge function for sending the magic link
+      const { error } = await supabase.functions.invoke('magic-link-handler', {
+        body: { 
+          email, 
+          redirectTo: `${window.location.origin}/auth/callback` 
+        }
+      });
+      
       if (!error) {
         setLinkSent(true);
         toast.success('Magic link sent! Check your email');
