@@ -26,7 +26,7 @@ export const router = createBrowserRouter([
       {
         path: "tasks",
         element: (
-          <RequireAuth>
+          <RequireAuth requireAuth={false}>
             <TaskPage />
           </RequireAuth>
         ),
@@ -34,7 +34,7 @@ export const router = createBrowserRouter([
       {
         path: "timer",
         element: (
-          <RequireAuth>
+          <RequireAuth requireAuth={false}>
             <Timer />
           </RequireAuth>
         ),
@@ -42,7 +42,7 @@ export const router = createBrowserRouter([
       {
         path: "notes",
         element: (
-          <RequireAuth>
+          <RequireAuth requireAuth={false}>
             <Notes />
           </RequireAuth>
         ),
@@ -50,7 +50,7 @@ export const router = createBrowserRouter([
       {
         path: "habits",
         element: (
-          <RequireAuth>
+          <RequireAuth requireAuth={false}>
             <Habits />
           </RequireAuth>
         ),
@@ -58,7 +58,7 @@ export const router = createBrowserRouter([
       {
         path: "voice-notes",
         element: (
-          <RequireAuth>
+          <RequireAuth requireAuth={false}>
             <VoiceNotes />
           </RequireAuth>
         ),
@@ -66,7 +66,7 @@ export const router = createBrowserRouter([
       {
         path: "screenshots",
         element: (
-          <RequireAuth>
+          <RequireAuth requireAuth={false}>
             <Screenshots />
           </RequireAuth>
         ),
@@ -74,7 +74,7 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         element: (
-          <RequireAuth>
+          <RequireAuth requireAuth={false}>
             <Settings />
           </RequireAuth>
         ),

@@ -1,11 +1,13 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -15,32 +17,55 @@ const AuthCallback = () => {
       if (hash && hash.includes('access_token')) {
         try {
           // Try to set the session using the URL params
-          const { error } = await supabase.auth.getSession();
+          const { data, error } = await supabase.auth.getSession();
           
           if (error) {
-            toast.error('Failed to log in. Please try again.');
-            navigate('/auth');
+            setError('Failed to authenticate. Please try again.');
+            toast.error('Authentication failed: ' + error.message);
+            setTimeout(() => navigate('/auth'), 3000);
           } else {
             toast.success('Successfully logged in!');
-            navigate('/');
+            
+            // Try to find the original location they were trying to access
+            // This works with RequireAuth's state passing
+            try {
+              // This might be undefined if they went directly to auth
+              const from = (location.state as any)?.from?.pathname || '/';
+              navigate(from, { replace: true });
+            } catch (e) {
+              // If anything goes wrong with the state, just go home
+              navigate('/');
+            }
           }
         } catch (error) {
           console.error('Error during auth callback:', error);
-          toast.error('Something went wrong');
-          navigate('/auth');
+          setError('Something went wrong');
+          toast.error('Authentication error');
+          setTimeout(() => navigate('/auth'), 3000);
         }
       } else {
-        navigate('/auth');
+        setError('Invalid authentication link');
+        toast.error('Invalid authentication link');
+        setTimeout(() => navigate('/auth'), 3000);
       }
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, location]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      <p className="mt-4 text-lg">Logging you in...</p>
+      {error ? (
+        <>
+          <div className="text-destructive text-lg mb-4">{error}</div>
+          <div className="text-muted-foreground">Redirecting you back to sign in...</div>
+        </>
+      ) : (
+        <>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-lg">Logging you in...</p>
+        </>
+      )}
     </div>
   );
 };

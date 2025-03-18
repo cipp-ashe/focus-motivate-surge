@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,13 +15,17 @@ const Auth = () => {
   const [linkSent, setLinkSent] = useState(false);
   const { signInWithMagicLink, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // If user is already logged in, redirect to main page
+  // Get redirect path from location state
+  const from = location.state?.from?.pathname || '/';
+
+  // If user is already logged in, redirect to previous page or main page
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, from]);
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +46,13 @@ const Auth = () => {
       const { error } = await signInWithMagicLink(email);
       if (!error) {
         setLinkSent(true);
+        toast.success('Magic link sent! Check your email');
+      } else {
+        toast.error(`Failed to send magic link: ${error.message}`);
       }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +64,9 @@ const Auth = () => {
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-2xl font-bold text-center text-white">Focus Notes</CardTitle>
           <CardDescription className="text-center text-slate-300">
-            Access your tasks and notes securely
+            {linkSent 
+              ? "Check your email for the magic link" 
+              : "Sign in to sync your data across devices"}
           </CardDescription>
         </CardHeader>
         

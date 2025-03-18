@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 
 export const RequireAuth: React.FC<{ children: React.ReactNode; requireAuth?: boolean }> = ({ 
   children, 
-  requireAuth = false
+  requireAuth = true
 }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
