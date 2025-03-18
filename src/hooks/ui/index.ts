@@ -1,2 +1,2 @@
 
-export { useIsMobile } from './useIsMobile';
+export { useIsMobile, useMobile } from './useIsMobile';

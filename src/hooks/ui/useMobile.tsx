@@ -1,5 +1,5 @@
+// This file is redundant, but keeping it for backward compatibility
+// Re-export from the canonical implementation
+import { useIsMobile, useMobile } from './useIsMobile';
 
-// Re-export from the unified implementation
-import { useIsMobile } from './useIsMobile';
-
-export const useMobile = useIsMobile;
+export { useIsMobile, useMobile };

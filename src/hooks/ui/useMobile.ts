@@ -1,5 +1,5 @@
 
-// Re-export from the unified implementation
-import { useIsMobile } from './useIsMobile';
+// Re-export from the canonical implementation
+import { useIsMobile, useMobile } from './useIsMobile';
 
-export const useMobile = useIsMobile;
+export { useIsMobile, useMobile };

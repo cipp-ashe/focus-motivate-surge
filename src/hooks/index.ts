@@ -1,3 +1,3 @@
 
 export { useEvent } from './useEvent';
-export { useIsMobile } from './ui/useIsMobile';
+export { useIsMobile, useMobile } from './ui/useIsMobile';
