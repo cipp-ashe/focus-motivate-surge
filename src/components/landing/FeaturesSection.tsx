@@ -72,7 +72,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           </div>
           <CardTitle>{title}</CardTitle>
         </div>
-        <CardDescription className="text-left">{description}</CardDescription>
+        <CardDescription className="text-left mt-2">{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <ul className="space-y-2 mb-4 text-left">
