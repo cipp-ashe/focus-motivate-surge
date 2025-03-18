@@ -1,17 +1,13 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ListTodo, BookOpen, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
 const FeaturesSection: React.FC = () => {
   return <section className="mb-16">
       <div className="text-center mb-10">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">Everything You Need</h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          A complete productivity suite with powerful features to streamline your work
-        </p>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">FlowTime combines task management, habit automation, and focused work sessions in one powerful, privacy-focused application.</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -32,7 +28,6 @@ const FeaturesSection: React.FC = () => {
       </div>
     </section>;
 };
-
 interface FeatureCardProps {
   icon: React.ElementType;
   iconClass: string;
@@ -48,7 +43,6 @@ interface FeatureCardProps {
   iconFeatureColor: string;
   buttonStyle: React.CSSProperties;
 }
-
 const FeatureCard: React.FC<FeatureCardProps> = ({
   icon: Icon,
   iconClass,
@@ -91,5 +85,4 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       </CardFooter>
     </Card>;
 };
-
 export default FeaturesSection;
