@@ -1,6 +1,5 @@
-
 import { createBrowserRouter } from "react-router-dom";
-import IndexAlternative from "./pages/IndexAlternative";
+import Index from "./pages/Index";
 import TaskPage from "./pages/TaskPage";
 import Timer from "./pages/Timer";
 import Notes from "./pages/Notes";
@@ -22,7 +21,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <IndexAlternative />,
+        element: <Index />,
       },
       {
         path: "tasks",

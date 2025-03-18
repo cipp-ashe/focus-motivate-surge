@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -6,270 +7,352 @@ import {
   ListTodo,
   BookOpen, 
   Timer, 
-  Settings,
-  CalendarCheck,
   Activity,
   Image,
   Mic,
   Tag,
-  FileText
+  FileText,
+  LayoutDashboard,
+  Zap,
+  CalendarCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { cn } from '@/lib/utils';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardFooter from '@/components/dashboard/DashboardFooter';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <DashboardLayout>
-      {/* Header section with simple, non-marketing language */}
-      <DashboardHeader 
-        title="TaskTimer Dashboard"
-        description="Organize tasks, track habits, and manage your work sessions"
-      />
+    <div className="min-h-screen py-8 px-4 relative overflow-hidden">
+      {/* Enhanced background decorative elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-[10%] w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] bg-primary/10 rounded-full filter blur-[120px] opacity-70 animate-float"></div>
+        <div className="absolute bottom-[10%] right-[10%] w-[40vw] h-[40vw] max-w-[700px] max-h-[700px] bg-purple-500/10 rounded-full filter blur-[120px] opacity-50" style={{ animationDelay: '2s', animationDuration: '8s' }}></div>
+        <div className="absolute top-[30%] right-[15%] w-[20vw] h-[20vw] max-w-[400px] max-h-[400px] bg-blue-400/10 rounded-full filter blur-[80px] opacity-30" style={{ animationDelay: '1s', animationDuration: '12s' }}></div>
+      </div>
       
-      {/* Habits Feature Showcase - Now as a hero section at the top */}
-      <div className="mb-8 glass-card p-5 md:p-6 bg-gradient-to-br from-amber-50/90 to-transparent dark:from-amber-950/30 dark:to-transparent border border-amber-100 dark:border-amber-800/30 transition-all duration-300 hover:shadow-md">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-shrink-0 bg-amber-400/20 p-3 rounded-full">
-            <Activity className="w-6 h-6 text-amber-500" aria-hidden="true" />
+      <div className="max-w-7xl mx-auto">
+        {/* Hero Section */}
+        <section className="mb-16 md:mb-24">
+          <div className="flex flex-col items-center text-center mb-12">
+            <Badge variant="outline" className="mb-4 px-3 py-1 bg-primary/10 text-primary border-primary/20 backdrop-blur-sm">
+              <Zap className="h-3.5 w-3.5 mr-1" />
+              Productivity Reimagined
+            </Badge>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gradient-primary max-w-4xl leading-tight">
+              Organize Your Work, Automate Your Habits
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mb-8">
+              FlowTime combines task management, habit automation, and focused work sessions
+              in one powerful, privacy-focused application.
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button asChild size="lg" className="rounded-full px-8 shadow-glow button-glow">
+                <Link to="/tasks">
+                  Start Inputting Your Tasks <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl md:text-2xl font-semibold">Habit Automation</h2>
-            <p className="text-muted-foreground text-sm md:text-base">
-              Configure once, automate your daily workflow with tasks, timers, and journals
+          
+          {/* Hero Habit Automation Showcase */}
+          <div className="bg-gradient-to-br from-amber-50/90 via-amber-50/40 to-transparent dark:from-amber-950/30 dark:via-amber-950/10 dark:to-transparent border border-amber-100/50 dark:border-amber-800/30 rounded-xl overflow-hidden shadow-xl mb-12 backdrop-blur-sm">
+            <div className="p-6 md:p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-amber-400/20 p-3 rounded-full">
+                  <Activity className="w-6 h-6 text-amber-500" />
+                </div>
+                <div className="text-left">
+                  <h2 className="text-2xl md:text-3xl font-bold">Habit Automation</h2>
+                  <p className="text-muted-foreground">Configure once, automate your daily workflow</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {/* Morning Workout Example - Left-aligned titles and enhanced styling */}
+                <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg border border-amber-200/50 dark:border-amber-800/30 p-5 shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-blue-400/20 h-10 w-10 rounded-full flex items-center justify-center">
+                      <Timer className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="text-lg font-semibold">Morning Workout</h3>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border-none">habit</Badge>
+                        <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-none flex items-center gap-1">
+                          <Clock className="h-3 w-3" /> 25 min
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pl-12 border-l-2 border-blue-200 dark:border-blue-800/50 ml-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 text-left">
+                      <Tag className="h-3.5 w-3.5 text-primary/70" />
+                      <span>fitness, morning-routine</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground text-left">Auto-creates a timed task with proper tags</p>
+                  </div>
+                </div>
+                
+                {/* Daily Journal Example - Left-aligned titles and enhanced styling */}
+                <div className="bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg border border-green-200/50 dark:border-green-800/30 p-5 shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-green-400/20 h-10 w-10 rounded-full flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-green-500" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <h3 className="text-lg font-semibold">Evening Reflection</h3>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        <Badge variant="outline" className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-none">journal</Badge>
+                        <Badge variant="outline" className="bg-gray-100 dark:bg-gray-900/40 text-gray-800 dark:text-gray-300 border-none flex items-center gap-1">
+                          <CalendarCheck className="h-3 w-3" /> daily
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pl-12 border-l-2 border-green-200 dark:border-green-800/50 ml-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2 text-left">
+                      <Tag className="h-3.5 w-3.5 text-primary/70" />
+                      <span>journal, reflection</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground text-left">Auto-generates a journal entry with prompts</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <Button asChild variant="default" size="lg" className="bg-amber-500 hover:bg-amber-600 rounded-full shadow-glow button-glow">
+                  <Link to="/habits" className="flex items-center gap-2">
+                    Configure Your Habits <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Main Features Section */}
+        <section className="mb-16">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-primary">Everything You Need</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              A complete productivity suite with powerful features to streamline your work
             </p>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="bg-gradient-to-r from-amber-50 to-amber-100/70 dark:from-amber-900/20 dark:to-amber-800/10 rounded-md p-4 border border-dashed border-amber-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-blue-400/20 flex items-center justify-center">
-                <Timer className="h-4 w-4 text-blue-500" />
-              </div>
-              <div className="flex-1">
-                <div className="text-base font-medium">Morning Workout</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap mt-1">
-                  <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-medium">habit</span>
-                  <span className="flex items-center gap-1">
-                    <Tag className="h-3.5 w-3.5 text-primary/70" />
-                    <span className="text-xs">fitness</span>
-                  </span>
-                  <span className="text-xs flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 text-blue-500/80" />
-                    <span>25 min timer</span>
-                  </span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tasks Card */}
+            <Card className="border-primary/10 bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20 dark:to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm">
+              <CardHeader>
+                <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-3">
+                  <ListTodo className="h-6 w-6 text-primary" />
                 </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/10 rounded-md p-4 border border-dashed border-green-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-green-400/20 flex items-center justify-center">
-                <FileText className="h-4 w-4 text-green-500" />
-              </div>
-              <div className="flex-1">
-                <div className="text-base font-medium">Daily Reflection</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap mt-1">
-                  <span className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium">journal</span>
-                  <span className="flex items-center gap-1">
-                    <CalendarCheck className="h-3.5 w-3.5 text-green-500/80" />
-                    <span className="text-xs">auto-generated</span>
-                  </span>
+                <CardTitle className="text-left">Task Management</CardTitle>
+                <CardDescription className="text-left">Organize all your work in one place</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-4 text-left">
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-primary" />
+                    </div>
+                    <span className="text-sm">Smart task organization</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-primary" />
+                    </div>
+                    <span className="text-sm">Integrated with timers</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-primary" />
+                    </div>
+                    <span className="text-sm">Tagging system</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button asChild className="w-full button-glow" variant="default">
+                  <Link to="/tasks">Go to Tasks</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            {/* Timer Card */}
+            <Card className="border-primary/10 bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-950/20 dark:to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm">
+              <CardHeader>
+                <div className="bg-[#9b87f5]/10 w-12 h-12 rounded-full flex items-center justify-center mb-3">
+                  <Timer className="h-6 w-6 text-[#9b87f5]" />
                 </div>
+                <CardTitle className="text-left">Focus Timers</CardTitle>
+                <CardDescription className="text-left">Track time spent on tasks</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-4 text-left">
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-[#9b87f5]/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-[#9b87f5]" />
+                    </div>
+                    <span className="text-sm">Customizable timers</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-[#9b87f5]/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-[#9b87f5]" />
+                    </div>
+                    <span className="text-sm">Session tracking</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-[#9b87f5]/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-[#9b87f5]" />
+                    </div>
+                    <span className="text-sm">Productivity metrics</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button asChild className="w-full button-glow" variant="default" style={{ backgroundColor: "#9b87f5", borderColor: "#9b87f5" }}>
+                  <Link to="/timer">Use Timer</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            {/* Notes Card */}
+            <Card className="border-primary/10 bg-gradient-to-br from-green-50/50 to-transparent dark:from-green-950/20 dark:to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm">
+              <CardHeader>
+                <div className="bg-green-400/10 w-12 h-12 rounded-full flex items-center justify-center mb-3">
+                  <BookOpen className="h-6 w-6 text-green-500" />
+                </div>
+                <CardTitle className="text-left">Notes & Journals</CardTitle>
+                <CardDescription className="text-left">Capture ideas and reflections</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-4 text-left">
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-green-400/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-green-500" />
+                    </div>
+                    <span className="text-sm">Written notes</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-green-400/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-green-500" />
+                    </div>
+                    <span className="text-sm">Voice recordings</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-green-400/20 flex items-center justify-center">
+                      <ArrowRight className="h-3 w-3 text-green-500" />
+                    </div>
+                    <span className="text-sm">Journal templates</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button asChild className="w-full button-glow" variant="default" style={{ backgroundColor: "rgb(74, 222, 128)", borderColor: "rgb(74, 222, 128)" }}>
+                  <Link to="/notes">View Notes</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </section>
+        
+        {/* Quick Access Section */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <LayoutDashboard className="h-5 w-5 text-primary/70" />
+            Quick Access
+          </h2>
+          
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
+            <Link to="/tasks" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-primary/5">
+              <div className="bg-primary/10 rounded-full p-3 mb-1">
+                <ListTodo className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-sm font-medium">Tasks</span>
+            </Link>
+            
+            <Link to="/timer" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-[#9b87f5]/5">
+              <div className="bg-[#9b87f5]/10 rounded-full p-3 mb-1">
+                <Timer className="w-5 h-5 text-[#9b87f5]" />
+              </div>
+              <span className="text-sm font-medium">Timer</span>
+            </Link>
+            
+            <Link to="/habits" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-amber-400/5">
+              <div className="bg-amber-400/10 rounded-full p-3 mb-1">
+                <Activity className="w-5 h-5 text-amber-500" />
+              </div>
+              <span className="text-sm font-medium">Habits</span>
+            </Link>
+            
+            <Link to="/screenshots" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-blue-400/5">
+              <div className="bg-blue-400/10 rounded-full p-3 mb-1">
+                <Image className="w-5 h-5 text-blue-400" />
+              </div>
+              <span className="text-sm font-medium">Screenshots</span>
+            </Link>
+            
+            <Link to="/notes" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-green-400/5">
+              <div className="bg-green-400/10 rounded-full p-3 mb-1">
+                <BookOpen className="w-5 h-5 text-green-400" />
+              </div>
+              <span className="text-sm font-medium">Notes</span>
+            </Link>
+            
+            <Link to="/voice-notes" className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/80 dark:bg-black/20 backdrop-blur-md border border-gray-100 dark:border-gray-800/50 shadow-sm transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-rose-400/5">
+              <div className="bg-rose-400/10 rounded-full p-3 mb-1">
+                <Mic className="w-5 h-5 text-rose-400" />
+              </div>
+              <span className="text-sm font-medium">Voice</span>
+            </Link>
+          </div>
+        </section>
+        
+        {/* Privacy Section */}
+        <section className="mb-16">
+          <div className="bg-gradient-to-r from-gray-50 to-transparent dark:from-gray-900/30 dark:to-transparent border border-gray-100 dark:border-gray-800/30 rounded-xl p-6 shadow-lg backdrop-blur-sm">
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/10 p-4 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-primary">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl font-semibold mb-2">Your Data is Stored Locally</h3>
+                <p className="text-muted-foreground mb-4">
+                  FlowTime saves your data to your browser's local storage. For access across multiple devices, 
+                  register with a magic link on the settings page.
+                </p>
+                <Button asChild variant="outline" size="sm" className="rounded-full border-primary/20 hover:bg-primary/10">
+                  <Link to="/settings">
+                    Settings <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
-        </div>
+        </section>
         
-        <div className="bg-white/60 dark:bg-black/5 p-3 rounded-md mb-4 text-sm border border-amber-200/50 dark:border-amber-800/30">
-          <p className="text-muted-foreground flex items-start gap-1.5">
-            <span className="text-amber-600 dark:text-amber-400 font-medium flex-shrink-0">How it works:</span> 
-            <span>Configure habit templates once, and TaskTimer auto-creates tasks based on your schedule with proper tags, timers, and journal entries.</span>
-          </p>
-        </div>
-        
-        <Button asChild variant="default" size="sm" className="w-full md:w-auto rounded-md bg-amber-500/90 hover:bg-amber-500 ml-auto flex">
-          <Link to="/habits" className="flex items-center justify-center">
-            Configure Habits <ArrowRight className="h-3.5 w-3.5 ml-1" />
-          </Link>
-        </Button>
-      </div>
-      
-      {/* Main feature cards - Three column layout for desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
-        <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/30 dark:to-transparent border border-blue-100 dark:border-blue-800/30 transition-all duration-300 hover:shadow-md">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-shrink-0 bg-primary/20 p-2 md:p-3 rounded-full">
-              <ListTodo className="w-5 h-5 md:w-6 md:h-6 text-primary" aria-hidden="true" />
-            </div>
-            <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/10 px-2 py-1 text-sm">
-              <Link to="/tasks">View Tasks</Link>
-            </Button>
-          </div>
-          <h2 className="text-lg md:text-xl font-semibold mb-2">Tasks</h2>
-          <p className="text-muted-foreground text-sm md:text-base mb-4 flex-grow">
-            Manage your daily tasks with optional timers, checklists, and more.
-          </p>
-          
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-600 dark:text-blue-400">
-              <Link to="/timer">
-                <Timer className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">Timer</span>
-              </Link>
-            </Button>
-            
-            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-blue-400/10 hover:bg-blue-400/20 border-blue-400/30 text-blue-500 dark:text-blue-300">
-              <Link to="/screenshots">
-                <Image className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">Screenshot</span>
-              </Link>
-            </Button>
-          </div>
-          
-          <Button asChild variant="default" size="sm" className="w-full rounded-md bg-primary/90 hover:bg-primary">
-            <Link to="/tasks" className="flex items-center justify-center">
-              All Tasks <ArrowRight className="h-3.5 w-3.5 ml-1" />
+        {/* Footer */}
+        <footer className="text-center mt-16 mb-8">
+          <Button 
+            asChild 
+            variant="outline" 
+            className="bg-card/80 backdrop-blur-sm rounded-full px-6 shadow-glass border-primary/20 hover:bg-primary/10 button-scale"
+          >
+            <Link to="/tasks" className="flex items-center gap-2">
+              Start Organizing Your Tasks
+              <ArrowRight className="h-4 w-4 arrow-slide-right" />
             </Link>
           </Button>
-        </div>
-        
-        <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-purple-50 to-transparent dark:from-purple-950/30 dark:to-transparent border border-purple-100 dark:border-purple-800/30 transition-all duration-300 hover:shadow-md">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-shrink-0 bg-[#9b87f5]/20 p-2 md:p-3 rounded-full">
-              <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-[#9b87f5]" aria-hidden="true" />
-            </div>
-            <Button asChild variant="ghost" size="sm" className="text-[#9b87f5] hover:text-[#9b87f5]/80 hover:bg-[#9b87f5]/10 px-2 py-1 text-sm">
-              <Link to="/notes">View Notes</Link>
-            </Button>
-          </div>
-          <h2 className="text-lg md:text-xl font-semibold mb-2">Notes</h2>
-          <p className="text-muted-foreground text-sm md:text-base mb-4 flex-grow">
-            Record written notes or voice memos for your ideas and thoughts.
-          </p>
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 border-[#9b87f5]/30 text-[#9b87f5]">
-              <Link to="/notes">
-                <BookOpen className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">All</span>
-              </Link>
-            </Button>
-            
-            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-rose-400/10 hover:bg-rose-400/20 border-rose-400/30 text-rose-500">
-              <Link to="/voice-notes">
-                <Mic className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">Voice</span>
-              </Link>
-            </Button>
-          </div>
-          
-          <Button asChild variant="default" size="sm" className="w-full rounded-md bg-[#9b87f5]/90 hover:bg-[#9b87f5]">
-            <Link to="/notes" className="flex items-center justify-center">
-              Browse Notes <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Link>
-          </Button>
-        </div>
-        
-        <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-gray-50 to-transparent dark:from-gray-900/30 dark:to-transparent border border-gray-100 dark:border-gray-800/30 transition-all duration-300 hover:shadow-md">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/10 p-2 md:p-3 rounded-full">
-              <Settings className="w-5 h-5 md:w-6 md:h-6 text-primary" aria-hidden="true" />
-            </div>
-            <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/10 px-2 py-1 text-sm">
-              <Link to="/settings">View Settings</Link>
-            </Button>
-          </div>
-          <h2 className="text-lg md:text-xl font-semibold mb-2">Settings</h2>
-          <p className="text-muted-foreground text-sm md:text-base mb-4 flex-grow">
-            Your data is stored locally. For access across multiple devices, register with a magic link.
-          </p>
-          
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-gray-200/50 hover:bg-gray-200/80 border-gray-300/50 text-gray-600 dark:bg-gray-800/30 dark:hover:bg-gray-800/50 dark:border-gray-700/50 dark:text-gray-300">
-              <Link to="/settings">
-                <Settings className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">Account</span>
-              </Link>
-            </Button>
-            
-            <Button asChild variant="outline" size="auto" className="flex flex-col items-center py-3 md:py-4 h-auto bg-blue-100/50 hover:bg-blue-100/80 border-blue-200/50 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:border-blue-800/50 dark:text-blue-300">
-              <Link to="/settings">
-                <Activity className="h-5 w-5 md:h-6 md:w-6 mb-1" />
-                <span className="text-xs md:text-sm font-medium">Sync</span>
-              </Link>
-            </Button>
-          </div>
-          
-          <Button asChild variant="default" size="sm" className="w-full rounded-md bg-gray-500/90 hover:bg-gray-500">
-            <Link to="/settings" className="flex items-center justify-center">
-              All Settings <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Link>
-          </Button>
-        </div>
+        </footer>
       </div>
-      
-      <div className="mb-8">
-        <h3 className="text-md md:text-lg font-medium mb-3 flex items-center">
-          <Clock className="w-4 h-4 mr-2 text-primary/70" />
-          Quick Access
-        </h3>
-        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 md:gap-3">
-          <Link to="/tasks" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-primary/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-primary/10 rounded-full p-2 mb-1.5">
-              <ListTodo className="w-3.5 h-3.5 text-primary" />
-            </div>
-            <span className="text-xs font-medium">Tasks</span>
-          </Link>
-          
-          <Link to="/timer" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-[#9b87f5]/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-[#9b87f5]/10 rounded-full p-2 mb-1.5">
-              <Timer className="w-3.5 h-3.5 text-[#9b87f5]" />
-            </div>
-            <span className="text-xs font-medium">Timer</span>
-          </Link>
-          
-          <Link to="/habits" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-amber-400/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-amber-400/10 rounded-full p-2 mb-1.5">
-              <Activity className="w-3.5 h-3.5 text-amber-500" />
-            </div>
-            <span className="text-xs font-medium">Habits</span>
-          </Link>
-          
-          <Link to="/screenshots" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-blue-400/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-blue-400/10 rounded-full p-2 mb-1.5">
-              <Image className="w-3.5 h-3.5 text-blue-400" />
-            </div>
-            <span className="text-xs font-medium">Screenshots</span>
-          </Link>
-          
-          <Link to="/notes" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-green-400/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-green-400/10 rounded-full p-2 mb-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-green-400" />
-            </div>
-            <span className="text-xs font-medium">Notes</span>
-          </Link>
-          
-          <Link to="/voice-notes" className="glass-card aspect-square flex flex-col items-center justify-center text-center transition-all duration-300 hover:bg-rose-400/5 p-2 hover:shadow-sm hover:-translate-y-0.5">
-            <div className="bg-rose-400/10 rounded-full p-2 mb-1.5">
-              <Mic className="w-3.5 h-3.5 text-rose-400" />
-            </div>
-            <span className="text-xs font-medium">Voice</span>
-          </Link>
-        </div>
-      </div>
-      
-      <DashboardFooter
-        linkTo="/tasks"
-        text="Go to Tasks"
-      />
-    </DashboardLayout>
+    </div>
   );
 };
 
