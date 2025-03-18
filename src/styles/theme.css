@@ -50,7 +50,7 @@
 }
 
 .glass-card {
-  @apply backdrop-blur-xl bg-white/8 dark:bg-black/15 border border-white/15 dark:border-white/5 shadow-md;
+  @apply backdrop-blur-xl bg-white/10 dark:bg-black/15 border border-white/15 dark:border-white/5 shadow-md;
 }
 
 /* Text gradient effects */
