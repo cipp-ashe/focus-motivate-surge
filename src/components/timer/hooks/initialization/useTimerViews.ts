@@ -1,4 +1,4 @@
-
+import { useCallback } from "react";
 import { useTimerView } from "../useTimerView";
 import { useAutoComplete } from "../useAutoComplete";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -11,7 +11,7 @@ interface UseTimerViewsProps {
   isExpanded: boolean;
   pauseTimeLeft: number | null;
   handleToggle: () => void;
-  handleComplete: () => Promise<void>;  // Ensure this is Promise<void>
+  handleComplete: () => Promise<void>;
   handleAddTime: (minutes: number) => void;
 }
 
@@ -24,9 +24,8 @@ export const useTimerViews = ({
   pauseTimeLeft,
   handleToggle,
   handleComplete,
-  handleAddTime,
+  handleAddTime
 }: UseTimerViewsProps) => {
-  // Get view props
   const { getTimerCircleProps, getTimerControlsProps } = useTimerView({
     isRunning,
     timeLeft,
@@ -36,12 +35,12 @@ export const useTimerViews = ({
     handleTimerToggle: handleToggle,
     handleComplete,
     handleAddTime,
-    pauseTimeLeft,
+    pauseTimeLeft
   });
 
   return {
     getTimerCircleProps,
-    getTimerControlsProps,
+    getTimerControlsProps
   };
 };
 
@@ -50,14 +49,35 @@ interface UseAutoCompleteProps {
   pause: () => void;
   playSound: () => void;
   metrics: TimerStateMetrics;
-  completeTimer: () => Promise<void>;  // Make sure this is Promise<void>
+  completeTimer: () => Promise<void>;
   onComplete?: (metrics: TimerStateMetrics) => void;
   taskName: string;
-  setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
+  setCompletionMetrics: (metrics: any) => void;
   setShowCompletion: (show: boolean) => void;
 }
 
-export const useTimerAutoComplete = (props: UseAutoCompleteProps): (() => Promise<void>) => {
-  // Pass props through to useAutoComplete
-  return useAutoComplete(props);
+export const useTimerAutoComplete = ({
+  isRunning,
+  pause,
+  playSound,
+  metrics,
+  completeTimer,
+  onComplete,
+  taskName,
+  setCompletionMetrics,
+  setShowCompletion
+}: UseAutoCompleteProps) => {
+  return useCallback(async (): Promise<void> => {
+    if (isRunning) {
+      pause();
+    }
+    
+    try {
+      await completeTimer();
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error in autoComplete:", error);
+      return Promise.reject(error);
+    }
+  }, [isRunning, pause, completeTimer]);
 };

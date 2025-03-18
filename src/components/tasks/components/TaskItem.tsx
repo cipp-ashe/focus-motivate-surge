@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { cn } from '@/lib/utils';
@@ -12,10 +11,10 @@ export interface TaskItemProps {
   onOpenTaskDialog?: () => void;
   isTimerView?: boolean;
   dialogOpeners?: {
-    checklist?: (taskId: string, taskName: string, items: any[]) => void;
-    journal?: (taskId: string, taskName: string, entry: string) => void;
-    screenshot?: (imageUrl: string, taskName: string) => void;
-    voicenote?: (taskId: string, taskName: string) => void;
+    checklist?: ((taskId: string, taskName: string, items: any[]) => void) | undefined;
+    journal?: ((taskId: string, taskName: string, entry: string) => void) | undefined;
+    screenshot?: ((imageUrl: string, taskName: string) => void) | undefined;
+    voicenote?: ((taskId: string, taskName: string) => void) | undefined;
   };
 }
 
@@ -31,12 +30,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   
   const isSelected = selected === task.id;
   
-  // Handle selecting a task
   const handleSelectTask = useCallback(() => {
     selectTask(isSelected ? null : task.id);
   }, [selectTask, isSelected, task.id]);
   
-  // Handle keyboard accessibility
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();

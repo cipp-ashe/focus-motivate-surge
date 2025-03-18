@@ -15,6 +15,7 @@ export interface TimerMetrics {
   isPaused: boolean;
   pausedTimeLeft: number | null;
   completionDate?: string; // Added to match usage in ScreenshotTask
+  taskId?: string; // Adding this to support storing taskId in metrics
 }
 
 export interface MetricsDisplayProps {

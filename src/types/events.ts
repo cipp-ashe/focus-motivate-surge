@@ -1,183 +1,113 @@
 
-// Type definitions for all event types used in the application
-// This ensures type safety when emitting and listening for events
+// Event types for all application events
+export type AppEventType = "app:start" | "app:error" | "app:theme-change" | "app:language-change";
+export type AuthEventType = "auth:login" | "auth:logout" | "auth:register" | "auth:password-reset";
+export type HabitEventType = "habits:create" | "habits:update" | "habits:delete" | "habits:complete" | "habits:check-pending";
+export type NavigationEventType = "navigation:change" | "navigation:go-back" | "navigation:go-forward";
+export type NoteEventType = "note:create" | "note:update" | "note:delete" | "note:create-from-habit";
+export type QuoteEventType = "quote:create" | "quote:update" | "quote:delete" | "quote:favorite" | "quote:unfavorite";
+export type RelationshipEventType = "relationship:create" | "relationship:update" | "relationship:delete";
+export type TagEventType = "tag:create" | "tag:update" | "tag:delete" | "tag:assign" | "tag:remove";
+export type TaskEventType = "task:create" | "task:update" | "task:delete" | "task:complete" | "task:dismiss" | "task:reload";
+export type TimerEventType = "timer:start" | "timer:pause" | "timer:resume" | "timer:stop" | "timer:complete" | "timer:extend" | "timer:reset" | "timer:tick" | "timer:set-task" | "timer:task-set" | "timer:init";
+export type JournalEventType = "journal:create" | "journal:update" | "journal:delete";
+export type VoiceNoteEventType = "voicenote:start" | "voicenote:stop" | "voicenote:transcribe" | "voicenote:save";
 
-export type TaskEventType =
-  | 'task:create'
-  | 'task:update'
-  | 'task:delete'
-  | 'task:complete'
-  | 'task:select'
-  | 'task:reload'
-  | 'task:dismiss'; // Added missing task:dismiss
+// Combined event type for all possible events
+export type AllEventTypes = 
+  | AppEventType 
+  | AuthEventType 
+  | HabitEventType 
+  | NavigationEventType 
+  | NoteEventType 
+  | QuoteEventType 
+  | RelationshipEventType 
+  | TagEventType 
+  | TaskEventType 
+  | TimerEventType 
+  | JournalEventType 
+  | VoiceNoteEventType;
 
-export type HabitEventType =
-  | 'habit:complete'
-  | 'habit:template-add'
-  | 'habit:template-update'
-  | 'habit:template-delete'
-  | 'habits:check-pending'
-  | 'habit:schedule'         // Added missing habit:schedule
-  | 'habit:dismissed'        // Added missing habit:dismissed
-  | 'habit:journal-deleted'  // Added missing habit:journal-deleted
-  | 'habit:task-deleted'     // Added missing habit:task-deleted
-  | 'habit:select';          // Added missing habit:select
-
-export type TimerEventType =
-  | 'timer:start'
-  | 'timer:pause'
-  | 'timer:resume'
-  | 'timer:reset'
-  | 'timer:complete'
-  | 'timer:task-set'
-  | 'timer:tick'            // Added missing timer:tick
-  | 'timer:init'            // Added missing timer:init
-  | 'timer:close'           // Added missing timer:close
-  | 'timer:expand'          // Added missing timer:expand
-  | 'timer:collapse'        // Added missing timer:collapse
-  | 'timer:metrics-update'  // Added missing timer:metrics-update
-  | 'timer:set-task';       // Added missing timer:set-task
-
-export type NoteEventType =
-  | 'note:create'
-  | 'note:update'
-  | 'note:deleted'
-  | 'note:view'
-  | 'note:format'
-  | 'note:format-complete'
-  | 'note:create-from-habit'
-  | 'note:create-from-voice';
-
-export type VoiceNoteEventType =
-  | 'voice-note:created'
-  | 'voice-note:deleted'
-  | 'voice-note:updated';
-
-export type AuthEventType =
-  | 'auth:signed-in'
-  | 'auth:signed-out'
-  | 'auth:state-change';
-
-export type AppEventType =
-  | 'app:initialized'
-  | 'app:route-changed';
-
-// Adding new event types for relationships, tags, journals, and quotes
-export type RelationshipEventType =
-  | 'relationship:create'
-  | 'relationship:delete'
-  | 'relationship:update'
-  | 'relationship:batch-update';
-
-export type TagEventType =
-  | 'tag:link'
-  | 'tag:unlink'
-  | 'tags:force-update';
-
-export type JournalEventType =
-  | 'journal:open';
-
-export type QuoteEventType =
-  | 'quote:link-task';
-
-export type NavigationEventType =
-  | 'nav:route-change';
-
-// Union type of all event types for the event bus
-export type AllEventTypes =
-  | TaskEventType
-  | HabitEventType
-  | TimerEventType
-  | NoteEventType
-  | VoiceNoteEventType
-  | AuthEventType
-  | AppEventType
-  | RelationshipEventType
-  | TagEventType
-  | JournalEventType
-  | QuoteEventType
-  | NavigationEventType;
-
-// Define the EventPayloads interface to map event types to their payload types
+// Payloads for each event type
 export interface EventPayloads {
-  // Task events
-  'task:create': any;
-  'task:update': { taskId: string; updates: any };
-  'task:delete': { taskId: string; reason?: string; suppressToast?: boolean };
-  'task:complete': { taskId: string; metrics?: any };
-  'task:select': string;
-  'task:reload': any;
-  'task:dismiss': { taskId: string; habitId: string; date: string; suppressToast?: boolean };
-
-  // Habit events
-  'habit:complete': { habitId: string; completed: boolean };
-  'habit:template-add': { id: string; templateId: string };
-  'habit:template-update': any;
-  'habit:template-delete': { templateId: string; isOriginatingAction?: boolean; suppressToast?: boolean };
-  'habits:check-pending': any;
-  'habit:schedule': any;
-  'habit:dismissed': { habitId: string; date: string };
-  'habit:journal-deleted': { habitId: string };
-  'habit:task-deleted': { habitId: string; date: string; taskId?: string };
-  'habit:select': string;
-
-  // Timer events
-  'timer:start': { taskName: string; duration: number; currentTime?: number };
-  'timer:pause': { taskName: string; timeLeft?: number; metrics?: any };
-  'timer:resume': { taskName: string; timeLeft?: number; metrics?: any; currentTime?: number };
-  'timer:reset': { taskName: string; duration?: number };
-  'timer:complete': { taskName: string; metrics: any };
-  'timer:task-set': any;
-  'timer:tick': { timeLeft: number; taskName: string; remaining?: number };
-  'timer:init': { taskName: string; duration: number };
-  'timer:close': { taskName: string };
-  'timer:expand': { taskName: string };
-  'timer:collapse': { taskName: string; saveNotes?: boolean };
-  'timer:metrics-update': { taskName: string; metrics: any };
-  'timer:set-task': any;
-
-  // Note events
-  'note:create': { id: string; title: string; content: string };
-  'note:update': { id: string; updates: any };
-  'note:deleted': { id: string };
-  'note:view': { id: string };
-  'note:format': { id: string; format: string; action?: string };
-  'note:format-complete': { id: string; format?: string };
-  'note:create-from-habit': any;
-  'note:create-from-voice': { audioUrl: string; transcript?: string };
-
-  // Voice note events
-  'voice-note:created': { noteId: string };
-  'voice-note:deleted': { noteId: string };
-  'voice-note:updated': { noteId: string; updates: any };
+  // App events
+  "app:start": {};
+  "app:error": { message: string; code?: string; };
+  "app:theme-change": { theme: string; };
+  "app:language-change": { language: string; };
 
   // Auth events
-  'auth:signed-in': { user: any };
-  'auth:signed-out': any;
-  'auth:state-change': { user: any };
+  "auth:login": { userId: string; email?: string; };
+  "auth:logout": {};
+  "auth:register": { userId: string; email?: string; };
+  "auth:password-reset": { email: string; };
 
-  // App events
-  'app:initialized': { timestamp: string };
-  'app:route-changed': { path: string };
-
-  // Relationship events
-  'relationship:create': any;
-  'relationship:delete': any;
-  'relationship:update': any;
-  'relationship:batch-update': any;
-
-  // Tag events
-  'tag:link': any;
-  'tag:unlink': any;
-  'tags:force-update': { timestamp: string };
-
-  // Journal events
-  'journal:open': any;
-
-  // Quote events
-  'quote:link-task': any;
+  // Habit events
+  "habits:create": { habitId: string; name: string; };
+  "habits:update": { habitId: string; updates: any; };
+  "habits:delete": { habitId: string; };
+  "habits:complete": { habitId: string; date: string; };
+  "habits:check-pending": {};
 
   // Navigation events
-  'nav:route-change': any;
-}
+  "navigation:change": { path: string; };
+  "navigation:go-back": {};
+  "navigation:go-forward": {};
 
+  // Note events
+  "note:create": { id: string; title: string; content: string; };
+  "note:update": { id: string; updates: any; };
+  "note:delete": { id: string; };
+  "note:create-from-habit": { habitId: string; habitName: string; content: string; templateId?: string; };
+
+  // Quote events
+  "quote:create": { id: string; text: string; author?: string; };
+  "quote:update": { id: string; updates: any; };
+  "quote:delete": { id: string; };
+  "quote:favorite": { id: string; };
+  "quote:unfavorite": { id: string; };
+
+  // Relationship events
+  "relationship:create": { id: string; type: string; sourceId: string; targetId: string; };
+  "relationship:update": { id: string; updates: any; };
+  "relationship:delete": { id: string; };
+
+  // Tag events
+  "tag:create": { id: string; name: string; color?: string; };
+  "tag:update": { id: string; updates: any; };
+  "tag:delete": { id: string; };
+  "tag:assign": { tagId: string; itemId: string; itemType: string; };
+  "tag:remove": { tagId: string; itemId: string; };
+
+  // Task events
+  "task:create": { id: string; name: string; description?: string; taskType?: string; [key: string]: any; };
+  "task:update": { taskId: string; updates: any; };
+  "task:delete": { taskId: string; reason?: string; };
+  "task:complete": { taskId: string; metrics?: any; };
+  "task:dismiss": { taskId: string; habitId?: string; date?: string; };
+  "task:reload": {};
+
+  // Timer events
+  "timer:start": { taskId?: string; taskName?: string; duration?: number; };
+  "timer:pause": { timeLeft: number; pauseCount: number; };
+  "timer:resume": {};
+  "timer:stop": {};
+  "timer:complete": { taskName: string; metrics: any; taskId?: string; };
+  "timer:extend": { minutes: number; };
+  "timer:reset": {};
+  "timer:tick": { timeLeft: number; };
+  "timer:set-task": { id: string; name: string; duration?: number; };
+  "timer:task-set": { id: string; name: string; duration?: number; };
+  "timer:init": { taskName: string; duration: number; taskId?: string; };
+
+  // Journal events
+  "journal:create": { id: string; title: string; content: string; date: string; };
+  "journal:update": { id: string; updates: any; };
+  "journal:delete": { id: string; };
+
+  // Voice note events
+  "voicenote:start": { taskId?: string; };
+  "voicenote:stop": {};
+  "voicenote:transcribe": { audioUrl: string; };
+  "voicenote:save": { taskId: string; text: string; url: string; duration: number; };
+}

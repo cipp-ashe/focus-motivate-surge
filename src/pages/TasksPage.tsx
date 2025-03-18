@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { TaskLayout } from '@/components/tasks/TaskLayout';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -21,19 +20,15 @@ const TasksPage: React.FC = () => {
   const tasks = taskContext?.items || [];
   const completedTasks = taskContext?.completed || [];
   
-  // Initialize the timer task handler
   const { handleTimerTaskSet } = useTimerTaskHandler(navigate);
   
-  // State for dialogs
   const [checklistDialogOpen, setChecklistDialogOpen] = useState(false);
   const [journalDialogOpen, setJournalDialogOpen] = useState(false);
   const [screenshotDialogOpen, setScreenshotDialogOpen] = useState(false);
   const [voiceNoteDialogOpen, setVoiceNoteDialogOpen] = useState(false);
   
-  // State for UI updates
   const [, setForceUpdate] = useState(0);
   
-  // Force update handler with debouncing to prevent excessive re-renders
   const forceUpdateHandlerRef = React.useRef<NodeJS.Timeout | null>(null);
   const forceUpdateHandler = useCallback(() => {
     if (forceUpdateHandlerRef.current) {
@@ -46,7 +41,6 @@ const TasksPage: React.FC = () => {
     }, 50);
   }, []);
   
-  // Clean up timeout on unmount
   useEffect(() => {
     return () => {
       if (forceUpdateHandlerRef.current) {
@@ -55,25 +49,21 @@ const TasksPage: React.FC = () => {
     };
   }, []);
   
-  // Dialog content state
   const [activeTaskId, setActiveTaskId] = useState<string>('');
   const [activeTaskName, setActiveTaskName] = useState<string>('');
   const [checklistItems, setChecklistItems] = useState<any[]>([]);
   const [journalEntry, setJournalEntry] = useState<string>('');
   const [screenshotUrl, setScreenshotUrl] = useState<string>('');
   
-  // Debug: Log task context on component mount
   useEffect(() => {
     console.log("TasksPage mounted, taskContext:", taskContext);
     console.log("Tasks available:", tasks);
     
-    // Force a reload of tasks when we mount to ensure we have the latest
     setTimeout(() => {
       eventManager.emit('task:reload', {});
     }, 100);
   }, [taskContext, tasks]);
   
-  // Setup timer event listeners
   useEffect(() => {
     const handleTimerEvent = (event: CustomEvent) => {
       if (event.detail) {
@@ -88,7 +78,6 @@ const TasksPage: React.FC = () => {
     };
   }, [handleTimerTaskSet]);
   
-  // Dialog openers
   const dialogOpeners = {
     checklist: (taskId: string, taskName: string, items: any[]) => {
       console.log("Opening checklist dialog:", { taskId, taskName, items });
@@ -122,7 +111,6 @@ const TasksPage: React.FC = () => {
     }
   };
   
-  // Handle task creation using taskContext directly 
   const handleAddTask = useCallback((task: Task) => {
     try {
       console.log("Adding task to context:", task);
@@ -139,7 +127,6 @@ const TasksPage: React.FC = () => {
     }
   }, [taskContext]);
   
-  // Handle multiple tasks addition with error handling
   const handleAddMultipleTasks = useCallback((tasks: Task[]) => {
     try {
       console.log("Adding multiple tasks:", tasks);
@@ -158,7 +145,14 @@ const TasksPage: React.FC = () => {
     }
   }, [taskContext]);
   
-  // If no task context, show loading or error
+  const handleTaskComplete = useCallback(({ taskId, metrics }) => {
+    console.log("TasksPage: Completing task", taskId, "with metrics:", metrics);
+    if (taskContext?.completeTask) {
+      taskContext.completeTask(taskId, metrics);
+      toast.success(`Task completed!`);
+    }
+  }, [taskContext]);
+  
   if (!taskContext) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -174,12 +168,12 @@ const TasksPage: React.FC = () => {
   
   return (
     <div className="min-h-screen">
-      {/* Include the TaskEventHandler to listen for task events */}
       <TaskEventHandler
         onForceUpdate={forceUpdateHandler}
         onTaskCreate={task => taskContext.addTask(task)}
         onTaskUpdate={({taskId, updates}) => taskContext.updateTask(taskId, updates)}
         onTaskDelete={({taskId}) => taskContext.deleteTask(taskId)}
+        onTaskComplete={handleTaskComplete}
         tasks={tasks}
       />
       

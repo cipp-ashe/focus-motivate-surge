@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
@@ -31,7 +30,6 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   useEvent('task:delete', onTaskDelete);
   useEvent('task:complete', onTaskComplete);
   
-  // Handle UI refresh events - minimize the number of handlers and debounce actions
   useEffect(() => {
     if (eventHandlersInitialized) return;
     

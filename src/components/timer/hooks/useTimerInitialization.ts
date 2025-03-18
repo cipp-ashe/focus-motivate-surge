@@ -59,7 +59,8 @@ export const useTimerInitialization = ({
       
       // Add taskId to metrics if available
       if (taskId) {
-        updateMetrics({ taskId });
+        // Update metrics to include the taskId
+        updateMetrics((prev) => ({ ...prev, taskId }));
       }
       
       // Emit initialization event
@@ -122,8 +123,8 @@ export const useTimerInitialization = ({
       handleAddTime: timerHandlers.handleAddTime,
     });
 
-    // Use the auto-complete hook
-    const handleAutoComplete = useTimerAutoComplete({
+    // Use the auto-complete hook for automatic timer completion
+    const autoCompleteHandler = useTimerAutoComplete({
       isRunning,
       pause: pauseTimer,
       playSound,

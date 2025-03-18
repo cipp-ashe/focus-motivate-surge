@@ -56,7 +56,7 @@ export const useTimerComplete = ({
       const netEffectiveTime = actualDuration - (metrics.pausedTime || 0) + (metrics.extensionTime || 0);
       
       // Determine completion status based on expected vs actual time
-      let completionStatus = "Completed On Time";
+      let completionStatus: "Completed Early" | "Completed On Time" | "Completed Late" | "Completed Very Early" | "Completed Very Late" = "Completed On Time";
       if (netEffectiveTime < metrics.expectedTime * 0.8) {
         completionStatus = "Completed Early";
       } else if (netEffectiveTime > metrics.expectedTime * 1.2) {
@@ -100,10 +100,9 @@ export const useTimerComplete = ({
       }, 300);
       
       // Emit completion event
-      eventManager.emit('timer:complete', {
-        taskId: metrics.taskId,
-        taskName,
-        metrics: completeMetrics
+      eventManager.emit('timer:complete', { 
+        taskName, 
+        metrics: completeMetrics 
       });
       
       // Call completion callback if provided
@@ -134,7 +133,6 @@ export const useTimerComplete = ({
   ]);
 
   return {
-    handleComplete,
-    completeTimer
+    handleComplete
   };
 };
