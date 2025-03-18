@@ -21,8 +21,6 @@ import { cn } from '@/lib/utils';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import DashboardCardGrid from '@/components/dashboard/DashboardCardGrid';
-import { Card, CardContent } from '@/components/ui/card';
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -35,8 +33,81 @@ const Index = () => {
         description="Organize tasks, track habits, and manage your work sessions"
       />
       
-      {/* Main feature cards - preserving original functionality */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
+      {/* Habits Feature Showcase - Now as a hero section at the top */}
+      <div className="mb-8 glass-card p-5 md:p-6 bg-gradient-to-br from-amber-50/90 to-transparent dark:from-amber-950/30 dark:to-transparent border border-amber-100 dark:border-amber-800/30 transition-all duration-300 hover:shadow-md">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-shrink-0 bg-amber-400/20 p-3 rounded-full">
+            <Activity className="w-6 h-6 text-amber-500" aria-hidden="true" />
+          </div>
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold">Habit Automation</h2>
+            <p className="text-muted-foreground text-sm md:text-base">
+              Configure once, automate your daily workflow with tasks, timers, and journals
+            </p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Sample auto-generated task showcase - Timer task example */}
+          <div className="bg-gradient-to-r from-amber-50 to-amber-100/70 dark:from-amber-900/20 dark:to-amber-800/10 rounded-md p-4 border border-dashed border-amber-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-blue-400/20 flex items-center justify-center">
+                <Timer className="h-4 w-4 text-blue-500" />
+              </div>
+              <div className="flex-1">
+                <div className="text-base font-medium">Morning Workout</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap mt-1">
+                  <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-medium">habit</span>
+                  <span className="flex items-center gap-1">
+                    <Tag className="h-3.5 w-3.5 text-primary/70" />
+                    <span className="text-xs">fitness</span>
+                  </span>
+                  <span className="text-xs flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5 text-blue-500/80" />
+                    <span>25 min timer</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Sample auto-generated journal task showcase */}
+          <div className="bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/10 rounded-md p-4 border border-dashed border-green-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-green-400/20 flex items-center justify-center">
+                <FileText className="h-4 w-4 text-green-500" />
+              </div>
+              <div className="flex-1">
+                <div className="text-base font-medium">Daily Reflection</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap mt-1">
+                  <span className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium">journal</span>
+                  <span className="flex items-center gap-1">
+                    <CalendarCheck className="h-3.5 w-3.5 text-green-500/80" />
+                    <span className="text-xs">auto-generated</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Additional information about habit automation */}
+        <div className="bg-white/60 dark:bg-black/5 p-3 rounded-md mb-4 text-sm border border-amber-200/50 dark:border-amber-800/30">
+          <p className="text-muted-foreground flex items-start gap-1.5">
+            <span className="text-amber-600 dark:text-amber-400 font-medium flex-shrink-0">How it works:</span> 
+            <span>Configure habit templates once, and TaskTimer auto-creates tasks based on your schedule with proper tags, timers, and journal entries.</span>
+          </p>
+        </div>
+        
+        <Button asChild variant="default" size="sm" className="w-full md:w-auto rounded-md bg-amber-500/90 hover:bg-amber-500 ml-auto flex">
+          <Link to="/habits" className="flex items-center justify-center">
+            Configure Habits <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          </Link>
+        </Button>
+      </div>
+      
+      {/* Main feature cards - Two column layout for Tasks and Notes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
         {/* Tasks section with direct action links */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/30 dark:to-transparent border border-blue-100 dark:border-blue-800/30 transition-all duration-300 hover:shadow-md">
           <div className="flex justify-between items-start mb-4">
@@ -108,74 +179,6 @@ const Index = () => {
           <Button asChild variant="default" size="sm" className="w-full rounded-md bg-[#9b87f5]/90 hover:bg-[#9b87f5]">
             <Link to="/notes" className="flex items-center justify-center">
               Browse Notes <ArrowRight className="h-3.5 w-3.5 ml-1" />
-            </Link>
-          </Button>
-        </div>
-        
-        {/* Habits feature component - showcasing real integration with tasks, timers, journals */}
-        <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-amber-50 to-transparent dark:from-amber-950/30 dark:to-transparent border border-amber-100 dark:border-amber-800/30 transition-all duration-300 hover:shadow-md">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-shrink-0 bg-amber-400/20 p-2 md:p-3 rounded-full">
-              <Activity className="w-5 h-5 md:w-6 md:h-6 text-amber-500" aria-hidden="true" />
-            </div>
-            <Button asChild variant="ghost" size="sm" className="text-amber-500 hover:text-amber-500/80 hover:bg-amber-500/10 px-2 py-1 text-sm">
-              <Link to="/habits">Configure</Link>
-            </Button>
-          </div>
-          <h2 className="text-lg md:text-xl font-semibold mb-2">Habit Automation</h2>
-          <p className="text-muted-foreground text-sm md:text-base mb-3">
-            Automate your workflow with habit templates that create tasks, timers, and journals automatically.
-          </p>
-          
-          {/* Sample auto-generated task showcase - Timer task example */}
-          <div className="bg-gradient-to-r from-amber-50 to-amber-100/70 dark:from-amber-900/20 dark:to-amber-800/10 rounded-md p-3 mb-2.5 border border-dashed border-amber-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full bg-blue-400/20 flex items-center justify-center">
-                <Timer className="h-3 w-3 text-blue-500" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium">Morning Workout</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded-sm text-[10px]">habit</span>
-                  <span className="flex items-center gap-0.5">
-                    <Tag className="h-3 w-3 text-primary/70" />
-                    <span className="text-[10px]">fitness</span>
-                  </span>
-                  <span className="text-[10px]">25 min timer</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Sample auto-generated journal task showcase */}
-          <div className="bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/10 rounded-md p-3 mb-2.5 border border-dashed border-green-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full bg-green-400/20 flex items-center justify-center">
-                <FileText className="h-3 w-3 text-green-500" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium">Daily Reflection</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <span className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 px-1.5 py-0.5 rounded-sm text-[10px]">journal</span>
-                  <span className="flex items-center gap-0.5">
-                    <CalendarCheck className="h-3 w-3 text-green-500/80" />
-                    <span className="text-[10px]">auto-generated</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Additional information about habit automation */}
-          <div className="bg-white/60 dark:bg-black/5 p-2.5 rounded-md mb-4 text-xs border border-amber-200/50 dark:border-amber-800/30">
-            <p className="text-muted-foreground">
-              <span className="text-amber-600 dark:text-amber-400 font-medium">How it works:</span> Configure habit templates once, and TaskTimer auto-creates tasks based on your schedule with proper tags, timers, and journal entries.
-            </p>
-          </div>
-          
-          <Button asChild variant="default" size="sm" className="w-full rounded-md bg-amber-500/90 hover:bg-amber-500 mt-auto">
-            <Link to="/habits" className="flex items-center justify-center">
-              Configure Habits <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Link>
           </Button>
         </div>
