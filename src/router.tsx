@@ -1,3 +1,4 @@
+
 import { createBrowserRouter } from "react-router-dom";
 import Index from "./pages/Index";
 import TaskPage from "./pages/TaskPage";
@@ -9,7 +10,6 @@ import AuthCallback from "./pages/AuthCallback";
 import Settings from "./pages/Settings";
 import VoiceNotes from "./pages/VoiceNotes";
 import Screenshots from "./pages/Screenshots";
-import SecurityControlsPage from "./pages/SecurityControls";
 import { RequireAuth } from "./components/auth/RequireAuth";
 import AppLayout from "./components/AppLayout";
 
@@ -68,14 +68,6 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <Screenshots />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: "security-controls",
-        element: (
-          <RequireAuth>
-            <SecurityControlsPage />
           </RequireAuth>
         ),
       },
