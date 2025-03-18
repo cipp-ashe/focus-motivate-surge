@@ -47,7 +47,6 @@ const Index = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {/* Sample auto-generated task showcase - Timer task example */}
           <div className="bg-gradient-to-r from-amber-50 to-amber-100/70 dark:from-amber-900/20 dark:to-amber-800/10 rounded-md p-4 border border-dashed border-amber-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-blue-400/20 flex items-center justify-center">
@@ -70,7 +69,6 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Sample auto-generated journal task showcase */}
           <div className="bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/10 rounded-md p-4 border border-dashed border-green-300/70 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-sm">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-green-400/20 flex items-center justify-center">
@@ -90,7 +88,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Additional information about habit automation */}
         <div className="bg-white/60 dark:bg-black/5 p-3 rounded-md mb-4 text-sm border border-amber-200/50 dark:border-amber-800/30">
           <p className="text-muted-foreground flex items-start gap-1.5">
             <span className="text-amber-600 dark:text-amber-400 font-medium flex-shrink-0">How it works:</span> 
@@ -107,7 +104,6 @@ const Index = () => {
       
       {/* Main feature cards - Three column layout for desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
-        {/* Tasks section with direct action links */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/30 dark:to-transparent border border-blue-100 dark:border-blue-800/30 transition-all duration-300 hover:shadow-md">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-primary/20 p-2 md:p-3 rounded-full">
@@ -145,7 +141,6 @@ const Index = () => {
           </Button>
         </div>
         
-        {/* Notes section - simplified with direct links */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-purple-50 to-transparent dark:from-purple-950/30 dark:to-transparent border border-purple-100 dark:border-purple-800/30 transition-all duration-300 hover:shadow-md">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-[#9b87f5]/20 p-2 md:p-3 rounded-full">
@@ -182,7 +177,6 @@ const Index = () => {
           </Button>
         </div>
         
-        {/* Settings section - moved from the bottom to be part of the main grid */}
         <div className="flex flex-col glass-card p-4 md:p-6 h-full bg-gradient-to-br from-gray-50 to-transparent dark:from-gray-900/30 dark:to-transparent border border-gray-100 dark:border-gray-800/30 transition-all duration-300 hover:shadow-md">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-shrink-0 bg-gradient-to-br from-primary/20 to-primary/10 p-2 md:p-3 rounded-full">
@@ -221,7 +215,6 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Compact quick access section - keep but make more efficient */}
       <div className="mb-8">
         <h3 className="text-md md:text-lg font-medium mb-3 flex items-center">
           <Clock className="w-4 h-4 mr-2 text-primary/70" />
@@ -272,7 +265,6 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Simple footer */}
       <DashboardFooter
         linkTo="/tasks"
         text="Go to Tasks"

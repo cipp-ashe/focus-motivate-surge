@@ -54,7 +54,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
             >
               <Icon className={cn("w-6 h-6", iconColor)} />
             </div>
-            <div className="flex-1">
+            <div>
               <h2 className="text-xl font-semibold" id={`card-title-${title.toLowerCase().replace(/\s+/g, '-')}`}>
                 {title}
               </h2>
