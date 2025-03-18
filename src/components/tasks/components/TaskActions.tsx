@@ -10,7 +10,7 @@ interface TaskActionsProps {
   isHovered: boolean;
   isSelected: boolean;
   handleDelete: () => void;
-  handleTaskAction: (e: React.MouseEvent<Element>, actionType?: string) => void;
+  handleTaskAction: (e: React.MouseEvent<Element, MouseEvent>, actionType?: string) => void;
 }
 
 export const TaskActions: React.FC<TaskActionsProps> = ({
@@ -30,7 +30,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
           className="h-7 w-7 text-muted-foreground hover:text-foreground"
           onClick={(e) => {
             e.stopPropagation();
-            handleTaskAction(e, 'true');
+            handleTaskAction(e as React.MouseEvent<Element, MouseEvent>, 'true');
           }}
           aria-label="Select for timer"
         >
@@ -42,7 +42,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
       {(isHovered || isSelected) && (
         <TaskStatusDropdown 
           task={task} 
-          onStatusChange={(status) => handleTaskAction({} as React.MouseEvent<Element>, `status-${status}`)} 
+          onStatusChange={(status) => handleTaskAction({} as React.MouseEvent<Element, MouseEvent>, `status-${status}`)} 
         />
       )}
       

@@ -143,7 +143,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
   };
 
   return (
-    <div className="w-full h-full p-6">
+    <div className="w-full h-full p-4">
       {selectedTaskState ? (
         <Timer 
           key={selectedTaskState.id}
@@ -154,7 +154,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
           onDurationChange={undefined}
           favorites={favorites}
           setFavorites={setFavorites}
-          taskId={selectedTaskState.id} // Pass the task ID to the Timer
+          taskId={selectedTaskState.id}
         />
       ) : (
         <EmptyTimerState />
