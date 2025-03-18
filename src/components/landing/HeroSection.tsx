@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, Activity, Timer, FileText, Clock, CalendarCheck, Tag, ListTodo, BookOpen } from 'lucide-react';
@@ -27,13 +26,9 @@ const HeroSection: React.FC = () => {
         </Badge>
       </div>
       
-      {/* Habit Automation Section - Now between title and feature cards */}
-      <HabitAutomationShowcase />
-      
-      {/* Features Section - Feature cards come last */}
+      {/* Features Section - Feature cards come first */}
       <div className="mb-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* We'll render the feature cards from FeaturesSection but not its title */}
           <FeatureCard 
             icon={ListTodo} 
             iconClass="bg-primary/10" 
@@ -89,6 +84,9 @@ const HeroSection: React.FC = () => {
           />
         </div>
       </div>
+      
+      {/* Habit Automation Section - Now after the feature cards */}
+      <HabitAutomationShowcase />
     </section>;
 };
 
