@@ -20,7 +20,7 @@ export const useTimerComplete = ({
   setIsExpanded: (expanded: boolean) => void;
   onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
 }): (() => Promise<void>) => {
-  // Handle timer completion
+  // Handle timer completion - return a direct function (not an object)
   return useCallback(async (): Promise<void> => {
     try {
       // Convert dates to ISO strings for serialization

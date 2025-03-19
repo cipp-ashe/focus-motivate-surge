@@ -1,7 +1,5 @@
 
-import { useState } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
-import { Quote, SoundOption, TimerExpandedViewRef } from "@/types/timer";
 import { useTimerCore } from "./initialization/useTimerCore";
 import { useTimerHandlers } from "./initialization/useTimerHandlers";
 import { useTimerViews } from "./initialization/useTimerViews";
@@ -35,13 +33,7 @@ export const useTimerInitialization = ({
     pauseTimerRef,
     
     // State getters
-    timerState: {
-      timeLeft,
-      minutes,
-      isRunning,
-      metrics,
-      isMountedRef
-    },
+    timerState,
     
     // State setters
     updateTimeLeft,
@@ -50,16 +42,7 @@ export const useTimerInitialization = ({
     updateMetrics,
     
     // View state
-    viewState: {
-      isExpanded,
-      selectedSound,
-      showCompletion,
-      showConfirmation,
-      completionMetrics,
-      internalMinutes,
-      pauseTimeLeft,
-      isLoadingAudio
-    },
+    viewState,
     
     // View state setters
     setIsExpanded,
@@ -90,9 +73,9 @@ export const useTimerInitialization = ({
   // Initialize timer handlers
   const timerHandlers = useTimerHandlers({
     taskName,
-    isRunning,
-    timeLeft,
-    metrics,
+    isRunning: timerState.isRunning,
+    timeLeft: timerState.timeLeft,
+    metrics: timerState.metrics,
     startTimer,
     pauseTimer,
     resetTimer,
@@ -114,12 +97,12 @@ export const useTimerInitialization = ({
     getTimerCircleProps,
     getTimerControlsProps
   } = useTimerViews({
-    isRunning,
-    timeLeft,
-    minutes,
-    metrics,
-    isExpanded,
-    pauseTimeLeft,
+    isRunning: timerState.isRunning,
+    timeLeft: timerState.timeLeft,
+    minutes: timerState.minutes,
+    metrics: timerState.metrics,
+    isExpanded: viewState.isExpanded,
+    pauseTimeLeft: viewState.pauseTimeLeft,
     handleToggle: timerHandlers.handleToggle,
     handleComplete: timerHandlers.handleComplete,
     handleAddTime: timerHandlers.handleAddTime
@@ -128,7 +111,7 @@ export const useTimerInitialization = ({
   // Create a function to complete the timer - this returns a function directly
   const completeTimerFn = useTimerComplete({
     taskName,
-    metrics,
+    metrics: timerState.metrics,
     setIsExpanded,
     onComplete: onComplete || (() => {})
   });
@@ -145,10 +128,10 @@ export const useTimerInitialization = ({
 
   // Auto-complete function
   const autoComplete = useAutoComplete({
-    isRunning,
+    isRunning: timerState.isRunning,
     pause: pauseTimer,
     playSound,
-    metrics,
+    metrics: timerState.metrics,
     completeTimer: completeTimerAction,
     onComplete,
     taskName,
@@ -160,9 +143,9 @@ export const useTimerInitialization = ({
   logger.debug('TimerInitialization', 'Timer initialized with:', {
     duration,
     taskName,
-    isRunning,
-    timeLeft,
-    metrics
+    isRunning: timerState.isRunning,
+    timeLeft: timerState.timeLeft,
+    metrics: timerState.metrics
   });
 
   return {
@@ -170,22 +153,22 @@ export const useTimerInitialization = ({
     expandedViewRef,
     
     // State
-    isExpanded,
-    selectedSound,
+    isExpanded: viewState.isExpanded,
+    selectedSound: viewState.selectedSound,
     setSelectedSound,
-    showCompletion,
-    showConfirmation,
+    showCompletion: viewState.showCompletion,
+    showConfirmation: viewState.showConfirmation,
     setShowConfirmation,
-    completionMetrics,
-    internalMinutes,
+    completionMetrics: viewState.completionMetrics,
+    internalMinutes: viewState.internalMinutes,
     setInternalMinutes: (minutes: number) => {
       setInternalMinutes(minutes);
       if (onDurationChange) {
         onDurationChange(minutes);
       }
     },
-    metrics,
-    isRunning,
+    metrics: timerState.metrics,
+    isRunning: timerState.isRunning,
     
     // Handlers
     timerHandlers,
@@ -197,7 +180,7 @@ export const useTimerInitialization = ({
     // Utility functions
     testSound,
     updateMetrics,
-    isLoadingAudio,
+    isLoadingAudio: viewState.isLoadingAudio,
     
     // Auto-complete function
     autoComplete

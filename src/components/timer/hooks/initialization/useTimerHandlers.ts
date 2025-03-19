@@ -45,8 +45,8 @@ export const useTimerHandlers = ({
   setPauseTimeLeft,
   pauseTimerRef,
 }: UseTimerHandlersProps) => {
-  // Use the timer completion hook - this returns a function directly
-  const completeTimer = useTimerComplete({
+  // Use the timer completion hook - returns a function directly now
+  const completeTimerFn = useTimerComplete({
     taskName,
     metrics,
     setIsExpanded,
@@ -62,8 +62,8 @@ export const useTimerHandlers = ({
     pause: pauseTimer,
     reset: resetTimer,
     addTime: extendTimer,
-    // Pass the direct function, not an object
-    completeTimer,
+    // Pass the direct function
+    completeTimer: completeTimerFn,
     playSound,
     onAddTime,
     onComplete,
