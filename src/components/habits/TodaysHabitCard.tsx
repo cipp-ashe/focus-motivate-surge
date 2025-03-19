@@ -54,7 +54,8 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
       name: habit.name,
       duration: habit.metrics.target || 1500, // Default to 25 minutes
       date: new Date().toDateString(),
-      metricType: habit.metrics.type
+      // Use as a TypeScript assertion to ensure compatibility with event types
+      metricType: habit.metrics.type as string
     });
     
     // Force task update after a short delay

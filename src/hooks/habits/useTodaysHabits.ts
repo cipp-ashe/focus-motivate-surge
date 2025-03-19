@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useHabitState } from '@/contexts/habits/HabitContext';
@@ -86,7 +85,7 @@ export const useTodaysHabits = () => {
               habits.push(newHabit);
               
               // Get habit duration (default to 1500 seconds = 25 minutes)
-              const habitDuration = 1500;
+              const habitDuration = habit.metrics.target || 1500;
               
               // Determine the metric type from the metrics field
               let metricType = habit.metrics.type || 'regular';

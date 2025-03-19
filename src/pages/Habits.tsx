@@ -78,13 +78,14 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
     console.log('Adding habit to tasks:', habit.id, habit.name);
     
     // Emit habit schedule event with all required data
+    // Use type assertion to ensure type compatibility
     eventManager.emit('habit:schedule', {
       habitId: habit.id,
       templateId: habit.relationships?.templateId || '',
       name: habit.name,
       duration: habit.metrics.target || 1500, // Default to 25 minutes
       date: new Date().toDateString(),
-      metricType: habit.metrics.type
+      metricType: habit.metrics.type as string
     });
     
     // Force task update after a short delay

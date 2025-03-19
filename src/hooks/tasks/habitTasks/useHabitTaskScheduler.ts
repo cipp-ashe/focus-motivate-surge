@@ -14,7 +14,7 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
   
   // Handle habit schedule events
   const handleHabitSchedule = useCallback((event: HabitTaskEvent) => {
-    const { habitId, templateId, name, duration, date } = event;
+    const { habitId, templateId, name, duration, date, metricType } = event;
     
     // Generate a unique key for this habit-date combination
     const key = `${habitId}-${date}`;
@@ -33,7 +33,11 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
         name,
         duration,
         date,
-        { suppressToast: true }
+        { 
+          suppressToast: true,
+          taskType: metricType === 'timer' ? 'timer' : 
+                    metricType === 'journal' ? 'journal' : 'regular'
+        }
       );
       
       if (taskId) {

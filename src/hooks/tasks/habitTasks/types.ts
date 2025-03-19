@@ -7,6 +7,7 @@ export interface HabitTaskEvent {
   name: string;
   duration: number;
   date: string;
+  metricType?: string;
 }
 
 export interface HabitTaskSchedulerReturn {
