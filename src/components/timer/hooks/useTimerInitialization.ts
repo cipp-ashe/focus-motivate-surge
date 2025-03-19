@@ -125,7 +125,7 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime
   });
 
-  // Create a handleComplete function using the useTimerComplete hook
+  // Create a function to complete the timer - this returns a function directly
   const completeTimerFn = useTimerComplete({
     taskName,
     metrics,
@@ -133,8 +133,8 @@ export const useTimerInitialization = ({
     onComplete: onComplete || (() => {})
   });
 
-  // Set up timer monitoring - pass the function directly
-  const monitoringCallback = useTimerMonitoring({
+  // Set up timer monitoring - pass the direct function
+  useTimerMonitoring({
     taskName,
     updateTimeLeft,
     handleComplete: completeTimerFn
