@@ -57,6 +57,7 @@ interface UseAutoCompleteProps {
   setShowCompletion: (show: boolean) => void;
 }
 
+// Modify to return the function directly instead of an object with handleComplete property
 export const useTimerAutoComplete = ({
   isRunning,
   pause,
@@ -67,7 +68,7 @@ export const useTimerAutoComplete = ({
   taskName,
   setCompletionMetrics,
   setShowCompletion
-}: UseAutoCompleteProps): () => Promise<void> => {
+}: UseAutoCompleteProps): (() => Promise<void>) => {
   return useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();

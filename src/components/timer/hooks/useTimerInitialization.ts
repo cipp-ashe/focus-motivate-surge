@@ -134,7 +134,7 @@ export const useTimerInitialization = ({
   useTimerEvents(taskName, duration);
 
   // Handle auto-complete function
-  // Fix: Return the function directly instead of an object
+  // Fix: return the function directly without wrapping it in an object
   const autoComplete = useTimerAutoComplete({
     isRunning,
     pause: pauseTimer,

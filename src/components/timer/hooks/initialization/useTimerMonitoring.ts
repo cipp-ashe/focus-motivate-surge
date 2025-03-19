@@ -34,11 +34,10 @@ export const useTimerMonitoring = ({
     return () => {};
   }, []);
 
-  return {
-    handleTimeUp: async (): Promise<void> => {
-      logger.debug("TimerMonitoring", `Timer completed for task: ${taskName}`);
-      // Call the provided handleComplete function and ensure it returns a Promise
-      return handleComplete();
-    },
+  // Return a function, not an object with a function property
+  return async (): Promise<void> => {
+    logger.debug("TimerMonitoring", `Timer completed for task: ${taskName}`);
+    // Call the provided handleComplete function and ensure it returns a Promise
+    return handleComplete();
   };
 };
