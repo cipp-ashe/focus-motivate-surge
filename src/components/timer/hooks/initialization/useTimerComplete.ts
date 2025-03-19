@@ -23,7 +23,7 @@ export const useTimerComplete = ({
   onComplete 
 }: UseTimerCompleteProps): (() => Promise<void>) => {
   // Return a function that returns a Promise<void> directly
-  return useCallback(async () => {
+  const completeTimerFn = useCallback(async (): Promise<void> => {
     try {
       // Convert dates to ISO strings for serialization
       const finalMetrics = {
@@ -65,4 +65,6 @@ export const useTimerComplete = ({
       return Promise.reject(error);
     }
   }, [taskName, metrics, onComplete, setIsExpanded]);
+  
+  return completeTimerFn;
 };
