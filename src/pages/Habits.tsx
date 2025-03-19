@@ -12,6 +12,8 @@ import { useHabitCompletion } from '@/hooks/habits/useHabitCompletion';
 import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
 import { ErrorBoundary } from 'react-error-boundary';
 import { HabitProvider, useHabitContext } from '@/contexts/habits/HabitContext';
+import { eventManager } from '@/lib/events/EventManager';
+import { HabitDetail } from '@/components/habits/types';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -71,10 +73,26 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
     return success;
   };
   
-  // Update the signature to receive a HabitDetail object
-  const handleAddHabitToTasks = (habit: any) => {
-    // Implementation for adding habit to tasks
+  // Handle adding habit to tasks - fixed implementation
+  const handleAddHabitToTasks = (habit: HabitDetail) => {
     console.log('Adding habit to tasks:', habit.id, habit.name);
+    
+    // Emit habit schedule event with all required data
+    eventManager.emit('habit:schedule', {
+      habitId: habit.id,
+      templateId: habit.relationships?.templateId || '',
+      name: habit.name,
+      duration: habit.metrics.target || 1500, // Default to 25 minutes
+      date: new Date().toDateString(),
+      metricType: habit.metrics.type
+    });
+    
+    // Force task update after a short delay
+    setTimeout(() => {
+      window.dispatchEvent(new Event('force-task-update'));
+      eventManager.emit('habits:check-pending', {});
+    }, 500);
+    
     return true;
   };
 

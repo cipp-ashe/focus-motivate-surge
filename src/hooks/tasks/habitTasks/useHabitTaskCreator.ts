@@ -38,13 +38,16 @@ export const useHabitTaskCreator = () => {
         // This is critical - we need to emit the task:select event to make it visible in timer page
         eventManager.emit('task:select', existingTask.id);
         
+        // Also directly emit task:create to ensure it's in memory
+        eventManager.emit('task:create', existingTask);
+        
         return existingTask.id;
       }
       
       // Generate task ID
       const taskId = uuidv4();
       
-      // Create task object with appropriate task type - use the provided task type, not "habit"
+      // Create task object with appropriate task type
       const task: Task = {
         id: taskId,
         name: name,

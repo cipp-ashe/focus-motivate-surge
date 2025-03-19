@@ -1,72 +1,74 @@
 
+import { useCallback } from 'react';
 import { TaskType } from '@/types/tasks';
 
 /**
- * Hook for determining the appropriate task type based on habit metadata
+ * Hook for processing and determining task types
  */
 export const useTaskTypeProcessor = () => {
   /**
-   * Checks if a taskType is valid according to the TaskType enum
+   * Determine the appropriate task type based on various inputs
    */
-  const isValidTaskType = (taskType: string): taskType is TaskType => {
-    const validTypes: TaskType[] = ['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote'];
-    return validTypes.includes(taskType as TaskType);
-  };
-  
-  /**
-   * Determines the appropriate task type from habit metric type and name
-   * 
-   * @param taskType - Optional explicit task type to use
-   * @param metricType - The habit metric type
-   * @param habitName - The habit name for context-based detection
-   * @returns The determined TaskType
-   */
-  const determineTaskType = (taskType?: TaskType, metricType?: string, habitName?: string): TaskType => {
-    // If a specific task type is provided and it's valid, use it
-    if (taskType && isValidTaskType(taskType)) {
-      return taskType;
+  const determineTaskType = useCallback((
+    specifiedType?: TaskType,
+    metricType?: string,
+    habitName?: string
+  ): TaskType => {
+    // First, if a valid task type is explicitly specified, use it
+    if (specifiedType && isValidTaskType(specifiedType)) {
+      return specifiedType;
     }
     
-    console.log(`Determining task type from metric type: ${metricType} and name: ${habitName}`);
+    // Check if this is a journal by metric type
+    if (metricType === 'journal') {
+      return 'journal';
+    }
     
-    // First check if the habit name indicates a journal task
+    // Check if this is a timer by metric type
+    if (metricType === 'timer') {
+      return 'timer';
+    }
+    
+    // If we have a habit name, try to determine from it
     if (habitName) {
       const nameLower = habitName.toLowerCase();
-      if (nameLower.includes('journal') || 
-          nameLower.includes('gratitude') || 
-          nameLower.includes('diary') ||
-          nameLower.includes('reflect')) {
-        console.log(`Detected journal task from name: ${habitName}`);
+      
+      // Check for journal-related keywords
+      if (
+        nameLower.includes('journal') || 
+        nameLower.includes('gratitude') || 
+        nameLower.includes('diary') ||
+        nameLower.includes('reflect')
+      ) {
         return 'journal';
+      }
+      
+      // Check for timer-related keywords
+      if (
+        nameLower.includes('meditation') || 
+        nameLower.includes('workout') || 
+        nameLower.includes('exercise') ||
+        nameLower.includes('run') ||
+        nameLower.includes('practice')
+      ) {
+        return 'timer';
       }
     }
     
-    // Aligned mapping between metric types and task types
-    switch (metricType) {
-      case 'timer':
-        return 'timer';
-      case 'journal':
-        return 'journal';
-      case 'boolean':
-      case 'counter':
-      case 'rating':
-        // Map these to regular tasks
-        return 'regular';
-      case 'checklist':
-      case 'todo':
-        return 'checklist';
-      case 'voicenote':
-      case 'audio':
-        return 'voicenote';
-      case 'screenshot':
-        return 'screenshot';
-      default:
-        return 'regular';
-    }
-  };
+    // Default to regular task type
+    return 'regular';
+  }, []);
+  
+  /**
+   * Validate if a task type is valid
+   */
+  const isValidTaskType = useCallback((taskType: string): boolean => {
+    const validTypes = ['timer', 'regular', 'journal', 'checklist'];
+    return validTypes.includes(taskType);
+  }, []);
   
   return {
-    isValidTaskType,
-    determineTaskType
+    determineTaskType,
+    isValidTaskType
   };
 };

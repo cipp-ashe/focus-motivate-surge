@@ -1,13 +1,17 @@
 
 /**
- * MIGRATION UTILITY: This file exists only to assist with migration.
- * Import it in files that still depend on the old eventBus to get explicit errors,
- * then update those files to use eventManager instead.
+ * @deprecated Use eventManager from @/lib/events/EventManager instead
+ * This file is maintained for backward compatibility only
  */
-import { eventBus } from '@/utils/eventBusToManagerMigration';
 
-// Export the compatibility layer for components still using eventBus
+// Re-export the eventBus mock and other utilities
+import { eventBus, trackEventBusUsage, reportEventBusImport, reportEventBusUsage } from '@/utils/eventBusToManagerMigration';
+
+// When this file is imported, track the usage for debugging
+trackEventBusUsage();
+
+// Export the eventBus mock for backward compatibility
 export { eventBus };
 
-// Alert developers that this file should be imported from
-console.warn('DEPRECATED: Importing from @/lib/eventBus.ts is deprecated. Import eventManager from @/lib/events/EventManager.ts instead.');
+// Export the helper functions
+export { trackEventBusUsage, reportEventBusImport, reportEventBusUsage };

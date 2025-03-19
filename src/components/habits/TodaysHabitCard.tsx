@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Clock, ClipboardList, BookOpen, Zap, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { eventManager } from '@/lib/events/EventManager';
 
 interface TodaysHabitCardProps {
   habit: HabitDetail;
@@ -39,6 +40,27 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
       default:
         return <Zap className="h-5 w-5 text-orange-500" />;
     }
+  };
+
+  // Handle the add to tasks button click - directly emit the event
+  const handleAddToTasks = () => {
+    // First call the provided handler
+    onAddToTasks();
+    
+    // Then directly emit the event for better reliability
+    eventManager.emit('habit:schedule', {
+      habitId: habit.id,
+      templateId: habit.relationships?.templateId || '',
+      name: habit.name,
+      duration: habit.metrics.target || 1500, // Default to 25 minutes
+      date: new Date().toDateString(),
+      metricType: habit.metrics.type
+    });
+    
+    // Force task update after a short delay
+    setTimeout(() => {
+      window.dispatchEvent(new Event('force-task-update'));
+    }, 300);
   };
 
   return (
@@ -88,7 +110,7 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
           variant="ghost"
           size="sm"
           className={`flex items-center gap-1.5 ${hasTask || dismissed ? 'text-muted-foreground' : ''}`}
-          onClick={onAddToTasks}
+          onClick={handleAddToTasks}
           disabled={hasTask || dismissed}
         >
           <ClipboardList className="h-4 w-4" />

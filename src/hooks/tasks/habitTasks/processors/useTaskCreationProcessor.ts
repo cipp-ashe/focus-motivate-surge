@@ -85,52 +85,50 @@ export const useTaskCreationProcessor = (createHabitTask: (
           eventManager.emit('task:create', existingTask);
         }
         
-        // Force task update
+        // Force refresh task list
         setTimeout(() => {
           window.dispatchEvent(new Event('force-task-update'));
-        }, 100);
-      } else {
-        // Determine proper task type from the metric type AND habit name
-        const taskType = determineTaskType(event.taskType, event.metricType, event.name);
+        }, 200);
         
-        // Create the habit task using the creator hook
-        const newTaskId = createHabitTask(
-          event.habitId,
-          event.templateId,
-          event.name,
-          event.duration,
-          event.date,
-          taskType
-        );
+        // Clean up processing flag after slight delay
+        setTimeout(() => {
+          delete processingRef.current[processingKey];
+        }, 500);
         
-        if (newTaskId) {
-          console.log(`Successfully created task ${newTaskId} for habit ${event.habitId} with type ${taskType}`);
-          toast.success(`Created ${taskType} task: ${event.name}`, {
-            description: "Your habit task has been scheduled."
-          });
-          
-          // Force task updates with staggered timing
-          [100, 300, 600].forEach(delay => {
-            setTimeout(() => {
-              window.dispatchEvent(new Event('force-task-update'));
-            }, delay);
-          });
-        }
+        return existingTask.id;
       }
-    } catch (error) {
-      console.error('Error processing habit task:', error);
-      toast.error('Failed to create habit task', {
-        description: "There was an error scheduling your habit task. Please try again."
-      });
-    } finally {
-      // Clean up processing state after a delay
+      
+      // Determine the appropriate task type
+      const taskType = determineTaskType(event.taskType, event.metricType, event.name);
+      
+      // Create new task
+      const taskId = createHabitTask(
+        event.habitId,
+        event.templateId,
+        event.name,
+        event.duration,
+        event.date,
+        taskType
+      );
+      
+      // Clean up processing flag after slight delay
       setTimeout(() => {
         delete processingRef.current[processingKey];
-        if (processingTimeoutsRef.current[processingKey]) {
-          clearTimeout(processingTimeoutsRef.current[processingKey]);
-          delete processingTimeoutsRef.current[processingKey];
-        }
       }, 500);
+      
+      // Force update task list
+      setTimeout(() => {
+        window.dispatchEvent(new Event('force-task-update'));
+      }, 200);
+      
+      return taskId;
+    } catch (error) {
+      console.error('Error processing habit task:', error);
+      
+      // Clean up processing flag on error
+      delete processingRef.current[processingKey];
+      
+      return null;
     }
   }, [createHabitTask, determineTaskType, isValidTaskType]);
   
