@@ -118,7 +118,7 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime
   });
 
-  // Set up timer monitoring - pass the direct function instead of an object
+  // Set up timer monitoring - pass the direct function
   useTimerMonitoring({
     taskName,
     updateTimeLeft,
