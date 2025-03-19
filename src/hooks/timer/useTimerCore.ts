@@ -3,6 +3,8 @@ import { useState, useCallback, useRef, useEffect, useReducer } from 'react';
 import { TimerState, TimerAction } from '@/types/timer';
 import { timerReducer } from './useTimerReducer';
 import { UseTimerOptions } from './types/UseTimerTypes';
+import { eventManager } from '@/lib/events/EventManager';
+import { logger } from '@/utils/logManager';
 
 export const useTimerCore = (options: UseTimerOptions | number = 25) => {
   // Convert options to standardized format
@@ -62,7 +64,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
 
   // Improved start/stop timer logic with better cleanup
   useEffect(() => {
-    console.log(`Timer running state changed: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
+    logger.debug('TimerCore', `Timer running state changed: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
     
     // Clear any existing interval to prevent multiple intervals
     if (intervalRef.current) {
@@ -71,7 +73,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     }
     
     if (state.isRunning && isMountedRef.current) {
-      console.log("Setting up timer interval");
+      logger.debug('TimerCore', "Setting up timer interval");
       lastTickTime.current = Date.now(); // Track when the interval starts
       
       // Set up new interval to decrement time
@@ -92,12 +94,18 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
           lastTickTime.current = now;
           
           // Debug logging
-          console.log(`Timer tick: ${state.timeLeft - 1}s remaining`);
+          logger.debug('TimerCore', `Timer tick: ${state.timeLeft - 1}s remaining`);
           
           // Decrement the timer
           dispatch({ type: 'DECREMENT_TIME' });
           
           // Emit tick event for any listeners
+          eventManager.emit('timer:tick', { 
+            timeLeft: state.timeLeft - 1,
+            taskName: 'timer'  // Generic taskName as this is a core hook
+          });
+          
+          // Also dispatch a window event for backward compatibility
           if (typeof window !== 'undefined') {
             const event = new CustomEvent('timer:tick', { 
               detail: { timeLeft: state.timeLeft - 1 } 
@@ -111,7 +119,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     // Clean up interval on effect cleanup or component unmount
     return () => {
       if (intervalRef.current) {
-        console.log("Cleanup: clearing timer interval");
+        logger.debug('TimerCore', "Cleanup: clearing timer interval");
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
@@ -121,7 +129,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
   // Handle time up
   useEffect(() => {
     if (state.timeLeft === 0 && onTimeUp && isMountedRef.current) {
-      console.log("Timer reached zero, calling onTimeUp");
+      logger.debug('TimerCore', "Timer reached zero, calling onTimeUp");
       onTimeUp();
     }
   }, [state.timeLeft, onTimeUp]);

@@ -5,6 +5,7 @@ import { useTimerState } from "@/hooks/timer/useTimerState";
 import { useTimerActions } from '@/hooks/timer/useTimerActions';
 import { TimerActionProps } from "@/hooks/timer/types/UseTimerTypes";
 import { logger } from "@/utils/logManager";
+import { eventManager } from "@/lib/events/EventManager";
 
 export const useTimerCore = (duration: number, taskName: string) => {
   // Create a ref for the expanded view
@@ -51,6 +52,33 @@ export const useTimerCore = (duration: number, taskName: string) => {
     completeTimer: completeTimerAction,
     updateMetrics: updateMetricsAction
   } = useTimerActions(timerActionProps);
+
+  // Add additional effect to emit timer:start event when timer starts
+  const wrappedStartTimer = () => {
+    logger.debug('TimerCore', `Starting fresh timer for ${taskName} with duration: ${timeLeft}`);
+    
+    // Start the timer first
+    startTimer();
+    
+    // Then emit the event
+    eventManager.emit('timer:start', {
+      taskName,
+      duration: timeLeft,
+      currentTime: Date.now()
+    });
+    
+    // Also dispatch a window event for backward compatibility
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('timer:start', { 
+        detail: { 
+          taskName,
+          duration: timeLeft,
+          currentTime: Date.now()
+        } 
+      });
+      window.dispatchEvent(event);
+    }
+  };
 
   // Add audio functionality
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
@@ -142,7 +170,7 @@ export const useTimerCore = (duration: number, taskName: string) => {
     
     // Timer actions
     timerActions: {
-      startTimer,
+      startTimer: wrappedStartTimer,  // Use the wrapped version that emits events
       pauseTimer,
       extendTimer,
       resetTimer,

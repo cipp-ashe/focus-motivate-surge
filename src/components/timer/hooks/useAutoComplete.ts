@@ -1,8 +1,18 @@
 
 import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
-import { eventManager } from "@/lib/events/EventManager";
-import { toast } from "sonner";
+
+interface UseAutoCompleteProps {
+  isRunning: boolean;
+  pause: () => void;
+  playSound: () => void;
+  metrics: TimerStateMetrics;
+  completeTimer: () => Promise<void>;
+  onComplete?: (metrics: TimerStateMetrics) => void;
+  taskName: string;
+  setCompletionMetrics: (metrics: any) => void;
+  setShowCompletion: (show: boolean) => void;
+}
 
 export const useAutoComplete = ({
   isRunning,
@@ -13,19 +23,9 @@ export const useAutoComplete = ({
   onComplete,
   taskName,
   setCompletionMetrics,
-  setShowCompletion,
-}: {
-  isRunning: boolean;
-  pause: () => void;
-  playSound: () => void;
-  metrics: TimerStateMetrics;
-  completeTimer: () => Promise<void>;
-  onComplete?: (metrics: TimerStateMetrics) => void;
-  taskName: string;
-  setCompletionMetrics: (metrics: TimerStateMetrics | null) => void;
-  setShowCompletion: (show: boolean) => void;
-}): (() => Promise<void>) => {
-  // Return a callback that explicitly returns a Promise<void>
+  setShowCompletion
+}: UseAutoCompleteProps): (() => Promise<void>) => {
+  // Return a direct function that returns a Promise<void>
   return useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();
@@ -49,25 +49,9 @@ export const useAutoComplete = ({
         onComplete(completionMetrics);
       }
       
-      const tasks = JSON.parse(localStorage.getItem('taskList') || '[]');
-      const habitTask = tasks.find((t: any) => t.name === taskName && t.relationships?.habitId);
-      
-      if (habitTask) {
-        console.log('Completing timer task for habit:', habitTask);
-        eventManager.emit('task:complete', { 
-          taskId: habitTask.id,
-          metrics: completionMetrics
-        });
-        toast.success(`Completed timer for habit: ${taskName}`, { duration: 2000 });
-      } else {
-        toast.success(`Timer completed: ${taskName}`, { duration: 2000 });
-      }
-      
-      // Explicitly return a resolved promise
       return Promise.resolve();
     } catch (error) {
       console.error("Error completing timer:", error);
-      // Return a rejected promise for the error case
       return Promise.reject(error);
     }
   }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName, setCompletionMetrics, setShowCompletion]);
