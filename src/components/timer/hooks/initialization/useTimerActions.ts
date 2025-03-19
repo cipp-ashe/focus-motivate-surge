@@ -1,12 +1,12 @@
 
-import { useRef } from "react";
-import { useTimerActions } from '@/hooks/timer/useTimerActions';
+import { useRef, useCallback } from "react";
+import { useTimerActions as useBaseTimerActions } from '@/hooks/timer/useTimerActions';
 import { TimerStateMetrics } from "@/types/metrics";
 import { TimerActionProps } from "@/hooks/timer/types/UseTimerTypes";
 import { eventManager } from "@/lib/events/EventManager";
 import { logger } from "@/utils/logManager";
 
-interface UseTimerActionsProps {
+interface UseTimerActionsInitProps {
   timeLeft: number;
   metrics: TimerStateMetrics;
   updateTimeLeft: (timeLeft: number) => void;
@@ -22,7 +22,7 @@ export const useTimerActions = ({
   updateMetrics,
   setIsRunning,
   taskName
-}: UseTimerActionsProps) => {
+}: UseTimerActionsInitProps) => {
   // Ref for pause timer
   const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -36,20 +36,20 @@ export const useTimerActions = ({
   };
   
   const { 
-    startTimer, 
+    startTimer: baseStartTimer, 
     pauseTimer, 
     extendTimer, 
     resetTimer, 
     completeTimer: completeTimerAction,
     updateMetrics: updateMetricsAction
-  } = useTimerActions(timerActionProps);
+  } = useBaseTimerActions(timerActionProps);
 
   // Add additional effect to emit timer:start event when timer starts
-  const wrappedStartTimer = () => {
+  const startTimer = useCallback(() => {
     logger.debug('TimerCore', `Starting fresh timer for ${taskName} with duration: ${timeLeft}`);
     
     // Start the timer first
-    startTimer();
+    baseStartTimer();
     
     // Then emit the event
     eventManager.emit('timer:start', {
@@ -67,11 +67,11 @@ export const useTimerActions = ({
       });
       window.dispatchEvent(event);
     }
-  };
+  }, [baseStartTimer, taskName, timeLeft]);
 
   return {
     pauseTimerRef,
-    startTimer: wrappedStartTimer,
+    startTimer,
     pauseTimer,
     extendTimer,
     resetTimer,

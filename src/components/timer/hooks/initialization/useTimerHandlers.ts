@@ -1,7 +1,6 @@
 
 import { useCallback } from "react";
 import { useTimerHandlers as useBaseTimerHandlers } from "../../handlers/TimerHandlers";
-import { useTimerComplete } from "./useTimerComplete";
 import { TimerStateMetrics } from "@/types/metrics";
 
 interface UseTimerHandlersProps {
@@ -23,6 +22,7 @@ interface UseTimerHandlersProps {
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
   setPauseTimeLeft: (timeLeft: number | null) => void;
   pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | null>;
+  completeTimer?: () => Promise<void>;
 }
 
 export const useTimerHandlers = ({
@@ -44,15 +44,8 @@ export const useTimerHandlers = ({
   updateMetrics,
   setPauseTimeLeft,
   pauseTimerRef,
+  completeTimer,
 }: UseTimerHandlersProps) => {
-  // Use the timer completion hook - returns a function directly now
-  const completeTimerFn = useTimerComplete({
-    taskName,
-    metrics,
-    setIsExpanded,
-    onComplete: onComplete || (() => {})
-  });
-
   // Initialize handlers with consistent function signatures
   const timerHandlers = useBaseTimerHandlers({
     taskName,
@@ -62,8 +55,8 @@ export const useTimerHandlers = ({
     pause: pauseTimer,
     reset: resetTimer,
     addTime: extendTimer,
-    // Pass the direct function
-    completeTimer: completeTimerFn,
+    // Pass the direct function or a default implementation
+    completeTimer: completeTimer || (async () => Promise.resolve()),
     playSound,
     onAddTime,
     onComplete,

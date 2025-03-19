@@ -5,6 +5,13 @@ import { TimerStateMetrics } from "@/types/metrics";
 import { logger } from "@/utils/logManager";
 import { toISOString } from "@/lib/utils/dateUtils";
 
+interface UseTimerCompleteProps {
+  taskName: string;
+  metrics: TimerStateMetrics;
+  setIsExpanded: (expanded: boolean) => void;
+  onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
+}
+
 /**
  * Hook for handling timer completion
  * Returns a function that returns Promise<void>
@@ -14,13 +21,8 @@ export const useTimerComplete = ({
   metrics, 
   setIsExpanded, 
   onComplete 
-}: {
-  taskName: string;
-  metrics: TimerStateMetrics;
-  setIsExpanded: (expanded: boolean) => void;
-  onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
-}): (() => Promise<void>) => {
-  // Handle timer completion - return a direct function (not an object)
+}: UseTimerCompleteProps): (() => Promise<void>) => {
+  // Return a function that returns a Promise<void>
   return useCallback(async (): Promise<void> => {
     try {
       // Convert dates to ISO strings for serialization

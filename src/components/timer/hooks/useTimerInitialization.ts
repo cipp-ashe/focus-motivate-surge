@@ -70,6 +70,14 @@ export const useTimerInitialization = ({
     }
   } = useTimerCore(duration, taskName);
 
+  // Create a function to complete the timer - this returns a function directly
+  const completeTimerFn = useTimerComplete({
+    taskName,
+    metrics: timerState.metrics,
+    setIsExpanded,
+    onComplete: onComplete || (() => {})
+  });
+
   // Initialize timer handlers
   const timerHandlers = useTimerHandlers({
     taskName,
@@ -89,7 +97,9 @@ export const useTimerInitialization = ({
     setIsExpanded,
     updateMetrics,
     setPauseTimeLeft,
-    pauseTimerRef
+    pauseTimerRef,
+    // Pass the direct function here
+    completeTimer: completeTimerFn
   });
 
   // Initialize timer views
@@ -106,14 +116,6 @@ export const useTimerInitialization = ({
     handleToggle: timerHandlers.handleToggle,
     handleComplete: timerHandlers.handleComplete,
     handleAddTime: timerHandlers.handleAddTime
-  });
-
-  // Create a function to complete the timer - this returns a function directly
-  const completeTimerFn = useTimerComplete({
-    taskName,
-    metrics: timerState.metrics,
-    setIsExpanded,
-    onComplete: onComplete || (() => {})
   });
 
   // Set up timer monitoring - pass the direct function
