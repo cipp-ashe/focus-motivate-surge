@@ -22,7 +22,7 @@ interface UseTimerHandlersProps {
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
   setPauseTimeLeft: (timeLeft: number | null) => void;
   pauseTimerRef: React.MutableRefObject<NodeJS.Timeout | null>;
-  completeTimer?: () => Promise<void>;
+  completeTimer: () => Promise<void>;  // Ensure this has the correct type
 }
 
 export const useTimerHandlers = ({
@@ -55,8 +55,8 @@ export const useTimerHandlers = ({
     pause: pauseTimer,
     reset: resetTimer,
     addTime: extendTimer,
-    // Pass the direct function or a default implementation
-    completeTimer: completeTimer || (async () => Promise.resolve()),
+    // Pass the direct function
+    completeTimer,
     playSound,
     onAddTime,
     onComplete,

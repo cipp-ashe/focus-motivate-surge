@@ -29,7 +29,7 @@ export const useTimerComplete = ({
   metrics,
   taskName,
 }: UseTimerCompleteProps) => {
-  // Handle timer completion - return an object with handleComplete method
+  // Define a function that returns a Promise<void>
   const handleComplete = useCallback(async (): Promise<void> => {
     try {
       console.log("TimerHandlers: Starting timer completion process");
