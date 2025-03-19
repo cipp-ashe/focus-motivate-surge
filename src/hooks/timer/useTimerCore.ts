@@ -52,6 +52,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
 
   // Set mounted ref to false on unmount
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       // Clear any interval on unmount
@@ -62,7 +63,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     };
   }, []);
 
-  // Improved start/stop timer logic with better cleanup
+  // Fixed timer functionality - ensure proper countdown
   useEffect(() => {
     logger.debug('TimerCore', `Timer running state changed: isRunning=${state.isRunning}, timeLeft=${state.timeLeft}`);
     
@@ -72,13 +73,13 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
       intervalRef.current = null;
     }
     
-    if (state.isRunning && isMountedRef.current) {
+    if (state.isRunning && state.timeLeft > 0) {
       logger.debug('TimerCore', "Setting up timer interval");
       lastTickTime.current = Date.now(); // Track when the interval starts
       
-      // Set up new interval to decrement time
+      // Set up a more reliable ticker using setInterval with a smaller interval
+      // to compensate for potential delays and ensure we decrement accurately
       intervalRef.current = setInterval(() => {
-        // Ensure we're mounted before updating state
         if (!isMountedRef.current) {
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -87,36 +88,43 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
           return;
         }
         
-        // Ensure we're only decrementing once per second, regardless of CPU load
         const now = Date.now();
         const elapsed = now - lastTickTime.current;
-        if (elapsed >= 1000) { // Only tick if at least 1 second has passed
-          lastTickTime.current = now;
+        
+        // Only decrement if at least 1 second has passed
+        if (elapsed >= 1000) {
+          lastTickTime.current = now - (elapsed % 1000); // Account for any extra time
           
-          // Debug logging
+          // Log the timer tick
           logger.debug('TimerCore', `Timer tick: ${state.timeLeft - 1}s remaining`);
           
-          // Decrement the timer
+          // Dispatch the decrement action
           dispatch({ type: 'DECREMENT_TIME' });
           
-          // Emit tick event for any listeners
+          // Emit the timer tick event
           eventManager.emit('timer:tick', { 
             timeLeft: state.timeLeft - 1,
-            taskName: 'timer'  // Generic taskName as this is a core hook
+            taskName: 'timer'
           });
           
           // Also dispatch a window event for backward compatibility
           if (typeof window !== 'undefined') {
-            const event = new CustomEvent('timer:tick', { 
+            window.dispatchEvent(new CustomEvent('timer:tick', { 
               detail: { timeLeft: state.timeLeft - 1 } 
-            });
-            window.dispatchEvent(event);
+            }));
           }
         }
-      }, 100); // Run more frequently but only update when 1 second has passed
+      }, 100); // Check more frequently (10 times/second) but only update once per second
+    } else if (state.timeLeft === 0 && state.isRunning) {
+      // Handle timer completion when it reaches zero
+      dispatch({ type: 'COMPLETE' });
+      if (onTimeUp) {
+        logger.debug('TimerCore', "Timer reached zero, calling onTimeUp");
+        onTimeUp();
+      }
     }
   
-    // Clean up interval on effect cleanup or component unmount
+    // Clean up interval on effect cleanup
     return () => {
       if (intervalRef.current) {
         logger.debug('TimerCore', "Cleanup: clearing timer interval");
@@ -124,15 +132,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
         intervalRef.current = null;
       }
     };
-  }, [state.isRunning, state.timeLeft]);
-
-  // Handle time up
-  useEffect(() => {
-    if (state.timeLeft === 0 && onTimeUp && isMountedRef.current) {
-      logger.debug('TimerCore', "Timer reached zero, calling onTimeUp");
-      onTimeUp();
-    }
-  }, [state.timeLeft, onTimeUp]);
+  }, [state.isRunning, state.timeLeft, onTimeUp]);
 
   return {
     state,

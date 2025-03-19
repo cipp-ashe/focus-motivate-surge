@@ -20,7 +20,7 @@ export { useTimerEventListeners } from '@/components/timer/hooks/useTimerEventLi
 // Timer monitoring
 export { useTimerMonitor } from '@/hooks/useTimerMonitor';
 
-// Timer initialization
+// Timer initialization - fixed import for useTimerComplete
 export { 
   useTimerCore,
   useTimerComplete,
