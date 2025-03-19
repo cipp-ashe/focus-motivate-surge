@@ -58,11 +58,14 @@ export const useTimerMonitoring = ({
       }
     });
     
-    // Mark timer as initialized
-    eventManager.emit('timer:initialized', {
-      taskName,
-      timestamp: new Date().toISOString()
+    // Use window events to mark timer as initialized since we don't have the proper event type yet
+    const timerInitEvent = new CustomEvent('timer:initialized', { 
+      detail: { 
+        taskName,
+        timestamp: new Date().toISOString()
+      } 
     });
+    window.dispatchEvent(timerInitEvent);
     
     // Cleanup when unmounting
     return () => {
@@ -77,10 +80,13 @@ export const useTimerMonitoring = ({
   return useCallback(() => {
     logger.debug('TimerMonitoring', `Manually checking timer state for task: ${taskName}`);
     
-    // Request a sync from any timers that might be running
-    eventManager.emit('timer:request-sync', {
-      taskName,
-      timestamp: new Date().toISOString()
+    // Use window events for sync requests since we don't have the proper event type yet
+    const syncRequestEvent = new CustomEvent('timer:request-sync', { 
+      detail: { 
+        taskName,
+        timestamp: new Date().toISOString()
+      } 
     });
+    window.dispatchEvent(syncRequestEvent);
   }, [taskName]);
 };

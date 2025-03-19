@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { TimerExpandedViewRef } from "@/types/timer";
 import { useTimerState } from "@/hooks/timer/useTimerState";
@@ -63,8 +62,7 @@ export const useTimerCore = (duration: number, taskName: string) => {
     // Then emit the event
     eventManager.emit('timer:start', {
       taskName,
-      duration: timeLeft,
-      currentTime: Date.now()
+      duration: timeLeft
     });
     
     // Also dispatch a window event for backward compatibility
@@ -72,8 +70,7 @@ export const useTimerCore = (duration: number, taskName: string) => {
       const event = new CustomEvent('timer:start', { 
         detail: { 
           taskName,
-          duration: timeLeft,
-          currentTime: Date.now()
+          duration: timeLeft
         } 
       });
       window.dispatchEvent(event);

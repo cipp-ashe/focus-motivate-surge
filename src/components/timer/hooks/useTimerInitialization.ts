@@ -7,6 +7,7 @@ import { useTimerHandlers } from "./initialization/useTimerHandlers";
 import { useTimerViews } from "./initialization/useTimerViews";
 import { useTimerMonitoring } from "./initialization/useTimerMonitoring";
 import { useTimerEvents } from "./initialization/useTimerEvents";
+import { useTimerComplete } from "./initialization/useTimerComplete";
 import { useAutoComplete } from "./useAutoComplete";
 import { logger } from "@/utils/logManager";
 
@@ -124,11 +125,19 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime
   });
 
-  // Set up timer monitoring
+  // Create a handleComplete function for the timer monitoring
+  const handleComplete = useTimerComplete({
+    taskName,
+    metrics,
+    setIsExpanded,
+    onComplete
+  });
+
+  // Set up timer monitoring - pass the function directly
   const monitoringCallback = useTimerMonitoring({
     taskName,
     updateTimeLeft,
-    handleComplete: timerHandlers.handleComplete
+    handleComplete
   });
 
   // Set up timer event listeners

@@ -28,7 +28,7 @@ export {
   useTimerHandlers as useTimerInitHandlers,
   useTimerMonitoring,
   useTimerViews,
-  useTimerAutoComplete
+  useAutoComplete
 } from '@/components/timer/hooks/initialization';
 
 // Types

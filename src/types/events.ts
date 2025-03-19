@@ -1,4 +1,3 @@
-
 // Event types for all application events
 export type AppEventType = 
   | "app:start" 
@@ -92,7 +91,9 @@ export type TimerEventType =
   | "timer:expand"
   | "timer:collapse"
   | "timer:close"
-  | "timer:metrics-update";
+  | "timer:metrics-update"
+  | "timer:initialized"
+  | "timer:request-sync";
 
 export type JournalEventType = 
   | "journal:create" 
@@ -216,6 +217,8 @@ export interface EventPayloads {
   "timer:collapse": { taskName: string; saveNotes?: boolean; };
   "timer:close": { taskName: string; };
   "timer:metrics-update": { taskName: string; metrics: any; };
+  "timer:initialized": { taskName: string; timestamp: string; };
+  "timer:request-sync": { taskName: string; timestamp: string; };
 
   // Journal events
   "journal:create": { id: string; title: string; content: string; date: string; };
