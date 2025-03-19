@@ -4,9 +4,10 @@ import { TimerStateMetrics } from "@/types/metrics";
 import { Quote, SoundOption, TimerExpandedViewRef } from "@/types/timer";
 import { useTimerCore } from "./initialization/useTimerCore";
 import { useTimerHandlers } from "./initialization/useTimerHandlers";
-import { useTimerViews, useTimerAutoComplete } from "./initialization/useTimerViews";
+import { useTimerViews } from "./initialization/useTimerViews";
 import { useTimerMonitoring } from "./initialization/useTimerMonitoring";
 import { useTimerEvents } from "./initialization/useTimerEvents";
+import { useAutoComplete } from "./useAutoComplete";
 import { logger } from "@/utils/logManager";
 
 interface UseTimerInitializationProps {
@@ -134,7 +135,7 @@ export const useTimerInitialization = ({
   useTimerEvents(taskName, duration);
 
   // Auto-complete function - also returns a function directly
-  const autoComplete = useTimerAutoComplete({
+  const autoComplete = useAutoComplete({
     isRunning,
     pause: pauseTimer,
     playSound,

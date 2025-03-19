@@ -7,6 +7,7 @@ import { toISOString } from "@/lib/utils/dateUtils";
 
 /**
  * Hook for handling timer completion
+ * Returns a function that returns Promise<void>
  */
 export const useTimerComplete = ({ 
   taskName, 
@@ -18,9 +19,9 @@ export const useTimerComplete = ({
   metrics: TimerStateMetrics;
   setIsExpanded: (expanded: boolean) => void;
   onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
-}) => {
+}): (() => Promise<void>) => {
   // Handle timer completion
-  const completeTimer = useCallback(async (): Promise<void> => {
+  return useCallback(async (): Promise<void> => {
     try {
       // Convert dates to ISO strings for serialization
       const finalMetrics = {
@@ -62,6 +63,4 @@ export const useTimerComplete = ({
       return Promise.reject(error);
     }
   }, [taskName, metrics, onComplete, setIsExpanded]);
-
-  return { completeTimer };
 };
