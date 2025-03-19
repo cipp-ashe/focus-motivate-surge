@@ -63,7 +63,7 @@ export const useTimerHandlers = ({
     reset: resetTimer,
     addTime: extendTimer,
     // Pass the direct function, not an object
-    completeTimer: completeTimer,
+    completeTimer,
     playSound,
     onAddTime,
     onComplete,

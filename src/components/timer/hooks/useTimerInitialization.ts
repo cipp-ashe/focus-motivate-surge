@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { Quote, SoundOption, TimerExpandedViewRef } from "@/types/timer";
