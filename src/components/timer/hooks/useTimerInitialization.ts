@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { Quote, SoundOption, TimerExpandedViewRef } from "@/types/timer";
@@ -124,19 +125,19 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime
   });
 
-  // Create a handleComplete function for the timer monitoring
-  const handleComplete = useTimerComplete({
+  // Create a handleComplete function using the useTimerComplete hook
+  const completeTimerFn = useTimerComplete({
     taskName,
     metrics,
     setIsExpanded,
-    onComplete
+    onComplete: onComplete || (() => {})
   });
 
   // Set up timer monitoring - pass the function directly
   const monitoringCallback = useTimerMonitoring({
     taskName,
     updateTimeLeft,
-    handleComplete
+    handleComplete: completeTimerFn
   });
 
   // Set up timer event listeners
