@@ -10,12 +10,13 @@ interface UseTimerMonitoringProps {
 
 /**
  * Hook for monitoring timer behavior and handling timer completion
+ * Returns a function that can be called to manually complete the timer
  */
 export const useTimerMonitoring = ({
   taskName,
   updateTimeLeft,
   handleComplete,
-}: UseTimerMonitoringProps) => {
+}: UseTimerMonitoringProps): (() => Promise<void>) => {
   // Log timer information on mount
   useEffect(() => {
     logger.debug("TimerMonitoring", `Monitoring timer for task: ${taskName}`);
@@ -34,10 +35,6 @@ export const useTimerMonitoring = ({
     return () => {};
   }, []);
 
-  // Return a function, not an object with a function property
-  return async (): Promise<void> => {
-    logger.debug("TimerMonitoring", `Timer completed for task: ${taskName}`);
-    // Call the provided handleComplete function and ensure it returns a Promise
-    return handleComplete();
-  };
+  // Return the handleComplete function directly, not an object with a function property
+  return handleComplete;
 };
