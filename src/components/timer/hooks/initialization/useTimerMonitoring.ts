@@ -35,6 +35,6 @@ export const useTimerMonitoring = ({
     return () => {};
   }, []);
 
-  // Return the handleComplete function directly
+  // Return the handleComplete function directly, not wrapped in an object
   return handleComplete;
 };

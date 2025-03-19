@@ -26,7 +26,7 @@ export const useAutoComplete = ({
   setShowCompletion: (show: boolean) => void;
 }): (() => Promise<void>) => {
   // Return a callback that explicitly returns a Promise<void>
-  const handleComplete = useCallback(async (): Promise<void> => {
+  return useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();
     }
@@ -71,6 +71,4 @@ export const useAutoComplete = ({
       return Promise.reject(error);
     }
   }, [isRunning, pause, playSound, metrics, completeTimer, onComplete, taskName, setCompletionMetrics, setShowCompletion]);
-  
-  return handleComplete;
 };

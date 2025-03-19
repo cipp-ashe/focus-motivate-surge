@@ -68,6 +68,7 @@ export const useTimerAutoComplete = ({
   setCompletionMetrics,
   setShowCompletion
 }: UseAutoCompleteProps): (() => Promise<void>) => {
+  // Return a direct function that returns a Promise<void>
   return useCallback(async (): Promise<void> => {
     if (isRunning) {
       pause();

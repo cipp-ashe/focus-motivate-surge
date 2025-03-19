@@ -123,7 +123,7 @@ export const useTimerInitialization = ({
     handleAddTime: timerHandlers.handleAddTime
   });
 
-  // Set up timer monitoring
+  // Set up timer monitoring - this now returns a function directly
   const monitoringCallback = useTimerMonitoring({
     taskName,
     updateTimeLeft,
@@ -133,7 +133,7 @@ export const useTimerInitialization = ({
   // Set up timer event listeners
   useTimerEvents(taskName, duration);
 
-  // Auto-complete function
+  // Auto-complete function - also returns a function directly
   const autoComplete = useTimerAutoComplete({
     isRunning,
     pause: pauseTimer,
@@ -189,7 +189,7 @@ export const useTimerInitialization = ({
     updateMetrics,
     isLoadingAudio,
     
-    // Auto-complete function
+    // Auto-complete function - now correctly typed as a function
     autoComplete
   };
 };
