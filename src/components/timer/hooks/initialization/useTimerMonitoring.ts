@@ -5,7 +5,7 @@ import { logger } from "@/utils/logManager";
 interface UseTimerMonitoringProps {
   taskName: string;
   updateTimeLeft: (timeLeft: number) => void;
-  handleComplete: () => Promise<void>; // This should return Promise<void>
+  handleComplete: () => Promise<void>;
 }
 
 /**
@@ -35,6 +35,6 @@ export const useTimerMonitoring = ({
     return () => {};
   }, []);
 
-  // Return the handleComplete function directly, not an object with a function property
+  // Return the handleComplete function directly
   return handleComplete;
 };

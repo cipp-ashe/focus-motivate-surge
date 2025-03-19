@@ -57,7 +57,6 @@ interface UseAutoCompleteProps {
   setShowCompletion: (show: boolean) => void;
 }
 
-// Return the function directly instead of an object with handleComplete property
 export const useTimerAutoComplete = ({
   isRunning,
   pause,
