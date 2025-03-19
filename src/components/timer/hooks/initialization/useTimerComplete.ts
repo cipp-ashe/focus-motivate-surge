@@ -9,7 +9,7 @@ interface UseTimerCompleteProps {
   taskName: string;
   metrics: TimerStateMetrics;
   setIsExpanded: (expanded: boolean) => void;
-  onComplete: ((metrics: TimerStateMetrics) => void) | undefined;
+  onComplete?: (metrics: TimerStateMetrics) => void;
 }
 
 /**

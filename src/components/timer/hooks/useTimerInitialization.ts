@@ -75,7 +75,7 @@ export const useTimerInitialization = ({
     taskName,
     metrics: timerState.metrics,
     setIsExpanded,
-    onComplete: onComplete || (() => {})
+    onComplete
   });
 
   // Initialize timer handlers

@@ -3,9 +3,10 @@ import { TimerStateMetrics } from "@/types/metrics";
 import { useTimerToggle } from "./toggle/useTimerToggle";
 import { useTimerAddTime } from "./time/useTimerAddTime";
 import { useTimerReset } from "./reset/useTimerReset";
-import { useTimerComplete } from "./complete/useTimerComplete";
 import { useTimerPauseResume } from "./pause/useTimerPauseResume";
 import { useTimerClose } from "./close/useTimerClose";
+import { useCallback } from "react";
+import { eventManager } from "@/lib/events/EventManager";
 
 interface TimerHandlersProps {
   taskName: string;
@@ -79,19 +80,50 @@ export const useTimerHandlers = ({
     metrics,
   });
 
-  // Complete timer - ensure it matches the type of completeTimer (Promise<void>)
-  const handleComplete = useTimerComplete({
+  // Complete timer handler - inline implementation
+  const handleComplete = useCallback(async (): Promise<void> => {
+    try {
+      console.log("TimerHandlers: Starting timer completion process");
+      
+      // If timer is running, pause it first
+      if (isRunning) {
+        pause();
+      }
+      
+      // Calculate end time
+      const now = new Date();
+      
+      // Play sound to indicate completion
+      setTimeout(() => {
+        playSound();
+      }, 300);
+      
+      // Call the provided completeTimer function
+      await completeTimer();
+      
+      // Show completion UI
+      setShowCompletion(true);
+      
+      // Emit completion event
+      eventManager.emit('timer:complete', { 
+        taskName, 
+        metrics 
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error during timer completion:", error);
+      return Promise.reject(error);
+    }
+  }, [
     isRunning,
     pause,
-    playSound,
-    setCompletionMetrics,
-    setShowCompletion,
-    setIsExpanded,
     completeTimer,
-    onComplete,
-    metrics,
+    playSound,
+    setShowCompletion,
     taskName,
-  });
+    metrics
+  ]);
 
   // Pause/Resume timer
   const { handlePause, handleResume } = useTimerPauseResume({
@@ -138,4 +170,3 @@ export const useTimerHandlers = ({
     isPaused: metrics.isPaused || false
   };
 };
-
