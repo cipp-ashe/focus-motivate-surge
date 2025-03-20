@@ -30,7 +30,7 @@ interface TaskInputRowProps {
  * Only includes the allowed task types
  */
 const taskTypeIcons = {
-  regular: <FileText className="h-4 w-4 text-primary" />,
+  regular: <FileText className="h-4 w-4 text-[#9b87f5]" />,
   timer: <Timer className="h-4 w-4 text-purple-400" />,
   journal: <BookOpen className="h-4 w-4 text-amber-400" />,
   checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />,
@@ -91,7 +91,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
               {taskTypeIcons[taskType as keyof typeof taskTypeIcons] || taskTypeIcons.regular}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-1 bg-background/95 backdrop-blur-sm border-border/50">
+          <PopoverContent className="w-48 p-1 bg-[#1A1F2C]/95 backdrop-blur-sm border-[#6E59A5]/50">
             <div className="space-y-1">
               {Object.entries(taskTypeIcons).map(([type, icon]) => (
                 <Button
@@ -114,7 +114,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
           value={taskName}
           onChange={onTaskNameChange}
           ref={inputRef}
-          className="flex-grow bg-background/20 dark:bg-[#1A1F2C] border-input/50 focus-visible:border-primary pl-12"
+          className="flex-grow bg-[#1A1F2C]/60 dark:bg-[#1A1F2C] border-[#6E59A5]/50 focus-visible:border-[#9b87f5] pl-12"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               onAddTask();
@@ -125,7 +125,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
       
       <Button 
         onClick={onAddTask}
-        className="bg-primary text-primary-foreground hover:bg-primary/90"
+        className="bg-[#9b87f5] text-white hover:bg-[#7E69AB]"
         size="icon"
         aria-label="Add task"
       >
@@ -137,7 +137,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
         size="icon" 
         onClick={onToggleMultipleInput}
         title="Bulk Import Tasks"
-        className="border-input/50 hover:bg-accent"
+        className="border-[#6E59A5]/50 hover:bg-[#6E59A5]/20 text-white"
         aria-label="Bulk import tasks"
       >
         <Upload size={18} />

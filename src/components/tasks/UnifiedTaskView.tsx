@@ -109,7 +109,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
   };
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden bg-card/50 backdrop-blur-sm border border-border/20 shadow-sm">
+    <Card className="flex flex-col h-full overflow-hidden bg-[#1A1F2C]/80 backdrop-blur-sm border border-[#6E59A5]/20 shadow-sm">
       <CardContent className="p-0">
         {/* Task type tabs/filters */}
         <div className="flex-none">
@@ -117,7 +117,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
             taskCounts={taskCounts}
             activeTaskType={activeTaskType}
             onTaskTypeChange={(type) => setActiveTaskType(type as 'all' | TaskType)}
-            // Also provide props with the names used in the component
+            // Also provide props with the legacy names
             counts={taskCounts}
             activeFilter={activeTaskType}
             onFilterChange={(type) => setActiveTaskType(type as 'all' | TaskType)}
@@ -125,16 +125,16 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
         </div>
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col">
-          <TabsList className="grid grid-cols-2 bg-background/80 border-b border-border/10 rounded-none px-0.5">
+          <TabsList className="grid grid-cols-2 bg-[#1A1F2C]/80 border-b border-[#6E59A5]/20 rounded-none px-0.5">
             <TabsTrigger value="active" className={cn(
-              "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
-              "data-[state=active]:text-primary font-medium transition-all duration-200"
+              "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-[#9b87f5] rounded-none px-5 py-2.5",
+              "data-[state=active]:text-[#9b87f5] font-medium transition-all duration-200"
             )}>
               Active Tasks ({activeTasks.length})
             </TabsTrigger>
             <TabsTrigger value="completed" className={cn(
-              "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
-              "data-[state=active]:text-primary font-medium transition-all duration-200"
+              "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-[#9b87f5] rounded-none px-5 py-2.5",
+              "data-[state=active]:text-[#9b87f5] font-medium transition-all duration-200"
             )}>
               Completed Tasks ({completedTasks.length})
             </TabsTrigger>

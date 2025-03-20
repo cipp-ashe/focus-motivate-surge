@@ -49,14 +49,14 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
   const effectiveOnChange = onFilterChange || onTaskTypeChange;
   
   return (
-    <div className="flex w-full overflow-x-auto py-2 px-1 gap-2 border-b border-border/10 bg-card/30">
+    <div className="flex w-full overflow-x-auto py-2 px-1 gap-2 border-b border-[#6E59A5]/20 bg-[#1A1F2C]/80">
       <button
         onClick={() => effectiveOnChange('all')}
         className={cn(
           "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
           effectiveActiveType === 'all' 
             ? "bg-purple-500/20 text-purple-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/50"
+            : "bg-transparent text-muted-foreground hover:bg-[#6E59A5]/20"
         )}
       >
         <FileText className="h-4 w-4" />
@@ -68,11 +68,11 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
         className={cn(
           "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
           effectiveActiveType === 'regular' 
-            ? "bg-primary/10 text-primary" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/50"
+            ? "bg-[#9b87f5]/20 text-[#9b87f5]" 
+            : "bg-transparent text-muted-foreground hover:bg-[#6E59A5]/20"
         )}
       >
-        <FileText className="h-4 w-4 text-primary" />
+        <FileText className="h-4 w-4 text-[#9b87f5]" />
         <span>{`Regular (${effectiveTaskCounts.regular})`}</span>
       </button>
       
@@ -82,7 +82,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
           "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
           effectiveActiveType === 'timer' 
             ? "bg-purple-500/20 text-purple-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/50"
+            : "bg-transparent text-muted-foreground hover:bg-[#6E59A5]/20"
         )}
       >
         <Timer className="h-4 w-4 text-purple-400" />
@@ -95,7 +95,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
           "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
           effectiveActiveType === 'journal' 
             ? "bg-amber-500/20 text-amber-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/50"
+            : "bg-transparent text-muted-foreground hover:bg-[#6E59A5]/20"
         )}
       >
         <BookOpen className="h-4 w-4 text-amber-400" />
@@ -108,7 +108,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
           "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
           effectiveActiveType === 'checklist' 
             ? "bg-cyan-500/20 text-cyan-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/50"
+            : "bg-transparent text-muted-foreground hover:bg-[#6E59A5]/20"
         )}
       >
         <CheckSquare className="h-4 w-4 text-cyan-400" />
@@ -121,7 +121,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
           "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
           effectiveActiveType === 'screenshot' 
             ? "bg-blue-500/20 text-blue-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/50"
+            : "bg-transparent text-muted-foreground hover:bg-[#6E59A5]/20"
         )}
       >
         <Image className="h-4 w-4 text-blue-400" />
@@ -134,7 +134,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
           "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
           effectiveActiveType === 'voicenote' 
             ? "bg-rose-500/20 text-rose-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/50"
+            : "bg-transparent text-muted-foreground hover:bg-[#6E59A5]/20"
         )}
       >
         <Mic className="h-4 w-4 text-rose-400" />

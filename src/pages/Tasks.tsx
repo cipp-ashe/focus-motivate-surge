@@ -125,16 +125,16 @@ const TaskPage = () => {
   };
 
   return (
-    <div className={`container mx-auto ${isMobile ? 'p-2' : 'py-3 px-4 sm:py-5 sm:px-6'} max-w-6xl`}>
+    <div className={`container mx-auto ${isMobile ? 'p-2' : 'py-3 px-4 sm:py-5 sm:px-6'} max-w-6xl bg-[#1A1F2C]`}>
       <h1 
-        className={`${isMobile ? 'text-xl mb-2' : 'text-2xl sm:text-3xl mb-3 sm:mb-5'} font-bold text-primary`}
+        className={`${isMobile ? 'text-xl mb-2' : 'text-2xl sm:text-3xl mb-3 sm:mb-5'} font-bold text-[#9b87f5]`}
         id="page-title"
       >
         Task Manager
       </h1>
       
       <main aria-labelledby="page-title" className="space-y-4">
-        <Card className="bg-background/80 backdrop-blur-sm border-border/30">
+        <Card className="bg-[#1A1F2C]/80 backdrop-blur-sm border-[#6E59A5]/30">
           <CardContent className="p-4">
             <TaskInput 
               onTaskAdd={(task) => taskContext?.addTask?.(task)}

@@ -1,0 +1,32 @@
+
+/* Dark mode specific styles for Tasks */
+.task-dark-mode {
+  --task-bg: #1A1F2C;
+  --task-card-bg: rgba(26, 31, 44, 0.8);
+  --task-primary: #9b87f5;
+  --task-secondary: #7E69AB;
+  --task-border: rgba(110, 89, 165, 0.3);
+  --task-text: #ffffff;
+  --task-text-muted: rgba(255, 255, 255, 0.7);
+}
+
+.task-card-dark {
+  background-color: var(--task-card-bg);
+  border-color: var(--task-border);
+  color: var(--task-text);
+}
+
+.task-input-dark {
+  background-color: rgba(26, 31, 44, 0.6);
+  border-color: var(--task-border);
+  color: var(--task-text);
+}
+
+.task-button-dark {
+  background-color: var(--task-primary);
+  color: white;
+}
+
+.task-button-dark:hover {
+  background-color: var(--task-secondary);
+}

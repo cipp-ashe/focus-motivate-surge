@@ -70,7 +70,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({
             placeholder="Add a timer task"
             value={taskName}
             onChange={handleTaskNameChange}
-            className="flex-grow bg-background/20 dark:bg-[#222222] border-input/30 text-foreground"
+            className="flex-grow bg-[#1A1F2C]/60 dark:bg-[#1A1F2C] border-[#6E59A5]/30 text-foreground"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 handleAddTask();
@@ -80,7 +80,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({
           <Button 
             onClick={handleAddTask}
             variant="default"
-            className="bg-primary text-primary-foreground"
+            className="bg-[#9b87f5] text-white hover:bg-[#7E69AB]"
           >
             Add Timer
           </Button>
