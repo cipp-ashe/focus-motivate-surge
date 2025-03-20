@@ -1,6 +1,5 @@
 
 import React, { useState, useCallback } from 'react';
-import { TaskManager } from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { ChecklistItem, Task } from '@/types/tasks';
@@ -14,6 +13,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
 import { TaskInput } from '@/components/tasks/TaskInput';
 import { Card, CardContent } from '@/components/ui/card';
+import { TaskTabsList } from '@/components/tasks/tabs/TaskTabsList';
 
 const ErrorFallback = () => (
   <div className="p-4 m-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md text-center">
@@ -125,15 +125,13 @@ const TaskPage = () => {
   };
 
   return (
-    <div className={`container mx-auto ${isMobile ? 'p-2' : 'py-3 px-4 sm:py-5 sm:px-6'} max-w-6xl bg-[#1A1F2C]`}>
-      <h1 
-        className={`${isMobile ? 'text-xl mb-2' : 'text-2xl sm:text-3xl mb-3 sm:mb-5'} font-bold text-[#9b87f5]`}
-        id="page-title"
-      >
+    <div className="container mx-auto max-w-6xl bg-[#1A1F2C] py-4 px-4">
+      <h1 className="text-2xl sm:text-3xl mb-5 font-bold text-[#9b87f5]" id="page-title">
         Task Manager
       </h1>
       
       <main aria-labelledby="page-title" className="space-y-4">
+        {/* Task Input */}
         <Card className="bg-[#1A1F2C]/80 backdrop-blur-sm border-[#6E59A5]/30">
           <CardContent className="p-4">
             <TaskInput 
@@ -153,14 +151,18 @@ const TaskPage = () => {
         
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           {taskContext && (
-            <UnifiedTaskView 
-              activeTasks={taskContext.items || []}
-              completedTasks={taskContext.completed || []}
-              selectedTaskId={taskContext.selected}
-              dialogOpeners={dialogOpeners}
-              onTaskAdd={(task) => taskContext.addTask?.(task)}
-              onTasksAdd={(tasks) => tasks.forEach(task => taskContext.addTask?.(task))}
-            />
+            <Card className="bg-[#1A1F2C]/80 backdrop-blur-sm border-[#6E59A5]/30 overflow-hidden">
+              <CardContent className="p-0">
+                <UnifiedTaskView 
+                  activeTasks={taskContext.items || []}
+                  completedTasks={taskContext.completed || []}
+                  selectedTaskId={taskContext.selected}
+                  dialogOpeners={dialogOpeners}
+                  onTaskAdd={(task) => taskContext.addTask?.(task)}
+                  onTasksAdd={(tasks) => tasks.forEach(task => taskContext.addTask?.(task))}
+                />
+              </CardContent>
+            </Card>
           )}
         </ErrorBoundary>
       </main>

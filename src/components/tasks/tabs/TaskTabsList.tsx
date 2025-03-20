@@ -17,7 +17,7 @@ interface TaskTabsListProps {
   };
   activeTaskType?: 'all' | TaskType;
   onTaskTypeChange?: (type: string) => void;
-  // Add support for legacy prop names
+  // Legacy prop names for compatibility
   activeFilter?: 'all' | TaskType;
   onFilterChange?: (type: string) => void;
   counts?: {
