@@ -44,7 +44,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       return value ? 'Complete' : 'Incomplete';
     }
     
-    if (habit.metrics.type === 'Number') {
+    if (habit.metrics.type === 'counter') {
       return `${value} / ${habit.metrics.target}`;
     }
     
@@ -57,7 +57,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       return value ? 'text-green-500' : 'text-red-500';
     }
     
-    if (habit.metrics.type === 'Number') {
+    if (habit.metrics.type === 'counter') {
       const progress = (Number(value) / Number(habit.metrics.target)) * 100;
       if (progress >= 100) {
         return 'text-green-500';
