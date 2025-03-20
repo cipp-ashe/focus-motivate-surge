@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useReducer, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -58,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (session && session.user) {
           dispatch({ type: 'SIGNED_IN', payload: session.user });
           
-          // Fix: Use proper payload structure without userId
+          // Use the proper payload format
           eventManager.emit('auth:state-change' as AuthEventType, { 
             user: session.user
           });
@@ -67,7 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           dispatch({ type: 'SIGNED_OUT' });
           
-          // Fix: Use proper payload structure without userId
+          // Use the proper payload format
           eventManager.emit('auth:state-change' as AuthEventType, { 
             user: null
           });
@@ -134,8 +133,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return false;
       }
       
-      // Fix: Use correct payload type for auth:signed-out event
-      eventManager.emit('auth:signed-out' as AuthEventType, {});
+      // Use correct event type and payload
+      eventManager.emit('auth:logout', undefined);
       
       return true;
     } catch (error) {

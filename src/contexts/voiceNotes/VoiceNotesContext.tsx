@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useState, useCallback } from 'react';
 import { VoiceNote } from '@/types/voiceNotes';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,14 +5,12 @@ import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { AllEventTypes, VoiceNoteEventType } from '@/types/events';
 
-// Define state
 export interface VoiceNotesState {
   notes: VoiceNote[];
   isRecording: boolean;
   currentTranscript: string;
 }
 
-// Define actions
 type VoiceNotesAction = 
   | { type: 'ADD_NOTE'; payload: VoiceNote }
   | { type: 'DELETE_NOTE'; payload: string }
@@ -23,7 +20,6 @@ type VoiceNotesAction =
   | { type: 'SET_TRANSCRIPT'; payload: string }
   | { type: 'CLEAR_TRANSCRIPT' };
 
-// Create context
 const VoiceNotesContext = createContext<{
   state: VoiceNotesState;
   dispatch: React.Dispatch<VoiceNotesAction>;
@@ -31,7 +27,6 @@ const VoiceNotesContext = createContext<{
   deleteVoiceNote: (id: string) => void;
   toggleRecording: () => void;
   transcribe: (voiceNoteId: string) => Promise<string>;
-  // Add missing methods
   notes: VoiceNote[];
   addNote: (text: string) => void;
   deleteNote: (id: string) => void;
@@ -40,7 +35,6 @@ const VoiceNotesContext = createContext<{
   createNoteFromVoiceNote: (voiceNoteId: string) => void;
 } | undefined>(undefined);
 
-// Reducer function
 const voiceNotesReducer = (state: VoiceNotesState, action: VoiceNotesAction): VoiceNotesState => {
   switch (action.type) {
     case 'ADD_NOTE':
@@ -91,18 +85,15 @@ const voiceNotesReducer = (state: VoiceNotesState, action: VoiceNotesAction): Vo
   }
 };
 
-// Initial state
 const initialState: VoiceNotesState = {
   notes: [],
   isRecording: false,
   currentTranscript: ''
 };
 
-// Provider component
 export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(voiceNotesReducer, initialState);
   
-  // Create a new voice note
   const createVoiceNote = useCallback(async (audioBlob: Blob): Promise<string> => {
     try {
       const id = uuidv4();
@@ -119,8 +110,10 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       dispatch({ type: 'ADD_NOTE', payload: newNote });
       dispatch({ type: 'CLEAR_TRANSCRIPT' });
       
-      // Emit voice note created event
-      eventManager.emit('voice-note:created' as VoiceNoteEventType, { noteId: id });
+      eventManager.emit('voice-note:created', { 
+        voiceNoteId: id,
+        noteId: id
+      });
       
       return id;
     } catch (error) {
@@ -129,7 +122,6 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [state.currentTranscript]);
   
-  // Delete a voice note
   const deleteVoiceNote = useCallback((id: string) => {
     const noteToDelete = state.notes.find(note => note.id === id);
     if (noteToDelete?.audioUrl) {
@@ -137,23 +129,22 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
     
     dispatch({ type: 'DELETE_NOTE', payload: id });
-    // Emit voice note deleted event
-    eventManager.emit('voice-note:deleted' as VoiceNoteEventType, { noteId: id });
+    
+    eventManager.emit('voice-note:deleted', { 
+      voiceNoteId: id,
+      noteId: id
+    });
   }, [state.notes]);
   
-  // Toggle recording state
   const toggleRecording = useCallback(() => {
     dispatch({ type: 'SET_RECORDING', payload: !state.isRecording });
   }, [state.isRecording]);
   
-  // Transcribe a voice note (placeholder for actual implementation)
   const transcribe = useCallback(async (voiceNoteId: string): Promise<string> => {
-    // Placeholder for actual transcription implementation
     console.log(`Transcribing voice note ${voiceNoteId}`);
     return 'Transcription not implemented';
   }, []);
-
-  // Add missing methods to match the components' expectations
+  
   const addNote = useCallback((text: string) => {
     const newNote: VoiceNote = {
       id: uuidv4(),
@@ -180,8 +171,7 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const createNoteFromVoiceNote = useCallback((voiceNoteId: string) => {
     const voiceNote = state.notes.find(note => note.id === voiceNoteId);
     if (voiceNote) {
-      // Emit note:create-from-voice event with the correct payload structure
-      eventManager.emit('note:create-from-voice' as AllEventTypes, { 
+      eventManager.emit('note:create-from-voice', { 
         audioUrl: voiceNote.audioUrl || '',
         transcript: voiceNote.text
       });
@@ -197,7 +187,6 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     deleteVoiceNote,
     toggleRecording,
     transcribe,
-    // Added properties for components
     notes: state.notes,
     addNote,
     deleteNote,
@@ -213,7 +202,6 @@ export const VoiceNotesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   );
 };
 
-// Custom hook to use voice notes context
 export const useVoiceNotes = () => {
   const context = useContext(VoiceNotesContext);
   if (context === undefined) {

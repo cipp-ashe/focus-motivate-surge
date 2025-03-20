@@ -15,8 +15,8 @@ export const useHabitCompletion = () => {
       // Emit event to mark habit as completed for the given date
       eventManager.emit('habit:complete', {
         habitId,
-        date: formattedDate
-        // Removed 'completed: true' as it's not in the expected type
+        date: formattedDate,
+        completed: true // Add this required property
       });
       
       // Return success

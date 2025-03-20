@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { eventManager } from '@/lib/events/EventManager';
@@ -68,8 +67,7 @@ export const useSupabaseRealtime = () => {
         }, (payload) => {
           console.log('Task deleted:', payload);
           eventManager.emit('task:delete', { 
-            taskId: payload.old.id, 
-            reason: 'database-sync' 
+            taskId: payload.old.id
           });
         })
         // Habit templates
@@ -134,9 +132,10 @@ export const useSupabaseRealtime = () => {
           filter: user ? `user_id=eq.${user.id}` : undefined
         }, (payload) => {
           console.log('Note updated:', payload);
-          // Fix: Use proper id property
+          // Fix: Use proper property names
           eventManager.emit('note:update', { 
-            id: payload.new.id, 
+            id: payload.new.id,
+            noteId: payload.new.id,
             updates: payload.new 
           });
         })

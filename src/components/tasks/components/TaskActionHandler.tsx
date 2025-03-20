@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Task } from '@/types/tasks';
+import { Task, TaskStatus } from '@/types/tasks';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 
@@ -67,7 +67,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
       default:
         // For status changes
         if (actionType.startsWith('status-')) {
-          const status = actionType.replace('status-', '') as any;
+          const status = actionType.replace('status-', '') as TaskStatus;
           eventManager.emit('task:update', { 
             taskId: task.id, 
             updates: { status } 

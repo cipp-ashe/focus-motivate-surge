@@ -1,17 +1,14 @@
-
 import { useCallback, createContext, useContext, useReducer, ReactNode } from 'react';
 import { Note, Tag, TagColor, isValidTagColor } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
 
-// Define the state type
 interface NoteState {
   notes: Note[];
   selected: Note | null;
   content: string;
-  items: Note[]; // Add this to fix the missing items property
+  items: Note[];
 }
 
-// Define the action types
 type NoteAction = 
   | { type: 'ADD_NOTE'; payload: Note }
   | { type: 'UPDATE_NOTE'; payload: { id: string; updates: Partial<Note> } }
@@ -19,19 +16,16 @@ type NoteAction =
   | { type: 'SELECT_NOTE'; payload: Note | null }
   | { type: 'UPDATE_CURRENT_CONTENT'; payload: string };
 
-// Initialize the state
 const initialState: NoteState = {
   notes: [],
   selected: null,
   content: '',
-  items: [] // Initialize items array
+  items: []
 };
 
-// Create the context
 const NoteStateContext = createContext<NoteState | undefined>(undefined);
 const NoteDispatchContext = createContext<React.Dispatch<NoteAction> | undefined>(undefined);
 
-// Create the reducer
 function noteReducer(state: NoteState, action: NoteAction): NoteState {
   switch (action.type) {
     case 'ADD_NOTE': {
@@ -39,7 +33,7 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
       return { 
         ...state, 
         notes: newNotes,
-        items: newNotes // Update items as well
+        items: newNotes
       };
     }
     case 'UPDATE_NOTE': {
@@ -51,7 +45,7 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
       return {
         ...state,
         notes: updatedNotes,
-        items: updatedNotes // Update items as well
+        items: updatedNotes
       };
     }
     case 'DELETE_NOTE': {
@@ -59,7 +53,7 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
       return {
         ...state,
         notes: filteredNotes,
-        items: filteredNotes // Update items as well
+        items: filteredNotes
       };
     }
     case 'SELECT_NOTE':
@@ -71,11 +65,9 @@ function noteReducer(state: NoteState, action: NoteAction): NoteState {
   }
 }
 
-// Create the provider component
 export function NoteContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(noteReducer, initialState);
 
-  // Set items to be the same as notes for compatibility
   const stateWithItems: NoteState = {
     ...state,
     items: state.notes
@@ -90,7 +82,6 @@ export function NoteContextProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Create the hooks
 export function useNoteState() {
   const context = useContext(NoteStateContext);
   if (context === undefined) {
@@ -118,7 +109,6 @@ export const useNoteActions = () => {
   const selectNoteForEdit = useCallback((note: Note) => {
     dispatch({ type: 'SELECT_NOTE', payload: note });
     
-    // Also emit an event for other parts of the app with correct event payload
     eventManager.emit('note:view', { 
       id: note.id,
     });
@@ -127,7 +117,6 @@ export const useNoteActions = () => {
   const addNote = useCallback(() => {
     if (!content?.trim()) return;
 
-    // Ensure tag colors comply with TagColor type
     const newNote: Note = {
       id: crypto.randomUUID(),
       title: content.split('\n')[0]?.trim().replace(/^#+ /, '') || 'Untitled Note',
@@ -141,7 +130,6 @@ export const useNoteActions = () => {
     dispatch({ type: 'SELECT_NOTE', payload: null });
     dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
     
-    // Emit event for other components with correct payload structure
     eventManager.emit('note:create', { 
       id: newNote.id, 
       title: newNote.title, 
@@ -162,9 +150,9 @@ export const useNoteActions = () => {
     dispatch({ type: 'SELECT_NOTE', payload: null });
     dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
     
-    // Emit event for other components with correct payload structure
     eventManager.emit('note:update', { 
       id, 
+      noteId: id,
       updates: updatedNote
     });
   }, [dispatch]);
@@ -176,32 +164,26 @@ export const useNoteActions = () => {
       dispatch({ type: 'UPDATE_CURRENT_CONTENT', payload: '' });
     }
     
-    // Emit event with correct payload structure
     eventManager.emit('note:deleted', { 
       id 
     });
   }, [dispatch, selected?.id]);
 
   const addTagToNote = useCallback((noteId: string, tagName: string, tagColor: string = 'default') => {
-    // Validate the tag color
     const color: TagColor = isValidTagColor(tagColor) ? tagColor as TagColor : 'default';
     
     const updates: Partial<Note> = {
       updatedAt: new Date().toISOString()
     };
     
-    // Get the current note to modify its tags
     const currentNote = useNoteState().notes.find(note => note.id === noteId);
     if (currentNote) {
       const tags = [...(currentNote.tags || [])];
-      // Check if tag already exists
       const existingTagIndex = tags.findIndex(tag => tag.name === tagName);
       
       if (existingTagIndex >= 0) {
-        // Update existing tag
         tags[existingTagIndex] = { ...tags[existingTagIndex], color };
       } else {
-        // Add new tag
         tags.push({ name: tagName, color });
       }
       
@@ -215,7 +197,6 @@ export const useNoteActions = () => {
   }, []);
 
   const removeTagFromNote = useCallback((noteId: string, tagId: string) => {
-    // Get the current note
     const currentNote = useNoteState().notes.find(note => note.id === noteId);
     if (currentNote && currentNote.tags) {
       const updates: Partial<Note> = {

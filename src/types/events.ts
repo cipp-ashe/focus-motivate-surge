@@ -1,4 +1,3 @@
-
 // Import and re-export all event types from the main events.ts
 import type { Task } from './tasks';
 
@@ -60,7 +59,9 @@ export type NavigationEventType =
 
 export type AuthEventType = 
   | 'auth:login'
-  | 'auth:logout';
+  | 'auth:logout'
+  | 'auth:signed-out'
+  | 'auth:state-change';
 
 export type NoteEventType = 
   | 'note:create'
@@ -70,7 +71,8 @@ export type NoteEventType =
   | 'note:view'
   | 'note:deleted'
   | 'note:format'
-  | 'note:format-complete';
+  | 'note:format-complete'
+  | 'note:create-from-voice';
 
 export type TagEventType = 
   | 'tag:create'
@@ -94,7 +96,9 @@ export type QuoteEventType =
 export type VoiceNoteEventType = 
   | 'voicenote:create'
   | 'voicenote:update'
-  | 'voicenote:delete';
+  | 'voicenote:delete'
+  | 'voice-note:created'
+  | 'voice-note:deleted';
 
 // Combine all event types
 export type AllEventTypes = 
@@ -134,14 +138,14 @@ export interface EventPayloads {
   // Task events
   'task:create': Task;
   'task:update': { taskId: string, updates: Partial<Task> };
-  'task:delete': { taskId: string };
+  'task:delete': { taskId: string, reason?: string };
   'task:complete': { taskId: string, metrics?: any };
   'task:select': string | null;
   'task:dismiss': { taskId: string, reason?: string, habitId?: string, date?: string };
   'task:reload': any;
   
   // Habit events
-  'habit:complete': { habitId: string, date: string, completed: boolean };
+  'habit:complete': { habitId: string, date: string, completed?: boolean };
   'habit:create': { habitId: string, habitData: any };
   'habit:update': { habitId: string, updates: any };
   'habit:delete': { habitId: string };
@@ -169,25 +173,28 @@ export interface EventPayloads {
   'relationship:batch-update': any;
   
   // App events
-  'app:initialized': undefined | { timestamp: string };
-  'app:ready': undefined | { timestamp: string };
+  'app:initialized': { timestamp?: string };
+  'app:ready': { timestamp?: string };
   
   // Navigation events
   'navigation:changed': { path: string };
   
   // Auth events
-  'auth:login': { userId: string, user?: any };
+  'auth:login': { user?: any };
   'auth:logout': undefined;
+  'auth:signed-out': any;
+  'auth:state-change': { user: any | null };
   
   // Note events
-  'note:create': { title: string, content: string, id?: string };
-  'note:update': { noteId: string, updates: any, id?: string };
+  'note:create': { id?: string, title: string, content: string };
+  'note:update': { id?: string, noteId?: string, updates: any };
   'note:delete': { noteId: string };
   'note:create-from-habit': { habitId: string, habitName: string, content: string, templateId?: string };
-  'note:view': any;
-  'note:deleted': any;
+  'note:view': { id: string };
+  'note:deleted': { id: string };
   'note:format': any;
   'note:format-complete': any;
+  'note:create-from-voice': { audioUrl: string, transcript?: string };
   
   // Tag events
   'tag:create': { name: string, color?: string };
@@ -212,4 +219,6 @@ export interface EventPayloads {
   'voicenote:create': { audioUrl: string, text?: string, duration: number, noteId?: string };
   'voicenote:update': { voiceNoteId: string, updates: any, noteId?: string };
   'voicenote:delete': { voiceNoteId: string, noteId?: string };
+  'voice-note:created': { noteId: string, voiceNoteId?: string };
+  'voice-note:deleted': { noteId: string, voiceNoteId?: string };
 }

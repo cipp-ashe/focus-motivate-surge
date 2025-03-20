@@ -25,10 +25,7 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
         window.dispatchEvent(event);
         
         // Also use eventManager
-        eventManager.emit('timer:set-task', { 
-          id: task.id, 
-          name: task.name 
-        });
+        eventManager.emit('timer:set-task', task);
       }, 300);
       
       toast.success(`Timer set for: ${task.name}`);
@@ -54,10 +51,7 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
         window.dispatchEvent(event);
         
         // Also use eventManager
-        eventManager.emit('timer:set-task', { 
-          id: timerTask.id, 
-          name: timerTask.name 
-        });
+        eventManager.emit('timer:set-task', timerTask);
         
         // Update the task type in the system
         eventManager.emit('task:update', {
@@ -74,17 +68,20 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
   useEffect(() => {
     // Listen for timer:set-task events from eventManager
     const unsubscribe = eventManager.on('timer:set-task', (task) => {
-      // This expects to get an object with id and name
+      // This expects to get a Task object
       if (task && task.id) {
-        const fullTask = {
-          id: task.id,
-          name: task.name,
-          // Add minimum required properties for a Task
-          completed: false,
-          createdAt: new Date().toISOString()
-        } as Task;
-        
-        handleTimerTaskSet(fullTask);
+        // Ensure the task has all required properties for a Task
+        if (!task.completed || !task.createdAt) {
+          const fullTask: Task = {
+            ...task,
+            completed: task.completed !== undefined ? task.completed : false,
+            createdAt: task.createdAt !== undefined ? task.createdAt : new Date().toISOString()
+          };
+          
+          handleTimerTaskSet(fullTask);
+        } else {
+          handleTimerTaskSet(task);
+        }
       }
     });
     
