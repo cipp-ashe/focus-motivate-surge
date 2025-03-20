@@ -15,6 +15,7 @@ import { HabitProvider, useHabitContext } from '@/contexts/habits/HabitContext';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitDetail } from '@/components/habits/types';
 import { NoteProvider } from '@/contexts/notes/NoteContext';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -112,33 +113,67 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
     refreshHabits();
   }, [templates, refreshHabits]);
   
+  // For mobile, use a stacked layout
+  if (isMobile) {
+    return (
+      <div className="grid gap-4 grid-cols-1">
+        <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
+        
+        {/* Today's Habits Card */}
+        {todaysHabits && todaysHabits.length > 0 && (
+          <TodaysHabitsSection
+            key={`today-habits-${todaysHabitsSectionKey}`}
+            todaysHabits={todaysHabits}
+            completedHabits={completedHabits}
+            dismissedHabits={dismissedHabits}
+            onHabitComplete={handleHabitComplete}
+            onAddHabitToTasks={handleAddHabitToTasks}
+            templateId={todaysHabits[0]?.relationships?.templateId}
+          />
+        )}
+
+        <div className="bg-background h-full">
+          <HabitTracker />
+        </div>
+      </div>
+    );
+  }
+  
+  // For desktop, use a resizable layout with TodaysHabits taking less space
   return (
-    <div className={cn(
-      "grid gap-4",
-      isMobile 
-        ? "grid-cols-1" 
-        : todaysHabits && todaysHabits.length > 0 
-          ? "grid-cols-1 lg:grid-cols-[1fr_300px]" 
-          : "grid-cols-1"
-    )}>
+    <div className="h-[calc(100vh-12rem)]">
       <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
       
-      {/* Today's Habits Card */}
-      {todaysHabits && todaysHabits.length > 0 && (
-        <TodaysHabitsSection
-          key={`today-habits-${todaysHabitsSectionKey}`}
-          todaysHabits={todaysHabits}
-          completedHabits={completedHabits}
-          dismissedHabits={dismissedHabits}
-          onHabitComplete={handleHabitComplete}
-          onAddHabitToTasks={handleAddHabitToTasks}
-          templateId={todaysHabits[0]?.relationships?.templateId}
-        />
+      {todaysHabits && todaysHabits.length > 0 ? (
+        <ResizablePanelGroup direction="horizontal" className="h-full mt-4">
+          {/* Habit Tracker section - larger */}
+          <ResizablePanel defaultSize={70} minSize={50}>
+            <div className="bg-background h-full pr-2">
+              <HabitTracker />
+            </div>
+          </ResizablePanel>
+          
+          {/* Resizable handle */}
+          <ResizableHandle withHandle />
+          
+          {/* Today's Habits section - smaller */}
+          <ResizablePanel defaultSize={30} minSize={20}>
+            <TodaysHabitsSection
+              key={`today-habits-${todaysHabitsSectionKey}`}
+              todaysHabits={todaysHabits}
+              completedHabits={completedHabits}
+              dismissedHabits={dismissedHabits}
+              onHabitComplete={handleHabitComplete}
+              onAddHabitToTasks={handleAddHabitToTasks}
+              templateId={todaysHabits[0]?.relationships?.templateId}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      ) : (
+        <div className="bg-background h-full mt-4">
+          <HabitTracker />
+        </div>
       )}
-
-      <div className="bg-background h-full">
-        <HabitTracker />
-      </div>
     </div>
   );
 };

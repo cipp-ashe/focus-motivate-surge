@@ -91,19 +91,19 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
   };
 
   return (
-    <Card className="bg-card">
-      <CardHeader>
-        <CardTitle>Today's Habits</CardTitle>
+    <Card className="bg-card h-full overflow-hidden flex flex-col">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Today's Habits</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 mb-4">
+      <CardContent className="flex-1 overflow-auto p-3">
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          <TabsList className="grid grid-cols-3 mb-3">
             <TabsTrigger value="all">All ({todaysHabits.length})</TabsTrigger>
             <TabsTrigger value="timer">Timer ({timerHabits.length})</TabsTrigger>
             <TabsTrigger value="journal">Journal ({journalHabits.length})</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="all" className="space-y-4">
+          <TabsContent value="all" className="space-y-3 flex-1 overflow-auto">
             {todaysHabits.map(habit => (
               <TodaysHabitCard
                 key={habit.id}
@@ -117,7 +117,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
             ))}
           </TabsContent>
           
-          <TabsContent value="timer" className="space-y-4">
+          <TabsContent value="timer" className="space-y-3 flex-1 overflow-auto">
             {timerHabits.map(habit => (
               <TodaysHabitCard
                 key={habit.id}
@@ -131,7 +131,7 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
             ))}
           </TabsContent>
           
-          <TabsContent value="journal" className="space-y-4">
+          <TabsContent value="journal" className="space-y-3 flex-1 overflow-auto">
             {journalHabits.map(habit => (
               <TodaysHabitCard
                 key={habit.id}
