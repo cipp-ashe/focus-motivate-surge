@@ -80,6 +80,15 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     setTaskCounts(counts);
   }, [activeTasks, completedTasks, activeTab]);
   
+  // For debugging
+  console.log('UnifiedTaskView rendering with:', {
+    activeTasksCount: activeTasks.length,
+    completedTasksCount: completedTasks.length,
+    activeTab,
+    activeTaskType,
+    taskCounts
+  });
+  
   // Filter tasks based on active type
   const getFilteredTasks = () => {
     const currentTasks = activeTab === 'active' ? activeTasks : completedTasks;

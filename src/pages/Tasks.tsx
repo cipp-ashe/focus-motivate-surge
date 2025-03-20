@@ -123,6 +123,15 @@ const TaskPage = () => {
     voicenote: handleOpenVoiceRecorder
   };
 
+  // Added some debugging logs to help identify why UnifiedTaskView might not be rendering
+  console.log('Tasks.tsx rendering - Task context:', 
+    { 
+      items: taskContext?.items?.length || 0,
+      completed: taskContext?.completed?.length || 0,
+      selected: taskContext?.selected || null
+    }
+  );
+
   return (
     <div className="container mx-auto max-w-6xl py-4 px-4">
       <h1 className="text-2xl sm:text-3xl mb-5 font-bold" id="page-title">
