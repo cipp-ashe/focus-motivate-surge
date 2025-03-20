@@ -28,11 +28,15 @@ export const TaskTask: React.FC<TaskTaskProps> = ({ task, onEdit }) => {
   // Handler for setting a task for the timer
   const handleSetForTimer = useCallback(() => {
     console.log("TaskTask: Setting timer for task:", task.id);
-    eventManager.emit('timer:set-task', { 
-      id: task.id, 
+    // Create a proper Task object to pass to the timer
+    const timerTask: Task = {
+      id: task.id,
       name: task.name,
-      duration: task.duration || 1500 
-    });
+      duration: task.duration || 1500,
+      completed: false,
+      createdAt: new Date().toISOString()
+    };
+    eventManager.emit('timer:set-task', timerTask);
     toast.success(`Timer set for: ${task.name}`);
   }, [task]);
 

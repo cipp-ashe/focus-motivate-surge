@@ -12,7 +12,14 @@ export type TimerEventType =
   | 'timer:add-time'
   | 'timer:set-task'
   | 'timer:update-metrics'
-  | 'timer:cancel';
+  | 'timer:cancel'
+  | 'timer:init'
+  | 'timer:tick'
+  | 'timer:expand'
+  | 'timer:collapse'
+  | 'timer:close'
+  | 'timer:task-set'
+  | 'timer:metrics-update';
 
 export type TaskEventType = 
   | 'task:create' 
@@ -20,7 +27,8 @@ export type TaskEventType =
   | 'task:delete' 
   | 'task:complete'
   | 'task:select'
-  | 'task:dismiss';
+  | 'task:dismiss'
+  | 'task:reload';
 
 export type HabitEventType = 
   | 'habit:complete' 
@@ -30,11 +38,18 @@ export type HabitEventType =
   | 'habit:schedule'
   | 'habit:dismissed'
   | 'habits:check-pending'
-  | 'habits:processed';
+  | 'habits:processed'
+  | 'habit:template-add'
+  | 'habit:template-update'
+  | 'habit:template-delete'
+  | 'habit:select'
+  | 'habit:task-deleted';
 
 export type RelationshipEventType = 
   | 'relationship:create'
-  | 'relationship:delete';
+  | 'relationship:delete'
+  | 'relationship:update'
+  | 'relationship:batch-update';
 
 export type AppEventType = 
   | 'app:initialized'
@@ -51,23 +66,30 @@ export type NoteEventType =
   | 'note:create'
   | 'note:update'
   | 'note:delete'
-  | 'note:create-from-habit';
+  | 'note:create-from-habit'
+  | 'note:view'
+  | 'note:deleted'
+  | 'note:format'
+  | 'note:format-complete';
 
 export type TagEventType = 
   | 'tag:create'
   | 'tag:update'
   | 'tag:delete'
   | 'tag:link'
-  | 'tag:unlink';
+  | 'tag:unlink'
+  | 'tags:force-update';
 
 export type JournalEventType = 
   | 'journal:create'
   | 'journal:update'
-  | 'journal:delete';
+  | 'journal:delete'
+  | 'journal:open';
 
 export type QuoteEventType = 
   | 'quote:favorite'
-  | 'quote:unfavorite';
+  | 'quote:unfavorite'
+  | 'quote:link-task';
 
 export type VoiceNoteEventType = 
   | 'voicenote:create'
@@ -92,15 +114,22 @@ export type AllEventTypes =
 // Define payload types for each event
 export interface EventPayloads {
   // Timer events
-  'timer:start': { taskId?: string, duration?: number };
-  'timer:pause': { taskId?: string };
-  'timer:resume': { taskId?: string };
-  'timer:reset': { taskId?: string };
-  'timer:complete': { taskId?: string };
+  'timer:start': { taskId?: string, duration?: number, taskName?: string };
+  'timer:pause': { taskId?: string, timeLeft?: number, taskName?: string };
+  'timer:resume': { taskId?: string, timeLeft?: number, taskName?: string };
+  'timer:reset': { taskId?: string, taskName?: string, duration?: number };
+  'timer:complete': { taskId?: string, metrics?: any, taskName?: string };
   'timer:add-time': { minutes: number, taskId?: string };
   'timer:set-task': Task;
   'timer:update-metrics': { taskId: string, metrics: any };
   'timer:cancel': { taskId?: string };
+  'timer:init': { taskId?: string, duration?: number, taskName?: string };
+  'timer:tick': { taskId?: string, remaining?: number, timeLeft?: number, taskName?: string };
+  'timer:expand': any;
+  'timer:collapse': any;
+  'timer:close': any;
+  'timer:task-set': any;
+  'timer:metrics-update': { taskId?: string, metrics?: any, taskName?: string };
   
   // Task events
   'task:create': Task;
@@ -108,7 +137,8 @@ export interface EventPayloads {
   'task:delete': { taskId: string };
   'task:complete': { taskId: string, metrics?: any };
   'task:select': string | null;
-  'task:dismiss': { taskId: string, reason?: string };
+  'task:dismiss': { taskId: string, reason?: string, habitId?: string, date?: string };
+  'task:reload': any;
   
   // Habit events
   'habit:complete': { habitId: string, date: string, completed: boolean };
@@ -126,27 +156,38 @@ export interface EventPayloads {
   'habit:dismissed': { habitId: string, date: string };
   'habits:check-pending': any;
   'habits:processed': any[];
+  'habit:template-add': { id: string, templateId: string, [key: string]: any };
+  'habit:template-update': any;
+  'habit:template-delete': { templateId: string, isOriginatingAction?: boolean };
+  'habit:select': any;
+  'habit:task-deleted': any;
   
   // Relationship events
   'relationship:create': { type: string, sourceId: string, targetId: string };
   'relationship:delete': { type: string, sourceId: string, targetId: string };
+  'relationship:update': any;
+  'relationship:batch-update': any;
   
   // App events
-  'app:initialized': undefined;
-  'app:ready': undefined;
+  'app:initialized': undefined | { timestamp: string };
+  'app:ready': undefined | { timestamp: string };
   
   // Navigation events
   'navigation:changed': { path: string };
   
   // Auth events
-  'auth:login': { userId: string };
+  'auth:login': { userId: string, user?: any };
   'auth:logout': undefined;
   
   // Note events
-  'note:create': { title: string, content: string };
-  'note:update': { noteId: string, updates: any };
+  'note:create': { title: string, content: string, id?: string };
+  'note:update': { noteId: string, updates: any, id?: string };
   'note:delete': { noteId: string };
   'note:create-from-habit': { habitId: string, habitName: string, content: string, templateId?: string };
+  'note:view': any;
+  'note:deleted': any;
+  'note:format': any;
+  'note:format-complete': any;
   
   // Tag events
   'tag:create': { name: string, color?: string };
@@ -154,18 +195,21 @@ export interface EventPayloads {
   'tag:delete': { tagId: string };
   'tag:link': { tagId: string, entityId: string, entityType: string };
   'tag:unlink': { tagId: string, entityId: string, entityType: string };
+  'tags:force-update': any;
   
   // Journal events
   'journal:create': { title: string, content: string };
   'journal:update': { journalId: string, updates: any };
   'journal:delete': { journalId: string };
+  'journal:open': any;
   
   // Quote events
   'quote:favorite': { quoteId: string };
   'quote:unfavorite': { quoteId: string };
+  'quote:link-task': any;
   
   // Voice note events
-  'voicenote:create': { audioUrl: string, text?: string, duration: number };
-  'voicenote:update': { voiceNoteId: string, updates: any };
-  'voicenote:delete': { voiceNoteId: string };
+  'voicenote:create': { audioUrl: string, text?: string, duration: number, noteId?: string };
+  'voicenote:update': { voiceNoteId: string, updates: any, noteId?: string };
+  'voicenote:delete': { voiceNoteId: string, noteId?: string };
 }

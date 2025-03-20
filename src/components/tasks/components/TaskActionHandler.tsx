@@ -34,7 +34,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
       case 'dismiss':
         eventManager.emit('task:dismiss', { 
           taskId: task.id, 
-          habitId: task.relationships?.habitId || 'none',
+          habitId: task.relationships?.habitId,
           date: task.relationships?.date || new Date().toISOString()
         });
         toast.info(`Task "${task.name}" dismissed`);
@@ -52,18 +52,22 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'timer':
-        eventManager.emit('timer:set-task', { 
+        // Create a proper Task object to pass to the timer
+        const timerTask: Task = {
           id: task.id, 
           name: task.name,
-          duration: task.duration || 1500
-        });
+          duration: task.duration || 1500,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        eventManager.emit('timer:set-task', timerTask);
         toast.info(`Timer set for task: ${task.name}`);
         break;
         
       default:
         // For status changes
         if (actionType.startsWith('status-')) {
-          const status = actionType.replace('status-', '');
+          const status = actionType.replace('status-', '') as any;
           eventManager.emit('task:update', { 
             taskId: task.id, 
             updates: { status } 
