@@ -14,6 +14,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { HabitProvider, useHabitContext } from '@/contexts/habits/HabitContext';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitDetail } from '@/components/habits/types';
+import { NoteProvider } from '@/contexts/notes/NoteContext';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -32,20 +33,22 @@ const HabitsPage = () => {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <HabitProvider>
-        <HabitsPanelProvider>
-          <div className="container mx-auto py-4 px-4">
-            <div className="mb-5">
-              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-                Habit Tracker
-              </h1>
-              <p className="text-muted-foreground">Build consistent habits and track your progress</p>
+        <NoteProvider> {/* Add NoteProvider here to wrap all habit components */}
+          <HabitsPanelProvider>
+            <div className="container mx-auto py-4 px-4">
+              <div className="mb-5">
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                  Habit Tracker
+                </h1>
+                <p className="text-muted-foreground">Build consistent habits and track your progress</p>
+              </div>
+              
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <HabitsContent isMobile={isMobile} />
+              </ErrorBoundary>
             </div>
-            
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <HabitsContent isMobile={isMobile} />
-            </ErrorBoundary>
-          </div>
-        </HabitsPanelProvider>
+          </HabitsPanelProvider>
+        </NoteProvider>
       </HabitProvider>
     </ErrorBoundary>
   );
