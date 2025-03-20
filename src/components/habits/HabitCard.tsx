@@ -13,8 +13,8 @@ interface HabitCardProps {
 
 export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle }) => {
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg">
-      <CardContent className="p-6">
+    <Card className="overflow-hidden transition-all hover:shadow-lg h-full">
+      <CardContent className="p-6 flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="font-semibold mb-1">{habit.name}</h3>
@@ -28,7 +28,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle }) => {
             <Check className={`h-4 w-4 ${habit.completed ? "" : "text-muted-foreground"}`} />
           </Button>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mt-auto">
           <Badge variant="outline" className="text-xs">
             {habit.category}
           </Badge>

@@ -130,7 +130,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDragEnd={handleDragEnd}
                 className={cn(
-                  "transition-transform cursor-move",
+                  "transition-transform cursor-move h-full",
                   draggedIndex === index ? 'scale-[1.01] opacity-80 shadow-md' : ''
                 )}
               >
@@ -167,7 +167,7 @@ const TemplateList: React.FC<TemplateListProps> = ({
               onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
               className={cn(
-                "transition-transform cursor-move",
+                "transition-transform cursor-move h-full",
                 draggedIndex === index ? 'scale-[1.01] opacity-80 shadow-md' : ''
               )}
             >

@@ -30,7 +30,9 @@ export const HabitList: React.FC<HabitListProps> = ({ habits, onToggle }) => {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {habits.map((habit) => (
-          <HabitCard key={habit.id} habit={habit} onToggle={onToggle} />
+          <div key={habit.id} className="h-full">
+            <HabitCard habit={habit} onToggle={onToggle} />
+          </div>
         ))}
       </div>
     </div>

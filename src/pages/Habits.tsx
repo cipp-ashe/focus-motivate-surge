@@ -133,7 +133,7 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
         />
       )}
 
-      <div className="bg-background">
+      <div className="bg-background h-full">
         <HabitTracker />
       </div>
     </div>
