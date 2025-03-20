@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Task, TaskType } from '@/types/tasks';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { TaskList } from './TaskList';
@@ -7,16 +7,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskTabsList } from './tabs/TaskTabsList';
 import { cn } from '@/lib/utils';
 import { eventManager } from '@/lib/events/EventManager';
+import { toast } from 'sonner';
 
 interface UnifiedTaskViewProps {
   activeTasks: Task[];
   completedTasks: Task[];
   selectedTaskId: string | null;
   dialogOpeners?: {
-    checklist: (taskId: string, taskName: string, items: any[]) => void;
-    journal: (taskId: string, taskName: string, entry: string) => void;
-    screenshot: (imageUrl: string, taskName: string) => void;
-    voicenote: (taskId: string, taskName: string) => void;
+    checklist?: (taskId: string, taskName: string, items: any[]) => void;
+    journal?: (taskId: string, taskName: string, entry: string) => void;
+    screenshot?: (imageUrl: string, taskName: string) => void;
+    voicenote?: (taskId: string, taskName: string) => void;
   };
   onTaskAdd: (task: Task) => void;
   onTasksAdd: (tasks: Task[]) => void;
@@ -32,6 +33,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [activeTaskType, setActiveTaskType] = useState<'all' | TaskType>('all');
+  const [isLoading, setIsLoading] = useState(false);
   
   // Task counts for filtering
   const [taskCounts, setTaskCounts] = useState({
@@ -46,21 +48,27 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
   });
   
   // Task event handlers
-  const handleTaskSelect = (taskId: string) => {
+  const handleTaskSelect = useCallback((taskId: string) => {
+    console.log('UnifiedTaskView: Task selected', taskId);
     eventManager.emit('task:select', taskId);
-  };
+  }, []);
 
-  const handleTaskDelete = (data: { taskId: string }) => {
+  const handleTaskDelete = useCallback((data: { taskId: string }) => {
+    console.log('UnifiedTaskView: Task delete requested', data);
     eventManager.emit('task:delete', data);
-  };
+    toast.success('Task deleted');
+  }, []);
 
-  const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
+  const handleTaskUpdate = useCallback((data: { taskId: string; updates: Partial<Task> }) => {
+    console.log('UnifiedTaskView: Task update requested', data);
     eventManager.emit('task:update', data);
-  };
+  }, []);
 
-  const handleTaskComplete = (data: { taskId: string; metrics?: any }) => {
+  const handleTaskComplete = useCallback((data: { taskId: string; metrics?: any }) => {
+    console.log('UnifiedTaskView: Task complete requested', data);
     eventManager.emit('task:complete', data);
-  };
+    toast.success('Task completed');
+  }, []);
   
   // Calculate counts whenever tasks change
   useEffect(() => {
@@ -80,6 +88,19 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     setTaskCounts(counts);
   }, [activeTasks, completedTasks, activeTab]);
   
+  // Refresh task UI when events occur
+  useEffect(() => {
+    const handleTaskUiRefresh = () => {
+      console.log('UnifiedTaskView: Handling task-ui-refresh event');
+      // We don't need to do anything here since props should update
+    };
+    
+    window.addEventListener('task-ui-refresh', handleTaskUiRefresh);
+    return () => {
+      window.removeEventListener('task-ui-refresh', handleTaskUiRefresh);
+    };
+  }, []);
+  
   // For debugging
   console.log('UnifiedTaskView rendering with:', {
     activeTasksCount: activeTasks.length,
@@ -90,15 +111,15 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
   });
   
   // Filter tasks based on active type
-  const getFilteredTasks = () => {
+  const getFilteredTasks = useCallback(() => {
     const currentTasks = activeTab === 'active' ? activeTasks : completedTasks;
     
     if (activeTaskType === 'all') return currentTasks;
     return currentTasks.filter(task => task.taskType === activeTaskType);
-  };
+  }, [activeTaskType, activeTab, activeTasks, completedTasks]);
 
   // Get empty state message based on active tab and task type
-  const getEmptyStateMessage = () => {
+  const getEmptyStateMessage = useCallback(() => {
     if (activeTab === 'active') {
       return (
         <div className="text-center py-16">
@@ -113,7 +134,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
         </div>
       );
     }
-  };
+  }, [activeTab]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -150,6 +171,8 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
                 handleTaskUpdate={handleTaskUpdate}
                 handleTaskComplete={handleTaskComplete}
                 emptyState={getEmptyStateMessage()}
+                isLoading={isLoading}
+                onForceUpdate={() => window.dispatchEvent(new Event('task-ui-refresh'))}
               />
             </div>
           </ScrollArea>
@@ -167,6 +190,8 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
                 handleTaskUpdate={handleTaskUpdate}
                 handleTaskComplete={handleTaskComplete}
                 emptyState={getEmptyStateMessage()}
+                isLoading={isLoading}
+                onForceUpdate={() => window.dispatchEvent(new Event('task-ui-refresh'))}
               />
             </div>
           </ScrollArea>
