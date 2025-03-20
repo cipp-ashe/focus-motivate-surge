@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { HabitDetail, HabitMetricType, ActiveTemplate } from './types';
+import { HabitDetail, HabitMetric, ActiveTemplate } from './types';
 import { X, Check, Calendar, Settings, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -43,7 +44,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       return value ? 'Complete' : 'Incomplete';
     }
     
-    if (habit.metrics.type === HabitMetricType.Number) {
+    if (habit.metrics.type === 'Number') {
       return `${value} / ${habit.metrics.target}`;
     }
     
@@ -56,7 +57,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       return value ? 'text-green-500' : 'text-red-500';
     }
     
-    if (habit.metrics.type === HabitMetricType.Number) {
+    if (habit.metrics.type === 'Number') {
       const progress = (Number(value) / Number(habit.metrics.target)) * 100;
       if (progress >= 100) {
         return 'text-green-500';
@@ -112,14 +113,17 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       
       <CardContent className="flex-grow overflow-auto">
         <div className="space-y-2">
-          {template.habits?.map(habit => (
-            <HabitRow 
-              key={habit.id}
-              habit={habit}
-              progress={getProgress(habit.id)}
-              onUpdate={(value) => onHabitUpdate(habit.id, value)}
-            />
-          ))}
+          {template.habits?.map(habit => {
+            const progress = getProgress(habit.id);
+            return (
+              <HabitRow 
+                key={habit.id}
+                habit={habit}
+                value={progress.value}
+                onUpdate={(value) => onHabitUpdate(habit.id, value)}
+              />
+            );
+          })}
         </div>
       </CardContent>
       
