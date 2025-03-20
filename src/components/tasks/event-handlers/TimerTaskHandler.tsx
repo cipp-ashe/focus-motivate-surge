@@ -1,6 +1,6 @@
 
 import { useCallback, useEffect } from 'react';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 import { NavigateFunction, useLocation } from 'react-router-dom';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
@@ -34,9 +34,10 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
       console.log('TimerTaskHandler: Converting task to timer:', task);
       
       // Create a timer version of the task
-      const timerTask = {
+      // Explicitly cast the taskType as TaskType to ensure type safety
+      const timerTask: Task = {
         ...task,
-        taskType: 'timer',
+        taskType: 'timer' as TaskType, // Use explicit type assertion
         duration: 1500 // Default 25 minutes
       };
       
@@ -56,7 +57,7 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
         // Update the task type in the system
         eventManager.emit('task:update', {
           taskId: task.id,
-          updates: { taskType: 'timer', duration: 1500 }
+          updates: { taskType: 'timer' as TaskType, duration: 1500 }
         });
       }, 300);
       
