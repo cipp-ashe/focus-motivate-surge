@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Task, TaskType } from '@/types/tasks';
-import { useToast } from '@/hooks/use-toast';
 import { TagInputSection } from './inputs/TagInputSection';
 import { MultipleTasksInput } from './inputs/MultipleTasksInput';
 import { HabitTemplateDialog } from './inputs/HabitTemplateDialog';
@@ -12,6 +11,7 @@ import { useTaskCreation } from './hooks/useTaskCreation';
 import { useTemplateManagement } from './hooks/useTemplateManagement';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
@@ -91,7 +91,7 @@ export const TaskInput: React.FC<TaskInputProps> = ({
   
   // UI Rendering for full view with improved styling
   return (
-    <div className="flex flex-col gap-4 bg-background/80 dark:bg-background/20 p-4 rounded-xl shadow-sm border border-border/30">
+    <div className="flex flex-col gap-4">
       {/* Main Task Input Row */}
       <TaskInputRow
         taskName={taskName}
@@ -102,12 +102,14 @@ export const TaskInput: React.FC<TaskInputProps> = ({
         onToggleMultipleInput={toggleMultipleInput}
       />
       
-      {/* Tags Component */}
-      <TagInputSection 
-        tags={tags}
-        onAddTag={handleAddTag}
-        onRemoveTag={handleRemoveTag}
-      />
+      {/* Tags Component - only show if user has started typing */}
+      {taskName.trim().length > 0 && (
+        <TagInputSection 
+          tags={tags}
+          onAddTag={handleAddTag}
+          onRemoveTag={handleRemoveTag}
+        />
+      )}
       
       {/* Multiple Tasks Input */}
       {isAddingMultiple && (

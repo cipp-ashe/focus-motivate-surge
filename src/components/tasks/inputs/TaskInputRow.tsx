@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Upload, FileText, Timer, BookOpen, CheckSquare } from "lucide-react";
+import { Send, Upload, FileText, Timer, BookOpen, CheckSquare, Image, Mic } from "lucide-react";
 import { TaskType } from '@/types/tasks';
 
 /**
@@ -33,7 +33,9 @@ const taskTypeIcons = {
   regular: <FileText className="h-4 w-4 text-primary" />,
   timer: <Timer className="h-4 w-4 text-purple-400" />,
   journal: <BookOpen className="h-4 w-4 text-amber-400" />,
-  checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />
+  checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />,
+  screenshot: <Image className="h-4 w-4 text-blue-400" />,
+  voicenote: <Mic className="h-4 w-4 text-rose-400" />
 };
 
 /**
@@ -43,7 +45,9 @@ const taskTypeLabels = {
   regular: 'Regular Task',
   timer: 'Focused Timer',
   journal: 'Journal Entry',
-  checklist: 'Checklist'
+  checklist: 'Checklist',
+  screenshot: 'Screenshot',
+  voicenote: 'Voice Note'
 };
 
 /**

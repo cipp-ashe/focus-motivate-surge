@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { TaskManager } from '@/components/tasks/TaskManager';
 import { toast } from 'sonner';
@@ -10,6 +11,9 @@ import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
 import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { ErrorBoundary } from 'react-error-boundary';
+import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
+import { TaskInput } from '@/components/tasks/TaskInput';
+import { Card, CardContent } from '@/components/ui/card';
 
 const ErrorFallback = () => (
   <div className="p-4 m-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md text-center">
@@ -129,7 +133,16 @@ const TaskPage = () => {
         Task Manager
       </h1>
       
-      <main aria-labelledby="page-title">
+      <main aria-labelledby="page-title" className="space-y-4">
+        <Card className="bg-background/80 backdrop-blur-sm border-border/30">
+          <CardContent className="p-4">
+            <TaskInput 
+              onTaskAdd={(task) => taskContext?.addTask?.(task)}
+              onTasksAdd={(tasks) => tasks.forEach(task => taskContext?.addTask?.(task))}
+            />
+          </CardContent>
+        </Card>
+        
         <TaskEventListener 
           onShowImage={handleShowImage}
           onOpenChecklist={handleOpenChecklist}
@@ -139,7 +152,16 @@ const TaskPage = () => {
         />
         
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <TaskManager dialogOpeners={dialogOpeners} />
+          {taskContext && (
+            <UnifiedTaskView 
+              activeTasks={taskContext.items || []}
+              completedTasks={taskContext.completed || []}
+              selectedTaskId={taskContext.selected}
+              dialogOpeners={dialogOpeners}
+              onTaskAdd={(task) => taskContext.addTask?.(task)}
+              onTasksAdd={(tasks) => tasks.forEach(task => taskContext.addTask?.(task))}
+            />
+          )}
         </ErrorBoundary>
       </main>
       

@@ -6,8 +6,8 @@ import { TaskList } from './TaskList';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskTabsList } from './tabs/TaskTabsList';
 import { cn } from '@/lib/utils';
-import { TaskTypeFilters } from './filters/TaskTypeFilters';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface UnifiedTaskViewProps {
   activeTasks: Task[];
@@ -48,19 +48,19 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
   
   // Task event handlers
   const handleTaskSelect = (taskId: string) => {
-    eventBus.emit('task:select', taskId);
+    eventManager.emit('task:select', { taskId });
   };
 
   const handleTaskDelete = (data: { taskId: string }) => {
-    eventBus.emit('task:delete', data);
+    eventManager.emit('task:delete', data);
   };
 
   const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
-    eventBus.emit('task:update', data);
+    eventManager.emit('task:update', data);
   };
 
   const handleTaskComplete = (data: { taskId: string; metrics?: any }) => {
-    eventBus.emit('task:complete', data);
+    eventManager.emit('task:complete', data);
   };
   
   // Calculate counts whenever tasks change
@@ -89,66 +89,87 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     return currentTasks.filter(task => task.taskType === activeTaskType);
   };
 
+  // Get empty state message based on active tab and task type
+  const getEmptyStateMessage = () => {
+    if (activeTab === 'active') {
+      return (
+        <div className="text-center py-16">
+          <p className="text-muted-foreground mb-1">No tasks available</p>
+          <p className="text-sm text-muted-foreground/70">Create a task using the input field above</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-center py-16">
+          <p className="text-muted-foreground">No completed tasks</p>
+        </div>
+      );
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full rounded-lg overflow-hidden bg-card/50 backdrop-blur-sm border border-border/20 shadow-sm">
-      {/* Task type filters */}
-      <div className="flex-none">
-        <TaskTypeFilters
-          activeFilter={activeTaskType}
-          onFilterChange={(type) => setActiveTaskType(type)}
-          counts={taskCounts}
-          className="border-b border-border/10 bg-card/30"
-        />
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col h-full">
-        <TabsList className="grid grid-cols-2 bg-card/80 border-b border-border/10 rounded-none px-0.5">
-          <TabsTrigger value="active" className={cn(
-            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
-            "data-[state=active]:text-primary font-medium transition-all duration-200"
-          )}>
-            Active Tasks ({activeTasks.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed" className={cn(
-            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
-            "data-[state=active]:text-primary font-medium transition-all duration-200"
-          )}>
-            Completed Tasks ({completedTasks.length})
-          </TabsTrigger>
-        </TabsList>
+    <Card className="flex flex-col h-full overflow-hidden bg-card/50 backdrop-blur-sm border border-border/20 shadow-sm">
+      <CardContent className="p-0">
+        {/* Task type tabs/filters */}
+        <div className="flex-none">
+          <TaskTabsList
+            activeFilter={activeTaskType}
+            onFilterChange={(type) => setActiveTaskType(type as 'all' | TaskType)}
+            counts={taskCounts}
+          />
+        </div>
         
-        <TabsContent value="active" className="flex-1 overflow-hidden p-0 m-0 data-[state=active]:border-0">
-          <ScrollArea className="h-full">
-            <div className="p-4">
-              <TaskList
-                tasks={getFilteredTasks()}
-                selectedTaskId={selectedTaskId}
-                dialogOpeners={dialogOpeners}
-                handleTaskSelect={handleTaskSelect}
-                handleDelete={handleTaskDelete}
-                handleTaskUpdate={handleTaskUpdate}
-                handleTaskComplete={handleTaskComplete}
-              />
-            </div>
-          </ScrollArea>
-        </TabsContent>
-        
-        <TabsContent value="completed" className="flex-1 overflow-hidden p-0 m-0 data-[state=active]:border-0">
-          <ScrollArea className="h-full">
-            <div className="p-4">
-              <TaskList
-                tasks={getFilteredTasks()}
-                selectedTaskId={selectedTaskId}
-                dialogOpeners={dialogOpeners}
-                handleTaskSelect={handleTaskSelect}
-                handleDelete={handleTaskDelete}
-                handleTaskUpdate={handleTaskUpdate}
-                handleTaskComplete={handleTaskComplete}
-              />
-            </div>
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
-    </div>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col">
+          <TabsList className="grid grid-cols-2 bg-background/80 border-b border-border/10 rounded-none px-0.5">
+            <TabsTrigger value="active" className={cn(
+              "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
+              "data-[state=active]:text-primary font-medium transition-all duration-200"
+            )}>
+              Active Tasks ({activeTasks.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed" className={cn(
+              "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5",
+              "data-[state=active]:text-primary font-medium transition-all duration-200"
+            )}>
+              Completed Tasks ({completedTasks.length})
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="active" className="flex-1 overflow-hidden p-0 m-0 data-[state=active]:border-0">
+            <ScrollArea className="h-full max-h-[calc(100vh-320px)]">
+              <div className="p-4">
+                <TaskList
+                  tasks={getFilteredTasks()}
+                  selectedTaskId={selectedTaskId}
+                  dialogOpeners={dialogOpeners}
+                  handleTaskSelect={handleTaskSelect}
+                  handleDelete={handleTaskDelete}
+                  handleTaskUpdate={handleTaskUpdate}
+                  handleTaskComplete={handleTaskComplete}
+                  emptyState={getEmptyStateMessage()}
+                />
+              </div>
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="completed" className="flex-1 overflow-hidden p-0 m-0 data-[state=active]:border-0">
+            <ScrollArea className="h-full max-h-[calc(100vh-320px)]">
+              <div className="p-4">
+                <TaskList
+                  tasks={getFilteredTasks()}
+                  selectedTaskId={selectedTaskId}
+                  dialogOpeners={dialogOpeners}
+                  handleTaskSelect={handleTaskSelect}
+                  handleDelete={handleTaskDelete}
+                  handleTaskUpdate={handleTaskUpdate}
+                  handleTaskComplete={handleTaskComplete}
+                  emptyState={getEmptyStateMessage()}
+                />
+              </div>
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
