@@ -48,7 +48,8 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
   
   // Task event handlers
   const handleTaskSelect = (taskId: string) => {
-    eventManager.emit('task:select', { taskId });
+    // Fix: Pass just the taskId string instead of an object
+    eventManager.emit('task:select', taskId);
   };
 
   const handleTaskDelete = (data: { taskId: string }) => {
@@ -113,9 +114,13 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
         {/* Task type tabs/filters */}
         <div className="flex-none">
           <TaskTabsList
+            taskCounts={taskCounts}
+            activeTaskType={activeTaskType}
+            onTaskTypeChange={(type) => setActiveTaskType(type as 'all' | TaskType)}
+            // Also provide props with the names used in the component
+            counts={taskCounts}
             activeFilter={activeTaskType}
             onFilterChange={(type) => setActiveTaskType(type as 'all' | TaskType)}
-            counts={taskCounts}
           />
         </div>
         
