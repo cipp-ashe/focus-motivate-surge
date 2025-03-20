@@ -16,6 +16,7 @@ import { eventManager } from '@/lib/events/EventManager';
 import { HabitDetail } from '@/components/habits/types';
 import { NoteProvider } from '@/contexts/notes/NoteContext';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { motion } from 'framer-motion';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-6 border border-red-300 bg-red-50/30 dark:bg-red-900/10 rounded-xl shadow-sm backdrop-blur-sm">
@@ -36,18 +37,21 @@ const HabitsPage = () => {
       <HabitProvider>
         <NoteProvider>
           <HabitsPanelProvider>
-            <div className="container mx-auto py-6 px-4">
-              <div className="mb-6">
-                <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 animate-gradient-subtle">
-                  Habit Tracker
-                </h1>
-                <p className="text-muted-foreground mt-1">Build consistent habits and track your progress</p>
+            <motion.div 
+              className="page-container"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="page-header">
+                <h1 className="page-title">Habit Tracker</h1>
+                <p className="page-description">Build consistent habits and track your progress</p>
               </div>
               
               <ErrorBoundary FallbackComponent={ErrorFallback}>
                 <HabitsContent isMobile={isMobile} />
               </ErrorBoundary>
-            </div>
+            </motion.div>
           </HabitsPanelProvider>
         </NoteProvider>
       </HabitProvider>
@@ -113,51 +117,45 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
     refreshHabits();
   }, [templates, refreshHabits]);
   
+  // Animation variants for staggered entries
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1, 
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      } 
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        type: "spring",
+        stiffness: 300,
+        damping: 24
+      }
+    }
+  };
+
   // For mobile, use a stacked layout
   if (isMobile) {
     return (
-      <div className="grid gap-5 grid-cols-1">
+      <motion.div 
+        className="grid gap-5 grid-cols-1"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
         
         {/* Today's Habits Card */}
         {todaysHabits && todaysHabits.length > 0 && (
-          <TodaysHabitsSection
-            key={`today-habits-${todaysHabitsSectionKey}`}
-            todaysHabits={todaysHabits}
-            completedHabits={completedHabits}
-            dismissedHabits={dismissedHabits}
-            onHabitComplete={handleHabitComplete}
-            onAddHabitToTasks={handleAddHabitToTasks}
-            templateId={todaysHabits[0]?.relationships?.templateId}
-          />
-        )}
-
-        <div className="bg-background/40 backdrop-blur-sm rounded-xl h-full shadow-sm border border-border/50">
-          <HabitTracker />
-        </div>
-      </div>
-    );
-  }
-  
-  // For desktop, use a resizable layout with TodaysHabits taking less space
-  return (
-    <div className="h-[calc(100vh-12rem)]">
-      <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
-      
-      {todaysHabits && todaysHabits.length > 0 ? (
-        <ResizablePanelGroup direction="horizontal" className="h-full mt-4 rounded-xl overflow-hidden border border-border/40 shadow-sm">
-          {/* Habit Tracker section - larger */}
-          <ResizablePanel defaultSize={75} minSize={55} className="transition-all duration-300">
-            <div className="bg-background/40 backdrop-blur-sm h-full pr-1 pl-1 pt-1">
-              <HabitTracker />
-            </div>
-          </ResizablePanel>
-          
-          {/* Resizable handle */}
-          <ResizableHandle withHandle className="bg-border/30 hover:bg-primary/20 transition-colors" />
-          
-          {/* Today's Habits section - smaller */}
-          <ResizablePanel defaultSize={25} minSize={20} className="transition-all duration-300">
+          <motion.div variants={itemVariants}>
             <TodaysHabitsSection
               key={`today-habits-${todaysHabitsSectionKey}`}
               todaysHabits={todaysHabits}
@@ -167,12 +165,62 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
               onAddHabitToTasks={handleAddHabitToTasks}
               templateId={todaysHabits[0]?.relationships?.templateId}
             />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      ) : (
-        <div className="bg-background/40 backdrop-blur-sm h-full mt-4 rounded-xl border border-border/40 shadow-sm">
+          </motion.div>
+        )}
+
+        <motion.div variants={itemVariants} className="card-glass h-full shadow-sm">
           <HabitTracker />
-        </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
+  
+  // For desktop, use a resizable layout with TodaysHabits taking less space
+  return (
+    <div className="h-[calc(100vh-12rem)]">
+      <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
+      
+      {todaysHabits && todaysHabits.length > 0 ? (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="mt-4"
+        >
+          <ResizablePanelGroup direction="horizontal" className="h-full rounded-xl overflow-hidden border border-border/20 shadow-sm">
+            {/* Habit Tracker section - larger */}
+            <ResizablePanel defaultSize={75} minSize={55} className="transition-all duration-300">
+              <div className="glass-panel h-full p-1">
+                <HabitTracker />
+              </div>
+            </ResizablePanel>
+            
+            {/* Resizable handle */}
+            <ResizableHandle withHandle className="bg-border/20 hover:bg-primary/10 transition-colors" />
+            
+            {/* Today's Habits section - smaller */}
+            <ResizablePanel defaultSize={25} minSize={20} className="transition-all duration-300">
+              <TodaysHabitsSection
+                key={`today-habits-${todaysHabitsSectionKey}`}
+                todaysHabits={todaysHabits}
+                completedHabits={completedHabits}
+                dismissedHabits={dismissedHabits}
+                onHabitComplete={handleHabitComplete}
+                onAddHabitToTasks={handleAddHabitToTasks}
+                templateId={todaysHabits[0]?.relationships?.templateId}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </motion.div>
+      ) : (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 24 }}
+          className="glass-panel h-full mt-4 rounded-xl border border-border/20 shadow-sm"
+        >
+          <HabitTracker />
+        </motion.div>
       )}
     </div>
   );

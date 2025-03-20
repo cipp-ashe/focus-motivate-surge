@@ -1,5 +1,5 @@
 
-/* Base theme styles with modern design approach */
+/* Base theme with modern design approach */
 #root {
   max-width: 1400px;
   margin: 0 auto;
@@ -115,6 +115,15 @@
   50% { opacity: 0.8; }
 }
 
+/* Interactive components */
+.interactive-card {
+  @apply transition-all duration-300 hover:shadow-lg hover:border-primary/20 cursor-pointer;
+}
+
+.interactive-button {
+  @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm;
+}
+
 /* Responsive design utilities */
 .responsive-card {
   @apply w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] p-3 sm:p-4;
@@ -136,4 +145,76 @@
 
 .bg-gradient-subtle {
   @apply bg-gradient-to-tr from-background to-muted/40;
+}
+
+/* Interactive list items */
+.list-item-hover {
+  @apply transition-colors duration-200 hover:bg-muted/50 cursor-pointer;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Better skeleton loading */
+.skeleton {
+  @apply bg-muted/50 animate-pulse rounded;
+}
+
+/* Tooltip styling */
+.tooltip {
+  @apply relative inline-block;
+}
+
+.tooltip-text {
+  @apply absolute invisible opacity-0 bg-popover text-popover-foreground text-xs py-1 px-2 rounded
+  shadow-sm transition-opacity duration-200 z-50 w-max max-w-xs;
+}
+
+.tooltip:hover .tooltip-text {
+  @apply visible opacity-100;
+}
+
+/* Arrow effect for tooltips */
+.tooltip-arrow::before {
+  content: "";
+  @apply absolute w-0 h-0 border-solid border-8 z-50;
+}
+
+/* Callout box */
+.callout {
+  @apply p-4 rounded-lg border border-l-4 bg-muted/30;
+}
+
+.callout-info {
+  @apply border-blue-400 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/10;
+}
+
+.callout-warning {
+  @apply border-amber-400 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-900/10;
+}
+
+.callout-error {
+  @apply border-red-400 dark:border-red-700 bg-red-50/30 dark:bg-red-900/10;
+}
+
+.callout-success {
+  @apply border-green-400 dark:border-green-700 bg-green-50/30 dark:bg-green-900/10;
 }

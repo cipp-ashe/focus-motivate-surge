@@ -59,7 +59,7 @@
     "cmdk": "^0.2.1",
     "date-fns": "^3.3.1",
     "embla-carousel-react": "^8.0.0-rc19",
-    "framer-motion": "^10.16.4",
+    "framer-motion": "^12.5.0",
     "input-otp": "^1.1.0",
     "lucide-react": "^0.320.0",
     "marked": "^5.0.2",

@@ -174,7 +174,7 @@ const HabitTracker: React.FC = () => {
 
   return (
     <motion.div 
-      className="rounded-lg p-5 flex flex-col h-full"
+      className="glass-panel p-5 flex flex-col h-full"
       initial="hidden"
       animate="visible"
       variants={containerVariants}

@@ -32,6 +32,36 @@
   to { transform: scale(1); opacity: 1; }
 }
 
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px hsl(var(--primary) / 0.3); }
+  50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.5); }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
 /* Animation classes */
 .animate-float {
   animation: float 6s ease-in-out infinite;
@@ -56,6 +86,36 @@
 
 .animate-scale-in {
   animation: scale-in 0.2s ease-out forwards;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 3s ease-in-out infinite;
+}
+
+.animate-rotate {
+  animation: rotate 20s linear infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+.animate-reveal {
+  animation: reveal 0.6s ease-out forwards;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, 
+    hsl(var(--primary) / 0.05),
+    hsl(var(--primary) / 0.1),
+    hsl(var(--primary) / 0.05)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
 
 /* Staggered animations for children */
@@ -89,4 +149,49 @@
 
 .scale-on-hover:hover {
   transform: scale(1.03);
+}
+
+/* Opacity transitions */
+.opacity-transition {
+  transition: opacity 200ms ease;
+}
+
+.opacity-hover:hover {
+  opacity: 0.8;
+}
+
+/* Border transitions */
+.border-transition {
+  transition: border-color 200ms ease;
+}
+
+.border-hover:hover {
+  border-color: hsl(var(--primary) / 0.5);
+}
+
+/* Background transitions */
+.bg-transition {
+  transition: background-color 200ms ease;
+}
+
+.bg-hover:hover {
+  background-color: hsl(var(--primary) / 0.1);
+}
+
+/* Text transitions */
+.text-transition {
+  transition: color 200ms ease;
+}
+
+.text-hover:hover {
+  color: hsl(var(--primary));
+}
+
+/* Shadow transitions */
+.shadow-transition {
+  transition: box-shadow 200ms ease;
+}
+
+.shadow-hover:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.07);
 }
