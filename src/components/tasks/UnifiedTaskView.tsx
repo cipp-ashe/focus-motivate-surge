@@ -45,7 +45,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     focus: 0
   });
   
-  // Task event handlers - Fixed to pass string instead of object
+  // Task event handlers
   const handleTaskSelect = (taskId: string) => {
     eventManager.emit('task:select', taskId);
   };
@@ -110,25 +110,20 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     <div className="flex flex-col h-full overflow-hidden">
       {/* Task type tabs/filters */}
       <TaskTabsList
-        taskCounts={taskCounts}
         activeTaskType={activeTaskType}
         onTaskTypeChange={(type) => setActiveTaskType(type as 'all' | TaskType)}
-        counts={taskCounts}
-        activeFilter={activeTaskType}
-        onFilterChange={(type) => setActiveTaskType(type as 'all' | TaskType)}
+        taskCounts={taskCounts}
       />
       
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed')} className="w-full flex flex-col">
-        <TabsList className="grid grid-cols-2 bg-[#1A1F2C]/80 border-b border-[#6E59A5]/20 rounded-none px-0.5">
+        <TabsList className="grid grid-cols-2 rounded-none">
           <TabsTrigger value="active" className={cn(
-            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-[#9b87f5] rounded-none px-5 py-2.5",
-            "data-[state=active]:text-[#9b87f5] font-medium transition-all duration-200"
+            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5"
           )}>
             Active Tasks ({activeTasks.length})
           </TabsTrigger>
           <TabsTrigger value="completed" className={cn(
-            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-[#9b87f5] rounded-none px-5 py-2.5",
-            "data-[state=active]:text-[#9b87f5] font-medium transition-all duration-200"
+            "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-5 py-2.5"
           )}>
             Completed Tasks ({completedTasks.length})
           </TabsTrigger>
