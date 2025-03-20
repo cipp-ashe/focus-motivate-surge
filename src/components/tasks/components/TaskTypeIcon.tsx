@@ -2,24 +2,48 @@
 import React from 'react';
 import { Timer, FileText, Image, Mic, CheckSquare, FileSpreadsheet } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
+import { cn } from '@/lib/utils';
 
 interface TaskTypeIconProps {
   taskType?: TaskType;
+  className?: string;
 }
 
-export const TaskTypeIcon: React.FC<TaskTypeIconProps> = ({ taskType }) => {
+export const TaskTypeIcon: React.FC<TaskTypeIconProps> = ({ taskType, className }) => {
+  // Use our standardized task color classes
+  const getTaskColorClass = (type: TaskType) => {
+    switch (type) {
+      case 'timer':
+        return 'task-timer';
+      case 'journal':
+        return 'task-journal';
+      case 'screenshot':
+        return 'task-screenshot';
+      case 'voicenote':
+        return 'task-voicenote';
+      case 'checklist':
+        return 'task-checklist';
+      case 'focus':
+        return 'task-focus';
+      default:
+        return 'text-muted-foreground';
+    }
+  };
+
+  const colorClass = taskType ? getTaskColorClass(taskType) : 'text-muted-foreground';
+
   switch (taskType) {
     case 'timer':
-      return <Timer className="h-4 w-4 text-purple-500" aria-hidden="true" />;
+      return <Timer className={cn("h-4 w-4", colorClass, className)} aria-hidden="true" />;
     case 'journal':
-      return <FileText className="h-4 w-4 text-blue-500" aria-hidden="true" />;
+      return <FileText className={cn("h-4 w-4", colorClass, className)} aria-hidden="true" />;
     case 'screenshot':
-      return <Image className="h-4 w-4 text-green-500" aria-hidden="true" />;
+      return <Image className={cn("h-4 w-4", colorClass, className)} aria-hidden="true" />;
     case 'voicenote':
-      return <Mic className="h-4 w-4 text-red-500" aria-hidden="true" />;
+      return <Mic className={cn("h-4 w-4", colorClass, className)} aria-hidden="true" />;
     case 'checklist':
-      return <CheckSquare className="h-4 w-4 text-amber-500" aria-hidden="true" />;
+      return <CheckSquare className={cn("h-4 w-4", colorClass, className)} aria-hidden="true" />;
     default:
-      return <FileSpreadsheet className="h-4 w-4 text-gray-400" aria-hidden="true" />;
+      return <FileSpreadsheet className={cn("h-4 w-4", colorClass, className)} aria-hidden="true" />;
   }
 };

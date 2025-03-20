@@ -19,33 +19,6 @@ interface TaskIconProps {
 }
 
 /**
- * Color mapping for each task type using Tailwind classes
- * that respect the theme's color palette
- */
-const taskTypeColors: Record<TaskType, string> = {
-  regular: 'text-primary',
-  timer: 'text-purple-400',
-  journal: 'text-amber-400',
-  checklist: 'text-cyan-400',
-  screenshot: 'text-blue-400',
-  voicenote: 'text-rose-400',
-  focus: 'text-green-400'
-};
-
-/**
- * Hover state color mapping for each task type
- */
-const taskTypeHoverColors: Record<TaskType, string> = {
-  regular: 'group-hover:text-primary/80',
-  timer: 'group-hover:text-purple-600',
-  journal: 'group-hover:text-amber-600',
-  checklist: 'group-hover:text-cyan-600',
-  screenshot: 'group-hover:text-blue-600',
-  voicenote: 'group-hover:text-rose-600',
-  focus: 'group-hover:text-green-600'
-};
-
-/**
  * A component that displays the appropriate icon for a task type
  * 
  * This component ensures consistent icon usage throughout the task system,
@@ -61,8 +34,13 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   muted = false
 }) => {
   // Apply color class based on task type
-  const colorClass = muted ? 'text-muted-foreground' : taskTypeColors[taskType];
-  const hoverColorClass = !muted ? taskTypeHoverColors[taskType] : '';
+  const colorClass = muted 
+    ? 'text-muted-foreground' 
+    : `task-${taskType}`;
+  
+  const hoverColorClass = !muted 
+    ? `hover-task-color-${taskType}` 
+    : '';
   
   // Determine which icon to render based on task type
   switch (taskType) {

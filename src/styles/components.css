@@ -13,15 +13,16 @@
     @apply grid h-full w-full transition-all duration-300 ease-in-out gap-4;
   }
 
-  /* Glass and card effects */
+  /* Glass and card effects - now unified */
   .card-glass {
     @apply bg-card/70 backdrop-blur-md rounded-lg border border-border/40 shadow-sm
     transition-all duration-300 hover:shadow-md hover:border-primary/20;
   }
 
   .glass-panel {
-    @apply bg-background/40 backdrop-blur-md rounded-lg border border-border/30
-    shadow-sm transition-all;
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    @apply rounded-lg border border-border/30 shadow-sm transition-all;
   }
 
   .glass-input {
@@ -47,7 +48,7 @@
   }
 
   .scrollable-content {
-    @apply flex-1 overflow-y-auto px-4 py-2 space-y-3;
+    @apply flex-1 overflow-y-auto px-4 py-2 space-y-3 scrollbar-thin;
   }
 
   /* Page layouts */
@@ -60,15 +61,14 @@
   }
 
   .page-title {
-    @apply text-2xl md:text-3xl font-bold bg-clip-text text-transparent 
-    bg-gradient-to-r from-primary to-purple-500 animate-gradient-subtle;
+    @apply text-2xl md:text-3xl font-bold text-gradient-primary;
   }
 
   .page-description {
     @apply text-muted-foreground mt-1;
   }
 
-  /* Card patterns */
+  /* Card patterns - unified */
   .feature-card {
     @apply card-glass p-6 flex flex-col h-full;
   }
@@ -105,7 +105,44 @@
     @apply text-sm text-muted-foreground mt-auto pt-3;
   }
 
-  /* Button styles */
+  /* Task item styling - now unified with other components */
+  .task-item {
+    @apply card-glass p-3 relative hover:shadow-md hover:bg-card/80 
+    hover:border-primary/20 transition-all duration-200;
+  }
+
+  .task-item-selected {
+    @apply border-primary/50 bg-primary/5;
+  }
+
+  .task-item-completed {
+    @apply opacity-70;
+  }
+
+  /* Note item styling - unified with task styling */
+  .note-item {
+    @apply card-glass p-3 relative hover:shadow-md hover:bg-card/80 
+    hover:border-primary/20 transition-all duration-200;
+  }
+
+  /* Screenshot styling - unified */
+  .screenshot-card {
+    @apply card-glass overflow-hidden;
+  }
+
+  .screenshot-header {
+    @apply p-4 pb-2;
+  }
+
+  .screenshot-content {
+    @apply px-4 pb-4 pt-2;
+  }
+
+  .screenshot-footer {
+    @apply p-4 pt-2 flex justify-between;
+  }
+
+  /* Button styles - unified */
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm 
     hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
@@ -155,6 +192,31 @@
 
   .badge-outline {
     @apply border border-border bg-transparent text-xs py-0.5 px-2 rounded-full;
+  }
+
+  /* Task type colors - now using CSS variables */
+  .task-color-timer {
+    @apply text-[hsl(var(--timer-color))];
+  }
+  
+  .task-color-journal {
+    @apply text-[hsl(var(--journal-color))];
+  }
+  
+  .task-color-checklist {
+    @apply text-[hsl(var(--checklist-color))];
+  }
+  
+  .task-color-screenshot {
+    @apply text-[hsl(var(--screenshot-color))];
+  }
+  
+  .task-color-voicenote {
+    @apply text-[hsl(var(--voicenote-color))];
+  }
+  
+  .task-color-focus {
+    @apply text-[hsl(var(--focus-color))];
   }
 
   /* Mobile optimizations */

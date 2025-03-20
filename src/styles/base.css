@@ -11,6 +11,7 @@
 
 @layer base {
   :root {
+    /* Base colors - purple accent theme */
     --background: 225 25% 96%;
     --foreground: 225 25% 10%;
     --card: 225 25% 99%;
@@ -31,6 +32,20 @@
     --input: 225 25% 88%;
     --ring: 280 85% 60%;
     --radius: 0.5rem;
+    
+    /* Task type colors */
+    --timer-color: 260 84% 60%;
+    --journal-color: 47 95% 55%;
+    --checklist-color: 190 95% 55%;
+    --screenshot-color: 215 95% 55%;
+    --voicenote-color: 350 95% 65%;
+    --focus-color: 140 50% 55%;
+    
+    /* Glass effect variables */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --glass-blur: 10px;
   }
 
   .dark {
@@ -53,6 +68,12 @@
     --border: 225 25% 25%;
     --input: 225 25% 25%;
     --ring: 280 85% 60%;
+    
+    /* Dark mode glass effect variables */
+    --glass-bg: rgba(30, 30, 40, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    --glass-blur: 15px;
   }
 }
 

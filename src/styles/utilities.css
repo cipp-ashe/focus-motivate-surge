@@ -32,7 +32,10 @@
   }
   
   .glass-effect {
-    @apply backdrop-blur-md bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10;
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
   }
   
   .neo-glass {
@@ -41,6 +44,19 @@
   
   .backdrop-blur-card {
     backdrop-filter: blur(12px);
+  }
+
+  /* Enhanced glassmorphism effects */
+  .glassmorphism {
+    @apply bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10;
+  }
+  
+  .glassmorphism-card {
+    @apply bg-white/20 dark:bg-black/20 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-sm;
+  }
+  
+  .glassmorphism-input {
+    @apply bg-white/30 dark:bg-black/20 backdrop-blur-md border border-white/30 dark:border-white/10;
   }
 
   /* Scrollbar utilities */
@@ -89,10 +105,7 @@
   }
   
   .shadow-glass {
-    box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.06),
-      0 1px 5px rgba(0, 0, 0, 0.03),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    box-shadow: var(--glass-shadow);
   }
 
   /* Text utilities */
@@ -125,6 +138,31 @@
   
   .stretch-box {
     @apply w-full h-full;
+  }
+
+  /* Task type colors - for hover states */
+  .hover-task-color-timer:hover {
+    @apply text-[hsl(var(--timer-color))];
+  }
+  
+  .hover-task-color-journal:hover {
+    @apply text-[hsl(var(--journal-color))];
+  }
+  
+  .hover-task-color-checklist:hover {
+    @apply text-[hsl(var(--checklist-color))];
+  }
+  
+  .hover-task-color-screenshot:hover {
+    @apply text-[hsl(var(--screenshot-color))];
+  }
+  
+  .hover-task-color-voicenote:hover {
+    @apply text-[hsl(var(--voicenote-color))];
+  }
+  
+  .hover-task-color-focus:hover {
+    @apply text-[hsl(var(--focus-color))];
   }
 
   /* Mobile-specific utilities */

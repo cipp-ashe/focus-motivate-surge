@@ -10,23 +10,51 @@
   --task-text-muted: rgba(255, 255, 255, 0.7);
 }
 
+/* Using our unified glass effect classes */
 .task-card-dark {
+  @apply glass-effect text-white;
   background-color: var(--task-card-bg);
   border-color: var(--task-border);
-  color: var(--task-text);
 }
 
 .task-input-dark {
+  @apply glass-input;
   background-color: rgba(26, 31, 44, 0.6);
   border-color: var(--task-border);
   color: var(--task-text);
 }
 
 .task-button-dark {
+  @apply btn-primary;
   background-color: var(--task-primary);
   color: white;
 }
 
 .task-button-dark:hover {
   background-color: var(--task-secondary);
+}
+
+/* Task type specific styles in dark mode */
+.task-timer-dark {
+  @apply task-timer;
+}
+
+.task-journal-dark {
+  @apply task-journal;
+}
+
+.task-checklist-dark {
+  @apply task-checklist;
+}
+
+.task-screenshot-dark {
+  @apply task-screenshot;
+}
+
+.task-voicenote-dark {
+  @apply task-voicenote;
+}
+
+.task-focus-dark {
+  @apply task-focus;
 }

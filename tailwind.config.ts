@@ -39,6 +39,9 @@ export default {
         "float-left": "float-left 12s ease-in-out infinite",
         "float-right": "float-right 15s ease-in-out infinite",
         "float-top": "float-top 18s ease-in-out infinite",
+        "fade-in": "fade-in 0.3s ease-out forwards",
+        "scale-in": "scale-in 0.2s ease-out forwards",
+        "slide-up": "slide-up 0.4s ease-out forwards",
       },
       colors: {
         border: "hsl(var(--border))",
@@ -74,6 +77,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Task type specific colors
+        timer: "hsl(var(--timer-color))",
+        journal: "hsl(var(--journal-color))",
+        checklist: "hsl(var(--checklist-color))",
+        screenshot: "hsl(var(--screenshot-color))",
+        voicenote: "hsl(var(--voicenote-color))",
+        focus: "hsl(var(--focus-color))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -103,6 +113,18 @@ export default {
           "0%": { transform: "translate(0, 0) rotate(0deg)" },
           "50%": { transform: "translate(0, -15px) rotate(1deg)" },
           "100%": { transform: "translate(0, 0) rotate(0deg)" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "scale-in": {
+          from: { transform: "scale(0.95)", opacity: "0" },
+          to: { transform: "scale(1)", opacity: "1" },
+        },
+        "slide-up": {
+          from: { transform: "translateY(10px)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
         },
       },
     },

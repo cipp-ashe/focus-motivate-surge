@@ -6,12 +6,43 @@
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
   }
+  
+  .responsive-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .responsive-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  .responsive-text-lg {
+    @apply text-base;
+  }
+  
+  .responsive-text-base {
+    @apply text-sm;
+  }
+  
+  .responsive-text-sm {
+    @apply text-xs;
+  }
 }
 
 /* Better mobile touch targets */
 @media (max-width: 640px) {
   .touch-target {
     @apply min-h-12 min-w-12 flex items-center justify-center;
+  }
+  
+  .touch-target-sm {
+    @apply min-h-10 min-w-10 flex items-center justify-center;
   }
 }
 
@@ -36,5 +67,40 @@
   .icon-size-sm {
     width: 1.25rem !important;
     height: 1.25rem !important;
+  }
+  
+  .mobile-stack {
+    @apply flex-col !important;
+  }
+  
+  .mobile-center {
+    @apply justify-center items-center !important;
+  }
+  
+  .mobile-full-width {
+    @apply w-full !important;
+  }
+}
+
+/* Mobile-specific layouts */
+@media (max-width: 640px) {
+  .mobile-padding {
+    @apply px-3 py-2 !important;
+  }
+  
+  .mobile-hide {
+    display: none !important;
+  }
+  
+  .mobile-show {
+    display: block !important;
+  }
+  
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  
+  .mobile-bottom-navigation-spacing {
+    padding-bottom: 5rem !important;
   }
 }
