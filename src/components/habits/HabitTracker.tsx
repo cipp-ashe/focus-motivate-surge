@@ -9,6 +9,7 @@ import { DayOfWeek, ActiveTemplate, HabitTemplate } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import { useHabitTaskIntegration } from '@/hooks/habits/useHabitTaskIntegration';
 import { EventHandler } from '@/lib/events/types';
+import { motion } from 'framer-motion';
 
 /**
  * Main component for habit tracking and template management
@@ -150,19 +151,50 @@ const HabitTracker: React.FC = () => {
     toast.success('Template days updated');
   };
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        delayChildren: 0.3,
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+
   return (
-    <div className="bg-card rounded-lg border shadow-sm p-4 flex flex-col h-full">
-      <HabitTemplateManager activeTemplates={templates} />
+    <motion.div 
+      className="rounded-lg p-5 flex flex-col h-full"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div variants={itemVariants}>
+        <HabitTemplateManager activeTemplates={templates} />
+      </motion.div>
       
-      <div className="mt-6 flex-grow overflow-hidden">
+      <motion.div 
+        className="mt-6 flex-grow overflow-hidden"
+        variants={itemVariants}
+      >
         <ActiveTemplateList
           activeTemplates={templates}
           onRemove={handleRemoveTemplate}
           getTodayProgress={getHabitProgress}
           onHabitUpdate={handleHabitUpdate}
         />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

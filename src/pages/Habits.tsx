@@ -18,12 +18,12 @@ import { NoteProvider } from '@/contexts/notes/NoteContext';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
-  <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
-    <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">Error Loading Habits</h2>
-    <p className="mb-2">There was a problem loading the habits component.</p>
-    <details className="text-sm text-gray-700 dark:text-gray-300">
-      <summary>Technical Details</summary>
-      <p className="mt-1">{error.message}</p>
+  <div className="p-6 border border-red-300 bg-red-50/30 dark:bg-red-900/10 rounded-xl shadow-sm backdrop-blur-sm">
+    <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-3">Error Loading Habits</h2>
+    <p className="mb-3 text-red-800/70 dark:text-red-300/70">There was a problem loading the habits component.</p>
+    <details className="text-sm text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-black/20 p-3 rounded-lg">
+      <summary className="cursor-pointer font-medium">Technical Details</summary>
+      <p className="mt-2 font-mono text-xs">{error.message}</p>
     </details>
   </div>
 );
@@ -34,14 +34,14 @@ const HabitsPage = () => {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <HabitProvider>
-        <NoteProvider> {/* Add NoteProvider here to wrap all habit components */}
+        <NoteProvider>
           <HabitsPanelProvider>
-            <div className="container mx-auto py-4 px-4">
-              <div className="mb-5">
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+            <div className="container mx-auto py-6 px-4">
+              <div className="mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 animate-gradient-subtle">
                   Habit Tracker
                 </h1>
-                <p className="text-muted-foreground">Build consistent habits and track your progress</p>
+                <p className="text-muted-foreground mt-1">Build consistent habits and track your progress</p>
               </div>
               
               <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -116,7 +116,7 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
   // For mobile, use a stacked layout
   if (isMobile) {
     return (
-      <div className="grid gap-4 grid-cols-1">
+      <div className="grid gap-5 grid-cols-1">
         <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
         
         {/* Today's Habits Card */}
@@ -132,7 +132,7 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
           />
         )}
 
-        <div className="bg-background h-full">
+        <div className="bg-background/40 backdrop-blur-sm rounded-xl h-full shadow-sm border border-border/50">
           <HabitTracker />
         </div>
       </div>
@@ -145,19 +145,19 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
       <HabitDebugLogger templates={templates} todaysHabits={todaysHabits} />
       
       {todaysHabits && todaysHabits.length > 0 ? (
-        <ResizablePanelGroup direction="horizontal" className="h-full mt-4">
+        <ResizablePanelGroup direction="horizontal" className="h-full mt-4 rounded-xl overflow-hidden border border-border/40 shadow-sm">
           {/* Habit Tracker section - larger */}
-          <ResizablePanel defaultSize={70} minSize={50}>
-            <div className="bg-background h-full pr-2">
+          <ResizablePanel defaultSize={75} minSize={55} className="transition-all duration-300">
+            <div className="bg-background/40 backdrop-blur-sm h-full pr-1 pl-1 pt-1">
               <HabitTracker />
             </div>
           </ResizablePanel>
           
           {/* Resizable handle */}
-          <ResizableHandle withHandle />
+          <ResizableHandle withHandle className="bg-border/30 hover:bg-primary/20 transition-colors" />
           
           {/* Today's Habits section - smaller */}
-          <ResizablePanel defaultSize={30} minSize={20}>
+          <ResizablePanel defaultSize={25} minSize={20} className="transition-all duration-300">
             <TodaysHabitsSection
               key={`today-habits-${todaysHabitsSectionKey}`}
               todaysHabits={todaysHabits}
@@ -170,7 +170,7 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
           </ResizablePanel>
         </ResizablePanelGroup>
       ) : (
-        <div className="bg-background h-full mt-4">
+        <div className="bg-background/40 backdrop-blur-sm h-full mt-4 rounded-xl border border-border/40 shadow-sm">
           <HabitTracker />
         </div>
       )}

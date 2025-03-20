@@ -1,14 +1,9 @@
 
-/* Animation effects for the Focus Notes app */
-
+/* Animation keyframes */
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
 }
 
 @keyframes pulse {
@@ -16,116 +11,82 @@
   50% { opacity: 0.7; }
 }
 
-.animate-pulse-slow {
-  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@keyframes gradient-subtle {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Card hover animations */
-.hover-scale {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+@keyframes slide-in {
+  from { transform: translateX(-10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.hover-scale:hover {
-  transform: scale(1.02);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 
-              0 8px 10px -6px rgba(0, 0, 0, 0.05);
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Focus animations */
-.focus-ring:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.3);
+@keyframes scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-/* Fade-in animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Animation classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-.fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
+.animate-pulse-subtle {
+  animation: pulse 3s ease-in-out infinite;
 }
 
-.fade-in-delay-1 {
-  opacity: 0;
-  animation: fadeIn 0.6s ease-out forwards;
-  animation-delay: 0.1s;
-}
-
-.fade-in-delay-2 {
-  opacity: 0;
-  animation: fadeIn 0.6s ease-out forwards;
-  animation-delay: 0.2s;
-}
-
-.fade-in-delay-3 {
-  opacity: 0;
-  animation: fadeIn 0.6s ease-out forwards;
-  animation-delay: 0.3s;
-}
-
-/* Gradient text animations */
-@keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient {
+.animate-gradient-subtle {
   background-size: 200% 200%;
-  animation: gradientFlow 4s ease infinite;
+  animation: gradient-subtle 8s ease infinite;
 }
 
-/* Glow animations */
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(124, 58, 237, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.6);
-  }
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
 }
 
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
 }
 
-/* Staggered animations for lists */
-.stagger-item:nth-child(1) { animation-delay: 0.1s; }
-.stagger-item:nth-child(2) { animation-delay: 0.2s; }
-.stagger-item:nth-child(3) { animation-delay: 0.3s; }
-.stagger-item:nth-child(4) { animation-delay: 0.4s; }
-.stagger-item:nth-child(5) { animation-delay: 0.5s; }
-.stagger-item:nth-child(6) { animation-delay: 0.6s; }
-
-/* Dashboard card hover effects */
-.dashboard-card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out forwards;
 }
 
-.dashboard-card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.1);
+/* Staggered animations for children */
+.stagger-children > *:nth-child(1) { animation-delay: 0.0s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.6s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.7s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.8s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.9s; }
+
+/* Transition utilities */
+.transition-all-300 {
+  transition: all 300ms ease;
 }
 
-/* Arrow hover animation */
-.arrow-slide-right {
-  transition: transform 0.3s ease;
+.hover-lift {
+  transition: transform 200ms ease;
 }
 
-.group:hover .arrow-slide-right {
-  transform: translateX(4px);
+.hover-lift:hover {
+  transform: translateY(-3px);
+}
+
+.scale-on-hover {
+  transition: transform 200ms ease;
+}
+
+.scale-on-hover:hover {
+  transform: scale(1.03);
 }
