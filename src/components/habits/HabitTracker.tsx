@@ -151,10 +151,10 @@ const HabitTracker: React.FC = () => {
   };
 
   return (
-    <div className="bg-card rounded-lg border shadow-sm p-4">
+    <div className="bg-card rounded-lg border shadow-sm p-4 flex flex-col h-full">
       <HabitTemplateManager activeTemplates={templates} />
       
-      <div className="mt-6">
+      <div className="mt-6 flex-grow overflow-hidden">
         <ActiveTemplateList
           activeTemplates={templates}
           onRemove={handleRemoveTemplate}
