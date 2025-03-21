@@ -10,7 +10,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen py-6 px-4 relative overflow-hidden bg-gradient-to-b from-gray-900 to-gray-950">
+    <div className="min-h-screen py-6 px-4 relative overflow-hidden">
       {/* Background decorative elements */}
       <BackgroundDecorations />
       

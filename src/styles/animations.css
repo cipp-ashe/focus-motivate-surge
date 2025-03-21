@@ -32,6 +32,12 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .animate-float-left {
   animation: float-left 12s ease-in-out infinite;
 }
@@ -54,4 +60,9 @@
 
 .animate-slide-up {
   animation: slide-up 0.4s ease-out forwards;
+}
+
+.animate-gradient {
+  animation: gradient 15s ease infinite;
+  background-size: 400% 400%;
 }

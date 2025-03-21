@@ -12,12 +12,22 @@ import VoiceNotes from "./pages/VoiceNotes";
 import Screenshots from "./pages/Screenshots";
 import { RequireAuth } from "./components/auth/RequireAuth";
 import AppLayout from "./components/AppLayout";
+import { ErrorBoundary } from "react-error-boundary";
 
 // Create and export the router configuration
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
+    errorElement: (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+        <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
+        <p className="mb-4">We couldn't find the page you're looking for.</p>
+        <a href="/" className="text-primary hover:underline">
+          Return to homepage
+        </a>
+      </div>
+    ),
     children: [
       {
         index: true,
