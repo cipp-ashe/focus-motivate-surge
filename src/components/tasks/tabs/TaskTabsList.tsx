@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { TaskIcon } from '../components/TaskIcon';
 
 interface TaskTabsListProps {
   activeTaskType: string;
@@ -26,11 +27,11 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
 }) => {
   const taskTypes = [
     { id: 'all', name: 'All Tasks', icon: <Layers className="h-4 w-4 mr-1.5" /> },
-    { id: 'timer', name: 'Timers', icon: <Timer className="h-4 w-4 mr-1.5 task-timer" /> },
-    { id: 'journal', name: 'Journals', icon: <BookOpen className="h-4 w-4 mr-1.5 task-journal" /> },
-    { id: 'checklist', name: 'Checklists', icon: <CheckSquare className="h-4 w-4 mr-1.5 task-checklist" /> },
-    { id: 'screenshot', name: 'Screenshots', icon: <Image className="h-4 w-4 mr-1.5 task-screenshot" /> },
-    { id: 'voicenote', name: 'Voice Notes', icon: <Mic className="h-4 w-4 mr-1.5 task-voicenote" /> },
+    { id: 'timer', name: 'Timers', icon: <TaskIcon taskType="timer" size={16} className="mr-1.5" /> },
+    { id: 'journal', name: 'Journals', icon: <TaskIcon taskType="journal" size={16} className="mr-1.5" /> },
+    { id: 'checklist', name: 'Checklists', icon: <TaskIcon taskType="checklist" size={16} className="mr-1.5" /> },
+    { id: 'screenshot', name: 'Screenshots', icon: <TaskIcon taskType="screenshot" size={16} className="mr-1.5" /> },
+    { id: 'voicenote', name: 'Voice Notes', icon: <TaskIcon taskType="voicenote" size={16} className="mr-1.5" /> },
     { id: 'regular', name: 'Regular', icon: <FileText className="h-4 w-4 mr-1.5" /> }
   ];
 

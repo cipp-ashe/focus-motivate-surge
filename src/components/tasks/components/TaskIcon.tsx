@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TaskType } from '@/types/tasks';
-import { Timer, FileText, BookOpen, CheckSquare, Image, Mic } from 'lucide-react';
+import { Timer, FileText, BookOpen, CheckSquare, Image, Mic, FileSpreadsheet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -41,18 +41,20 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   // Determine which icon to render based on task type
   switch (taskType) {
     case 'timer':
-      return <Timer className={cn(colorClass, className)} size={size} />;
+      return <Timer className={cn(colorClass, className)} size={size} aria-hidden="true" />;
     case 'journal':
-      return <BookOpen className={cn(colorClass, className)} size={size} />;
+      return <BookOpen className={cn(colorClass, className)} size={size} aria-hidden="true" />;
     case 'checklist':
-      return <CheckSquare className={cn(colorClass, className)} size={size} />;
+      return <CheckSquare className={cn(colorClass, className)} size={size} aria-hidden="true" />;
     case 'screenshot':
-      return <Image className={cn(colorClass, className)} size={size} />;
+      return <Image className={cn(colorClass, className)} size={size} aria-hidden="true" />;
     case 'voicenote':
-      return <Mic className={cn(colorClass, className)} size={size} />;
+      return <Mic className={cn(colorClass, className)} size={size} aria-hidden="true" />;
+    case 'focus':
+      return <FileSpreadsheet className={cn(colorClass, className)} size={size} aria-hidden="true" />;
     case 'regular':
     default:
-      return <FileText className={cn(colorClass, className)} size={size} />;
+      return <FileText className={cn(colorClass, className)} size={size} aria-hidden="true" />;
   }
 };
 
