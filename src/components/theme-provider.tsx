@@ -75,20 +75,30 @@ export function ThemeProvider({
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [enableSystem, theme]);
 
-  // Force an initial theme check on mount
+  // Force an initial theme check on mount with a stronger approach
   useEffect(() => {
-    // Force the theme to be applied immediately on mount
+    // Apply theme immediately on mount
+    const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+    
     const savedTheme = localStorage.getItem(storageKey) as Theme;
     if (savedTheme) {
+      root.classList.add(savedTheme);
       setTheme(savedTheme);
     } else if (enableSystem) {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
-      document.documentElement.classList.add(systemTheme);
+      root.classList.add(systemTheme);
     } else {
-      document.documentElement.classList.add(defaultTheme);
+      root.classList.add(defaultTheme);
     }
+
+    // Force a repaint to ensure theme is applied
+    document.body.style.display = 'none';
+    setTimeout(() => {
+      document.body.style.display = '';
+    }, 0);
   }, []);
 
   const value = {

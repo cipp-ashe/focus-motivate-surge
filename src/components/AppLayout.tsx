@@ -23,7 +23,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       
       <div className="flex flex-1">
         {/* Main content */}
-        <main className="flex-1 pb-16 md:pb-0">
+        <main className="flex-1 pb-16 md:pb-0 bg-background">
           <div className="relative z-10 container mx-auto px-4 py-4">
             {children || <Outlet />}
           </div>

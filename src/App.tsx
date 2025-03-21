@@ -17,9 +17,13 @@ function App() {
   useEffect(() => {
     console.log("App initialized successfully");
     
+    // Ensure theme is applied to body as well
+    document.body.classList.add('bg-background', 'text-foreground');
+    
     // Clean up function
     return () => {
       console.log("App component unmounting");
+      document.body.classList.remove('bg-background', 'text-foreground');
     };
   }, []);
   
@@ -46,7 +50,7 @@ function App() {
       <AuthProvider>
         <TaskProvider>
           <RouterProvider router={router} fallbackElement={
-            <div className="flex items-center justify-center h-screen">
+            <div className="flex items-center justify-center h-screen bg-background text-foreground">
               <p className="text-lg">Loading application...</p>
             </div>
           } />

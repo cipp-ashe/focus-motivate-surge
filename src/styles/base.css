@@ -13,6 +13,11 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
+  /* Override any white backgrounds */
+  #root {
+    @apply bg-background text-foreground min-h-screen h-full transition-colors duration-300;
+  }
+  
   h1, h2, h3, h4, h5, h6 {
     @apply font-medium tracking-tight;
   }
@@ -42,8 +47,11 @@
     @apply outline-none ring-2 ring-primary/50 ring-offset-1;
   }
   
-  /* Set default background for the app */
-  #root {
-    @apply bg-background min-h-screen h-full;
+  /* Improved Glass effect */
+  .glass-effect {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
   }
 }

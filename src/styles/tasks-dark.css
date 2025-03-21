@@ -1,25 +1,25 @@
 
 /* Dark mode specific styles for Tasks */
 .dark {
-  --task-bg: #1A1F2C;
-  --task-card-bg: rgba(26, 31, 44, 0.8);
-  --task-primary: #9b87f5;
-  --task-secondary: #7E69AB;
-  --task-border: rgba(110, 89, 165, 0.3);
-  --task-text: #ffffff;
-  --task-text-muted: rgba(255, 255, 255, 0.7);
+  --task-bg: hsl(var(--background));
+  --task-card-bg: hsl(var(--card));
+  --task-primary: hsl(var(--primary));
+  --task-secondary: hsl(var(--secondary));
+  --task-border: hsl(var(--border));
+  --task-text: hsl(var(--foreground));
+  --task-text-muted: hsl(var(--muted-foreground));
 }
 
 /* Using our unified glass effect classes */
 .dark .task-card {
-  @apply glass-effect text-white;
+  @apply glass-effect text-foreground;
   background-color: var(--task-card-bg);
   border-color: var(--task-border);
 }
 
 .dark .task-input {
   @apply glass-input;
-  background-color: rgba(26, 31, 44, 0.6);
+  background-color: hsl(var(--card) / 0.8);
   border-color: var(--task-border);
   color: var(--task-text);
 }
@@ -27,7 +27,7 @@
 .dark .task-button {
   @apply btn-primary;
   background-color: var(--task-primary);
-  color: white;
+  color: hsl(var(--primary-foreground));
 }
 
 .dark .task-button:hover {
@@ -63,4 +63,5 @@
 .dark .card,
 .dark .bg-card {
   @apply shadow-md border-border/30;
+  background-color: hsl(var(--card));
 }
