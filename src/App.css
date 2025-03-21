@@ -1,6 +1,3 @@
 
-/* Import refactored style files */
-@import './styles/theme.css';
-@import './styles/timer.css';
-@import './styles/animations.css';
-@import './styles/responsive.css';
+/* This file is kept minimal as styles are organized in the styles directory */
+/* All styles should be imported in index.css for better organization */
