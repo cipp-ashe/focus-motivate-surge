@@ -23,6 +23,10 @@ interface TaskListProps {
   loadingCount?: number;
   onForceUpdate?: () => void;
   className?: string;
+  taskCountInfo?: {
+    total: number;
+    completed: number;
+  };
 }
 
 export const TaskList: React.FC<TaskListProps> = ({

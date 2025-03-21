@@ -37,7 +37,9 @@ export const TaskContent: React.FC<TaskContentProps> = React.memo(({
 }) => {
   // Handle checkbox changes with memoized callback
   const handleCheckboxChange = useCallback((checked: boolean) => {
-    handleTaskAction({} as React.MouseEvent<HTMLElement>, checked ? 'complete' : 'uncomplete');
+    if (checked) {
+      handleTaskAction({} as React.MouseEvent<HTMLElement>, 'complete');
+    }
   }, [handleTaskAction]);
 
   return (

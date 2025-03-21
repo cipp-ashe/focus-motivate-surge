@@ -42,9 +42,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const timeAgo = formatDistanceToNow(createdAtDate, { addSuffix: true });
   
   // Handle task completion
-  const handleComplete = useCallback((e: React.MouseEvent<HTMLElement> | React.ChangeEvent<HTMLInputElement>) => {
+  const handleComplete = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     onComplete({ completedAt: new Date().toISOString() });
+  }, [onComplete]);
+  
+  // Handle checkbox change
+  const handleCheckboxChange = useCallback((checked: boolean) => {
+    if (checked) {
+      onComplete({ completedAt: new Date().toISOString() });
+    }
   }, [onComplete]);
   
   // Handle task action
@@ -135,7 +142,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         <div className="pt-0.5">
           <Checkbox 
             checked={task.completed} 
-            onCheckedChange={handleComplete}
+            onCheckedChange={handleCheckboxChange}
             onClick={(e) => e.stopPropagation()}
             className={cn(
               "transition-colors",

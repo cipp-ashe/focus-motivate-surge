@@ -97,6 +97,12 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     }
   };
 
+  // Calculate task counts
+  const taskCounts = {
+    total: items.length,
+    completed: items.filter(t => t.completed).length
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="px-4 py-2 flex items-center justify-between">
@@ -120,10 +126,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
           screenshot: undefined,
           voicenote: undefined
         }}
-        taskCountInfo={{
-          total: items.length,
-          completed: items.filter(t => t.completed).length
-        }}
+        taskCountInfo={taskCounts}
       />
       
       <TaskEventHandler
