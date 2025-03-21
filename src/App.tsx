@@ -6,6 +6,7 @@ import { setupGlobalErrorHandlers } from './utils/errorHandler';
 import { toast, Toaster } from 'sonner';
 import { ThemeProvider } from './components/theme-provider';
 import { AuthProvider } from './contexts/auth/AuthContext';
+import { TaskProvider } from './contexts/tasks/TaskContext';
 
 // Set up global error handling
 setupGlobalErrorHandlers();
@@ -43,12 +44,14 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" attribute="class">
       <AuthProvider>
-        <RouterProvider router={router} fallbackElement={
-          <div className="flex items-center justify-center h-screen">
-            <p className="text-lg">Loading application...</p>
-          </div>
-        } />
-        <Toaster position="top-right" />
+        <TaskProvider>
+          <RouterProvider router={router} fallbackElement={
+            <div className="flex items-center justify-center h-screen">
+              <p className="text-lg">Loading application...</p>
+            </div>
+          } />
+          <Toaster position="top-right" />
+        </TaskProvider>
       </AuthProvider>
     </ThemeProvider>
   );
