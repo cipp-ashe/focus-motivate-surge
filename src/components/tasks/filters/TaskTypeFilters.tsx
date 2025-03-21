@@ -5,11 +5,9 @@ import {
   FileText, 
   Timer, 
   BookOpen,
-
   CheckSquare, 
   Image, 
   Mic,
-  BrainCircuit,
   CalendarClock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,7 +20,6 @@ interface TaskTypeFiltersProps {
     all: number;
     timer: number;
     regular: number;
-    focus: number;
     journal: number;
     checklist: number;
     screenshot: number;
@@ -58,13 +55,6 @@ export const TaskTypeFilters: React.FC<TaskTypeFiltersProps> = ({
       icon: Timer, 
       count: counts.timer,
       color: 'purple'
-    },
-    { 
-      id: 'focus', 
-      label: 'Focus', 
-      icon: BrainCircuit, 
-      count: counts.focus,
-      color: 'indigo'
     },
     { 
       id: 'journal', 

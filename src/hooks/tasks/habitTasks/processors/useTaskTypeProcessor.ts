@@ -63,8 +63,9 @@ export const useTaskTypeProcessor = () => {
    * Validate if a task type is valid
    */
   const isValidTaskType = useCallback((taskType: string): boolean => {
-    const validTypes = ['timer', 'regular', 'journal', 'checklist'];
-    return validTypes.includes(taskType);
+    // Only allow these specific task types to be created through the task interface
+    const validCreationTypes = ['timer', 'regular', 'journal', 'checklist'];
+    return validCreationTypes.includes(taskType);
   }, []);
   
   return {

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TaskType } from '@/types/tasks';
-import { Timer, FileText, BookOpen, CheckSquare, Image, Mic, Focus } from 'lucide-react';
+import { Timer, FileText, BookOpen, CheckSquare, Image, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -50,8 +50,6 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
       return <Image className={cn(colorClass, className)} size={size} />;
     case 'voicenote':
       return <Mic className={cn(colorClass, className)} size={size} />;
-    case 'focus':
-      return <Timer className={cn(colorClass, className)} size={size} />;
     case 'regular':
     default:
       return <FileText className={cn(colorClass, className)} size={size} />;

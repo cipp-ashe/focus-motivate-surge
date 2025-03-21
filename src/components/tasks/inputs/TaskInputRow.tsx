@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Upload, FileText, Timer, BookOpen, CheckSquare, Image, Mic } from "lucide-react";
+import { Send, Upload, FileText, Timer, BookOpen, CheckSquare } from "lucide-react";
 import { TaskType } from '@/types/tasks';
 
 /**
@@ -27,15 +27,13 @@ interface TaskInputRowProps {
 
 /**
  * Map of task types to their corresponding icons
- * Only includes the allowed task types
+ * Only includes the allowed task types for creation via the input
  */
 const taskTypeIcons = {
   regular: <FileText className="h-4 w-4 text-[#9b87f5]" />,
   timer: <Timer className="h-4 w-4 text-purple-400" />,
   journal: <BookOpen className="h-4 w-4 text-amber-400" />,
-  checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />,
-  screenshot: <Image className="h-4 w-4 text-blue-400" />,
-  voicenote: <Mic className="h-4 w-4 text-rose-400" />
+  checklist: <CheckSquare className="h-4 w-4 text-cyan-400" />
 };
 
 /**
@@ -45,9 +43,7 @@ const taskTypeLabels = {
   regular: 'Regular Task',
   timer: 'Focused Timer',
   journal: 'Journal Entry',
-  checklist: 'Checklist',
-  screenshot: 'Screenshot',
-  voicenote: 'Voice Note'
+  checklist: 'Checklist'
 };
 
 /**
@@ -91,7 +87,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
               {taskTypeIcons[taskType as keyof typeof taskTypeIcons] || taskTypeIcons.regular}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-1 bg-[#1A1F2C]/95 backdrop-blur-sm border-[#6E59A5]/50">
+          <PopoverContent className="w-48 p-1 bg-background/95 backdrop-blur-sm border-border/50">
             <div className="space-y-1">
               {Object.entries(taskTypeIcons).map(([type, icon]) => (
                 <Button
