@@ -1,7 +1,7 @@
 
 import { createBrowserRouter } from "react-router-dom";
 import Index from "./pages/Index";
-import TaskPage from "./pages/TaskPage";
+import Tasks from "./pages/Tasks";
 import Timer from "./pages/Timer";
 import Notes from "./pages/Notes";
 import Habits from "./pages/Habits";
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
         path: "tasks",
         element: (
           <RequireAuth requireAuth={false}>
-            <TaskPage />
+            <Tasks />
           </RequireAuth>
         ),
       },
