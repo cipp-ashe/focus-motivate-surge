@@ -7,7 +7,8 @@ import {
   CheckSquare, 
   Image, 
   Mic, 
-  Layers 
+  Layers,
+  FileSpreadsheet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
     { id: 'checklist', name: 'Checklists', icon: <TaskIcon taskType="checklist" size={16} className="mr-1.5" /> },
     { id: 'screenshot', name: 'Screenshots', icon: <TaskIcon taskType="screenshot" size={16} className="mr-1.5" /> },
     { id: 'voicenote', name: 'Voice Notes', icon: <TaskIcon taskType="voicenote" size={16} className="mr-1.5" /> },
+    { id: 'focus', name: 'Focus', icon: <TaskIcon taskType="focus" size={16} className="mr-1.5" /> },
     { id: 'regular', name: 'Regular', icon: <FileText className="h-4 w-4 mr-1.5" /> }
   ];
 
