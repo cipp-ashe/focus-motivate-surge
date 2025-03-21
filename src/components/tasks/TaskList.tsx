@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Task } from '@/types/tasks';
-import { TaskItem } from './TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TaskItem } from './components/TaskItem';
 
 interface TaskListProps {
   tasks: Task[];

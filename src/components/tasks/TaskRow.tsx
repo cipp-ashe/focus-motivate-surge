@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
 import { eventBus } from "@/lib/eventBus";
 import { Card } from "@/components/ui/card";
-import { TaskContent } from "./TaskContent";
+import { TaskContent } from "./components/TaskContent";
 
 /**
  * Props for the TaskRow component
