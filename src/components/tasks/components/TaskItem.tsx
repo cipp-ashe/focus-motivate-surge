@@ -20,6 +20,8 @@ export interface TaskItemProps {
   };
   onSelect?: () => void;
   onDelete?: () => void;
+  onUpdate?: (updates: Partial<Task>) => void;
+  onComplete?: (metrics?: any) => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -29,7 +31,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   isSelected = false,
   dialogOpeners,
   onSelect,
-  onDelete
+  onDelete,
+  onUpdate,
+  onComplete
 }) => {
   const { selectTask, selected } = useTaskContext();
   const [isHovered, setIsHovered] = useState(false);
