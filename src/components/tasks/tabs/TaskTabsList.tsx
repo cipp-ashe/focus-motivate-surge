@@ -1,153 +1,72 @@
 
 import React from 'react';
-import { TaskType } from '@/types/tasks';
-import { FileText, Timer, Image, BookOpen, CheckSquare, Mic, Sparkles } from 'lucide-react';
-import { useIsMobile } from '@/hooks/ui/useIsMobile';
+import { 
+  FileText, 
+  Timer, 
+  BookOpen, 
+  CheckSquare, 
+  Image, 
+  Mic, 
+  Focus, 
+  Layers 
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TaskTabsListProps {
-  taskCounts: {
-    all: number;
-    timer: number;
-    screenshot: number;
-    journal: number;
-    checklist: number;
-    voicenote: number;
-    regular: number;
-    focus: number;
-  };
-  activeTaskType: 'all' | TaskType;
+  activeTaskType: string;
   onTaskTypeChange: (type: string) => void;
-  // Legacy prop names removed
+  taskCounts: Record<string, number>;
 }
 
-export const TaskTabsList: React.FC<TaskTabsListProps> = ({ 
-  taskCounts, 
-  activeTaskType = 'all',
+export const TaskTabsList: React.FC<TaskTabsListProps> = ({
+  activeTaskType,
   onTaskTypeChange,
-  // Check for legacy props and throw errors
-  ...props
+  taskCounts
 }) => {
-  const isMobile = useIsMobile();
-  
-  // Throw errors if legacy props are present
-  if ('activeFilter' in props) {
-    throw new Error('LEGACY PROP DETECTED: "activeFilter" is deprecated. Use "activeTaskType" instead.');
-  }
-  
-  if ('onFilterChange' in props) {
-    throw new Error('LEGACY PROP DETECTED: "onFilterChange" is deprecated. Use "onTaskTypeChange" instead.');
-  }
-  
-  if ('counts' in props) {
-    throw new Error('LEGACY PROP DETECTED: "counts" is deprecated. Use "taskCounts" instead.');
-  }
-  
+  const taskTypes = [
+    { id: 'all', name: 'All Tasks', icon: <Layers className="h-4 w-4 mr-1.5" /> },
+    { id: 'timer', name: 'Timers', icon: <Timer className="h-4 w-4 mr-1.5 task-timer" /> },
+    { id: 'journal', name: 'Journals', icon: <BookOpen className="h-4 w-4 mr-1.5 task-journal" /> },
+    { id: 'checklist', name: 'Checklists', icon: <CheckSquare className="h-4 w-4 mr-1.5 task-checklist" /> },
+    { id: 'screenshot', name: 'Screenshots', icon: <Image className="h-4 w-4 mr-1.5 task-screenshot" /> },
+    { id: 'voicenote', name: 'Voice Notes', icon: <Mic className="h-4 w-4 mr-1.5 task-voicenote" /> },
+    { id: 'focus', name: 'Focus Tasks', icon: <Focus className="h-4 w-4 mr-1.5 task-focus" /> },
+    { id: 'regular', name: 'Regular', icon: <FileText className="h-4 w-4 mr-1.5" /> }
+  ];
+
   return (
-    <div className="flex w-full overflow-x-auto py-2 px-1 gap-2 border-b">
-      <button
-        onClick={() => onTaskTypeChange('all')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'all' 
-            ? "bg-primary/20 text-primary" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <FileText className="h-4 w-4" />
-        <span>{`All (${taskCounts.all})`}</span>
-      </button>
-      
-      <button
-        onClick={() => onTaskTypeChange('regular')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'regular' 
-            ? "bg-primary/20 text-primary" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <FileText className="h-4 w-4" />
-        <span>{`Regular (${taskCounts.regular})`}</span>
-      </button>
-      
-      <button
-        onClick={() => onTaskTypeChange('timer')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'timer' 
-            ? "bg-purple-500/20 text-purple-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <Timer className="h-4 w-4 text-purple-400" />
-        <span>{`Timer (${taskCounts.timer})`}</span>
-      </button>
-      
-      <button
-        onClick={() => onTaskTypeChange('journal')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'journal' 
-            ? "bg-amber-500/20 text-amber-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <BookOpen className="h-4 w-4 text-amber-400" />
-        <span>{`Journal (${taskCounts.journal})`}</span>
-      </button>
-      
-      <button
-        onClick={() => onTaskTypeChange('checklist')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'checklist' 
-            ? "bg-cyan-500/20 text-cyan-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <CheckSquare className="h-4 w-4 text-cyan-400" />
-        <span>{`Checklists (${taskCounts.checklist})`}</span>
-      </button>
-      
-      <button
-        onClick={() => onTaskTypeChange('screenshot')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'screenshot' 
-            ? "bg-blue-500/20 text-blue-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <Image className="h-4 w-4 text-blue-400" />
-        <span>{`Screenshots (${taskCounts.screenshot})`}</span>
-      </button>
-      
-      <button
-        onClick={() => onTaskTypeChange('voicenote')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'voicenote' 
-            ? "bg-rose-500/20 text-rose-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <Mic className="h-4 w-4 text-rose-400" />
-        <span>{`Voice Notes (${taskCounts.voicenote})`}</span>
-      </button>
-      
-      <button
-        onClick={() => onTaskTypeChange('focus')}
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap",
-          activeTaskType === 'focus' 
-            ? "bg-emerald-500/20 text-emerald-400" 
-            : "bg-transparent text-muted-foreground hover:bg-muted/80"
-        )}
-      >
-        <Sparkles className="h-4 w-4 text-emerald-400" />
-        <span>{`Focus (${taskCounts.focus})`}</span>
-      </button>
-    </div>
+    <ScrollArea className="pb-1">
+      <div className="flex items-center gap-1 px-4 pt-3 pb-2 overflow-x-auto hide-scrollbar">
+        {taskTypes.map((type) => (
+          <Button
+            key={type.id}
+            variant={activeTaskType === type.id ? "secondary" : "ghost"}
+            size="sm"
+            className={cn(
+              "h-8 rounded-md text-xs font-normal justify-start",
+              activeTaskType === type.id 
+                ? "bg-secondary text-secondary-foreground" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            onClick={() => onTaskTypeChange(type.id)}
+          >
+            {type.icon}
+            {type.name}
+            {taskCounts[type.id] > 0 && (
+              <span className={cn(
+                "ml-1.5 rounded-full px-1.5 py-0.5 text-[10px]",
+                activeTaskType === type.id 
+                  ? "bg-primary/20 text-primary-foreground" 
+                  : "bg-muted text-muted-foreground"
+              )}>
+                {taskCounts[type.id]}
+              </span>
+            )}
+          </Button>
+        ))}
+      </div>
+    </ScrollArea>
   );
 };

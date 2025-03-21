@@ -3,6 +3,7 @@ import React from 'react';
 import { Task } from '@/types/tasks';
 import { TaskItem } from './TaskItem';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 interface TaskListProps {
   tasks: Task[];
@@ -21,10 +22,7 @@ interface TaskListProps {
   isLoading?: boolean;
   loadingCount?: number;
   onForceUpdate?: () => void;
-  taskCountInfo?: {
-    total: number;
-    completed: number;
-  };
+  className?: string;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -39,18 +37,11 @@ export const TaskList: React.FC<TaskListProps> = ({
   isLoading = false,
   loadingCount = 3,
   onForceUpdate,
-  taskCountInfo
+  className
 }) => {
-  
-  console.log('TaskList rendering with:', {
-    tasksCount: tasks.length,
-    selectedTaskId,
-    isLoading
-  });
-  
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className={cn("space-y-3", className)}>
         {Array.from({ length: loadingCount }).map((_, index) => (
           <div key={index} className="flex items-center space-x-4 p-3 border rounded-md">
             <Skeleton className="h-4 w-4 rounded-full" />
@@ -65,18 +56,21 @@ export const TaskList: React.FC<TaskListProps> = ({
   }
 
   if (!tasks || tasks.length === 0) {
-    return <>{emptyState}</>;
+    return <div className={className}>{emptyState}</div>;
   }
 
   return (
-    <div className="space-y-2">
+    <div className={cn("space-y-2", className)}>
       {tasks.map((task) => (
         <TaskItem
           key={task.id}
           task={task}
           isSelected={selectedTaskId === task.id}
           onSelect={() => handleTaskSelect(task.id)}
-          onDelete={() => handleDelete({ taskId: task.id })}
+          onDelete={(e) => {
+            e.stopPropagation();
+            handleDelete({ taskId: task.id });
+          }}
           onUpdate={(updates) => handleTaskUpdate({ taskId: task.id, updates })}
           onComplete={(metrics) => handleTaskComplete({ taskId: task.id, metrics })}
           dialogOpeners={dialogOpeners}

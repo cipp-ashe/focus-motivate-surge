@@ -1,19 +1,22 @@
 
 import React from 'react';
 import { Task, TaskStatus } from '@/types/tasks';
+import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { 
-  MoreVertical, 
-  Check, 
-  PlayCircle, 
+  CheckCircle, 
   Clock, 
-  XCircle 
+  AlertTriangle, 
+  Play, 
+  XCircle, 
+  Circle,
+  ChevronDown
 } from 'lucide-react';
 
 interface TaskStatusDropdownProps {
@@ -25,59 +28,118 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
   task,
   onStatusChange
 }) => {
+  const getStatusDisplay = (status: TaskStatus = 'pending') => {
+    switch (status) {
+      case 'pending':
+        return { 
+          label: 'Pending', 
+          icon: <Circle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-muted text-muted-foreground'
+        };
+      case 'started':
+        return { 
+          label: 'Started', 
+          icon: <Clock className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+        };
+      case 'in-progress':
+        return { 
+          label: 'In Progress', 
+          icon: <Play className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' 
+        };
+      case 'delayed':
+        return { 
+          label: 'Delayed', 
+          icon: <AlertTriangle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' 
+        };
+      case 'completed':
+        return { 
+          label: 'Completed', 
+          icon: <CheckCircle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-green-500/10 text-green-600 dark:text-green-400' 
+        };
+      case 'dismissed':
+        return { 
+          label: 'Dismissed', 
+          icon: <XCircle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-red-500/10 text-red-600 dark:text-red-400' 
+        };
+      default:
+        return { 
+          label: 'Pending', 
+          icon: <Circle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-muted text-muted-foreground' 
+        };
+    }
+  };
+
+  const currentStatus = getStatusDisplay(task.status);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-foreground"
-          aria-label="More options"
+          variant="outline"
+          size="sm"
+          className={cn(
+            "h-7 px-2 text-xs flex items-center gap-1",
+            currentStatus.class
+          )}
           onClick={(e) => e.stopPropagation()}
         >
-          <MoreVertical className="h-4 w-4" />
+          {currentStatus.icon}
+          {currentStatus.label}
+          <ChevronDown className="h-3 w-3 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      
-      <DropdownMenuContent align="end" className="w-40">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-40"
+        onClick={(e) => e.stopPropagation()}
+      >
         <DropdownMenuItem 
-          className="flex items-center gap-2"
           onClick={() => onStatusChange('pending')}
+          className="text-xs"
         >
-          <div className="h-1.5 w-1.5 rounded-full bg-gray-400"></div>
-          <span>Pending</span>
+          <Circle className="h-3.5 w-3.5 mr-2" />
+          Pending
         </DropdownMenuItem>
-        
         <DropdownMenuItem 
-          className="flex items-center gap-2"
           onClick={() => onStatusChange('started')}
+          className="text-xs"
         >
-          <PlayCircle className="h-4 w-4 text-blue-500" />
-          <span>Started</span>
+          <Clock className="h-3.5 w-3.5 mr-2" />
+          Started
         </DropdownMenuItem>
-        
         <DropdownMenuItem 
-          className="flex items-center gap-2"
           onClick={() => onStatusChange('in-progress')}
+          className="text-xs"
         >
-          <Clock className="h-4 w-4 text-yellow-500" />
-          <span>In Progress</span>
+          <Play className="h-3.5 w-3.5 mr-2" />
+          In Progress
         </DropdownMenuItem>
-        
         <DropdownMenuItem 
-          className="flex items-center gap-2"
+          onClick={() => onStatusChange('delayed')}
+          className="text-xs"
+        >
+          <AlertTriangle className="h-3.5 w-3.5 mr-2" />
+          Delayed
+        </DropdownMenuItem>
+        <DropdownMenuItem 
           onClick={() => onStatusChange('completed')}
+          className="text-xs text-green-600"
         >
-          <Check className="h-4 w-4 text-green-500" />
-          <span>Complete</span>
+          <CheckCircle className="h-3.5 w-3.5 mr-2" />
+          Completed
         </DropdownMenuItem>
-        
         <DropdownMenuItem 
-          className="flex items-center gap-2"
           onClick={() => onStatusChange('dismissed')}
+          className="text-xs text-red-600"
         >
-          <XCircle className="h-4 w-4 text-red-500" />
-          <span>Dismiss</span>
+          <XCircle className="h-3.5 w-3.5 mr-2" />
+          Dismissed
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
