@@ -1,113 +1,54 @@
 
-/* Task type-specific styles */
+/* Task-related colors and styles */
+:root {
+  --timer-color: 250 84% 70%;
+  --journal-color: 35 100% 60%;  
+  --checklist-color: 180 70% 55%;
+  --screenshot-color: 140 50% 50%;
+  --voicenote-color: 320 70% 60%;
+  --focus-color: 210 80% 65%;
+}
+
+/* Task type color classes */
 .task-timer {
-  @apply text-[hsl(var(--timer-color))];
+  color: hsl(var(--timer-color));
 }
 
 .task-journal {
-  @apply text-[hsl(var(--journal-color))];
+  color: hsl(var(--journal-color));
 }
 
 .task-checklist {
-  @apply text-[hsl(var(--checklist-color))];
+  color: hsl(var(--checklist-color));
 }
 
 .task-screenshot {
-  @apply text-[hsl(var(--screenshot-color))];
+  color: hsl(var(--screenshot-color));
 }
 
 .task-voicenote {
-  @apply text-[hsl(var(--voicenote-color))];
+  color: hsl(var(--voicenote-color));
 }
 
 .task-focus {
-  @apply text-[hsl(var(--focus-color))];
+  color: hsl(var(--focus-color));
 }
 
-/* Task backgrounds with low opacity for cards and badges */
-.task-timer-bg {
-  @apply bg-[hsl(var(--timer-color)_/_0.1)];
+.task-regular {
+  color: hsl(var(--muted-foreground));
 }
 
-.task-journal-bg {
-  @apply bg-[hsl(var(--journal-color)_/_0.1)];
-}
-
-.task-checklist-bg {
-  @apply bg-[hsl(var(--checklist-color)_/_0.1)];
-}
-
-.task-screenshot-bg {
-  @apply bg-[hsl(var(--screenshot-color)_/_0.1)];
-}
-
-.task-voicenote-bg {
-  @apply bg-[hsl(var(--voicenote-color)_/_0.1)];
-}
-
-.task-focus-bg {
-  @apply bg-[hsl(var(--focus-color)_/_0.1)];
-}
-
-/* Border styles for task items */
-.task-timer-border {
-  @apply border-[hsl(var(--timer-color)_/_0.3)];
-}
-
-.task-journal-border {
-  @apply border-[hsl(var(--journal-color)_/_0.3)];
-}
-
-.task-checklist-border {
-  @apply border-[hsl(var(--checklist-color)_/_0.3)];
-}
-
-.task-screenshot-border {
-  @apply border-[hsl(var(--screenshot-color)_/_0.3)];
-}
-
-.task-voicenote-border {
-  @apply border-[hsl(var(--voicenote-color)_/_0.3)];
-}
-
-.task-focus-border {
-  @apply border-[hsl(var(--focus-color)_/_0.3)];
-}
-
-/* Task animations */
-.task-item-enter {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.task-item-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
-}
-
-.task-item-exit {
-  opacity: 1;
-}
-
-.task-item-exit-active {
-  opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 200ms, transform 200ms;
-}
-
-/* Hover effects */
+/* Task item hover effects */
 .task-item-hover {
-  @apply transition-all duration-200 ease-in-out;
-  transform-origin: center;
+  transition: all 0.2s ease-in-out;
 }
 
 .task-item-hover:hover {
-  @apply shadow-md;
-  transform: translateY(-2px) scale(1.01);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* Task status indicators */
+/* Task status color classes */
 .task-status-pending {
   @apply bg-muted text-muted-foreground;
 }

@@ -2,11 +2,6 @@
 import React from 'react';
 import { 
   FileText, 
-  Timer, 
-  BookOpen, 
-  CheckSquare, 
-  Image, 
-  Mic, 
   Layers,
   FileSpreadsheet
 } from 'lucide-react';

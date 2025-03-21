@@ -1,6 +1,8 @@
 
 import React, { useCallback } from 'react';
 import { Task } from '@/types/tasks';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { TaskCheckbox } from './TaskCheckbox';
 import { TaskContentDisplay } from './TaskContentDisplay';
 import { TaskDetails } from './TaskDetails';
@@ -9,7 +11,6 @@ export interface TaskContentProps {
   task: Task;
   isSelected: boolean;
   isTimerView?: boolean;
-  // Add the missing properties that are being passed
   onSelect?: () => void;
   editingTaskId?: string | null;
   inputValue?: string;
