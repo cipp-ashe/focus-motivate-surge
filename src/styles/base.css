@@ -1,14 +1,4 @@
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 @layer base {
   * {
     @apply border-border;
@@ -51,4 +41,10 @@
   :focus-visible {
     @apply outline-none ring-2 ring-primary/50 ring-offset-1;
   }
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
