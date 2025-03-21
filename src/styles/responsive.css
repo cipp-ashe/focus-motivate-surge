@@ -104,3 +104,28 @@
     padding-bottom: 5rem !important;
   }
 }
+
+/* Fix for horizontal scroll issues */
+.prevent-horizontal-scroll {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.task-container {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure content doesn't overflow its container */
+.truncate-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.break-words-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}

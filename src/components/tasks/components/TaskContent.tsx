@@ -43,20 +43,26 @@ export const TaskContent: React.FC<TaskContentProps> = React.memo(({
   }, [handleTaskAction]);
 
   return (
-    <div className="flex items-start gap-2" data-testid="task-content">
-      <TaskCheckbox 
-        task={task} 
-        isTimerView={isTimerView} 
-        onCheck={handleCheckboxChange} 
-      />
+    <div className="flex items-start gap-2 w-full overflow-hidden" data-testid="task-content">
+      <div className="flex-shrink-0">
+        <TaskCheckbox 
+          task={task} 
+          isTimerView={isTimerView} 
+          onCheck={handleCheckboxChange} 
+        />
+      </div>
       
-      <TaskContentDisplay task={task} handleTaskAction={handleTaskAction} />
+      <div className="flex-grow min-w-0 overflow-hidden">
+        <TaskContentDisplay task={task} handleTaskAction={handleTaskAction} />
+      </div>
       
-      <TaskDetails
-        task={task}
-        isSelected={isSelected}
-        dialogOpeners={dialogOpeners}
-      />
+      <div className="flex-shrink-0">
+        <TaskDetails
+          task={task}
+          isSelected={isSelected}
+          dialogOpeners={dialogOpeners}
+        />
+      </div>
     </div>
   );
 });

@@ -73,8 +73,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   }
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-2 space-y-2">
+    <ScrollArea className="h-full w-full">
+      <div className="p-2 space-y-2 min-w-[300px] max-w-full">
         {tasks.map((task) => (
           <TaskRow
             key={task.id}
