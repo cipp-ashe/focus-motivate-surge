@@ -74,7 +74,9 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
                 to={item.path} 
                 className={cn(
                   "flex items-center space-x-2 px-3 py-2 rounded-md transition-colors",
-                  isActiveItem(item.path) ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                  isActiveItem(item.path) 
+                    ? "bg-secondary/70 text-foreground font-medium" 
+                    : "hover:bg-muted text-muted-foreground hover:text-foreground"
                 )}
                 onClick={() => handleItemClick(onToggle)}
               >
@@ -88,3 +90,4 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
     </div>
   );
 };
+
