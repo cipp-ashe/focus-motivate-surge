@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
+import BackgroundDecorations from '@/components/landing/BackgroundDecorations';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -14,6 +15,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   
   return (
     <div className="flex flex-col min-h-screen bg-background transition-colors duration-300">
+      {/* Background decorative elements */}
+      <BackgroundDecorations />
+      
       {/* Header navigation */}
       <Header />
       

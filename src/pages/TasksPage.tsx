@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { TaskProvider, useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { TaskEventHandler } from '@/components/tasks/TaskEventHandler';
 import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
 import { TaskInput } from '@/components/tasks/TaskInput';
@@ -11,9 +10,6 @@ import { TaskInput } from '@/components/tasks/TaskInput';
 // Inner component that has access to TaskContext
 const TasksPageContent = () => {
   const taskContext = useTaskContext();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const selectedTag = searchParams.get('tag');
   
   // For debugging purposes
   console.log('TasksPageContent rendering with context:', { 
@@ -69,8 +65,7 @@ const TasksPageContent = () => {
   
   const onForceUpdate = useCallback(() => {
     console.log('TasksPage: Force update');
-    router.refresh();
-  }, [router]);
+  }, []);
 
   // Calculate task statistics
   const totalTasks = (taskContext?.items?.length || 0) + (taskContext?.completed?.length || 0);
