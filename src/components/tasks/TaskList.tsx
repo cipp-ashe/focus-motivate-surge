@@ -71,7 +71,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           task={task}
           isSelected={selectedTaskId === task.id}
           onSelect={() => handleTaskSelect(task.id)}
-          onDelete={(e) => {
+          onDelete={(e: React.MouseEvent) => {
             e.stopPropagation();
             handleDelete({ taskId: task.id });
           }}
@@ -82,4 +82,4 @@ export const TaskList: React.FC<TaskListProps> = ({
       ))}
     </div>
   );
-};
+}
