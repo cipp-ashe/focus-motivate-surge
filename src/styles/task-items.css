@@ -1,52 +1,75 @@
 
-/* Task item animations and styling */
-.task-list-item {
-  @apply transform transition-all duration-200 hover:scale-102 hover:translate-x-1;
+/* Task type-specific styles */
+.task-timer {
+  @apply text-[hsl(var(--timer-color))];
 }
 
-.completed-task-enter {
-  opacity: 0;
-  transform: translateX(-20px);
+.task-journal {
+  @apply text-[hsl(var(--journal-color))];
 }
 
-.completed-task-enter-active {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 300ms, transform 300ms;
+.task-checklist {
+  @apply text-[hsl(var(--checklist-color))];
 }
 
-/* Timer circle and animations for tasks */
-@keyframes countdown {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: 100;
-  }
+.task-screenshot {
+  @apply text-[hsl(var(--screenshot-color))];
 }
 
-.timer-circle {
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
+.task-voicenote {
+  @apply text-[hsl(var(--voicenote-color))];
 }
 
-.timer-circle {
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-  transition: all 0.3s ease;
+.task-focus {
+  @apply text-[hsl(var(--focus-color))];
 }
 
-.timer-circle.active {
-  filter: drop-shadow(0 0 10px hsl(var(--primary)));
+/* Task backgrounds with low opacity for cards and badges */
+.task-timer-bg {
+  @apply bg-[hsl(var(--timer-color)_/_0.1)];
 }
 
-.timer-expand-enter {
-  transform: scale(0.95);
-  opacity: 0;
+.task-journal-bg {
+  @apply bg-[hsl(var(--journal-color)_/_0.1)];
 }
 
-.timer-expand-enter-active {
-  transform: scale(1);
-  opacity: 1;
-  transition: transform 0.3s, opacity 0.3s;
+.task-checklist-bg {
+  @apply bg-[hsl(var(--checklist-color)_/_0.1)];
+}
+
+.task-screenshot-bg {
+  @apply bg-[hsl(var(--screenshot-color)_/_0.1)];
+}
+
+.task-voicenote-bg {
+  @apply bg-[hsl(var(--voicenote-color)_/_0.1)];
+}
+
+.task-focus-bg {
+  @apply bg-[hsl(var(--focus-color)_/_0.1)];
+}
+
+/* Border styles for task items */
+.task-timer-border {
+  @apply border-[hsl(var(--timer-color)_/_0.3)];
+}
+
+.task-journal-border {
+  @apply border-[hsl(var(--journal-color)_/_0.3)];
+}
+
+.task-checklist-border {
+  @apply border-[hsl(var(--checklist-color)_/_0.3)];
+}
+
+.task-screenshot-border {
+  @apply border-[hsl(var(--screenshot-color)_/_0.3)];
+}
+
+.task-voicenote-border {
+  @apply border-[hsl(var(--voicenote-color)_/_0.3)];
+}
+
+.task-focus-border {
+  @apply border-[hsl(var(--focus-color)_/_0.3)];
 }

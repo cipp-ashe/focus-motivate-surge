@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TaskType } from '@/types/tasks';
-import { Timer, FileText, BookOpen, CheckSquare, Image, Mic, Focus } from 'lucide-react';
+import { Timer, FileText, BookOpen, CheckSquare, Image, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**

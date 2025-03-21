@@ -10,24 +10,9 @@ interface TaskTypeIconProps {
 }
 
 export const TaskTypeIcon: React.FC<TaskTypeIconProps> = ({ taskType, className }) => {
-  // Use our standardized task color classes
+  // Use our standardized task color classes from task-items.css
   const getTaskColorClass = (type: TaskType) => {
-    switch (type) {
-      case 'timer':
-        return 'task-timer';
-      case 'journal':
-        return 'task-journal';
-      case 'screenshot':
-        return 'task-screenshot';
-      case 'voicenote':
-        return 'task-voicenote';
-      case 'checklist':
-        return 'task-checklist';
-      case 'focus':
-        return 'task-focus';
-      default:
-        return 'text-muted-foreground';
-    }
+    return `task-${type}`;
   };
 
   const colorClass = taskType ? getTaskColorClass(taskType) : 'text-muted-foreground';
