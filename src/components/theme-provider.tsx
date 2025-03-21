@@ -28,7 +28,7 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
   storageKey = "vite-ui-theme",
-  attribute = "class", // Changed to "class" for better Tailwind compatibility
+  attribute = "class",
   enableSystem = true,
   ...props
 }: ThemeProviderProps) {
@@ -74,6 +74,22 @@ export function ThemeProvider({
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [enableSystem, theme]);
+
+  // Force an initial theme check on mount
+  useEffect(() => {
+    // Force the theme to be applied immediately on mount
+    const savedTheme = localStorage.getItem(storageKey) as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (enableSystem) {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+      document.documentElement.classList.add(systemTheme);
+    } else {
+      document.documentElement.classList.add(defaultTheme);
+    }
+  }, []);
 
   const value = {
     theme,

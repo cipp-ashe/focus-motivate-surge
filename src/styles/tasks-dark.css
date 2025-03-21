@@ -1,6 +1,6 @@
 
 /* Dark mode specific styles for Tasks */
-.task-dark-mode {
+.dark {
   --task-bg: #1A1F2C;
   --task-card-bg: rgba(26, 31, 44, 0.8);
   --task-primary: #9b87f5;
@@ -11,50 +11,56 @@
 }
 
 /* Using our unified glass effect classes */
-.task-card-dark {
+.dark .task-card {
   @apply glass-effect text-white;
   background-color: var(--task-card-bg);
   border-color: var(--task-border);
 }
 
-.task-input-dark {
+.dark .task-input {
   @apply glass-input;
   background-color: rgba(26, 31, 44, 0.6);
   border-color: var(--task-border);
   color: var(--task-text);
 }
 
-.task-button-dark {
+.dark .task-button {
   @apply btn-primary;
   background-color: var(--task-primary);
   color: white;
 }
 
-.task-button-dark:hover {
+.dark .task-button:hover {
   background-color: var(--task-secondary);
 }
 
 /* Task type specific styles in dark mode */
-.task-timer-dark {
-  @apply task-timer;
+.dark .task-timer {
+  @apply text-[hsl(var(--timer-color))] !important;
 }
 
-.task-journal-dark {
-  @apply task-journal;
+.dark .task-journal {
+  @apply text-[hsl(var(--journal-color))] !important;
 }
 
-.task-checklist-dark {
-  @apply task-checklist;
+.dark .task-checklist {
+  @apply text-[hsl(var(--checklist-color))] !important;
 }
 
-.task-screenshot-dark {
-  @apply task-screenshot;
+.dark .task-screenshot {
+  @apply text-[hsl(var(--screenshot-color))] !important;
 }
 
-.task-voicenote-dark {
-  @apply task-voicenote;
+.dark .task-voicenote {
+  @apply text-[hsl(var(--voicenote-color))] !important;
 }
 
-.task-focus-dark {
-  @apply task-focus;
+.dark .task-focus {
+  @apply text-[hsl(var(--focus-color))] !important;
+}
+
+/* Cards and content areas in dark mode */
+.dark .card,
+.dark .bg-card {
+  @apply shadow-md border-border/30;
 }

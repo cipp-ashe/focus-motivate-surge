@@ -75,7 +75,7 @@ const TasksPageContent = () => {
   return (
     <>
       <div className="mb-6">
-        <div className="bg-card rounded-md p-4">
+        <div className="bg-card rounded-md p-4 shadow-sm">
           <h2 className="text-xl font-semibold mb-2">Task Statistics</h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-muted/50 p-3 rounded-md">
@@ -95,7 +95,7 @@ const TasksPageContent = () => {
       </div>
       
       <div className="grid grid-cols-1 gap-6">
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <TaskInput 
               onTaskAdd={onTaskCreate}
@@ -104,7 +104,7 @@ const TasksPageContent = () => {
           </CardContent>
         </Card>
         
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden shadow-sm">
           <CardContent className="p-0">
             <UnifiedTaskView 
               activeTasks={taskContext?.items || []}
@@ -134,7 +134,7 @@ export default function TasksPage() {
   console.log('TasksPage.tsx main component rendering');
   
   return (
-    <div className="container max-w-6xl mx-auto p-4">
+    <div className="container max-w-6xl mx-auto">
       <TaskProvider>
         <TasksPageContent />
       </TaskProvider>

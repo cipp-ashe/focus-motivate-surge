@@ -14,7 +14,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile(1024);
   
   return (
-    <div className="flex flex-col min-h-screen bg-background transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Background decorative elements */}
       <BackgroundDecorations />
       

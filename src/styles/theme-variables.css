@@ -62,7 +62,7 @@
     --ring: 280 85% 60%;
     
     /* Glass effect variables - dark mode */
-    --glass-bg: rgba(30, 30, 40, 0.6);
+    --glass-bg: rgba(30, 30, 40, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     --glass-blur: 15px;

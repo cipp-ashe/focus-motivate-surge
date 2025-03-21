@@ -10,11 +10,11 @@ const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen py-6 px-4 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden py-6 px-4">
       {/* Background decorative elements */}
       <BackgroundDecorations />
       
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Hero Section */}
         <HeroSection />
         

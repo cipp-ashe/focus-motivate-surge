@@ -29,7 +29,7 @@ const Settings = () => {
       <h1 className="text-3xl font-bold mb-8 text-gradient-primary">Settings</h1>
       
       {/* Authentication Card */}
-      <Card className="mb-8 card-hover-effect bg-card/60 backdrop-blur-md border border-primary/10">
+      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
@@ -43,13 +43,13 @@ const Settings = () => {
         </CardHeader>
         <CardContent>
           {isAuthenticated ? (
-            <div className="space-y-3 p-4 rounded-lg bg-foreground/5">
+            <div className="space-y-3 p-4 rounded-lg bg-muted/30">
               <p><span className="font-medium">Email:</span> {user?.email}</p>
               <p><span className="font-medium">Account ID:</span> <span className="text-xs text-muted-foreground">{user?.id}</span></p>
               <p><span className="font-medium">Last Sign In:</span> {user?.last_sign_in_at && new Date(user.last_sign_in_at).toLocaleString()}</p>
             </div>
           ) : (
-            <div className="space-y-4 p-4 rounded-lg bg-foreground/5">
+            <div className="space-y-4 p-4 rounded-lg bg-muted/30">
               <p className="text-muted-foreground">
                 You're currently using Focus Notes without an account. Your data is stored locally on this device only.
               </p>
@@ -77,7 +77,7 @@ const Settings = () => {
       </Card>
       
       {/* Theme Settings */}
-      <Card className="mb-8 card-hover-effect bg-card/60 backdrop-blur-md border border-primary/10">
+      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <PaintBucket className="h-5 w-5 text-primary" />
@@ -86,7 +86,7 @@ const Settings = () => {
           <CardDescription>Customize the app's appearance</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-lg bg-foreground/5">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
             <div className="space-y-1">
               <Label htmlFor="dark-mode" className="text-base font-medium flex items-center gap-2">
                 {isDark ? <MoonStar className="h-4 w-4 text-purple-400" /> : <Sun className="h-4 w-4 text-amber-400" />}
@@ -107,7 +107,7 @@ const Settings = () => {
       </Card>
       
       {/* Data Management */}
-      <Card className="mb-8 card-hover-effect bg-card/60 backdrop-blur-md border border-primary/10">
+      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -116,7 +116,7 @@ const Settings = () => {
           <CardDescription>Manage your application data</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="p-4 rounded-lg bg-foreground/5 space-y-3">
+          <div className="p-4 rounded-lg bg-muted/30 space-y-3">
             <div className="space-y-2">
               <h3 className="font-medium">Reset Application Data</h3>
               <p className="text-sm text-muted-foreground">
@@ -152,7 +152,7 @@ const Settings = () => {
       </Card>
       
       {/* About Section */}
-      <Card className="bg-card/60 backdrop-blur-md border border-primary/10 card-hover-effect">
+      <Card className="bg-card shadow-sm border border-border card-hover-effect">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5 text-primary" />
@@ -161,7 +161,7 @@ const Settings = () => {
           <CardDescription>Focus Notes App</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="p-4 rounded-lg bg-foreground/5 space-y-3">
+          <div className="p-4 rounded-lg bg-muted/30 space-y-3">
             <p className="text-sm font-medium">
               Version 1.0.0
             </p>
