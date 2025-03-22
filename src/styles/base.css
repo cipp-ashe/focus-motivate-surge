@@ -102,14 +102,15 @@
     color: hsl(var(--foreground)) !important;
   }
   
-  /* New: Fix for icon colors in dark mode */
+  /* Critical fix: Ensure SVG icons in dark mode use the proper color inheritance */
   .dark svg {
-    color: currentColor;
+    color: currentColor !important;
+    fill: currentColor !important;
   }
   
-  /* New: Ensure proper border colors in dark mode */
+  /* Critical fix: Force proper border color in dark mode */
   .dark .border,
-  .dark [class*="border-"] {
+  .dark *[class*="border"] {
     border-color: hsl(var(--border)) !important;
   }
   

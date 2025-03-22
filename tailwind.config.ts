@@ -77,13 +77,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Task type specific colors - using the HSL variables
-        timer: "hsl(var(--timer-color))",
-        journal: "hsl(var(--journal-color))",
-        checklist: "hsl(var(--checklist-color))",
-        screenshot: "hsl(var(--screenshot-color))",
-        voicenote: "hsl(var(--voicenote-color))",
-        focus: "hsl(var(--focus-color))",
+        // Task type specific colors - using direct CSS variables
+        timer: "var(--timer)",
+        journal: "var(--journal)",
+        checklist: "var(--checklist)",
+        screenshot: "var(--screenshot)",
+        voicenote: "var(--voicenote)",
+        focus: "var(--focus)",
       },
       borderRadius: {
         lg: "var(--radius)",

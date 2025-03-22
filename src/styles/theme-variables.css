@@ -33,6 +33,14 @@
     --voicenote-color: 350 95% 65%;
     --focus-color: 140 50% 55%;
     
+    /* Added direct color references for task types */
+    --timer: hsl(var(--timer-color));
+    --journal: hsl(var(--journal-color));
+    --checklist: hsl(var(--checklist-color));
+    --screenshot: hsl(var(--screenshot-color));
+    --voicenote: hsl(var(--voicenote-color));
+    --focus: hsl(var(--focus-color));
+    
     /* Glass effect variables - light mode */
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.2);
@@ -60,10 +68,26 @@
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 65%;
     --destructive-foreground: 225 25% 98%;
-    /* Fixed: Updated border color to be darker in dark mode */
-    --border: 225 25% 22%;
-    --input: 225 25% 22%;
+    /* Darker border color in dark mode */
+    --border: 225 25% 20%;
+    --input: 225 25% 20%;
     --ring: 280 85% 65%;
+    
+    /* Task type colors for dark mode - higher brightness values */
+    --timer-color: 260 84% 75%;
+    --journal-color: 47 95% 70%;
+    --checklist-color: 190 95% 70%;
+    --screenshot-color: 215 95% 70%;
+    --voicenote-color: 350 95% 75%;
+    --focus-color: 140 50% 70%;
+    
+    /* Added direct color references for task types in dark mode */
+    --timer: hsl(var(--timer-color));
+    --journal: hsl(var(--journal-color));
+    --checklist: hsl(var(--checklist-color));
+    --screenshot: hsl(var(--screenshot-color));
+    --voicenote: hsl(var(--voicenote-color));
+    --focus: hsl(var(--focus-color));
     
     /* Glass effect variables - dark mode with higher opacity */
     --glass-bg: rgba(15, 15, 25, 0.75);
