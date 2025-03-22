@@ -77,7 +77,7 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Task type specific colors - using direct CSS variables
+        // Task type specific colors - using direct CSS variables for better dark mode support
         timer: "var(--timer)",
         journal: "var(--journal)",
         checklist: "var(--checklist)",

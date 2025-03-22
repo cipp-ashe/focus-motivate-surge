@@ -15,17 +15,17 @@ export function TaskBadge({ type, className, children }: TaskBadgeProps) {
   const getTypeClasses = () => {
     switch (type) {
       case 'timer':
-        return 'bg-[hsl(var(--timer-color)/0.15)] text-[hsl(var(--timer-color))]';
+        return 'bg-[hsl(var(--timer-color)/0.15)] text-timer';
       case 'journal':
-        return 'bg-[hsl(var(--journal-color)/0.15)] text-[hsl(var(--journal-color))]';
+        return 'bg-[hsl(var(--journal-color)/0.15)] text-journal';
       case 'checklist':
-        return 'bg-[hsl(var(--checklist-color)/0.15)] text-[hsl(var(--checklist-color))]';
+        return 'bg-[hsl(var(--checklist-color)/0.15)] text-checklist';
       case 'screenshot':
-        return 'bg-[hsl(var(--screenshot-color)/0.15)] text-[hsl(var(--screenshot-color))]';
+        return 'bg-[hsl(var(--screenshot-color)/0.15)] text-screenshot';
       case 'voicenote':
-        return 'bg-[hsl(var(--voicenote-color)/0.15)] text-[hsl(var(--voicenote-color))]';
+        return 'bg-[hsl(var(--voicenote-color)/0.15)] text-voicenote';
       case 'focus':
-        return 'bg-[hsl(var(--focus-color)/0.15)] text-[hsl(var(--focus-color))]';
+        return 'bg-[hsl(var(--focus-color)/0.15)] text-focus';
       case 'regular':
       default:
         return 'bg-muted text-muted-foreground';
