@@ -9,6 +9,8 @@
   height: 100%;
   position: relative;
   overflow-y: auto;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Enhanced Scrollbars */
@@ -56,7 +58,7 @@
   box-shadow: var(--glass-shadow);
 }
 
-/* Text gradient effects */
+/* Text gradient effects - ensure these don't affect backgrounds */
 .text-gradient-primary {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400 dark:from-primary dark:to-purple-300;
 }
@@ -121,13 +123,15 @@
   @apply max-w-7xl mx-auto px-3 sm:px-4 lg:px-6;
 }
 
-/* Gradient backgrounds */
+/* Gradient backgrounds - fix to ensure they respect theme colors */
 .bg-gradient-primary {
   @apply bg-gradient-to-br from-violet-500/15 to-purple-500/15 dark:from-violet-800/15 dark:to-purple-900/15;
+  background-color: hsl(var(--background)) !important;
 }
 
 .bg-gradient-subtle {
   @apply bg-gradient-to-tr from-background to-muted/40;
+  background-color: hsl(var(--background)) !important;
 }
 
 /* Interactive list items */

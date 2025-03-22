@@ -62,7 +62,10 @@
   animation: slide-up 0.4s ease-out forwards;
 }
 
+/* Ensure animate-gradient doesn't override theme colors */
 .animate-gradient {
   animation: gradient 15s ease infinite;
   background-size: 400% 400%;
+  background-clip: text; /* Ensure this only applies to text gradients */
+  color: inherit; /* Respect parent text color */
 }

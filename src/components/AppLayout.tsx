@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { Header } from '@/components/layout/Header';
@@ -19,7 +19,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   useThemeDebug('AppLayout');
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
+    <div className="flex flex-col min-h-screen w-full bg-background text-foreground transition-colors duration-300">
       {/* Background decorative elements */}
       <BackgroundDecorations />
       

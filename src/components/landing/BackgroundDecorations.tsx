@@ -4,8 +4,8 @@ import React from 'react';
 const BackgroundDecorations: React.FC = () => {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-      {/* Main background gradient - adjusted to work in both light and dark mode */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background/95" />
+      {/* Main background gradient - adjusted to respect theme background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background/95 transition-colors duration-300" />
       
       {/* Decorative elements that work in both light and dark modes with improved contrast */}
       <div className="absolute top-0 left-[10%] w-72 h-72 bg-primary/10 rounded-full filter blur-3xl opacity-50 dark:opacity-30 animate-float-left"></div>

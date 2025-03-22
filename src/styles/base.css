@@ -103,4 +103,16 @@
   .bg-background {
     background-color: hsl(var(--background)) !important;
   }
+  
+  /* Ensure animated backgrounds don't override theme */
+  .animate-gradient-bg {
+    background-blend-mode: overlay;
+    background-color: hsl(var(--background)) !important;
+  }
+  
+  /* Fix for background decorations */
+  .background-decoration {
+    pointer-events: none;
+    z-index: -1;
+  }
 }

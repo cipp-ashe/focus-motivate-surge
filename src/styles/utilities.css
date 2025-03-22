@@ -16,10 +16,12 @@
   
   .bg-gradient-subtle {
     @apply bg-gradient-to-tr from-background to-muted/40;
+    background-color: hsl(var(--background)) !important; /* Ensure theme color is respected */
   }
   
   .bg-gradient-primary {
     @apply bg-gradient-to-br from-primary/15 to-purple-500/15;
+    background-color: hsl(var(--background)) !important; /* Ensure theme color is respected */
   }
 
   /* Overlay and backdrop utilities */
@@ -192,5 +194,11 @@
     .touch-safe {
       @apply min-h-10 min-w-10;
     }
+  }
+  
+  /* Ensure background and text colors respect theme in all components */
+  .theme-background {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 }
