@@ -17,6 +17,9 @@
     @apply min-h-screen h-full;
     background-color: hsl(var(--background)) !important;
     color: hsl(var(--foreground)) !important;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
   }
   
   html {
@@ -72,20 +75,6 @@
     box-shadow: var(--glass-shadow);
   }
   
-  /* Ensure proper dark mode opacity levels for glass effects */
-  .dark .glass-effect {
-    --glass-bg: rgba(20, 20, 30, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Better light mode glass properties */
-  .light .glass-effect {
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  }
-  
   /* Add debugging hook to check when base.css is fully loaded */
   .base-css-loaded {
     content: 'base-css-loaded';
@@ -99,24 +88,21 @@
     color: hsl(var(--foreground)) !important;
   }
   
-  /* Fix all backgrounds */
+  /* Force all background classes to use theme colors */
   .bg-background {
     background-color: hsl(var(--background)) !important;
   }
   
-  /* Ensure animated backgrounds don't override theme */
-  .animate-gradient-bg {
-    background-blend-mode: overlay;
+  /* Force dark theme colors when dark mode is active */
+  .dark .bg-background {
     background-color: hsl(var(--background)) !important;
   }
   
-  /* Fix for background decorations */
-  .background-decoration {
-    pointer-events: none;
-    z-index: -1;
+  .dark .text-foreground {
+    color: hsl(var(--foreground)) !important;
   }
   
-  /* Critical fix for any containers with nested background issues */
+  /* Fix for containers with nested background issues */
   main, 
   .container, 
   .container-fancy, 
@@ -138,11 +124,10 @@
     background-color: transparent !important;
   }
   
-  /* Dark mode forced background for debugging */
-  .dark #root,
-  .dark main,
-  .dark body,
-  .dark html {
-    background-color: hsl(var(--background)) !important;
+  /* Make all cards and components respect theme colors */
+  .card, 
+  .bg-card {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
 }

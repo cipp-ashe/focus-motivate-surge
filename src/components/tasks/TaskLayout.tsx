@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { useThemeDebug } from '@/hooks/theme/useThemeDebug';
+import { useTheme } from '@/components/theme-provider';
+import { logger } from '@/utils/logManager';
 
 export interface TaskLayoutProps {
   mainContent: React.ReactNode;
@@ -10,9 +12,23 @@ export interface TaskLayoutProps {
 
 export const TaskLayout = ({ mainContent, asideContent }: TaskLayoutProps) => {
   const isMobile = useIsMobile();
+  const { theme } = useTheme();
   
   // Use the theme debug hook
   useThemeDebug('TaskLayout');
+  
+  // Force theme consistency on this component
+  useEffect(() => {
+    logger.debug('TaskLayout', `Current theme: ${theme}`);
+    
+    // Verify theme application
+    const layoutElements = document.querySelectorAll('.task-layout-debug');
+    layoutElements.forEach(el => {
+      const computed = window.getComputedStyle(el);
+      logger.debug('TaskLayout', 
+        `Element background: ${computed.backgroundColor}, color: ${computed.color}`);
+    });
+  }, [theme]);
   
   // Different layout for mobile vs desktop
   if (isMobile) {

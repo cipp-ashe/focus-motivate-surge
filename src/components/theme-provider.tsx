@@ -1,6 +1,7 @@
 
 import * as React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
+import { logger } from "@/utils/logManager";
 
 type Theme = "dark" | "light" | "system";
 
@@ -35,48 +36,57 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
-
-  // Apply theme to document element and handle system preference
-  useEffect(() => {
+  
+  // Apply theme to document element with better debug logging
+  const applyTheme = React.useCallback((newTheme: Theme) => {
+    logger.debug('ThemeProvider', `Applying theme: ${newTheme}`);
+    
     const root = window.document.documentElement;
-    const body = window.document.body;
-
-    // Force remove existing theme classes
+    
+    // Start by removing all theme classes
     root.classList.remove("light", "dark");
-    body.classList.remove("light", "dark");
-
-    if (theme === "system" && enableSystem) {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
+    
+    // Calculate effective theme (accounting for system preference if needed)
+    let effectiveTheme = newTheme;
+    
+    if (newTheme === "system" && enableSystem) {
+      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
-
-      root.classList.add(systemTheme);
-      body.classList.add(systemTheme);
-      root.setAttribute('data-theme', systemTheme);
-      
-      // Force update of CSS colors
-      document.documentElement.style.setProperty('color-scheme', systemTheme);
-      return;
+      logger.debug('ThemeProvider', `System preference detected: ${effectiveTheme}`);
     }
-
-    // Apply theme class to both root and body elements
-    root.classList.add(theme);
-    body.classList.add(theme);
     
-    // Also set data-theme attribute for components that use it
-    root.setAttribute('data-theme', theme);
+    // Apply the theme class
+    root.classList.add(effectiveTheme);
     
-    // Force update of CSS colors
-    document.documentElement.style.setProperty('color-scheme', theme);
+    // Force color-scheme property both on html element and as a CSS variable
+    root.style.colorScheme = effectiveTheme;
+    document.documentElement.setAttribute('data-theme', effectiveTheme);
+    
+    // Apply to body as well for extra certainty
+    document.body.classList.remove("light", "dark");
+    document.body.classList.add(effectiveTheme);
     
     // Store theme preference
-    localStorage.setItem(storageKey, theme);
+    localStorage.setItem(storageKey, newTheme);
     
-    console.log(`Theme set to: ${theme}`);
-  }, [theme, attribute, enableSystem, storageKey]);
+    logger.debug('ThemeProvider', `Theme applied: ${effectiveTheme}`);
+    
+    // Log computed variables to help debugging
+    if (typeof window !== 'undefined') {
+      const computedStyle = window.getComputedStyle(document.documentElement);
+      const bgVar = computedStyle.getPropertyValue('--background').trim();
+      const fgVar = computedStyle.getPropertyValue('--foreground').trim();
+      logger.debug('ThemeProvider', `CSS Variables - background: ${bgVar}, foreground: ${fgVar}`);
+    }
+  }, [enableSystem, storageKey]);
 
-  // Listen for system theme changes and update if using system theme
+  // Apply theme when it changes
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme, applyTheme]);
+
+  // Listen for system theme changes
   useEffect(() => {
     if (!enableSystem) return;
     
@@ -84,62 +94,41 @@ export function ThemeProvider({
     
     const handleChange = () => {
       if (theme === "system") {
-        const root = window.document.documentElement;
-        const body = window.document.body;
-        const systemTheme = mediaQuery.matches ? "dark" : "light";
-        
-        root.classList.remove("light", "dark");
-        body.classList.remove("light", "dark");
-        
-        root.classList.add(systemTheme);
-        body.classList.add(systemTheme);
-        root.setAttribute('data-theme', systemTheme);
-        document.documentElement.style.setProperty('color-scheme', systemTheme);
+        applyTheme("system");
       }
     };
     
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [enableSystem, theme]);
+  }, [enableSystem, theme, applyTheme]);
 
-  // Force an initial theme check on mount with a stronger approach
+  // Initial theme application on mount
   useEffect(() => {
-    // Apply theme immediately on mount
-    const root = window.document.documentElement;
-    const body = window.document.body;
+    // Apply theme immediately 
+    const savedTheme = (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+    applyTheme(savedTheme);
     
-    root.classList.remove("light", "dark");
-    body.classList.remove("light", "dark");
-    
-    const savedTheme = localStorage.getItem(storageKey) as Theme;
-    let themeToApply = defaultTheme;
-    
-    if (savedTheme) {
-      themeToApply = savedTheme;
-    } else if (enableSystem) {
-      themeToApply = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+    // If saved theme is different from state, update state
+    if (theme !== savedTheme) {
+      setTheme(savedTheme);
     }
     
-    root.classList.add(themeToApply);
-    body.classList.add(themeToApply);
-    root.setAttribute('data-theme', themeToApply);
-    document.documentElement.style.setProperty('color-scheme', themeToApply);
+    logger.debug('ThemeProvider', `Initial theme applied: ${savedTheme}`);
     
-    // Update state if different
-    if (theme !== themeToApply) {
-      setTheme(themeToApply);
-    }
+    // Force a re-check after a brief delay to catch any race conditions
+    const timeoutId = setTimeout(() => {
+      applyTheme(savedTheme);
+      logger.debug('ThemeProvider', 'Forced re-check of theme application');
+    }, 50);
     
-    console.log(`Initial theme applied: ${themeToApply}`);
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      logger.debug('ThemeProvider', `Setting theme to: ${newTheme}`);
+      setTheme(newTheme);
     },
   };
 

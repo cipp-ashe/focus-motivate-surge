@@ -22,14 +22,37 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   
   // Force theme application on mount and update
   useEffect(() => {
-    // Force the theme class on body and html
+    // Determine the effective theme
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effectiveTheme = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+    
+    // Force the theme class on document elements
     document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme === 'system' ? 
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : 
-      theme);
-      
+    document.documentElement.classList.add(effectiveTheme);
+    document.body.classList.remove('light', 'dark');
+    document.body.classList.add(effectiveTheme);
+    
+    // Set the color-scheme property directly
+    document.documentElement.style.colorScheme = effectiveTheme;
+    
     // Log theme application
-    logger.debug('AppLayout', `Forcing theme application: ${theme}`);
+    logger.debug('AppLayout', `Forcing theme application: ${theme} (effective: ${effectiveTheme})`);
+    
+    // Additional check to verify CSS variables are applied
+    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--background');
+    logger.debug('AppLayout', `Background variable: ${bgColor}`);
+    
+    // Force a refresh of backgrounds after a short delay
+    const timeoutId = setTimeout(() => {
+      const mainElement = document.querySelector('main');
+      if (mainElement) {
+        // Trigger a repaint by briefly changing a property
+        mainElement.classList.add('theme-refresh');
+        setTimeout(() => mainElement.classList.remove('theme-refresh'), 10);
+      }
+    }, 50);
+    
+    return () => clearTimeout(timeoutId);
   }, [theme]);
   
   return (
@@ -50,7 +73,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       </div>
       
       {/* Bottom navigation for mobile */}
-      <BottomNav />
+      {isMobile && <BottomNav />}
     </div>
   );
 };
