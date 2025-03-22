@@ -33,7 +33,7 @@
     --voicenote-color: 350 95% 65%;
     --focus-color: 140 50% 55%;
     
-    /* Added direct color references for task types */
+    /* Direct color references for task types */
     --timer: hsl(var(--timer-color));
     --journal: hsl(var(--journal-color));
     --checklist: hsl(var(--checklist-color));
@@ -68,9 +68,9 @@
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 65%;
     --destructive-foreground: 225 25% 98%;
-    /* Darker border color in dark mode */
-    --border: 225 25% 20%;
-    --input: 225 25% 20%;
+    /* Darker border color in dark mode - important for visibility */
+    --border: 225 25% 30%;
+    --input: 225 25% 30%;
     --ring: 280 85% 65%;
     
     /* Task type colors for dark mode - higher brightness values */
@@ -81,7 +81,7 @@
     --voicenote-color: 350 95% 75%;
     --focus-color: 140 50% 70%;
     
-    /* Added direct color references for task types in dark mode */
+    /* Direct color references for task types in dark mode */
     --timer: hsl(var(--timer-color));
     --journal: hsl(var(--journal-color));
     --checklist: hsl(var(--checklist-color));

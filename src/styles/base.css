@@ -102,16 +102,31 @@
     color: hsl(var(--foreground)) !important;
   }
   
-  /* Critical fix: Ensure SVG icons in dark mode use the proper color inheritance */
+  /* Global fix: All SVG/icon colors in dark mode */
   .dark svg {
-    color: currentColor !important;
-    fill: currentColor !important;
+    color: inherit !important;
   }
   
-  /* Critical fix: Force proper border color in dark mode */
-  .dark .border,
-  .dark *[class*="border"] {
+  /* Global fix: All borders in dark mode */
+  .dark *, 
+  .dark *:before, 
+  .dark *:after {
     border-color: hsl(var(--border)) !important;
+  }
+  
+  /* Global exception: Allow border colors that are explicitly set */
+  .dark .border-primary,
+  .dark .border-primary-foreground,
+  .dark .border-secondary,
+  .dark .border-secondary-foreground,
+  .dark .border-accent,
+  .dark .border-accent-foreground,
+  .dark .border-destructive,
+  .dark [class*="border-primary"],
+  .dark [class*="border-secondary"],
+  .dark [class*="border-accent"],
+  .dark [class*="border-destructive"] {
+    border-color: inherit !important;
   }
   
   /* Fix for containers with nested background issues */
