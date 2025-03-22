@@ -7,7 +7,8 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen w-full py-4 sm:py-8 px-2 sm:px-6 relative overflow-hidden bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen w-full py-4 sm:py-8 px-2 sm:px-6 relative overflow-hidden bg-background text-foreground transition-colors duration-300"
+         style={{ backgroundColor: 'hsl(var(--background))' }}>
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute -top-[5%] left-[5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-primary/10 rounded-full filter blur-3xl opacity-40 dark:opacity-20 animate-float"></div>

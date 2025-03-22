@@ -17,9 +17,11 @@ function App() {
   useEffect(() => {
     console.log("App initialized successfully");
     
-    // Ensure theme is applied to document elements
+    // Ensure theme is applied to document elements with explicit styles
     document.documentElement.classList.add('bg-background', 'text-foreground');
     document.body.classList.add('bg-background', 'text-foreground');
+    document.documentElement.style.backgroundColor = 'hsl(var(--background))';
+    document.body.style.backgroundColor = 'hsl(var(--background))';
     
     // Clean up function
     return () => {
@@ -51,7 +53,7 @@ function App() {
     <ThemeProvider defaultTheme="dark" attribute="class">
       <AuthProvider>
         <TaskProvider>
-          <div className="min-h-screen bg-background text-foreground transition-all duration-300">
+          <div className="min-h-screen w-full bg-background text-foreground transition-all duration-300">
             <RouterProvider router={router} fallbackElement={
               <div className="flex items-center justify-center h-screen bg-background text-foreground">
                 <p className="text-lg">Loading application...</p>

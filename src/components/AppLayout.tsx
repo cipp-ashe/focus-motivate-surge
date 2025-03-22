@@ -14,7 +14,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile(1024);
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background text-foreground transition-colors duration-300">
+    <div className="flex flex-col min-h-screen w-full bg-background text-foreground transition-colors duration-300"
+         style={{ backgroundColor: 'hsl(var(--background))' }}>
       {/* Background decorative elements */}
       <BackgroundDecorations />
       
@@ -23,7 +24,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       
       <div className="flex flex-1 w-full">
         {/* Main content */}
-        <main className="flex-1 w-full pb-16 md:pb-0 bg-background">
+        <main className="flex-1 w-full pb-16 md:pb-0 bg-background"
+              style={{ backgroundColor: 'hsl(var(--background))' }}>
           <div className="relative z-10 container mx-auto px-4 py-4">
             {children || <Outlet />}
           </div>

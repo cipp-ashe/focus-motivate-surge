@@ -53,6 +53,11 @@ export function ThemeProvider({
 
       root.classList.add(systemTheme);
       body.classList.add(systemTheme);
+      root.setAttribute('data-theme', systemTheme);
+      
+      // Force body and root to have background color based on theme
+      root.style.backgroundColor = `hsl(var(--background))`;
+      body.style.backgroundColor = `hsl(var(--background))`;
       return;
     }
 
@@ -62,6 +67,10 @@ export function ThemeProvider({
     
     // Also set data-theme attribute for components that use it
     root.setAttribute('data-theme', theme);
+    
+    // Force body and root to have background color based on theme
+    root.style.backgroundColor = `hsl(var(--background))`;
+    body.style.backgroundColor = `hsl(var(--background))`;
     
     // Store theme preference
     localStorage.setItem(storageKey, theme);
@@ -85,6 +94,10 @@ export function ThemeProvider({
         root.classList.add(systemTheme);
         body.classList.add(systemTheme);
         root.setAttribute('data-theme', systemTheme);
+        
+        // Force body and root to have background color based on theme
+        root.style.backgroundColor = `hsl(var(--background))`;
+        body.style.backgroundColor = `hsl(var(--background))`;
       }
     };
     
@@ -115,6 +128,10 @@ export function ThemeProvider({
     root.classList.add(themeToApply);
     body.classList.add(themeToApply);
     root.setAttribute('data-theme', themeToApply);
+    
+    // Force body and root to have background color based on theme
+    root.style.backgroundColor = `hsl(var(--background))`;
+    body.style.backgroundColor = `hsl(var(--background))`;
     
     // Update state if different
     if (theme !== themeToApply) {
