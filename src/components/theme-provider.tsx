@@ -54,10 +54,6 @@ export function ThemeProvider({
       root.classList.add(systemTheme);
       body.classList.add(systemTheme);
       root.setAttribute('data-theme', systemTheme);
-      
-      // Force body and root to have background color based on theme
-      document.documentElement.style.setProperty('background-color', `hsl(var(--background))`);
-      document.body.style.setProperty('background-color', `hsl(var(--background))`);
       return;
     }
 
@@ -67,10 +63,6 @@ export function ThemeProvider({
     
     // Also set data-theme attribute for components that use it
     root.setAttribute('data-theme', theme);
-    
-    // Force body and root to have background color based on theme
-    document.documentElement.style.setProperty('background-color', `hsl(var(--background))`);
-    document.body.style.setProperty('background-color', `hsl(var(--background))`);
     
     // Store theme preference
     localStorage.setItem(storageKey, theme);
@@ -94,10 +86,6 @@ export function ThemeProvider({
         root.classList.add(systemTheme);
         body.classList.add(systemTheme);
         root.setAttribute('data-theme', systemTheme);
-        
-        // Force body and root to have background color based on theme
-        document.documentElement.style.setProperty('background-color', `hsl(var(--background))`);
-        document.body.style.setProperty('background-color', `hsl(var(--background))`);
       }
     };
     
@@ -129,20 +117,10 @@ export function ThemeProvider({
     body.classList.add(themeToApply);
     root.setAttribute('data-theme', themeToApply);
     
-    // Force the background color to be applied immediately and strongly
-    document.documentElement.style.setProperty('background-color', `hsl(var(--background))`, 'important');
-    document.body.style.setProperty('background-color', `hsl(var(--background))`, 'important');
-    
     // Update state if different
     if (theme !== themeToApply) {
       setTheme(themeToApply);
     }
-
-    // Force a repaint to ensure theme is applied
-    document.body.style.display = 'none';
-    setTimeout(() => {
-      document.body.style.display = '';
-    }, 5);
   }, []);
 
   const value = {

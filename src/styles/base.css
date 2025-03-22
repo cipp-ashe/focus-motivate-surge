@@ -15,26 +15,17 @@
   body,
   #root {
     @apply min-h-screen h-full;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
   
   html {
     @apply overflow-x-hidden scroll-smooth;
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
   }
   
   body {
     @apply overflow-x-hidden;
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
     font-feature-settings: "rlig" 1, "calt" 1;
-  }
-  
-  #root {
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
-    min-height: 100vh;
-    height: 100%;
   }
   
   /* Theme transition for specific properties only */
@@ -100,7 +91,7 @@
     content: 'base-css-loaded';
   }
   
-  /* Adding app-specific bg colors */
+  /* Ensuring app layout components use theme colors */
   .app-root, 
   .dashboard-debug,
   .task-layout-debug {
