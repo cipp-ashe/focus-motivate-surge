@@ -65,3 +65,20 @@
   @apply shadow-md border-border/30;
   background-color: hsl(var(--card));
 }
+
+/* Ensure dark mode applies to UI components */
+.dark .bg-background {
+  background-color: hsl(var(--background)) !important;
+}
+
+.dark .text-foreground {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix for dark mode glass effects */
+.dark .glass-effect {
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}

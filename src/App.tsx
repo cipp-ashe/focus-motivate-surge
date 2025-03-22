@@ -17,12 +17,14 @@ function App() {
   useEffect(() => {
     console.log("App initialized successfully");
     
-    // Ensure theme is applied to body as well
+    // Ensure theme is applied to document elements
+    document.documentElement.classList.add('bg-background', 'text-foreground');
     document.body.classList.add('bg-background', 'text-foreground');
     
     // Clean up function
     return () => {
       console.log("App component unmounting");
+      document.documentElement.classList.remove('bg-background', 'text-foreground');
       document.body.classList.remove('bg-background', 'text-foreground');
     };
   }, []);
@@ -30,7 +32,7 @@ function App() {
   // Show error state if initialization failed
   if (initError) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-background text-foreground">
         <div className="bg-destructive/10 p-6 rounded-lg max-w-md text-center">
           <h2 className="text-xl font-bold text-destructive mb-3">Application Error</h2>
           <p className="mb-4">{initError.message}</p>
@@ -49,12 +51,14 @@ function App() {
     <ThemeProvider defaultTheme="dark" attribute="class">
       <AuthProvider>
         <TaskProvider>
-          <RouterProvider router={router} fallbackElement={
-            <div className="flex items-center justify-center h-screen bg-background text-foreground">
-              <p className="text-lg">Loading application...</p>
-            </div>
-          } />
-          <Toaster position="top-right" />
+          <div className="min-h-screen bg-background text-foreground transition-all duration-300">
+            <RouterProvider router={router} fallbackElement={
+              <div className="flex items-center justify-center h-screen bg-background text-foreground">
+                <p className="text-lg">Loading application...</p>
+              </div>
+            } />
+            <Toaster position="top-right" />
+          </div>
         </TaskProvider>
       </AuthProvider>
     </ThemeProvider>

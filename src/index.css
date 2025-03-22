@@ -14,10 +14,10 @@
 @import './styles/theme.css';
 @import './styles/components.css';
 @import './styles/utilities.css';
-@import './styles/timer.css';
 @import './styles/animations.css';
 @import './styles/responsive.css';
 @import './styles/task-items.css';
 @import './styles/quotes.css';
 @import './styles/tasks-dark.css';
+@import './styles/timer.css';
 @import './styles/custom.css';

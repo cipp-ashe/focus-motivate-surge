@@ -36,10 +36,14 @@ export function ThemeProvider({
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
 
+  // Apply theme to document element and handle system preference
   useEffect(() => {
     const root = window.document.documentElement;
+    const body = window.document.body;
 
+    // Remove existing theme classes
     root.classList.remove("light", "dark");
+    body.classList.remove("light", "dark");
 
     if (theme === "system" && enableSystem) {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -48,10 +52,18 @@ export function ThemeProvider({
         : "light";
 
       root.classList.add(systemTheme);
+      body.classList.add(systemTheme);
       return;
     }
 
+    // Apply theme class to both root and body elements
     root.classList.add(theme);
+    body.classList.add(theme);
+    
+    // Also set data-theme attribute for components that use it
+    root.setAttribute('data-theme', theme);
+    
+    // Store theme preference
     localStorage.setItem(storageKey, theme);
   }, [theme, attribute, enableSystem, storageKey]);
 
@@ -64,10 +76,15 @@ export function ThemeProvider({
     const handleChange = () => {
       if (theme === "system") {
         const root = window.document.documentElement;
+        const body = window.document.body;
         const systemTheme = mediaQuery.matches ? "dark" : "light";
         
         root.classList.remove("light", "dark");
+        body.classList.remove("light", "dark");
+        
         root.classList.add(systemTheme);
+        body.classList.add(systemTheme);
+        root.setAttribute('data-theme', systemTheme);
       }
     };
     
@@ -79,19 +96,29 @@ export function ThemeProvider({
   useEffect(() => {
     // Apply theme immediately on mount
     const root = window.document.documentElement;
+    const body = window.document.body;
+    
     root.classList.remove("light", "dark");
+    body.classList.remove("light", "dark");
     
     const savedTheme = localStorage.getItem(storageKey) as Theme;
+    let themeToApply = defaultTheme;
+    
     if (savedTheme) {
-      root.classList.add(savedTheme);
-      setTheme(savedTheme);
+      themeToApply = savedTheme;
     } else if (enableSystem) {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+      themeToApply = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(defaultTheme);
+    }
+    
+    root.classList.add(themeToApply);
+    body.classList.add(themeToApply);
+    root.setAttribute('data-theme', themeToApply);
+    
+    // Update state if different
+    if (theme !== themeToApply) {
+      setTheme(themeToApply);
     }
 
     // Force a repaint to ensure theme is applied
