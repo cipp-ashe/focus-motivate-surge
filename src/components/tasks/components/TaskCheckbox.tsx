@@ -29,7 +29,7 @@ export const TaskCheckbox: React.FC<TaskCheckboxProps> = ({
         checked={task.completed}
         onCheckedChange={(checked) => onCheck(checked === true)}
         className={cn(
-          "transition-colors",
+          "transition-colors dark:border-border",
           task.completed && "data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
         )}
       />

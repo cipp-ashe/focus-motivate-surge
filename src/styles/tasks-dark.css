@@ -59,6 +59,13 @@
   @apply text-[hsl(var(--focus-color))] !important;
 }
 
+/* Ensure icon colors are fixed in dark mode */
+.dark .task-item svg,
+.dark .task-row svg,
+.dark .task-card svg {
+  @apply text-foreground;
+}
+
 /* Cards and content areas in dark mode */
 .dark .card,
 .dark .bg-card {
@@ -81,4 +88,14 @@
   backdrop-filter: blur(var(--glass-blur));
   border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
+}
+
+/* Fix for task-specific icons */
+.dark .task-icon-wrapper svg {
+  @apply text-foreground;
+}
+
+/* Ensure task checkbox has proper styling */
+.dark .task-checkbox {
+  @apply border-border bg-background;
 }

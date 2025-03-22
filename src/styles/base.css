@@ -102,6 +102,17 @@
     color: hsl(var(--foreground)) !important;
   }
   
+  /* New: Fix for icon colors in dark mode */
+  .dark svg {
+    color: currentColor;
+  }
+  
+  /* New: Ensure proper border colors in dark mode */
+  .dark .border,
+  .dark [class*="border-"] {
+    border-color: hsl(var(--border)) !important;
+  }
+  
   /* Fix for containers with nested background issues */
   main, 
   .container, 

@@ -60,8 +60,9 @@
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 65%;
     --destructive-foreground: 225 25% 98%;
-    --border: 225 25% 18%;
-    --input: 225 25% 18%;
+    /* Fixed: Updated border color to be darker in dark mode */
+    --border: 225 25% 22%;
+    --input: 225 25% 22%;
     --ring: 280 85% 65%;
     
     /* Glass effect variables - dark mode with higher opacity */

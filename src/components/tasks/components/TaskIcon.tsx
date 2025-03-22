@@ -33,10 +33,10 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   size = 16,
   muted = false
 }) => {
-  // Apply color class based on task type
+  // Apply color class based on task type, respecting dark mode
   const colorClass = muted 
     ? 'text-muted-foreground' 
-    : `task-${taskType}`;
+    : `task-${taskType} dark:text-foreground`;
   
   // Determine which icon to render based on task type
   switch (taskType) {
