@@ -1,26 +1,17 @@
 
-import React, { ReactNode, useEffect } from 'react';
-import { logger } from '@/utils/logManager';
+import React, { ReactNode } from 'react';
+import { useThemeDebug } from '@/hooks/theme/useThemeDebug';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  useEffect(() => {
-    // Debug theme in dashboard layout
-    logger.debug('DashboardLayout', 'Component mounted');
-    logger.debug('DashboardLayout', 'Theme class on HTML:', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    
-    // Try to understand computed background values
-    const computedStyle = window.getComputedStyle(document.documentElement);
-    logger.debug('DashboardLayout', 'Computed --background CSS variable:', 
-      computedStyle.getPropertyValue('--background'));
-  }, []);
+  // Use the theme debug hook for consistent debugging
+  useThemeDebug('DashboardLayout');
   
   return (
-    <div className="dashboard-debug min-h-screen w-full py-4 sm:py-8 px-2 sm:px-6 relative overflow-hidden bg-background text-foreground transition-colors duration-300"
-         style={{ backgroundColor: 'hsl(var(--background))' }}>
+    <div className="dashboard-debug min-h-screen w-full py-4 sm:py-8 px-2 sm:px-6 relative overflow-hidden bg-background text-foreground">
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute -top-[5%] left-[5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] bg-primary/10 rounded-full filter blur-3xl opacity-40 dark:opacity-20 animate-float"></div>

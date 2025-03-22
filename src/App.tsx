@@ -18,22 +18,10 @@ function App() {
   useEffect(() => {
     console.log("App initialized successfully");
     logger.debug('App', 'Current theme class on HTML:', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    logger.debug('App', 'Current background color style:', document.documentElement.style.backgroundColor);
-    
-    // Ensure theme is applied to document elements with explicit styles
-    document.documentElement.classList.add('bg-background', 'text-foreground');
-    document.body.classList.add('bg-background', 'text-foreground');
-    document.documentElement.style.backgroundColor = 'hsl(var(--background))';
-    document.body.style.backgroundColor = 'hsl(var(--background))';
-    
-    // Debug after adding classes
-    logger.debug('App', 'After classes added - background color style:', document.documentElement.style.backgroundColor);
     
     // Clean up function
     return () => {
       console.log("App component unmounting");
-      document.documentElement.classList.remove('bg-background', 'text-foreground');
-      document.body.classList.remove('bg-background', 'text-foreground');
     };
   }, []);
   
@@ -59,9 +47,9 @@ function App() {
     <ThemeProvider defaultTheme="dark" attribute="class">
       <AuthProvider>
         <TaskProvider>
-          <div className="min-h-screen w-full bg-background text-foreground transition-all duration-300">
+          <div className="app-root min-h-screen w-full bg-background text-foreground">
             <RouterProvider router={router} fallbackElement={
-              <div className="flex items-center justify-center h-screen bg-background text-foreground">
+              <div className="flex items-center justify-center h-screen">
                 <p className="text-lg">Loading application...</p>
               </div>
             } />

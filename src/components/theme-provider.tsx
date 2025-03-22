@@ -56,8 +56,8 @@ export function ThemeProvider({
       root.setAttribute('data-theme', systemTheme);
       
       // Force body and root to have background color based on theme
-      root.style.backgroundColor = `hsl(var(--background))`;
-      body.style.backgroundColor = `hsl(var(--background))`;
+      document.documentElement.style.setProperty('background-color', `hsl(var(--background))`);
+      document.body.style.setProperty('background-color', `hsl(var(--background))`);
       return;
     }
 
@@ -69,8 +69,8 @@ export function ThemeProvider({
     root.setAttribute('data-theme', theme);
     
     // Force body and root to have background color based on theme
-    root.style.backgroundColor = `hsl(var(--background))`;
-    body.style.backgroundColor = `hsl(var(--background))`;
+    document.documentElement.style.setProperty('background-color', `hsl(var(--background))`);
+    document.body.style.setProperty('background-color', `hsl(var(--background))`);
     
     // Store theme preference
     localStorage.setItem(storageKey, theme);
@@ -96,8 +96,8 @@ export function ThemeProvider({
         root.setAttribute('data-theme', systemTheme);
         
         // Force body and root to have background color based on theme
-        root.style.backgroundColor = `hsl(var(--background))`;
-        body.style.backgroundColor = `hsl(var(--background))`;
+        document.documentElement.style.setProperty('background-color', `hsl(var(--background))`);
+        document.body.style.setProperty('background-color', `hsl(var(--background))`);
       }
     };
     
@@ -129,9 +129,9 @@ export function ThemeProvider({
     body.classList.add(themeToApply);
     root.setAttribute('data-theme', themeToApply);
     
-    // Force body and root to have background color based on theme
-    root.style.backgroundColor = `hsl(var(--background))`;
-    body.style.backgroundColor = `hsl(var(--background))`;
+    // Force the background color to be applied immediately and strongly
+    document.documentElement.style.setProperty('background-color', `hsl(var(--background))`, 'important');
+    document.body.style.setProperty('background-color', `hsl(var(--background))`, 'important');
     
     // Update state if different
     if (theme !== themeToApply) {
@@ -142,7 +142,7 @@ export function ThemeProvider({
     document.body.style.display = 'none';
     setTimeout(() => {
       document.body.style.display = '';
-    }, 0);
+    }, 5);
   }, []);
 
   const value = {

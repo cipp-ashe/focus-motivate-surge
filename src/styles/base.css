@@ -24,21 +24,20 @@
   }
   
   body {
-    @apply overflow-x-hidden transition-colors duration-300;
+    @apply overflow-x-hidden;
     background-color: hsl(var(--background)) !important;
     color: hsl(var(--foreground)) !important;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
   #root {
-    @apply transition-colors duration-300;
     background-color: hsl(var(--background)) !important;
     color: hsl(var(--foreground)) !important;
     min-height: 100vh;
     height: 100%;
   }
   
-  /* Theme transition for all elements */
+  /* Theme transition for specific properties only */
   *,
   *::before,
   *::after {
@@ -99,5 +98,18 @@
   /* Add debugging hook to check when base.css is fully loaded */
   .base-css-loaded {
     content: 'base-css-loaded';
+  }
+  
+  /* Adding app-specific bg colors */
+  .app-root, 
+  .dashboard-debug,
+  .task-layout-debug {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  /* Fix all backgrounds */
+  .bg-background {
+    background-color: hsl(var(--background)) !important;
   }
 }
