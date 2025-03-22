@@ -41,7 +41,7 @@ export function ThemeProvider({
     const root = window.document.documentElement;
     const body = window.document.body;
 
-    // Remove existing theme classes
+    // Force remove existing theme classes
     root.classList.remove("light", "dark");
     body.classList.remove("light", "dark");
 
@@ -54,6 +54,9 @@ export function ThemeProvider({
       root.classList.add(systemTheme);
       body.classList.add(systemTheme);
       root.setAttribute('data-theme', systemTheme);
+      
+      // Force update of CSS colors
+      document.documentElement.style.setProperty('color-scheme', systemTheme);
       return;
     }
 
@@ -64,8 +67,13 @@ export function ThemeProvider({
     // Also set data-theme attribute for components that use it
     root.setAttribute('data-theme', theme);
     
+    // Force update of CSS colors
+    document.documentElement.style.setProperty('color-scheme', theme);
+    
     // Store theme preference
     localStorage.setItem(storageKey, theme);
+    
+    console.log(`Theme set to: ${theme}`);
   }, [theme, attribute, enableSystem, storageKey]);
 
   // Listen for system theme changes and update if using system theme
@@ -86,6 +94,7 @@ export function ThemeProvider({
         root.classList.add(systemTheme);
         body.classList.add(systemTheme);
         root.setAttribute('data-theme', systemTheme);
+        document.documentElement.style.setProperty('color-scheme', systemTheme);
       }
     };
     
@@ -116,11 +125,14 @@ export function ThemeProvider({
     root.classList.add(themeToApply);
     body.classList.add(themeToApply);
     root.setAttribute('data-theme', themeToApply);
+    document.documentElement.style.setProperty('color-scheme', themeToApply);
     
     // Update state if different
     if (theme !== themeToApply) {
       setTheme(themeToApply);
     }
+    
+    console.log(`Initial theme applied: ${themeToApply}`);
   }, []);
 
   const value = {

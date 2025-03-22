@@ -74,7 +74,7 @@
   
   /* Ensure proper dark mode opacity levels for glass effects */
   .dark .glass-effect {
-    --glass-bg: rgba(30, 30, 40, 0.7);
+    --glass-bg: rgba(20, 20, 30, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
@@ -114,5 +114,35 @@
   .background-decoration {
     pointer-events: none;
     z-index: -1;
+  }
+  
+  /* Critical fix for any containers with nested background issues */
+  main, 
+  .container, 
+  .container-fancy, 
+  .layout-container,
+  [class*="layout-"],
+  [class*="-layout"],
+  .app-container,
+  .content-area,
+  .page-container {
+    background-color: transparent !important;
+  }
+  
+  /* Force theme colors on any layout wrapper */
+  .min-h-screen,
+  .h-screen,
+  .flex-1,
+  .flex-col,
+  .flex-row {
+    background-color: transparent !important;
+  }
+  
+  /* Dark mode forced background for debugging */
+  .dark #root,
+  .dark main,
+  .dark body,
+  .dark html {
+    background-color: hsl(var(--background)) !important;
   }
 }

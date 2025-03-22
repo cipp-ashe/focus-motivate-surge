@@ -15,16 +15,30 @@ export const useThemeDebug = (componentName: string) => {
       
       // Log CSS variables
       const computedStyle = window.getComputedStyle(html);
+      const bgVar = computedStyle.getPropertyValue('--background').trim();
       logger.debug(componentName, 'CSS Variables:');
-      logger.debug(componentName, '  --background:', computedStyle.getPropertyValue('--background'));
-      logger.debug(componentName, '  --foreground:', computedStyle.getPropertyValue('--foreground'));
+      logger.debug(componentName, '  --background:', bgVar);
+      logger.debug(componentName, '  --foreground:', computedStyle.getPropertyValue('--foreground').trim());
       
-      // Log applied styles
+      // Log actual computed colors
+      logger.debug(componentName, 'Computed background:', window.getComputedStyle(html).backgroundColor);
+      logger.debug(componentName, 'color-scheme:', computedStyle.colorScheme);
+      
+      // Check for theme application
+      const htmlBg = window.getComputedStyle(html).backgroundColor;
+      const bodyBg = window.getComputedStyle(body).backgroundColor;
+      const rootBg = root ? window.getComputedStyle(root).backgroundColor : 'N/A';
+      
+      // Log all applied styles
       logger.debug(componentName, 'Applied Styles:');
-      logger.debug(componentName, '  HTML background:', window.getComputedStyle(html).backgroundColor);
-      logger.debug(componentName, '  BODY background:', window.getComputedStyle(body).backgroundColor);
-      if (root) {
-        logger.debug(componentName, '  ROOT background:', window.getComputedStyle(root).backgroundColor);
+      logger.debug(componentName, '  HTML background:', htmlBg);
+      logger.debug(componentName, '  BODY background:', bodyBg);
+      logger.debug(componentName, '  ROOT background:', rootBg);
+      
+      // Check for transparency issues (common theme bug)
+      const isTransparent = (color: string) => color === 'rgba(0, 0, 0, 0)' || color === 'transparent';
+      if (isTransparent(htmlBg) && isTransparent(bodyBg) && isTransparent(rootBg)) {
+        logger.warn(componentName, 'THEME WARNING: All containers have transparent backgrounds!');
       }
     };
     

@@ -38,33 +38,38 @@
     --glass-border: rgba(255, 255, 255, 0.2);
     --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     --glass-blur: 10px;
+    
+    color-scheme: light;
   }
 
   .dark {
-    --background: 225 25% 10%;
+    /* Truly dark background colors */
+    --background: 225 25% 8%;
     --foreground: 225 25% 98%;
-    --card: 225 25% 13%;
+    --card: 225 25% 12%;
     --card-foreground: 225 25% 98%;
-    --popover: 225 25% 13%;
+    --popover: 225 25% 12%;
     --popover-foreground: 225 25% 98%;
     --primary: 280 85% 60%;
     --primary-foreground: 225 25% 98%;
-    --secondary: 225 25% 20%;
+    --secondary: 225 25% 18%;
     --secondary-foreground: 225 25% 98%;
-    --muted: 225 25% 20%;
+    --muted: 225 25% 18%;
     --muted-foreground: 225 25% 60%;
     --accent: 280 85% 60%;
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 225 25% 98%;
-    --border: 225 25% 25%;
-    --input: 225 25% 25%;
+    --border: 225 25% 20%;
+    --input: 225 25% 20%;
     --ring: 280 85% 60%;
     
     /* Glass effect variables - dark mode */
-    --glass-bg: rgba(30, 30, 40, 0.7);
+    --glass-bg: rgba(20, 20, 30, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     --glass-blur: 15px;
+    
+    color-scheme: dark;
   }
 }
