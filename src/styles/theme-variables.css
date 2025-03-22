@@ -51,12 +51,12 @@
   }
 
   .dark {
-    /* True dark background colors with higher contrast */
-    --background: 225 25% 6%;
+    /* True dark background with pure black for better contrast */
+    --background: 225 25% 4%;  /* Much darker */
     --foreground: 225 25% 98%;
-    --card: 225 25% 10%;
+    --card: 225 25% 8%;  /* Darker card background */
     --card-foreground: 225 25% 98%;
-    --popover: 225 25% 10%;
+    --popover: 225 25% 8%;
     --popover-foreground: 225 25% 98%;
     --primary: 280 85% 65%;
     --primary-foreground: 225 25% 98%;
@@ -68,9 +68,9 @@
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 65%;
     --destructive-foreground: 225 25% 98%;
-    /* Darker border color in dark mode - important for visibility */
-    --border: 225 25% 30%;
-    --input: 225 25% 30%;
+    /* Much darker border color for dark mode visibility */
+    --border: 225 25% 20%;
+    --input: 225 25% 20%;
     --ring: 280 85% 65%;
     
     /* Task type colors for dark mode - higher brightness values */
@@ -90,9 +90,9 @@
     --focus: hsl(var(--focus-color));
     
     /* Glass effect variables - dark mode with higher opacity */
-    --glass-bg: rgba(15, 15, 25, 0.75);
+    --glass-bg: rgba(15, 15, 25, 0.85);  /* More opaque */
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
     --glass-blur: 15px;
     
     color-scheme: dark;

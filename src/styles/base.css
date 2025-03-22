@@ -93,43 +93,41 @@
     background-color: hsl(var(--background)) !important;
   }
   
-  /* Force dark theme colors when dark mode is active */
-  .dark .bg-background {
-    background-color: hsl(var(--background)) !important;
+  /* DARK MODE FIXES */
+  /* Override all borders in dark mode */
+  .dark * {
+    border-color: hsl(var(--border)) !important;
   }
   
-  .dark .text-foreground {
-    color: hsl(var(--foreground)) !important;
-  }
-  
-  /* Global fix: All SVG/icon colors in dark mode */
+  /* Fix ALL SVG/icons in dark mode */
   .dark svg {
     color: inherit !important;
   }
   
-  /* Global fix: All borders in dark mode */
-  .dark *, 
-  .dark *:before, 
-  .dark *:after {
-    border-color: hsl(var(--border)) !important;
+  /* Fix card backgrounds in dark mode */
+  .dark .card,
+  .dark .bg-card,
+  .dark [class*="card"],
+  .dark [class*="bg-card"] {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
   }
   
-  /* Global exception: Allow border colors that are explicitly set */
-  .dark .border-primary,
-  .dark .border-primary-foreground,
-  .dark .border-secondary,
-  .dark .border-secondary-foreground,
-  .dark .border-accent,
-  .dark .border-accent-foreground,
-  .dark .border-destructive,
-  .dark [class*="border-primary"],
-  .dark [class*="border-secondary"],
-  .dark [class*="border-accent"],
-  .dark [class*="border-destructive"] {
-    border-color: inherit !important;
+  /* Ensure dark mode text is properly visible */
+  .dark .text-foreground,
+  .dark p,
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6,
+  .dark span,
+  .dark div {
+    color: hsl(var(--foreground)) !important;
   }
-  
-  /* Fix for containers with nested background issues */
+
+  /* Fix for components with nested background issues */
   main, 
   .container, 
   .container-fancy, 
@@ -142,19 +140,28 @@
     background-color: transparent !important;
   }
   
-  /* Force theme colors on any layout wrapper */
-  .min-h-screen,
-  .h-screen,
-  .flex-1,
-  .flex-col,
-  .flex-row {
-    background-color: transparent !important;
+  /* Fix glass effects in dark mode */
+  .dark .glass-effect {
+    background-color: var(--glass-bg) !important;
+    border-color: var(--glass-border) !important;
   }
   
-  /* Make all cards and components respect theme colors */
-  .card, 
-  .bg-card {
+  /* Fix input backgrounds in dark mode */
+  .dark input,
+  .dark textarea,
+  .dark select {
     background-color: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  /* Specific component overrides for dark mode */
+  .dark .task-item,
+  .dark .note-item,
+  .dark .habit-item,
+  .dark .settings-card,
+  .dark .timer-card {
+    border-color: hsl(var(--border)) !important;
+    background-color: hsl(var(--card)) !important;
   }
 }

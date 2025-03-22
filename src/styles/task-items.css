@@ -11,31 +11,60 @@
 
 /* Task type color classes */
 .task-timer {
-  color: hsl(var(--timer-color));
+  color: hsl(var(--timer-color)) !important;
 }
 
 .task-journal {
-  color: hsl(var(--journal-color));
+  color: hsl(var(--journal-color)) !important;
 }
 
 .task-checklist {
-  color: hsl(var(--checklist-color));
+  color: hsl(var(--checklist-color)) !important;
 }
 
 .task-screenshot {
-  color: hsl(var(--screenshot-color));
+  color: hsl(var(--screenshot-color)) !important;
 }
 
 .task-voicenote {
-  color: hsl(var(--voicenote-color));
+  color: hsl(var(--voicenote-color)) !important;
 }
 
 .task-focus {
-  color: hsl(var(--focus-color));
+  color: hsl(var(--focus-color)) !important;
 }
 
 .task-regular {
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Fix for dark mode task colors */
+.dark .task-timer {
+  color: hsl(var(--timer-color)) !important;
+}
+
+.dark .task-journal {
+  color: hsl(var(--journal-color)) !important;
+}
+
+.dark .task-checklist {
+  color: hsl(var(--checklist-color)) !important;
+}
+
+.dark .task-screenshot {
+  color: hsl(var(--screenshot-color)) !important;
+}
+
+.dark .task-voicenote {
+  color: hsl(var(--voicenote-color)) !important;
+}
+
+.dark .task-focus {
+  color: hsl(var(--focus-color)) !important;
+}
+
+.dark .task-regular {
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 /* Task item hover effects */
@@ -71,4 +100,23 @@
 
 .task-status-dismissed {
   @apply bg-red-500/10 text-red-600 dark:text-red-400;
+}
+
+/* Dark mode specific fixes for task containers */
+.dark .task-container,
+.dark .task-item,
+.dark .task-list,
+.dark .task-card {
+  background-color: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .task-icon {
+  color: inherit !important;
+}
+
+/* Fix task badge colors in dark mode */
+.dark .task-badge {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: hsl(var(--foreground)) !important;
 }

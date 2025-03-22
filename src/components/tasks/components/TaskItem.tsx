@@ -72,9 +72,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       className={cn(
         "relative rounded-md border p-3 transition-all",
         taskIsSelected 
-          ? "border-primary/50 bg-primary/5 dark:bg-primary/10 dark:border-primary/50" 
-          : "border-border/50 dark:border-border/70",
-        isHovered && !taskIsSelected && "border-border bg-card/80 dark:bg-card/50"
+          ? "border-primary/50 bg-primary/5 dark:bg-primary/10 dark:border-primary/30" 
+          : "border-border/50 dark:border-border/50",
+        isHovered && !taskIsSelected && "border-border dark:border-border/80 bg-card/80 dark:bg-card/40"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

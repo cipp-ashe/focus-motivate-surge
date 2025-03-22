@@ -52,6 +52,24 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       }
     }, 50);
     
+    // Force all SVGs to inherit color in dark mode
+    if (effectiveTheme === 'dark') {
+      const style = document.createElement('style');
+      style.id = 'dark-mode-svg-fix';
+      style.innerHTML = `
+        .dark svg:not([class*="text-"]) { color: inherit !important; }
+        .dark *[class*="border-"] { border-color: hsl(var(--border)) !important; }
+        .dark input, .dark select, .dark textarea { background-color: hsl(var(--card)) !important; color: hsl(var(--foreground)) !important; }
+        .dark button { color: inherit !important; }
+      `;
+      document.head.appendChild(style);
+    } else {
+      const existingStyle = document.getElementById('dark-mode-svg-fix');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    }
+    
     return () => clearTimeout(timeoutId);
   }, [theme]);
   
