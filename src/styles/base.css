@@ -4,6 +4,12 @@
     @apply border-border;
   }
   
+  /* Specific debugging class for theme troubleshooting */
+  .theme-debug-element {
+    content: 'theme-loaded';
+    display: none;
+  }
+  
   :root,
   html,
   body,
@@ -12,21 +18,22 @@
   }
   
   html {
-    @apply overflow-x-hidden scroll-smooth bg-background text-foreground;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    @apply overflow-x-hidden scroll-smooth;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
   
   body {
-    @apply bg-background text-foreground overflow-x-hidden transition-colors duration-300;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    @apply overflow-x-hidden transition-colors duration-300;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
   #root {
-    @apply bg-background text-foreground transition-colors duration-300;
-    background-color: hsl(var(--background));
+    @apply transition-colors duration-300;
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
     min-height: 100vh;
     height: 100%;
   }
@@ -70,7 +77,7 @@
   /* Improved Glass effect - unified for light and dark modes */
   .glass-effect {
     background-color: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur, 12px));
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
   }
@@ -87,5 +94,10 @@
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.2);
     --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Add debugging hook to check when base.css is fully loaded */
+  .base-css-loaded {
+    content: 'base-css-loaded';
   }
 }

@@ -1,13 +1,25 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
+import { logger } from '@/utils/logManager';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  useEffect(() => {
+    // Debug theme in dashboard layout
+    logger.debug('DashboardLayout', 'Component mounted');
+    logger.debug('DashboardLayout', 'Theme class on HTML:', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    
+    // Try to understand computed background values
+    const computedStyle = window.getComputedStyle(document.documentElement);
+    logger.debug('DashboardLayout', 'Computed --background CSS variable:', 
+      computedStyle.getPropertyValue('--background'));
+  }, []);
+  
   return (
-    <div className="min-h-screen w-full py-4 sm:py-8 px-2 sm:px-6 relative overflow-hidden bg-background text-foreground transition-colors duration-300"
+    <div className="dashboard-debug min-h-screen w-full py-4 sm:py-8 px-2 sm:px-6 relative overflow-hidden bg-background text-foreground transition-colors duration-300"
          style={{ backgroundColor: 'hsl(var(--background))' }}>
       {/* Decorative background elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">

@@ -7,6 +7,7 @@ import { toast, Toaster } from 'sonner';
 import { ThemeProvider } from './components/theme-provider';
 import { AuthProvider } from './contexts/auth/AuthContext';
 import { TaskProvider } from './contexts/tasks/TaskContext';
+import { logger } from './utils/logManager';
 
 // Set up global error handling
 setupGlobalErrorHandlers();
@@ -16,12 +17,17 @@ function App() {
   
   useEffect(() => {
     console.log("App initialized successfully");
+    logger.debug('App', 'Current theme class on HTML:', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    logger.debug('App', 'Current background color style:', document.documentElement.style.backgroundColor);
     
     // Ensure theme is applied to document elements with explicit styles
     document.documentElement.classList.add('bg-background', 'text-foreground');
     document.body.classList.add('bg-background', 'text-foreground');
     document.documentElement.style.backgroundColor = 'hsl(var(--background))';
     document.body.style.backgroundColor = 'hsl(var(--background))';
+    
+    // Debug after adding classes
+    logger.debug('App', 'After classes added - background color style:', document.documentElement.style.backgroundColor);
     
     // Clean up function
     return () => {

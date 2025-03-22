@@ -62,19 +62,41 @@ const throttle = (func: Function, limit: number) => {
   };
 };
 
+// Function to log theme CSS variables for debugging
+const logThemeVariables = () => {
+  if (getLogLevel() >= LOG_LEVELS.DEBUG) {
+    const style = window.getComputedStyle(document.documentElement);
+    const themeVars = {
+      '--background': style.getPropertyValue('--background'),
+      '--foreground': style.getPropertyValue('--foreground'),
+      '--card': style.getPropertyValue('--card'),
+      '--card-foreground': style.getPropertyValue('--card-foreground'),
+      '--primary': style.getPropertyValue('--primary'),
+      '--primary-foreground': style.getPropertyValue('--primary-foreground'),
+      '--muted': style.getPropertyValue('--muted'),
+      '--muted-foreground': style.getPropertyValue('--muted-foreground'),
+    };
+    
+    console.groupCollapsed('%c🎨 Theme Variables', 'font-weight: bold; color: #6366f1;');
+    console.table(themeVars);
+    console.log('Current theme:', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    console.groupEnd();
+  }
+};
+
 // Logger utility
 export const logger = {
   LOG_LEVELS,
   
   debug: (component: string, message: string, data?: any) => {
     if (getLogLevel() >= LOG_LEVELS.DEBUG) {
-      console.log(formatLogMessage(component, message, data));
+      console.log(`%c${formatLogMessage(component, message, data)}`, 'color: #6366f1');
     }
   },
   
   info: (component: string, message: string, data?: any) => {
     if (getLogLevel() >= LOG_LEVELS.INFO) {
-      console.info(formatLogMessage(component, message, data));
+      console.info(`%c${formatLogMessage(component, message, data)}`, 'color: #38bdf8; font-weight: bold');
     }
   },
   
@@ -139,5 +161,31 @@ export const logger = {
   },
   
   // Get current log level
-  getLogLevel
+  getLogLevel,
+  
+  // Enhanced theme debugging
+  logThemeState: () => {
+    if (getLogLevel() >= LOG_LEVELS.DEBUG) {
+      logThemeVariables();
+      
+      // Log the computed background color of key elements
+      const html = document.documentElement;
+      const body = document.body;
+      const root = document.getElementById('root');
+      
+      console.groupCollapsed('%c🔍 Theme Application', 'font-weight: bold; color: #8b5cf6;');
+      console.log('HTML element classes:', html.className);
+      console.log('HTML background:', window.getComputedStyle(html).backgroundColor);
+      console.log('BODY background:', window.getComputedStyle(body).backgroundColor);
+      if (root) {
+        console.log('ROOT background:', window.getComputedStyle(root).backgroundColor);
+      }
+      console.groupEnd();
+    }
+  }
 };
+
+// Log theme state when this module loads (helpful for debugging)
+setTimeout(() => {
+  logger.logThemeState();
+}, 500);
