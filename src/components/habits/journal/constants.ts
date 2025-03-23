@@ -1,4 +1,3 @@
-
 import { Quote } from "@/types/timer/models";
 import { Tag } from "@/types/notes";
 import { quotes } from "@/data/quotes";
@@ -21,11 +20,16 @@ export const getJournalQuotes = (journalType: string): Quote[] => {
   
   const relevantCategories = categoryMap[journalType] || ['motivation', 'growth'];
   
-  return quotes.filter(quote => 
-    quote.category.some(cat => 
-      relevantCategories.includes(cat)
-    )
-  );
+  return quotes.filter(quote => {
+    // Handle both array and string category types
+    const categories = quote.category;
+    if (Array.isArray(categories)) {
+      return categories.some(cat => relevantCategories.includes(cat));
+    } else if (typeof categories === 'string') {
+      return relevantCategories.includes(categories);
+    }
+    return false;
+  });
 };
 
 export const journalTemplates: Record<string, JournalTemplate> = {
