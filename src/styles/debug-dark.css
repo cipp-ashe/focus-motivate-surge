@@ -24,6 +24,6 @@
 .dark .debug-panel *,
 .dark .debug-panel *::before,
 .dark .debug-panel *::after {
-  outline: none !important;
+  outline: none;
   border-style: solid;
 }

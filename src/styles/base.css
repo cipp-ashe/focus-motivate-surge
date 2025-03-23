@@ -2,7 +2,7 @@
 @layer base {
   * {
     @apply border-border;
-    outline: none; /* Explicitly disable outlines */
+    outline: none;
   }
   
   /* Specific debugging class for theme troubleshooting */
@@ -16,9 +16,9 @@
   body,
   #root {
     @apply min-h-screen h-full;
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
-    outline: none; /* Explicitly disable outlines */
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    outline: none;
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
@@ -76,7 +76,7 @@
   textarea:not(:focus-visible),
   a:not(:focus-visible),
   [tabindex]:not(:focus-visible) {
-    outline: none !important;
+    outline: none;
   }
   
   /* Improved Glass effect - unified for light and dark modes */
@@ -96,17 +96,17 @@
   .app-root, 
   .dashboard-debug,
   .task-layout-debug {
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
   
-  /* Force all background classes to use theme colors */
+  /* Use theme colors for background */
   .bg-background {
-    background-color: hsl(var(--background)) !important;
+    background-color: hsl(var(--background));
   }
   
   /* DARK MODE FIXES */
-  /* Remove the global border override and target specific elements */
+  /* Target specific elements for dark mode styling */
   .dark * {
     border-color: hsl(var(--border) / 0.05); /* Make all borders in dark mode very subtle by default */
   }
@@ -114,17 +114,18 @@
   .dark .card,
   .dark [class*="card-"],
   .dark [class*="border-"] {
-    border-color: hsl(var(--border) / 0.05) !important;
+    border-color: hsl(var(--border) / 0.05);
+    border-style: solid;
   }
   
   .dark button,
   .dark input,
   .dark textarea,
   .dark select {
-    border-color: hsl(var(--border) / 0.1) !important;
+    border-color: hsl(var(--border) / 0.1);
   }
   
-  /* Fix ALL SVG/icons in dark mode */
+  /* Fix SVG/icons in dark mode */
   .dark svg {
     color: inherit;
   }
@@ -134,8 +135,8 @@
   .dark .bg-card,
   .dark [class*="card"],
   .dark [class*="bg-card"] {
-    background-color: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
   }
   
   /* Ensure dark mode text is properly visible */
@@ -162,22 +163,22 @@
   .app-container,
   .content-area,
   .page-container {
-    background-color: transparent !important;
+    background-color: transparent;
   }
   
   /* Fix glass effects in dark mode */
   .dark .glass-effect {
-    background-color: var(--glass-bg) !important;
-    border-color: var(--glass-border) !important;
+    background-color: var(--glass-bg);
+    border-color: var(--glass-border);
   }
   
   /* Fix input backgrounds in dark mode */
   .dark input,
   .dark textarea,
   .dark select {
-    background-color: hsl(var(--card)) !important;
-    border-color: hsl(var(--border) / 0.1) !important;
-    color: hsl(var(--foreground)) !important;
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border) / 0.1);
+    color: hsl(var(--foreground));
   }
   
   /* Specific component overrides for dark mode */
@@ -186,7 +187,7 @@
   .dark .habit-item,
   .dark .settings-card,
   .dark .timer-card {
-    border-color: hsl(var(--border) / 0.05) !important;
-    background-color: hsl(var(--card)) !important;
+    border-color: hsl(var(--border) / 0.05);
+    background-color: hsl(var(--card));
   }
 }

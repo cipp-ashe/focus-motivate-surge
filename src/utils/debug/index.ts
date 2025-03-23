@@ -1,191 +1,165 @@
 
-// Debug utilities
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+// Debug utility functions for development and troubleshooting
+import React from 'react';
 import { logger } from '@/utils/logManager';
 
-// Debug context types
-type DebugContextType = {
-  isDebugMode: boolean;
-  toggleDebugMode: () => void;
-  logEvent: (category: string, event: string, data?: any) => void;
-  events: DebugEvent[];
-  clearEvents: () => void;
-  getFilteredEvents: (category?: string) => DebugEvent[];
-  showPanel: boolean;
-  togglePanel: () => void;
-};
-
-// Debug event type
-export type DebugEvent = {
-  id: string;
-  timestamp: number;
-  category: string;
-  event: string;
-  data?: any;
-};
-
-// Create the debug context with default values
-const DebugContext = createContext<DebugContextType>({
-  isDebugMode: false,
-  toggleDebugMode: () => {},
-  logEvent: () => {},
-  events: [],
-  clearEvents: () => {},
-  getFilteredEvents: () => [],
-  showPanel: false,
-  togglePanel: () => {},
-});
-
-// Generate a unique ID for debug events
-const generateId = () => {
-  return Math.random().toString(36).substr(2, 9);
-};
-
-// Debug provider component
-export const DebugProvider = ({ children }: { children: ReactNode }) => {
-  const [isDebugMode, setIsDebugMode] = useState<boolean>(
-    localStorage.getItem('debug_mode') === 'true'
-  );
-  const [events, setEvents] = useState<DebugEvent[]>([]);
-  const [showPanel, setShowPanel] = useState<boolean>(false);
-
-  // Toggle debug mode
-  const toggleDebugMode = useCallback(() => {
-    const newValue = !isDebugMode;
-    setIsDebugMode(newValue);
-    localStorage.setItem('debug_mode', newValue.toString());
-  }, [isDebugMode]);
-
-  // Log a new event
-  const logEvent = useCallback(
-    (category: string, event: string, data?: any) => {
-      if (!isDebugMode) return;
-
-      const newEvent: DebugEvent = {
-        id: generateId(),
-        timestamp: Date.now(),
-        category,
-        event,
-        data,
-      };
-
-      setEvents((prev) => [newEvent, ...prev].slice(0, 100)); // Keep only the latest 100 events
-      logger.debug(category, `${event}: ${JSON.stringify(data)}`);
-    },
-    [isDebugMode]
-  );
-
-  // Clear all events
-  const clearEvents = useCallback(() => {
-    setEvents([]);
-  }, []);
-
-  // Get filtered events by category
-  const getFilteredEvents = useCallback(
-    (category?: string) => {
-      if (!category) return events;
-      return events.filter((e) => e.category === category);
-    },
-    [events]
-  );
-
-  // Toggle debug panel visibility
-  const togglePanel = useCallback(() => {
-    setShowPanel((prev) => !prev);
-  }, []);
-
-  // Initialize debug keyboard shortcut
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Alt+Shift+D to toggle debug mode
-      if (e.altKey && e.shiftKey && e.key === 'D') {
-        toggleDebugMode();
-      }
-      
-      // Alt+Shift+P to toggle panel visibility
-      if (e.altKey && e.shiftKey && e.key === 'P') {
-        togglePanel();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [toggleDebugMode, togglePanel]);
-
-  // Log debug mode changes
-  useEffect(() => {
-    console.log(`Debug mode: ${isDebugMode ? 'enabled' : 'disabled'}`);
-  }, [isDebugMode]);
-
-  // Provide context value
-  const contextValue = {
-    isDebugMode,
-    toggleDebugMode,
-    logEvent,
-    events,
-    clearEvents,
-    getFilteredEvents,
-    showPanel,
-    togglePanel,
+/**
+ * Helper function to add debugging information to a component
+ * @param Component The component to add debugging to
+ * @param debugName The name to use for debugging
+ */
+export function withDebugging<P extends object>(
+  Component: React.ComponentType<P>,
+  debugName: string
+): React.FC<P> {
+  const WrappedComponent: React.FC<P> = (props) => {
+    logger.debug(debugName, 'Rendering component', { props });
+    
+    return <Component {...props} />;
   };
+  
+  WrappedComponent.displayName = `Debug(${debugName})`;
+  return WrappedComponent;
+}
 
+/**
+ * Creates a debug logger for a specific component or module
+ * @param namespace The namespace to use for logging
+ */
+export function createDebugLogger(namespace: string) {
+  return {
+    log: (...args: any[]) => logger.debug(namespace, ...args),
+    warn: (...args: any[]) => logger.warn(namespace, ...args),
+    error: (...args: any[]) => logger.error(namespace, ...args),
+    info: (...args: any[]) => logger.info(namespace, ...args),
+  };
+}
+
+/**
+ * Simple component that displays debug information
+ */
+export const DebugDisplay: React.FC<{
+  title?: string;
+  data: Record<string, any>;
+  expanded?: boolean;
+}> = ({ title = 'Debug Info', data, expanded = false }) => {
+  const [isExpanded, setIsExpanded] = React.useState(expanded);
+  
   return (
-    <DebugContext.Provider value={contextValue}>
-      {children}
-    </DebugContext.Provider>
+    <div className="p-2 mt-2 mb-2 border border-gray-300 rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700 text-left">
+      <div 
+        className="flex justify-between items-center cursor-pointer" 
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <h4 className="text-sm font-medium">{title}</h4>
+        <span>{isExpanded ? '▼' : '►'}</span>
+      </div>
+      
+      {isExpanded && (
+        <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-900 rounded text-xs overflow-auto max-h-64">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      )}
+    </div>
   );
 };
 
-// Custom hook for using debug context
-export const useDebug = () => {
-  const context = useContext(DebugContext);
+/**
+ * Utility to conditionally apply debugging features based on environment
+ */
+export const createDebugger = (namespace: string) => {
+  const isDev = process.env.NODE_ENV === 'development';
   
-  if (!context) {
-    throw new Error('useDebug must be used within a DebugProvider');
+  return {
+    log: isDev ? (...args: any[]) => logger.debug(namespace, ...args) : () => {},
+    trace: isDev ? (...args: any[]) => console.trace(namespace, ...args) : () => {},
+    group: isDev ? (label: string) => console.group(label) : () => {},
+    groupEnd: isDev ? () => console.groupEnd() : () => {},
+    time: isDev ? (label: string) => console.time(label) : () => {},
+    timeEnd: isDev ? (label: string) => console.timeEnd(label) : () => {},
+    count: isDev ? (label: string) => console.count(label) : () => {},
+  };
+};
+
+/**
+ * Hook for monitoring prop changes
+ */
+export function useDebugProps<T extends Record<string, any>>(name: string, props: T) {
+  const prevPropsRef = React.useRef<T | null>(null);
+  
+  React.useEffect(() => {
+    if (prevPropsRef.current) {
+      const allKeys = new Set([
+        ...Object.keys(prevPropsRef.current),
+        ...Object.keys(props)
+      ]);
+      
+      const changedProps: Record<string, { from: any; to: any }> = {};
+      
+      allKeys.forEach(key => {
+        if (prevPropsRef.current?.[key] !== props[key]) {
+          changedProps[key] = {
+            from: prevPropsRef.current?.[key],
+            to: props[key]
+          };
+        }
+      });
+      
+      if (Object.keys(changedProps).length > 0) {
+        logger.debug(name, 'Props changed:', changedProps);
+      }
+    }
+    
+    prevPropsRef.current = { ...props };
+  }, [name, props]);
+}
+
+/**
+ * Debug helper for rendering cycles
+ */
+export function useRenderDebug(componentName: string) {
+  const renderCount = React.useRef(0);
+  
+  logger.debug(
+    componentName,
+    `Render ${++renderCount.current}`
+  );
+  
+  React.useEffect(() => {
+    logger.debug(componentName, 'Component mounted');
+    
+    return () => {
+      logger.debug(componentName, 'Component unmounted');
+    };
+  }, [componentName]);
+}
+
+/**
+ * Utility function to validate props against a schema
+ */
+export function validateProps<T>(props: T, schema: Record<keyof T, any>, componentName: string): boolean {
+  const errors: string[] = [];
+  
+  Object.keys(schema).forEach((key) => {
+    const propKey = key as keyof T;
+    const rule = schema[propKey];
+    
+    if (rule.required && (props[propKey] === undefined || props[propKey] === null)) {
+      errors.push(`Missing required prop '${String(propKey)}'`);
+    }
+    
+    if (props[propKey] !== undefined && rule.type && typeof props[propKey] !== rule.type) {
+      errors.push(`Prop '${String(propKey)}' should be of type '${rule.type}', got '${typeof props[propKey]}'`);
+    }
+  });
+  
+  if (errors.length > 0) {
+    logger.error(componentName, 'Prop validation errors:', errors);
+    return false;
   }
   
-  return context;
-};
-
-// Logging functions
-export function logRender(componentName: string, props?: any) {
-  console.log(`[RENDER] ${componentName}`, props || '');
+  return true;
 }
 
-export function logMount(componentName: string) {
-  console.log(`[MOUNT] ${componentName}`);
-}
-
-export function logUnmount(componentName: string) {
-  console.log(`[UNMOUNT] ${componentName}`);
-}
-
-export function logEffect(componentName: string, effectName: string) {
-  console.log(`[EFFECT] ${componentName} - ${effectName}`);
-}
-
-export function logState(componentName: string, stateName: string, value: any) {
-  console.log(`[STATE] ${componentName} - ${stateName}:`, value);
-}
-
-export function logError(componentName: string, error: Error) {
-  console.error(`[ERROR] ${componentName}:`, error);
-}
-
-export function logPerformance(componentName: string, operation: string, time: number) {
-  console.log(`[PERF] ${componentName} - ${operation}: ${time}ms`);
-}
-
-export const debugUtils = {
-  logRender,
-  logMount,
-  logUnmount,
-  logEffect,
-  logState,
-  logError,
-  logPerformance,
-};
-
-export default debugUtils;
+// Export a debugging flag for development features
+export const DEBUG_MODE = process.env.NODE_ENV === 'development';

@@ -30,11 +30,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     const style = document.createElement('style');
     style.id = 'outline-reset';
     style.innerHTML = `
-      * { outline: none !important; }
-      *.dark { outline: none !important; }
-      *.light { outline: none !important; }
-      [class*="border"] { border-style: solid !important; }
-      .card, .border { border-style: solid !important; }
+      * { outline: none; }
+      *.dark { outline: none; }
+      *.light { outline: none; }
+      [class*="border"] { border-style: solid; }
+      .card, .border { border-style: solid; }
     `;
     document.head.appendChild(style);
     
@@ -69,11 +69,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       const style = document.createElement('style');
       style.id = 'dark-mode-svg-fix';
       style.innerHTML = `
-        .dark svg:not([class*="text-"]) { color: inherit !important; }
-        .dark *[class*="border-"] { border-color: hsl(var(--border) / 0.05) !important; border-style: solid !important; }
-        .dark .card, .dark .border { border-color: hsl(var(--border) / 0.05) !important; border-style: solid !important; }
-        .dark input, .dark select, .dark textarea { background-color: hsl(var(--card)) !important; color: hsl(var(--foreground)) !important; }
-        .dark button { color: inherit !important; }
+        .dark svg:not([class*="text-"]) { color: inherit; }
+        .dark *[class*="border-"] { border-color: hsl(var(--border) / 0.05); border-style: solid; }
+        .dark .card, .dark .border { border-color: hsl(var(--border) / 0.05); border-style: solid; }
+        .dark input, .dark select, .dark textarea { background-color: hsl(var(--card)); color: hsl(var(--foreground)); }
+        .dark button { color: inherit; }
       `;
       document.head.appendChild(style);
     } else {
