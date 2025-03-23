@@ -2,7 +2,6 @@
 @layer base {
   * {
     @apply border-border;
-    outline: none;
   }
   
   /* Specific debugging class for theme troubleshooting */
@@ -18,7 +17,6 @@
     @apply min-h-screen h-full;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    outline: none;
   }
   
   html {
@@ -61,18 +59,13 @@
     @apply text-primary hover:text-primary/80 transition-colors;
   }
   
-  /* Focus styles - Only show outline on focus */
+  /* Improved focus styles that don't apply to everything */
   :focus-visible {
-    @apply outline-none ring-2 ring-primary/50 ring-offset-1;
+    @apply ring-2 ring-primary/50 ring-offset-1 outline-none;
   }
   
-  /* Force all elements to have no outline except when focused */
-  button:not(:focus-visible),
-  input:not(:focus-visible),
-  select:not(:focus-visible),
-  textarea:not(:focus-visible),
-  a:not(:focus-visible),
-  [tabindex]:not(:focus-visible) {
+  /* Remove default focus styles from all elements */
+  * {
     outline: none;
   }
   

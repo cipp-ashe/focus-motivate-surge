@@ -1,3 +1,4 @@
+
 // Debug utility constants and types
 import React from 'react';
 import { logger } from '@/utils/logManager';
@@ -45,10 +46,12 @@ class DebugStore {
 export const debugStore = new DebugStore();
 
 // Debug context for providing debug tools
-const DebugContext = React.createContext<{
+interface DebugContextType {
   isDebugMode: boolean;
   toggleDebugMode: () => void;
-}>({
+}
+
+const DebugContext = React.createContext<DebugContextType>({
   isDebugMode: false,
   toggleDebugMode: () => {},
 });
