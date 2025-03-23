@@ -24,7 +24,7 @@ const TemplateCardView: React.FC<TemplateCardViewProps> = ({
   return (
     <Card 
       className={cn(
-        "bg-card border-border/60 transition-all duration-200 hover:shadow-md",
+        "bg-card border-border/30 dark:border-border/10 transition-all duration-200 hover:shadow-md",
         isActive ? "border-primary/60 ring-1 ring-primary/10" : "hover:border-primary/30"
       )}
     >

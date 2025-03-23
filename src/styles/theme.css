@@ -260,14 +260,17 @@
 .dark .border,
 .dark .card,
 .dark .border-card,
-.dark .border-muted,
+.dark .border-muted {
+  border-color: hsl(var(--border) / 0.15) !important;
+}
+
 .dark .border-primary {
-  border-color: hsl(var(--border) / 0.3) !important;
+  border-color: hsl(var(--primary) / 0.2) !important;
 }
 
 .dark .interactive-card:hover,
 .dark .card-hover-effect:hover {
-  border-color: hsl(var(--border) / 0.5) !important;
+  border-color: hsl(var(--border) / 0.3) !important;
 }
 
 .dark .glass-effect,

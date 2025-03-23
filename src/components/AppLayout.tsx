@@ -58,7 +58,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       style.id = 'dark-mode-svg-fix';
       style.innerHTML = `
         .dark svg:not([class*="text-"]) { color: inherit !important; }
-        .dark *[class*="border-"] { border-color: hsl(var(--border)) !important; }
+        .dark *[class*="border-"] { border-color: hsl(var(--border) / 0.2) !important; }
         .dark input, .dark select, .dark textarea { background-color: hsl(var(--card)) !important; color: hsl(var(--foreground)) !important; }
         .dark button { color: inherit !important; }
       `;

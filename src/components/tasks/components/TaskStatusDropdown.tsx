@@ -84,7 +84,7 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
           variant="outline"
           size="sm"
           className={cn(
-            "h-7 px-2 text-xs flex items-center gap-1 border-muted/50 dark:border-muted/30",
+            "h-7 px-2 text-xs flex items-center gap-1 border-muted/50 dark:border-muted/20",
             currentStatus.class
           )}
           onClick={(e) => e.stopPropagation()}
@@ -96,7 +96,7 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-40 dark:border-muted/30"
+        className="w-40 dark:border-border/10"
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuItem 
