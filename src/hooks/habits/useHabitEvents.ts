@@ -7,11 +7,12 @@ import { eventManager } from '@/lib/events/EventManager';
  */
 export const useHabitEvents = () => {
   // Complete a habit
-  const completeHabit = useCallback((habitId: string, date: string, completed: boolean = true) => {
+  const completeHabit = useCallback((habitId: string, date: string, value: boolean | number = true) => {
     eventManager.emit('habit:complete', {
       habitId,
       date,
-      completed
+      value,
+      completed: true
     });
   }, []);
 
@@ -55,7 +56,6 @@ export const useHabitEvents = () => {
   // Add a habit template
   const addHabitTemplate = useCallback((templateId: string) => {
     eventManager.emit('habit:template-add', {
-      id: templateId,
       templateId
     });
   }, []);

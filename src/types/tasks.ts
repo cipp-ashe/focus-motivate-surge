@@ -1,10 +1,15 @@
+
 // Task type enum for type checking
 export type TaskType = 
-  | 'todo' 
   | 'timer' 
-  | 'focus' 
+  | 'regular' 
+  | 'screenshot' 
+  | 'journal' 
+  | 'checklist' 
+  | 'voicenote' 
+  | 'focus'
   | 'habit'
-  | 'journal'
+  | 'todo'
   | 'exercise'
   | 'reading'
   | 'meditation'
@@ -53,6 +58,7 @@ export interface Task {
     habitId?: string;    // If this task was created from a habit
     templateId?: string; // The template that contains the habit
     date?: string;       // The date this habit task is for
+    noteId?: string;     // ID of the note associated with this task
   };
   metrics?: TaskMetrics;
   tags?: Tag[];
@@ -108,4 +114,5 @@ export interface TaskState {
   completed: Task[];
   cleared: Task[];
   selected: string | null;
+  isLoaded: boolean;
 }

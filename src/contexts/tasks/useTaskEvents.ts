@@ -2,7 +2,7 @@
 import { useCallback, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
-import { EventType, EventPayloads } from '@/types/events';
+import { EventType } from '@/types/events';
 
 /**
  * Hook for handling task-related events in the TaskContext
@@ -25,19 +25,19 @@ export const useTaskEvents = (
       dispatch({ type: 'ADD_TASK', payload });
     });
     
-    const updateUnsubscribe = eventManager.on('task:update', (payload: EventPayloads['task:update']) => {
+    const updateUnsubscribe = eventManager.on('task:update', (payload: { taskId: string; updates: Partial<Task> }) => {
       dispatch({ type: 'UPDATE_TASK', payload });
     });
     
-    const deleteUnsubscribe = eventManager.on('task:delete', (payload: EventPayloads['task:delete']) => {
+    const deleteUnsubscribe = eventManager.on('task:delete', (payload: { taskId: string; reason?: string }) => {
       dispatch({ type: 'DELETE_TASK', payload });
     });
     
-    const completeUnsubscribe = eventManager.on('task:complete', (payload: EventPayloads['task:complete']) => {
+    const completeUnsubscribe = eventManager.on('task:complete', (payload: { taskId: string; metrics?: any }) => {
       dispatch({ type: 'COMPLETE_TASK', payload });
     });
     
-    const selectUnsubscribe = eventManager.on('task:select', (payload: string) => {
+    const selectUnsubscribe = eventManager.on('task:select', (payload: string | null) => {
       dispatch({ type: 'SELECT_TASK', payload });
     });
     

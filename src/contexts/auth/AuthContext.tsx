@@ -6,6 +6,7 @@ import { app } from '@/lib/firebase/config';
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isAuthenticated: boolean; // Add this property
   signOut: () => Promise<void>;
 }
 
@@ -34,7 +35,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signOut: handleSignOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isLoading, 
+      isAuthenticated: !!user, // Add this property
+      signOut: handleSignOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );

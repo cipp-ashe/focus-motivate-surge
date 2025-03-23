@@ -1,5 +1,5 @@
 
-import { EventType, EventCallback, EventPayloads, EventUnsubscribe } from '@/types/events';
+import { EventType, EventCallback, EventPayload, EventPayloads, EventUnsubscribe } from '@/types/events';
 
 /**
  * EventManager singleton class
@@ -62,7 +62,7 @@ class EventManager {
    * @param eventType Event to emit
    * @param payload Data to pass to event listeners
    */
-  emit<T extends EventType>(eventType: T, payload: EventPayloads[T]): void {
+  emit<T extends EventType>(eventType: T, payload: EventPayload<T>): void {
     console.log(`EventManager: Emitting ${eventType}`, payload);
     
     // Add to history
@@ -111,7 +111,7 @@ class EventManager {
    * @param eventType Event type to get history for
    * @returns Most recent event payload or null if no history exists
    */
-  getLastEvent<T extends EventType>(eventType: T): EventPayloads[T] | null {
+  getLastEvent<T extends EventType>(eventType: T): EventPayload<T> | null {
     const history = this.eventHistory.get(eventType);
     if (!history || history.length === 0) return null;
     return history[history.length - 1];
@@ -122,7 +122,7 @@ class EventManager {
    * @param eventType Event type to get history for
    * @returns Array of event payloads or empty array if no history exists
    */
-  getEventHistory<T extends EventType>(eventType: T): EventPayloads[T][] {
+  getEventHistory<T extends EventType>(eventType: T): EventPayload<T>[] {
     return this.eventHistory.get(eventType) || [];
   }
 
