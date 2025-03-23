@@ -4,8 +4,8 @@ import React from 'react';
 const BackgroundDecorations: React.FC = () => {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none background-decoration">
-      {/* Primary theme-respecting background */}
-      <div className="absolute inset-0 bg-background transition-colors duration-300" />
+      {/* Primary theme-respecting background - no transition for immediate visibility */}
+      <div className="absolute inset-0 bg-background"></div>
       
       {/* Light mode decorations with better dark mode visibility adjustments */}
       <div className="absolute top-0 left-[10%] w-72 h-72 bg-primary/10 rounded-full filter blur-3xl opacity-40 dark:opacity-20 animate-float-left"></div>

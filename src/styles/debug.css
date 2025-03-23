@@ -1,0 +1,66 @@
+
+@import './debug-dark.css';
+
+/* Base debug panel styles */
+.debug-panel {
+  @apply fixed bottom-4 right-4 w-96 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-6rem)] overflow-hidden z-50
+  rounded-lg border shadow-lg bg-background/95 backdrop-blur-sm;
+  transition: all 0.3s ease-in-out;
+}
+
+.debug-header {
+  @apply flex items-center justify-between p-3 bg-muted/30 border-b;
+}
+
+.debug-card {
+  @apply bg-card rounded-md border p-3 mb-3;
+}
+
+.debug-event-list {
+  @apply overflow-y-auto max-h-[40vh] p-3;
+}
+
+.debug-event-item {
+  @apply p-2 mb-2 rounded border bg-background hover:bg-accent/10 cursor-pointer
+  transition-all duration-200 flex flex-col gap-1;
+}
+
+.debug-tabs {
+  @apply flex border-b;
+}
+
+.debug-tab {
+  @apply px-3 py-2 border-b-2 border-transparent hover:border-primary/50 cursor-pointer
+  transition-all duration-200;
+}
+
+.debug-tab-active {
+  @apply border-primary font-medium;
+}
+
+.debug-code {
+  @apply font-mono text-xs p-2 rounded bg-muted/20 border mb-2 overflow-x-auto;
+}
+
+/* Debug event types */
+.debug-error {
+  @apply text-destructive border-destructive/20 bg-destructive/10;
+}
+
+.debug-warning {
+  @apply text-yellow-500 border-yellow-500/20 bg-yellow-500/10;
+}
+
+.debug-info {
+  @apply text-blue-500 border-blue-500/20 bg-blue-500/10;
+}
+
+.debug-success {
+  @apply text-green-500 border-green-500/20 bg-green-500/10;
+}
+
+.debug-trace {
+  @apply text-purple-500 border-purple-500/20 bg-purple-500/10;
+}
+
+/* Add this to index.css to load the debug styles */

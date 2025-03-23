@@ -20,8 +20,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   // Use the theme debug hook to consistently log theme information
   useThemeDebug('AppLayout');
   
-  // Force theme application on mount and update
+  // Immediate theme application on page load
   useEffect(() => {
+    // Force immediate theme application without transitions
+    document.documentElement.style.transition = 'none';
+    document.body.style.transition = 'none';
+    
     // Determine the effective theme
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effectiveTheme = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
@@ -36,21 +40,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     document.documentElement.style.colorScheme = effectiveTheme;
     
     // Log theme application
-    logger.debug('AppLayout', `Forcing theme application: ${theme} (effective: ${effectiveTheme})`);
+    logger.debug('AppLayout', `Immediate theme application: ${theme} (effective: ${effectiveTheme})`);
     
     // Additional check to verify CSS variables are applied
     const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--background');
     logger.debug('AppLayout', `Background variable: ${bgColor}`);
     
-    // Force a refresh of backgrounds after a short delay
-    const timeoutId = setTimeout(() => {
-      const mainElement = document.querySelector('main');
-      if (mainElement) {
-        // Trigger a repaint by briefly changing a property
-        mainElement.classList.add('theme-refresh');
-        setTimeout(() => mainElement.classList.remove('theme-refresh'), 10);
-      }
-    }, 50);
+    // Re-enable transitions after a small delay
+    setTimeout(() => {
+      document.documentElement.style.transition = '';
+      document.body.style.transition = '';
+    }, 100);
     
     // Force all SVGs to inherit color in dark mode
     if (effectiveTheme === 'dark') {
@@ -70,13 +70,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         existingStyle.remove();
       }
     }
-    
-    return () => clearTimeout(timeoutId);
   }, [theme]);
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background text-foreground transition-colors duration-300">
-      {/* Background decorative elements */}
+    <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
+      {/* Background decorative elements - with immediate visibility */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-background"></div>
+      </div>
       <BackgroundDecorations />
       
       {/* Header navigation */}
