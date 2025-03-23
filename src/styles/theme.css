@@ -1,14 +1,2 @@
 
-/* Base theme with modern design approach */
-#root {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0;
-  text-align: center;
-  min-height: 100vh;
-  height: 100%;
-  position: relative;
-  overflow-y: auto;
-  background-color: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
-}
+/* Base theme - Factory Reset */

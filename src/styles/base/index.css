@@ -1,5 +1,5 @@
 
-/* Base layer styles organized into modular imports */
+/* Base index - Factory Reset */
 @import './reset.css';
 @import './layout.css';
 @import './typography.css';
