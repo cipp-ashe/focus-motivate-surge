@@ -4,6 +4,7 @@
  * This file is the central hub for all debugging utilities
  */
 import { logger } from '@/utils/logManager';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 // Environment detection (updated during build process)
 export const IS_DEV = process.env.NODE_ENV === 'development';
@@ -348,8 +349,6 @@ export function withErrorBoundary(Component: React.ComponentType<any>, options?:
 }
 
 // Create a debug context provider
-import React, { createContext, useContext, useState, useCallback } from 'react';
-
 interface DebugContextType {
   isDebugMode: boolean;
   toggleDebugMode: () => void;
@@ -363,9 +362,12 @@ interface DebugContextType {
 
 const DebugContext = createContext<DebugContextType | null>(null);
 
-export const DebugProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DebugProvider: React.FC<{ children: React.ReactNode; enabled?: boolean }> = ({ 
+  children, 
+  enabled = true 
+}) => {
   const [isDebugMode, setIsDebugMode] = useState(
-    IS_DEV || localStorage.getItem('debug_mode') === 'true'
+    enabled && (IS_DEV || localStorage.getItem('debug_mode') === 'true')
   );
   
   const toggleDebugMode = useCallback(() => {
