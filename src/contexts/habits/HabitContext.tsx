@@ -1,10 +1,9 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { type HabitState, type HabitContextActions, type HabitContext as HabitContextType, initialState } from './types';
-import { habitReducer } from './reducer';
+import { habitReducer } from './habitReducer';
 import { eventManager } from '@/lib/events/EventManager';
 import { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
-import { StorageKeys } from '@/utils/constants';
 import { logger } from '@/utils/logManager';
 import { EventType } from '@/types/events';
 
@@ -18,9 +17,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Load templates from localStorage on init
   useEffect(() => {
     try {
-      const storedTemplates = localStorage.getItem(StorageKeys.HABIT_TEMPLATES);
-      const storedProgress = localStorage.getItem(StorageKeys.HABIT_PROGRESS);
-      const storedCustomTemplates = localStorage.getItem(StorageKeys.CUSTOM_TEMPLATES);
+      const storedTemplates = localStorage.getItem('habit-templates');
+      const storedProgress = localStorage.getItem('habit-progress');
+      const storedCustomTemplates = localStorage.getItem('custom-templates');
 
       if (storedTemplates) {
         dispatch({ type: 'INITIALIZE_TEMPLATES', payload: JSON.parse(storedTemplates) });
@@ -43,7 +42,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Actions
   const addTemplate = (template: ActiveTemplate) => {
     dispatch({ type: 'ADD_TEMPLATE', payload: template });
-    eventManager.emit('habit:template-add' as EventType, template);
+    eventManager.emit('habit:template-add', template);
   };
 
   const updateTemplate = (templateId: string, updates: Partial<ActiveTemplate>) => {
@@ -51,12 +50,12 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       type: 'UPDATE_TEMPLATE', 
       payload: { templateId, updates } 
     });
-    eventManager.emit('habit:template-update' as EventType, { templateId, ...updates });
+    eventManager.emit('habit:template-update', { templateId, ...updates });
   };
 
   const removeTemplate = (templateId: string) => {
     dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
-    eventManager.emit('habit:template-remove' as EventType, { templateId });
+    eventManager.emit('habit:template-remove', { templateId });
   };
 
   const updateTemplateOrder = (templates: ActiveTemplate[]) => {
@@ -68,7 +67,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       type: 'UPDATE_TEMPLATE_DAYS', 
       payload: { templateId, days } 
     });
-    eventManager.emit('habit:template-days-update' as EventType, { templateId, days });
+    eventManager.emit('habit:template-days-update', { templateId, days });
   };
 
   const addCustomTemplate = (template: any) => {
@@ -94,9 +93,9 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Save to localStorage on state change
   useEffect(() => {
     if (state.isLoaded) {
-      localStorage.setItem(StorageKeys.HABIT_TEMPLATES, JSON.stringify(state.templates));
-      localStorage.setItem(StorageKeys.HABIT_PROGRESS, JSON.stringify(state.progress));
-      localStorage.setItem(StorageKeys.CUSTOM_TEMPLATES, JSON.stringify(state.customTemplates));
+      localStorage.setItem('habit-templates', JSON.stringify(state.templates));
+      localStorage.setItem('habit-progress', JSON.stringify(state.progress));
+      localStorage.setItem('custom-templates', JSON.stringify(state.customTemplates));
     }
   }, [state.templates, state.progress, state.customTemplates, state.isLoaded]);
 

@@ -47,7 +47,6 @@ export const useTimerCountdown = ({
     // Handle timer tick - update time left
     const unsubTick = eventManager.on('timer:tick', (payload) => {
       if (payload.taskName === taskName || payload.taskName === 'timer') {
-        // FIX: Only use timeLeft, not remaining (removed backward compatibility)
         if (payload.timeLeft !== undefined) {
           logger.debug('TimerCountdown', `Timer tick for ${taskName}: ${payload.timeLeft}s remaining`);
           timeLeftRef.current = payload.timeLeft;

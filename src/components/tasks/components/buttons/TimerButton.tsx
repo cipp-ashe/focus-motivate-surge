@@ -25,11 +25,14 @@ export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) 
     
     // After a small delay to ensure navigation happens
     setTimeout(() => {
+      // Ensure duration is always provided (default to 25 minutes = 1500 seconds)
+      const duration = typeof task.duration === 'number' ? task.duration : 1500;
+      
       // Emit the timer event with task details using standardized payload
       eventManager.emit('timer:set-task', {
         id: task.id,
         name: task.name,
-        duration: task.duration || 1500, // Ensure duration is always provided
+        duration: duration, // Ensure duration is always provided
         completed: task.completed || false,
         createdAt: task.createdAt || new Date().toISOString()
       });
