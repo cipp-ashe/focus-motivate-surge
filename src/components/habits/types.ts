@@ -1,12 +1,17 @@
 
-export type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+// Define day of week as specific string literals only
+export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday' | 
+                         'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 
+// Define consistent arrays for full and short day names
 export const DAYS_OF_WEEK: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 export const SHORT_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+// Default active days for habits (weekdays)
 export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
-export type MetricType = 'timer' | 'counter' | 'boolean' | 'journal' | string;
+// Define specific metric types instead of allowing any string
+export type MetricType = 'timer' | 'counter' | 'boolean' | 'journal';
 
 export interface HabitMetrics {
   type: MetricType;
@@ -16,12 +21,16 @@ export interface HabitMetrics {
   unit?: string;
 }
 
+// More specific category types
+export type HabitCategory = 'Wellness' | 'Work' | 'Personal' | 'Learning' | 'Custom';
+export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
+
 export interface HabitDetail {
   id: string;
   name: string;
   description?: string;
-  category?: 'Wellness' | 'Work' | 'Personal' | 'Learning' | 'Custom' | string;
-  timePreference?: 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
+  category?: HabitCategory | string;
+  timePreference?: TimePreference;
   metrics?: HabitMetrics;
   insights?: string[];
   tips?: string[];
@@ -59,6 +68,7 @@ export interface ActiveTemplate {
 export interface NewTemplate {
   name: string;
   description: string;
+  category?: string;
   defaultHabits: HabitDetail[];
 }
 
@@ -84,13 +94,15 @@ export interface HabitProgress {
   habitId: string;
   date: string;
   completed: boolean;
-  value?: number;
+  value?: number | boolean;
   notes?: string;
+  streak?: number;
 }
 
 export interface HabitProgressResult {
   value: number | boolean;
   streak: number;
+  completed?: boolean;
 }
 
 // Helper function to create an empty habit

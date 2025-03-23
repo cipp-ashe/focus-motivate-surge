@@ -6,7 +6,9 @@ export type EventType = string;
 export type AuthEventType = 
   | 'auth:state-change'
   | 'auth:sign-in'
-  | 'auth:sign-out';
+  | 'auth:sign-out'
+  | 'auth:signed-out'
+  | 'auth:logout';
 
 // Timer events
 export type TimerEventType = 
@@ -17,7 +19,15 @@ export type TimerEventType =
   | 'timer:complete'
   | 'timer:add-time'
   | 'timer:reset'
-  | 'timer:update';
+  | 'timer:update'
+  | 'timer:tick'
+  | 'timer:init'
+  | 'timer:expand'
+  | 'timer:collapse'
+  | 'timer:close'
+  | 'timer:set-task'
+  | 'timer:task-set'
+  | 'timer:metrics-update';
 
 // Task events
 export type TaskEventType = 
@@ -27,14 +37,21 @@ export type TaskEventType =
   | 'task:complete'
   | 'task:select'
   | 'task:dismiss'
-  | 'tasks:reload';
+  | 'tasks:reload'
+  | 'task:reload';
 
 // Note events
 export type NoteEventType = 
   | 'note:create'
   | 'note:update'
   | 'note:delete'
-  | 'note:select';
+  | 'note:select'
+  | 'note:view'
+  | 'note:deleted'
+  | 'note:format'
+  | 'note:format-complete'
+  | 'note:create-from-habit'
+  | 'note:create-from-voice';
 
 // Habit events
 export type HabitEventType = 
@@ -50,14 +67,39 @@ export type HabitEventType =
   | 'habit:template-order-update'
   | 'habit:custom-template-create'
   | 'habit:custom-template-delete'
-  | 'habits:check-pending';
+  | 'habits:check-pending'
+  | 'habit:schedule'
+  | 'habit:dismissed'
+  | 'habit:task-deleted'
+  | 'habit:template-add'
+  | 'journal:open';
 
 // Voice note events
 export type VoiceNoteEventType =
   | 'voicenote:create'
   | 'voicenote:update'
   | 'voicenote:delete'
-  | 'voicenote:select';
+  | 'voicenote:select'
+  | 'voice-note:created'
+  | 'voice-note:deleted';
+
+// Tag-related events
+export type TagEventType =
+  | 'tag:link'
+  | 'tag:unlink'
+  | 'tags:force-update';
+
+// Relationship events
+export type RelationshipEventType =
+  | 'relationship:create'
+  | 'relationship:delete'
+  | 'relationship:update'
+  | 'relationship:batch-update';
+
+// Miscellaneous events
+export type MiscEventType =
+  | 'app:initialized'
+  | 'quote:link-task';
 
 // All event types combined
 export type AllEventTypes = 
@@ -66,9 +108,28 @@ export type AllEventTypes =
   | TaskEventType 
   | NoteEventType 
   | HabitEventType
-  | VoiceNoteEventType;
+  | VoiceNoteEventType
+  | TagEventType
+  | RelationshipEventType
+  | MiscEventType;
 
 // Generic event payload type
 export interface EventPayload {
   [key: string]: any;
+}
+
+// Type definition for event handlers
+export type EventHandler<T = any> = (payload: T) => void;
+
+// Map of event types to their payload types
+export interface EventPayloads {
+  [key: string]: any;
+  'habit:schedule': {
+    habitId: string;
+    templateId: string;
+    name: string;
+    duration: number;
+    date: string;
+    metricType?: string;
+  };
 }
