@@ -3,7 +3,6 @@ import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { eventManager } from "@/lib/events/EventManager";
 import { TIMER_CONSTANTS } from "@/types/timer/constants";
-import { EventType } from "@/types/events";
 
 interface UseTimerAddTimeProps {
   addTime: (minutes: number) => void;

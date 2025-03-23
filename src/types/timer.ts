@@ -1,11 +1,14 @@
 
 import { TimerStateMetrics } from './metrics';
+import { Quote, SoundOption } from './timer/models';
+import { TimerExpandedViewRef } from './timer/views';
 
 export interface TimerProps {
   duration: number;
   taskName: string;
+  taskId?: string;
   onComplete?: (metrics: TimerStateMetrics) => void;
-  onAddTime?: (seconds: number) => void;
+  onAddTime?: (minutes: number) => void;
   onDurationChange?: (minutes: number) => void;
   favorites?: Quote[];
   setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
@@ -22,21 +25,14 @@ export interface TimerState {
   lastPauseTimestamp: Date | null;
   pausedTimeTotal: number;
   extensionTimeTotal: number;
+  metrics?: TimerStateMetrics;
+  showCompletion?: boolean;
+  completionCelebrated?: boolean;
 }
 
-export interface TimerExpandedViewRef {
-  notesRef: React.RefObject<HTMLTextAreaElement>;
-  handleSave: () => void;
-}
-
-export interface Quote {
-  id: string;
-  text: string;
-  author: string;
-  isFavorite: boolean;
-}
-
-export type SoundOption = 'bell' | 'chime' | 'gong' | 'notification' | 'success' | 'none';
+// Re-export key types for backwards compatibility
+export type { Quote, SoundOption } from './timer/models';
+export type { TimerExpandedViewRef } from './timer/views';
 
 export interface TimerControlsProps {
   isRunning: boolean;
@@ -48,7 +44,13 @@ export interface TimerControlsProps {
   onStop: () => void;
   onReset: () => void;
   onAddTime: (minutes: number) => void;
+  onToggle?: () => void;
+  onComplete?: () => Promise<void>;
   disabled?: boolean;
+  showAddTime?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  metrics?: TimerStateMetrics;
+  pauseTimeLeft?: number | null;
 }
 
 export interface TimerCircleProps {

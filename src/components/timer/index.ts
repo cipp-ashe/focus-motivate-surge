@@ -2,9 +2,9 @@
 // Re-export all timer components
 export { Timer } from './Timer';
 export { TimerControls } from './controls/TimerControls';
-export { TimerCircle } from './components/TimerCircle';
-export { MinutesInput } from '../minutes/MinutesInput';
-export { SoundSelector } from '../SoundSelector';
+export { TimerCircle } from './TimerCircle';
+export { MinutesInput } from '@/components/minutes/MinutesInput';
+export { SoundSelector } from '@/components/SoundSelector';
 
 // Re-export timer views
 export { TimerCompactView } from './views/TimerCompactView';

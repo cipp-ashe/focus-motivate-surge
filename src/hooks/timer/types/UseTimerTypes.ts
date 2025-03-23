@@ -1,11 +1,33 @@
 
-import { TimerState, TimerAction } from '@/types/timer';
 import { TimerStateMetrics } from '@/types/metrics';
 
 export interface UseTimerOptions {
   initialMinutes?: number;
   onTimeUp?: () => void;
 }
+
+export interface TimerState {
+  timeLeft: number;
+  isRunning: boolean;
+  isPaused: boolean;
+  showCompletion: boolean;
+  completionCelebrated: boolean;
+  metrics: TimerStateMetrics;
+}
+
+export type TimerAction =
+  | { type: 'INIT'; payload: { duration: number } }
+  | { type: 'START' }
+  | { type: 'PAUSE' }
+  | { type: 'RESET' }
+  | { type: 'COMPLETE' }
+  | { type: 'CELEBRATE' }
+  | { type: 'UPDATE_METRICS'; payload: Partial<TimerStateMetrics> }
+  | { type: 'DECREMENT_TIME' }
+  | { type: 'SET_START_TIME'; payload: Date }
+  | { type: 'SET_LAST_PAUSE_TIMESTAMP'; payload: Date }
+  | { type: 'SET_EXTENSION_TIME'; payload: number }
+  | { type: 'EXTEND'; payload: number };
 
 export interface UseTimerReturn {
   state: TimerState;
@@ -102,5 +124,5 @@ export interface UseTimerHandlersReturn {
 
 export interface UseTimerViewReturn {
   getTimerCircleProps: () => any;
-  getTimerControlsProps: (size?: 'normal' | 'large') => any;
+  getTimerControlsProps: (size?: 'sm' | 'md' | 'lg') => any;
 }

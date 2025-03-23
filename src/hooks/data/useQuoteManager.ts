@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { quotes } from '@/data/quotes';
-import { Quote, QuoteCategory } from '@/types/timer';
+import { Quote, QuoteCategory } from '@/types/timer/models';
 
 export const useQuoteManager = () => {
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
@@ -18,7 +18,11 @@ export const useQuoteManager = () => {
   // Get a random quote, optionally filtered by category
   const getRandomQuote = useCallback((category?: QuoteCategory) => {
     const filteredQuotes = category
-      ? quotes.filter(quote => quote.category.includes(category))
+      ? quotes.filter(quote => 
+          quote.category && 
+          (Array.isArray(quote.category) 
+            ? quote.category.includes(category)
+            : quote.category === category))
       : quotes;
     
     if (filteredQuotes.length === 0) return null;
