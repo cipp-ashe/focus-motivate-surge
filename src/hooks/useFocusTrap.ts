@@ -5,21 +5,35 @@ interface FocusTrapOptions {
   autoFocus?: boolean;
   returnFocusOnUnmount?: boolean;
   preventScroll?: boolean;
-  disableOutline?: boolean; // New option to disable outline
+  disableOutline?: boolean;
+  enabled?: boolean;
 }
 
 export const useFocusTrap = (options: FocusTrapOptions = {}) => {
   const {
-    autoFocus = false, // Default to false to prevent auto focusing
-    returnFocusOnUnmount = false, // Default to false to prevent focus return
+    autoFocus = false,
+    returnFocusOnUnmount = false,
     preventScroll = true,
-    disableOutline = true // Default to true to disable outline
+    disableOutline = true,
+    enabled = true
   } = options;
   
   const containerRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
+  // Add a method to get focusable elements for testing
+  const getFocusableElements = () => {
+    if (!containerRef.current) return [];
+    return Array.from(
+      containerRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+      )
+    );
+  };
+
   useEffect(() => {
+    if (!enabled || !containerRef.current) return;
+
     // Save the currently focused element to restore later if needed
     if (returnFocusOnUnmount) {
       previousFocusRef.current = document.activeElement as HTMLElement;
@@ -48,7 +62,9 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     };
     
     // Apply styles immediately
-    applyNoOutlineStyles();
+    if (disableOutline) {
+      applyNoOutlineStyles();
+    }
     
     // Add global no-outline styles
     if (disableOutline) {
@@ -68,25 +84,28 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     }
     
     // Add mutation observer to apply styles to dynamically added elements
-    const observer = new MutationObserver(applyNoOutlineStyles);
-    observer.observe(container, { childList: true, subtree: true });
+    let observer: MutationObserver | null = null;
+    if (disableOutline) {
+      observer = new MutationObserver(applyNoOutlineStyles);
+      observer.observe(container, { childList: true, subtree: true });
+    }
     
     // Basic focus handling if needed
     if (autoFocus) {
-      const focusableElements = [...container.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )];
+      const focusableElements = getFocusableElements();
       
       if (focusableElements.length) {
         focusableElements[0].focus({ preventScroll });
-        focusableElements[0].style.outline = 'none';
-        focusableElements[0].style.boxShadow = 'none';
+        if (disableOutline) {
+          focusableElements[0].style.outline = 'none';
+          focusableElements[0].style.boxShadow = 'none';
+        }
       }
     }
     
     // Simplified tab handler that just disables outlines
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
+      if (e.key === 'Tab' && disableOutline) {
         setTimeout(() => {
           if (document.activeElement instanceof HTMLElement) {
             document.activeElement.style.outline = 'none';
@@ -100,14 +119,21 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      observer.disconnect();
+      if (observer) observer.disconnect();
       
       // Return focus if configured
       if (returnFocusOnUnmount && previousFocusRef.current) {
         previousFocusRef.current.focus({ preventScroll });
       }
     };
-  }, [autoFocus, returnFocusOnUnmount, preventScroll, disableOutline]);
+  }, [autoFocus, returnFocusOnUnmount, preventScroll, disableOutline, enabled]);
   
-  return containerRef;
+  // For testing purposes, expose the ref and the getFocusableElements method
+  const refWithMethods = Object.assign(containerRef, {
+    getFocusableElements
+  });
+  
+  return refWithMethods;
 };
+
+export default useFocusTrap;
