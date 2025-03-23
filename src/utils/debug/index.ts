@@ -64,6 +64,7 @@ export const DEBUG_CONFIG = {
   defaultModules: ['app', 'ui', 'data'] as DebugModule[],
   captureConsoleErrors: true,
   captureGlobalErrors: true,
+  TRACE_DATA_FLOW: IS_DEV,
 };
 
 // Debug store for event logging
@@ -211,6 +212,25 @@ export function trackState(
       prevValue,
       changed: prevValue !== undefined
     }
+  });
+}
+
+/**
+ * Utility to trace data flow
+ */
+export function traceData(
+  module: DebugModule,
+  component: string,
+  message: string,
+  data?: any
+): void {
+  debugStore.addEvent({
+    type: 'data-flow',
+    module,
+    component,
+    message,
+    timestamp: Date.now(),
+    data
   });
 }
 
