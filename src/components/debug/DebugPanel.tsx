@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Bug } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -11,15 +10,17 @@ import OverviewTab from './tabs/OverviewTab';
 import EventsListTab from './tabs/EventsListTab';
 import useDebugPanel from './hooks/useDebugPanel';
 
+interface DebugPanelProps {
+  onClose: () => void;
+}
+
 /**
  * Debug panel component for displaying debug information and controls
  */
-const DebugPanel: React.FC = () => {
+const DebugPanel: React.FC<DebugPanelProps> = ({ onClose }) => {
   const {
     isDebugMode,
     toggleDebugMode,
-    isOpen,
-    setIsOpen,
     activeEvents,
     activeTab,
     setActiveTab,
@@ -32,20 +33,6 @@ const DebugPanel: React.FC = () => {
     return null;
   }
 
-  // If panel is closed, just show the toggle button
-  if (!isOpen) {
-    return (
-      <Button
-        variant="outline"
-        size="icon"
-        className="fixed bottom-4 right-4 z-50 h-10 w-10 rounded-full shadow-lg bg-background border-primary/20 dark:bg-background/80 dark:border-primary/10"
-        onClick={() => setIsOpen(true)}
-      >
-        <Bug className="h-5 w-5" />
-      </Button>
-    );
-  }
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-border/30 dark:border-border/20 shadow-lg">
@@ -53,7 +40,7 @@ const DebugPanel: React.FC = () => {
           <DebugPanelHeader
             isDebugMode={isDebugMode}
             toggleDebugMode={toggleDebugMode}
-            onClose={() => setIsOpen(false)}
+            onClose={onClose}
             totalErrors={totalErrors}
             totalWarnings={totalWarnings}
           />
