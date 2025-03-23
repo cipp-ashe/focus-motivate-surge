@@ -34,20 +34,40 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = window.document.documentElement
-
+    
+    // Remove both theme classes
     root.classList.remove("light", "dark")
 
+    // Store the theme preference
+    localStorage.setItem(storageKey, theme)
+
+    // Apply system preference or the selected theme
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light"
-
       root.classList.add(systemTheme)
-      return
+    } else {
+      root.classList.add(theme)
     }
+  }, [theme, storageKey])
 
-    root.classList.add(theme)
+  // Add a listener for system theme changes
+  useEffect(() => {
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+      
+      const handleChange = () => {
+        const root = window.document.documentElement
+        root.classList.remove("light", "dark")
+        root.classList.add(
+          mediaQuery.matches ? "dark" : "light"
+        )
+      }
+      
+      mediaQuery.addEventListener("change", handleChange)
+      return () => mediaQuery.removeEventListener("change", handleChange)
+    }
   }, [theme])
 
   const value = {

@@ -99,7 +99,9 @@ const Settings = () => {
                 {isDark ? 'Dark Mode' : 'Light Mode'}
               </Label>
               <p className="text-sm text-muted-foreground">
-                Switch between light and dark themes
+                {isDark 
+                  ? 'Using dark theme with reduced brightness for better night viewing' 
+                  : 'Using light theme for better daylight visibility'}
               </p>
             </div>
             <Switch
