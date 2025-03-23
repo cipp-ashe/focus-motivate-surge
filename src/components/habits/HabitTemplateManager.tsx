@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { ActiveTemplate, HabitTemplate, NewTemplate } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
+import ConfigurationDialog from './ConfigurationDialog';
 import { predefinedTemplates } from './data/templates';
 
 export interface HabitTemplateManagerProps {
@@ -24,6 +25,8 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
   const [activeTemplateIds, setActiveTemplateIds] = useState<string[]>([]);
+  const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
 
   // Load custom templates
   useEffect(() => {
@@ -107,6 +110,29 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
     }
   }, []);
 
+  const handleConfigureTemplate = useCallback((template: ActiveTemplate) => {
+    setConfiguringTemplate(template);
+    setConfigDialogOpen(true);
+  }, []);
+
+  const handleSaveConfiguration = useCallback(() => {
+    if (!configuringTemplate) return;
+    
+    onConfigureTemplate(configuringTemplate);
+    setConfigDialogOpen(false);
+    setConfiguringTemplate(null);
+    toast.success('Template configuration updated');
+  }, [configuringTemplate, onConfigureTemplate]);
+
+  const handleUpdateTemplateDays = useCallback((days: string[]) => {
+    if (!configuringTemplate) return;
+    
+    setConfiguringTemplate(prev => {
+      if (!prev) return null;
+      return { ...prev, activeDays: days as any[] };
+    });
+  }, [configuringTemplate]);
+
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
@@ -135,6 +161,23 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
         onDeleteCustomTemplate={handleDeleteCustomTemplate}
         onClose={handleCloseTemplateSheet}
       />
+      
+      {configuringTemplate && (
+        <ConfigurationDialog
+          open={configDialogOpen}
+          onClose={() => {
+            setConfigDialogOpen(false);
+            setConfiguringTemplate(null);
+          }}
+          habits={configuringTemplate.habits}
+          activeDays={configuringTemplate.activeDays}
+          onUpdateDays={handleUpdateTemplateDays}
+          onSave={handleSaveConfiguration}
+          onSaveAsTemplate={() => {
+            toast.info("Save as template feature coming soon");
+          }}
+        />
+      )}
     </div>
   );
 };

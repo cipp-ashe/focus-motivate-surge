@@ -67,3 +67,42 @@ export const formatTimeHuman = (seconds: number): string => {
   
   return `${hours}h ${remainingMinutes}m`;
 };
+
+/**
+ * Standardize metric values across timer and task metrics
+ */
+export const standardizeMetrics = (metrics: any) => {
+  return {
+    // Ensure all numeric values are numbers
+    actualDuration: typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 
+                    typeof metrics.actualTime === 'number' ? metrics.actualTime : 0,
+    pauseCount: typeof metrics.pauseCount === 'number' ? metrics.pauseCount : 0,
+    pausedTime: typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0,
+    extensionTime: typeof metrics.extensionTime === 'number' ? metrics.extensionTime : 0,
+    expectedTime: typeof metrics.expectedTime === 'number' ? metrics.expectedTime : 
+                 typeof metrics.duration === 'number' ? metrics.duration : 0,
+    
+    // Ensure date fields are properly formatted
+    startTime: metrics.startTime || new Date().toISOString(),
+    endTime: metrics.endTime || new Date().toISOString(),
+    completionDate: metrics.completionDate || new Date().toISOString(),
+    
+    // Calculate efficiency metrics if missing
+    netEffectiveTime: metrics.netEffectiveTime || (
+      (typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 0) -
+      (typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0)
+    ),
+    efficiencyRatio: metrics.efficiencyRatio || calculateEfficiencyRatio(
+      typeof metrics.expectedTime === 'number' ? metrics.expectedTime : 
+      typeof metrics.duration === 'number' ? metrics.duration : 0,
+      typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 
+      typeof metrics.actualTime === 'number' ? metrics.actualTime : 0
+    ),
+    completionStatus: metrics.completionStatus || determineCompletionStatus(
+      typeof metrics.expectedTime === 'number' ? metrics.expectedTime : 
+      typeof metrics.duration === 'number' ? metrics.duration : 0,
+      typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 
+      typeof metrics.actualTime === 'number' ? metrics.actualTime : 0
+    )
+  };
+};

@@ -69,7 +69,9 @@ export interface NewTemplate {
   name: string;
   description: string;
   category?: string;
-  defaultHabits: HabitDetail[];
+  habits?: HabitDetail[];
+  defaultHabits?: HabitDetail[];
+  days?: DayOfWeek[];
   defaultDays?: DayOfWeek[];
 }
 
@@ -94,6 +96,7 @@ export interface TabSectionProps {
   onSelectTemplate: (template: HabitTemplate) => void;
   onDeleteCustomTemplate: (templateId: string) => void;
   onCreateTemplate: (template: NewTemplate) => void;
+  allTemplates?: HabitTemplate[];
 }
 
 // Modified HabitProgress to accept the simpler format used in the code

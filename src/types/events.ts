@@ -15,6 +15,7 @@ export type EventType =
   | 'task:force-update'
   | 'task:reload'
   | 'task:dismiss'
+  | 'task:task-set'
   
   // Habit events
   | 'habit:complete'
@@ -49,6 +50,7 @@ export type EventType =
   | 'timer:collapse'
   | 'timer:update-metrics'
   | 'timer:init'
+  | 'timer:task-set'
   
   // UI events
   | 'ui:theme-change'
@@ -78,8 +80,9 @@ export interface EventPayloads {
   'task:complete': { taskId: string; metrics?: TaskMetrics };
   'task:select': string | null;
   'task:force-update': undefined;
-  'task:reload': undefined;
+  'task:reload': { taskId?: string } | undefined;
   'task:dismiss': { taskId: string; habitId?: string; date: string };
+  'task:task-set': { taskId: string; taskName: string } | Task;
   
   // Habit events
   'habit:complete': { habitId: string; date: string; value?: number | boolean; completed?: boolean };
@@ -133,6 +136,7 @@ export interface EventPayloads {
   'timer:collapse': { taskName: string; saveNotes: boolean };
   'timer:update-metrics': { taskId: string; metrics: any; taskName?: string };
   'timer:init': { taskName: string; duration: number };
+  'timer:task-set': { id: string; name: string; duration: number; taskId?: string };
   
   // UI events
   'ui:theme-change': { theme: 'light' | 'dark' | 'system' };
@@ -168,3 +172,7 @@ export type EventCallback<T extends EventType> = (payload: EventPayload<T>) => v
  * Function returned by event subscription methods to unsubscribe
  */
 export type EventUnsubscribe = () => void;
+
+// Legacy type aliases for backward compatibility
+export { EventType as AllEventTypes };
+export type EventHandler<T = any> = EventCallback<any>;

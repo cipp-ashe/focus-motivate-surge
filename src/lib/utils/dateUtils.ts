@@ -55,3 +55,65 @@ export const isToday = (dateString: string): boolean => {
          date.getMonth() === today.getMonth() &&
          date.getFullYear() === today.getFullYear();
 };
+
+/**
+ * Convert date to a specific timezone
+ */
+export const toZonedTime = (date: Date, timeZone: string): Date => {
+  // Simple implementation that doesn't actually convert timezone
+  // For proper timezone support, use date-fns-tz or similar library
+  return new Date(date);
+};
+
+/**
+ * Convert date from a specific timezone to UTC
+ */
+export const fromZonedTime = (zonedDate: Date, timeZone: string): Date => {
+  // Simple implementation that doesn't actually convert timezone
+  // For proper timezone support, use date-fns-tz or similar library
+  return new Date(zonedDate);
+};
+
+/**
+ * Format a date with a timezone
+ */
+export const formatInTimeZone = (date: Date, timeZone: string, formatStr: string): string => {
+  // Simple implementation that doesn't actually use timezone
+  // For proper timezone support, use date-fns-tz or similar library
+  const localDate = new Date(date);
+  return localDate.toLocaleDateString();
+};
+
+/**
+ * Convert ISO string to Date object
+ */
+export const parseISO = (dateString: string): Date => {
+  return new Date(dateString);
+};
+
+/**
+ * Add days to a date
+ */
+export const addDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
+/**
+ * Get start of day (midnight)
+ */
+export const startOfDay = (date: Date): Date => {
+  const result = new Date(date);
+  result.setHours(0, 0, 0, 0);
+  return result;
+};
+
+/**
+ * Get end of day (23:59:59.999)
+ */
+export const endOfDay = (date: Date): Date => {
+  const result = new Date(date);
+  result.setHours(23, 59, 59, 999);
+  return result;
+};
