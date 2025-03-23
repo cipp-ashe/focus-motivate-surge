@@ -13,6 +13,7 @@ export type {
   NoteEventType,
   VoiceNoteEventType,
   RelationshipEventType,
+  JournalEventType,
   EventUnsubscribe
 } from './events/index';
 

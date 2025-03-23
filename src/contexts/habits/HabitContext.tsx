@@ -1,144 +1,171 @@
-import React, { createContext, useContext, useState, useReducer, useCallback } from 'react';
-import { HabitState, HabitContext, initialState } from './types';
-import { habitReducer } from './habitReducer';
-import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import type { HabitContext as HabitContextType, HabitState, initialState } from './types';
 import { eventManager } from '@/lib/events/EventManager';
-import { toast } from 'sonner';
-import { DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
+import { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
+import { EventType } from '@/types/events';
 
-/**
- * Context for managing habit-related state
- */
-const HabitContext = createContext<HabitContext | undefined>(undefined);
+// Create the context
+const HabitContext = createContext<HabitContextType>({} as HabitContextType);
 
-/**
- * Provider component for the habit context
- */
-export const HabitProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, dispatch] = useReducer(habitReducer, initialState);
-  const [isLoaded, setIsLoaded] = useState(false);
+// Create a reducer function
+const habitReducer = (state: HabitState, action: any): HabitState => {
+  switch (action.type) {
+    case 'SET_TEMPLATES':
+      return { ...state, templates: action.payload, isLoaded: true };
+    case 'ADD_TEMPLATE':
+      return { ...state, templates: [...state.templates, action.payload] };
+    case 'UPDATE_TEMPLATE':
+      return {
+        ...state,
+        templates: state.templates.map(template =>
+          template.templateId === action.payload.templateId
+            ? { ...template, ...action.payload.updates }
+            : template
+        )
+      };
+    case 'REMOVE_TEMPLATE':
+      return {
+        ...state,
+        templates: state.templates.filter(
+          template => template.templateId !== action.payload
+        )
+      };
+    case 'UPDATE_TEMPLATE_ORDER':
+      return { ...state, templates: action.payload };
+    default:
+      return state;
+  }
+};
 
-  /**
-   * Add a new habit template
-   */
-  const addTemplate = useCallback((template: Omit<ActiveTemplate, 'templateId'>) => {
-    const newTemplate: ActiveTemplate = {
-      templateId: `template-${Date.now()}`,
-      habits: template.habits || [],
-      activeDays: template.activeDays || DEFAULT_ACTIVE_DAYS,
-      customized: template.customized,
-      name: template.name,
-      description: template.description,
-      relationships: template.relationships
+// Create the provider component
+export const HabitProvider: React.FC<{
+  children: React.ReactNode;
+  initialState?: HabitState;
+}> = ({ children, initialState: initialStateProps }) => {
+  const [state, dispatch] = useReducer(habitReducer, initialStateProps || initialState);
+
+  // Event handlers for template actions
+  useEffect(() => {
+    const handleTemplateAdd = (template: ActiveTemplate) => {
+      dispatch({ type: 'ADD_TEMPLATE', payload: template });
     };
-    dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
-    eventManager.emit('habit:template-add', newTemplate);
-    toast.success(`Added ${newTemplate.name || 'template'}`);
-    return newTemplate.templateId;
+
+    const handleTemplateUpdate = (template: ActiveTemplate) => {
+      dispatch({
+        type: 'UPDATE_TEMPLATE',
+        payload: { templateId: template.templateId, updates: template },
+      });
+    };
+
+    const handleTemplateRemove = (data: { templateId: string }) => {
+      dispatch({ type: 'REMOVE_TEMPLATE', payload: data.templateId });
+    };
+
+    const handleTemplateOrderUpdate = (templates: ActiveTemplate[]) => {
+      dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
+    };
+
+    const handleTemplateDaysUpdate = (template: ActiveTemplate) => {
+      dispatch({
+        type: 'UPDATE_TEMPLATE',
+        payload: {
+          templateId: template.templateId,
+          updates: { activeDays: template.activeDays, customized: true },
+        },
+      });
+    };
+
+    // Subscribe to template events
+    const unsubscribeAdd = eventManager.on('habit:template-add' as EventType, handleTemplateAdd);
+    const unsubscribeUpdate = eventManager.on('habit:template-update' as EventType, handleTemplateUpdate);
+    const unsubscribeRemove = eventManager.on('habit:template-remove' as EventType, handleTemplateRemove);
+    const unsubscribeOrder = eventManager.on('habit:template-order-update' as EventType, handleTemplateOrderUpdate);
+    const unsubscribeDays = eventManager.on('habit:template-days-update' as EventType, handleTemplateDaysUpdate);
+
+    return () => {
+      unsubscribeAdd();
+      unsubscribeUpdate();
+      unsubscribeRemove();
+      unsubscribeOrder();
+      unsubscribeDays();
+    };
   }, []);
 
-  /**
-   * Update an existing habit template
-   */
-  const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
-    dispatch({ type: 'UPDATE_TEMPLATE', payload: { templateId, updates } });
-    eventManager.emit('habit:template-update', { templateId, updates });
-    toast.success(`Updated template ${templateId}`);
-  }, []);
-
-  /**
-   * Remove a habit template
-   */
-  const removeTemplate = useCallback((templateId: string) => {
-    dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
-    eventManager.emit('habit:template-remove', { templateId });
-    toast.success(`Removed template ${templateId}`);
-  }, []);
-
-  /**
-   * Update the order of habit templates
-   */
-  const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
-    dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
-    eventManager.emit('habit:template-order-update', templates);
-  }, []);
-
-  /**
-   * Update the active days for a habit template
-   */
-  const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
-    dispatch({ type: 'UPDATE_TEMPLATE_DAYS', payload: { templateId, days } });
-    eventManager.emit('habit:template-days-update', { templateId, days });
-    toast.success(`Updated days for template ${templateId}`);
-  }, []);
-
-  /**
-   * Add a new custom habit template
-   */
-  const addCustomTemplate = useCallback((template: Omit<HabitTemplate, 'id'>) => {
-    // Implementation for adding a custom template
-  }, []);
-
-  /**
-   * Remove a custom habit template
-   */
-  const removeCustomTemplate = useCallback((templateId: string) => {
-    // Implementation for removing a custom template
-  }, []);
-
-  /**
-   * Reorder templates
-   */
-  const reorderTemplates = useCallback((templates: ActiveTemplate[]) => {
-    dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
-  }, []);
-
-  /**
-   * Find a template by its ID
-   */
-  const findTemplateById = useCallback((templateId: string) => {
-    const templates = state.templates;
-    const templateIndex = templates.findIndex(t => t.templateId === templateId);
-    if (templateIndex === -1) return undefined;
-    return templates[templateIndex];
-  }, [state.templates]);
-
-  /**
-   * Reload templates
-   */
-  const reloadTemplates = useCallback(() => {
-    // Implementation for reloading templates
-  }, []);
-
-  // Provide the context value
-  const contextValue: HabitContext = {
-    ...state,
-    addTemplate,
-    updateTemplate,
-    removeTemplate,
-    updateTemplateOrder,
-    updateTemplateDays,
-    addCustomTemplate,
-    removeCustomTemplate,
-    reorderTemplates,
-    findTemplateById,
-    reloadTemplates,
+  // Actions for the context
+  const actions = {
+    addTemplate: (template: Omit<ActiveTemplate, 'templateId'>) => {
+      const newTemplate: ActiveTemplate = {
+        ...template,
+        templateId: template.templateId || `template-${Date.now()}`,
+        habits: template.habits || [],
+        activeDays: template.activeDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      };
+      dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+      return newTemplate.templateId;
+    },
+    updateTemplate: (templateId: string, updates: Partial<ActiveTemplate>) => {
+      dispatch({ 
+        type: 'UPDATE_TEMPLATE', 
+        payload: { templateId, updates } 
+      });
+      return templateId;
+    },
+    removeTemplate: (templateId: string) => {
+      dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+    },
+    updateTemplateOrder: (templates: ActiveTemplate[]) => {
+      dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
+    },
+    updateTemplateDays: (templateId: string, days: DayOfWeek[]) => {
+      dispatch({
+        type: 'UPDATE_TEMPLATE',
+        payload: { templateId, updates: { activeDays: days, customized: true } },
+      });
+      return templateId;
+    },
+    addCustomTemplate: () => {},
+    removeCustomTemplate: () => {},
+    reorderTemplates: () => {},
+    findTemplateById: (templateId: string) => {
+      return state.templates.find(t => t.templateId === templateId);
+    },
+    reloadTemplates: () => {}
   };
 
   return (
-    <HabitContext.Provider value={contextValue}>
+    <HabitContext.Provider value={{ ...state, ...actions }}>
       {children}
     </HabitContext.Provider>
   );
 };
 
-/**
- * Hook for using the habit context
- */
-export const useHabitContext = () => {
+// Create custom hooks for accessing the context
+export const useHabitContext = () => useContext(HabitContext);
+export const useHabitState = () => {
   const context = useContext(HabitContext);
-  if (!context) {
-    throw new Error('useHabitContext must be used within a HabitProvider');
-  }
-  return context;
+  return {
+    templates: context.templates || [],
+    todaysHabits: context.todaysHabits || [],
+    progress: context.progress || {},
+    customTemplates: context.customTemplates || [],
+    isLoaded: context.isLoaded || false
+  };
 };
+
+export const useHabitActions = () => {
+  const context = useContext(HabitContext);
+  return {
+    addTemplate: context.addTemplate,
+    updateTemplate: context.updateTemplate,
+    removeTemplate: context.removeTemplate,
+    updateTemplateOrder: context.updateTemplateOrder,
+    updateTemplateDays: context.updateTemplateDays,
+    addCustomTemplate: context.addCustomTemplate,
+    removeCustomTemplate: context.removeCustomTemplate,
+    reorderTemplates: context.reorderTemplates,
+    findTemplateById: context.findTemplateById,
+    reloadTemplates: context.reloadTemplates
+  };
+};
+
+export default HabitContext;

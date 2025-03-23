@@ -9,6 +9,20 @@ export const formatTimeDisplay = (seconds: number): string => {
 };
 
 /**
+ * Format a time in seconds for display with optional custom format
+ */
+export const formatTime = (seconds: number, showMinutesOnly: boolean = false): string => {
+  if (showMinutesOnly) {
+    const minutes = Math.ceil(seconds / 60);
+    return `${minutes}m`;
+  }
+  
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+/**
  * Format a percentage value for display
  */
 export const formatPercentage = (value: number): string => {

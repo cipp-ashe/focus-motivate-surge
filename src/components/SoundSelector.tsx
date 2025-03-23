@@ -4,16 +4,10 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Loader2, Volume2 } from "lucide-react";
-import { SoundOption } from "@/types/timer/components";
+import { SoundOption } from "@/types/timer/models";
 import { SOUND_OPTIONS } from "@/types/timer/constants";
+import { SoundSelectorProps } from "@/types/timer/components";
 import { cn } from "@/lib/utils";
-
-export interface SoundSelectorProps {
-  selectedSound: SoundOption;
-  onSoundChange: (sound: SoundOption) => void;
-  onTestSound: () => void;
-  isLoadingAudio?: boolean;
-}
 
 export const SoundSelector = memo(({
   selectedSound,

@@ -1,11 +1,13 @@
-import { useCallback, useContext } from 'react';
-import { HabitContext } from './HabitContext';
+
+import { useCallback } from 'react';
+import { useHabitContext } from './HabitContext';
 import { ActiveTemplate, DayOfWeek, DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
+import { EventType } from '@/types/events';
 
 export const useHabitActions = () => {
-  const { templates } = useContext(HabitContext);
+  const context = useHabitContext();
 
   const addTemplate = useCallback((template: Omit<ActiveTemplate, 'templateId'>) => {
     const newTemplate: ActiveTemplate = {
@@ -15,10 +17,9 @@ export const useHabitActions = () => {
       customized: template.customized,
       name: template.name,
       description: template.description,
-      relationships: template.relationships
     };
     
-    eventManager.emit('habit:template-add', newTemplate);
+    eventManager.emit('habit:template-add' as EventType, newTemplate);
     
     if (!newTemplate.suppressToast) {
       toast.success(`Added ${newTemplate.name || 'template'}`);
@@ -28,7 +29,7 @@ export const useHabitActions = () => {
   }, []);
 
   const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
-    const templateToUpdate = templates.find(t => t.templateId === templateId);
+    const templateToUpdate = context.templates.find(t => t.templateId === templateId);
     if (!templateToUpdate) {
       console.error(`Template ${templateId} not found for updating`);
       return;
@@ -41,26 +42,26 @@ export const useHabitActions = () => {
       activeDays: updates.activeDays !== undefined ? updates.activeDays : templateToUpdate.activeDays,
     };
     
-    eventManager.emit('habit:template-update', updatedTemplate);
+    eventManager.emit('habit:template-update' as EventType, updatedTemplate);
     
     if (!updatedTemplate.suppressToast) {
       toast.success(`Updated ${updatedTemplate.name || 'template'}`);
     }
     
     return templateId;
-  }, [templates]);
+  }, [context.templates]);
 
   const removeTemplate = useCallback((templateId: string) => {
-    eventManager.emit('habit:template-remove', { templateId });
+    eventManager.emit('habit:template-remove' as EventType, { templateId });
     toast.success(`Removed template`);
   }, []);
 
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
-    eventManager.emit('habit:template-order-update', templates);
+    eventManager.emit('habit:template-order-update' as EventType, templates);
   }, []);
 
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
-    const templateToUpdate = templates.find(t => t.templateId === templateId);
+    const templateToUpdate = context.templates.find(t => t.templateId === templateId);
     if (!templateToUpdate) {
       console.error(`Template ${templateId} not found for updating days`);
       return;
@@ -72,10 +73,10 @@ export const useHabitActions = () => {
       habits: templateToUpdate.habits, // Ensure habits is provided
     };
     
-    eventManager.emit('habit:template-days-update', updatedTemplate);
+    eventManager.emit('habit:template-days-update' as EventType, updatedTemplate);
     
     return templateId;
-  }, [templates]);
+  }, [context.templates]);
 
   return {
     addTemplate,

@@ -7,7 +7,8 @@ export type TaskEventType =
   | 'task:complete' 
   | 'task:select'
   | 'task:reload'
-  | 'task:dismiss';
+  | 'task:dismiss'
+  | 'task:force-update';
 
 export type HabitEventType = 
   | 'habit:dismissed' 
@@ -15,14 +16,36 @@ export type HabitEventType =
   | 'habit:progress-update'
   | 'habit:template-order-update'
   | 'habit:select'
+  | 'habit:template-add'
+  | 'habit:template-update'
+  | 'habit:template-delete'
+  | 'habit:template-remove'
+  | 'habit:template-days-update'
+  | 'habit:check-pending'
   | 'habits:verify-tasks'
-  | 'habits:check-pending';
+  | 'habits:check-pending'
+  | 'habit:complete'
+  | 'habit:schedule'
+  | 'habit:journal-complete'
+  | 'habit:journal-deleted'
+  | 'habit:custom-template-create'
+  | 'habit:custom-template-delete';
 
 export type TimerEventType = 
   | 'timer:tick' 
   | 'timer:complete'
   | 'timer:close'
-  | 'timer:metrics-update';
+  | 'timer:metrics-update'
+  | 'timer:start'
+  | 'timer:pause'
+  | 'timer:resume'
+  | 'timer:reset'
+  | 'timer:init'
+  | 'timer:set-task'
+  | 'timer:task-set'
+  | 'timer:expand'
+  | 'timer:collapse'
+  | 'timer:update-metrics';
 
 export type UIEventType = 
   | 'ui:sidebar-toggle' 
@@ -55,6 +78,9 @@ export type RelationshipEventType =
   | 'tag:unlink'
   | 'quote:link-task';
 
+export type JournalEventType =
+  | 'journal:open';
+
 // Combined type of all event types
 export type EventType = 
   | TaskEventType 
@@ -64,7 +90,8 @@ export type EventType =
   | SystemEventType 
   | NoteEventType
   | VoiceNoteEventType
-  | RelationshipEventType;
+  | RelationshipEventType
+  | JournalEventType;
 
 // Define payload types for each event
 export interface EventPayloadMap {
@@ -76,6 +103,7 @@ export interface EventPayloadMap {
   'task:select': string | null;
   'task:reload': undefined;
   'task:dismiss': { taskId: string; habitId?: string; date?: string };
+  'task:force-update': any;
 
   // Habit events
   'habit:dismissed': { habitId: string; date: string };
@@ -83,14 +111,36 @@ export interface EventPayloadMap {
   'habit:progress-update': any;
   'habit:template-order-update': any;
   'habit:select': any;
+  'habit:template-add': any;
+  'habit:template-update': any;
+  'habit:template-delete': { templateId: string; isOriginatingAction?: boolean };
+  'habit:template-remove': { templateId: string };
+  'habit:template-days-update': any;
+  'habit:check-pending': any;
   'habits:verify-tasks': any;
   'habits:check-pending': any;
+  'habit:complete': { habitId: string; date: string; value: boolean | number; completed: boolean };
+  'habit:schedule': { habitId: string; templateId: string; name: string; duration: number; date: string; metricType?: string };
+  'habit:journal-complete': any;
+  'habit:journal-deleted': any;
+  'habit:custom-template-create': any;
+  'habit:custom-template-delete': any;
 
   // Timer events
-  'timer:tick': { timeLeft: number; taskName: string };
+  'timer:tick': { timeLeft: number; taskName: string; remaining?: number };
   'timer:complete': any;
   'timer:close': any;
   'timer:metrics-update': any;
+  'timer:start': { taskId: string; taskName: string; duration: number };
+  'timer:pause': { taskId: string; taskName: string; timeLeft: number };
+  'timer:resume': { taskId: string; taskName: string; timeLeft: number };
+  'timer:reset': { taskId: string; taskName: string; duration: number };
+  'timer:init': { taskName: string; duration: number };
+  'timer:set-task': any;
+  'timer:task-set': any;
+  'timer:expand': { taskName: string };
+  'timer:collapse': { taskName: string; saveNotes: boolean };
+  'timer:update-metrics': { taskId: string; metrics: any; taskName?: string };
 
   // UI events
   'ui:sidebar-toggle': boolean;
@@ -122,6 +172,9 @@ export interface EventPayloadMap {
   'tag:link': any;
   'tag:unlink': any;
   'quote:link-task': any;
+
+  // Journal events
+  'journal:open': any;
 }
 
 // Helper type to extract the payload type for a specific event
