@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -42,6 +41,7 @@ export const useTimerPauseResume = ({
     
     // Emit pause event with correct payload structure
     eventManager.emit('timer:pause', {
+      taskId: metrics.taskId || 'unknown',
       taskName,
       timeLeft
     });
@@ -79,6 +79,7 @@ export const useTimerPauseResume = ({
     
     // Emit resume event with correct payload structure
     eventManager.emit('timer:resume', {
+      taskId: metrics.taskId || 'unknown',
       taskName,
       timeLeft
     });

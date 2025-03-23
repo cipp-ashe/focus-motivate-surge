@@ -1,6 +1,6 @@
 
 import { eventManager } from './EventManager';
-import { EventType, EventHandler, EventPayloads } from '@/types/events';
+import { EventType, EventCallback } from '@/types/events';
 
 /**
  * Registry for managing and prioritizing event handlers
@@ -14,7 +14,7 @@ export class EventHandlerRegistry {
    */
   register<T extends EventType>(
     eventType: T, 
-    handler: EventHandler<EventPayloads[T]>, 
+    handler: EventCallback<T>, 
     priority: number = 0
   ): () => void {
     if (!this.registry.has(eventType)) {
@@ -28,7 +28,7 @@ export class EventHandlerRegistry {
     
     // Add the handler to the registry
     const handlers = this.registry.get(eventType)!;
-    handlers.push({ handler, priority });
+    handlers.push({ handler: handler as Function, priority });
     
     // Sort handlers by priority (highest first)
     handlers.sort((a, b) => b.priority - a.priority);
@@ -61,7 +61,7 @@ export class EventHandlerRegistry {
   /**
    * Handle an event by calling all registered handlers in priority order
    */
-  private handleEvent<T extends EventType>(eventType: T, payload: EventPayloads[T]): void {
+  private handleEvent<T extends EventType>(eventType: T, payload: any): void {
     if (!this.registry.has(eventType)) return;
     
     const handlers = this.registry.get(eventType)!;

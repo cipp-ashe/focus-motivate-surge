@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -23,6 +22,7 @@ export const useTimerReset = ({
     
     // Emit reset event
     eventManager.emit('timer:reset', {
+      taskId: metrics.taskId || 'unknown',
       taskName,
       duration: metrics.expectedTime
     });

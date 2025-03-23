@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Timer } from './Timer';
 import { EmptyTimerState } from './EmptyTimerState';
@@ -88,19 +87,19 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
     window.addEventListener('timer:set-task', handleSetTask as EventListener);
     
     // Also listen with event manager
-    const unsubscribe = eventManager.on('timer:set-task', (task) => {
-      console.log('TimerSection: Received timer:set-task from eventManager', task);
-      if (task && task.id) {
+    const unsubscribe = eventManager.on('timer:set-task', (payload) => {
+      console.log('TimerSection: Received timer:set-task from eventManager', payload);
+      if (payload && typeof payload === 'object' && 'id' in payload) {
         // Create a valid Task object
-        const taskObject: Task = {
-          id: task.id,
-          name: task.name,
-          duration: task.duration || 1500,
+        const task: Task = {
+          id: payload.id,
+          name: payload.name,
+          duration: payload.duration || 1500,
           completed: false,
           createdAt: new Date().toISOString()
         };
         
-        selectTask(taskObject);
+        selectTask(task);
       }
     });
     

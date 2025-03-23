@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -39,6 +38,7 @@ export const useTimerToggle = ({
       
       // Emit pause event with current time left (fixed payload structure)
       eventManager.emit('timer:pause', { 
+        taskId: metrics.taskId || 'unknown',
         taskName, 
         timeLeft
       });
@@ -59,6 +59,7 @@ export const useTimerToggle = ({
         });
         
         eventManager.emit('timer:resume', { 
+          taskId: metrics.taskId || 'unknown',
           taskName, 
           timeLeft
         });
@@ -73,6 +74,7 @@ export const useTimerToggle = ({
         });
         
         eventManager.emit('timer:start', { 
+          taskId: metrics.taskId || 'unknown',
           taskName, 
           duration: timeLeft
         });

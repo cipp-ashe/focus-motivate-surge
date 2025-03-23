@@ -1,82 +1,79 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Lightbulb } from "lucide-react";
+import { Lightbulb, InfoIcon, Clock } from 'lucide-react';
+import { InsightsTipsProps } from '@/types/habit';
 
-interface InsightsTipsProps {
-  insights?: string[] | { type: string; text: string }[];
-  tips?: string[] | { type: string; text: string; description?: string }[];
-}
+const InsightsTips: React.FC<InsightsTipsProps> = ({ habit }) => {
+  if (!habit) return null;
 
-const InsightsTips: React.FC<InsightsTipsProps> = ({ insights = [], tips = [] }) => {
-  // Helper to convert strings to objects if needed
-  const formatItems = (items: any[]) => {
-    return items.map((item, index) => {
-      if (typeof item === 'string') {
-        return { type: 'default', text: item };
-      }
-      return item;
-    });
+  const renderInsight = (insight: string | { type: string, description: string }, index: number) => {
+    // Handle both string and object formats
+    const content = typeof insight === 'string' 
+      ? insight 
+      : insight.description;
+      
+    const type = typeof insight === 'string' 
+      ? 'general'
+      : insight.type;
+      
+    return (
+      <div key={`insight-${index}`} className="flex items-start mb-2">
+        <div className="mr-2 pt-0.5">
+          <InfoIcon className="h-4 w-4 text-blue-500" />
+        </div>
+        <div className="text-sm">{content}</div>
+      </div>
+    );
   };
 
-  const formattedInsights = formatItems(insights);
-  const formattedTips = formatItems(tips);
+  const renderTip = (tip: string | { type: string, description: string }, index: number) => {
+    // Handle both string and object formats
+    const content = typeof tip === 'string' 
+      ? tip 
+      : tip.description;
+      
+    return (
+      <div key={`tip-${index}`} className="flex items-start mb-2">
+        <div className="mr-2 pt-0.5">
+          <Lightbulb className="h-4 w-4 text-amber-500" />
+        </div>
+        <div className="text-sm">{content}</div>
+      </div>
+    );
+  };
+
+  // Render time preference
+  const renderTimePreference = () => {
+    if (!habit.timePreference) return null;
+    
+    const label = typeof habit.timePreference === 'string'
+      ? habit.timePreference
+      : habit.timePreference.description;
+    
+    return (
+      <div className="flex items-center mb-3 text-xs text-muted-foreground">
+        <Clock className="h-3 w-3 mr-1" />
+        <span>Best time: {label}</span>
+      </div>
+    );
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-      {formattedInsights.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center">
-              <Lightbulb className="w-4 h-4 mr-2" />
-              Insights
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Knowledge to deepen your understanding
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              {formattedInsights.map((insight, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="mr-2 mt-0.5 text-blue-500">•</span>
-                  <span>{insight.text}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      {renderTimePreference()}
+      
+      {habit.insights && habit.insights.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">Insights</h4>
+          {habit.insights.map(renderInsight)}
+        </div>
       )}
-
-      {formattedTips.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center">
-              <AlertCircle className="w-4 h-4 mr-2" />
-              Tips
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Practical advice for better results
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              {formattedTips.map((tip, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="mr-2 mt-0.5 text-emerald-500">•</span>
-                  <div>
-                    <div>{tip.text}</div>
-                    {tip.description && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {tip.description}
-                      </div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+      
+      {habit.tips && habit.tips.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium mb-2">Tips</h4>
+          {habit.tips.map(renderTip)}
+        </div>
       )}
     </div>
   );

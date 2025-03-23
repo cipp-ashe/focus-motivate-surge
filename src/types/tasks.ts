@@ -1,5 +1,19 @@
 // Task type enum for type checking
-export type TaskType = 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote' | 'focus';
+export type TaskType = 
+  | 'todo' 
+  | 'timer' 
+  | 'focus' 
+  | 'habit'
+  | 'journal'
+  | 'exercise'
+  | 'reading'
+  | 'meditation'
+  | 'check-in'
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'yearly'
+  | 'reminder';
 
 // Task status to track progress
 export type TaskStatus = 'pending' | 'started' | 'in-progress' | 'delayed' | 'completed' | 'dismissed';

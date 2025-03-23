@@ -1,7 +1,7 @@
 
 import { useEffect, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayloads, EventCallback } from '@/types/events';
+import { EventType, EventCallback } from '@/types/events';
 
 /**
  * Custom hook to subscribe to events with automatic cleanup
@@ -22,7 +22,7 @@ export function useEvent<T extends EventType>(
   
   // Subscribe to the event and clean up on unmount
   useEffect(() => {
-    const wrappedCallback = (payload: EventPayloads[T]) => {
+    const wrappedCallback: EventCallback<T> = (payload) => {
       callbackRef.current(payload);
     };
     

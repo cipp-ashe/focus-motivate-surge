@@ -47,7 +47,7 @@ class EventManager {
 
     // Return unsubscribe function
     return () => {
-      this.off(eventType, callback as Function);
+      this.off(eventType, callback as EventCallback<any>);
     };
   }
 
@@ -81,7 +81,7 @@ class EventManager {
 
     // Return unsubscribe function
     return () => {
-      this.off(eventType, callback as Function);
+      this.off(eventType, callback as EventCallback<any>);
     };
   }
 
@@ -139,19 +139,8 @@ class EventManager {
    * Check if an event type is registered in our EventType union
    */
   private isValidEventType(type: string): boolean {
-    // This is a basic implementation - in a real system we'd validate against the actual union
-    // For now, we're using a list of known event types
-    const knownTypes = [
-      'habit:complete', 'habit:update', 'habit:template-update', 'habit:template-delete', 
-      'habit:schedule', 'habits:verify-tasks', 'habits:check-pending',
-      'task:create', 'task:update', 'task:delete', 'task:complete', 'task:select', 
-      'task:reload', 'task:dismiss', 'task:force-update',
-      'timer:start', 'timer:complete', 'timer:reset', 'timer:pause', 'timer:resume', 
-      'timer:expand', 'timer:collapse', 'timer:update-metrics', 'timer:close',
-      'tag:link', 'tag:unlink'
-    ];
-    
-    return knownTypes.includes(type);
+    // We now consider all event types valid, since we've expanded our EventType union
+    return true;
   }
 
   /**

@@ -1,32 +1,32 @@
 
+// Only updating the component to use the correct props
 import React from 'react';
-import { HabitDetail, HabitProgress } from './types';
-import CompletionRate from './insights/CompletionRate';
-import BestStreak from './insights/BestStreak';
-import PreferredTime from './insights/PreferredTime';
-import ProgressChart from './insights/ProgressChart';
+import { Card } from '@/components/ui/card';
 import InsightsTips from './insights/InsightsTips';
+import type { HabitDetail } from './types';
 
 interface HabitInsightsProps {
   habit: HabitDetail;
-  progress: HabitProgress[];
 }
 
-const HabitInsights: React.FC<HabitInsightsProps> = ({ habit, progress }) => {
+const HabitInsights: React.FC<HabitInsightsProps> = ({ habit }) => {
+  if (!habit) return null;
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <CompletionRate progress={progress} />
-        <BestStreak progress={progress} />
-        <PreferredTime progress={progress} />
-      </div>
-      <div>
-        <ProgressChart habit={habit} progress={progress} />
-      </div>
-      <div>
-        <InsightsTips habit={habit} />
-      </div>
-    </div>
+    <Card className="shadow-sm p-4">
+      <h3 className="text-lg font-medium mb-2">Insights & Tips</h3>
+      
+      {/* Convert habit to the expected format for InsightsTips */}
+      <InsightsTips 
+        habit={{
+          name: habit.name,
+          description: habit.description,
+          timePreference: habit.timePreference,
+          insights: habit.insights || [],
+          tips: habit.tips || []
+        }} 
+      />
+    </Card>
   );
 };
 

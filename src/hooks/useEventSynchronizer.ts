@@ -1,12 +1,12 @@
 
 import { useEffect, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayloads } from '@/types/events';
+import { EventType } from '@/types/events';
 
 interface EventMapping<T extends EventType, U extends EventType> {
   source: T;
   target: U;
-  transform?: (payload: EventPayloads[T]) => EventPayloads[U];
+  transform?: (payload: any) => any;
 }
 
 /**
@@ -24,10 +24,10 @@ export function useEventSynchronizer<T extends EventType, U extends EventType>(
   
   useEffect(() => {
     const unsubscribers = mappingsRef.current.map(mapping => {
-      return eventManager.on(mapping.source, (payload: EventPayloads[T]) => {
+      return eventManager.on(mapping.source, (payload: any) => {
         const transformedPayload = mapping.transform ? 
           mapping.transform(payload) : 
-          payload as unknown as EventPayloads[U];
+          payload as any;
           
         eventManager.emit(mapping.target, transformedPayload);
       });

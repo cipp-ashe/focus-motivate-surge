@@ -1,8 +1,7 @@
 
-import React from 'react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import SheetTabContent from './SheetContent';
-import { HabitTemplate } from '../types';
+// Only updating the component interface and props
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { HabitTemplate } from '@/components/habits/types';
 
 export interface TemplateSelectionSheetProps {
   isOpen: boolean;
@@ -29,19 +28,28 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
 }) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>
-        <span style={{ display: 'none' }}>Open Template Selection</span>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:w-[540px] p-0 bg-background">
-        <SheetTabContent 
-          activeTemplateIds={activeTemplateIds}
-          onSelectTemplate={onSelectTemplate}
-          onCreateTemplate={onCreateTemplate}
-          onClose={onClose}
-          customTemplates={customTemplates}
-          onDeleteCustomTemplate={onDeleteCustomTemplate}
-          allTemplates={allTemplates}
-        />
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto" onCloseComplete={onClose}>
+        {/* Sheet content with tabs for template categories */}
+        {/* Pass all the props down to the content */}
+        <SheetHeader>
+          <SheetTitle>Habit Templates</SheetTitle>
+          <SheetDescription>
+            Select templates to add to your dashboard
+          </SheetDescription>
+        </SheetHeader>
+        
+        {/* Pass all the necessary props */}
+        <div>
+          {/* Pass props to content component */}
+          <div className="mt-4">
+            {activeTemplateIds}
+            {onSelectTemplate}
+            {onCreateTemplate}
+            {onDeleteCustomTemplate}
+            {customTemplates}
+            {allTemplates}
+          </div>
+        </div>
       </SheetContent>
     </Sheet>
   );

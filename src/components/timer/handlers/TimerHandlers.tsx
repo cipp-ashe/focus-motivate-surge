@@ -1,4 +1,3 @@
-
 import { TimerStateMetrics } from "@/types/metrics";
 import { useTimerToggle } from "./toggle/useTimerToggle";
 import { useTimerAddTime } from "./time/useTimerAddTime";
@@ -104,8 +103,9 @@ export const useTimerHandlers = ({
       // Show completion UI
       setShowCompletion(true);
       
-      // Emit completion event
+      // Emit completion event with taskId from metrics if available
       eventManager.emit('timer:complete', { 
+        taskId: metrics.taskId || 'unknown',
         taskName, 
         metrics 
       });
