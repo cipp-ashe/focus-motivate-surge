@@ -3,7 +3,6 @@ import { memo } from "react";
 import { TimerCircle } from "../timer/TimerCircle";
 import { TimerCircleProps } from "@/types/timer";
 import { cn } from "@/lib/utils";
-import { Maximize2 } from "lucide-react";
 
 interface TimerDisplayProps {
   circleProps: Omit<TimerCircleProps, "size">;
@@ -30,7 +29,7 @@ export const TimerDisplay = memo(({
     tabIndex: 0,
     "aria-label": isRunning ? "Expand timer view" : "Timer display",
     "aria-live": isRunning ? "polite" : "off" as "polite" | "off",
-    "aria-atomic": "true" as any, // Fix the type error by using 'any' for now
+    "aria-atomic": "true" as any,
     onKeyDown: (e: React.KeyboardEvent) => {
       if ((e.key === 'Enter' || e.key === ' ') && isRunning && onClick) {
         e.preventDefault();
@@ -42,8 +41,8 @@ export const TimerDisplay = memo(({
   return (
     <div 
       className={cn(
-        "relative group rounded-full bg-card shadow-xl transition-all duration-300 border border-primary/10",
-        isRunning ? "cursor-pointer hover:shadow-2xl" : "",
+        "relative group rounded-full bg-card",
+        isRunning ? "cursor-pointer" : "",
         size === "large" ? "p-8" : "p-6"
       )}
       onClick={handleClick}
@@ -57,10 +56,15 @@ export const TimerDisplay = memo(({
       
       {isRunning && onClick && (
         <div 
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute top-2 right-2"
           aria-hidden="true"
         >
-          <Maximize2 className="h-5 w-5 text-primary" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+          </svg>
         </div>
       )}
     </div>

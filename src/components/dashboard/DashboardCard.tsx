@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { cn } from '@/lib/utils';
@@ -32,13 +31,13 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
   return (
     <Link 
       to={to} 
-      className="block h-full group" 
+      className="block h-full" 
       aria-label={`Navigate to ${title}`}
     >
       <Card className={cn(
-        "transition-all duration-300 h-full",
-        "bg-card border-border hover:border-primary/20",
-        "overflow-hidden flex flex-col dashboard-card-hover"
+        "h-full",
+        "bg-card",
+        "overflow-hidden flex flex-col"
       )}>
         <CardContent className={cn(
           "flex flex-col h-full",
@@ -48,7 +47,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
             <div 
               className={cn(
                 "rounded-xl p-2.5 flex-shrink-0 mr-3", 
-                "bg-background shadow-sm border border-border"
+                "bg-background"
               )}
               aria-hidden="true"
             >
@@ -69,7 +68,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           
           {metrics && metrics.length > 0 && (
             <div 
-              className="mt-auto pt-3 grid grid-cols-2 gap-2 text-sm border-t border-border"
+              className="mt-auto pt-3 grid grid-cols-2 gap-2 text-sm"
               aria-label={`${title} metrics`}
             >
               {metrics.map((metric, index) => {
@@ -88,8 +87,22 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
             </div>
           )}
           
-          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ArrowRight className="h-5 w-5 text-primary arrow-slide-right" aria-hidden="true" />
+          <div className="absolute bottom-3 right-3">
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="text-primary"
+              aria-hidden="true"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
           </div>
         </CardContent>
       </Card>

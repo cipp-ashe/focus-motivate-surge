@@ -1,11 +1,7 @@
 
-import { memo, useEffect, useRef } from "react";
+import { memo } from "react";
 import { TimerCircleProps } from "../../types/timer";
 import { cn } from "@/lib/utils";
-
-const prefersReducedMotion = typeof window !== 'undefined'
-  ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  : false;
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
@@ -22,72 +18,7 @@ export const TimerCircle = memo(({
   a11yProps,
   onClick
 }: TimerCircleProps) => {
-  const progressRef = useRef<SVGCircleElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-  const prevTimeLeftRef = useRef(timeLeft);
-  const isMountedRef = useRef(true);
-
-  // Smoothly animate the progress circle and time text
-  useEffect(() => {
-    if (!progressRef.current || !textRef.current || !isMountedRef.current) return;
-
-    if (prefersReducedMotion) {
-      progressRef.current.style.transition = 'none';
-      progressRef.current.style.strokeDashoffset = `${
-        circumference * ((minutes * 60 - timeLeft) / (minutes * 60))
-      }`;
-      textRef.current.textContent = formatTime(timeLeft);
-      return;
-    }
-
-    const startValue = prevTimeLeftRef.current;
-    const endValue = timeLeft;
-    const duration = 1000; // 1 second transition
-    const startTime = performance.now();
-
-    let animationFrameId: number;
-    
-    const animate = (currentTime: number) => {
-      if (!isMountedRef.current) return;
-
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Smooth easing function
-      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      
-      const currentTime1 = startValue - (startValue - endValue) * eased;
-      
-      if (progressRef.current) {
-        progressRef.current.style.strokeDashoffset = `${
-          circumference * ((minutes * 60 - currentTime1) / (minutes * 60))
-        }`;
-      }
-
-      if (textRef.current) {
-        textRef.current.textContent = formatTime(Math.round(currentTime1));
-      }
-
-      if (progress < 1 && isMountedRef.current) {
-        animationFrameId = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-    prevTimeLeftRef.current = timeLeft;
-
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, [timeLeft, minutes, circumference]);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  const dashOffset = circumference * ((minutes * 60 - timeLeft) / (minutes * 60));
 
   const sizeClasses = size === 'large' 
     ? 'w-64 h-64 sm:w-72 sm:h-72' 
@@ -104,21 +35,10 @@ export const TimerCircle = memo(({
       {...a11yProps}
     >
       <svg 
-        className={cn(
-          "timer-circle transform -rotate-90",
-          isRunning && "active"
-        )}
+        className="timer-circle transform -rotate-90"
         viewBox="0 0 100 100"
         aria-hidden="true"
       >
-        {/* Background gradient */}
-        <defs>
-          <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#9b87f5" />
-            <stop offset="100%" stopColor="#8b5cf6" />
-          </linearGradient>
-        </defs>
-        
         {/* Background circle */}
         <circle
           className="dark:text-slate-800 text-slate-200 stroke-current"
@@ -131,45 +51,33 @@ export const TimerCircle = memo(({
         
         {/* Progress circle */}
         <circle
-          ref={progressRef}
-          className={cn(
-            "transition-all duration-300",
-            isRunning ? "filter drop-shadow" : ""
-          )}
+          className="text-primary stroke-current"
           strokeWidth="5"
           fill="transparent"
           r="45"
           cx="50"
           cy="50"
           strokeLinecap="round"
-          stroke="url(#circleGradient)"
           strokeDasharray={circumference}
-          strokeDashoffset={circumference * ((minutes * 60 - timeLeft) / (minutes * 60))}
-          style={prefersReducedMotion ? { transition: 'none' } : undefined}
+          strokeDashoffset={dashOffset}
         />
       </svg>
       
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span 
-          ref={textRef}
           className={cn(
             "font-mono font-bold",
             size === 'large' ? 'text-5xl sm:text-6xl' : 'text-3xl sm:text-4xl',
             isRunning ? "text-foreground" : "text-foreground/90"
           )}
-          style={prefersReducedMotion ? { transition: 'none' } : undefined}
         >
           {formatTime(timeLeft)}
         </span>
         
-        {/* Add a subtle label */}
         <span className="text-xs text-muted-foreground mt-2 font-medium">
           {isRunning ? "FOCUS TIME" : "READY"}
         </span>
       </div>
-      
-      {/* Subtle circle decoration */}
-      <div className="absolute -inset-1 rounded-full border border-purple-200 dark:border-purple-800 -z-10" />
     </div>
   );
 });
