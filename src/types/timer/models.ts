@@ -10,3 +10,5 @@ export interface Quote {
   task?: string;
   timestamp?: string;
 }
+
+export type SoundOption = 'bell' | 'chime' | 'gong' | 'notification' | 'success' | 'none';

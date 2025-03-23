@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 export const TimerControls: React.FC<TimerControlsProps> = ({
   isRunning,
   isPaused,
+  isComplete,
   onToggle,
   onComplete,
   onAddTime,

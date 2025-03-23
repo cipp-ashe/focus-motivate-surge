@@ -7,16 +7,17 @@ export type {
   TimerCircleProps,
   TimerControlsProps,
   MinutesInputProps,
-  SoundOption,
   SoundSelectorProps,
-  TimerExpandedViewRef,
 } from './components';
 
+// Re-export view types
+export type { TimerExpandedViewRef } from './views';
+
 // Re-export constants
-export { TIMER_CONSTANTS, SOUND_OPTIONS } from './constants';
+export { TIMER_CONSTANTS } from './constants';
 
 // Re-export model types
-export type { QuoteCategory, Quote } from './models';
+export type { QuoteCategory, Quote, SoundOption } from './models';
 
 // Timer state and action types
 export interface TimerState {

@@ -6,13 +6,13 @@ import { EventType, EventCallback } from '@/types/events';
 /**
  * Hook to subscribe to events with automatic cleanup
  */
-export function useEvent<E extends string>(
+export function useEvent<E extends EventType>(
   eventType: E,
-  callback: EventCallback<E extends EventType ? E : never>
+  callback: EventCallback<E>
 ) {
   useEffect(() => {
-    // Cast eventType to EventType to satisfy TypeScript
-    const unsubscribe = eventManager.on(eventType as EventType, callback as any);
+    // Subscribe to the event
+    const unsubscribe = eventManager.on(eventType, callback);
     
     // Clean up subscription on unmount
     return () => {

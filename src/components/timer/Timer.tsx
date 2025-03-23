@@ -2,7 +2,7 @@
 import React from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
-import type { TimerProps } from "@/types/timer";
+import type { TimerProps } from "@/types/timer/components";
 import { TimerError } from "./TimerError";
 import { TimerContent } from "./TimerContent";
 import { useTimerInitialization } from "./hooks/useTimerInitialization";
@@ -19,7 +19,7 @@ export const Timer = ({
   onDurationChange,
   favorites = [],
   setFavorites = () => {}
-}: TimerProps & { taskId?: string }) => {
+}: TimerProps) => {
   logger.debug('Timer', 'Timer component rendering with:', {
     duration,
     taskName,

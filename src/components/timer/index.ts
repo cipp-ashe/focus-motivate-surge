@@ -30,21 +30,16 @@ export { useTimerReset } from './handlers/reset/useTimerReset';
 export { useTimerPauseResume } from './handlers/pause/useTimerPauseResume';
 export { useTimerClose } from './handlers/close/useTimerClose';
 
-// Type re-exports - these should come from the types file, not directly
-import { 
-  MinutesInputProps,
-  TimerA11yProps,
-  ButtonA11yProps,
-  SoundSelectorProps,
-  TimerControlsProps,
-  TimerCircleProps
-} from '@/types/timer/components';
-
+// Type re-exports from timer types
 export type {
   MinutesInputProps,
   TimerA11yProps,
   ButtonA11yProps,
   SoundSelectorProps,
   TimerControlsProps,
-  TimerCircleProps
-};
+  TimerCircleProps,
+  TimerProps
+} from '@/types/timer/components';
+
+export type { TimerExpandedViewRef } from '@/types/timer/views';
+export type { SoundOption, Quote } from '@/types/timer/models';

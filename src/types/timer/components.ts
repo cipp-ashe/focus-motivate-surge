@@ -1,5 +1,6 @@
 
 import { SoundOption, Quote } from './models';
+import { TimerStateMetrics } from '@/types/metrics';
 
 export interface MinutesInputProps {
   minutes: number;
@@ -41,21 +42,32 @@ export interface TimerCircleProps {
 export interface TimerControlsProps {
   isRunning: boolean;
   isPaused: boolean;
-  isComplete: boolean;
-  onStart: () => void;
-  onPause: () => void;
-  onResume: () => void;
-  onStop: () => void;
-  onReset: () => void;
-  onAddTime: (minutes: number) => void;
-  disabled?: boolean;
+  isComplete?: boolean;
+  onStart?: () => void;
+  onPause?: () => void;
+  onResume?: () => void;
+  onStop?: () => void;
+  onReset?: () => void;
+  onAddTime?: (minutes: number) => void;
   onToggle?: () => void;
   onComplete?: () => Promise<void>;
+  disabled?: boolean;
   showAddTime?: boolean;
   size?: 'sm' | 'md' | 'lg';
   toggleButtonA11yProps?: ButtonA11yProps;
   completeButtonA11yProps?: ButtonA11yProps;
   addTimeButtonA11yProps?: ButtonA11yProps;
-  metrics?: any;
+  metrics?: TimerStateMetrics;
   pauseTimeLeft?: number | null;
+}
+
+export interface TimerProps {
+  duration: number;
+  taskName: string;
+  taskId?: string;
+  onComplete?: (metrics: TimerStateMetrics) => void;
+  onAddTime?: (minutes: number) => void;
+  onDurationChange?: (minutes: number) => void;
+  favorites?: Quote[];
+  setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
 }

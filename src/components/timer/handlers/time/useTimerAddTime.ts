@@ -38,7 +38,7 @@ export const useTimerAddTime = ({
     const newTimeLeft = timeLeft + secondsToAdd;
     
     // Emit tick event with updated time left
-    eventManager.emit('timer:tick' as EventType, { 
+    eventManager.emit('timer:tick', { 
       timeLeft: newTimeLeft, 
       taskName,
       remaining: newTimeLeft  // Add remaining property for compatibility
