@@ -36,7 +36,7 @@ export const TaskLayout = ({ mainContent, asideContent }: TaskLayoutProps) => {
       <div className="task-layout-debug min-h-screen w-full py-2 px-2 bg-background text-foreground">
         <div className="space-y-4 w-full">
           {/* Mobile: Stack vertically with compact spacing */}
-          <div className="w-full glass-effect rounded-xl shadow-glass border-primary/10 transform transition-all duration-300 hover:shadow-primary/10 max-h-[40vh] overflow-hidden">
+          <div className="w-full glass-effect rounded-xl shadow-glass border-primary/10 dark:border-border/30 transform transition-all duration-300 hover:shadow-primary/10 max-h-[40vh] overflow-hidden">
             <div className="overflow-x-hidden w-full">
               {asideContent}
             </div>
@@ -52,7 +52,7 @@ export const TaskLayout = ({ mainContent, asideContent }: TaskLayoutProps) => {
   return (
     <div className="task-layout-debug min-h-screen w-full py-8 px-4 sm:px-6 bg-background text-foreground">
       <div className="max-w-5xl mx-auto space-y-8 w-full">
-        <div className="w-full glass-effect rounded-xl shadow-glass border-primary/10 transform transition-all duration-300 hover:shadow-primary/10 max-h-[50vh] overflow-hidden">
+        <div className="w-full glass-effect rounded-xl shadow-glass border-primary/10 dark:border-border/30 transform transition-all duration-300 hover:shadow-primary/10 max-h-[50vh] overflow-hidden">
           <div className="overflow-x-hidden w-full">
             {asideContent}
           </div>

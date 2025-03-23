@@ -34,43 +34,43 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
         return { 
           label: 'Pending', 
           icon: <Circle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-muted text-muted-foreground'
+          class: 'bg-muted text-muted-foreground dark:bg-muted/30'
         };
       case 'started':
         return { 
           label: 'Started', 
           icon: <Clock className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+          class: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 dark:bg-blue-500/20'
         };
       case 'in-progress':
         return { 
           label: 'In Progress', 
           icon: <Play className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' 
+          class: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20' 
         };
       case 'delayed':
         return { 
           label: 'Delayed', 
           icon: <AlertTriangle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' 
+          class: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 dark:bg-orange-500/20' 
         };
       case 'completed':
         return { 
           label: 'Completed', 
           icon: <CheckCircle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-green-500/10 text-green-600 dark:text-green-400' 
+          class: 'bg-green-500/10 text-green-600 dark:text-green-400 dark:bg-green-500/20' 
         };
       case 'dismissed':
         return { 
           label: 'Dismissed', 
           icon: <XCircle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-red-500/10 text-red-600 dark:text-red-400' 
+          class: 'bg-red-500/10 text-red-600 dark:text-red-400 dark:bg-red-500/20' 
         };
       default:
         return { 
           label: 'Pending', 
           icon: <Circle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-muted text-muted-foreground' 
+          class: 'bg-muted text-muted-foreground dark:bg-muted/30' 
         };
     }
   };
@@ -84,7 +84,7 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
           variant="outline"
           size="sm"
           className={cn(
-            "h-7 px-2 text-xs flex items-center gap-1",
+            "h-7 px-2 text-xs flex items-center gap-1 border-muted/50 dark:border-muted/30",
             currentStatus.class
           )}
           onClick={(e) => e.stopPropagation()}
@@ -96,7 +96,7 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-40"
+        className="w-40 dark:border-muted/30"
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuItem 
@@ -129,14 +129,14 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => onStatusChange('completed')}
-          className="text-xs text-green-600"
+          className="text-xs text-green-600 dark:text-green-400"
         >
           <CheckCircle className="h-3.5 w-3.5 mr-2" />
           Completed
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => onStatusChange('dismissed')}
-          className="text-xs text-red-600"
+          className="text-xs text-red-600 dark:text-red-400"
         >
           <XCircle className="h-3.5 w-3.5 mr-2" />
           Dismissed

@@ -69,8 +69,9 @@
 /* Cards and content areas in dark mode */
 .dark .card,
 .dark .bg-card {
-  @apply shadow-md border-border/30;
+  @apply shadow-md;
   background-color: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.3) !important;
 }
 
 /* Ensure dark mode applies to UI components */

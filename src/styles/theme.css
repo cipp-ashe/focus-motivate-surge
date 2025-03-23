@@ -255,3 +255,22 @@
 .task-focus-bg {
   @apply bg-[hsl(var(--focus-color)_/_0.1)];
 }
+
+/* Dark mode specific border fixes */
+.dark .border,
+.dark .card,
+.dark .border-card,
+.dark .border-muted,
+.dark .border-primary {
+  border-color: hsl(var(--border) / 0.3) !important;
+}
+
+.dark .interactive-card:hover,
+.dark .card-hover-effect:hover {
+  border-color: hsl(var(--border) / 0.5) !important;
+}
+
+.dark .glass-effect,
+.dark .glass-card {
+  border-color: var(--glass-border) !important;
+}
