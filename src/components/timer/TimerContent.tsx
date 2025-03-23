@@ -97,9 +97,9 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
   return (
     <>
       <CardHeader className="bg-card/70 border-b border-border/10 py-4">
-        <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
-          <TimerIcon className="h-5 w-5 text-purple-400" />
-          {isRunning ? "Timer Running" : "Timer"}
+        <CardTitle className="text-lg font-medium flex items-center gap-2">
+          <TimerIcon className="h-5 w-5 text-purple-500" />
+          {taskName || 'Focus Timer'}
         </CardTitle>
       </CardHeader>
       <TimerRenderer
@@ -116,14 +116,14 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
         testSound={testSound}
         isLoadingAudio={isLoadingAudio}
         updateMetrics={updateMetrics}
-        expandedViewRef={expandedViewRef as React.RefObject<any>}
+        expandedViewRef={expandedViewRef}
         handleCloseTimer={handleCloseTimer}
-        favorites={favorites}
-        setFavorites={setFavorites}
         showConfirmation={showConfirmation}
         setShowConfirmation={setShowConfirmation}
         handleAddTimeAndContinue={handleAddTimeAndContinue}
         handleComplete={handleComplete}
+        favorites={favorites}
+        setFavorites={setFavorites}
       />
     </>
   );

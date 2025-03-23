@@ -99,7 +99,15 @@ export const TimerView: React.FC<TimerViewProps> = ({
     
     // Use eventManager directly instead of eventBus
     eventManager.emit('task:select', task.id);
-    eventManager.emit('timer:set-task', task);
+    
+    // Ensure duration is always provided when emitting timer:set-task
+    eventManager.emit('timer:set-task', {
+      id: task.id,
+      name: task.name,
+      duration: typeof task.duration === 'number' ? task.duration : 1500, // Default to 1500 (25 min) if not set
+      completed: task.completed || false,
+      createdAt: task.createdAt || new Date().toISOString()
+    });
     
     // Also dispatch window event for backward compatibility
     window.dispatchEvent(new CustomEvent('timer:set-task', { detail: task }));

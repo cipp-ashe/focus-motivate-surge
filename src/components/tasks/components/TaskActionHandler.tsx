@@ -52,8 +52,14 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'timer':
-        // Create a proper Task object to pass to the timer
-        eventManager.emit('timer:set-task', task);
+        // Create a proper Task object to pass to the timer with required fields
+        eventManager.emit('timer:set-task', {
+          id: task.id,
+          name: task.name,
+          duration: typeof task.duration === 'number' ? task.duration : 1500, // Default to 25 min if not set
+          completed: task.completed || false,
+          createdAt: task.createdAt || new Date().toISOString()
+        });
         toast.info(`Timer set for task: ${task.name}`);
         break;
         
