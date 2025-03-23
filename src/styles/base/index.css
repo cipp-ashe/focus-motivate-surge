@@ -1,8 +1,4 @@
 
-/* Base index - Factory Reset */
-@import './reset.css';
+/* Base index - Minimal required imports */
 @import './layout.css';
 @import './typography.css';
-@import './interactive.css';
-@import './effects.css';
-@import './dark-mode.css';
