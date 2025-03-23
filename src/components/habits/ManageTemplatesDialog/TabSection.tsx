@@ -1,83 +1,216 @@
-
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CreateTemplateForm from './CreateTemplateForm';
-import CustomTemplates from './CustomTemplates';
-import AvailableTemplates from './AvailableTemplates';
-
-interface TabSectionProps {
-  defaultTab?: string;
-  onTabChange?: (tab: string) => void;
-  onTemplateCreate?: (templateName: string, habits: string[]) => void;
-  onTemplateDelete?: (templateId: string) => void;
-  onTemplateApply?: (templateId: string) => void;
-  userTemplates: {
-    id: string;
-    name: string;
-    habits: string[];
-    createdAt: string;
-  }[];
-  predefinedTemplates: {
-    id: string;
-    name: string;
-    description: string;
-    habits: string[];
-  }[];
-  isMobile?: boolean;
-}
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HabitTemplate, NewTemplate, TabSectionProps } from '../types';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import TemplateCardView from "./TemplateCardView";
+import { useToast } from "@/components/ui/use-toast";
+import { predefinedTemplates } from "../data/templates";
 
 const TabSection: React.FC<TabSectionProps> = ({
-  defaultTab = 'available',
-  onTabChange,
-  onTemplateCreate,
-  onTemplateDelete,
-  onTemplateApply,
-  userTemplates,
-  predefinedTemplates,
-  isMobile = false,
+  customTemplates,
+  activeTemplateIds,
+  onSelectTemplate,
+  onDeleteCustomTemplate,
+  onCreateTemplate
 }) => {
-  const handleValueChange = (value: string) => {
-    if (onTabChange) {
-      onTabChange(value);
+  const { toast } = useToast();
+  const [newTemplateName, setNewTemplateName] = React.useState("");
+  const [newTemplateDescription, setNewTemplateDescription] = React.useState("");
+  const [newTemplateHabits, setNewTemplateHabits] = React.useState<string[]>([]);
+  const [currentHabit, setCurrentHabit] = React.useState("");
+
+  // Convert templates to properly match the HabitTemplate interface
+  const fixedCustomTemplates: HabitTemplate[] = customTemplates.map(template => {
+    // Make sure the template has defaultHabits property
+    if (!('defaultHabits' in template)) {
+      return {
+        ...template,
+        defaultHabits: (template as any).habits?.map((habit: string) => ({
+          name: habit
+        })) || []
+      };
     }
+    return template;
+  });
+
+  const handleAddHabit = () => {
+    if (!currentHabit.trim()) return;
+    
+    setNewTemplateHabits([...newTemplateHabits, currentHabit.trim()]);
+    setCurrentHabit("");
+  };
+
+  const handleRemoveHabit = (index: number) => {
+    setNewTemplateHabits(newTemplateHabits.filter((_, i) => i !== index));
+  };
+
+  const handleCreateTemplate = () => {
+    if (!newTemplateName.trim()) {
+      toast({
+        title: "Template name required",
+        description: "Please provide a name for your template",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newTemplateHabits.length === 0) {
+      toast({
+        title: "Habits required",
+        description: "Please add at least one habit to your template",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newTemplate: NewTemplate = {
+      name: newTemplateName.trim(),
+      description: newTemplateDescription.trim() || `Custom template for ${newTemplateName.trim()}`,
+      defaultHabits: newTemplateHabits.map(habit => ({
+        name: habit,
+        description: ""
+      }))
+    };
+    
+    onCreateTemplate(newTemplate);
+    
+    // Reset form
+    setNewTemplateName("");
+    setNewTemplateDescription("");
+    setNewTemplateHabits([]);
+    setCurrentHabit("");
+    
+    toast({
+      title: "Template created",
+      description: "Your custom template has been created successfully"
+    });
   };
 
   return (
-    <Tabs defaultValue={defaultTab} onValueChange={handleValueChange} className="w-full">
-      <div className="flex justify-center mb-4">
-        <TabsList>
-          <TabsTrigger value="available">Available Templates</TabsTrigger>
-          <TabsTrigger value="custom">Your Templates</TabsTrigger>
-          <TabsTrigger value="create">Create New</TabsTrigger>
-        </TabsList>
-      </div>
-
-      <TabsContent value="available" className="mt-6 space-y-4">
-        <AvailableTemplates 
-          templates={predefinedTemplates}
-          onApply={onTemplateApply}
-          isMobile={isMobile}
-        />
+    <Tabs defaultValue="all" className="w-full">
+      <TabsList className="grid grid-cols-2 mb-4">
+        <TabsTrigger value="all">All Templates</TabsTrigger>
+        <TabsTrigger value="custom">My Templates</TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="all" className="space-y-4">
+        <ScrollArea className="h-[400px] pr-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {predefinedTemplates.map((template) => (
+              <TemplateCardView
+                key={template.id}
+                template={template}
+                isActive={activeTemplateIds.includes(template.id)}
+                onSelect={() => onSelectTemplate(template)}
+              />
+            ))}
+          </div>
+        </ScrollArea>
       </TabsContent>
-
-      <TabsContent value="custom" className="mt-6 space-y-4">
-        <CustomTemplates 
-          templates={userTemplates}
-          onDelete={onTemplateDelete}
-          onApply={onTemplateApply}
-          isMobile={isMobile}
-        />
-      </TabsContent>
-
-      <TabsContent value="create" className="mt-6">
-        <CreateTemplateForm 
-          onSubmit={(name, habits) => {
-            if (onTemplateCreate) {
-              onTemplateCreate(name, habits);
-            }
-          }}
-          submitButtonSize="default"
-        />
+      
+      <TabsContent value="custom" className="space-y-4">
+        <ScrollArea className="h-[250px] pr-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {fixedCustomTemplates.length > 0 ? (
+              fixedCustomTemplates.map((template) => (
+                <TemplateCardView
+                  key={template.id}
+                  template={template}
+                  isActive={activeTemplateIds.includes(template.id)}
+                  isCustom={true}
+                  onSelect={() => onSelectTemplate(template)}
+                  onDelete={() => onDeleteCustomTemplate(template.id)}
+                />
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-8 text-muted-foreground">
+                No custom templates yet. Create one below.
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+        
+        <Card className="mt-6">
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-medium mb-4">Create New Template</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <Input
+                  placeholder="Template Name"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <Textarea
+                  placeholder="Template Description (optional)"
+                  value={newTemplateDescription}
+                  onChange={(e) => setNewTemplateDescription(e.target.value)}
+                  className="resize-none"
+                  rows={2}
+                />
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium mb-2">Habits</h4>
+                <div className="space-y-2">
+                  {newTemplateHabits.map((habit, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="flex-1 bg-muted/30 p-2 rounded-md text-sm">
+                        {habit}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveHabit(index)}
+                        className="h-8 w-8 text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Add a habit"
+                      value={currentHabit}
+                      onChange={(e) => setCurrentHabit(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddHabit();
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleAddHabit}
+                      className="h-10 w-10 flex-shrink-0"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              <Button
+                onClick={handleCreateTemplate}
+                className="w-full"
+                disabled={!newTemplateName.trim() || newTemplateHabits.length === 0}
+              >
+                Create Template
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </TabsContent>
     </Tabs>
   );

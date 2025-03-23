@@ -1,85 +1,63 @@
 
-export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
+// If this file doesn't exist, we need to create it with proper type definitions for HabitTemplate
+import { DayOfWeek } from './types';
 
-export const DAYS_OF_WEEK: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-export type MetricType = 'timer' | 'counter' | 'boolean' | 'rating' | 'journal' | 'checklist' | 'voicenote' | 'screenshot';
-
-export interface HabitMetric {
-  type: MetricType;
-  target?: number;
-  unit?: string;
-  min?: number;
-  max?: number;
-}
-
-export interface HabitProgress {
-  value: boolean | number;
-  streak: number;
-  date: string;
-  completed: boolean;
-}
-
-export interface HabitInsight {
-  type: 'streak' | 'completion' | 'timing' | 'pattern';
+export type HabitTemplate = {
+  id: string;
+  name: string;
   description: string;
+  category?: string;
+  defaultHabits: Array<{
+    name: string;
+    description?: string;
+    type?: string;
+  }>;
+};
+
+export type NewTemplate = {
+  name: string;
+  description: string;
+  defaultHabits: Array<{
+    name: string;
+    description?: string;
+    type?: string;
+  }>;
+};
+
+export interface TabSectionProps {
+  customTemplates: HabitTemplate[];
+  activeTemplateIds: string[];
+  onSelectTemplate: (template: HabitTemplate) => void;
+  onDeleteCustomTemplate: (templateId: string) => void;
+  onCreateTemplate: (template: NewTemplate) => void;
 }
 
 export interface HabitDetail {
   id: string;
   name: string;
   description?: string;
-  metrics: HabitMetric;
+  type?: string;
   category?: string;
-  timePreference?: string;
-  insights?: HabitInsight[];
-  tips?: string[];
-  order?: number;
-  relationships?: {
-    templateId?: string;
-    habitId?: string;
-    [key: string]: string | undefined;
-  };
+  insights: Array<{
+    type: string;
+    description: string;
+  }>;
+  tips: string[];
 }
 
-export interface HabitTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category?: string;
-  defaultHabits: HabitDetail[];
-  defaultDays?: DayOfWeek[];
-  duration?: number | null;
+export interface HabitProgress {
+  date: string;
+  value: boolean | number;
 }
 
-export interface ActiveTemplate {
-  templateId: string;
-  habits: HabitDetail[];
-  activeDays: DayOfWeek[];
-  customized: boolean;
-  name?: string;
-  description?: string;
-  relationships?: {
-    habitId?: string;
-  };
-}
+export const DAYS_OF_WEEK = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+] as const;
 
-export interface NewTemplate {
-  name: string;
-  description: string;
-  category: string;
-  defaultHabits: HabitDetail[];
-  defaultDays: DayOfWeek[];
-}
-
-export const createEmptyHabit = (): HabitDetail => ({
-  id: crypto.randomUUID(),
-  name: '',
-  description: '',
-  metrics: {
-    type: 'boolean',
-    target: 1
-  }
-});
+export type DayOfWeek = typeof DAYS_OF_WEEK[number];
