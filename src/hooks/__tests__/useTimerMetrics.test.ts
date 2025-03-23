@@ -21,7 +21,6 @@ describe('useTimerMetrics', () => {
       pauseCount: 0,
       expectedTime: 300,
       actualDuration: 0,
-      favoriteQuotes: 0,
       pausedTime: 0,
       lastPauseTimestamp: null,
       extensionTime: 0,

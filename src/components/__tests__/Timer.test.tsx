@@ -99,9 +99,10 @@ describe('Timer Component', () => {
 
   it('manages favorites correctly', () => {
     const favorites: Quote[] = [{
+      id: 'quote-1',
       text: 'Test quote',
       author: 'Test Author',
-      category: ['motivation'],
+      isFavorite: true,
     }];
     
     render(<Timer {...{...mockProps, favorites}} />);

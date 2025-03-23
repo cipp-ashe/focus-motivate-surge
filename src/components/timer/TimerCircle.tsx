@@ -1,6 +1,6 @@
 
 import { memo } from "react";
-import { TimerCircleProps } from "../../types/timer";
+import { TimerCircleProps } from "@/types/timer";
 import { cn } from "@/lib/utils";
 
 const formatTime = (seconds: number): string => {
@@ -10,15 +10,24 @@ const formatTime = (seconds: number): string => {
 };
 
 export const TimerCircle = memo(({
-  size = 'normal',
-  isRunning,
+  percentage,
   timeLeft,
-  minutes,
+  duration,
+  isRunning,
+  isPaused,
+  isComplete,
+  taskName,
+  size = 'normal',
   circumference = 282.74, // Default value based on r=45
   a11yProps,
   onClick
-}: TimerCircleProps) => {
-  const dashOffset = circumference * ((minutes * 60 - timeLeft) / (minutes * 60));
+}: TimerCircleProps & {
+  size?: 'normal' | 'large';
+  circumference?: number;
+  a11yProps?: React.AriaAttributes;
+  onClick?: () => void;
+}) => {
+  const dashOffset = circumference * ((duration - timeLeft) / duration);
 
   const sizeClasses = size === 'large' 
     ? 'w-64 h-64 sm:w-72 sm:h-72' 
@@ -75,7 +84,7 @@ export const TimerCircle = memo(({
         </span>
         
         <span className="text-xs text-muted-foreground mt-2 font-medium">
-          {isRunning ? "FOCUS TIME" : "READY"}
+          {isComplete ? "COMPLETED" : isRunning ? "FOCUS TIME" : isPaused ? "PAUSED" : "READY"}
         </span>
       </div>
     </div>

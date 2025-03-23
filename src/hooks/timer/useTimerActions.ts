@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { TimerAction } from '@/types/timer';
 import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
@@ -143,57 +144,41 @@ export const useTimerActions = (
         
         // Calculate efficiency metrics
         const efficiencyRatio = calculateEfficiencyRatio(metrics.expectedTime, netEffectiveTime);
-        const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime) as 
-          "Completed Early" | "Completed On Time" | "Completed Late" | "Completed Very Early" | "Completed Very Late";
+        const completionStatus = determineCompletionStatus(metrics.expectedTime, netEffectiveTime);
         
-        // Create a properly formatted completion metrics object with serializable dates
-        const updatedMetrics = {
-          startTime: startTime instanceof Date ? toISOString(startTime) : startTime,
-          endTime: toISOString(now),
+        setIsRunning(false);
+        updateMetrics({
+          endTime: now,
           actualDuration,
           pausedTime,
-          extensionTime,
           netEffectiveTime,
           efficiencyRatio,
           completionStatus,
           isPaused: false,
           pausedTimeLeft: null,
-          // Always ensure completionDate is a properly formatted ISO string
           completionDate: toISOString(now)
-        };
+        });
         
-        console.log("useTimerActions: Completing timer with metrics:", updatedMetrics);
-        
-        // Update state and metrics
-        setIsRunning(false);
-        updateMetrics(updatedMetrics);
-        
-        // Return a resolved promise
         return Promise.resolve();
       } else {
         const { dispatch } = props as UseTimerActionsProps;
-        
         console.log("useTimerActions: Completing timer (reducer)");
         dispatch({ type: 'COMPLETE' });
         return Promise.resolve();
       }
     } catch (error) {
-      console.error("Error in completeTimer:", error);
+      console.error("Error completing timer:", error);
       return Promise.reject(error);
     }
   }, [props, isLegacyInterface]);
-  
-  const updateMetricsFunc = useCallback((updates: any) => {
+
+  const updateMetrics = useCallback((updates: any) => {
     if (isLegacyInterface) {
-      const { updateMetrics } = props as TimerActionProps;
-      updateMetrics(updates);
+      const { updateMetrics: legacyUpdateMetrics } = props as TimerActionProps;
+      legacyUpdateMetrics(updates);
     } else {
-      const { dispatch, updateMetrics: propsUpdateMetrics } = props as UseTimerActionsProps;
-      if (propsUpdateMetrics) {
-        propsUpdateMetrics(updates);
-      } else {
-        dispatch({ type: 'UPDATE_METRICS', payload: updates });
-      }
+      const { dispatch } = props as UseTimerActionsProps;
+      dispatch({ type: 'UPDATE_METRICS', payload: updates });
     }
   }, [props, isLegacyInterface]);
 
@@ -204,6 +189,6 @@ export const useTimerActions = (
     extendTimer,
     setMinutes,
     completeTimer,
-    updateMetrics: updateMetricsFunc
+    updateMetrics
   };
 };
