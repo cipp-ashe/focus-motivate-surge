@@ -1,13 +1,16 @@
 
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { useSyncHandler } from './taskIntegration/useSyncHandler';
 
 /**
  * Hook to integrate habits with tasks
  */
 export const useHabitTaskIntegration = () => {
-  const { syncHabitsWithTasks } = useSyncHandler();
+  // Mock implementation of syncHabitsWithTasks
+  const syncHabitsWithTasks = useCallback(() => {
+    console.log('Syncing habits with tasks');
+    eventManager.emit('habits:verify-tasks', {});
+  }, []);
   
   // Check for pending tasks
   const checkPendingTasks = useCallback(() => {

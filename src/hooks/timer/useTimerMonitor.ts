@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { logger } from '@/utils/logManager';
+import { EventPayload } from '@/types/events';
 
 interface UseTimerMonitorProps {
   onComplete?: () => void;
@@ -34,7 +35,7 @@ export const useTimerMonitor = ({
     logger.debug('TimerMonitor', "Setting up timer monitor event listeners");
     
     // Update the handler to correctly process remaining or timeLeft values with throttling
-    const handleTimerTick = (payload: { timeLeft?: number; remaining?: number; taskName?: string }) => {
+    const handleTimerTick = (payload: EventPayload<'timer:tick'>) => {
       // Use either timeLeft or remaining based on what's available
       const timeLeft = payload.timeLeft !== undefined ? payload.timeLeft : payload.remaining;
       
@@ -53,44 +54,37 @@ export const useTimerMonitor = ({
       }
     };
 
-    const handleTimerStart = ({
-      taskName,
-      duration,
-    }: {
-      taskName: string;
-      duration: number;
-      currentTime?: number;
-    }) => {
-      logger.debug('TimerMonitor', `Timer start event received for ${taskName} with duration ${duration}`);
+    const handleTimerStart = (payload: EventPayload<'timer:start'>) => {
+      logger.debug('TimerMonitor', `Timer start event received for ${payload.taskName} with duration ${payload.duration}`);
       timerInfoRef.current = {
         isActive: true,
-        secondsLeft: duration,
-        taskName,
-        totalSeconds: duration,
+        secondsLeft: payload.duration,
+        taskName: payload.taskName,
+        totalSeconds: payload.duration,
       };
       
-      if (onStart) onStart(taskName, duration);
+      if (onStart) onStart(payload.taskName, payload.duration);
     };
 
-    const handleTimerPause = ({ timeLeft }: { taskName: string; timeLeft: number }) => {
+    const handleTimerPause = (payload: EventPayload<'timer:pause'>) => {
       logger.debug('TimerMonitor', "Timer pause event received");
       timerInfoRef.current.isActive = false;
       
       // Update seconds left if provided
-      if (timeLeft !== undefined) {
-        timerInfoRef.current.secondsLeft = timeLeft;
+      if (payload.timeLeft !== undefined) {
+        timerInfoRef.current.secondsLeft = payload.timeLeft;
       }
       
       if (onPause) onPause();
     };
 
-    const handleTimerResume = ({ timeLeft }: { taskName: string; timeLeft: number }) => {
+    const handleTimerResume = (payload: EventPayload<'timer:resume'>) => {
       logger.debug('TimerMonitor', "Timer resume event received");
       timerInfoRef.current.isActive = true;
       
       // Update seconds left if provided
-      if (timeLeft !== undefined) {
-        timerInfoRef.current.secondsLeft = timeLeft;
+      if (payload.timeLeft !== undefined) {
+        timerInfoRef.current.secondsLeft = payload.timeLeft;
       }
       
       if (onResume) onResume();
@@ -104,13 +98,13 @@ export const useTimerMonitor = ({
     };
 
     // Handle timer reset event
-    const handleTimerReset = ({ taskName, duration }: { taskName: string; duration?: number }) => {
-      logger.debug('TimerMonitor', `Timer reset event received for ${taskName}`);
+    const handleTimerReset = (payload: EventPayload<'timer:reset'>) => {
+      logger.debug('TimerMonitor', `Timer reset event received for ${payload.taskName}`);
       timerInfoRef.current = {
         isActive: false,
-        secondsLeft: duration || timerInfoRef.current.totalSeconds,
-        taskName,
-        totalSeconds: duration || timerInfoRef.current.totalSeconds,
+        secondsLeft: payload.duration || timerInfoRef.current.totalSeconds,
+        taskName: payload.taskName,
+        totalSeconds: payload.duration || timerInfoRef.current.totalSeconds,
       };
     };
 

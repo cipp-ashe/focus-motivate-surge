@@ -1,36 +1,52 @@
 
 import { useCallback } from 'react';
-import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
+import { eventManager } from '@/lib/events/EventManager';
 
 /**
- * Hook providing task-related actions
+ * Hook for task-related actions
  */
 export const useTaskActions = () => {
-  // Create task
+  // Create a new task
   const createTask = useCallback((task: Task) => {
+    console.log('Creating task:', task);
     eventManager.emit('task:create', task);
   }, []);
 
-  // Update task
+  // Update an existing task
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
+    console.log(`Updating task ${taskId}:`, updates);
     eventManager.emit('task:update', { taskId, updates });
   }, []);
 
-  // Delete task
+  // Delete a task
   const deleteTask = useCallback((taskId: string, reason?: string) => {
-    eventManager.emit('task:delete', { taskId, reason });
+    console.log(`Deleting task ${taskId}`, reason ? `Reason: ${reason}` : '');
+    eventManager.emit('task:delete', { taskId });
   }, []);
 
-  // Complete task
+  // Complete a task
   const completeTask = useCallback((taskId: string, metrics?: any) => {
+    console.log(`Completing task ${taskId}`, metrics ? `Metrics: ${JSON.stringify(metrics)}` : '');
     eventManager.emit('task:complete', { taskId, metrics });
   }, []);
 
-  // Force update tasks
+  // Force update task list
   const forceTaskUpdate = useCallback(() => {
-    window.dispatchEvent(new Event('force-task-update'));
-    eventManager.emit('task:reload', {});
+    console.log('Forcing task update');
+    eventManager.emit('task:force-update', undefined);
+  }, []);
+
+  // Force update of tags
+  const forceTagsUpdate = useCallback(() => {
+    console.log('Forcing tags update');
+    // This could emit a specific event for tags
+  }, []);
+
+  // Check for pending habits
+  const checkPendingHabits = useCallback(() => {
+    console.log('Checking pending habits');
+    eventManager.emit('habit:check-pending', {});
   }, []);
 
   return {
@@ -38,6 +54,8 @@ export const useTaskActions = () => {
     updateTask,
     deleteTask,
     completeTask,
-    forceTaskUpdate
+    forceTaskUpdate,
+    forceTagsUpdate,
+    checkPendingHabits
   };
 };

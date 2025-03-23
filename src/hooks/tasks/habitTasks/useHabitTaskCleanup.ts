@@ -1,56 +1,33 @@
 
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { TaskEventType } from '@/lib/events/types';
+import { Task } from '@/types/tasks';
 
 /**
- * Hook for handling cleanup of habit tasks
+ * Hook to clean up habit tasks that are no longer needed
  */
 export const useHabitTaskCleanup = () => {
-  /**
-   * Deletes a habit task and notifies related systems
-   * 
-   * @param habitId ID of the habit
-   * @param date Date of the habit task
-   * @param taskId Optional ID of the associated task
-   * @returns Promise that resolves when cleanup is complete
-   */
-  const deleteHabitTask = useCallback(async (
-    habitId: string,
-    date: string,
-    taskId?: string
-  ): Promise<void> => {
-    try {
-      console.log(`Deleting habit task for habit ${habitId} on ${date}`);
-      
-      // Ensure taskId is always provided (use empty string if not available)
-      const finalTaskId = taskId || '';
-      
-      // First, emit the habit:task-deleted event with the corrected payload structure
-      const payload = { 
-        habitId, 
-        taskId: finalTaskId,
-        date
-      };
-      
-      eventManager.emit('habit:task-deleted', payload);
-      
-      // If we have the taskId, also trigger the standard task deletion process
-      if (taskId) {
-        eventManager.emit('task:delete' as TaskEventType, { 
-          taskId,
-          reason: 'habit-cleanup'
-        });
-      }
-      
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error deleting habit task:', error);
-      return Promise.reject(error);
-    }
+  const cleanupOrphanedHabitTasks = useCallback((tasks: Task[], templates: any[]) => {
+    // Find tasks that reference non-existent templates
+    const templateIds = templates.map(t => t.templateId || t.id);
+    const orphanedTasks = tasks.filter(task => {
+      const templateId = task.relationships?.templateId;
+      return templateId && !templateIds.includes(templateId);
+    });
+
+    console.log(`Found ${orphanedTasks.length} orphaned habit tasks`);
+    
+    // Could emit events to delete them or mark them
+    return orphanedTasks;
   }, []);
-  
+
+  const removeHabitTasks = useCallback((templateId: string) => {
+    console.log(`Removing habit tasks for template ${templateId}`);
+    // This could emit an event to trigger cleanup
+  }, []);
+
   return {
-    deleteHabitTask
+    cleanupOrphanedHabitTasks,
+    removeHabitTasks
   };
 };
