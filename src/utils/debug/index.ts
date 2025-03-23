@@ -57,6 +57,31 @@ interface DebugContextType {
   clearLogs: () => void;
 }
 
+// Configuration for the debug system
+export const DEBUG_CONFIG = {
+  enabled: IS_DEV,
+  defaultLevel: 'info' as DebugLevel,
+  defaultModules: ['app', 'ui', 'data'] as DebugModule[],
+  captureConsoleErrors: true,
+  captureGlobalErrors: true,
+};
+
+// Debug store for event logging
+export const debugStore = {
+  events: [] as any[],
+  addEvent: (event: any) => {
+    debugStore.events.push(event);
+    // Limit size to prevent memory issues
+    if (debugStore.events.length > 1000) {
+      debugStore.events.shift();
+    }
+  },
+  getEvents: () => debugStore.events,
+  clear: () => {
+    debugStore.events = [];
+  }
+};
+
 // ============================
 // Debug Context
 // ============================
@@ -159,6 +184,77 @@ export const useDebugContext = () => {
   }
   return context;
 };
+
+// ============================
+// Debugging Utilities
+// ============================
+
+/**
+ * Utility to track state changes
+ */
+export function trackState(
+  module: DebugModule,
+  component: string,
+  stateName: string,
+  newValue: any,
+  prevValue?: any
+): void {
+  debugStore.addEvent({
+    type: 'state-change',
+    module,
+    component,
+    message: `State '${stateName}' changed`,
+    timestamp: Date.now(),
+    data: {
+      stateName,
+      newValue,
+      prevValue,
+      changed: prevValue !== undefined
+    }
+  });
+}
+
+/**
+ * Utility to measure performance
+ */
+export function measurePerformance<T>(
+  module: DebugModule,
+  component: string,
+  functionName: string,
+  fn: () => T
+): T {
+  const startTime = performance.now();
+  let result: T;
+  let error: Error | null = null;
+  
+  try {
+    result = fn();
+  } catch (e) {
+    error = e as Error;
+    throw e;
+  } finally {
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    
+    debugStore.addEvent({
+      type: 'performance',
+      module,
+      component,
+      message: `Function '${functionName}' took ${duration.toFixed(2)}ms`,
+      timestamp: Date.now(),
+      data: {
+        functionName,
+        duration,
+        error: error ? {
+          message: error.message,
+          stack: error.stack
+        } : null
+      }
+    });
+  }
+  
+  return result;
+}
 
 // ============================
 // Error Boundary
@@ -271,5 +367,40 @@ export function assertCondition(
   }
 }
 
+// Simple debug hook
+export const useDebug = () => {
+  const [isDebugMode, setIsDebugMode] = useState(() => 
+    localStorage.getItem('debug_enabled') === 'true' || IS_DEV
+  );
+  
+  const toggleDebugMode = () => {
+    const newValue = !isDebugMode;
+    setIsDebugMode(newValue);
+    localStorage.setItem('debug_enabled', String(newValue));
+    console.log(`Debug mode ${newValue ? 'enabled' : 'disabled'}`);
+  };
+  
+  return {
+    isDebugMode,
+    toggleDebugMode,
+    logger: {
+      log: (module: string, message: string, data?: any) => {
+        if (isDebugMode) {
+          console.log(`[${module}] ${message}`, data);
+        }
+      },
+      warn: (module: string, message: string, data?: any) => {
+        if (isDebugMode) {
+          console.warn(`[${module}] ${message}`, data);
+        }
+      },
+      error: (module: string, message: string, data?: any) => {
+        console.error(`[${module}] ${message}`, data);
+      }
+    }
+  };
+};
+
 // Export common utilities
 export { DebugContext };
+export const logger = console;
