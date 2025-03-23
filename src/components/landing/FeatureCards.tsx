@@ -1,63 +1,56 @@
 
 import React from 'react';
 import { ListTodo, Timer, BookOpen } from 'lucide-react';
-import FeatureCard from './FeatureCard';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+
+const FeatureCard = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  link 
+}: { 
+  icon: React.ElementType; 
+  title: string; 
+  description: string; 
+  link: string; 
+}) => {
+  return (
+    <div className="border rounded-lg p-6">
+      <div className="mb-4">
+        <Icon className="h-8 w-8" />
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground mb-4">{description}</p>
+      <Button asChild variant="outline">
+        <Link to={link}>Learn more</Link>
+      </Button>
+    </div>
+  );
+};
 
 const FeatureCards: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <FeatureCard 
-        icon={ListTodo} 
-        iconClass="bg-primary/10" 
-        iconColor="text-primary" 
+        icon={ListTodo}
         title="Task Management" 
         description="Organize all your work in one place" 
-        features={["Smart task organization", "Integrated with timers", "Tagging system"]} 
-        buttonLabel="Go to Tasks" 
-        buttonLink="/tasks" 
-        cardClass="from-blue-50/50 dark:from-blue-950/20" 
-        iconBgClass="bg-primary/10" 
-        iconFeatureClass="bg-primary/20" 
-        iconFeatureColor="text-primary" 
-        buttonStyle={{}} 
+        link="/tasks"
       />
       
       <FeatureCard 
-        icon={Timer} 
-        iconClass="bg-[#9b87f5]/10" 
-        iconColor="text-[#9b87f5]" 
+        icon={Timer}
         title="Focus Timers" 
         description="Track time spent on tasks" 
-        features={["Customizable timers", "Session tracking", "Productivity metrics"]} 
-        buttonLabel="Use Timer" 
-        buttonLink="/timer" 
-        cardClass="from-purple-50/50 dark:from-purple-950/20" 
-        iconBgClass="bg-[#9b87f5]/10" 
-        iconFeatureClass="bg-[#9b87f5]/20" 
-        iconFeatureColor="text-[#9b87f5]" 
-        buttonStyle={{
-          backgroundColor: "#9b87f5",
-          borderColor: "#9b87f5"
-        }} 
+        link="/timer"
       />
       
       <FeatureCard 
-        icon={BookOpen} 
-        iconClass="bg-green-400/10" 
-        iconColor="text-green-500" 
+        icon={BookOpen}
         title="Notes & Journals" 
         description="Capture ideas and reflections" 
-        features={["Written notes", "Voice recordings", "Journal templates"]} 
-        buttonLabel="View Notes" 
-        buttonLink="/notes" 
-        cardClass="from-green-50/50 dark:from-green-950/20" 
-        iconBgClass="bg-green-400/10" 
-        iconFeatureClass="bg-green-400/20" 
-        iconFeatureColor="text-green-500" 
-        buttonStyle={{
-          backgroundColor: "rgb(74, 222, 128)",
-          borderColor: "rgb(74, 222, 128)"
-        }} 
+        link="/notes"
       />
     </div>
   );

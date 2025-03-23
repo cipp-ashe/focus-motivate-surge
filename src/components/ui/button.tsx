@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -21,11 +21,10 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3",
-        lg: "h-10 rounded-md px-6",
-        icon: "h-9 w-9",
-        auto: "h-auto min-h-9 py-1.5 px-3.5", // Adjusted auto size variant
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
       },
     },
     defaultVariants: {
@@ -44,55 +43,10 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
-    
-    // Apply no-outline style when the component mounts
-    React.useEffect(() => {
-      if (ref && 'current' in ref && ref.current) {
-        ref.current.style.outline = 'none';
-        ref.current.style.boxShadow = 'none';
-        
-        // Apply to all child elements too
-        const allChildren = ref.current.querySelectorAll('*');
-        allChildren.forEach(child => {
-          if (child instanceof HTMLElement) {
-            child.style.outline = 'none';
-            child.style.boxShadow = 'none';
-          }
-        });
-      }
-      
-      // Add global style for buttons
-      const style = document.createElement('style');
-      style.id = 'button-no-outline-style';
-      style.innerHTML = `
-        button, .button, [class*="button-"], [class*="Button"], a {
-          outline: none !important;
-          box-shadow: none !important;
-        }
-        button:focus, .button:focus, [class*="button-"]:focus, [class*="Button"]:focus, a:focus,
-        button:focus-visible, .button:focus-visible, [class*="button-"]:focus-visible, [class*="Button"]:focus-visible, a:focus-visible {
-          outline: none !important;
-          box-shadow: none !important;
-        }
-      `;
-      
-      if (!document.getElementById('button-no-outline-style')) {
-        document.head.appendChild(style);
-      }
-      
-      return () => {
-        const styleElement = document.getElementById('button-no-outline-style');
-        if (styleElement && styleElement.parentNode) {
-          styleElement.parentNode.removeChild(styleElement);
-        }
-      };
-    }, [ref]);
-    
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }), "outline-none")}
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        style={{ outline: 'none', boxShadow: 'none' }}
         {...props}
       />
     )
