@@ -17,7 +17,7 @@ export const TaskLayout = ({ mainContent, asideContent }: TaskLayoutProps) => {
   // Use the theme debug hook
   useThemeDebug('TaskLayout');
   
-  // Force theme consistency on this component
+  // Log theme for debugging
   useEffect(() => {
     logger.debug('TaskLayout', `Current theme: ${theme}`);
     

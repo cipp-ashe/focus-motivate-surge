@@ -13,7 +13,6 @@ const Card = React.forwardRef<
       "rounded-lg border border-border/30 bg-card text-card-foreground shadow-sm dark:border-border/5",
       className
     )}
-    style={{ borderStyle: 'solid', outline: 'none' }}
     {...props}
   />
 ))

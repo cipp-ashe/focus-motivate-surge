@@ -52,9 +52,9 @@
 
   .dark {
     /* Much darker background with higher contrast */
-    --background: 225 25% 8%;  /* Darker for better contrast */
-    --foreground: 225 25% 98%; /* Nearly white text */
-    --card: 225 25% 12%;      /* Darker card background */
+    --background: 225 25% 8%;
+    --foreground: 225 25% 98%;
+    --card: 225 25% 12%;
     --card-foreground: 225 25% 98%;
     --popover: 225 25% 12%;
     --popover-foreground: 225 25% 98%;
@@ -68,7 +68,6 @@
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 65%;
     --destructive-foreground: 225 25% 98%;
-    /* Much darker border color for dark mode - changing from 12% to 20% but with lower opacity in use */
     --border: 225 20% 20%;
     --input: 225 25% 16%;
     --ring: 280 85% 65%;
@@ -91,7 +90,7 @@
     
     /* Glass effect variables - dark mode with higher opacity */
     --glass-bg: rgba(15, 15, 25, 0.85);
-    --glass-border: rgba(40, 40, 60, 0.2);  /* Darker glass border */
+    --glass-border: rgba(40, 40, 60, 0.2);
     --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
     --glass-blur: 15px;
     

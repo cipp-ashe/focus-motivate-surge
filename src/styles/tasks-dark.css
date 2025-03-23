@@ -34,29 +34,29 @@
   background-color: var(--task-secondary);
 }
 
-/* Task type specific styles in dark mode */
+/* Task type specific styles in dark mode - higher specificity selectors */
 .dark .task-timer {
-  @apply text-[hsl(var(--timer-color))] !important;
+  color: hsl(var(--timer-color));
 }
 
 .dark .task-journal {
-  @apply text-[hsl(var(--journal-color))] !important;
+  color: hsl(var(--journal-color));
 }
 
 .dark .task-checklist {
-  @apply text-[hsl(var(--checklist-color))] !important;
+  color: hsl(var(--checklist-color));
 }
 
 .dark .task-screenshot {
-  @apply text-[hsl(var(--screenshot-color))] !important;
+  color: hsl(var(--screenshot-color));
 }
 
 .dark .task-voicenote {
-  @apply text-[hsl(var(--voicenote-color))] !important;
+  color: hsl(var(--voicenote-color));
 }
 
 .dark .task-focus {
-  @apply text-[hsl(var(--focus-color))] !important;
+  color: hsl(var(--focus-color));
 }
 
 /* Ensure icon colors are fixed in dark mode */
@@ -71,16 +71,16 @@
 .dark .bg-card {
   @apply shadow-md;
   background-color: hsl(var(--card));
-  border-color: hsl(var(--border) / 0.05) !important;
+  border-color: hsl(var(--border) / 0.05);
 }
 
 /* Ensure dark mode applies to UI components */
 .dark .bg-background {
-  background-color: hsl(var(--background)) !important;
+  background-color: hsl(var(--background));
 }
 
 .dark .text-foreground {
-  color: hsl(var(--foreground)) !important;
+  color: hsl(var(--foreground));
 }
 
 /* Fix for dark mode glass effects */

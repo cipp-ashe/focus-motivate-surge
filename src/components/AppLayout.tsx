@@ -20,93 +20,33 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   // Use the theme debug hook to consistently log theme information
   useThemeDebug('AppLayout');
   
-  // Immediate theme application on page load
+  // Log theme changes but avoid DOM manipulation
   useEffect(() => {
-    // Force immediate theme application without transitions
-    document.documentElement.style.transition = 'none';
-    document.body.style.transition = 'none';
-    
-    // Forcefully disable outlines
-    const style = document.createElement('style');
-    style.id = 'outline-reset';
-    style.innerHTML = `
-      * { outline: none; }
-      *.dark { outline: none; }
-      *.light { outline: none; }
-      [class*="border"] { border-style: solid; }
-      .card, .border { border-style: solid; }
-    `;
-    document.head.appendChild(style);
+    // Log theme application
+    logger.debug('AppLayout', `Theme application: ${theme}`);
     
     // Determine the effective theme
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effectiveTheme = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
     
-    // Force the theme class on document elements
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(effectiveTheme);
-    document.body.classList.remove('light', 'dark');
-    document.body.classList.add(effectiveTheme);
-    
-    // Set the color-scheme property directly
-    document.documentElement.style.colorScheme = effectiveTheme;
-    
-    // Log theme application
-    logger.debug('AppLayout', `Immediate theme application: ${theme} (effective: ${effectiveTheme})`);
-    
-    // Additional check to verify CSS variables are applied
-    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--background');
-    logger.debug('AppLayout', `Background variable: ${bgColor}`);
-    
-    // Re-enable transitions after a small delay
-    setTimeout(() => {
-      document.documentElement.style.transition = '';
-      document.body.style.transition = '';
-    }, 100);
-    
-    // Force all SVGs to inherit color in dark mode
-    if (effectiveTheme === 'dark') {
-      const style = document.createElement('style');
-      style.id = 'dark-mode-svg-fix';
-      style.innerHTML = `
-        .dark svg:not([class*="text-"]) { color: inherit; }
-        .dark *[class*="border-"] { border-color: hsl(var(--border) / 0.05); border-style: solid; }
-        .dark .card, .dark .border { border-color: hsl(var(--border) / 0.05); border-style: solid; }
-        .dark input, .dark select, .dark textarea { background-color: hsl(var(--card)); color: hsl(var(--foreground)); }
-        .dark button { color: inherit; }
-      `;
-      document.head.appendChild(style);
-    } else {
-      const existingStyle = document.getElementById('dark-mode-svg-fix');
-      if (existingStyle) {
-        existingStyle.remove();
-      }
-    }
-    
-    return () => {
-      // Clean up when component unmounts
-      const outlineReset = document.getElementById('outline-reset');
-      if (outlineReset) {
-        outlineReset.remove();
-      }
-    };
+    logger.debug('AppLayout', `Effective theme: ${effectiveTheme}`);
   }, [theme]);
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background text-foreground" style={{ outline: 'none' }}>
-      {/* Background decorative elements - with immediate visibility */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" style={{ outline: 'none' }}>
-        <div className="absolute inset-0 bg-background" style={{ outline: 'none' }}></div>
+    <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
+      {/* Background decorative elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-background"></div>
       </div>
       <BackgroundDecorations />
       
       {/* Header navigation */}
       <Header />
       
-      <div className="flex flex-1 w-full" style={{ outline: 'none' }}>
+      <div className="flex flex-1 w-full">
         {/* Main content */}
-        <main className="flex-1 w-full pb-16 md:pb-0 bg-background" style={{ outline: 'none' }}>
-          <div className="relative z-10 container mx-auto px-4 py-4" style={{ outline: 'none' }}>
+        <main className="flex-1 w-full pb-16 md:pb-0 bg-background">
+          <div className="relative z-10 container mx-auto px-4 py-4">
             {children || <Outlet />}
           </div>
         </main>
