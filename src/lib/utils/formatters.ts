@@ -1,139 +1,53 @@
+
 /**
- * Calculate the efficiency ratio of a timer session
+ * Format a duration in seconds to a time display (mm:ss)
  */
-export const calculateEfficiencyRatio = (
-  expectedTime: number, 
-  actualTime: number
-): number => {
-  if (expectedTime <= 0 || actualTime <= 0) {
-    return 1.0;
-  }
-  
-  // A ratio of 1.0 means the timer completed right on time
-  // < 1.0 means it took less time than expected
-  // > 1.0 means it took more time than expected
-  return actualTime / expectedTime;
+export const formatTimeDisplay = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
 /**
- * Determine the completion status based on efficiency ratio
+ * Format a percentage value for display
  */
-export const determineCompletionStatus = (
-  expectedTime: number, 
-  actualTime: number
-): string => {
-  const ratio = calculateEfficiencyRatio(expectedTime, actualTime);
-  
-  if (ratio < 0.9) {
-    return 'Completed Quickly';
-  } else if (ratio <= 1.1) {
-    return 'Completed On Time';
-  } else if (ratio <= 1.5) {
-    return 'Slightly Delayed';
-  } else {
-    return 'Significantly Delayed';
-  }
+export const formatPercentage = (value: number): string => {
+  return `${Math.round(value * 100)}%`;
 };
 
 /**
- * Format seconds into MM:SS format
+ * Format a timestamp for display
  */
-export const formatTimeMMSS = (seconds: number): string => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+export const formatTimestamp = (timestamp: string | Date | null): string => {
+  if (!timestamp) return '';
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+  return date.toLocaleString();
 };
 
 /**
- * Format seconds into human readable format (e.g., "1h 30m")
+ * Get a CSS class based on completion timing
  */
-export const formatTimeHuman = (seconds: number): string => {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) {
-    return `${minutes}m`;
-  }
-  
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  
-  if (remainingMinutes === 0) {
-    return `${hours}h`;
-  }
-  
-  return `${hours}h ${remainingMinutes}m`;
+export const getCompletionTimingClass = (efficiency: number): string => {
+  if (efficiency >= 1.1) return 'text-red-500';
+  if (efficiency > 0.9 && efficiency < 1.1) return 'text-green-500';
+  return 'text-yellow-500';
 };
 
 /**
- * Format duration in seconds to a human-readable string
- * @param seconds Duration in seconds
- * @param detailed If true, includes seconds in output
- * @returns Formatted duration string (e.g., "1h 30m" or "1h 30m 15s")
+ * Determine completion status based on expected and actual times
  */
-export const formatDuration = (seconds: number, detailed = false): string => {
-  if (seconds === undefined || seconds === null || isNaN(seconds)) {
-    return '-';
-  }
+export const determineCompletionStatus = (expectedTime: number, actualTime: number): string => {
+  const ratio = actualTime / expectedTime;
   
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  
-  let result = '';
-  
-  if (hours > 0) {
-    result += `${hours}h `;
-  }
-  
-  if (minutes > 0 || hours > 0) {
-    result += `${minutes}m `;
-  }
-  
-  if ((remainingSeconds > 0 && detailed) || (result === '' && remainingSeconds >= 0)) {
-    result += `${remainingSeconds}s`;
-  }
-  
-  return result.trim();
+  if (ratio < 0.8) return 'Early';
+  if (ratio > 1.2) return 'Late';
+  return 'On Time';
 };
 
 /**
- * Standardize metric values across timer and task metrics
+ * Calculate efficiency ratio (actual/expected)
  */
-export const standardizeMetrics = (metrics: any) => {
-  return {
-    // Ensure all numeric values are numbers
-    actualDuration: typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 
-                    typeof metrics.actualTime === 'number' ? metrics.actualTime : 0,
-    pauseCount: typeof metrics.pauseCount === 'number' ? metrics.pauseCount : 0,
-    pausedTime: typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0,
-    extensionTime: typeof metrics.extensionTime === 'number' ? metrics.extensionTime : 0,
-    expectedTime: typeof metrics.expectedTime === 'number' ? metrics.expectedTime : 
-                 typeof metrics.duration === 'number' ? metrics.duration : 0,
-    
-    // Ensure date fields are properly formatted
-    startTime: metrics.startTime || new Date().toISOString(),
-    endTime: metrics.endTime || new Date().toISOString(),
-    completionDate: metrics.completionDate || new Date().toISOString(),
-    
-    // Calculate efficiency metrics if missing
-    netEffectiveTime: metrics.netEffectiveTime || (
-      (typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 0) -
-      (typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0)
-    ),
-    efficiencyRatio: metrics.efficiencyRatio || calculateEfficiencyRatio(
-      typeof metrics.expectedTime === 'number' ? metrics.expectedTime : 
-      typeof metrics.duration === 'number' ? metrics.duration : 0,
-      typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 
-      typeof metrics.actualTime === 'number' ? metrics.actualTime : 0
-    ),
-    completionStatus: metrics.completionStatus || determineCompletionStatus(
-      typeof metrics.expectedTime === 'number' ? metrics.expectedTime : 
-      typeof metrics.duration === 'number' ? metrics.duration : 0,
-      typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 
-      typeof metrics.actualTime === 'number' ? metrics.actualTime : 0
-    )
-  };
+export const calculateEfficiencyRatio = (expectedTime: number, actualTime: number): number => {
+  if (expectedTime === 0) return 1.0;
+  return parseFloat((actualTime / expectedTime).toFixed(2));
 };

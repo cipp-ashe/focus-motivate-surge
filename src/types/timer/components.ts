@@ -107,4 +107,5 @@ export interface TimerExpandedViewRef {
   collapse: () => void;
   toggleExpansion: () => void;
   isExpanded: boolean;
+  saveNotes?: () => void;
 }

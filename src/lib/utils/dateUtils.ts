@@ -41,6 +41,54 @@ export const formatDate = (date: string | Date, format: string = 'yyyy-MM-dd'): 
 };
 
 /**
+ * Format a time duration in seconds
+ */
+export const formatTime = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${remainingSeconds}s`;
+  } else {
+    return `${remainingSeconds}s`;
+  }
+};
+
+/**
+ * Format a date relative to the current time (e.g., "2 hours ago")
+ */
+export const formatRelativeTime = (date: string | Date): string => {
+  const now = new Date();
+  const inputDate = typeof date === 'string' ? new Date(date) : date;
+  
+  if (isNaN(inputDate.getTime())) {
+    console.error('Invalid date provided to formatRelativeTime:', date);
+    return 'Invalid date';
+  }
+  
+  const diffMs = now.getTime() - inputDate.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffSecs < 60) {
+    return 'just now';
+  } else if (diffMins < 60) {
+    return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  } else {
+    return formatDate(inputDate, 'MM/dd/yyyy');
+  }
+};
+
+/**
  * Get today's date as YYYY-MM-DD format
  */
 export const formatToday = (): string => {

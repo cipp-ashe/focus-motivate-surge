@@ -32,7 +32,27 @@ export type HabitEventType =
   | 'habit:check-pending'
   | 'habit:schedule'
   | 'habit:journal-complete'
-  | 'habit:journal-deleted';
+  | 'habit:journal-deleted'
+  | 'habit:dismissed'
+  | 'habit:tasks-sync'
+  | 'habit:progress-update'
+  | 'habits:verify-tasks'
+  | 'habit:template-order-update'
+  | 'habit:select';
+
+export type NoteEventType =
+  | 'note:create'
+  | 'note:update'
+  | 'note:deleted' 
+  | 'note:view'
+  | 'note:format'
+  | 'note:format-complete'
+  | 'note:create-from-habit'
+  | 'note:create-from-voice';
+
+export type VoiceNoteEventType =
+  | 'voice-note:created'
+  | 'voice-note:deleted';
 
 export type TimerEventType = 
   | 'timer:start'
@@ -44,7 +64,9 @@ export type TimerEventType =
   | 'timer:expand'
   | 'timer:collapse'
   | 'timer:update-metrics'
-  | 'timer:set-task';
+  | 'timer:set-task'
+  | 'timer:metrics-update'
+  | 'timer:close';
 
 export type UIEventType =
   | 'ui:theme-change'
@@ -58,7 +80,17 @@ export type SystemEventType =
   | 'system:sync-complete'
   | 'system:error'
   | 'system:auth-change'
+  | 'app:initialized'
   | '*'; // Wildcard for listening to all events
+
+export type RelationshipEventType =
+  | 'relationship:create'
+  | 'relationship:delete'
+  | 'relationship:update'
+  | 'relationship:batch-update'
+  | 'tag:link'
+  | 'tag:unlink'
+  | 'quote:link-task';
 
 // Union of all event types
 export type EventType = 
@@ -66,7 +98,10 @@ export type EventType =
   | HabitEventType 
   | TimerEventType 
   | UIEventType 
-  | SystemEventType;
+  | SystemEventType
+  | NoteEventType
+  | VoiceNoteEventType
+  | RelationshipEventType;
 
 // Define payload type for each event
 export interface EventPayloadMap {
@@ -93,6 +128,26 @@ export interface EventPayloadMap {
   };
   'habit:journal-complete': { habitId: string; templateId: string };
   'habit:journal-deleted': { habitId: string; templateId: string };
+  'habit:dismissed': { habitId: string; date: string };
+  'habit:tasks-sync': any;
+  'habit:progress-update': any;
+  'habits:verify-tasks': any;
+  'habit:template-order-update': any;
+  'habit:select': any;
+  
+  // Note events
+  'note:create': any;
+  'note:update': any;
+  'note:deleted': any;
+  'note:view': any;
+  'note:format': any;
+  'note:format-complete': any;
+  'note:create-from-habit': any;
+  'note:create-from-voice': any;
+  
+  // Voice Note events
+  'voice-note:created': any;
+  'voice-note:deleted': any;
   
   // Timer events
   'timer:start': { 
@@ -146,6 +201,13 @@ export interface EventPayloadMap {
     createdAt?: string;
     tags?: any[];
   };
+  'timer:metrics-update': {
+    taskName: string;
+    metrics: any;
+  };
+  'timer:close': {
+    taskName: string;
+  };
   
   // UI events
   'ui:theme-change': { theme: 'light' | 'dark' | 'system' };
@@ -159,7 +221,17 @@ export interface EventPayloadMap {
   'system:sync-complete': { success: boolean; error?: string };
   'system:error': { message: string; code?: string; stack?: string };
   'system:auth-change': { authenticated: boolean; userId?: string };
+  'app:initialized': any;
   '*': any; // Wildcard type
+  
+  // Relationship events
+  'relationship:create': any;
+  'relationship:delete': any;
+  'relationship:update': any;
+  'relationship:batch-update': any;
+  'tag:link': any;
+  'tag:unlink': any;
+  'quote:link-task': any;
 }
 
 // Helper type to get payload type for a specific event
