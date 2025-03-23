@@ -48,6 +48,17 @@ button:active, a:active, input:active, textarea:active, select:active,
   box-shadow: none !important;
 }
 
+/* Target specific UI components - dropdowns, navigation, and cards */
+.collapsible-content, 
+.dropdown-content,
+.navigation-menu-content,
+.bottom-nav,
+.feature-card,
+.feature-card-habit {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Base Tailwind imports - bringing this to the top so our rules don't get overridden */
 @tailwind base;
 @tailwind components;

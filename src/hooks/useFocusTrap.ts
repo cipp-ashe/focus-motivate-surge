@@ -42,7 +42,7 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Always apply our no-outline styles
+    // Apply no-outline styles immediately
     const applyNoOutlineStyles = () => {
       // Find all focusable elements
       const focusable = container.querySelectorAll<HTMLElement>(
@@ -59,6 +59,15 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
       // Also apply to the container itself
       container.style.outline = 'none';
       container.style.boxShadow = 'none';
+      
+      // Apply to all elements inside the container
+      const allElements = container.querySelectorAll('*');
+      allElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          el.style.outline = 'none';
+          el.style.boxShadow = 'none';
+        }
+      });
     };
     
     // Apply styles immediately
@@ -121,6 +130,12 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
       document.removeEventListener('keydown', handleKeyDown);
       if (observer) observer.disconnect();
       
+      // Remove global styles when component unmounts
+      const styleElement = document.getElementById('focus-trap-no-outline-styles');
+      if (styleElement && styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement);
+      }
+      
       // Return focus if configured
       if (returnFocusOnUnmount && previousFocusRef.current) {
         previousFocusRef.current.focus({ preventScroll });
@@ -128,10 +143,12 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     };
   }, [autoFocus, returnFocusOnUnmount, preventScroll, disableOutline, enabled]);
   
-  // Return the ref directly and add the getFocusableElements method
-  return Object.assign(containerRef, {
+  // Return the ref and the getFocusableElements method
+  const refWithMethods = Object.assign(containerRef, {
     getFocusableElements
   });
+  
+  return refWithMethods;
 };
 
 export default useFocusTrap;

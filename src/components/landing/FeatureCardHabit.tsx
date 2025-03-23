@@ -34,34 +34,48 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
   buttonStyle
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   
   // Effect to remove outlines and box-shadows
   useEffect(() => {
+    // Apply style to the card immediately
     if (cardRef.current) {
-      // Apply to the card itself
       cardRef.current.style.outline = 'none';
       cardRef.current.style.boxShadow = 'none';
       
-      // Apply to all focusable elements inside
-      const focusableElements = cardRef.current.querySelectorAll<HTMLElement>(
-        'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
-      );
-      
-      focusableElements.forEach(el => {
-        el.style.outline = 'none';
-        el.style.boxShadow = 'none';
+      // Find and apply to all focusable elements
+      const allElements = cardRef.current.querySelectorAll('*');
+      allElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          el.style.outline = 'none';
+          el.style.boxShadow = 'none';
+        }
       });
     }
+    
+    // Global style override for this component
+    const style = document.createElement('style');
+    style.textContent = `
+      .feature-card-habit, .feature-card-habit * {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
   
   return (
     <div 
       ref={cardRef}
-      className={`bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg border border-primary/10 p-6 shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${cardClass}`}
+      className={`feature-card-habit bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg border border-primary/10 p-6 shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${cardClass}`}
       style={{ outline: 'none', boxShadow: 'none' }}
     >
       <div className="flex items-center gap-3 mb-3">
-        <div className={`${iconClass} p-2 rounded-md flex items-center justify-center`}>
+        <div className={`${iconClass} p-2 rounded-md flex items-center justify-center`} style={{ outline: 'none', boxShadow: 'none' }}>
           <Icon className={`h-6 w-6 ${iconColor}`} />
         </div>
         <h3 className="text-lg font-semibold">{title}</h3>
@@ -71,8 +85,8 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
       
       <ul className="space-y-2 mb-6 text-left">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-center gap-2">
-            <div className={`h-5 w-5 rounded-full ${iconFeatureClass} flex items-center justify-center`}>
+          <li key={index} className="flex items-center gap-2" style={{ outline: 'none', boxShadow: 'none' }}>
+            <div className={`h-5 w-5 rounded-full ${iconFeatureClass} flex items-center justify-center`} style={{ outline: 'none', boxShadow: 'none' }}>
               <ArrowRight className={`h-3 w-3 ${iconFeatureColor}`} />
             </div>
             <span className="text-sm">{feature}</span>

@@ -30,6 +30,7 @@ export const DEBUG_CONFIG = {
   enableStateTracking: true,
   enableValidation: true,
   enableErrorBoundary: true,
+  TRACE_DATA_FLOW: true,
 };
 
 // Mock debug store for storing events
@@ -47,15 +48,25 @@ export const debugStore = {
   }
 };
 
-// Mock functions to make TypeScript happy
+// Stub implementations for the functions used in other files
 export const withErrorBoundary = (Component: any, options: any) => Component;
-export const traceData = () => {};
+export const traceData = (component?: string, event?: string, data?: any, meta?: any) => {};
 export const measurePerformance = () => {};
-export const trackState = () => {};
-export const validateData = () => {};
-export const assertCondition = () => {};
-export const logger = { log: debugLog, warn: debugWarn, error: debugError };
-export const DebugProvider = ({ children }: { children: React.ReactNode }) => children;
+export const trackState = (component?: string, name?: string, value?: any, prev?: any, meta?: any) => {};
+export const validateData = (schema?: any, data?: any, component?: string, errorMessage?: string) => true;
+export const assertCondition = (condition?: boolean, component?: string, message?: string, data?: any, level?: string) => {};
+
+// Logger with all methods
+export const logger = { 
+  log: debugLog, 
+  warn: debugWarn, 
+  error: debugError,
+  info: (component: string, message: string, data?: any) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.info(`[${component}] ${message}`, data || '');
+    }
+  }
+};
 
 // Export a useDebug hook
 export const useDebug = () => {
@@ -70,7 +81,7 @@ export const useDebug = () => {
 };
 
 // Export as default for compatibility
-export default {
+const DebugModule = {
   debugLog,
   debugWarn,
   debugError,
@@ -79,5 +90,15 @@ export default {
   debugStore,
   withErrorBoundary,
   useDebug,
-  // Add other exports
+  traceData,
+  measurePerformance,
+  trackState,
+  validateData,
+  assertCondition,
+  logger,
 };
+
+export default DebugModule;
+
+// Mock component for DebugProvider
+export const DebugProvider = ({ children }: { children: React.ReactNode }) => children;

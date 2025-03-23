@@ -71,6 +71,8 @@
   /* Card patterns - unified */
   .feature-card {
     @apply card-glass p-6 flex flex-col h-full;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   .feature-card-icon {
@@ -103,6 +105,27 @@
 
   .data-card-meta {
     @apply text-sm text-muted-foreground mt-auto pt-3;
+  }
+
+  /* Bottom navigation with solid background */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-background/95 dark:bg-background/95 backdrop-blur-md
+    border-t border-border/40 p-2 z-50 md:hidden shadow-lg;
+    outline: none !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center p-2 rounded-md transition-colors;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .bottom-nav-dropdown {
+    @apply absolute bg-background/95 dark:bg-background/95 backdrop-blur-md rounded-md 
+    border border-border/40 shadow-lg p-1 z-50;
+    outline: none !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
   }
 
   /* Task item styling - now unified with other components */

@@ -63,9 +63,10 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
         </CollapsibleTrigger>
         <CollapsibleContent 
           className={cn(
-            "absolute bg-background rounded-md border shadow-lg p-1 w-36 z-50 left-1/2 -translate-x-1/2",
+            "absolute bg-background/95 dark:bg-background/95 backdrop-blur-md rounded-md border border-border/40 shadow-lg p-1 w-36 z-50 left-1/2 -translate-x-1/2",
             position === 'top' ? "top-full mt-2" : "bottom-full mb-2"
           )}
+          style={{ outline: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}
         >
           <div className="flex flex-col space-y-1">
             {items.map((item) => (
@@ -79,6 +80,7 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
                     : "hover:bg-muted text-muted-foreground hover:text-foreground"
                 )}
                 onClick={() => handleItemClick(onToggle)}
+                style={{ outline: 'none', boxShadow: 'none' }}
               >
                 <item.icon className="h-4 w-4" />
                 <span className="text-sm">{item.label}</span>
@@ -90,4 +92,3 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
     </div>
   );
 };
-

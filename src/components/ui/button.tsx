@@ -50,7 +50,42 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       if (ref && 'current' in ref && ref.current) {
         ref.current.style.outline = 'none';
         ref.current.style.boxShadow = 'none';
+        
+        // Apply to all child elements too
+        const allChildren = ref.current.querySelectorAll('*');
+        allChildren.forEach(child => {
+          if (child instanceof HTMLElement) {
+            child.style.outline = 'none';
+            child.style.boxShadow = 'none';
+          }
+        });
       }
+      
+      // Add global style for buttons
+      const style = document.createElement('style');
+      style.id = 'button-no-outline-style';
+      style.innerHTML = `
+        button, .button, [class*="button-"], [class*="Button"], a {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+        button:focus, .button:focus, [class*="button-"]:focus, [class*="Button"]:focus, a:focus,
+        button:focus-visible, .button:focus-visible, [class*="button-"]:focus-visible, [class*="Button"]:focus-visible, a:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+      `;
+      
+      if (!document.getElementById('button-no-outline-style')) {
+        document.head.appendChild(style);
+      }
+      
+      return () => {
+        const styleElement = document.getElementById('button-no-outline-style');
+        if (styleElement && styleElement.parentNode) {
+          styleElement.parentNode.removeChild(styleElement);
+        }
+      };
     }, [ref]);
     
     return (

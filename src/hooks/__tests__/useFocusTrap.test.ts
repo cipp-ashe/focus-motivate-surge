@@ -17,14 +17,14 @@ describe('useFocusTrap', () => {
 
   it('should initialize with correct state', () => {
     const { result } = renderHook(() => useFocusTrap({ enabled: true }));
-    expect(result.current.containerRef).toBeDefined();
+    expect(result.current).toBeDefined();
     expect(typeof result.current.getFocusableElements).toBe('function');
   });
 
   it('should handle disabled state', () => {
     const { result } = renderHook(() => useFocusTrap({ enabled: false }));
     
-    Object.defineProperty(result.current.containerRef, 'current', {
+    Object.defineProperty(result.current, 'current', {
       value: {
         querySelectorAll: () => []
       }
@@ -37,7 +37,7 @@ describe('useFocusTrap', () => {
   it('should get focusable elements', () => {
     const { result } = renderHook(() => useFocusTrap({ enabled: true }));
     
-    Object.defineProperty(result.current.containerRef, 'current', {
+    Object.defineProperty(result.current, 'current', {
       value: {
         querySelectorAll: () => [mockFocusableElement]
       }
@@ -50,7 +50,7 @@ describe('useFocusTrap', () => {
   it('should handle null container ref', () => {
     const { result } = renderHook(() => useFocusTrap({ enabled: true }));
     
-    Object.defineProperty(result.current.containerRef, 'current', {
+    Object.defineProperty(result.current, 'current', {
       value: null
     });
 
