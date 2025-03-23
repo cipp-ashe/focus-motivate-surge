@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
 import './App.css';
+import { applyDebugging } from './utils/debug/applyDebugging';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -17,23 +18,13 @@ const queryClient = new QueryClient({
   },
 });
 
-// Create a dummy component to catch unhandled errors globally
-class ErrorBoundary extends React.Component<{children: React.ReactNode}> {
-  componentDidCatch(error: Error) {
-    console.error("Global error caught:", error);
-  }
-  
-  render() {
-    return this.props.children;
-  }
-}
+// Apply debugging to the App component
+const DebuggableApp = applyDebugging(App, queryClient);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <DebuggableApp />
+    </QueryClientProvider>
   </React.StrictMode>,
 );
