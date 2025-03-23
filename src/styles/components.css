@@ -15,19 +15,28 @@
 
   /* Glass and card effects - now unified */
   .card-glass {
-    @apply bg-card/70 backdrop-blur-md rounded-lg border border-border/40 shadow-sm
+    @apply bg-card/70 backdrop-blur-md rounded-lg border-border/40 shadow-sm
     transition-all duration-300 hover:shadow-md hover:border-primary/20;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   .glass-panel {
     background-color: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
-    @apply rounded-lg border border-border/30 shadow-sm transition-all;
+    @apply rounded-lg shadow-sm transition-all;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   .glass-input {
-    @apply bg-background/50 backdrop-blur-sm border border-border/40 focus:border-primary/30
+    @apply bg-background/50 backdrop-blur-sm focus:border-primary/30
     focus:bg-background/60 focus:shadow-sm transition-all duration-200;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   /* Section containers */
@@ -36,7 +45,8 @@
   }
 
   .section-header {
-    @apply flex items-center justify-between p-4 border-b border-border/40;
+    @apply flex items-center justify-between p-4;
+    border-bottom: 1px solid hsl(var(--border) / 0.1) !important;
   }
 
   .section-content {
@@ -44,7 +54,8 @@
   }
 
   .section-footer {
-    @apply p-4 border-t border-border/40;
+    @apply p-4;
+    border-top: 1px solid hsl(var(--border) / 0.1) !important;
   }
 
   .scrollable-content {
@@ -70,7 +81,8 @@
 
   /* Card patterns - unified */
   .feature-card {
-    @apply card-glass p-6 flex flex-col h-full;
+    @apply p-6 flex flex-col h-full bg-card/70 backdrop-blur-md rounded-lg transition-all duration-300 hover:shadow-md hover:-translate-y-1;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
     outline: none !important;
     box-shadow: none !important;
   }
@@ -88,7 +100,10 @@
   }
 
   .data-card {
-    @apply card-glass p-5 flex flex-col;
+    @apply p-5 flex flex-col bg-card/70 backdrop-blur-md rounded-lg transition-all duration-300;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   .data-card-header {
@@ -109,8 +124,9 @@
 
   /* Bottom navigation with solid background */
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-background/95 dark:bg-background/95 backdrop-blur-md
-    border-t border-border/40 p-2 z-50 md:hidden shadow-lg;
+    @apply fixed bottom-0 left-0 right-0 p-2 z-50 md:hidden;
+    background-color: hsl(var(--background)) !important;
+    border-top: 1px solid hsl(var(--border) / 0.1) !important;
     outline: none !important;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
   }
@@ -122,16 +138,20 @@
   }
 
   .bottom-nav-dropdown {
-    @apply absolute bg-background/95 dark:bg-background/95 backdrop-blur-md rounded-md 
-    border border-border/40 shadow-lg p-1 z-50;
+    @apply absolute rounded-md p-1 z-50;
+    background-color: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
     outline: none !important;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
   }
 
   /* Task item styling - now unified with other components */
   .task-item {
-    @apply card-glass p-3 relative hover:shadow-md hover:bg-card/80 
-    hover:border-primary/20 transition-all duration-200;
+    @apply p-3 relative hover:shadow-md hover:bg-card/80 
+    hover:border-primary/20 transition-all duration-200 bg-card/70 backdrop-blur-md rounded-lg;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   .task-item-selected {
@@ -144,124 +164,20 @@
 
   /* Note item styling - unified with task styling */
   .note-item {
-    @apply card-glass p-3 relative hover:shadow-md hover:bg-card/80 
-    hover:border-primary/20 transition-all duration-200;
+    @apply p-3 relative hover:shadow-md hover:bg-card/80 
+    hover:border-primary/20 transition-all duration-200 bg-card/70 backdrop-blur-md rounded-lg;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   /* Screenshot styling - unified */
   .screenshot-card {
-    @apply card-glass overflow-hidden;
+    @apply overflow-hidden bg-card/70 backdrop-blur-md rounded-lg;
+    border: 1px solid hsl(var(--border) / 0.1) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
-  .screenshot-header {
-    @apply p-4 pb-2;
-  }
-
-  .screenshot-content {
-    @apply px-4 pb-4 pt-2;
-  }
-
-  .screenshot-footer {
-    @apply p-4 pt-2 flex justify-between;
-  }
-
-  /* Button styles - unified */
-  .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm 
-    hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
-  }
-
-  .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
-  }
-
-  .btn-outline {
-    @apply border border-input bg-transparent hover:bg-accent hover:text-accent-foreground;
-  }
-
-  .btn-ghost {
-    @apply bg-transparent hover:bg-secondary/50 text-foreground;
-  }
-
-  .btn-icon {
-    @apply p-2 rounded-full;
-  }
-
-  /* Form elements */
-  .form-group {
-    @apply space-y-2 mb-4;
-  }
-
-  .form-label {
-    @apply text-sm font-medium block;
-  }
-
-  .form-input {
-    @apply glass-input rounded-md px-3 py-2 w-full;
-  }
-
-  .form-error {
-    @apply text-destructive text-sm mt-1;
-  }
-
-  /* Badge variations */
-  .badge-primary {
-    @apply bg-primary/20 text-primary text-xs py-0.5 px-2 rounded-full;
-  }
-
-  .badge-secondary {
-    @apply bg-secondary/60 text-secondary-foreground text-xs py-0.5 px-2 rounded-full;
-  }
-
-  .badge-outline {
-    @apply border border-border bg-transparent text-xs py-0.5 px-2 rounded-full;
-  }
-
-  /* Task type colors - now using CSS variables */
-  .task-color-timer {
-    @apply text-[hsl(var(--timer-color))];
-  }
-  
-  .task-color-journal {
-    @apply text-[hsl(var(--journal-color))];
-  }
-  
-  .task-color-checklist {
-    @apply text-[hsl(var(--checklist-color))];
-  }
-  
-  .task-color-screenshot {
-    @apply text-[hsl(var(--screenshot-color))];
-  }
-  
-  .task-color-voicenote {
-    @apply text-[hsl(var(--voicenote-color))];
-  }
-  
-  .task-color-focus {
-    @apply text-[hsl(var(--focus-color))];
-  }
-
-  /* Mobile optimizations */
-  @media (max-width: 640px) {
-    .mobile-container {
-      @apply px-3 py-1.5;
-    }
-    
-    .mobile-text {
-      @apply text-sm;
-    }
-    
-    .mobile-compact-padding {
-      @apply p-3;
-    }
-    
-    .mobile-bottom-spacing {
-      @apply pb-20;
-    }
-    
-    .mobile-touch-target {
-      @apply min-h-11 min-w-11;
-    }
-  }
+  /* ... keep existing code (remaining styles) */
 }

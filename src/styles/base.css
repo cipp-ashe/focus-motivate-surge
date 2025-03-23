@@ -1,4 +1,3 @@
-
 @layer base {
   * {
     @apply border-border;
@@ -24,6 +23,7 @@
   [data-radix-sheet-content] {
     outline: none !important;
     box-shadow: none !important;
+    border-color: hsl(var(--border) / 0.1) !important;
   }
   
   /* Specific debugging class for theme troubleshooting */
@@ -56,6 +56,7 @@
   *::after {
     @apply transition-colors duration-300;
     outline: none !important;
+    border-color: hsl(var(--border) / 0.1) !important;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -86,13 +87,15 @@
   button, input, textarea, select, a, div, [tabindex], [role="button"] {
     outline: none !important;
     box-shadow: none !important;
+    border-color: hsl(var(--border) / 0.1) !important;
   }
   
   /* Explicitly remove focus styles for feature cards and their children */
-  [class*="Card"], [class*="card-"], .card,
-  [class*="Card"] *, [class*="card-"] *, .card * {
+  [class*="Card"], [class*="card-"], .card, .feature-card, .feature-card-habit,
+  [class*="Card"] *, [class*="card-"] *, .card *, .feature-card *, .feature-card-habit * {
     outline: none !important;
-    box-shadow: none !important; 
+    box-shadow: none !important;
+    border-color: hsl(var(--border) / 0.1) !important;
   }
   
   /* Improved Glass effect - unified for light and dark modes */
@@ -100,7 +103,8 @@
     background-color: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur, 12px));
     border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+    box-shadow: none !important;
+    outline: none !important;
   }
   
   /* Add debugging hook to check when base.css is fully loaded */
@@ -123,13 +127,13 @@
   
   /* DARK MODE STYLES - Increased specificity for dark mode */
   .dark * {
-    border-color: hsl(var(--border) / 0.05);
+    border-color: hsl(var(--border) / 0.05) !important;
   }
   
   .dark .card,
   .dark [class*="card-"],
   .dark [class*="border-"] {
-    border-color: hsl(var(--border) / 0.05);
+    border-color: hsl(var(--border) / 0.05) !important;
     border-style: solid;
   }
   
@@ -137,7 +141,7 @@
   .dark input,
   .dark textarea,
   .dark select {
-    border-color: hsl(var(--border) / 0.1);
+    border-color: hsl(var(--border) / 0.1) !important;
   }
   
   /* Fix SVG/icons in dark mode */

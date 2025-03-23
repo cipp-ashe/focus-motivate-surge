@@ -63,10 +63,15 @@ export const NavigationDropdown: React.FC<NavigationDropdownProps> = ({
         </CollapsibleTrigger>
         <CollapsibleContent 
           className={cn(
-            "absolute bg-background/95 dark:bg-background/95 backdrop-blur-md rounded-md border border-border/40 shadow-lg p-1 w-36 z-50 left-1/2 -translate-x-1/2",
+            "absolute bg-background rounded-md border border-border/40 shadow-lg p-1 w-36 z-50 left-1/2 -translate-x-1/2",
             position === 'top' ? "top-full mt-2" : "bottom-full mb-2"
           )}
-          style={{ outline: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}
+          style={{ 
+            backgroundColor: 'hsl(var(--background))', 
+            outline: 'none', 
+            boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            border: '1px solid hsl(var(--border) / 0.4)'
+          }}
         >
           <div className="flex flex-col space-y-1">
             {items.map((item) => (

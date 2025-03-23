@@ -98,6 +98,7 @@ const DebugModule = {
   logger,
 };
 
+// Make sure all debug hooks have access to the default export
 export default DebugModule;
 
 // Mock component for DebugProvider

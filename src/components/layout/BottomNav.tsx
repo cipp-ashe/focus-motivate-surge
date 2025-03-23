@@ -12,7 +12,13 @@ export const BottomNav = () => {
   const { openCategory, toggleCategory, isActive, isInCategory } = useNavigation();
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background/95 dark:bg-background/95 backdrop-blur-md border-t border-border/40 p-2 z-50 md:hidden shadow-lg" style={{ outline: 'none', boxShadow: '0 -2px 10px rgba(0,0,0,0.1)' }}>
+    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border/40 p-2 z-50 md:hidden" 
+      style={{ 
+        backgroundColor: 'hsl(var(--background))',
+        outline: 'none', 
+        boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+        backdropFilter: 'blur(10px)'
+      }}>
       <div className="flex items-center justify-between">
         {/* Home Button */}
         <NavigationLinkItem

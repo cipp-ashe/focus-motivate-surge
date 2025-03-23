@@ -34,34 +34,60 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
   buttonStyle
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   
   // Effect to remove outlines and box-shadows
   useEffect(() => {
-    // Apply style to the card immediately
-    if (cardRef.current) {
-      cardRef.current.style.outline = 'none';
-      cardRef.current.style.boxShadow = 'none';
-      
-      // Find and apply to all focusable elements
-      const allElements = cardRef.current.querySelectorAll('*');
-      allElements.forEach(el => {
-        if (el instanceof HTMLElement) {
-          el.style.outline = 'none';
-          el.style.boxShadow = 'none';
-        }
-      });
-    }
-    
-    // Global style override for this component
+    // Add a global style override for this component
     const style = document.createElement('style');
-    style.textContent = `
-      .feature-card-habit, .feature-card-habit * {
+    style.innerHTML = `
+      .feature-card-habit, 
+      .feature-card-habit *,
+      button, a, div[role="button"],
+      .card, .card-glass, .feature-card {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: rgba(var(--border-rgb), 0.1) !important;
+      }
+      
+      .feature-card-habit:focus,
+      .feature-card-habit *:focus,
+      button:focus, a:focus, div[role="button"]:focus,
+      .card:focus, .card-glass:focus, .feature-card:focus {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+      
+      .card, .card-content, .feature-card {
         outline: none !important;
         box-shadow: none !important;
       }
     `;
     document.head.appendChild(style);
+    
+    // Apply style to all elements within the card
+    if (cardRef.current) {
+      const applyNoOutlineStyle = (element: HTMLElement) => {
+        element.style.outline = 'none';
+        element.style.boxShadow = 'none';
+        
+        // Also remove focus styles
+        element.addEventListener('focus', () => {
+          element.style.outline = 'none';
+          element.style.boxShadow = 'none';
+        }, true);
+      };
+      
+      // Apply to the card itself
+      applyNoOutlineStyle(cardRef.current);
+      
+      // Apply to all child elements
+      const allElements = cardRef.current.querySelectorAll('*');
+      allElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          applyNoOutlineStyle(el);
+        }
+      });
+    }
     
     return () => {
       document.head.removeChild(style);
@@ -71,8 +97,12 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
   return (
     <div 
       ref={cardRef}
-      className={`feature-card-habit bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg border border-primary/10 p-6 shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${cardClass}`}
-      style={{ outline: 'none', boxShadow: 'none' }}
+      className={`feature-card-habit bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg p-6 transform transition-all duration-300 hover:-translate-y-1 ${cardClass}`}
+      style={{ 
+        outline: 'none', 
+        boxShadow: 'none',
+        border: '1px solid rgba(var(--border-rgb), 0.1)'
+      }}
     >
       <div className="flex items-center gap-3 mb-3">
         <div className={`${iconClass} p-2 rounded-md flex items-center justify-center`} style={{ outline: 'none', boxShadow: 'none' }}>
@@ -95,7 +125,7 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
       </ul>
       
       <Button 
-        className="w-full button-glow outline-none" 
+        className="w-full" 
         variant="default" 
         style={{...buttonStyle, outline: 'none', boxShadow: 'none'}}
         asChild

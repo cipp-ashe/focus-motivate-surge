@@ -1,4 +1,3 @@
-
 /* Base theme with modern design approach */
 #root {
   max-width: 1400px;
@@ -37,25 +36,25 @@
 
 /* Enhanced shadows and glass effects */
 .shadow-glass {
-  box-shadow: var(--glass-shadow);
+  box-shadow: none !important;
 }
 
 .shadow-glow {
-  box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.15);
+  box-shadow: none !important;
 }
 
 .glass-effect {
   background-color: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  border: 1px solid hsl(var(--border) / 0.1) !important;
+  box-shadow: none !important;
 }
 
 .glass-card {
   background-color: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  border: 1px solid hsl(var(--border) / 0.1) !important;
+  box-shadow: none !important;
 }
 
 /* Text gradient effects - ensure these don't affect backgrounds */
@@ -69,7 +68,7 @@
 
 /* Button styles and hover effects */
 .button-glow:hover {
-  box-shadow: 0 0 12px hsl(var(--primary) / 0.3);
+  box-shadow: none !important;
   transform: translateY(-1px);
 }
 
@@ -87,23 +86,28 @@
 
 /* Enhanced card styling */
 .card-hover-effect {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:translate-y-[-1px];
+  @apply transition-all duration-300 hover:translate-y-[-1px];
+  box-shadow: none !important;
 }
 
 /* Remove any focus-related styling */
 
 /* Form element styling */
 .input-bordered {
-  @apply border border-primary/20 focus:border-primary/30;
+  @apply border-primary/20 focus:border-primary/30;
+  border: 1px solid hsl(var(--border) / 0.1) !important;
 }
 
 /* Interactive components */
 .interactive-card {
-  @apply transition-all duration-300 hover:shadow-lg hover:border-primary/20 cursor-pointer;
+  @apply transition-all duration-300 cursor-pointer;
+  border: 1px solid hsl(var(--border) / 0.1) !important;
+  box-shadow: none !important;
 }
 
 .interactive-button {
-  @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm;
+  @apply transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0;
+  box-shadow: none !important;
 }
 
 /* Responsive design utilities */
@@ -262,7 +266,7 @@
 }
 
 .dark .border-primary {
-  border-color: hsl(var(--primary) / 0.2) !important;
+  border-color: hsl(var(--border) / 0.2) !important;
 }
 
 .dark .interactive-card:hover,

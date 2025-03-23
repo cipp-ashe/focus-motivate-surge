@@ -1,154 +1,55 @@
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
-interface FocusTrapOptions {
-  autoFocus?: boolean;
-  returnFocusOnUnmount?: boolean;
-  preventScroll?: boolean;
-  disableOutline?: boolean;
+interface UseFocusTrapOptions {
   enabled?: boolean;
 }
 
-export const useFocusTrap = (options: FocusTrapOptions = {}) => {
-  const {
-    autoFocus = false,
-    returnFocusOnUnmount = false,
-    preventScroll = true,
-    disableOutline = true,
-    enabled = true
-  } = options;
-  
-  const containerRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
+export const useFocusTrap = ({ enabled = true }: UseFocusTrapOptions = {}) => {
+  const containerRef = useRef<HTMLElement | null>(null);
 
-  // Add a method to get focusable elements for testing
-  const getFocusableElements = () => {
-    if (!containerRef.current) return [];
-    return Array.from(
+  const getFocusableElements = useCallback(() => {
+    if (!enabled || !containerRef.current) return [];
+
+    const elements = Array.from(
       containerRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       )
     );
+
+    // Filter out disabled elements
+    return elements.filter((el) => {
+      return !el.hasAttribute('disabled') && 
+        el.getAttribute('aria-hidden') !== 'true' &&
+        (el.tabIndex ?? 0) >= 0;
+    });
+  }, [enabled]);
+
+  // Function to trap focus within the container
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!enabled || !containerRef.current || e.key !== 'Tab') return;
+
+    const focusableElements = getFocusableElements();
+    if (focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    
+    // Trap the focus within the container
+    if (e.shiftKey && document.activeElement === firstElement) {
+      e.preventDefault();
+      lastElement.focus();
+    } else if (!e.shiftKey && document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement.focus();
+    }
+  }, [enabled, getFocusableElements]);
+
+  return {
+    ...containerRef,
+    getFocusableElements,
+    handleKeyDown
   };
-
-  useEffect(() => {
-    if (!enabled || !containerRef.current) return;
-
-    // Save the currently focused element to restore later if needed
-    if (returnFocusOnUnmount) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
-    }
-    
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Apply no-outline styles immediately
-    const applyNoOutlineStyles = () => {
-      // Find all focusable elements
-      const focusable = container.querySelectorAll<HTMLElement>(
-        'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
-      );
-      
-      // Apply no-outline styles to all of them
-      focusable.forEach(el => {
-        el.style.outline = 'none';
-        el.style.boxShadow = 'none';
-        el.setAttribute('data-no-focus-outline', 'true');
-      });
-      
-      // Also apply to the container itself
-      container.style.outline = 'none';
-      container.style.boxShadow = 'none';
-      
-      // Apply to all elements inside the container
-      const allElements = container.querySelectorAll('*');
-      allElements.forEach(el => {
-        if (el instanceof HTMLElement) {
-          el.style.outline = 'none';
-          el.style.boxShadow = 'none';
-        }
-      });
-    };
-    
-    // Apply styles immediately
-    if (disableOutline) {
-      applyNoOutlineStyles();
-    }
-    
-    // Add global no-outline styles
-    if (disableOutline) {
-      const style = document.createElement('style');
-      style.id = 'focus-trap-no-outline-styles';
-      style.innerHTML = `
-        *[data-no-focus-outline], 
-        *[data-no-focus-outline]:focus, 
-        *[data-no-focus-outline]:focus-visible {
-          outline: none !important;
-          box-shadow: none !important;
-        }
-      `;
-      if (!document.getElementById('focus-trap-no-outline-styles')) {
-        document.head.appendChild(style);
-      }
-    }
-    
-    // Add mutation observer to apply styles to dynamically added elements
-    let observer: MutationObserver | null = null;
-    if (disableOutline) {
-      observer = new MutationObserver(applyNoOutlineStyles);
-      observer.observe(container, { childList: true, subtree: true });
-    }
-    
-    // Basic focus handling if needed
-    if (autoFocus) {
-      const focusableElements = getFocusableElements();
-      
-      if (focusableElements.length) {
-        focusableElements[0].focus({ preventScroll });
-        if (disableOutline) {
-          focusableElements[0].style.outline = 'none';
-          focusableElements[0].style.boxShadow = 'none';
-        }
-      }
-    }
-    
-    // Simplified tab handler that just disables outlines
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab' && disableOutline) {
-        setTimeout(() => {
-          if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.style.outline = 'none';
-            document.activeElement.style.boxShadow = 'none';
-          }
-        }, 0);
-      }
-    };
-    
-    document.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      if (observer) observer.disconnect();
-      
-      // Remove global styles when component unmounts
-      const styleElement = document.getElementById('focus-trap-no-outline-styles');
-      if (styleElement && styleElement.parentNode) {
-        styleElement.parentNode.removeChild(styleElement);
-      }
-      
-      // Return focus if configured
-      if (returnFocusOnUnmount && previousFocusRef.current) {
-        previousFocusRef.current.focus({ preventScroll });
-      }
-    };
-  }, [autoFocus, returnFocusOnUnmount, preventScroll, disableOutline, enabled]);
-  
-  // Return the ref and the getFocusableElements method
-  const refWithMethods = Object.assign(containerRef, {
-    getFocusableElements
-  });
-  
-  return refWithMethods;
 };
 
 export default useFocusTrap;
