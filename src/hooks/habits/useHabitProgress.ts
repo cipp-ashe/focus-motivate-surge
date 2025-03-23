@@ -1,13 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
-
-interface HabitProgressResult {
-  value: boolean | number;
-  streak: number;
-  completed: boolean;
-}
+import { eventManager } from '@/lib/events/EventManager';
+import { HabitProgressResult } from '@/components/habits/types';
 
 export const useHabitProgress = () => {
   const [progressMap, setProgressMap] = useState<Record<string, Record<string, Record<string, any>>>>({});
@@ -51,10 +46,10 @@ export const useHabitProgress = () => {
       });
     };
     
-    // Subscribe to relevant events
-    const unsubJournalComplete = eventBus.on('habit:journal-complete', handleJournalComplete);
-    const unsubJournalDeleted = eventBus.on('habit:journal-deleted', handleJournalDeleted);
-    const unsubTemplateDeleted = eventBus.on('habit:template-delete', handleTemplateDeleted);
+    // Subscribe to relevant events using eventManager instead of eventBus
+    const unsubJournalComplete = eventManager.on('habit:journal-complete', handleJournalComplete);
+    const unsubJournalDeleted = eventManager.on('habit:journal-deleted', handleJournalDeleted);
+    const unsubTemplateDeleted = eventManager.on('habit:template-delete', handleTemplateDeleted);
     
     return () => {
       unsubJournalComplete();
@@ -96,8 +91,8 @@ export const useHabitProgress = () => {
       return updated;
     });
     
-    // Emit event for other components to react to
-    eventBus.emit('habit:progress-update', { habitId, templateId, value, date: today });
+    // Emit event using eventManager instead of eventBus
+    eventManager.emit('habit:progress-update', { habitId, templateId, value, date: today });
     
     return { value, streak, completed: !!value };
   }, [getTodayProgress]);

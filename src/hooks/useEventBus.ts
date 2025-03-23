@@ -1,6 +1,6 @@
 
 /**
- * REMOVED: This hook has been removed.
+ * DEPRECATED: This hook has been removed.
  * Please use the useEvent hook from @/hooks/useEvent instead.
  */
 export function useEventBus() {

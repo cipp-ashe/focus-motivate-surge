@@ -1,6 +1,7 @@
+
 import { useCallback } from 'react';
 import { DayOfWeek, ActiveTemplate } from '@/components/habits/types';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { HabitContextActions } from './types';
 
 export const createHabitActions = (
@@ -23,15 +24,15 @@ export const createHabitActions = (
     const updatedTemplates = [...state.templates, template];
     localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
     
-    // Emit event to notify other components
-    eventBus.emit('habit:template-update', template);
+    // Emit event to notify other components using eventManager
+    eventManager.emit('habit:template-update', template);
   }, [dispatch, state.templates]);
 
   const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
     console.log("Updating template:", templateId, updates);
     
-    // Emit event to update template
-    eventBus.emit('habit:template-update', { 
+    // Emit event to update template using eventManager
+    eventManager.emit('habit:template-update', { 
       templateId, 
       ...updates 
     });
@@ -49,8 +50,8 @@ export const createHabitActions = (
     // First update the state directly using the reducer
     dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
     
-    // Then use the event bus to notify other components
-    eventBus.emit('habit:template-delete', { 
+    // Then use eventManager to notify other components
+    eventManager.emit('habit:template-delete', { 
       templateId, 
       isOriginatingAction: true 
     });
@@ -65,8 +66,8 @@ export const createHabitActions = (
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
     console.log("Updating template days:", templateId, days);
     
-    // Emit event to update template days via the event bus
-    eventBus.emit('habit:template-update', { 
+    // Emit event to update template days via eventManager
+    eventManager.emit('habit:template-update', { 
       templateId, 
       activeDays: days 
     });
@@ -82,8 +83,8 @@ export const createHabitActions = (
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     console.log("Reordering templates");
     
-    // Use the event bus to handle template order updates
-    eventBus.emit('habit:template-order-update', templates);
+    // Use eventManager to handle template order updates
+    eventManager.emit('habit:template-order-update', templates);
     
     // Also update state through reducer
     dispatch({ 

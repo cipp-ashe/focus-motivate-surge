@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 const STORAGE_KEY = 'habit-templates';
 
@@ -39,8 +39,8 @@ export const useTemplateManagement = () => {
         
         toast.success('Template added successfully');
         
-        // Emit event for template addition
-        eventBus.emit('habit:template-update', newTemplate);
+        // Emit event for template addition using eventManager
+        eventManager.emit('habit:template-update', newTemplate);
         
         return [...prev, newTemplate];
       }
@@ -54,8 +54,8 @@ export const useTemplateManagement = () => {
       
       toast.success('Template added successfully');
       
-      // Emit event for template addition
-      eventBus.emit('habit:template-update', template);
+      // Emit event for template addition using eventManager
+      eventManager.emit('habit:template-update', template);
       
       // Trigger UI update
       setTimeout(() => {
@@ -74,10 +74,10 @@ export const useTemplateManagement = () => {
           : template
       );
       
-      // Emit event for template update
+      // Emit event for template update using eventManager
       const updatedTemplate = updated.find(t => t.templateId === templateId);
       if (updatedTemplate) {
-        eventBus.emit('habit:template-update', updatedTemplate);
+        eventManager.emit('habit:template-update', updatedTemplate);
       }
       
       return updated;
@@ -89,8 +89,8 @@ export const useTemplateManagement = () => {
       prev.filter(template => template.templateId !== templateId)
     );
     
-    // Emit event for template deletion
-    eventBus.emit('habit:template-delete', { templateId });
+    // Emit event for template deletion using eventManager
+    eventManager.emit('habit:template-delete', { templateId, isOriginatingAction: true });
     
     toast.success('Template removed');
   }, []);
@@ -98,8 +98,8 @@ export const useTemplateManagement = () => {
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     setActiveTemplates(templates);
     
-    // Emit event for order update
-    eventBus.emit('habit:template-order-update', templates);
+    // Emit event for order update using eventManager
+    eventManager.emit('habit:template-order-update', templates);
   }, []);
 
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
@@ -110,10 +110,10 @@ export const useTemplateManagement = () => {
           : template
       );
       
-      // Emit event for days update
+      // Emit event for days update using eventManager
       const updatedTemplate = updated.find(t => t.templateId === templateId);
       if (updatedTemplate) {
-        eventBus.emit('habit:template-update', updatedTemplate);
+        eventManager.emit('habit:template-update', updatedTemplate);
       }
       
       return updated;
