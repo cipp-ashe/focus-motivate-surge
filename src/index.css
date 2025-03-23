@@ -1,86 +1,30 @@
 
-/* Force removal of all outlines and borders - more aggressive approach with !important */
-*, *:before, *:after {
-  outline: none !important;
-  outline-width: 0 !important;
-  outline-style: none !important;
-  outline-color: transparent !important;
-  box-shadow: none !important;
-}
-
-*:focus, *:focus-visible, *:focus-within, *:active {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Target all interactive elements specifically */
-button, a, input, textarea, select, [tabindex], [contenteditable], [role="button"],
-.card, [class*="card-"], [class*="Card"], .feature-card, .feature-card-habit,
-.button, [class*="button-"], [class*="Button"] {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Target focused states */
-button:focus, a:focus, input:focus, textarea:focus, select:focus, 
-[tabindex]:focus, [contenteditable]:focus, [role="button"]:focus,
-.card:focus, [class*="card-"]:focus, [class*="Card"]:focus, .feature-card:focus, .feature-card-habit:focus,
-.button:focus, [class*="button-"]:focus, [class*="Button"]:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Target hover states */
-button:hover, a:hover, input:hover, textarea:hover, select:hover,
-[tabindex]:hover, [role="button"]:hover,
-.card:hover, [class*="card-"]:hover, [class*="Card"]:hover, .feature-card:hover, .feature-card-habit:hover,
-.button:hover, [class*="button-"]:hover, [class*="Button"]:hover {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Target active states */
-button:active, a:active, input:active, textarea:active, select:active,
-[tabindex]:active, [role="button"]:active,
-.card:active, [class*="card-"]:active, [class*="Card"]:active, .feature-card:active, .feature-card-habit:active,
-.button:active, [class*="button-"]:active, [class*="Button"]:active {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Target specific UI components - dropdowns, navigation, and cards */
-.collapsible-content, 
-.dropdown-content,
-.navigation-menu-content,
-.bottom-nav,
-.feature-card,
-.feature-card-habit {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: rgba(var(--border-rgb), 0.1) !important;
-}
-
-/* Base Tailwind imports - bringing this to the top so our rules don't get overridden */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Theme variables - must be imported before other styles */
+/* Import essential theme variables */
 @import './styles/theme-variables.css';
 
-/* Base styles */
-@import './styles/base.css';
+/* Basic global styles */
+html,
+body,
+#root {
+  height: 100%;
+}
 
-/* Component and utility styles */
-@import './styles/theme.css';
-@import './styles/components.css';
-@import './styles/utilities.css';
-@import './styles/animations.css';
-@import './styles/responsive.css';
-@import './styles/task-items.css';
-@import './styles/quotes.css';
-@import './styles/tasks-dark.css';
-@import './styles/timer.css';
-@import './styles/debug.css';
-@import './styles/debug-dark.css';
-@import './styles/custom.css';
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 
+    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}

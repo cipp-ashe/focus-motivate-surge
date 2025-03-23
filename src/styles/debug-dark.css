@@ -1,4 +1,3 @@
-
 /* Dark mode specific styles for debug components */
 .dark .debug-panel {
   @apply bg-card border-border/10 shadow-lg;
@@ -27,3 +26,4 @@
   outline: none;
   border-style: solid;
 }
+
