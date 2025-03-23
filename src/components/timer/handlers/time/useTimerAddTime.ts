@@ -2,7 +2,6 @@
 import { useCallback } from "react";
 import { TimerStateMetrics } from "@/types/metrics";
 import { eventManager } from "@/lib/events/EventManager";
-import { TIMER_CONSTANTS } from "@/types/timer/constants";
 
 interface UseTimerAddTimeProps {
   addTime: (minutes: number) => void;
@@ -36,7 +35,7 @@ export const useTimerAddTime = ({
     const secondsToAdd = minutes * 60;
     const newTimeLeft = timeLeft + secondsToAdd;
     
-    // Emit tick event with updated time left
+    // Emit tick event with updated time left using standardized payload
     eventManager.emit('timer:tick', { 
       timeLeft: newTimeLeft, 
       taskName

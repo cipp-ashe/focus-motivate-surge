@@ -1,3 +1,4 @@
+
 // Define all possible event types
 export type TaskEventType = 
   | 'task:create' 
@@ -100,7 +101,7 @@ export interface EventPayloadMap {
   'task:delete': { taskId: string; reason?: string; habitId?: string };
   'task:complete': { taskId: string; metrics?: any };
   'task:select': string | null;
-  'task:reload': undefined;
+  'task:reload': any;
   'task:dismiss': { taskId: string; habitId?: string; date?: string };
   'task:force-update': any;
 
@@ -125,20 +126,20 @@ export interface EventPayloadMap {
   'habit:custom-template-create': any;
   'habit:custom-template-delete': any;
 
-  // Timer events
+  // Timer events - STANDARDIZED PAYLOADS
   'timer:tick': { timeLeft: number; taskName: string };
-  'timer:complete': { taskId: string; taskName: string; metrics: any };
+  'timer:complete': { taskId?: string; taskName: string; metrics: any };
   'timer:close': { taskName: string };
-  'timer:metrics-update': any;
+  'timer:metrics-update': { taskId?: string; metrics: any; taskName?: string };
   'timer:start': { taskId?: string; taskName: string; duration: number };
   'timer:pause': { taskId?: string; taskName: string; timeLeft: number };
   'timer:resume': { taskId?: string; taskName: string; timeLeft: number };
-  'timer:reset': { taskId?: string; taskName: string; duration: number };
+  'timer:reset': { taskId?: string; taskName: string; duration?: number };
   'timer:init': { taskName: string; duration: number };
-  'timer:set-task': { id: string; name: string; duration: number; completed: boolean; createdAt: string };
-  'timer:task-set': any;
+  'timer:set-task': { id: string; name: string; duration: number; completed?: boolean; createdAt?: string };
+  'timer:task-set': { id: string; name: string; duration: number; taskId: string };
   'timer:expand': { taskName: string };
-  'timer:collapse': { taskName: string; saveNotes: boolean };
+  'timer:collapse': { taskName: string; saveNotes?: boolean };
   'timer:update-metrics': { taskId?: string; metrics: any; taskName?: string };
 
   // UI events
@@ -146,7 +147,7 @@ export interface EventPayloadMap {
   'ui:theme-change': 'light' | 'dark' | 'system';
 
   // System events
-  'app:initialized': any;
+  'app:initialized': { timestamp: string };
   '*': { eventType: EventType; payload: any; timestamp: string };
 
   // Note events

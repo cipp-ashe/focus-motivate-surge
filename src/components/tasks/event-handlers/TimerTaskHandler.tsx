@@ -21,10 +21,7 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
       
       // Send the task to the timer with a small delay
       setTimeout(() => {
-        const event = new CustomEvent('timer:set-task', { detail: task });
-        window.dispatchEvent(event);
-        
-        // Also use eventManager
+        // Use eventManager with standardized payload
         eventManager.emit('timer:set-task', {
           id: task.id,
           name: task.name,
@@ -54,10 +51,7 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
       
       // Send the timer task
       setTimeout(() => {
-        const event = new CustomEvent('timer:set-task', { detail: timerTask });
-        window.dispatchEvent(event);
-        
-        // Also use eventManager
+        // Use eventManager with standardized payload
         eventManager.emit('timer:set-task', {
           id: timerTask.id,
           name: timerTask.name,

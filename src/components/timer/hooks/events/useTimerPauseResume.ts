@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { logger } from '@/utils/logManager';
+import { EventPayload } from '@/types/events';
 
 interface UseTimerPauseResumeProps {
   taskName: string;
@@ -26,7 +27,7 @@ export const useTimerPauseResume = ({
     logger.debug('TimerPauseResume', `Setting up timer pause/resume event listeners for task: ${taskName}`);
     
     // Handle timer pause - stop the interval
-    const unsubPause = eventManager.on('timer:pause', (payload) => {
+    const unsubPause = eventManager.on('timer:pause', (payload: EventPayload<'timer:pause'>) => {
       if (payload.taskName === taskName) {
         logger.debug('TimerPauseResume', `Pausing timer for ${taskName}, time left: ${timeLeftRef.current}`);
         
@@ -50,7 +51,7 @@ export const useTimerPauseResume = ({
     });
     
     // Handle timer resume - restart the interval with the current time left
-    const unsubResume = eventManager.on('timer:resume', (payload) => {
+    const unsubResume = eventManager.on('timer:resume', (payload: EventPayload<'timer:resume'>) => {
       if (payload.taskName === taskName) {
         logger.debug('TimerPauseResume', `Resuming timer for ${taskName}, time left: ${timeLeftRef.current}`);
         

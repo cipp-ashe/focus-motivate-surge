@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { logger } from "@/utils/logManager";
 import { eventManager } from "@/lib/events/EventManager";
+import { EventPayload } from "@/types/events";
 
 interface UseTimerMonitoringProps {
   taskName: string;
@@ -20,25 +21,15 @@ export const useTimerMonitoring = ({
 }: UseTimerMonitoringProps) => {
   const timerSyncRef = useRef<boolean>(false);
   
-  // Set up timer synchronization logic
+  // Set up timer synchronization logic using only eventManager
   useEffect(() => {
     // Only set up monitoring if we have a task name
     if (!taskName) return;
     
     logger.debug('TimerMonitoring', `Monitoring timer for task: ${taskName}`);
     
-    // Custom window event for browser timers
-    const handleWindowTimerSync = (event: any) => {
-      if (event.detail && event.detail.timeLeft !== undefined) {
-        updateTimeLeft(event.detail.timeLeft);
-        logger.debug('TimerMonitoring', `Synchronized timer with window event: ${event.detail.timeLeft}s`);
-      }
-    };
-    
-    window.addEventListener('timer:sync', handleWindowTimerSync);
-    
     // Set up timer event listeners for synchronization
-    const unsubTick = eventManager.on('timer:tick', (payload) => {
+    const unsubTick = eventManager.on('timer:tick', (payload: EventPayload<'timer:tick'>) => {
       if (payload.taskName === taskName && payload.timeLeft !== undefined) {
         // Only update if the timeLeft is different, to prevent infinite loops
         updateTimeLeft(payload.timeLeft);
@@ -46,7 +37,7 @@ export const useTimerMonitoring = ({
     });
     
     // Handle timer complete events
-    const unsubComplete = eventManager.on('timer:complete', async (payload) => {
+    const unsubComplete = eventManager.on('timer:complete', async (payload: EventPayload<'timer:complete'>) => {
       if (payload.taskName === taskName) {
         logger.debug('TimerMonitoring', `Timer complete event received for task: ${taskName}`);
         
@@ -58,19 +49,15 @@ export const useTimerMonitoring = ({
       }
     });
     
-    // Use window events to mark timer as initialized since we don't have the proper event type yet
-    const timerInitEvent = new CustomEvent('timer:initialized', { 
-      detail: { 
-        taskName,
-        timestamp: new Date().toISOString()
-      } 
+    // Emit init event to mark timer as initialized
+    eventManager.emit('timer:init', {
+      taskName,
+      duration: 0 // Default duration
     });
-    window.dispatchEvent(timerInitEvent);
     
     // Cleanup when unmounting
     return () => {
       logger.debug('TimerMonitoring', `Stopped monitoring timer for task: ${taskName}`);
-      window.removeEventListener('timer:sync', handleWindowTimerSync);
       unsubTick();
       unsubComplete();
     };
@@ -80,13 +67,10 @@ export const useTimerMonitoring = ({
   return useCallback(() => {
     logger.debug('TimerMonitoring', `Manually checking timer state for task: ${taskName}`);
     
-    // Use window events for sync requests since we don't have the proper event type yet
-    const syncRequestEvent = new CustomEvent('timer:request-sync', { 
-      detail: { 
-        taskName,
-        timestamp: new Date().toISOString()
-      } 
+    // Emit a request for timer state
+    eventManager.emit('timer:tick', {
+      taskName,
+      timeLeft: -1 // Special value to indicate a request for the current time
     });
-    window.dispatchEvent(syncRequestEvent);
   }, [taskName]);
 };

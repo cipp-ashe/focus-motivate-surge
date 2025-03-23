@@ -34,22 +34,19 @@ export const useTimerMonitor = ({
   useEffect(() => {
     logger.debug('TimerMonitor', "Setting up timer monitor event listeners");
     
-    // Update the handler to correctly process remaining or timeLeft values with throttling
+    // Handle timer tick events with standardized payload structure
     const handleTimerTick = (payload: EventPayload<'timer:tick'>) => {
-      // Use either timeLeft or remaining based on what's available
-      const timeLeft = payload.timeLeft !== undefined ? payload.timeLeft : payload.remaining;
-      
-      if (timeLeft !== undefined) {
+      if (payload.timeLeft !== undefined) {
         // Apply throttling to reduce excessive updates
         const now = Date.now();
-        if (now - lastTickTimeRef.current > 500 || Math.abs(timerInfoRef.current.secondsLeft - timeLeft) > 5) {
+        if (now - lastTickTimeRef.current > 500 || Math.abs(timerInfoRef.current.secondsLeft - payload.timeLeft) > 5) {
           lastTickTimeRef.current = now;
-          timerInfoRef.current.secondsLeft = timeLeft;
+          timerInfoRef.current.secondsLeft = payload.timeLeft;
           timerInfoRef.current.isActive = true; // Assume running when tick received
           
           // Call both callbacks if provided
-          if (onProgress) onProgress(timeLeft);
-          if (onTick) onTick(timeLeft);
+          if (onProgress) onProgress(payload.timeLeft);
+          if (onTick) onTick(payload.timeLeft);
         }
       }
     };

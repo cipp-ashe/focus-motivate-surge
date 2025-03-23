@@ -25,11 +25,14 @@ export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) 
     
     // After a small delay to ensure navigation happens
     setTimeout(() => {
-      // Emit the timer event with task details
-      eventManager.emit('timer:set-task', task);
-      
-      // Also dispatch DOM event for backward compatibility
-      window.dispatchEvent(new CustomEvent('timer:set-task', { detail: task }));
+      // Emit the timer event with task details using standardized payload
+      eventManager.emit('timer:set-task', {
+        id: task.id,
+        name: task.name,
+        duration: task.duration || 1500,
+        completed: task.completed || false,
+        createdAt: task.createdAt || new Date().toISOString()
+      });
       
       toast.success(`Timer set for: ${task.name}`);
     }, 100);

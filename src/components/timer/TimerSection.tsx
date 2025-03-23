@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Timer } from './Timer';
 import { EmptyTimerState } from './EmptyTimerState';
@@ -52,41 +53,9 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
     }
   });
   
-  // Listen for timer:set-task events from window and event manager
-  useEffect(() => {
-    const handleSetTask = (event: CustomEvent) => {
-      const task = event.detail;
-      if (!task) return;
-      
-      console.log('TimerSection: Received timer:set-task event', task);
-      
-      // Use the taskSelection context to set the task
-      if (task.id) {
-        // Create a valid Task object
-        const taskObject: Task = {
-          id: task.id,
-          name: task.name,
-          duration: task.duration || 1500,
-          completed: false,
-          createdAt: new Date().toISOString()
-        };
-        
-        selectTask(taskObject);
-        
-        // Also emit event for other components listening
-        eventManager.emit('timer:task-set', {
-          id: task.id,
-          name: task.name,
-          duration: task.duration || 1500,
-          taskId: task.id
-        });
-      }
-    };
-    
-    // Add event listener for window events
-    window.addEventListener('timer:set-task', handleSetTask as EventListener);
-    
-    // Also listen with event manager
+  // Listen for timer:set-task events using eventManager only (no window events)
+  useEffect(() => {    
+    // Listen with event manager
     const unsubscribe = eventManager.on('timer:set-task', (payload) => {
       console.log('TimerSection: Received timer:set-task from eventManager', payload);
       if (payload && typeof payload === 'object' && 'id' in payload) {
@@ -95,16 +64,23 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
           id: payload.id,
           name: payload.name,
           duration: payload.duration || 1500,
-          completed: false,
-          createdAt: new Date().toISOString()
+          completed: payload.completed || false,
+          createdAt: payload.createdAt || new Date().toISOString()
         };
         
         selectTask(task);
+        
+        // Emit a task-set event for any components that need to know
+        eventManager.emit('timer:task-set', {
+          id: task.id,
+          name: task.name,
+          duration: task.duration || 1500,
+          taskId: task.id
+        });
       }
     });
     
     return () => {
-      window.removeEventListener('timer:set-task', handleSetTask as EventListener);
       unsubscribe();
     };
   }, [selectTask]);

@@ -100,7 +100,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
           // Dispatch the decrement action
           dispatch({ type: 'DECREMENT_TIME' });
           
-          // Emit the timer tick event
+          // Emit the timer tick event with standardized payload
           eventManager.emit('timer:tick', { 
             timeLeft: state.timeLeft - 1,
             taskName: 'timer'
