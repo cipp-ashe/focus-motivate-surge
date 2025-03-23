@@ -22,7 +22,7 @@ const DashboardFooter: React.FC<DashboardFooterProps> = ({ linkTo, text }) => {
       <Button 
         asChild 
         variant="outline" 
-        className="bg-card/80 backdrop-blur-sm rounded-full px-6 shadow-glass border-primary/20 hover:bg-primary/10 button-scale"
+        className="bg-card rounded-full px-6 shadow-solid border-primary/20 hover:bg-primary/10 button-scale"
         aria-label={text}
       >
         <Link to={linkTo} className="flex items-center gap-2">

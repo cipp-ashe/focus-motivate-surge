@@ -30,7 +30,7 @@ export default {
         '102': '1.02'
       },
       boxShadow: {
-        'glass': '0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.04) inset',
+        'solid': '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)',
       },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',

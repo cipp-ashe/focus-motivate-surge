@@ -43,7 +43,7 @@ export const TimerDisplay = memo(({
     <div 
       className={cn(
         "relative group rounded-full bg-card shadow-xl transition-all duration-300 border border-primary/10",
-        isRunning ? "cursor-pointer hover:shadow-2xl hover:shadow-primary/10" : "",
+        isRunning ? "cursor-pointer hover:shadow-2xl" : "",
         size === "large" ? "p-8" : "p-6"
       )}
       onClick={handleClick}
@@ -60,7 +60,7 @@ export const TimerDisplay = memo(({
           className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           aria-hidden="true"
         >
-          <Maximize2 className="h-5 w-5 text-primary/80" />
+          <Maximize2 className="h-5 w-5 text-primary" />
         </div>
       )}
     </div>

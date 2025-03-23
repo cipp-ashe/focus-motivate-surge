@@ -37,7 +37,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
     >
       <Card className={cn(
         "transition-all duration-300 h-full",
-        "bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/20",
+        "bg-card border-border hover:border-primary/20",
         "overflow-hidden flex flex-col dashboard-card-hover"
       )}>
         <CardContent className={cn(
@@ -48,7 +48,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
             <div 
               className={cn(
                 "rounded-xl p-2.5 flex-shrink-0 mr-3", 
-                "bg-background/50 backdrop-blur-sm shadow-sm border border-border/20"
+                "bg-background shadow-sm border border-border"
               )}
               aria-hidden="true"
             >
@@ -69,7 +69,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           
           {metrics && metrics.length > 0 && (
             <div 
-              className="mt-auto pt-3 grid grid-cols-2 gap-2 text-sm border-t border-border/10"
+              className="mt-auto pt-3 grid grid-cols-2 gap-2 text-sm border-t border-border"
               aria-label={`${title} metrics`}
             >
               {metrics.map((metric, index) => {
@@ -77,9 +77,9 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
                 return (
                   <div 
                     key={index} 
-                    className="flex items-center gap-1.5 bg-background/30 p-1.5 rounded-md"
+                    className="flex items-center gap-1.5 bg-background p-1.5 rounded-md"
                   >
-                    <metric.icon className="w-3.5 h-3.5 text-primary/70" aria-hidden="true" />
+                    <metric.icon className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                     <span className="text-muted-foreground" id={metricId}>{metric.label}:</span>
                     <span className="font-medium" aria-labelledby={metricId}>{metric.value}</span>
                   </div>

@@ -46,8 +46,8 @@ export const NoteCard = ({
   return (
     <div 
       className={cn(
-        "group relative px-2 py-1.5 rounded-md border border-primary/10 bg-card/30",
-        "backdrop-blur-sm transition-all duration-200 hover:border-primary/20 hover:bg-accent/5 w-full",
+        "group relative px-2 py-1.5 rounded-md border border-primary/10 bg-card",
+        "transition-all duration-200 hover:border-primary/20 hover:bg-accent/5 w-full",
         compact ? "text-sm" : "",
         "cursor-pointer"
       )}
@@ -59,7 +59,7 @@ export const NoteCard = ({
             <span className={cn(
               "text-foreground/90 block",
               "after:absolute after:right-0 after:top-0 after:h-full after:w-16",
-              "after:bg-gradient-to-r after:from-transparent after:to-card/30",
+              "after:bg-gradient-to-r after:from-transparent after:to-card",
               !isExpanded && "line-clamp-1",
               compact && "text-sm"
             )}>

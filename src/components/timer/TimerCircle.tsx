@@ -93,9 +93,6 @@ export const TimerCircle = memo(({
     ? 'w-64 h-64 sm:w-72 sm:h-72' 
     : 'w-52 h-52 sm:w-56 sm:h-56';
 
-  // Calculate percentage completion for the gradient
-  const percentComplete = ((minutes * 60 - timeLeft) / (minutes * 60)) * 100;
-
   return (
     <div 
       className={cn(
@@ -137,7 +134,7 @@ export const TimerCircle = memo(({
           ref={progressRef}
           className={cn(
             "transition-all duration-300",
-            isRunning ? "filter drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" : ""
+            isRunning ? "filter drop-shadow" : ""
           )}
           strokeWidth="5"
           fill="transparent"
@@ -169,15 +166,10 @@ export const TimerCircle = memo(({
         <span className="text-xs text-muted-foreground mt-2 font-medium">
           {isRunning ? "FOCUS TIME" : "READY"}
         </span>
-        
-        {/* Add a subtle glow effect behind the timer when running */}
-        {isRunning && (
-          <div className="absolute inset-0 rounded-full bg-purple-500/5 blur-xl -z-10" />
-        )}
       </div>
       
       {/* Subtle circle decoration */}
-      <div className="absolute -inset-1 rounded-full border border-purple-200/20 dark:border-purple-800/20 -z-10" />
+      <div className="absolute -inset-1 rounded-full border border-purple-200 dark:border-purple-800 -z-10" />
     </div>
   );
 });

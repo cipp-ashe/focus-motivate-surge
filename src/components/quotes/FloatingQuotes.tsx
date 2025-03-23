@@ -1,3 +1,4 @@
+
 import { memo, useEffect, useRef, useState } from "react";
 import { Quote } from "@/types/timer/models";
 
@@ -108,14 +109,14 @@ export const FloatingQuotes = memo(({ favorites }: FloatingQuotesProps) => {
             }}
           >
             <div 
-              className="text-lg font-light italic text-primary/80 leading-relaxed backdrop-blur-sm"
+              className="text-lg font-light italic text-primary leading-relaxed bg-background"
               style={{
                 textShadow: "1px 1px 5px rgba(0, 0, 0, 0.5)",
               }}
             >
               "{quote.text}"
             </div>
-            <div className="text-sm text-primary/60 mt-1">
+            <div className="text-sm text-primary mt-1">
               — {quote.author}
             </div>
           </div>
