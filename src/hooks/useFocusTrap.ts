@@ -28,37 +28,71 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     const container = containerRef.current;
     if (!container) return;
 
-    // If disableOutline is true, add a class to disable outlines
+    // Always apply our no-outline styles
+    const applyNoOutlineStyles = () => {
+      // Find all focusable elements
+      const focusable = container.querySelectorAll<HTMLElement>(
+        'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      // Apply no-outline styles to all of them
+      focusable.forEach(el => {
+        el.style.outline = 'none';
+        el.style.boxShadow = 'none';
+        el.setAttribute('data-no-focus-outline', 'true');
+      });
+      
+      // Also apply to the container itself
+      container.style.outline = 'none';
+      container.style.boxShadow = 'none';
+    };
+    
+    // Apply styles immediately
+    applyNoOutlineStyles();
+    
+    // Add global no-outline styles
     if (disableOutline) {
-      container.classList.add('focus-trap-no-outline');
       const style = document.createElement('style');
+      style.id = 'focus-trap-no-outline-styles';
       style.innerHTML = `
-        .focus-trap-no-outline, 
-        .focus-trap-no-outline * {
+        *[data-no-focus-outline], 
+        *[data-no-focus-outline]:focus, 
+        *[data-no-focus-outline]:focus-visible {
           outline: none !important;
           box-shadow: none !important;
         }
       `;
-      document.head.appendChild(style);
-    }
-
-    // Focus handling can be kept minimal if not needed
-    if (!autoFocus) {
-      return;
+      if (!document.getElementById('focus-trap-no-outline-styles')) {
+        document.head.appendChild(style);
+      }
     }
     
-    // Simplified focus handling that doesn't trap but doesn't cause outlines
+    // Add mutation observer to apply styles to dynamically added elements
+    const observer = new MutationObserver(applyNoOutlineStyles);
+    observer.observe(container, { childList: true, subtree: true });
+    
+    // Basic focus handling if needed
+    if (autoFocus) {
+      const focusableElements = [...container.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )];
+      
+      if (focusableElements.length) {
+        focusableElements[0].focus({ preventScroll });
+        focusableElements[0].style.outline = 'none';
+        focusableElements[0].style.boxShadow = 'none';
+      }
+    }
+    
+    // Simplified tab handler that just disables outlines
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Tab') {
-        // Allow tabbing but prevent outlines if configured
-        if (disableOutline) {
-          requestAnimationFrame(() => {
-            if (document.activeElement instanceof HTMLElement) {
-              document.activeElement.style.outline = 'none';
-              document.activeElement.style.boxShadow = 'none';
-            }
-          });
-        }
+        setTimeout(() => {
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.style.outline = 'none';
+            document.activeElement.style.boxShadow = 'none';
+          }
+        }, 0);
       }
     };
     
@@ -66,18 +100,11 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      observer.disconnect();
       
       // Return focus if configured
       if (returnFocusOnUnmount && previousFocusRef.current) {
         previousFocusRef.current.focus({ preventScroll });
-      }
-      
-      // Remove the style element if it was added
-      if (disableOutline) {
-        const styleElement = document.querySelector('style');
-        if (styleElement && styleElement.innerHTML.includes('focus-trap-no-outline')) {
-          styleElement.remove();
-        }
       }
     };
   }, [autoFocus, returnFocusOnUnmount, preventScroll, disableOutline]);

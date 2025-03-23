@@ -5,12 +5,14 @@ interface UseFocusTrapOptions {
   isActive?: boolean;
   autoFocus?: boolean;
   returnFocus?: boolean;
+  disableOutlines?: boolean;
 }
 
 export const useFocusTrap = ({
   isActive = true,
   autoFocus = true,
-  returnFocus = true
+  returnFocus = true,
+  disableOutlines = true
 }: UseFocusTrapOptions = {}) => {
   const trapRef = useRef<HTMLDivElement>(null);
   const previousFocusedElement = useRef<HTMLElement | null>(null);
@@ -35,21 +37,51 @@ export const useFocusTrap = ({
       previousFocusedElement.current = document.activeElement as HTMLElement;
     }
     
+    // Apply no-outline styles to all focusable elements
+    if (disableOutlines) {
+      focusableElements.forEach(el => {
+        el.style.outline = 'none';
+        el.style.boxShadow = 'none';
+      });
+    }
+    
     // Focus the first element when the trap is activated (only if autoFocus is true)
     if (autoFocus) {
       firstElement.focus({ preventScroll: true });
+      if (disableOutlines) {
+        firstElement.style.outline = 'none';
+        firstElement.style.boxShadow = 'none';
+      }
     }
     
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Disable outlines on tab
+      if (disableOutlines && event.key === 'Tab') {
+        setTimeout(() => {
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.style.outline = 'none';
+            document.activeElement.style.boxShadow = 'none';
+          }
+        }, 0);
+      }
+      
       if (event.key !== 'Tab') return;
       
       // Prevent regular tab behavior
       if (event.shiftKey && document.activeElement === firstElement) {
         event.preventDefault();
         lastElement.focus();
+        if (disableOutlines) {
+          lastElement.style.outline = 'none';
+          lastElement.style.boxShadow = 'none';
+        }
       } else if (!event.shiftKey && document.activeElement === lastElement) {
         event.preventDefault();
         firstElement.focus();
+        if (disableOutlines) {
+          firstElement.style.outline = 'none';
+          firstElement.style.boxShadow = 'none';
+        }
       }
     };
     
@@ -62,9 +94,13 @@ export const useFocusTrap = ({
       // Return focus to the previously focused element when the trap is deactivated
       if (returnFocus && previousFocusedElement.current && document.contains(previousFocusedElement.current)) {
         previousFocusedElement.current.focus();
+        if (disableOutlines && previousFocusedElement.current) {
+          previousFocusedElement.current.style.outline = 'none';
+          previousFocusedElement.current.style.boxShadow = 'none';
+        }
       }
     };
-  }, [isActive, autoFocus, returnFocus]);
+  }, [isActive, autoFocus, returnFocus, disableOutlines]);
 
   return trapRef;
 };
