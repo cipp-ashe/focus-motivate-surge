@@ -1,4 +1,3 @@
-
 /**
  * Calculate the efficiency ratio of a timer session
  */
@@ -66,6 +65,38 @@ export const formatTimeHuman = (seconds: number): string => {
   }
   
   return `${hours}h ${remainingMinutes}m`;
+};
+
+/**
+ * Format duration in seconds to a human-readable string
+ * @param seconds Duration in seconds
+ * @param detailed If true, includes seconds in output
+ * @returns Formatted duration string (e.g., "1h 30m" or "1h 30m 15s")
+ */
+export const formatDuration = (seconds: number, detailed = false): string => {
+  if (seconds === undefined || seconds === null || isNaN(seconds)) {
+    return '-';
+  }
+  
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  
+  let result = '';
+  
+  if (hours > 0) {
+    result += `${hours}h `;
+  }
+  
+  if (minutes > 0 || hours > 0) {
+    result += `${minutes}m `;
+  }
+  
+  if ((remainingSeconds > 0 && detailed) || (result === '' && remainingSeconds >= 0)) {
+    result += `${remainingSeconds}s`;
+  }
+  
+  return result.trim();
 };
 
 /**

@@ -1,4 +1,3 @@
-
 /**
  * Metrics for tracking timer state
  */
@@ -21,6 +20,9 @@ export interface TimerStateMetrics {
   taskId?: string;
   actualTime?: number; // Added for compatibility
 }
+
+// Export TimerStateMetrics as TimerMetrics for compatibility with existing code
+export type TimerMetrics = TimerStateMetrics;
 
 /**
  * Task completion metrics

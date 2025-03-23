@@ -7,6 +7,40 @@ export const toISOString = (date: Date): string => {
 };
 
 /**
+ * Format a date with the specified format string
+ * Basic implementation that supports common format patterns
+ */
+export const formatDate = (date: string | Date, format: string = 'yyyy-MM-dd'): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  if (isNaN(dateObj.getTime())) {
+    console.error('Invalid date provided to formatDate:', date);
+    return 'Invalid date';
+  }
+  
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth() + 1;
+  const day = dateObj.getDate();
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes();
+  const seconds = dateObj.getSeconds();
+  
+  // Replace format tokens with actual values
+  return format
+    .replace('yyyy', year.toString())
+    .replace('MM', month.toString().padStart(2, '0'))
+    .replace('M', month.toString())
+    .replace('dd', day.toString().padStart(2, '0'))
+    .replace('d', day.toString())
+    .replace('HH', hours.toString().padStart(2, '0'))
+    .replace('H', hours.toString())
+    .replace('mm', minutes.toString().padStart(2, '0'))
+    .replace('m', minutes.toString())
+    .replace('ss', seconds.toString().padStart(2, '0'))
+    .replace('s', seconds.toString());
+};
+
+/**
  * Get today's date as YYYY-MM-DD format
  */
 export const formatToday = (): string => {
