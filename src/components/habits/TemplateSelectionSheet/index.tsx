@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ActiveTemplate, HabitTemplate } from '../types';
@@ -46,20 +47,6 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     setConfiguringTemplate(null);
   };
 
-  // Create an adapter function to handle both template object and templateId
-  const handleSelectTemplateFn = (templateOrId: HabitTemplate | string) => {
-    // If it's a string (templateId), find the template
-    if (typeof templateOrId === 'string') {
-      const template = [...allTemplates, ...propCustomTemplates].find(t => t.id === templateOrId);
-      if (template) {
-        onSelectTemplate(template);
-      }
-    } else {
-      // Otherwise it's already a template object
-      onSelectTemplate(templateOrId);
-    }
-  };
-
   return (
     <>
       <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -68,7 +55,7 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
             allTemplates={allTemplates}
             customTemplates={propCustomTemplates || customTemplates}
             activeTemplateIds={activeTemplateIds}
-            onSelectTemplate={handleSelectTemplateFn}
+            onSelectTemplate={onSelectTemplate}
             onCreateTemplate={onCreateTemplate}
             onOpenChange={onOpenChange}
             setConfiguringTemplate={setConfiguringTemplate}
@@ -82,7 +69,7 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
         configuringTemplate={configuringTemplate}
         configDialogOpen={configDialogOpen}
         onClose={handleCloseConfigDialog}
-        onSelectTemplate={handleSelectTemplateFn}
+        onSelectTemplate={onSelectTemplate}
         onOpenChange={onOpenChange}
       />
     </>

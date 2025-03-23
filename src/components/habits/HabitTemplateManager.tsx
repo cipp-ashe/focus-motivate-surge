@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Plus, Settings } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from 'sonner';
 import { ActiveTemplate, HabitTemplate } from './types';
 import { eventManager } from '@/lib/events/EventManager';
@@ -56,6 +56,8 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
         habits: template.defaultHabits || [],
         activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
         customized: false,
+        name: template.name,
+        description: template.description
       };
       onAddTemplate(activeTemplate);
       toast.success(`Added ${template.name} template`);

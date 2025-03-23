@@ -56,6 +56,43 @@ export interface ActiveTemplate {
   };
 }
 
+export interface NewTemplate {
+  name: string;
+  description: string;
+  defaultHabits: HabitDetail[];
+}
+
+export interface TemplateCardProps {
+  title: string;
+  description: string;
+  habits: HabitDetail[];
+  onAdd: () => void;
+  onConfigure?: () => void;
+  isActive?: boolean;
+}
+
+export interface TabSectionProps {
+  customTemplates: HabitTemplate[];
+  activeTemplateIds: string[];
+  onSelectTemplate: (template: HabitTemplate) => void;
+  onDeleteCustomTemplate: (templateId: string) => void;
+  onCreateTemplate: (template: NewTemplate) => void;
+}
+
+export interface HabitProgress {
+  id: string;
+  habitId: string;
+  date: string;
+  completed: boolean;
+  value?: number;
+  notes?: string;
+}
+
+export interface HabitProgressResult {
+  value: number | boolean;
+  streak: number;
+}
+
 // Helper function to create an empty habit
 export const createEmptyHabit = (): HabitDetail => ({
   id: `habit-${Date.now()}`,
