@@ -1,74 +1,103 @@
 
 /**
- * Error boundary utilities for debugging
+ * Error boundary utilities for React components
  */
-import React from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
-import { DebugModule, IS_DEV } from './types';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { DebugModule, debugStore } from './types';
 import { logDebugEvent } from './logger';
 
-/** Options for the error boundary */
-export interface ErrorBoundaryOptions {
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
   module: DebugModule;
   component: string;
-  fallback?: React.ReactNode;
-  onError?: (error: Error, info: { componentStack: string }) => void;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
 }
 
 /**
- * Higher-order component that wraps a component with an error boundary
+ * Error boundary component to catch and handle errors in React components
+ */
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    const { module, component, onError } = this.props;
+    
+    // Log the error to the debug store
+    logDebugEvent(
+      'error',
+      module,
+      component,
+      `Error in ${component}: ${error.message}`,
+      { error: error.toString(), componentStack: errorInfo.componentStack }
+    );
+    
+    // Call the onError callback if provided
+    if (onError) {
+      onError(error, errorInfo);
+    }
+    
+    // Log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`Error in ${component}:`, error);
+      console.error('Component stack:', errorInfo.componentStack);
+    }
+  }
+
+  render(): ReactNode {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="p-4 bg-red-50 text-red-500 border border-red-200 rounded-md">
+          <h3 className="text-lg font-medium">Something went wrong</h3>
+          <p className="mt-1 text-sm">{this.state.error?.message}</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+/**
+ * HOC that wraps a component with an error boundary
  */
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  options: ErrorBoundaryOptions
+  options: {
+    module: DebugModule;
+    component: string;
+    fallback?: ReactNode;
+    onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  }
 ): React.ComponentType<P> {
-  const { module, component, fallback, onError } = options;
-  
-  // Create wrapped component
-  const WrappedComponent = (props: P) => {
-    // Default error handler if not provided
-    const handleError = onError || ((error, info) => {
-      console.error(`Error in ${module}:${component}:`, error);
-      console.error('Component stack:', info.componentStack);
-      
-      logDebugEvent(
-        'error',
-        module,
-        component,
-        `Component error: ${error.message}`,
-        { error, componentStack: info.componentStack }
-      );
-    });
-    
-    // Default fallback UI if not provided
-    const fallbackUI = fallback || (
-      <div style={{ 
-        padding: '1rem', 
-        margin: '1rem', 
-        border: '1px solid #ff0000',
-        borderRadius: '0.25rem',
-        background: 'rgba(255, 0, 0, 0.05)'
-      }}>
-        <h3>Something went wrong</h3>
-        <p>An error occurred in the {component} component.</p>
-      </div>
-    );
-    
-    return (
-      <ErrorBoundary
-        fallback={typeof fallbackUI === 'function' 
-          ? fallbackUI 
-          : () => <>{fallbackUI}</>
-        }
-        onError={handleError}
-      >
-        <Component {...props} />
-      </ErrorBoundary>
-    );
-  };
-  
-  // Set display name for React DevTools
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name || 'Component'})`;
-  
+  const WrappedComponent = (props: P) => (
+    <ErrorBoundary
+      module={options.module}
+      component={options.component}
+      fallback={options.fallback}
+      onError={options.onError}
+    >
+      <Component {...props} />
+    </ErrorBoundary>
+  );
+
+  WrappedComponent.displayName = `withErrorBoundary(${
+    Component.displayName || Component.name || 'Component'
+  })`;
+
   return WrappedComponent;
 }
+
+export default ErrorBoundary;
