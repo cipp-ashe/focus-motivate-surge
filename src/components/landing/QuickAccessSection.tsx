@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ListTodo, Timer, Activity, Image, BookOpen, Mic, LayoutDashboard } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface QuickAccessItemProps {
   to: string;
@@ -15,9 +16,13 @@ const QuickAccessItem: React.FC<QuickAccessItemProps> = ({
   label
 }) => {
   return (
-    <Link to={to} className="flex flex-col items-center gap-2 p-4 border rounded-lg">
-      <Icon className="w-5 h-5" />
-      <span className="text-sm font-medium">{label}</span>
+    <Link to={to}>
+      <Card className="hover:bg-muted/30 transition-colors">
+        <CardContent className="flex flex-col items-center justify-center p-4 gap-2">
+          <Icon className="w-5 h-5" />
+          <span className="text-sm font-medium">{label}</span>
+        </CardContent>
+      </Card>
     </Link>
   );
 };

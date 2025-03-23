@@ -2,6 +2,7 @@
 import React from 'react';
 import { ListTodo, Timer, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 
 const FeatureCard = ({ 
@@ -16,16 +17,20 @@ const FeatureCard = ({
   link: string; 
 }) => {
   return (
-    <div className="border rounded-lg p-6">
-      <div className="mb-4">
-        <Icon className="h-8 w-8" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground mb-4">{description}</p>
-      <Button asChild variant="outline">
-        <Link to={link}>Learn more</Link>
-      </Button>
-    </div>
+    <Card>
+      <CardHeader>
+        <Icon className="h-8 w-8 mb-2" />
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">{description}</p>
+      </CardContent>
+      <CardFooter>
+        <Button asChild variant="outline">
+          <Link to={link}>Learn more</Link>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

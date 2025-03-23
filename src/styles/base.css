@@ -20,25 +20,6 @@ body {
   color: hsl(var(--foreground));
 }
 
-/* Card hover effect */
-.card-hover-effect {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card-hover-effect:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Button glow effect */
-.button-glow {
-  transition: box-shadow 0.3s ease;
-}
-
-.button-glow:hover {
-  box-shadow: 0 0 15px rgba(155, 135, 245, 0.4);
-}
-
 /* Text gradient effects */
 .text-gradient-primary {
   @apply bg-gradient-to-br from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent;

@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface FeatureCardHabitProps {
   icon: React.ElementType;
@@ -22,27 +23,32 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
   buttonLink,
 }) => {
   return (
-    <div className="border rounded-lg p-6">
-      <div className="flex items-center gap-3 mb-3">
-        <Icon className="h-6 w-6" />
-        <h3 className="text-lg font-semibold">{title}</h3>
-      </div>
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-3">
+          <Icon className="h-6 w-6" />
+          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        </div>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
       
-      <p className="text-sm text-muted-foreground mb-4">{description}</p>
+      <CardContent>
+        <ul className="space-y-2">
+          {features.map((feature, index) => (
+            <li key={index} className="flex items-center gap-2">
+              <ArrowRight className="h-3 w-3 flex-shrink-0" />
+              <span className="text-sm">{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
       
-      <ul className="space-y-2 mb-6">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-center gap-2">
-            <ArrowRight className="h-3 w-3" />
-            <span className="text-sm">{feature}</span>
-          </li>
-        ))}
-      </ul>
-      
-      <Button asChild variant="default" className="w-full">
-        <Link to={buttonLink}>{buttonLabel}</Link>
-      </Button>
-    </div>
+      <CardFooter>
+        <Button asChild variant="default" className="w-full">
+          <Link to={buttonLink}>{buttonLabel}</Link>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
