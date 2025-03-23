@@ -1,14 +1,27 @@
 
 import React from 'react';
-import { IS_DEV } from '@/utils/debug';
+import { DebugProvider } from '@/providers/DebugProvider';
+import { IS_DEV } from './types';
 
 /**
- * Simplified function to apply debugging to the entire application
+ * Function to apply debugging to the entire application
  * 
  * @param App - The root application component
  */
 export function applyDebugging<P extends object>(
   App: React.ComponentType<P>
 ): React.ComponentType<P> {
-  return App;
+  // Simple wrapper component that adds debug capabilities
+  const DebuggedApp = (props: P) => {
+    return (
+      <DebugProvider enabled={IS_DEV}>
+        <App {...props} />
+      </DebugProvider>
+    );
+  };
+  
+  // Set display name for React DevTools
+  DebuggedApp.displayName = `DebuggedApp(${App.displayName || App.name || 'App'})`;
+  
+  return DebuggedApp;
 }

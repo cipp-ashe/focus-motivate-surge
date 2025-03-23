@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { IS_DEV } from '@/utils/debug';
+import { DebugProvider as DebugContextProvider, IS_DEV } from '@/utils/debug';
 
 interface DebugProviderProps {
   children: React.ReactNode;
@@ -8,8 +8,12 @@ interface DebugProviderProps {
 }
 
 /**
- * Simplified provider that adds debug tools to the application
+ * Provider that adds debug tools to the application
  */
-export function DebugProvider({ children }: DebugProviderProps) {
-  return <>{children}</>;
+export function DebugProvider({ children, enabled = IS_DEV }: DebugProviderProps) {
+  return (
+    <DebugContextProvider enabled={enabled}>
+      {children}
+    </DebugContextProvider>
+  );
 }
