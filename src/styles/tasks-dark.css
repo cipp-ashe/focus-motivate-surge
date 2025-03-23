@@ -5,7 +5,7 @@
   --task-card-bg: hsl(var(--card));
   --task-primary: hsl(var(--primary));
   --task-secondary: hsl(var(--secondary));
-  --task-border: hsl(var(--border));
+  --task-border: hsl(var(--border) / 0.05);
   --task-text: hsl(var(--foreground));
   --task-text-muted: hsl(var(--muted-foreground));
 }
@@ -14,13 +14,13 @@
 .dark .task-card {
   @apply glass-effect text-foreground;
   background-color: var(--task-card-bg);
-  border-color: var(--task-border) / 0.2;
+  border-color: var(--task-border);
 }
 
 .dark .task-input {
   @apply glass-input;
   background-color: hsl(var(--card) / 0.8);
-  border-color: var(--task-border) / 0.2;
+  border-color: var(--task-border);
   color: var(--task-text);
 }
 
@@ -71,7 +71,7 @@
 .dark .bg-card {
   @apply shadow-md;
   background-color: hsl(var(--card));
-  border-color: hsl(var(--border) / 0.1) !important;
+  border-color: hsl(var(--border) / 0.05) !important;
 }
 
 /* Ensure dark mode applies to UI components */
@@ -98,5 +98,5 @@
 
 /* Ensure task checkbox has proper styling */
 .dark .task-checkbox {
-  @apply border-border/20 bg-background;
+  @apply border-border/5 bg-background;
 }

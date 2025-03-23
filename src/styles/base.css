@@ -94,17 +94,22 @@
   }
   
   /* DARK MODE FIXES */
-  /* Remove the global border override and instead target specific elements */
+  /* Remove the global border override and target specific elements */
+  .dark * {
+    border-color: hsl(var(--border) / 0.05); /* Make all borders in dark mode very subtle by default */
+  }
+  
   .dark .card,
+  .dark [class*="card-"],
   .dark [class*="border-"] {
-    border-color: hsl(var(--border) / 0.2);
+    border-color: hsl(var(--border) / 0.05) !important;
   }
   
   .dark button,
   .dark input,
   .dark textarea,
   .dark select {
-    border-color: hsl(var(--border) / 0.3);
+    border-color: hsl(var(--border) / 0.1) !important;
   }
   
   /* Fix ALL SVG/icons in dark mode */
@@ -159,7 +164,7 @@
   .dark textarea,
   .dark select {
     background-color: hsl(var(--card)) !important;
-    border-color: hsl(var(--border) / 0.3) !important;
+    border-color: hsl(var(--border) / 0.1) !important;
     color: hsl(var(--foreground)) !important;
   }
   
@@ -169,7 +174,7 @@
   .dark .habit-item,
   .dark .settings-card,
   .dark .timer-card {
-    border-color: hsl(var(--border) / 0.2) !important;
+    border-color: hsl(var(--border) / 0.05) !important;
     background-color: hsl(var(--card)) !important;
   }
 }

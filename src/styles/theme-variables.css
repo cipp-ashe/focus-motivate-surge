@@ -68,8 +68,8 @@
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 65%;
     --destructive-foreground: 225 25% 98%;
-    /* Much darker border color for dark mode */
-    --border: 225 25% 12%;  /* Significantly darker to avoid light outlines */
+    /* Much darker border color for dark mode - changing from 12% to 20% but with lower opacity in use */
+    --border: 225 20% 20%;
     --input: 225 25% 16%;
     --ring: 280 85% 65%;
     
