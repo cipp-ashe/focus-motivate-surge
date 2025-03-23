@@ -1,91 +1,85 @@
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HabitTemplate } from '../types';
-import AvailableTemplates from './AvailableTemplates';
-import CustomTemplates from './CustomTemplates';
+import React from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateTemplateForm from './CreateTemplateForm';
+import CustomTemplates from './CustomTemplates';
+import AvailableTemplates from './AvailableTemplates';
 
 interface TabSectionProps {
-  allTemplates: HabitTemplate[];
-  customTemplates: HabitTemplate[];
-  activeTemplateIds: string[];
-  onSelectTemplate: (template: HabitTemplate) => void;
-  onDeleteCustomTemplate: (templateId: string) => void;
-  onCreateTemplate: (newTemplate: Omit<HabitTemplate, 'id'>) => void;
+  defaultTab?: string;
+  onTabChange?: (tab: string) => void;
+  onTemplateCreate?: (templateName: string, habits: string[]) => void;
+  onTemplateDelete?: (templateId: string) => void;
+  onTemplateApply?: (templateId: string) => void;
+  userTemplates: {
+    id: string;
+    name: string;
+    habits: string[];
+    createdAt: string;
+  }[];
+  predefinedTemplates: {
+    id: string;
+    name: string;
+    description: string;
+    habits: string[];
+  }[];
+  isMobile?: boolean;
 }
 
 const TabSection: React.FC<TabSectionProps> = ({
-  allTemplates,
-  customTemplates,
-  activeTemplateIds,
-  onSelectTemplate,
-  onDeleteCustomTemplate,
-  onCreateTemplate,
+  defaultTab = 'available',
+  onTabChange,
+  onTemplateCreate,
+  onTemplateDelete,
+  onTemplateApply,
+  userTemplates,
+  predefinedTemplates,
+  isMobile = false,
 }) => {
-  const [activeTab, setActiveTab] = useState("built-in");
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
-
-  if (isCreatingNew) {
-    return (
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="mb-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => setIsCreatingNew(false)}
-            className="mb-2"
-          >
-            ← Back to Templates
-          </Button>
-          <h3 className="text-lg font-medium">Create New Template</h3>
-        </div>
-        <CreateTemplateForm 
-          onSubmit={(template) => {
-            onCreateTemplate(template);
-            setIsCreatingNew(false);
-          }} 
-          onCancel={() => setIsCreatingNew(false)} 
-        />
-      </div>
-    );
-  }
+  const handleValueChange = (value: string) => {
+    if (onTabChange) {
+      onTabChange(value);
+    }
+  };
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
-      <Tabs defaultValue="built-in" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="built-in">Built-in Templates</TabsTrigger>
-          <TabsTrigger value="custom">Custom Templates</TabsTrigger>
+    <Tabs defaultValue={defaultTab} onValueChange={handleValueChange} className="w-full">
+      <div className="flex justify-center mb-4">
+        <TabsList>
+          <TabsTrigger value="available">Available Templates</TabsTrigger>
+          <TabsTrigger value="custom">Your Templates</TabsTrigger>
+          <TabsTrigger value="create">Create New</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="built-in" className="mt-0">
-          <AvailableTemplates 
-            templates={allTemplates}
-            activeTemplateIds={activeTemplateIds}
-            onSelect={onSelectTemplate}
-          />
-        </TabsContent>
-        
-        <TabsContent value="custom" className="mt-0">
-          <div className="mb-4">
-            <Button 
-              onClick={() => setIsCreatingNew(true)}
-              className="w-full"
-              size="auto"
-            >
-              Create New Template
-            </Button>
-          </div>
-          <CustomTemplates 
-            templates={customTemplates}
-            activeTemplateIds={activeTemplateIds}
-            onSelect={onSelectTemplate}
-            onDelete={onDeleteCustomTemplate}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+      </div>
+
+      <TabsContent value="available" className="mt-6 space-y-4">
+        <AvailableTemplates 
+          templates={predefinedTemplates}
+          onApply={onTemplateApply}
+          isMobile={isMobile}
+        />
+      </TabsContent>
+
+      <TabsContent value="custom" className="mt-6 space-y-4">
+        <CustomTemplates 
+          templates={userTemplates}
+          onDelete={onTemplateDelete}
+          onApply={onTemplateApply}
+          isMobile={isMobile}
+        />
+      </TabsContent>
+
+      <TabsContent value="create" className="mt-6">
+        <CreateTemplateForm 
+          onSubmit={(name, habits) => {
+            if (onTemplateCreate) {
+              onTemplateCreate(name, habits);
+            }
+          }}
+          submitButtonSize="default"
+        />
+      </TabsContent>
+    </Tabs>
   );
 };
 

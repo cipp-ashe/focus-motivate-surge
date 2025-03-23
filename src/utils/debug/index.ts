@@ -1,50 +1,42 @@
 
-// Simple debug utility with minimal functionality
-
-// Constants
-export const IS_DEV = process.env.NODE_ENV === 'development';
-
-// Basic logger for development
-const logger = {
-  debug: (module: string, message: string, ...args: any[]) => {
-    if (IS_DEV) {
-      console.debug(`[${module}]`, message, ...args);
-    }
-  },
-  
-  warn: (module: string, message: string, ...args: any[]) => {
-    if (IS_DEV) {
-      console.warn(`[${module}]`, message, ...args);
-    }
-  },
-  
-  error: (module: string, message: string, ...args: any[]) => {
-    console.error(`[${module}]`, message, ...args);
-  }
+// Basic debug utility functions
+export const useDebug = () => {
+  return {
+    log: (message: string) => console.log(message),
+    error: (message: string) => console.error(message),
+    warn: (message: string) => console.warn(message)
+  };
 };
 
-// Export the logger
-export { logger };
-
-// Main debug module
-export const DebugModule = {
-  log: (component: string, message: string, ...args: any[]) => {
-    logger.debug(component, message, ...args);
-  },
-  
-  warn: (component: string, message: string, ...args: any[]) => {
-    logger.warn(component, message, ...args);
-  },
-  
-  error: (component: string, message: string, ...args: any[]) => {
-    logger.error(component, message, ...args);
-  }
+export const debugStore = {
+  getState: () => ({}),
+  setState: () => {},
+  subscribe: () => () => {}
 };
 
-// Also export as default
-export default DebugModule;
+export const DEBUG_CONFIG = {
+  enabled: false,
+  logLevel: 'error'
+};
 
-// Simple placeholder for DebugProvider
-export const DebugProvider = ({ children }: { children: React.ReactNode }) => {
-  return children;
+export const withErrorBoundary = (Component: React.ComponentType<any>) => Component;
+
+export const traceData = (data: any, traceId: string) => data;
+
+export class DebugModule {
+  static getInstance() {
+    return new DebugModule();
+  }
+}
+
+export const measurePerformance = (name: string, fn: Function) => fn();
+
+export const trackState = (state: any) => state;
+
+export const validateData = (data: any) => true;
+
+export const assertCondition = (condition: boolean, message: string) => {
+  if (!condition) {
+    console.error(message);
+  }
 };

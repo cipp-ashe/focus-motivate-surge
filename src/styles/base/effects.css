@@ -11,6 +11,7 @@
   /* Add debugging hook to check when base.css is fully loaded */
   .base-css-loaded {
     content: 'base-css-loaded';
+    display: none;
   }
   
   /* Ensuring app layout components use theme colors */

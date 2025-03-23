@@ -9,10 +9,9 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border border-border/30 bg-card text-card-foreground shadow-sm dark:border-border/5 outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:ring-0 outline-offset-0",
+      "rounded-lg border bg-card text-card-foreground shadow-sm",
       className
     )}
-    style={{ outline: 'none', boxShadow: 'none' }}
     {...props}
   />
 ))
@@ -24,8 +23,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6 outline-none focus:outline-none focus-visible:outline-none", className)}
-    style={{ outline: 'none', boxShadow: 'none' }}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
     {...props}
   />
 ))
@@ -38,10 +36,9 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight outline-none focus:outline-none focus-visible:outline-none",
+      "text-2xl font-semibold leading-none tracking-tight",
       className
     )}
-    style={{ outline: 'none', boxShadow: 'none' }}
     {...props}
   />
 ))
@@ -53,8 +50,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground outline-none focus:outline-none focus-visible:outline-none", className)}
-    style={{ outline: 'none', boxShadow: 'none' }}
+    className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ))
@@ -66,8 +62,7 @@ const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div 
     ref={ref} 
-    className={cn("p-6 pt-0 outline-none focus:outline-none focus-visible:outline-none", className)} 
-    style={{ outline: 'none', boxShadow: 'none' }}
+    className={cn("p-6 pt-0", className)} 
     {...props} 
   />
 ))
@@ -79,8 +74,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0 outline-none focus:outline-none focus-visible:outline-none", className)}
-    style={{ outline: 'none', boxShadow: 'none' }}
+    className={cn("flex items-center p-6 pt-0", className)}
     {...props}
   />
 ))
