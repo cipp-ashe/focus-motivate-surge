@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,8 +33,33 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
   iconFeatureColor,
   buttonStyle
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Effect to remove outlines and box-shadows
+  useEffect(() => {
+    if (cardRef.current) {
+      // Apply to the card itself
+      cardRef.current.style.outline = 'none';
+      cardRef.current.style.boxShadow = 'none';
+      
+      // Apply to all focusable elements inside
+      const focusableElements = cardRef.current.querySelectorAll<HTMLElement>(
+        'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      focusableElements.forEach(el => {
+        el.style.outline = 'none';
+        el.style.boxShadow = 'none';
+      });
+    }
+  }, []);
+  
   return (
-    <div className={`bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg border border-primary/10 p-6 shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${cardClass}`}>
+    <div 
+      ref={cardRef}
+      className={`bg-white/80 dark:bg-black/20 backdrop-blur-md rounded-lg border border-primary/10 p-6 shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${cardClass}`}
+      style={{ outline: 'none', boxShadow: 'none' }}
+    >
       <div className="flex items-center gap-3 mb-3">
         <div className={`${iconClass} p-2 rounded-md flex items-center justify-center`}>
           <Icon className={`h-6 w-6 ${iconColor}`} />
@@ -56,12 +81,12 @@ const FeatureCardHabit: React.FC<FeatureCardHabitProps> = ({
       </ul>
       
       <Button 
-        className="w-full button-glow" 
+        className="w-full button-glow outline-none" 
         variant="default" 
-        style={buttonStyle}
+        style={{...buttonStyle, outline: 'none', boxShadow: 'none'}}
         asChild
       >
-        <Link to={buttonLink}>{buttonLabel}</Link>
+        <Link to={buttonLink} style={{outline: 'none', boxShadow: 'none'}}>{buttonLabel}</Link>
       </Button>
     </div>
   );

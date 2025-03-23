@@ -128,12 +128,10 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     };
   }, [autoFocus, returnFocusOnUnmount, preventScroll, disableOutline, enabled]);
   
-  // For testing purposes, expose the ref and the getFocusableElements method
-  const refWithMethods = Object.assign(containerRef, {
+  // Return the ref directly and add the getFocusableElements method
+  return Object.assign(containerRef, {
     getFocusableElements
   });
-  
-  return refWithMethods;
 };
 
 export default useFocusTrap;

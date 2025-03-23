@@ -5,6 +5,7 @@ import HeroSection from '@/components/landing/HeroSection';
 import PrivacySection from '@/components/landing/PrivacySection';
 import QuickAccessSection from '@/components/landing/QuickAccessSection';
 import BackgroundDecorations from '@/components/landing/BackgroundDecorations';
+import FeaturesSection from '@/components/landing/FeaturesSection';
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -17,6 +18,9 @@ const Index = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Hero Section */}
         <HeroSection />
+        
+        {/* Features Section - Add our new component */}
+        <FeaturesSection />
         
         {/* Privacy Section */}
         <PrivacySection />
