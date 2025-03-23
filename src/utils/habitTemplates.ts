@@ -1,4 +1,3 @@
-
 import { HabitTemplate, HabitDetail, DayOfWeek, DEFAULT_ACTIVE_DAYS } from '../components/habits/types';
 
 const createHabitDetail = (
@@ -121,9 +120,8 @@ export const habitTemplates: HabitTemplate[] = [
   },
 ];
 
-export const createTemplate = (template: Omit<HabitTemplate, 'id' | 'defaultHabits' | 'duration'>): HabitTemplate => ({
+export const createTemplate = (template: Omit<HabitTemplate, 'id' | 'defaultHabits'>): HabitTemplate => ({
   ...template,
   id: `template-${Date.now()}`,
   defaultHabits: [],
-  duration: null,
 });

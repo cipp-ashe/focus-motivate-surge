@@ -11,8 +11,11 @@ interface TemplateSelectionSheetProps {
   onOpenChange: (open: boolean) => void;
   allTemplates: HabitTemplate[];
   activeTemplateIds: string[];
-  onSelectTemplate: (templateId: string) => void;
+  onSelectTemplate: (template: HabitTemplate) => void;
   onCreateTemplate: () => void;
+  customTemplates: HabitTemplate[];
+  onDeleteCustomTemplate: (templateId: string) => void;
+  onClose: () => void;
 }
 
 const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
@@ -22,6 +25,9 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   activeTemplateIds,
   onSelectTemplate,
   onCreateTemplate,
+  customTemplates: propCustomTemplates,
+  onDeleteCustomTemplate,
+  onClose,
 }) => {
   const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
@@ -32,8 +38,9 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
     if (!isOpen) {
       setConfigDialogOpen(false);
       setConfiguringTemplate(null);
+      if (onClose) onClose();
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   const handleCloseConfigDialog = () => {
     setConfigDialogOpen(false);
@@ -46,13 +53,14 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
         <SheetContent side="right" className="p-0">
           <SheetContentComponent
             allTemplates={allTemplates}
-            customTemplates={customTemplates}
+            customTemplates={propCustomTemplates || customTemplates}
             activeTemplateIds={activeTemplateIds}
             onSelectTemplate={onSelectTemplate}
             onCreateTemplate={onCreateTemplate}
             onOpenChange={onOpenChange}
             setConfiguringTemplate={setConfiguringTemplate}
             setConfigDialogOpen={setConfigDialogOpen}
+            onDeleteCustomTemplate={onDeleteCustomTemplate}
           />
         </SheetContent>
       </Sheet>

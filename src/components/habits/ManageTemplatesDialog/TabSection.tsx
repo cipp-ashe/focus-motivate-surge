@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HabitTemplate, NewTemplate, TabSectionProps } from '../types';
+import { HabitTemplate, NewTemplate, TabSectionProps, createEmptyHabit } from '../types';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import TemplateCardView from "./TemplateCardView";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { predefinedTemplates } from "../data/templates";
 
 const TabSection: React.FC<TabSectionProps> = ({
@@ -18,7 +18,6 @@ const TabSection: React.FC<TabSectionProps> = ({
   onDeleteCustomTemplate,
   onCreateTemplate
 }) => {
-  const { toast } = useToast();
   const [newTemplateName, setNewTemplateName] = React.useState("");
   const [newTemplateDescription, setNewTemplateDescription] = React.useState("");
   const [newTemplateHabits, setNewTemplateHabits] = React.useState<string[]>([]);
@@ -30,8 +29,10 @@ const TabSection: React.FC<TabSectionProps> = ({
     if (!('defaultHabits' in template)) {
       return {
         ...template,
-        defaultHabits: (template as any).habits?.map((habit: string) => ({
-          name: habit
+        defaultHabits: (template as any).habits?.map((habit: any) => ({
+          id: `habit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: typeof habit === 'string' ? habit : habit.name,
+          description: typeof habit === 'string' ? '' : (habit.description || '')
         })) || []
       };
     }
@@ -51,20 +52,12 @@ const TabSection: React.FC<TabSectionProps> = ({
 
   const handleCreateTemplate = () => {
     if (!newTemplateName.trim()) {
-      toast({
-        title: "Template name required",
-        description: "Please provide a name for your template",
-        variant: "destructive"
-      });
+      toast.error("Template name required");
       return;
     }
 
     if (newTemplateHabits.length === 0) {
-      toast({
-        title: "Habits required",
-        description: "Please add at least one habit to your template",
-        variant: "destructive"
-      });
+      toast.error("Habits required");
       return;
     }
 
@@ -72,6 +65,7 @@ const TabSection: React.FC<TabSectionProps> = ({
       name: newTemplateName.trim(),
       description: newTemplateDescription.trim() || `Custom template for ${newTemplateName.trim()}`,
       defaultHabits: newTemplateHabits.map(habit => ({
+        id: `habit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: habit,
         description: ""
       }))
@@ -85,10 +79,7 @@ const TabSection: React.FC<TabSectionProps> = ({
     setNewTemplateHabits([]);
     setCurrentHabit("");
     
-    toast({
-      title: "Template created",
-      description: "Your custom template has been created successfully"
-    });
+    toast.success("Template created");
   };
 
   return (

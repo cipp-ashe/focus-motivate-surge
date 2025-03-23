@@ -67,7 +67,7 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
                 />
 
                 <Select
-                  value={habit.metrics.type}
+                  value={habit.metrics?.type || 'boolean'}
                   onValueChange={(value: MetricType) => {
                     const updates: Partial<HabitDetail> = {
                       metrics: {

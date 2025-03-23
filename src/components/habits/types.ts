@@ -12,7 +12,10 @@ export const DAYS_OF_WEEK = [
   'Saturday'
 ] as const;
 
-export type DayOfWeek = typeof DAYS_OF_WEEK[number] | 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
+// Shortened day names for compatibility
+export const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+export type DayOfWeek = typeof DAYS_OF_WEEK[number] | typeof SHORT_DAYS[number];
 
 // Default active days for new templates
 export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -31,6 +34,7 @@ export interface HabitTemplate {
     metrics?: HabitMetrics;
   }>;
   defaultDays?: DayOfWeek[];
+  duration?: number | null; // Added for compatibility
 }
 
 export type NewTemplate = Omit<HabitTemplate, 'id'>;
@@ -43,6 +47,7 @@ export interface ActiveTemplate {
   habits: HabitDetail[];
   activeDays: DayOfWeek[];
   customized: boolean;
+  relationships?: Record<string, any>; // Added for compatibility
 }
 
 // Props for tab sections
@@ -68,13 +73,20 @@ export interface HabitDetail {
     description: string;
   }>;
   tips?: string[];
+  relationships?: Record<string, any>; // Added for compatibility
+  order?: number; // Added for compatibility
 }
+
+// Define MetricType for reuse
+export type MetricType = 'boolean' | 'timer' | 'journal' | 'counter' | 'rating' | string;
 
 // Habit metrics
 export interface HabitMetrics {
-  type: 'boolean' | 'timer' | 'journal' | string;
+  type: MetricType;
   target?: number;
   unit?: string;
+  min?: number; // Added for rating type metrics
+  max?: number; // Added for rating type metrics
 }
 
 // Habit progress tracking
@@ -101,3 +113,15 @@ export interface HabitTaskEvent {
   date: string;
   metricType?: string;
 }
+
+// Helper function to create an empty habit
+export const createEmptyHabit = (): HabitDetail => ({
+  id: `habit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+  name: '',
+  description: '',
+  metrics: { type: 'boolean' },
+  category: 'Personal',
+  timePreference: 'Anytime',
+  insights: [],
+  tips: []
+});

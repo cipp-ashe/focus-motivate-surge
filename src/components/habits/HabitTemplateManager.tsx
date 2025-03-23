@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { TemplateSelectionSheet } from '@/components/habits';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { eventManager } from '@/lib/events/EventManager';
-import { ActiveTemplate } from './types';
+import { ActiveTemplate, HabitTemplate } from './types';
 
 interface HabitTemplateManagerProps {
   activeTemplates: ActiveTemplate[];
@@ -14,7 +14,7 @@ interface HabitTemplateManagerProps {
 
 const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTemplates }) => {
   const [configOpen, setConfigOpen] = useState(false);
-  const [customTemplates, setCustomTemplates] = useState([]);
+  const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
   const isAddingRef = useRef<boolean>(false);
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastAddedTemplateRef = useRef<string | null>(null);
@@ -61,7 +61,9 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
   };
 
   // Handle template selection
-  const handleSelectTemplate = (templateId: string) => {
+  const handleSelectTemplate = (template: HabitTemplate) => {
+    const templateId = template.id;
+    
     // Prevent duplicate template selection
     if (activeTemplates.some(t => t.templateId === templateId)) {
       toast.info(`Template already active`);
@@ -78,34 +80,27 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
     isAddingRef.current = true;
     lastAddedTemplateRef.current = templateId;
     
-    // Check both built-in and custom templates
-    const template = 
-      habitTemplates.find(t => t.id === templateId) || 
-      customTemplates.find(t => t.id === templateId);
+    console.log("Adding template:", template);
     
-    if (template) {
-      console.log("Adding template:", template);
+    // Emit template-add event using eventManager with correct payload format
+    eventManager.emit('habit:template-add', { 
+      id: template.id,
+      templateId: templateId 
+    });
+    
+    // Single toast notification from this component only
+    toast.success(`Added template: ${template.name}`);
+    
+    // Close sheet with slight delay for visual feedback
+    setTimeout(() => {
+      setConfigOpen(false);
       
-      // Emit template-add event using eventManager with correct payload format
-      eventManager.emit('habit:template-add', { 
-        id: template.id,
-        templateId: templateId 
-      });
-      
-      // Single toast notification from this component only
-      toast.success(`Added template: ${template.name}`);
-      
-      // Close sheet with slight delay for visual feedback
-      setTimeout(() => {
-        setConfigOpen(false);
-        
-        // Allow new additions after a shorter delay
-        cooldownTimerRef.current = setTimeout(() => {
-          isAddingRef.current = false;
-          lastAddedTemplateRef.current = null;
-        }, 500);
-      }, 300);
-    }
+      // Allow new additions after a shorter delay
+      cooldownTimerRef.current = setTimeout(() => {
+        isAddingRef.current = false;
+        lastAddedTemplateRef.current = null;
+      }, 500);
+    }, 300);
   };
 
   return (
@@ -133,6 +128,9 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTempl
         onCreateTemplate={() => {
           toast.info('Creating new template');
         }}
+        customTemplates={[]} // Added for compatibility
+        onDeleteCustomTemplate={() => {}} // Added for compatibility
+        onClose={() => {}} // Added for compatibility
       />
     </>
   );

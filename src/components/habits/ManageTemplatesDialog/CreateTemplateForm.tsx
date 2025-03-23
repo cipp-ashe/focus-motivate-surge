@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { DAYS_OF_WEEK, DayOfWeek, NewTemplate } from '../types';
+import { DAYS_OF_WEEK, DayOfWeek, NewTemplate, createEmptyHabit } from '../types';
 import { toast } from 'sonner';
 import HabitForm from '../ConfigurationDialog/HabitForm';
-import { createEmptyHabit } from '../types';
 
 interface CreateTemplateFormProps {
   onSubmit: (template: NewTemplate) => void;
