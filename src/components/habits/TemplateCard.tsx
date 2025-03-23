@@ -1,138 +1,82 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { HabitDetail, HabitMetric, ActiveTemplate } from './types';
-import { X, Check, Calendar, Settings, MoreHorizontal } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import HabitRow from './HabitRow';
-
-interface ProgressInfo {
-  value: boolean | number;
-  streak: number;
-}
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Timer, CheckCircle2, AlignJustify } from "lucide-react";
+import { HabitDetail, HabitMetrics } from './types';
 
 interface TemplateCardProps {
-  template: ActiveTemplate;
-  templateInfo: any;
-  onRemove: () => void;
-  onEdit: () => void;
-  getProgress: (habitId: string) => ProgressInfo;
-  onHabitUpdate: (habitId: string, value: boolean | number) => void;
+  title: string;
+  description: string;
+  habits: HabitDetail[];
+  onAdd: () => void;
+  onConfigure?: () => void;
+  isActive?: boolean;
 }
 
-const TemplateCard: React.FC<TemplateCardProps> = ({ 
-  template, 
-  templateInfo,
-  onRemove,
-  onEdit,
-  getProgress,
-  onHabitUpdate
+const TemplateCard: React.FC<TemplateCardProps> = ({
+  title,
+  description,
+  habits,
+  onAdd,
+  onConfigure,
+  isActive = false,
 }) => {
-  const [expanded, setExpanded] = useState(true);
-  
-  // Helper function to determine the display value based on metric type
-  const getDisplayValue = (habit: HabitDetail, value: boolean | number): string => {
-    if (typeof value === 'boolean') {
-      return value ? 'Complete' : 'Incomplete';
-    }
+  // Get icon based on habit metric type
+  const getHabitIcon = (metrics?: HabitMetrics) => {
+    if (!metrics) return <CheckCircle2 className="h-4 w-4" />;
     
-    if (habit.metrics.type === 'counter') {
-      return `${value} / ${habit.metrics.target}`;
+    switch (metrics.type) {
+      case 'timer':
+        return <Timer className="h-4 w-4" />;
+      case 'journal':
+        return <AlignJustify className="h-4 w-4" />;
+      default:
+        return <CheckCircle2 className="h-4 w-4" />;
     }
-    
-    return String(value);
-  };
-  
-  // Helper function to determine the color based on progress
-  const getProgressColor = (habit: HabitDetail, value: boolean | number): string => {
-    if (typeof value === 'boolean') {
-      return value ? 'text-green-500' : 'text-red-500';
-    }
-    
-    if (habit.metrics.type === 'counter') {
-      const progress = (Number(value) / Number(habit.metrics.target)) * 100;
-      if (progress >= 100) {
-        return 'text-green-500';
-      } else if (progress > 0) {
-        return 'text-yellow-500';
-      } else {
-        return 'text-red-500';
-      }
-    }
-    
-    return 'text-gray-500';
   };
 
   return (
-    <Card className="w-full transition-all shadow-sm hover:shadow-md h-full flex flex-col">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-medium">
-              {templateInfo?.name || 'Custom Template'}
-            </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              {templateInfo?.description || 'Your custom habit template'}
-            </CardDescription>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit}>
-                <Settings className="mr-2 h-4 w-4" />
-                Configure
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onRemove} className="text-destructive">
-                <X className="mr-2 h-4 w-4" />
-                Remove
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
-        <div className="flex flex-wrap gap-1 mt-2">
-          {template.activeDays?.map((day) => (
-            <Badge key={day} variant="outline" className="text-xs">
-              {day}
-            </Badge>
-          ))}
-        </div>
+    <Card className={`${isActive ? 'border-primary' : ''}`}>
+      <CardHeader>
+        <CardTitle className="text-base">{title}</CardTitle>
+        <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
-      
-      <CardContent className="flex-grow overflow-auto">
-        <div className="space-y-2">
-          {template.habits?.map(habit => {
-            const progress = getProgress(habit.id);
-            return (
-              <HabitRow 
-                key={habit.id}
-                habit={habit}
-                value={progress.value}
-                onUpdate={(value) => onHabitUpdate(habit.id, value)}
-              />
-            );
-          })}
-        </div>
+      <CardContent className="text-sm space-y-2">
+        <p className="font-medium text-xs">Habits included:</p>
+        <ul className="space-y-1">
+          {habits.slice(0, 3).map((habit) => (
+            <li key={habit.id} className="flex items-center gap-2 text-xs">
+              {getHabitIcon(habit.metrics)}
+              <span>{habit.name}</span>
+            </li>
+          ))}
+          {habits.length > 3 && (
+            <li className="text-xs text-muted-foreground">
+              +{habits.length - 3} more
+            </li>
+          )}
+        </ul>
       </CardContent>
-      
-      <CardFooter className="pt-2 pb-4 text-xs text-muted-foreground flex justify-between">
-        <span>{template.habits?.length || 0} habits</span>
-        <span className="flex items-center">
-          <Calendar className="mr-1 h-3 w-3" />
-          {template.customized ? 'Customized' : 'Default'} template
-        </span>
+      <CardFooter className="flex gap-2">
+        <Button
+          variant={isActive ? "outline" : "default"}
+          size="sm"
+          className="w-full text-xs"
+          onClick={onAdd}
+        >
+          {isActive ? "Remove" : "Add"}
+        </Button>
+        {onConfigure && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full text-xs"
+            onClick={onConfigure}
+          >
+            Configure
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

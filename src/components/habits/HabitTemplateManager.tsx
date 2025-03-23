@@ -1,138 +1,134 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Plus, Settings } from "lucide-react";
 import { toast } from 'sonner';
-import { TemplateSelectionSheet } from '@/components/habits';
-import { habitTemplates } from '@/utils/habitTemplates';
-import { eventManager } from '@/lib/events/EventManager';
 import { ActiveTemplate, HabitTemplate } from './types';
+import { eventManager } from '@/lib/events/EventManager';
+import TemplateSelectionSheet from './TemplateSelectionSheet';
+import { predefinedTemplates } from './data/templates';
 
 interface HabitTemplateManagerProps {
   activeTemplates: ActiveTemplate[];
+  onAddTemplate: (template: ActiveTemplate) => void;
+  onRemoveTemplate: (templateId: string) => void;
+  onConfigureTemplate: (template: ActiveTemplate) => void;
 }
 
-const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ activeTemplates }) => {
-  const [configOpen, setConfigOpen] = useState(false);
+const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
+  activeTemplates,
+  onAddTemplate,
+  onRemoveTemplate,
+  onConfigureTemplate,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
-  const isAddingRef = useRef<boolean>(false);
-  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const lastAddedTemplateRef = useRef<string | null>(null);
-  
+  const [activeTemplateIds, setActiveTemplateIds] = useState<string[]>([]);
+
   // Load custom templates
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('custom-templates');
-      if (saved) {
-        setCustomTemplates(JSON.parse(saved));
+      const savedTemplates = localStorage.getItem('custom-templates');
+      if (savedTemplates) {
+        setCustomTemplates(JSON.parse(savedTemplates));
       }
     } catch (error) {
-      console.error('Error loading custom templates:', error);
+      console.error('Failed to load custom templates:', error);
     }
-    
-    return () => {
-      if (cooldownTimerRef.current) {
-        clearTimeout(cooldownTimerRef.current);
-      }
-    };
   }, []);
 
-  // Function to open config sheet
-  const openConfig = () => {
-    // Prevent opening if we're currently adding a template
-    if (isAddingRef.current) {
-      console.log("Currently processing a template, postponing config open");
-      return;
-    }
-    
-    setConfigOpen(true);
-  };
+  // Update active template IDs when activeTemplates changes
+  useEffect(() => {
+    setActiveTemplateIds(activeTemplates.map(t => t.templateId));
+  }, [activeTemplates]);
 
-  // Handle closing config
-  const handleCloseConfig = (open: boolean) => {
-    setConfigOpen(open);
-    if (!open) {
-      // Clear any pending cooldown when explicitly closed
-      if (cooldownTimerRef.current) {
-        clearTimeout(cooldownTimerRef.current);
-      }
-      isAddingRef.current = false;
+  const handleSelectTemplate = useCallback((template: HabitTemplate) => {
+    const isActive = activeTemplateIds.includes(template.id);
+    
+    if (isActive) {
+      // Remove template
+      onRemoveTemplate(template.id);
+      toast.success(`Removed ${template.name} template`);
+    } else {
+      // Add template
+      const activeTemplate: ActiveTemplate = {
+        templateId: template.id,
+        habits: template.defaultHabits || [],
+        activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        customized: false,
+      };
+      onAddTemplate(activeTemplate);
+      toast.success(`Added ${template.name} template`);
     }
-  };
+  }, [activeTemplateIds, onAddTemplate, onRemoveTemplate]);
 
-  // Handle template selection
-  const handleSelectTemplate = (template: HabitTemplate) => {
-    const templateId = template.id;
-    
-    // Prevent duplicate template selection
-    if (activeTemplates.some(t => t.templateId === templateId)) {
-      toast.info(`Template already active`);
-      return;
-    }
-    
-    // Prevent adding the same template twice
-    if (lastAddedTemplateRef.current === templateId && isAddingRef.current) {
-      console.log("Preventing duplicate template add:", templateId);
-      return;
-    }
-    
-    // Set global cooldown and track last added template
-    isAddingRef.current = true;
-    lastAddedTemplateRef.current = templateId;
-    
-    console.log("Adding template:", template);
-    
-    // Emit template-add event using eventManager with correct payload format
-    eventManager.emit('habit:template-add', { 
-      id: template.id,
-      templateId: templateId 
+  const handleCreateTemplate = useCallback(() => {
+    // Close sheet and open custom template creation
+    setIsOpen(false);
+    // Emit event to create custom template
+    eventManager.emit('habit:custom-template-create', { 
+      id: `custom-${Date.now()}`, 
+      name: 'New Template'
     });
+  }, []);
+
+  const handleDeleteCustomTemplate = useCallback((templateId: string) => {
+    // Remove from active templates if it's active
+    if (activeTemplateIds.includes(templateId)) {
+      onRemoveTemplate(templateId);
+    }
     
-    // Single toast notification from this component only
-    toast.success(`Added template: ${template.name}`);
+    // Remove from storage
+    const updatedTemplates = customTemplates.filter(t => t.id !== templateId);
+    setCustomTemplates(updatedTemplates);
+    localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
     
-    // Close sheet with slight delay for visual feedback
-    setTimeout(() => {
-      setConfigOpen(false);
-      
-      // Allow new additions after a shorter delay
-      cooldownTimerRef.current = setTimeout(() => {
-        isAddingRef.current = false;
-        lastAddedTemplateRef.current = null;
-      }, 500);
-    }, 300);
-  };
+    // Emit event
+    eventManager.emit('habit:custom-template-delete', { templateId });
+    toast.success('Custom template deleted');
+  }, [activeTemplateIds, customTemplates, onRemoveTemplate]);
+
+  const handleCloseTemplateSheet = useCallback(() => {
+    // Reload custom templates when sheet closes
+    try {
+      const savedTemplates = localStorage.getItem('custom-templates');
+      if (savedTemplates) {
+        setCustomTemplates(JSON.parse(savedTemplates));
+      }
+    } catch (error) {
+      console.error('Failed to load custom templates:', error);
+    }
+  }, []);
 
   return (
-    <>
-      <div className="flex flex-col md:flex-row md:justify-end gap-2 mb-4">
-        <Button 
-          variant="default" 
-          size="sm" 
-          className="flex items-center gap-1.5 shadow-sm hover:shadow transition-all"
-          onClick={openConfig}
-          disabled={isAddingRef.current} // Disable only during active cooldown
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Manage Habit Templates
-        </Button>
+    <div>
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-sm font-semibold">Habit Templates</h2>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 px-2"
+            onClick={() => setIsOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            <span className="text-xs">Add Template</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Template configuration */}
-      <TemplateSelectionSheet
-        isOpen={configOpen}
-        onOpenChange={handleCloseConfig}
-        allTemplates={habitTemplates}
-        activeTemplateIds={activeTemplates.map(t => t.templateId)}
+      <TemplateSelectionSheet 
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        allTemplates={predefinedTemplates}
+        activeTemplateIds={activeTemplateIds}
         onSelectTemplate={handleSelectTemplate}
-        onCreateTemplate={() => {
-          toast.info('Creating new template');
-        }}
-        customTemplates={[]} // Added for compatibility
-        onDeleteCustomTemplate={() => {}} // Added for compatibility
-        onClose={() => {}} // Added for compatibility
+        onCreateTemplate={handleCreateTemplate}
+        customTemplates={customTemplates}
+        onDeleteCustomTemplate={handleDeleteCustomTemplate}
+        onClose={handleCloseTemplateSheet}
       />
-    </>
+    </div>
   );
 };
 
