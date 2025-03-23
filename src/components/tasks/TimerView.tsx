@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Task, Tag } from '@/types/tasks';
 import { TaskInput } from './TaskInput';
@@ -199,6 +200,7 @@ export const TimerView: React.FC<TimerViewProps> = ({
             setLocalTasks(prev => [...timerTasks, ...prev]);
           }}
           defaultTaskType="timer"
+          simplifiedView
         />
       </div>
       
@@ -215,7 +217,7 @@ export const TimerView: React.FC<TimerViewProps> = ({
                 className={`cursor-pointer transition-all duration-200 ${
                   task.id === selectedTaskId 
                     ? 'bg-accent/20 border-primary/40' 
-                    : 'bg-card/40 border-primary/10 hover:border-primary/30 hover:bg-accent/10'
+                    : 'bg-card hover:border-primary/30 hover:bg-accent/10'
                 }`}
                 onClick={() => handleTaskSelect(task)}
               >
