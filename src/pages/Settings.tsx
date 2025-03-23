@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,22 +5,29 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
-import { ArrowRight, LogIn, MoonStar, Sun, User, PaintBucket, Info, AlertTriangle } from 'lucide-react';
+import { ArrowRight, LogIn, MoonStar, Sun, User, PaintBucket, Info, AlertTriangle, Bug } from 'lucide-react';
 import { useTheme } from '@/components/theme-provider';
 import { useDataInitialization } from '@/hooks/data/useDataInitialization';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { useDebug } from '@/utils/debug/logger';
 
 const Settings = () => {
   const { user, isAuthenticated, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const { clearStorage } = useDataInitialization();
+  const { isDebugMode, toggleDebugMode } = useDebug();
   const isDark = theme === 'dark';
 
   const toggleTheme = () => {
     const newTheme = isDark ? 'light' : 'dark';
     setTheme(newTheme);
     toast.success(`Switched to ${newTheme} mode`);
+  };
+
+  const handleToggleDebug = () => {
+    toggleDebugMode();
+    toast.success(`Debug mode ${isDebugMode ? 'disabled' : 'enabled'}`);
   };
 
   return (
@@ -100,6 +106,36 @@ const Settings = () => {
               id="dark-mode"
               checked={isDark}
               onCheckedChange={toggleTheme}
+              className="data-[state=checked]:bg-primary"
+            />
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Debug Mode Settings */}
+      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2">
+            <Bug className="h-5 w-5 text-primary" />
+            Developer Tools
+          </CardTitle>
+          <CardDescription>Debug and developer settings</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
+            <div className="space-y-1">
+              <Label htmlFor="debug-mode" className="text-base font-medium flex items-center gap-2">
+                <Bug className="h-4 w-4 text-blue-500" />
+                Debug Mode
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Enable debugging tools and performance monitoring
+              </p>
+            </div>
+            <Switch
+              id="debug-mode"
+              checked={isDebugMode}
+              onCheckedChange={handleToggleDebug}
               className="data-[state=checked]:bg-primary"
             />
           </div>
