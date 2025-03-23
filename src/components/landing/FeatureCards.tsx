@@ -17,7 +17,7 @@ const FeatureCard = ({
   link: string; 
 }) => {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
         <Icon className="h-8 w-8 mb-2" />
         <CardTitle className="text-lg">{title}</CardTitle>
