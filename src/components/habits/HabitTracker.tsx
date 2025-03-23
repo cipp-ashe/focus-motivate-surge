@@ -2,21 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import { habitTemplates } from '@/utils/habitTemplates';
 import { toast } from 'sonner';
-import { useHabitState, useHabitActions } from '@/contexts/habits/HabitContext';
+import { useHabitContext } from '@/contexts/habits/HabitContext';
 import ActiveTemplateList from '@/components/habits/ActiveTemplateList';
 import HabitTemplateManager from '@/components/habits/HabitTemplateManager';
 import { DayOfWeek, ActiveTemplate, HabitTemplate } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import { useHabitTaskIntegration } from '@/hooks/habits/useHabitTaskIntegration';
-import { EventHandler } from '@/types/events'; // Updated import path
+import { EventType, EventCallback } from '@/types/events';
 import { motion } from 'framer-motion';
 
 /**
  * Main component for habit tracking and template management
  */
 const HabitTracker: React.FC = () => {
-  const { templates } = useHabitState();
-  const { addTemplate, removeTemplate, updateTemplateDays } = useHabitActions();
+  const { templates } = useHabitContext();
+  const { addTemplate, removeTemplate, updateTemplateDays } = useHabitContext();
   const [templateMap, setTemplateMap] = useState<Record<string, HabitTemplate>>({});
   const [processingTemplateId, setProcessingTemplateId] = useState<string | null>(null);
   
@@ -59,7 +59,7 @@ const HabitTracker: React.FC = () => {
         window.dispatchEvent(new Event('force-task-update'));
         
         // Check for pending habits
-        eventManager.emit('habits:check-pending', {});
+        eventManager.emit('habits:check-pending' as EventType, {});
       }, 200);
     }, 100);
   }, [templates, syncHabitsWithTasks]);
@@ -67,7 +67,7 @@ const HabitTracker: React.FC = () => {
   // Event listeners for template management
   useEffect(() => {
     // Handler for template add events
-    const handleTemplateAdd: EventHandler = (payload: any) => {
+    const handleTemplateAdd: EventCallback<any> = (payload: any) => {
       console.log("HabitTracker: Detected template add event for", payload);
       const templateId = payload.templateId || payload.id;
       
@@ -118,7 +118,7 @@ const HabitTracker: React.FC = () => {
     };
     
     // Subscribe to events using eventManager
-    const unsubAdd = eventManager.on('habit:template-add', handleTemplateAdd);
+    const unsubAdd = eventManager.on('habit:template-add' as EventType, handleTemplateAdd);
     
     return () => {
       unsubAdd();
@@ -132,7 +132,7 @@ const HabitTracker: React.FC = () => {
     toast.success('Template removed');
     
     // Also remove all tasks from this template
-    eventManager.emit('habit:template-delete', { templateId, isOriginatingAction: true });
+    eventManager.emit('habit:template-delete' as EventType, { templateId, isOriginatingAction: true });
   };
 
   // Track habit progress (placeholder for now)

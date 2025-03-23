@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { PlayIcon, PauseIcon, CheckIcon, PlusIcon } from "lucide-react";
-import type { TimerControlsProps, ButtonA11yProps } from "@/types/timer";
+import type { TimerControlsProps, ButtonA11yProps } from "@/types/timer/components";
 import { logger } from "@/utils/logManager";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
   onComplete,
   onAddTime,
   showAddTime = true,
-  size = "normal",
+  size = "md",
   toggleButtonA11yProps,
   completeButtonA11yProps,
   addTimeButtonA11yProps,
@@ -26,9 +26,9 @@ export const TimerControls: React.FC<TimerControlsProps> = ({
     showAddTime,
   });
 
-  const buttonSize = size === "large" ? "h-14 w-14" : "h-12 w-12";
-  const iconSize = size === "large" ? "h-6 w-6" : "h-5 w-5";
-  const gapSize = size === "large" ? "gap-6" : "gap-4";
+  const buttonSize = size === "lg" ? "h-14 w-14" : "h-12 w-12";
+  const iconSize = size === "lg" ? "h-6 w-6" : "h-5 w-5";
+  const gapSize = size === "lg" ? "gap-6" : "gap-4";
 
   // Handle complete click - ensuring we properly handle the Promise return type
   const handleCompleteClick = async () => {

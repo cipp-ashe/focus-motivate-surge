@@ -131,16 +131,16 @@ export interface EventPayloadMap {
   'timer:complete': any;
   'timer:close': any;
   'timer:metrics-update': any;
-  'timer:start': { taskId: string; taskName: string; duration: number };
-  'timer:pause': { taskId: string; taskName: string; timeLeft: number };
-  'timer:resume': { taskId: string; taskName: string; timeLeft: number };
-  'timer:reset': { taskId: string; taskName: string; duration: number };
+  'timer:start': { taskId?: string; taskName: string; duration: number };
+  'timer:pause': { taskId?: string; taskName: string; timeLeft: number };
+  'timer:resume': { taskId?: string; taskName: string; timeLeft: number };
+  'timer:reset': { taskId?: string; taskName: string; duration: number };
   'timer:init': { taskName: string; duration: number };
   'timer:set-task': any;
   'timer:task-set': any;
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
-  'timer:update-metrics': { taskId: string; metrics: any; taskName?: string };
+  'timer:update-metrics': { taskId?: string; metrics: any; taskName?: string };
 
   // UI events
   'ui:sidebar-toggle': boolean;

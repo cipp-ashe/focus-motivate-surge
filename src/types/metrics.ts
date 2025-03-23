@@ -1,3 +1,4 @@
+
 /**
  * Metrics for tracking timer state
  */
@@ -8,7 +9,7 @@ export interface TimerStateMetrics {
   expectedTime: number;
   actualDuration: number;
   pausedTime: number;
-  lastPauseTimestamp: Date | null;
+  lastPauseTimestamp: string | Date | null;
   extensionTime: number;
   netEffectiveTime: number;
   efficiencyRatio: number;
@@ -96,6 +97,6 @@ export const convertTaskMetricsToTimerMetrics = (
     lastPauseTimestamp: null,
     isPaused: false,
     pausedTimeLeft: null,
-    taskId: taskMetrics.taskId
+    taskId: taskMetrics.taskId as string | undefined
   };
 };

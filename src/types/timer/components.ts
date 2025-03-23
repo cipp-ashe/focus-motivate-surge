@@ -50,7 +50,7 @@ export interface TimerControlsProps {
   onAddTime: (minutes: number) => void;
   disabled?: boolean;
   onToggle?: () => void;
-  onComplete?: () => void;
+  onComplete?: () => Promise<void>;
   showAddTime?: boolean;
   size?: 'sm' | 'md' | 'lg';
   toggleButtonA11yProps?: ButtonA11yProps;

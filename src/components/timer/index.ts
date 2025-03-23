@@ -1,28 +1,50 @@
 
-// Re-export timer components
+// Re-export all timer components
 export { Timer } from './Timer';
-export { TimerCircle } from './TimerCircle';
-export { TimerDisplay } from './TimerDisplay';
 export { TimerControls } from './controls/TimerControls';
-export { TimerSection } from './TimerSection';
-export { TimerErrorBoundary } from './TimerErrorBoundary';
-export { TimerCompletionDialog } from './TimerCompletionDialog';
-export { CompletionCelebration } from './CompletionCelebration';
+export { TimerCircle } from './components/TimerCircle';
+export { MinutesInput } from '../minutes/MinutesInput';
+export { SoundSelector } from '../SoundSelector';
+
+// Re-export timer views
 export { TimerCompactView } from './views/TimerCompactView';
 export { TimerExpandedView } from './views/TimerExpandedView';
-export { TimerHeader } from './TimerHeader';
-export { TimerBody } from './components/TimerBody';
-export { TimerCompletion } from './components/TimerCompletion';
+export { TimerSection } from './TimerSection';
 
-// Re-export types
-export type {
-  TimerProps,
-  TimerCircleProps,
-  TimerControlsProps,
+// Re-export hooks
+export { useTimerInitialization } from './hooks/useTimerInitialization';
+export { useTimerHandlers } from './hooks/initialization/useTimerHandlers';
+export { useTimerCore } from './hooks/initialization/useTimerCore';
+export { useTimerAudio } from './hooks/initialization/useTimerAudio';
+export { useTimerActions } from './hooks/initialization/useTimerActions';
+export { useTimerEvents } from './hooks/initialization/useTimerEvents';
+export { useTimerComplete } from './hooks/initialization/useTimerComplete';
+export { useTimerMonitoring } from './hooks/initialization/useTimerMonitoring';
+export { useTimerViews } from './hooks/initialization/useTimerViews';
+export { useAutoComplete } from './hooks/useAutoComplete';
+
+// Re-export handler hooks
+export { useTimerToggle } from './handlers/toggle/useTimerToggle';
+export { useTimerAddTime } from './handlers/time/useTimerAddTime';
+export { useTimerReset } from './handlers/reset/useTimerReset';
+export { useTimerPauseResume } from './handlers/pause/useTimerPauseResume';
+export { useTimerClose } from './handlers/close/useTimerClose';
+
+// Type re-exports - these should come from the types file, not directly
+import { 
   MinutesInputProps,
   TimerA11yProps,
   ButtonA11yProps,
-  SoundOption,
   SoundSelectorProps,
-} from '@/types/timer';
+  TimerControlsProps,
+  TimerCircleProps
+} from '@/types/timer/components';
 
+export type {
+  MinutesInputProps,
+  TimerA11yProps,
+  ButtonA11yProps,
+  SoundSelectorProps,
+  TimerControlsProps,
+  TimerCircleProps
+};

@@ -4,6 +4,7 @@ import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
 import { logger } from "@/utils/logManager";
 import { toISOString } from "@/lib/utils/dateUtils";
+import { EventType } from "@/types/events";
 
 interface UseTimerCompleteProps {
   taskName: string;
@@ -52,7 +53,7 @@ export const useTimerComplete = ({
       }
       
       // Emit completion event
-      eventManager.emit('timer:complete', { 
+      eventManager.emit('timer:complete' as EventType, { 
         taskName, 
         metrics: finalMetrics 
       });

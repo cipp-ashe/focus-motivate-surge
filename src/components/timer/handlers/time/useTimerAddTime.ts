@@ -1,7 +1,9 @@
+
 import { useCallback } from "react";
-import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
-import { TIMER_CONSTANTS } from "@/types/timer";
+import { eventManager } from "@/lib/events/EventManager";
+import { TIMER_CONSTANTS } from "@/types/timer/constants";
+import { EventType } from "@/types/events";
 
 interface UseTimerAddTimeProps {
   addTime: (minutes: number) => void;
@@ -18,42 +20,32 @@ export const useTimerAddTime = ({
   taskName,
   metrics,
   timeLeft,
-  isRunning,
+  isRunning
 }: UseTimerAddTimeProps) => {
-  const handleAddTime = useCallback(
-    (minutes: number = TIMER_CONSTANTS.ADD_TIME_MINUTES) => {
-      console.log(`Adding ${minutes} minutes to timer`);
-      
-      addTime(minutes);
-      
-      // Calculate new timeLeft after adding minutes
-      const newTimeLeft = timeLeft + (minutes * 60);
-      
-      // Emit event to update the timer with new time
-      if (isRunning) {
-        eventManager.emit('timer:tick', {
-          taskName,
-          remaining: newTimeLeft,
-          timeLeft: newTimeLeft
-        });
-      }
-      
-      // Call onAddTime callback if provided
-      if (onAddTime) {
-        onAddTime(minutes);
-      }
-      
-      // Updated to use the correct event type
-      eventManager.emit('timer:metrics-update', {
-        taskName,
-        metrics: {
-          ...metrics,
-          extensionTime: (metrics.extensionTime || 0) + (minutes * 60)
-        }
-      });
-    },
-    [addTime, onAddTime, taskName, metrics, timeLeft, isRunning]
-  );
+  const handleAddTime = useCallback((minutes: number) => {
+    console.log(`Adding ${minutes} minutes to timer`);
+    
+    // Add the time
+    addTime(minutes);
+    
+    // Call external handler if provided
+    if (onAddTime) {
+      onAddTime(minutes);
+    }
+    
+    // Calculate newly extended time
+    const secondsToAdd = minutes * 60;
+    const newTimeLeft = timeLeft + secondsToAdd;
+    
+    // Emit tick event with updated time left
+    eventManager.emit('timer:tick' as EventType, { 
+      timeLeft: newTimeLeft, 
+      taskName,
+      remaining: newTimeLeft  // Add remaining property for compatibility
+    });
+    
+    console.log(`Timer extended by ${minutes} minutes. New time left: ${newTimeLeft}s`);
+  }, [addTime, onAddTime, taskName, timeLeft, isRunning]);
 
   return handleAddTime;
 };

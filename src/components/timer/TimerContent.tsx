@@ -116,7 +116,7 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
         testSound={testSound}
         isLoadingAudio={isLoadingAudio}
         updateMetrics={updateMetrics}
-        expandedViewRef={expandedViewRef}
+        expandedViewRef={expandedViewRef as React.RefObject<any>}
         handleCloseTimer={handleCloseTimer}
         favorites={favorites}
         setFavorites={setFavorites}

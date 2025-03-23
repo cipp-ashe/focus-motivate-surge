@@ -1,54 +1,22 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventCallback, EventPayload } from '@/types/events';
+import { EventType, EventCallback } from '@/types/events';
 
 /**
- * Custom hook to subscribe to events with automatic cleanup
- * @param eventType The event to subscribe to
- * @param callback The callback function to be executed when the event is emitted
+ * Hook to subscribe to events with automatic cleanup
  */
-export function useEvent<T extends EventType>(
-  eventType: T, 
-  callback: EventCallback<T>
+export function useEvent<E extends string>(
+  eventType: E,
+  callback: EventCallback<E extends EventType ? E : never>
 ) {
-  // Use ref to avoid unnecessary re-subscriptions
-  const callbackRef = useRef(callback);
-  
-  // Update the ref when the callback changes
   useEffect(() => {
-    callbackRef.current = callback;
-  }, [callback]);
-  
-  // Subscribe to the event and clean up on unmount
-  useEffect(() => {
-    const wrappedCallback = (payload: EventPayload<T>) => {
-      callbackRef.current(payload);
-    };
+    // Cast eventType to EventType to satisfy TypeScript
+    const unsubscribe = eventManager.on(eventType as EventType, callback as any);
     
-    const unsubscribe = eventManager.on(eventType, wrappedCallback);
-    
-    return () => {
-      unsubscribe();
-    };
-  }, [eventType]);
-}
-
-/**
- * Version of useEvent that only fires once
- */
-export function useEventOnce<T extends EventType>(
-  eventType: T, 
-  callback: EventCallback<T>
-) {
-  // Subscribe to the event and clean up on unmount
-  useEffect(() => {
-    const unsubscribe = eventManager.once(eventType, callback);
-    
+    // Clean up subscription on unmount
     return () => {
       unsubscribe();
     };
   }, [eventType, callback]);
 }
-
-export default useEvent;

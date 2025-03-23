@@ -1,63 +1,69 @@
 
 /**
- * Format a date to ISO string
+ * Convert a Date object to an ISO string safely
+ * If the input is already a string, return it unchanged
  */
-export const toISOString = (date: Date): string => {
+export const toISOString = (date: Date | string | null): string => {
+  if (date === null) {
+    return new Date().toISOString();
+  }
+  if (typeof date === 'string') {
+    return date;
+  }
   return date.toISOString();
 };
 
 /**
- * Format a date for display
+ * Convert an ISO string or Date to a formatted date string
  */
-export const formatDate = (dateString: string | Date): string => {
-  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  return date.toLocaleDateString(undefined, {
+export const formatDate = (date: Date | string | null, options: Intl.DateTimeFormatOptions = {}): string => {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  const defaultOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
-  });
+    day: 'numeric',
+    ...options
+  };
+  
+  return dateObj.toLocaleDateString(undefined, defaultOptions);
 };
 
 /**
- * Format a time for display
+ * Convert an ISO string or Date to a formatted time string
  */
-export const formatTime = (dateString: string | Date): string => {
-  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  return date.toLocaleTimeString(undefined, {
+export const formatTime = (date: Date | string | null, options: Intl.DateTimeFormatOptions = {}): string => {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  const defaultOptions: Intl.DateTimeFormatOptions = {
     hour: '2-digit',
-    minute: '2-digit'
-  });
+    minute: '2-digit',
+    ...options
+  };
+  
+  return dateObj.toLocaleTimeString(undefined, defaultOptions);
 };
 
 /**
- * Format a date and time for display
+ * Convert an ISO string or Date to a formatted date and time string
  */
-export const formatDateTime = (dateString: string | Date): string => {
-  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-  return `${formatDate(date)} ${formatTime(date)}`;
-};
-
-/**
- * Format a date relative to now (e.g. "2 days ago")
- */
-export const formatRelativeTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
-
-  if (diffDay > 30) {
-    return formatDate(date);
-  } else if (diffDay > 0) {
-    return `${diffDay} day${diffDay === 1 ? '' : 's'} ago`;
-  } else if (diffHour > 0) {
-    return `${diffHour} hour${diffHour === 1 ? '' : 's'} ago`;
-  } else if (diffMin > 0) {
-    return `${diffMin} minute${diffMin === 1 ? '' : 's'} ago`;
-  } else {
-    return 'just now';
-  }
+export const formatDateTime = (date: Date | string | null, options: Intl.DateTimeFormatOptions = {}): string => {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    ...options
+  };
+  
+  return dateObj.toLocaleString(undefined, defaultOptions);
 };
