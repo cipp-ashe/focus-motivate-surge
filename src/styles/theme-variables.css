@@ -68,9 +68,9 @@
     --accent-foreground: 225 25% 98%;
     --destructive: 0 84% 65%;
     --destructive-foreground: 225 25% 98%;
-    /* Much darker border color for dark mode visibility */
-    --border: 225 25% 25%;  /* Higher brightness for visibility */
-    --input: 225 25% 25%;
+    /* Much darker border color for dark mode - more subtle */
+    --border: 225 25% 16%;  /* Lower brightness for less visibility */
+    --input: 225 25% 16%;
     --ring: 280 85% 65%;
     
     /* Task type colors for dark mode - higher brightness values */

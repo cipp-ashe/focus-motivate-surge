@@ -37,7 +37,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   buttonStyle
 }) => {
   return (
-    <Card className={`border-primary/10 bg-gradient-to-br ${cardClass} to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm`}>
+    <Card className={`border-muted dark:border-muted bg-gradient-to-br ${cardClass} to-transparent shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 backdrop-blur-sm`}>
       <CardHeader>
         <div className="flex items-center gap-3 mb-1">
           <div className={`p-2 rounded-md ${iconBgClass}`}>

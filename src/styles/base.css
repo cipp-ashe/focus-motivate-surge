@@ -94,9 +94,15 @@
   }
   
   /* DARK MODE FIXES */
-  /* Override all borders in dark mode */
-  .dark * {
-    border-color: hsl(var(--border)) !important;
+  /* Remove the global border override and instead target specific elements */
+  .dark .card,
+  .dark .border,
+  .dark [class*="border-"],
+  .dark button,
+  .dark input,
+  .dark textarea,
+  .dark select {
+    border-color: hsl(var(--border));
   }
   
   /* Fix ALL SVG/icons in dark mode */
