@@ -48,13 +48,66 @@ export const debugStore = {
   }
 };
 
-// Stub implementations for the functions used in other files
-export const withErrorBoundary = (Component: any, options: any) => Component;
-export const traceData = (component?: string, event?: string, data?: any, meta?: any) => {};
-export const measurePerformance = () => {};
-export const trackState = (component?: string, name?: string, value?: any, prev?: any, meta?: any) => {};
-export const validateData = (schema?: any, data?: any, component?: string, errorMessage?: string) => true;
-export const assertCondition = (condition?: boolean, component?: string, message?: string, data?: any, level?: string) => {};
+// Function implementations for the debug hooks
+export const traceData = (component?: string, event?: string, data?: any, meta?: any) => {
+  if (IS_DEV && DEBUG_CONFIG.TRACE_DATA_FLOW) {
+    debugLog(component || 'unknown', `TRACE: ${event || 'event'}`, { data, meta });
+  }
+  return data; // Return data for chaining
+};
+
+export const measurePerformance = (name: string, fn: Function) => {
+  if (!IS_DEV || !DEBUG_CONFIG.enablePerformance) return fn();
+  
+  const start = performance.now();
+  const result = fn();
+  const end = performance.now();
+  debugLog('Performance', `${name}: ${end - start}ms`);
+  return result;
+};
+
+export const trackState = (component?: string, name?: string, value?: any, prev?: any, meta?: any) => {
+  if (IS_DEV && DEBUG_CONFIG.enableStateTracking) {
+    debugLog(component || 'unknown', `STATE: ${name || 'state'} changed`, { 
+      prev, 
+      current: value, 
+      meta 
+    });
+  }
+};
+
+export const validateData = (schema: any, data: any, component?: string, errorMessage?: string) => {
+  if (!IS_DEV || !DEBUG_CONFIG.enableValidation) return true;
+  
+  try {
+    if (schema && typeof schema.parse === 'function') {
+      schema.parse(data);
+      return true;
+    }
+    return true;
+  } catch (error) {
+    debugError(component || 'Validation', errorMessage || 'Validation failed', { error, data });
+    return false;
+  }
+};
+
+export const assertCondition = (
+  condition: boolean, 
+  component?: string, 
+  message?: string, 
+  data?: any, 
+  level: 'error' | 'warn' | 'log' = 'error'
+) => {
+  if (IS_DEV && !condition) {
+    if (level === 'error') {
+      debugError(component || 'Assertion', message || 'Assertion failed', data);
+    } else if (level === 'warn') {
+      debugWarn(component || 'Assertion', message || 'Assertion failed', data);
+    } else {
+      debugLog(component || 'Assertion', message || 'Assertion failed', data);
+    }
+  }
+};
 
 // Logger with all methods
 export const logger = { 
@@ -80,7 +133,13 @@ export const useDebug = () => {
   };
 };
 
-// Export as default for compatibility
+// Stub implementation for withErrorBoundary
+export const withErrorBoundary = (Component: any, options: any) => Component;
+
+// Mock component for DebugProvider
+export const DebugProvider = ({ children }: { children: React.ReactNode }) => children;
+
+// Default export with all utilities for easier access
 const DebugModule = {
   debugLog,
   debugWarn,
@@ -96,10 +155,7 @@ const DebugModule = {
   validateData,
   assertCondition,
   logger,
+  DebugProvider
 };
 
-// Make sure all debug hooks have access to the default export
 export default DebugModule;
-
-// Mock component for DebugProvider
-export const DebugProvider = ({ children }: { children: React.ReactNode }) => children;

@@ -1,0 +1,8 @@
+
+/* Base layer styles organized into modular imports */
+@import './reset.css';
+@import './layout.css';
+@import './typography.css';
+@import './interactive.css';
+@import './effects.css';
+@import './dark-mode.css';

@@ -1,0 +1,42 @@
+
+@layer base {
+  :root,
+  html,
+  body,
+  #root {
+    @apply min-h-screen h-full;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  
+  html {
+    @apply overflow-x-hidden scroll-smooth;
+  }
+  
+  body {
+    @apply overflow-x-hidden;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Transition properties applied here, not inline */
+  *,
+  *::before,
+  *::after {
+    @apply transition-colors duration-300;
+    outline: none !important;
+    border-color: hsl(var(--border) / 0.1) !important;
+  }
+
+  /* Fix for components with nested background issues */
+  main, 
+  .container, 
+  .container-fancy, 
+  .layout-container,
+  [class*="layout-"],
+  [class*="-layout"],
+  .app-container,
+  .content-area,
+  .page-container {
+    background-color: transparent;
+  }
+}
