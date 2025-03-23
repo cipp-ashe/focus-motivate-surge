@@ -1,8 +1,0 @@
-/* Quote display animations and styling */
-.quote-container {
-  transition: opacity 2s ease-in-out;
-}
-
-.quote-card {
-  transition: opacity 2s ease-in-out;
-}
