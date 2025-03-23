@@ -1,13 +1,13 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useDataFlow } from '@/hooks/debug/useDataFlow';
-import { usePerformance } from '@/hooks/debug/usePerformance';
-import { useStateTracking } from '@/hooks/debug/useStateTracking';
-import { useValidation } from '@/hooks/debug/useValidation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { withErrorBoundary } from '@/utils/debug';
+import React, { useState, useEffect, useCallback } from "react";
+import { useDataFlow } from "@/hooks/debug/useDataFlow";
+import { usePerformance } from "@/hooks/debug/usePerformance";
+import { useStateTracking } from "@/hooks/debug/useStateTracking";
+import { useValidation } from "@/hooks/debug/useValidation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { withErrorBoundary } from "@/utils/debug";
 
 interface ExampleData {
   id: string;

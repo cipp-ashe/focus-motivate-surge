@@ -35,7 +35,7 @@ export function useValidation(options: UseValidationOptions) {
         data,
         module,
         component,
-        expectedFields as string[],
+        expectedFields as string[]
       );
     },
     [enabled, module, component]

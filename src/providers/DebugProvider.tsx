@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DebugProvider as DebugToolsProvider } from '@/utils/debug';
+import { DebugProvider as DebugContextProvider } from '@/utils/debug';
 import DebugPanel from '@/components/debug/DebugPanel';
 import { IS_DEV } from '@/utils/debug';
 
@@ -18,9 +18,9 @@ export function DebugProvider({ children, enabled = IS_DEV }: DebugProviderProps
   }
   
   return (
-    <DebugToolsProvider>
+    <DebugContextProvider>
       {children}
       <DebugPanel />
-    </DebugToolsProvider>
+    </DebugContextProvider>
   );
 }

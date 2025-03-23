@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { withErrorBoundary, IS_DEV } from '@/utils/debug';
-import { DebugProvider } from '@/providers/DebugProvider';
+import { withErrorBoundary, IS_DEV, DebugProvider as DebugContextProvider } from '@/utils/debug';
 
 /**
  * Higher-order component that adds debugging capabilities to a component
@@ -48,9 +47,9 @@ export function withDebugging<P extends object>(
     }
     
     return (
-      <DebugProvider enabled={enableDebugTools}>
+      <DebugContextProvider enabled={enableDebugTools}>
         <WrappedComponent {...props} />
-      </DebugProvider>
+      </DebugContextProvider>
     );
   };
   

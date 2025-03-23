@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { withErrorBoundary, IS_DEV } from '@/utils/debug';
-import { DebugProvider } from '@/providers/DebugProvider';
+import { withErrorBoundary, IS_DEV, DebugProvider } from '@/utils/debug';
 import { QueryClient } from '@tanstack/react-query';
 import { useQueryDebugging } from '@/hooks/debug/useQueryDebugging';
 
@@ -36,11 +35,7 @@ export function applyDebugging<P extends object>(
   // Create error boundary wrapper
   const AppWithErrorBoundary = withErrorBoundary(App, {
     module: 'app',
-    component: displayName,
-    onError: (error, info) => {
-      console.error(`Critical app error:`, error);
-      console.error('Component stack:', info.componentStack);
-    }
+    component: displayName
   });
   
   // Create the final app component with debug context
