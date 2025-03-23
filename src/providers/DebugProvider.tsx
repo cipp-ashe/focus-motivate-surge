@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { DebugProvider as DebugContextProvider } from '@/utils/debug';
-import DebugPanel from '@/components/debug/DebugPanel';
 import { IS_DEV } from '@/utils/debug';
 
 interface DebugProviderProps {
@@ -10,17 +8,8 @@ interface DebugProviderProps {
 }
 
 /**
- * Provider that adds debug tools to the application
+ * Simplified provider that adds debug tools to the application
  */
-export function DebugProvider({ children, enabled = IS_DEV }: DebugProviderProps) {
-  if (!enabled) {
-    return <>{children}</>;
-  }
-  
-  return (
-    <DebugContextProvider>
-      {children}
-      <DebugPanel />
-    </DebugContextProvider>
-  );
+export function DebugProvider({ children }: DebugProviderProps) {
+  return <>{children}</>;
 }

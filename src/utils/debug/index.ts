@@ -2,9 +2,9 @@
 /**
  * Debug Utilities
  * 
- * This module provides utilities for debugging and error handling in the application.
+ * This module provides simplified utilities for debugging in the application.
  */
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 // ============================
@@ -37,26 +37,6 @@ export interface ErrorBoundaryOptions {
   onError?: (error: Error, info: { componentStack: string }) => void;
 }
 
-/** Debug context state */
-interface DebugContextType {
-  isEnabled: boolean;
-  toggleDebug: () => void;
-  debugLevel: DebugLevel;
-  setDebugLevel: (level: DebugLevel) => void;
-  enabledModules: Set<DebugModule>;
-  toggleModule: (module: DebugModule) => void;
-  lastError: Error | null;
-  setLastError: (error: Error | null) => void;
-  logs: Array<{
-    timestamp: Date;
-    level: DebugLevel;
-    module: DebugModule;
-    message: string;
-    data?: any;
-  }>;
-  clearLogs: () => void;
-}
-
 // Configuration for the debug system
 export const DEBUG_CONFIG = {
   enabled: IS_DEV,
@@ -67,7 +47,7 @@ export const DEBUG_CONFIG = {
   TRACE_DATA_FLOW: IS_DEV,
 };
 
-// Debug store for event logging
+// Simple debug store for event logging
 export const debugStore = {
   events: [] as any[],
   addEvent: (event: any) => {
@@ -84,111 +64,44 @@ export const debugStore = {
 };
 
 // ============================
-// Debug Context
-// ============================
-
-const DebugContext = createContext<DebugContextType | null>(null);
-
-/** Props for the Debug Provider */
-interface DebugProviderProps {
-  children: React.ReactNode;
-  enabled?: boolean;
-}
-
-/** Debug Provider component */
-export const DebugProvider: React.FC<DebugProviderProps> = ({ 
-  children, 
-  enabled = IS_DEV 
-}) => {
-  // State for debug configuration
-  const [isEnabled, setIsEnabled] = useState(enabled);
-  const [debugLevel, setDebugLevel] = useState<DebugLevel>('info');
-  const [enabledModules, setEnabledModules] = useState<Set<DebugModule>>(
-    new Set(['app', 'ui', 'data'])
-  );
-  const [lastError, setLastError] = useState<Error | null>(null);
-  const [logs, setLogs] = useState<DebugContextType['logs']>([]);
-
-  // Toggle debug mode
-  const toggleDebug = () => setIsEnabled(prev => !prev);
-
-  // Toggle module logging
-  const toggleModule = (module: DebugModule) => {
-    setEnabledModules(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(module)) {
-        newSet.delete(module);
-      } else {
-        newSet.add(module);
-      }
-      return newSet;
-    });
-  };
-
-  // Clear all logs
-  const clearLogs = () => setLogs([]);
-
-  // Store context value
-  const contextValue: DebugContextType = {
-    isEnabled,
-    toggleDebug,
-    debugLevel,
-    setDebugLevel,
-    enabledModules,
-    toggleModule,
-    lastError,
-    setLastError,
-    logs,
-    clearLogs
-  };
-
-  // Effects to initialize
-  useEffect(() => {
-    if (isEnabled) {
-      console.log('Debug mode enabled');
-      // Set up global error handlers
-      const originalConsoleError = console.error;
-      console.error = (...args) => {
-        const message = args.map(arg => 
-          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-        ).join(' ');
-        
-        setLogs(prev => [...prev, {
-          timestamp: new Date(),
-          level: 'error',
-          module: 'app',
-          message
-        }]);
-        
-        originalConsoleError.apply(console, args);
-      };
-      
-      // Cleanup
-      return () => {
-        console.error = originalConsoleError;
-      };
-    }
-  }, [isEnabled]);
-
-  return (
-    <DebugContext.Provider value={contextValue}>
-      {children}
-    </DebugContext.Provider>
-  );
-};
-
-/** Hook to use the debug context */
-export const useDebugContext = () => {
-  const context = useContext(DebugContext);
-  if (!context) {
-    throw new Error('useDebugContext must be used within a DebugProvider');
-  }
-  return context;
-};
-
-// ============================
 // Debugging Utilities
 // ============================
+
+/**
+ * Simple hook for debug functionality
+ */
+export const useDebug = () => {
+  const [isDebugMode, setIsDebugMode] = React.useState(() => 
+    localStorage.getItem('debug_enabled') === 'true' || IS_DEV
+  );
+  
+  const toggleDebugMode = () => {
+    const newValue = !isDebugMode;
+    setIsDebugMode(newValue);
+    localStorage.setItem('debug_enabled', String(newValue));
+    console.log(`Debug mode ${newValue ? 'enabled' : 'disabled'}`);
+  };
+  
+  return {
+    isDebugMode,
+    toggleDebugMode,
+    logger: {
+      log: (module: string, message: string, data?: any) => {
+        if (isDebugMode) {
+          console.log(`[${module}] ${message}`, data);
+        }
+      },
+      warn: (module: string, message: string, data?: any) => {
+        if (isDebugMode) {
+          console.warn(`[${module}] ${message}`, data);
+        }
+      },
+      error: (module: string, message: string, data?: any) => {
+        console.error(`[${module}] ${message}`, data);
+      }
+    }
+  };
+};
 
 /**
  * Utility to track state changes
@@ -200,6 +113,8 @@ export function trackState(
   newValue: any,
   prevValue?: any
 ): void {
+  if (!IS_DEV) return;
+  
   debugStore.addEvent({
     type: 'state-change',
     module,
@@ -224,6 +139,8 @@ export function traceData(
   message: string,
   data?: any
 ): void {
+  if (!IS_DEV) return;
+  
   debugStore.addEvent({
     type: 'data-flow',
     module,
@@ -233,52 +150,6 @@ export function traceData(
     data
   });
 }
-
-/**
- * Utility to measure performance
- */
-export function measurePerformance<T>(
-  module: DebugModule,
-  component: string,
-  functionName: string,
-  fn: () => T
-): T {
-  const startTime = performance.now();
-  let result: T;
-  let error: Error | null = null;
-  
-  try {
-    result = fn();
-  } catch (e) {
-    error = e as Error;
-    throw e;
-  } finally {
-    const endTime = performance.now();
-    const duration = endTime - startTime;
-    
-    debugStore.addEvent({
-      type: 'performance',
-      module,
-      component,
-      message: `Function '${functionName}' took ${duration.toFixed(2)}ms`,
-      timestamp: Date.now(),
-      data: {
-        functionName,
-        duration,
-        error: error ? {
-          message: error.message,
-          stack: error.stack
-        } : null
-      }
-    });
-  }
-  
-  return result;
-}
-
-// ============================
-// Error Boundary
-// ============================
 
 /**
  * Higher-order component that wraps a component with an error boundary
@@ -330,12 +201,34 @@ export function withErrorBoundary<P extends object>(
   return WrappedComponent;
 }
 
-// ============================
-// Validation Utilities
-// ============================
+// Export common utilities
+export const logger = console;
+
+// Simple placeholder for the provider until we've fixed all the issues
+export const DebugProvider: React.FC<{children: React.ReactNode; enabled?: boolean}> = ({ 
+  children
+}) => {
+  return <>{children}</>;
+};
+
+// Export this with a simplified implementation
+export function useDebugContext() {
+  return {
+    isEnabled: IS_DEV,
+    toggleDebug: () => console.log('Debug toggle called'),
+    debugLevel: 'info' as DebugLevel,
+    setDebugLevel: () => {},
+    enabledModules: new Set<DebugModule>(['app']),
+    toggleModule: () => {},
+    lastError: null,
+    setLastError: () => {},
+    logs: [],
+    clearLogs: () => {}
+  };
+}
 
 /**
- * Validate data structure
+ * Simplified validation utility
  */
 export function validateData<T>(
   data: T,
@@ -370,7 +263,7 @@ export function validateData<T>(
 }
 
 /**
- * Assert a condition is true
+ * Simplified assertion utility
  */
 export function assertCondition(
   condition: boolean,
@@ -387,40 +280,46 @@ export function assertCondition(
   }
 }
 
-// Simple debug hook
-export const useDebug = () => {
-  const [isDebugMode, setIsDebugMode] = useState(() => 
-    localStorage.getItem('debug_enabled') === 'true' || IS_DEV
-  );
+/**
+ * Utility to measure performance
+ */
+export function measurePerformance<T>(
+  module: DebugModule,
+  component: string,
+  functionName: string,
+  fn: () => T
+): T {
+  if (!IS_DEV) return fn();
   
-  const toggleDebugMode = () => {
-    const newValue = !isDebugMode;
-    setIsDebugMode(newValue);
-    localStorage.setItem('debug_enabled', String(newValue));
-    console.log(`Debug mode ${newValue ? 'enabled' : 'disabled'}`);
-  };
+  const startTime = performance.now();
+  let result: T;
+  let error: Error | null = null;
   
-  return {
-    isDebugMode,
-    toggleDebugMode,
-    logger: {
-      log: (module: string, message: string, data?: any) => {
-        if (isDebugMode) {
-          console.log(`[${module}] ${message}`, data);
-        }
-      },
-      warn: (module: string, message: string, data?: any) => {
-        if (isDebugMode) {
-          console.warn(`[${module}] ${message}`, data);
-        }
-      },
-      error: (module: string, message: string, data?: any) => {
-        console.error(`[${module}] ${message}`, data);
+  try {
+    result = fn();
+  } catch (e) {
+    error = e as Error;
+    throw e;
+  } finally {
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    
+    debugStore.addEvent({
+      type: 'performance',
+      module,
+      component,
+      message: `Function '${functionName}' took ${duration.toFixed(2)}ms`,
+      timestamp: Date.now(),
+      data: {
+        functionName,
+        duration,
+        error: error ? {
+          message: error.message,
+          stack: error.stack
+        } : null
       }
-    }
-  };
-};
-
-// Export common utilities
-export { DebugContext };
-export const logger = console;
+    });
+  }
+  
+  return result;
+}
