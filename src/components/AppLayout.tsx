@@ -13,7 +13,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile(1024);
   
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen w-full bg-background">
       <Header />
       
       <div className="flex flex-1 w-full">
