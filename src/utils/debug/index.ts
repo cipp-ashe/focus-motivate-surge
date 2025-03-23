@@ -1,31 +1,339 @@
-
-// Debug utility functions for development and troubleshooting
+// Debug utility constants and types
 import React from 'react';
 import { logger } from '@/utils/logManager';
 
-/**
- * Helper function to add debugging information to a component
- * @param Component The component to add debugging to
- * @param debugName The name to use for debugging
- */
-export function withDebugging<P extends object>(
-  Component: React.ComponentType<P>,
-  debugName: string
-): React.FC<P> {
-  const WrappedComponent: React.FC<P> = (props) => {
-    logger.debug(debugName, 'Rendering component', { props });
+// Debug module types
+export type DebugModule = 'app' | 'ui' | 'data' | 'auth' | 'api' | 'state' | 'events';
+
+// Global debug configuration
+export const DEBUG_CONFIG = {
+  TRACE_DATA_FLOW: process.env.NODE_ENV === 'development',
+  MEASURE_PERFORMANCE: process.env.NODE_ENV === 'development',
+  TRACK_STATE_CHANGES: process.env.NODE_ENV === 'development',
+  VALIDATE_DATA: process.env.NODE_ENV === 'development',
+  RECORD_ASSERTIONS: true,
+  LOG_LEVEL: process.env.NODE_ENV === 'development' ? 'debug' : 'warn',
+};
+
+// Flag to check if we're in development mode
+export const IS_DEV = process.env.NODE_ENV === 'development';
+
+// Debug store for collecting events
+class DebugStore {
+  private events: any[] = [];
+  private maxEvents = 500;
+
+  addEvent(event: any) {
+    this.events.unshift(event);
     
-    return <Component {...props} />;
-  };
-  
-  WrappedComponent.displayName = `Debug(${debugName})`;
-  return WrappedComponent;
+    // Keep the events list at a reasonable size
+    if (this.events.length > this.maxEvents) {
+      this.events = this.events.slice(0, this.maxEvents);
+    }
+  }
+
+  getEvents() {
+    return [...this.events];
+  }
+
+  clear() {
+    this.events = [];
+  }
 }
 
-/**
- * Creates a debug logger for a specific component or module
- * @param namespace The namespace to use for logging
- */
+// Create a singleton instance of the debug store
+export const debugStore = new DebugStore();
+
+// Debug context for providing debug tools
+const DebugContext = React.createContext<{
+  isDebugMode: boolean;
+  toggleDebugMode: () => void;
+}>({
+  isDebugMode: false,
+  toggleDebugMode: () => {},
+});
+
+export const DebugProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  const [isDebugMode, setIsDebugMode] = React.useState<boolean>(() => {
+    return localStorage.getItem('debug_mode') === 'true';
+  });
+
+  const toggleDebugMode = React.useCallback(() => {
+    setIsDebugMode(prev => {
+      const newValue = !prev;
+      localStorage.setItem('debug_mode', String(newValue));
+      return newValue;
+    });
+  }, []);
+
+  return (
+    <DebugContext.Provider value={{ isDebugMode, toggleDebugMode }}>
+      {children}
+    </DebugContext.Provider>
+  );
+};
+
+export const useDebug = () => React.useContext(DebugContext);
+
+// Utility function to trace data flow
+export function traceData(
+  module: DebugModule,
+  component: string,
+  message: string,
+  data?: any
+) {
+  if (!DEBUG_CONFIG.TRACE_DATA_FLOW) return;
+
+  debugStore.addEvent({
+    type: 'data-flow',
+    module,
+    component,
+    message,
+    timestamp: Date.now(),
+    data,
+  });
+
+  logger.debug(`${module}:${component}`, message, data);
+}
+
+// Utility function to measure performance
+export function measurePerformance<T>(
+  module: DebugModule,
+  component: string,
+  operation: string,
+  callback: () => T
+): T {
+  if (!DEBUG_CONFIG.MEASURE_PERFORMANCE) {
+    return callback();
+  }
+
+  const startTime = performance.now();
+  let result: T;
+  let error: Error | null = null;
+
+  try {
+    result = callback();
+  } catch (err) {
+    error = err instanceof Error ? err : new Error(String(err));
+    throw error;
+  } finally {
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+
+    debugStore.addEvent({
+      type: 'performance',
+      module,
+      component,
+      message: `${operation} took ${duration.toFixed(2)}ms`,
+      timestamp: Date.now(),
+      data: {
+        operation,
+        duration,
+        hasError: !!error,
+        error: error ? error.message : null,
+      },
+    });
+
+    if (!error) {
+      logger.debug(
+        `${module}:${component}`,
+        `⏱️ ${operation}: ${duration.toFixed(2)}ms`
+      );
+    } else {
+      logger.error(
+        `${module}:${component}`,
+        `⏱️ ${operation} failed after ${duration.toFixed(2)}ms: ${error.message}`
+      );
+    }
+  }
+
+  return result!;
+}
+
+// Utility function to track state changes
+export function trackState(
+  module: DebugModule,
+  component: string,
+  stateName: string,
+  currentValue: any,
+  previousValue?: any
+) {
+  if (!DEBUG_CONFIG.TRACK_STATE_CHANGES) return;
+
+  debugStore.addEvent({
+    type: 'state-change',
+    module,
+    component,
+    message: `State "${stateName}" changed`,
+    timestamp: Date.now(),
+    data: {
+      state: stateName,
+      current: currentValue,
+      previous: previousValue,
+    },
+  });
+
+  logger.debug(
+    `${module}:${component}`,
+    `📊 State "${stateName}" changed:`,
+    previousValue !== undefined
+      ? { from: previousValue, to: currentValue }
+      : { value: currentValue }
+  );
+}
+
+// Utility function to validate data
+export function validateData(
+  data: any,
+  module: DebugModule,
+  component: string,
+  expectedFields: string[] = []
+): boolean {
+  if (!DEBUG_CONFIG.VALIDATE_DATA) return true;
+
+  const missingFields = expectedFields.filter(
+    field => data[field] === undefined || data[field] === null
+  );
+
+  const isValid = missingFields.length === 0;
+
+  if (!isValid) {
+    debugStore.addEvent({
+      type: 'validation',
+      module,
+      component,
+      message: `Data validation failed: missing required fields`,
+      timestamp: Date.now(),
+      data: {
+        missingFields,
+        data,
+      },
+    });
+
+    logger.warn(
+      `${module}:${component}`,
+      `❌ Data validation failed: missing required fields:`,
+      missingFields
+    );
+  }
+
+  return isValid;
+}
+
+// Utility function for assertions
+export function assertCondition(
+  condition: boolean,
+  module: DebugModule,
+  component: string,
+  message: string,
+  data?: any
+): boolean {
+  if (!DEBUG_CONFIG.RECORD_ASSERTIONS) return condition;
+
+  if (!condition) {
+    debugStore.addEvent({
+      type: 'assertion',
+      module,
+      component,
+      message: `Assertion failed: ${message}`,
+      timestamp: Date.now(),
+      data,
+    });
+
+    logger.warn(
+      `${module}:${component}`,
+      `⚠️ Assertion failed: ${message}`,
+      data
+    );
+  }
+
+  return condition;
+}
+
+// Error boundary HOC for components
+export function withErrorBoundary<P extends object>(
+  Component: React.ComponentType<P>,
+  options: {
+    module: DebugModule;
+    component: string;
+    fallback?: React.ReactNode;
+    onError?: (error: Error, info: React.ErrorInfo) => void;
+  }
+): React.ComponentType<P> {
+  const { module, component, fallback, onError } = options;
+
+  class ErrorBoundary extends React.Component<
+    P,
+    { hasError: boolean; error: Error | null }
+  > {
+    constructor(props: P) {
+      super(props);
+      this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+      return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+      debugStore.addEvent({
+        type: 'error',
+        module,
+        component,
+        message: `Component error: ${error.message}`,
+        timestamp: Date.now(),
+        data: {
+          error: {
+            message: error.message,
+            stack: error.stack,
+          },
+          componentStack: errorInfo.componentStack,
+        },
+      });
+
+      logger.error(
+        `${module}:${component}`,
+        `🚨 Component error: ${error.message}`,
+        {
+          error,
+          componentStack: errorInfo.componentStack,
+        }
+      );
+
+      if (onError) {
+        onError(error, errorInfo);
+      }
+    }
+
+    render() {
+      if (this.state.hasError) {
+        if (fallback) {
+          return fallback;
+        }
+        return (
+          <div className="p-4 border border-red-300 bg-red-50 text-red-800 rounded">
+            <h3 className="text-lg font-medium">Something went wrong</h3>
+            <p className="mt-1">
+              {this.state.error ? this.state.error.message : 'Unknown error'}
+            </p>
+          </div>
+        );
+      }
+
+      return <Component {...this.props} />;
+    }
+  }
+
+  ErrorBoundary.displayName = `withErrorBoundary(${
+    Component.displayName || Component.name || 'Component'
+  })`;
+
+  return ErrorBoundary as any;
+}
+
+// Export a utility function to create a debug logger
 export function createDebugLogger(namespace: string) {
   return {
     log: (...args: any[]) => logger.debug(namespace, ...args),
@@ -34,132 +342,3 @@ export function createDebugLogger(namespace: string) {
     info: (...args: any[]) => logger.info(namespace, ...args),
   };
 }
-
-/**
- * Simple component that displays debug information
- */
-export const DebugDisplay: React.FC<{
-  title?: string;
-  data: Record<string, any>;
-  expanded?: boolean;
-}> = ({ title = 'Debug Info', data, expanded = false }) => {
-  const [isExpanded, setIsExpanded] = React.useState(expanded);
-  
-  return (
-    <div className="p-2 mt-2 mb-2 border border-gray-300 rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700 text-left">
-      <div 
-        className="flex justify-between items-center cursor-pointer" 
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <h4 className="text-sm font-medium">{title}</h4>
-        <span>{isExpanded ? '▼' : '►'}</span>
-      </div>
-      
-      {isExpanded && (
-        <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-900 rounded text-xs overflow-auto max-h-64">
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      )}
-    </div>
-  );
-};
-
-/**
- * Utility to conditionally apply debugging features based on environment
- */
-export const createDebugger = (namespace: string) => {
-  const isDev = process.env.NODE_ENV === 'development';
-  
-  return {
-    log: isDev ? (...args: any[]) => logger.debug(namespace, ...args) : () => {},
-    trace: isDev ? (...args: any[]) => console.trace(namespace, ...args) : () => {},
-    group: isDev ? (label: string) => console.group(label) : () => {},
-    groupEnd: isDev ? () => console.groupEnd() : () => {},
-    time: isDev ? (label: string) => console.time(label) : () => {},
-    timeEnd: isDev ? (label: string) => console.timeEnd(label) : () => {},
-    count: isDev ? (label: string) => console.count(label) : () => {},
-  };
-};
-
-/**
- * Hook for monitoring prop changes
- */
-export function useDebugProps<T extends Record<string, any>>(name: string, props: T) {
-  const prevPropsRef = React.useRef<T | null>(null);
-  
-  React.useEffect(() => {
-    if (prevPropsRef.current) {
-      const allKeys = new Set([
-        ...Object.keys(prevPropsRef.current),
-        ...Object.keys(props)
-      ]);
-      
-      const changedProps: Record<string, { from: any; to: any }> = {};
-      
-      allKeys.forEach(key => {
-        if (prevPropsRef.current?.[key] !== props[key]) {
-          changedProps[key] = {
-            from: prevPropsRef.current?.[key],
-            to: props[key]
-          };
-        }
-      });
-      
-      if (Object.keys(changedProps).length > 0) {
-        logger.debug(name, 'Props changed:', changedProps);
-      }
-    }
-    
-    prevPropsRef.current = { ...props };
-  }, [name, props]);
-}
-
-/**
- * Debug helper for rendering cycles
- */
-export function useRenderDebug(componentName: string) {
-  const renderCount = React.useRef(0);
-  
-  logger.debug(
-    componentName,
-    `Render ${++renderCount.current}`
-  );
-  
-  React.useEffect(() => {
-    logger.debug(componentName, 'Component mounted');
-    
-    return () => {
-      logger.debug(componentName, 'Component unmounted');
-    };
-  }, [componentName]);
-}
-
-/**
- * Utility function to validate props against a schema
- */
-export function validateProps<T>(props: T, schema: Record<keyof T, any>, componentName: string): boolean {
-  const errors: string[] = [];
-  
-  Object.keys(schema).forEach((key) => {
-    const propKey = key as keyof T;
-    const rule = schema[propKey];
-    
-    if (rule.required && (props[propKey] === undefined || props[propKey] === null)) {
-      errors.push(`Missing required prop '${String(propKey)}'`);
-    }
-    
-    if (props[propKey] !== undefined && rule.type && typeof props[propKey] !== rule.type) {
-      errors.push(`Prop '${String(propKey)}' should be of type '${rule.type}', got '${typeof props[propKey]}'`);
-    }
-  });
-  
-  if (errors.length > 0) {
-    logger.error(componentName, 'Prop validation errors:', errors);
-    return false;
-  }
-  
-  return true;
-}
-
-// Export a debugging flag for development features
-export const DEBUG_MODE = process.env.NODE_ENV === 'development';
