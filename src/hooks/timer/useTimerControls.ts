@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
-import { TIMER_CONSTANTS } from '@/types/timer';
+import { TIMER_CONSTANTS } from '@/types/timer/constants';
 
 interface UseTimerControlsParams {
   timeLeft: number;
