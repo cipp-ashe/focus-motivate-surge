@@ -7,4 +7,6 @@ export interface TimerExpandedViewRef {
   toggleExpansion: () => void;
   isExpanded: boolean;
   saveNotes?: () => void;
+  notesRef?: React.RefObject<HTMLTextAreaElement>;
+  handleSave?: () => void;
 }

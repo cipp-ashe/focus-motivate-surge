@@ -4,8 +4,8 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Loader2, Volume2 } from "lucide-react";
-import { SoundOption } from "../types/timer";
-import { SOUND_OPTIONS } from "../types/timer/constants";
+import { SoundOption } from "@/types/timer/components";
+import { SOUND_OPTIONS } from "@/types/timer/constants";
 import { cn } from "@/lib/utils";
 
 export interface SoundSelectorProps {

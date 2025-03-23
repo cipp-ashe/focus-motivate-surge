@@ -1,6 +1,6 @@
 
 import React, { memo } from "react";
-import { MinutesInputProps } from "@/types/timer";
+import { MinutesInputProps } from "@/types/timer/components";
 import { MinutesButton } from "./MinutesButton";
 import { MinutesDisplay } from "./MinutesDisplay";
 import { useMinutesHandlers } from "@/hooks/useMinutesHandlers";

@@ -38,6 +38,23 @@ class EventManager {
   }
 
   /**
+   * Get the listener counts for all events
+   */
+  getListenerCounts(): Record<string, number> {
+    const counts: Record<string, number> = {};
+    const allEvents = this.events.all;
+    
+    for (const event in allEvents) {
+      const handlers = allEvents[event as EventType];
+      if (handlers) {
+        counts[event] = handlers.length;
+      }
+    }
+    
+    return counts;
+  }
+
+  /**
    * Emit an event with a payload
    */
   emit<E extends EventType>(event: E, payload?: EventPayload<E>): void {

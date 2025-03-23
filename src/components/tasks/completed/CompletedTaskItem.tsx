@@ -39,7 +39,11 @@ export const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
   const getCompletionTimingStatus = () => {
     if (!task.metrics?.expectedTime || !task.metrics?.netEffectiveTime) return null;
     
-    const status = determineCompletionStatus(task.metrics.expectedTime, task.metrics.netEffectiveTime);
+    const status = determineCompletionStatus(
+      task.metrics.expectedTime, 
+      task.metrics.netEffectiveTime
+    );
+    
     return { 
       label: status.replace('Completed ', ''), 
       className: getCompletionTimingClass(status)

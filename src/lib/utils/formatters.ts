@@ -27,9 +27,12 @@ export const formatTimestamp = (timestamp: string | Date | null): string => {
 /**
  * Get a CSS class based on completion timing
  */
-export const getCompletionTimingClass = (efficiency: number): string => {
-  if (efficiency >= 1.1) return 'text-red-500';
-  if (efficiency > 0.9 && efficiency < 1.1) return 'text-green-500';
+export const getCompletionTimingClass = (efficiency: number | string): string => {
+  const efficiencyValue = typeof efficiency === 'string' ? 
+    parseFloat(efficiency.replace('%', '')) / 100 : efficiency;
+    
+  if (efficiencyValue >= 1.1) return 'text-red-500';
+  if (efficiencyValue > 0.9 && efficiencyValue < 1.1) return 'text-green-500';
   return 'text-yellow-500';
 };
 
@@ -68,4 +71,3 @@ export const formatDuration = (seconds: number): string => {
     return `${remainingSeconds}s`;
   }
 };
-

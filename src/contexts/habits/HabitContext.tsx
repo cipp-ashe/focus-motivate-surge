@@ -1,130 +1,144 @@
-
-import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } from 'react';
-import { toast } from 'sonner';
+import React, { createContext, useContext, useState, useReducer, useCallback } from 'react';
+import { HabitState, HabitContext, initialState } from './types';
 import { habitReducer } from './habitReducer';
-import { HabitState, HabitContextActions, initialState } from './types';
-import { useHabitEvents } from '@/hooks/habits/useHabitEvents';
-import { createHabitActions } from './useHabitActions';
+import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
+import { toast } from 'sonner';
+import { DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
 
-// Create contexts with proper typing
-const HabitContext = createContext<HabitState | undefined>(undefined);
-const HabitActionsContext = createContext<HabitContextActions | undefined>(undefined);
+/**
+ * Context for managing habit-related state
+ */
+const HabitContext = createContext<HabitContext | undefined>(undefined);
 
-// Track habit initialization globally
-let habitsInitialized = false;
-let habitsChecked = false;
-
-export const HabitProvider = ({ children }: { children: ReactNode }) => {
+/**
+ * Provider component for the habit context
+ */
+export const HabitProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(habitReducer, initialState);
-  const loadedRef = useRef(false);
-  const habitsCheckedRef = useRef(false);
-  const periodicCheckRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Load initial templates on mount
-  useEffect(() => {
-    // Prevent duplicate loading using both global and local flags
-    if (habitsInitialized || loadedRef.current) return;
-    
-    // Set flags immediately to prevent duplicate processing
-    loadedRef.current = true;
-    habitsInitialized = true;
-    
-    try {
-      const templates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
-      
-      dispatch({ type: 'LOAD_TEMPLATES', payload: templates });
-      
-      // Also load custom templates
-      const customTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
-      dispatch({ type: 'LOAD_CUSTOM_TEMPLATES', payload: customTemplates });
-      
-      // Mark as loaded and trigger habit processing once
-      if (!habitsChecked && !habitsCheckedRef.current) {
-        setTimeout(() => {
-          habitsCheckedRef.current = true;
-          habitsChecked = true;
-          // Update habit processing
-          eventManager.emit('habits:check-pending', {});
-        }, 300);
-      }
-    } catch (error) {
-      console.error('Error loading habits:', error);
-      toast.error('Failed to load habits');
-    }
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  /**
+   * Add a new habit template
+   */
+  const addTemplate = useCallback((template: Omit<ActiveTemplate, 'templateId'>) => {
+    const newTemplate: ActiveTemplate = {
+      templateId: `template-${Date.now()}`,
+      habits: template.habits || [],
+      activeDays: template.activeDays || DEFAULT_ACTIVE_DAYS,
+      customized: template.customized,
+      name: template.name,
+      description: template.description,
+      relationships: template.relationships
+    };
+    dispatch({ type: 'ADD_TEMPLATE', payload: newTemplate });
+    eventManager.emit('habit:template-add', newTemplate);
+    toast.success(`Added ${newTemplate.name || 'template'}`);
+    return newTemplate.templateId;
   }, []);
 
-  // Set up event handlers with the current templates
-  // Pass state.templates to avoid circular dependency
-  const eventHandlers = useHabitEvents(state.templates);
+  /**
+   * Update an existing habit template
+   */
+  const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
+    dispatch({ type: 'UPDATE_TEMPLATE', payload: { templateId, updates } });
+    eventManager.emit('habit:template-update', { templateId, updates });
+    toast.success(`Updated template ${templateId}`);
+  }, []);
 
-  // Create action handlers
-  const baseActions = createHabitActions(state, dispatch);
-  const actions: HabitContextActions = {
-    ...baseActions,
-    reloadTemplates: () => {
-      // Reset the loaded flag to allow reloading
-      loadedRef.current = false;
-      habitsInitialized = false;
-      
-      // Trigger events with debounce to ensure task synchronization
-      const checkTimeout = setTimeout(() => {
-        eventManager.emit('habits:check-pending', {});
-        window.dispatchEvent(new CustomEvent('force-habits-update'));
-        clearTimeout(checkTimeout);
-      }, 200);
-    }
+  /**
+   * Remove a habit template
+   */
+  const removeTemplate = useCallback((templateId: string) => {
+    dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
+    eventManager.emit('habit:template-remove', { templateId });
+    toast.success(`Removed template ${templateId}`);
+  }, []);
+
+  /**
+   * Update the order of habit templates
+   */
+  const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
+    dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
+    eventManager.emit('habit:template-order-update', templates);
+  }, []);
+
+  /**
+   * Update the active days for a habit template
+   */
+  const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
+    dispatch({ type: 'UPDATE_TEMPLATE_DAYS', payload: { templateId, days } });
+    eventManager.emit('habit:template-days-update', { templateId, days });
+    toast.success(`Updated days for template ${templateId}`);
+  }, []);
+
+  /**
+   * Add a new custom habit template
+   */
+  const addCustomTemplate = useCallback((template: Omit<HabitTemplate, 'id'>) => {
+    // Implementation for adding a custom template
+  }, []);
+
+  /**
+   * Remove a custom habit template
+   */
+  const removeCustomTemplate = useCallback((templateId: string) => {
+    // Implementation for removing a custom template
+  }, []);
+
+  /**
+   * Reorder templates
+   */
+  const reorderTemplates = useCallback((templates: ActiveTemplate[]) => {
+    dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
+  }, []);
+
+  /**
+   * Find a template by its ID
+   */
+  const findTemplateById = useCallback((templateId: string) => {
+    const templates = state.templates;
+    const templateIndex = templates.findIndex(t => t.templateId === templateId);
+    if (templateIndex === -1) return undefined;
+    return templates[templateIndex];
+  }, [state.templates]);
+
+  /**
+   * Reload templates
+   */
+  const reloadTemplates = useCallback(() => {
+    // Implementation for reloading templates
+  }, []);
+
+  // Provide the context value
+  const contextValue: HabitContext = {
+    ...state,
+    addTemplate,
+    updateTemplate,
+    removeTemplate,
+    updateTemplateOrder,
+    updateTemplateDays,
+    addCustomTemplate,
+    removeCustomTemplate,
+    reorderTemplates,
+    findTemplateById,
+    reloadTemplates,
   };
 
-  // Force periodic verification of habit tasks but at a reasonable interval and only one timer
-  useEffect(() => {
-    // Skip setting up if we already have a periodic check
-    if (periodicCheckRef.current) return;
-    
-    // Set up a single interval for all checks - much less frequent
-    periodicCheckRef.current = setInterval(() => {
-      eventManager.emit('habits:check-pending', {});
-    }, 900000); // Check every 15 minutes instead of every 5 minutes
-    
-    return () => {
-      if (periodicCheckRef.current) {
-        clearInterval(periodicCheckRef.current);
-        periodicCheckRef.current = null;
-      }
-    };
-  }, []);
-
   return (
-    <HabitContext.Provider value={state}>
-      <HabitActionsContext.Provider value={actions}>
-        {children}
-      </HabitActionsContext.Provider>
+    <HabitContext.Provider value={contextValue}>
+      {children}
     </HabitContext.Provider>
   );
 };
 
-export const useHabitState = () => {
-  const context = useContext(HabitContext);
-  if (context === undefined) {
-    throw new Error('useHabitState must be used within a HabitProvider');
-  }
-  return context;
-};
-
-export const useHabitActions = () => {
-  const context = useContext(HabitActionsContext);
-  if (context === undefined) {
-    throw new Error('useHabitActions must be used within a HabitProvider');
-  }
-  return context;
-};
-
 /**
- * Combined hook for habit context and actions
+ * Hook for using the habit context
  */
 export const useHabitContext = () => {
-  const state = useHabitState();
-  const actions = useHabitActions();
-  
-  return { ...state, ...actions };
+  const context = useContext(HabitContext);
+  if (!context) {
+    throw new Error('useHabitContext must be used within a HabitProvider');
+  }
+  return context;
 };

@@ -6,5 +6,7 @@ export interface Quote {
   text: string;
   author: string;
   isFavorite: boolean;
-  category?: QuoteCategory;
+  category?: QuoteCategory | QuoteCategory[];
+  task?: string;
+  timestamp?: string;
 }

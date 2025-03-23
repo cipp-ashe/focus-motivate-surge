@@ -1,134 +1,87 @@
-
-import { useCallback } from 'react';
-import { DayOfWeek, ActiveTemplate } from '@/components/habits/types';
+import { useCallback, useContext } from 'react';
+import { HabitContext } from './HabitContext';
+import { ActiveTemplate, DayOfWeek, DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
-import { HabitContextActions } from './types';
+import { toast } from 'sonner';
 
-export const createHabitActions = (
-  state: any,
-  dispatch: React.Dispatch<any>
-): HabitContextActions => {
-  const addTemplate = useCallback((template: ActiveTemplate) => {
-    console.log("Adding template:", template);
+export const useHabitActions = () => {
+  const { templates } = useContext(HabitContext);
+
+  const addTemplate = useCallback((template: Omit<ActiveTemplate, 'templateId'>) => {
+    const newTemplate: ActiveTemplate = {
+      templateId: `template-${Date.now()}`,
+      habits: template.habits || [], // Provide a default empty array
+      activeDays: template.activeDays || DEFAULT_ACTIVE_DAYS, // Provide default active days
+      customized: template.customized,
+      name: template.name,
+      description: template.description,
+      relationships: template.relationships
+    };
     
-    // Check if template already exists
-    if (state.templates.some((t: ActiveTemplate) => t.templateId === template.templateId)) {
-      console.log("Template already exists, skipping");
+    eventManager.emit('habit:template-add', newTemplate);
+    
+    if (!newTemplate.suppressToast) {
+      toast.success(`Added ${newTemplate.name || 'template'}`);
+    }
+    
+    return newTemplate.templateId;
+  }, []);
+
+  const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
+    const templateToUpdate = templates.find(t => t.templateId === templateId);
+    if (!templateToUpdate) {
+      console.error(`Template ${templateId} not found for updating`);
+      return;
+    }
+
+    const updatedTemplate: ActiveTemplate = {
+      ...templateToUpdate,
+      ...updates,
+      habits: updates.habits !== undefined ? updates.habits : templateToUpdate.habits,
+      activeDays: updates.activeDays !== undefined ? updates.activeDays : templateToUpdate.activeDays,
+    };
+    
+    eventManager.emit('habit:template-update', updatedTemplate);
+    
+    if (!updatedTemplate.suppressToast) {
+      toast.success(`Updated ${updatedTemplate.name || 'template'}`);
+    }
+    
+    return templateId;
+  }, [templates]);
+
+  const removeTemplate = useCallback((templateId: string) => {
+    eventManager.emit('habit:template-remove', { templateId });
+    toast.success(`Removed template`);
+  }, []);
+
+  const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
+    eventManager.emit('habit:template-order-update', templates);
+  }, []);
+
+  const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
+    const templateToUpdate = templates.find(t => t.templateId === templateId);
+    if (!templateToUpdate) {
+      console.error(`Template ${templateId} not found for updating days`);
       return;
     }
     
-    // Update state through reducer
-    dispatch({ type: 'ADD_TEMPLATE', payload: template });
+    const updatedTemplate: ActiveTemplate = {
+      ...templateToUpdate,
+      activeDays: days,
+      habits: templateToUpdate.habits, // Ensure habits is provided
+    };
     
-    // Update localStorage
-    const updatedTemplates = [...state.templates, template];
-    localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
+    eventManager.emit('habit:template-days-update', updatedTemplate);
     
-    // Emit event to notify other components using eventManager
-    eventManager.emit('habit:template-update', template);
-  }, [dispatch, state.templates]);
-
-  const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
-    console.log("Updating template:", templateId, updates);
-    
-    // Emit event to update template using eventManager
-    eventManager.emit('habit:template-update', { 
-      templateId, 
-      ...updates 
-    });
-    
-    // Update state through reducer
-    dispatch({ 
-      type: 'UPDATE_TEMPLATE', 
-      payload: { templateId, updates } 
-    });
-  }, [dispatch]);
-
-  const removeTemplate = useCallback((templateId: string) => {
-    console.log("Removing template:", templateId);
-    
-    // First update the state directly using the reducer
-    dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
-    
-    // Then use eventManager to notify other components
-    eventManager.emit('habit:template-delete', { 
-      templateId, 
-      isOriginatingAction: true 
-    });
-    
-    // Update local storage directly to ensure persistence
-    const templates = state.templates.filter((t: ActiveTemplate) => t.templateId !== templateId);
-    localStorage.setItem('habit-templates', JSON.stringify(templates));
-    
-    console.log("Template removed, updated templates:", templates);
-  }, [dispatch, state.templates]);
-
-  const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
-    console.log("Updating template days:", templateId, days);
-    
-    // Emit event to update template days via eventManager
-    eventManager.emit('habit:template-update', { 
-      templateId, 
-      activeDays: days 
-    });
-    
-    // Update state through reducer
-    dispatch({ 
-      type: 'UPDATE_TEMPLATE_DAYS', 
-      payload: { templateId, days } 
-    });
-  }, [dispatch]);
-
-  // Renamed to match the interface - this used to be reorderTemplates
-  const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
-    console.log("Reordering templates");
-    
-    // Use eventManager to handle template order updates
-    eventManager.emit('habit:template-order-update', templates);
-    
-    // Also update state through reducer
-    dispatch({ 
-      type: 'UPDATE_TEMPLATE_ORDER', 
-      payload: templates 
-    });
-  }, [dispatch]);
-
-  // Keep reorderTemplates for backward compatibility
-  const reorderTemplates = useCallback((templates: ActiveTemplate[]) => {
-    console.log("Reordering templates (calling updateTemplateOrder)");
-    updateTemplateOrder(templates);
-  }, [updateTemplateOrder]);
-
-  const findTemplateById = useCallback((templateId: string) => {
-    return state.templates.find((t: ActiveTemplate) => t.templateId === templateId);
-  }, [state.templates]);
-
-  const reloadTemplates = useCallback(() => {
-    console.log("Reloading templates - this should be implemented in the HabitProvider");
-    // This is a stub that will be overridden in the HabitProvider
-  }, []);
-
-  // Add stub implementations for the missing methods to satisfy the interface
-  const addCustomTemplate = useCallback((template: Omit<any, 'id'>) => {
-    console.log("Adding custom template - this should be implemented in the HabitProvider");
-    // Stub implementation
-  }, []);
-
-  const removeCustomTemplate = useCallback((templateId: string) => {
-    console.log("Removing custom template - this should be implemented in the HabitProvider");
-    // Stub implementation
-  }, []);
+    return templateId;
+  }, [templates]);
 
   return {
     addTemplate,
     updateTemplate,
     removeTemplate,
-    updateTemplateDays,
     updateTemplateOrder,
-    reorderTemplates,
-    findTemplateById,
-    reloadTemplates,
-    addCustomTemplate,
-    removeCustomTemplate
+    updateTemplateDays,
   };
 };

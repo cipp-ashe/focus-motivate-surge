@@ -1,9 +1,12 @@
 
 import { useState, useEffect, useCallback } from "react";
-import { Quote, QuoteCategory } from "../types/timer";
+import { Quote } from "../types/timer/models";
 import { toast } from "sonner";
 
 import { quotes } from "../data/quotes";
+
+// Define QuoteCategory here since we're using it internally
+type QuoteCategory = 'motivation' | 'productivity' | 'focus' | 'success' | 'wisdom' | 'general';
 
 interface UseQuoteManagerProps {
   favorites: Quote[];
@@ -36,14 +39,11 @@ export const useQuoteManager = ({
 
     const categoryKeywords = {
       focus: ['focus', 'concentrate', 'study', 'work', 'read'],
-      creativity: ['create', 'design', 'write', 'art', 'brainstorm'],
-      learning: ['learn', 'study', 'research', 'understand', 'explore','education'],
-      persistence: ['finish', 'complete', 'continue', 'keep', 'remain'],
+      productivity: ['create', 'design', 'write', 'art', 'brainstorm'],
       motivation: ['start', 'begin', 'initiate', 'launch', 'plan'],
-      growth: ['improve', 'develop', 'grow', 'progress', 'advance'],
-      gratitude: ['gratitude', 'thankful', 'appreciate', 'grateful', 'blessing'],
-      mindfulness: ['mindful', 'present', 'aware', 'meditation', 'breath'],
-      reflection: ['reflect', 'review', 'think', 'consider', 'contemplate']
+      success: ['finish', 'complete', 'continue', 'keep', 'remain'],
+      wisdom: ['learn', 'study', 'research', 'understand', 'explore','education'],
+      general: ['improve', 'develop', 'grow', 'progress', 'advance'],
     };
 
     Object.entries(categoryKeywords).forEach(([category, keywords]) => {
@@ -61,7 +61,11 @@ export const useQuoteManager = ({
 
   const getContextualQuotes = useCallback((allQuotes: Quote[], taskCategories: QuoteCategory[]): Quote[] => {
     let matchingQuotes = allQuotes.filter(quote => 
-      quote.category.some(category => taskCategories.includes(category))
+      quote.category && (
+        typeof quote.category === 'string' ? 
+          taskCategories.includes(quote.category as QuoteCategory) : 
+          (quote.category as QuoteCategory[]).some(cat => taskCategories.includes(cat))
+      )
     );
 
     if (matchingQuotes.length === 0) {
