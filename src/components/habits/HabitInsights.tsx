@@ -16,15 +16,13 @@ const HabitInsights: React.FC<HabitInsightsProps> = ({ habit }) => {
     <Card className="shadow-sm p-4">
       <h3 className="text-lg font-medium mb-2">Insights & Tips</h3>
       
-      {/* Convert habit to match InsightsTips expected format */}
+      {/* Use properties directly without wrapping them in habitData */}
       <InsightsTips 
-        habitData={{
-          name: habit.name,
-          description: habit.description,
-          timePreference: habit.timePreference,
-          insights: habit.insights || [],
-          tips: habit.tips || []
-        }} 
+        name={habit.name}
+        description={habit.description}
+        timePreference={habit.timePreference}
+        insights={habit.insights || []}
+        tips={habit.tips || []}
       />
     </Card>
   );

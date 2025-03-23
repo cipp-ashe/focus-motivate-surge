@@ -43,7 +43,11 @@ export const migrateTaskTypes = () => {
  * Check if a taskType is valid according to the TaskType enum
  */
 const isValidTaskType = (taskType: string): taskType is TaskType => {
-  const validTypes: TaskType[] = ['timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'focus'];
+  const validTypes: TaskType[] = [
+    'timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'focus',
+    'habit', 'todo', 'exercise', 'reading', 'meditation', 'check-in', 'daily', 
+    'weekly', 'monthly', 'yearly', 'reminder'
+  ];
   return validTypes.includes(taskType as TaskType);
 };
 
@@ -52,16 +56,16 @@ const isValidTaskType = (taskType: string): taskType is TaskType => {
  */
 const determineTaskTypeFromTask = (task: Task): TaskType => {
   // Check for specific task properties that indicate a certain type
-  if (task.duration && task.duration > 0) {
-    return 'timer'; // If it has a duration, it's likely a timer task
-  } else if (task.journalEntry) {
-    return 'journal';
-  } else if (task.checklistItems) {
+  if (task.checklistItems && task.checklistItems.length > 0) {
     return 'checklist';
   } else if (task.imageUrl || task.imageType) {
-    return 'screenshot'; 
+    return 'screenshot';
   } else if (task.voiceNoteUrl || task.voiceNoteText) {
     return 'voicenote';
+  } else if (task.duration && task.duration > 0) {
+    return 'timer';
+  } else if (task.journalEntry) {
+    return 'journal';
   }
   
   // Default to regular

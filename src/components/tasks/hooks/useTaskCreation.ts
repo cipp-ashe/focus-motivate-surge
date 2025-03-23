@@ -15,10 +15,10 @@ interface UseTaskCreationProps {
 export const useTaskCreation = ({ 
   onTaskAdd, 
   onTasksAdd, 
-  defaultTaskType 
+  defaultTaskType = 'regular' as TaskType
 }: UseTaskCreationProps) => {
   const [taskName, setTaskName] = useState('');
-  const [taskType, setTaskType] = useState<TaskType>(defaultTaskType || 'regular');
+  const [taskType, setTaskType] = useState<TaskType>(defaultTaskType);
   const [isAddingMultiple, setIsAddingMultiple] = useState(false);
   const [multipleTasksInput, setMultipleTasksInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -56,7 +56,7 @@ export const useTaskCreation = ({
     const newTask: Task = {
       id: uuidv4(),
       name: taskName,
-      taskType: taskType || 'regular',
+      taskType: taskType,
       completed: false,
       createdAt: new Date().toISOString(),
       tags: tags.map(tag => ({ id: uuidv4(), name: tag }))
@@ -93,7 +93,7 @@ export const useTaskCreation = ({
     const newTasks: Task[] = taskNames.map(name => ({
       id: uuidv4(),
       name: name.trim(),
-      taskType: taskType || 'regular',
+      taskType: taskType,
       completed: false,
       createdAt: new Date().toISOString(),
       tags: tags.map(tag => ({ id: uuidv4(), name: tag }))

@@ -1,8 +1,27 @@
+
 /**
  * Task type enum for type checking
  * Defines the different types of tasks supported by the application
  */
-export type TaskType = 'timer' | 'regular' | 'screenshot' | 'journal' | 'checklist' | 'voicenote' | 'focus';
+export type TaskType = 
+  | 'timer' 
+  | 'regular' 
+  | 'screenshot' 
+  | 'journal' 
+  | 'checklist' 
+  | 'voicenote' 
+  | 'focus'
+  | 'habit'
+  | 'todo'
+  | 'exercise'
+  | 'reading'
+  | 'meditation'
+  | 'check-in'
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'yearly'
+  | 'reminder';
 
 /**
  * Task status to track progress
@@ -82,6 +101,8 @@ export interface Task {
     templateId?: string;
     /** Date this habit task is for */
     date?: string;
+    /** ID of the note associated with this task */
+    noteId?: string;
   };
   /** Task performance metrics */
   metrics?: TaskMetrics;
@@ -181,4 +202,16 @@ export interface TaskContextState {
   selected: string | null;
   /** Whether the tasks have been loaded */
   isLoaded: boolean;
+  
+  // Task operations
+  /** Add a new task */
+  addTask: (task: Task) => void;
+  /** Update an existing task */
+  updateTask: (taskId: string, updates: Partial<Task>) => void;
+  /** Delete a task */
+  deleteTask: (taskId: string, reason?: string) => void;
+  /** Complete a task */
+  completeTask: (taskId: string, metrics?: any) => void;
+  /** Select a task */
+  selectTask: (taskId: string | null) => void;
 }

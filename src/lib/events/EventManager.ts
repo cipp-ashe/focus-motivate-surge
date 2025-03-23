@@ -1,229 +1,148 @@
 
-import { EventType, EventPayloads, EventCallback } from '@/types/events';
-
-interface EventSubscription {
-  callback: Function;
-  once: boolean;
-}
-
-type EventMap = Record<string, EventSubscription[]>;
+import { EventType, EventCallback, EventPayloads, EventUnsubscribe } from '@/types/events';
 
 /**
- * Centralized event management system that replaces the older eventBus pattern
+ * EventManager singleton class
+ * Provides a centralized event system for the application
  */
 class EventManager {
-  private events: EventMap = {};
-  private debugMode = false;
-  private readonly eventHistory: Array<{type: string, payload: any, timestamp: number}> = [];
-  private readonly MAX_HISTORY = 100;
+  private listeners: Map<EventType, Set<EventCallback<any>>> = new Map();
+  private onceListeners: Map<EventType, Set<EventCallback<any>>> = new Map();
+  private eventHistory: Map<EventType, any[]> = new Map();
+  private readonly historyLimit = 10;
 
   /**
    * Subscribe to an event
-   * @param eventType The event to subscribe to
-   * @param callback The callback function to be executed when the event is emitted
-   * @returns A function to unsubscribe from the event
+   * @param eventType Event to subscribe to
+   * @param callback Function to call when the event is emitted
+   * @returns Function to unsubscribe from the event
    */
-  on<T extends EventType>(eventType: T, callback: EventCallback<T>): () => void {
-    // Log warning if event type is not in the defined EventType union
-    if (!this.isValidEventType(eventType) && eventType !== '*') {
-      console.warn(
-        `%c[EventManager] Subscribing to unregistered event type: ${eventType}`, 
-        'color: orange; font-weight: bold;',
-        '\nStack trace:',
-        new Error().stack
-      );
+  on<T extends EventType>(eventType: T, callback: EventCallback<T>): EventUnsubscribe {
+    if (!this.listeners.has(eventType)) {
+      this.listeners.set(eventType, new Set());
     }
-
-    if (!this.events[eventType]) {
-      this.events[eventType] = [];
-    }
-
-    const subscription: EventSubscription = {
-      callback: callback as Function,
-      once: false
-    };
-
-    this.events[eventType].push(subscription);
-
+    
+    const listeners = this.listeners.get(eventType)!;
+    listeners.add(callback);
+    
     // Return unsubscribe function
     return () => {
-      this.off(eventType, callback as EventCallback<any>);
+      listeners.delete(callback);
+      if (listeners.size === 0) {
+        this.listeners.delete(eventType);
+      }
     };
   }
 
   /**
-   * Subscribe to an event, but only trigger once
-   * @param eventType The event to subscribe to
-   * @param callback The callback function to be executed when the event is emitted
-   * @returns A function to unsubscribe from the event
+   * Subscribe to an event, but only receive it once
+   * @param eventType Event to subscribe to
+   * @param callback Function to call when the event is emitted
+   * @returns Function to unsubscribe from the event
    */
-  once<T extends EventType>(eventType: T, callback: EventCallback<T>): () => void {
-    // Log warning if event type is not in the defined EventType union
-    if (!this.isValidEventType(eventType) && eventType !== '*') {
-      console.warn(
-        `%c[EventManager] Subscribing once to unregistered event type: ${eventType}`, 
-        'color: orange; font-weight: bold;',
-        '\nStack trace:',
-        new Error().stack
-      );
+  once<T extends EventType>(eventType: T, callback: EventCallback<T>): EventUnsubscribe {
+    if (!this.onceListeners.has(eventType)) {
+      this.onceListeners.set(eventType, new Set());
     }
-
-    if (!this.events[eventType]) {
-      this.events[eventType] = [];
-    }
-
-    const subscription: EventSubscription = {
-      callback: callback as Function,
-      once: true
-    };
-
-    this.events[eventType].push(subscription);
-
+    
+    const listeners = this.onceListeners.get(eventType)!;
+    listeners.add(callback);
+    
     // Return unsubscribe function
     return () => {
-      this.off(eventType, callback as EventCallback<any>);
+      listeners.delete(callback);
+      if (listeners.size === 0) {
+        this.onceListeners.delete(eventType);
+      }
     };
   }
 
   /**
-   * Unsubscribe from an event
-   * @param eventType The event to unsubscribe from
-   * @param callback The callback function to remove
-   */
-  off<T extends EventType>(eventType: T, callback: EventCallback<T>): void {
-    if (!this.events[eventType]) {
-      return;
-    }
-
-    this.events[eventType] = this.events[eventType].filter(
-      subscription => subscription.callback !== callback
-    );
-  }
-
-  /**
-   * Emit an event
-   * @param eventType The event to emit
-   * @param payload The data to send with the event
+   * Emit an event with optional payload
+   * @param eventType Event to emit
+   * @param payload Data to pass to event listeners
    */
   emit<T extends EventType>(eventType: T, payload: EventPayloads[T]): void {
-    // Log warning if event type is not in the defined EventType union
-    if (!this.isValidEventType(eventType)) {
-      console.warn(
-        `%c[EventManager] Emitting unregistered event type: ${eventType}`, 
-        'color: orange; font-weight: bold;',
-        '\nStack trace:',
-        new Error().stack
-      );
+    console.log(`EventManager: Emitting ${eventType}`, payload);
+    
+    // Add to history
+    if (!this.eventHistory.has(eventType)) {
+      this.eventHistory.set(eventType, []);
     }
     
-    // Log event to console in debug mode
-    if (this.debugMode) {
-      console.log(`%c[EventManager] ${eventType}`, 'color: #8c54de', payload);
-    }
-
-    // Add to history
-    this.trackEvent(eventType, payload);
-
-    // Execute callbacks for specific event
-    if (this.events[eventType]) {
-      this.executeCallbacks(eventType, payload);
-    }
-
-    // Execute callbacks for wildcard event
-    if (eventType !== '*' && this.events['*']) {
-      this.executeCallbacks('*', { type: eventType, payload });
-    }
-  }
-
-  /**
-   * Check if an event type is registered in our EventType union
-   */
-  private isValidEventType(type: string): boolean {
-    // We now consider all event types valid, since we've expanded our EventType union
-    return true;
-  }
-
-  /**
-   * Execute callbacks for an event
-   * @param eventType The event type
-   * @param payload The event payload
-   */
-  private executeCallbacks(eventType: string, payload: any): void {
-    // Create a copy to avoid issues if callbacks modify the array
-    const subscriptions = [...this.events[eventType]];
-
-    subscriptions.forEach(subscription => {
-      try {
-        subscription.callback(payload);
-      } catch (error) {
-        console.error(`Error in event handler for ${eventType}:`, error);
-      }
-    });
-
-    // Remove 'once' subscriptions
-    this.events[eventType] = this.events[eventType].filter(
-      subscription => !subscription.once
-    );
-  }
-
-  /**
-   * Enable or disable debug mode
-   * @param enabled Whether debug mode should be enabled
-   */
-  setDebugMode(enabled: boolean): void {
-    this.debugMode = enabled;
-  }
-
-  /**
-   * Track an event in the history
-   * @param type The event type
-   * @param payload The event payload
-   */
-  private trackEvent(type: string, payload: any): void {
-    this.eventHistory.unshift({ 
-      type, 
-      payload, 
-      timestamp: Date.now() 
-    });
+    const history = this.eventHistory.get(eventType)!;
+    history.push(payload);
     
     // Limit history size
-    if (this.eventHistory.length > this.MAX_HISTORY) {
-      this.eventHistory.pop();
+    if (history.length > this.historyLimit) {
+      history.shift();
+    }
+    
+    // Call normal listeners
+    const listeners = this.listeners.get(eventType);
+    if (listeners) {
+      listeners.forEach(callback => {
+        try {
+          callback(payload);
+        } catch (error) {
+          console.error(`Error in event listener for ${eventType}:`, error);
+        }
+      });
+    }
+    
+    // Call once listeners and then remove them
+    const onceListeners = this.onceListeners.get(eventType);
+    if (onceListeners && onceListeners.size > 0) {
+      const listenersArray = Array.from(onceListeners);
+      this.onceListeners.delete(eventType);
+      
+      listenersArray.forEach(callback => {
+        try {
+          callback(payload);
+        } catch (error) {
+          console.error(`Error in once event listener for ${eventType}:`, error);
+        }
+      });
     }
   }
 
   /**
-   * Get the event history
-   * @returns Array of recorded events
+   * Get the most recent event payload for a specific event type
+   * @param eventType Event type to get history for
+   * @returns Most recent event payload or null if no history exists
    */
-  getEventHistory(): Array<{type: string, payload: any, timestamp: number}> {
-    return [...this.eventHistory];
+  getLastEvent<T extends EventType>(eventType: T): EventPayloads[T] | null {
+    const history = this.eventHistory.get(eventType);
+    if (!history || history.length === 0) return null;
+    return history[history.length - 1];
   }
 
   /**
-   * Get a count of listeners for each event type
-   * @returns Record of event types and their listener counts
+   * Get the event history for a specific event type
+   * @param eventType Event type to get history for
+   * @returns Array of event payloads or empty array if no history exists
    */
-  getListenerCounts(): Record<string, number> {
-    const counts: Record<string, number> = {};
-    
-    Object.keys(this.events).forEach(eventType => {
-      counts[eventType] = this.events[eventType].length;
-    });
-    
-    return counts;
+  getEventHistory<T extends EventType>(eventType: T): EventPayloads[T][] {
+    return this.eventHistory.get(eventType) || [];
   }
 
   /**
-   * Clear all event subscriptions
+   * Remove all listeners for a specific event type
+   * @param eventType Event type to clear listeners for
    */
-  clearAllSubscriptions(): void {
-    this.events = {};
+  clearListeners(eventType: EventType): void {
+    this.listeners.delete(eventType);
+    this.onceListeners.delete(eventType);
+  }
+
+  /**
+   * Remove all listeners for all event types
+   */
+  clearAllListeners(): void {
+    this.listeners.clear();
+    this.onceListeners.clear();
   }
 }
 
 // Export a singleton instance
 export const eventManager = new EventManager();
-
-// Export the EventManager class for testing
-export { EventManager };
