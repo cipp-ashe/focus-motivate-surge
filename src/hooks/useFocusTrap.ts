@@ -5,13 +5,15 @@ interface FocusTrapOptions {
   autoFocus?: boolean;
   returnFocusOnUnmount?: boolean;
   preventScroll?: boolean;
+  disableOutline?: boolean; // New option to disable outline
 }
 
 export const useFocusTrap = (options: FocusTrapOptions = {}) => {
   const {
-    autoFocus = true,
-    returnFocusOnUnmount = true,
-    preventScroll = true
+    autoFocus = false, // Default to false to prevent auto focusing
+    returnFocusOnUnmount = false, // Default to false to prevent focus return
+    preventScroll = true,
+    disableOutline = true // Default to true to disable outline
   } = options;
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,86 +28,59 @@ export const useFocusTrap = (options: FocusTrapOptions = {}) => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Store the original tabIndex values to restore them later
-    const originalTabIndices = new Map<Element, string | null>();
-    
-    // Add container to tab order if not already focusable
-    if (!container.hasAttribute('tabindex')) {
-      container.setAttribute('tabindex', '-1');
+    // If disableOutline is true, add a class to disable outlines
+    if (disableOutline) {
+      container.classList.add('focus-trap-no-outline');
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .focus-trap-no-outline, 
+        .focus-trap-no-outline * {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Focus handling can be kept minimal if not needed
+    if (!autoFocus) {
+      return;
     }
     
-    // Find all normally focusable elements
-    const focusableElements = container.querySelectorAll(
-      'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    
-    // Make all elements outside the container not focusable
-    const allFocusableElements = document.querySelectorAll(
-      'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    
-    allFocusableElements.forEach(el => {
-      if (!container.contains(el)) {
-        originalTabIndices.set(el, el.getAttribute('tabindex'));
-        el.setAttribute('tabindex', '-1');
-      }
-    });
-    
-    // Handle focus transfer on tab press
+    // Simplified focus handling that doesn't trap but doesn't cause outlines
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Tab') {
-        const focusableElementsArray = Array.from(focusableElements) as HTMLElement[];
-        
-        if (focusableElementsArray.length === 0) return;
-        
-        const firstElement = focusableElementsArray[0];
-        const lastElement = focusableElementsArray[focusableElementsArray.length - 1];
-        
-        if (e.shiftKey && document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement.focus({ preventScroll });
-        } else if (!e.shiftKey && document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement.focus({ preventScroll });
+        // Allow tabbing but prevent outlines if configured
+        if (disableOutline) {
+          requestAnimationFrame(() => {
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.style.outline = 'none';
+              document.activeElement.style.boxShadow = 'none';
+            }
+          });
         }
       }
     };
     
-    container.addEventListener('keydown', handleKeyDown);
-    
-    // Initial focus - delay to allow any animations to complete
-    if (autoFocus) {
-      setTimeout(() => {
-        const firstFocusable = focusableElements[0] as HTMLElement;
-        if (firstFocusable) {
-          firstFocusable.focus({ preventScroll });
-        } else {
-          container.focus({ preventScroll });
-        }
-      }, 50);
-    }
+    document.addEventListener('keydown', handleKeyDown);
     
     return () => {
-      container.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
       
-      // Restore original tabindex values
-      allFocusableElements.forEach(el => {
-        if (!container.contains(el)) {
-          const originalValue = originalTabIndices.get(el);
-          if (originalValue === null) {
-            el.removeAttribute('tabindex');
-          } else if (originalValue !== undefined) {
-            el.setAttribute('tabindex', originalValue);
-          }
-        }
-      });
-      
-      // Return focus to previously focused element
+      // Return focus if configured
       if (returnFocusOnUnmount && previousFocusRef.current) {
         previousFocusRef.current.focus({ preventScroll });
       }
+      
+      // Remove the style element if it was added
+      if (disableOutline) {
+        const styleElement = document.querySelector('style');
+        if (styleElement && styleElement.innerHTML.includes('focus-trap-no-outline')) {
+          styleElement.remove();
+        }
+      }
     };
-  }, [autoFocus, returnFocusOnUnmount, preventScroll]);
+  }, [autoFocus, returnFocusOnUnmount, preventScroll, disableOutline]);
   
   return containerRef;
 };
