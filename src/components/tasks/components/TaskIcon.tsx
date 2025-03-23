@@ -17,7 +17,7 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   size = 16,
   muted = false
 }) => {
-  // Directly apply Tailwind classes instead of using CSS variables for better dark mode support
+  // Directly apply Tailwind classes for better dark mode support
   const getColorClass = () => {
     if (muted) return 'text-muted-foreground';
     
