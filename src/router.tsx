@@ -12,7 +12,6 @@ import VoiceNotes from "./pages/VoiceNotes";
 import Screenshots from "./pages/Screenshots";
 import { RequireAuth } from "./components/auth/RequireAuth";
 import AppLayout from "./components/AppLayout";
-import { ErrorBoundary } from "react-error-boundary";
 
 // Create and export the router configuration
 export const router = createBrowserRouter([
