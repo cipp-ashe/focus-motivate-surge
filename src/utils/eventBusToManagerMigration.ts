@@ -3,7 +3,7 @@ import { eventManager } from '@/lib/events/EventManager';
 
 /**
  * Migration utility to help identify components that need to be updated
- * This file can be removed once migration is complete
+ * This file provides a compatibility layer for transitioning from eventBus to eventManager
  */
 
 /**

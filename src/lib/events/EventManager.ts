@@ -1,14 +1,10 @@
 
 import { supabase } from '@/lib/supabase/client';
-import { AllEventTypes, EventPayloads } from '@/lib/events/types';
+import { AllEventTypes, EventPayloads, EventHandler } from '@/types/events';
 
 export type EventType = AllEventTypes | string;
-export type EventHandler<T extends EventType> = (payload: EventPayloads[T]) => void;
 
 type EventCallback<T = any> = (payload: T) => void;
-interface EventSubscription {
-  unsubscribe: () => void;
-}
 
 // Implement log throttling for persistence messages
 const createThrottledLogger = () => {
@@ -42,7 +38,7 @@ class EventManager {
   /**
    * Subscribe to an event
    */
-  on<T extends EventType>(event: T, callback: EventHandler<T>): () => void {
+  on<T extends EventType>(event: T, callback: EventHandler<EventPayloads[T]>): () => void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
@@ -56,7 +52,7 @@ class EventManager {
   /**
    * Unsubscribe from an event
    */
-  off<T extends EventType>(event: T, callback: EventHandler<T>): void {
+  off<T extends EventType>(event: T, callback: EventHandler<EventPayloads[T]>): void {
     if (!this.listeners[event]) return;
     
     const index = this.listeners[event].indexOf(callback as EventCallback);
@@ -215,5 +211,5 @@ class EventManager {
 // Create singleton instance
 export const eventManager = new EventManager();
 
-// Export the EventPayloads type for use in other files
-export type { EventPayloads };
+// Export the EventType and EventPayloads types for use in other files
+export type { EventType, EventPayloads };

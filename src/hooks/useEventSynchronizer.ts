@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType } from '@/lib/events/EventManager';
+import { EventType } from '@/types/events';
 
 /**
  * Hook to synchronize events between local state and Supabase

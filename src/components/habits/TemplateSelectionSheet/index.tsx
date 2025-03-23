@@ -11,12 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HabitTemplate } from '../types';
-import { TabSection } from '../ManageTemplatesDialog';
 import { toast } from 'sonner';
+import TabSection from '../ManageTemplatesDialog/TabSection';
 
 export interface TemplateSelectionSheetProps {
   isOpen: boolean;
-  onOpenChange?: React.Dispatch<React.SetStateAction<boolean>>;
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
   onClose: () => void;
   allTemplates: HabitTemplate[];
   customTemplates: HabitTemplate[];

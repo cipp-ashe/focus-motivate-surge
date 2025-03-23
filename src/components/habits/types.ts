@@ -10,7 +10,7 @@ export const SHORT_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
 // Default active days for habits (weekdays)
 export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
-// Define specific metric types instead of allowing any string
+// Define specific metric types to match the types/habits.ts
 export type MetricType = 'timer' | 'counter' | 'boolean' | 'journal' | 'rating';
 
 export interface HabitMetrics {
@@ -70,7 +70,7 @@ export interface NewTemplate {
   description: string;
   category?: string;
   defaultHabits: HabitDetail[];
-  defaultDays?: DayOfWeek[]; // Add this to match usage in CreateTemplateForm
+  defaultDays?: DayOfWeek[];
 }
 
 export interface TemplateCardProps {
@@ -80,6 +80,12 @@ export interface TemplateCardProps {
   onAdd: () => void;
   onConfigure?: () => void;
   isActive?: boolean;
+  template?: ActiveTemplate;
+  templateInfo?: HabitTemplate;
+  onRemove?: () => void;
+  onEdit?: () => void;
+  getProgress?: (habitId: string) => { value: number | boolean; streak: number };
+  onHabitUpdate?: (habitId: string, value: any) => void;
 }
 
 export interface TabSectionProps {
