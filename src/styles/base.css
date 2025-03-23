@@ -2,6 +2,7 @@
 @layer base {
   * {
     @apply border-border;
+    outline: none; /* Explicitly disable outlines */
   }
   
   /* Specific debugging class for theme troubleshooting */
@@ -17,6 +18,7 @@
     @apply min-h-screen h-full;
     background-color: hsl(var(--background)) !important;
     color: hsl(var(--foreground)) !important;
+    outline: none; /* Explicitly disable outlines */
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
@@ -62,9 +64,19 @@
     @apply text-primary hover:text-primary/80 transition-colors;
   }
   
-  /* Focus styles */
+  /* Focus styles - Only show outline on focus */
   :focus-visible {
     @apply outline-none ring-2 ring-primary/50 ring-offset-1;
+  }
+  
+  /* Force all elements to have no outline except when focused */
+  button:not(:focus-visible),
+  input:not(:focus-visible),
+  select:not(:focus-visible),
+  textarea:not(:focus-visible),
+  a:not(:focus-visible),
+  [tabindex]:not(:focus-visible) {
+    outline: none !important;
   }
   
   /* Improved Glass effect - unified for light and dark modes */

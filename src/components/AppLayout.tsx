@@ -26,6 +26,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     document.documentElement.style.transition = 'none';
     document.body.style.transition = 'none';
     
+    // Forcefully disable outlines
+    const style = document.createElement('style');
+    style.id = 'outline-reset';
+    style.innerHTML = `
+      * { outline: none !important; }
+      *.dark { outline: none !important; }
+      *.light { outline: none !important; }
+      [class*="border"] { border-style: solid !important; }
+      .card, .border { border-style: solid !important; }
+    `;
+    document.head.appendChild(style);
+    
     // Determine the effective theme
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const effectiveTheme = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
@@ -58,8 +70,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       style.id = 'dark-mode-svg-fix';
       style.innerHTML = `
         .dark svg:not([class*="text-"]) { color: inherit !important; }
-        .dark *[class*="border-"] { border-color: hsl(var(--border) / 0.05) !important; }
-        .dark .card, .dark .border { border-color: hsl(var(--border) / 0.05) !important; }
+        .dark *[class*="border-"] { border-color: hsl(var(--border) / 0.05) !important; border-style: solid !important; }
+        .dark .card, .dark .border { border-color: hsl(var(--border) / 0.05) !important; border-style: solid !important; }
         .dark input, .dark select, .dark textarea { background-color: hsl(var(--card)) !important; color: hsl(var(--foreground)) !important; }
         .dark button { color: inherit !important; }
       `;
@@ -70,23 +82,31 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         existingStyle.remove();
       }
     }
+    
+    return () => {
+      // Clean up when component unmounts
+      const outlineReset = document.getElementById('outline-reset');
+      if (outlineReset) {
+        outlineReset.remove();
+      }
+    };
   }, [theme]);
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
+    <div className="flex flex-col min-h-screen w-full bg-background text-foreground" style={{ outline: 'none' }}>
       {/* Background decorative elements - with immediate visibility */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-background"></div>
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" style={{ outline: 'none' }}>
+        <div className="absolute inset-0 bg-background" style={{ outline: 'none' }}></div>
       </div>
       <BackgroundDecorations />
       
       {/* Header navigation */}
       <Header />
       
-      <div className="flex flex-1 w-full">
+      <div className="flex flex-1 w-full" style={{ outline: 'none' }}>
         {/* Main content */}
-        <main className="flex-1 w-full pb-16 md:pb-0 bg-background">
-          <div className="relative z-10 container mx-auto px-4 py-4">
+        <main className="flex-1 w-full pb-16 md:pb-0 bg-background" style={{ outline: 'none' }}>
+          <div className="relative z-10 container mx-auto px-4 py-4" style={{ outline: 'none' }}>
             {children || <Outlet />}
           </div>
         </main>

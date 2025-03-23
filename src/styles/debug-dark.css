@@ -1,66 +1,29 @@
 
-/* Dark mode specific styles for debugging tools */
-.dark {
-  --debug-bg: hsl(var(--background));
-  --debug-card-bg: hsl(var(--card));
-  --debug-border: hsl(var(--border) / 0.05);
-  --debug-text: hsl(var(--foreground));
-  --debug-text-muted: hsl(var(--muted-foreground));
-  --debug-error: hsl(var(--destructive));
-  --debug-warning: hsl(38, 92%, 50%);
-  --debug-success: hsl(142, 71%, 45%);
-  --debug-info: hsl(221, 83%, 53%);
-  --debug-trace: hsl(262, 80%, 65%);
-}
-
-/* Debug panel dark mode styles */
+/* Dark mode specific styles for debug components */
 .dark .debug-panel {
-  @apply bg-background/95 border-border/5;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.dark .debug-card {
-  @apply bg-card border-border/5;
+  @apply bg-card border-border/10 shadow-lg;
 }
 
 .dark .debug-header {
-  @apply bg-accent/20 border-b border-border/5;
+  @apply bg-muted/10 border-border/10;
 }
 
 .dark .debug-event-item {
-  @apply bg-card hover:bg-accent/20 border-border/5;
+  @apply bg-card/80 border-border/5 hover:bg-accent/5;
+}
+
+.dark .debug-tab {
+  @apply hover:border-primary/40;
 }
 
 .dark .debug-code {
-  @apply bg-background/60 text-foreground border-border/5;
+  @apply bg-muted/10 border-border/10;
 }
 
-/* Debug event types in dark mode */
-.dark .debug-error {
-  @apply text-red-400 bg-red-500/10 border-red-500/10;
-}
-
-.dark .debug-warning {
-  @apply text-yellow-400 bg-yellow-500/10 border-yellow-500/10;
-}
-
-.dark .debug-info {
-  @apply text-blue-400 bg-blue-500/10 border-blue-500/10;
-}
-
-.dark .debug-success {
-  @apply text-green-400 bg-green-500/10 border-green-500/10;
-}
-
-.dark .debug-trace {
-  @apply text-purple-400 bg-purple-500/10 border-purple-500/10;
-}
-
-/* Debug tab styles for dark mode */
-.dark .debug-tab {
-  @apply bg-background border-border/5 text-muted-foreground hover:text-foreground;
-}
-
-.dark .debug-tab-active {
-  @apply bg-card text-foreground;
+/* Ensure no outlines in dark mode debug panel */
+.dark .debug-panel *,
+.dark .debug-panel *::before,
+.dark .debug-panel *::after {
+  outline: none !important;
+  border-style: solid;
 }
