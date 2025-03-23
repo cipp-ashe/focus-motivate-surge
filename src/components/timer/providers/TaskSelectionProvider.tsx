@@ -31,11 +31,12 @@ export const TaskSelectionProvider: React.FC<TaskSelectionProviderProps> = ({ ch
     console.log('TaskSelectionProvider: Selecting task', task.id, task.name);
     setSelectedTask(task);
     
-    // Emit task selection event with proper types
+    // FIX: Include taskId in the timer:task-set event
     eventManager.emit('timer:task-set', { 
       id: task.id, 
       name: task.name,
-      duration: task.duration || 1500 // Default to 25 minutes if no duration
+      duration: task.duration || 1500, // Default to 25 minutes if no duration
+      taskId: task.id  // Add the taskId property
     });
     
     // Also emit the more general select event

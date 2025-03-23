@@ -29,7 +29,7 @@ export const TimerButton: React.FC<TimerButtonProps> = ({ task, onTaskAction }) 
       eventManager.emit('timer:set-task', {
         id: task.id,
         name: task.name,
-        duration: task.duration || 1500,
+        duration: task.duration || 1500, // Ensure duration is always provided
         completed: task.completed || false,
         createdAt: task.createdAt || new Date().toISOString()
       });

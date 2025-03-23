@@ -43,7 +43,14 @@ export const TimerConfigModal = ({ open, onOpenChange }: TimerConfigModalProps) 
     });
     
     // Emit event to select and start the timer
-    eventManager.emit('timer:set-task', newTask);
+    // Fix: Ensure duration is always provided as a number
+    eventManager.emit('timer:set-task', {
+      id: newTask.id,
+      name: newTask.name,
+      duration: newTask.duration || minutes * 60, // Ensure duration is never undefined
+      completed: newTask.completed || false,
+      createdAt: newTask.createdAt
+    });
     
     toast.success(`Starting ${minutes} minute timer`, {
       description: `"${name}" timer started`

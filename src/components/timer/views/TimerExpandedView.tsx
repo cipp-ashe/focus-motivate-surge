@@ -4,23 +4,52 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDown, Save, X } from "lucide-react";
-import { TimerExpandedViewRef } from "@/types/timer";
+import { TimerExpandedViewRef } from "@/types/timer/views";
 import { Quote } from "@/types/timer";
 import { QuoteDisplay } from "../quote/QuoteDisplay";
 
 interface TimerExpandedViewProps {
-  notes: string;
-  onNotesChange: (notes: string) => void;
-  onSave: () => void;
-  onClose: () => void;
-  quote: Quote | null;
-  onNewQuote: () => void;
-  onAddToFavorites: (quote: Quote) => void;
-  onRemoveFromFavorites: (quoteId: string) => void;
+  taskName: string; // Add taskName to props
+  notes?: string;
+  onNotesChange?: (notes: string) => void;
+  onSave?: () => void;
+  onClose?: () => void;
+  onCollapse?: () => void;
+  quote?: Quote | null;
+  onNewQuote?: () => void;
+  onAddToFavorites?: (quote: Quote) => void;
+  onRemoveFromFavorites?: (quoteId: string) => void;
+  onLike?: () => void;
+  timerCircleProps: any;
+  timerControlsProps: any;
+  metrics: any;
+  internalMinutes: number;
+  handleMinutesChange: (minutes: number) => void;
+  selectedSound: any;
+  onSoundChange: React.Dispatch<React.SetStateAction<any>>;
+  onTestSound: () => void;
+  isLoadingAudio?: boolean;
+  handleCloseTimer: () => void;
+  favorites: Quote[];
+  setFavorites: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
 export const TimerExpandedView = forwardRef<TimerExpandedViewRef, TimerExpandedViewProps>(
-  ({ notes, onNotesChange, onSave, onClose, quote, onNewQuote, onAddToFavorites, onRemoveFromFavorites }, ref) => {
+  (props, ref) => {
+    const {
+      taskName,
+      notes = "",
+      onNotesChange = () => {},
+      onSave = () => {},
+      onClose = () => {},
+      onCollapse = () => {},
+      quote = null,
+      onNewQuote = () => {},
+      onAddToFavorites = () => {},
+      onRemoveFromFavorites = () => {},
+      onLike = () => {},
+    } = props;
+    
     const [isExpanded, setIsExpanded] = useState(true);
     const notesRef = useRef<HTMLTextAreaElement>(null);
 
@@ -35,7 +64,7 @@ export const TimerExpandedView = forwardRef<TimerExpandedViewRef, TimerExpandedV
     const collapse = () => {
       setIsExpanded(false);
       handleSave(); // Auto-save on collapse
-      onClose();
+      onCollapse();
     };
 
     const toggleExpansion = () => {
@@ -64,7 +93,9 @@ export const TimerExpandedView = forwardRef<TimerExpandedViewRef, TimerExpandedV
     return (
       <div className="p-4 h-full flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-foreground/90">Extended Timer View</h3>
+          <h3 className="text-lg font-medium text-foreground/90">
+            {taskName} - Extended View
+          </h3>
           <div className="flex gap-2">
             <Button variant="ghost" size="icon" onClick={handleSave} title="Save notes">
               <Save className="h-4 w-4" />
