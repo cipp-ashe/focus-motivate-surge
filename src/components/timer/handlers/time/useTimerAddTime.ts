@@ -39,12 +39,11 @@ export const useTimerAddTime = ({
     // Emit tick event with updated time left
     eventManager.emit('timer:tick', { 
       timeLeft: newTimeLeft, 
-      taskName,
-      remaining: newTimeLeft  // Add remaining property for compatibility
+      taskName
     });
     
     console.log(`Timer extended by ${minutes} minutes. New time left: ${newTimeLeft}s`);
-  }, [addTime, onAddTime, taskName, timeLeft, isRunning]);
+  }, [addTime, onAddTime, taskName, timeLeft]);
 
   return handleAddTime;
 };

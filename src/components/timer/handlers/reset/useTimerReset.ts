@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { eventManager } from "@/lib/events/EventManager";
 import { TimerStateMetrics } from "@/types/metrics";
@@ -22,7 +23,7 @@ export const useTimerReset = ({
     
     // Emit reset event
     eventManager.emit('timer:reset', {
-      taskId: metrics.taskId || 'unknown',
+      taskId: metrics.taskId || undefined,
       taskName,
       duration: metrics.expectedTime
     });
@@ -33,8 +34,8 @@ export const useTimerReset = ({
       duration: metrics.expectedTime
     });
     
-    return Promise.resolve(); // Explicitly return a Promise
-  }, [reset, setShowConfirmation, taskName, metrics.expectedTime]);
+    return Promise.resolve();
+  }, [reset, setShowConfirmation, taskName, metrics.expectedTime, metrics.taskId]);
 
   // Handle confirmation dialog
   const showResetConfirmation = useCallback(() => {

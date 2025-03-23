@@ -1,6 +1,6 @@
+
 import { useState, useCallback, useRef, useEffect, useReducer } from 'react';
-import { TimerState } from '@/types/timer';
-import { TimerAction } from '@/types/timer/index';
+import { TimerState, TimerAction } from '@/types/timer/index';
 import { timerReducer } from './useTimerReducer';
 import { UseTimerOptions } from './types/UseTimerTypes';
 import { eventManager } from '@/lib/events/EventManager';
@@ -77,8 +77,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
       logger.debug('TimerCore', "Setting up timer interval");
       lastTickTime.current = Date.now(); // Track when the interval starts
       
-      // Set up a more reliable ticker using setInterval with a smaller interval
-      // to compensate for potential delays and ensure we decrement accurately
+      // Set up a more reliable ticker
       intervalRef.current = setInterval(() => {
         if (!isMountedRef.current) {
           if (intervalRef.current) {
@@ -106,15 +105,8 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
             timeLeft: state.timeLeft - 1,
             taskName: 'timer'
           });
-          
-          // Also dispatch a window event for backward compatibility
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('timer:tick', { 
-              detail: { timeLeft: state.timeLeft - 1 } 
-            }));
-          }
         }
-      }, 100); // Check more frequently (10 times/second) but only update once per second
+      }, 100); // Check more frequently but only update once per second
     } else if (state.timeLeft === 0 && state.isRunning) {
       // Handle timer completion when it reaches zero
       dispatch({ type: 'COMPLETE' });

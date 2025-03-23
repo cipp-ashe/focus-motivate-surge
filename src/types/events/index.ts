@@ -1,4 +1,3 @@
-
 // Define all possible event types
 export type TaskEventType = 
   | 'task:create' 
@@ -127,16 +126,16 @@ export interface EventPayloadMap {
   'habit:custom-template-delete': any;
 
   // Timer events
-  'timer:tick': { timeLeft: number; taskName: string; remaining?: number };
-  'timer:complete': any;
-  'timer:close': any;
+  'timer:tick': { timeLeft: number; taskName: string };
+  'timer:complete': { taskId: string; taskName: string; metrics: any };
+  'timer:close': { taskName: string };
   'timer:metrics-update': any;
   'timer:start': { taskId?: string; taskName: string; duration: number };
   'timer:pause': { taskId?: string; taskName: string; timeLeft: number };
   'timer:resume': { taskId?: string; taskName: string; timeLeft: number };
   'timer:reset': { taskId?: string; taskName: string; duration: number };
   'timer:init': { taskName: string; duration: number };
-  'timer:set-task': any;
+  'timer:set-task': { id: string; name: string; duration: number; completed: boolean; createdAt: string };
   'timer:task-set': any;
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };

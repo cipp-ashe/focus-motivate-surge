@@ -103,7 +103,7 @@ export const Timer = ({
           {...timerProps}
           favorites={favorites}
           setFavorites={setFavorites}
-          taskName={taskName} // Ensure taskName is explicitly passed
+          taskName={taskName}
         />
       </Card>
     </TimerErrorBoundary>

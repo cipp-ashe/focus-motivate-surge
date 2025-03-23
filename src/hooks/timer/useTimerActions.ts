@@ -1,7 +1,10 @@
 
 import { useCallback } from 'react';
-import { TimerAction } from '@/types/timer';
-import { UseTimerActionsProps, UseTimerActionsReturn, TimerActionProps } from './types/UseTimerTypes';
+import { 
+  UseTimerActionsProps, 
+  UseTimerActionsReturn, 
+  TimerActionProps 
+} from './types/UseTimerTypes';
 import { 
   determineCompletionStatus, 
   calculateEfficiencyRatio 

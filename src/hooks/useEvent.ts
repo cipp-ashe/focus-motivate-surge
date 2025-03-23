@@ -1,12 +1,7 @@
 
 import { useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-
-// Define the EventType type locally if it's not exported from EventManager
-export type EventType = string;
-
-// Define a generic EventCallback type
-export type EventCallback<E extends EventType> = (payload: any) => void;
+import { EventType, EventCallback } from '@/types/events';
 
 /**
  * Hook to subscribe to events with automatic cleanup
