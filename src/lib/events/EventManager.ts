@@ -2,7 +2,7 @@
 import { supabase } from '@/lib/supabase/client';
 import { AllEventTypes, EventPayloads } from '@/lib/events/types';
 
-export type EventType = AllEventTypes;
+export type EventType = AllEventTypes | string;
 export type EventHandler<T extends EventType> = (payload: EventPayloads[T]) => void;
 
 type EventCallback<T = any> = (payload: T) => void;

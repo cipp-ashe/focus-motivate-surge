@@ -1,9 +1,11 @@
+
 import { HabitTemplate, HabitDetail, DayOfWeek, DEFAULT_ACTIVE_DAYS } from '../components/habits/types';
+import { MetricType } from '../types/habits';
 
 const createHabitDetail = (
   name: string,
   description: string,
-  metricType: 'timer' | 'counter' | 'boolean' | 'rating' | 'journal',
+  metricType: MetricType,
   target?: number,
   tips?: string[]
 ): HabitDetail => ({

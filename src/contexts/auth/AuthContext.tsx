@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useReducer, useCallback } 
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { eventManager } from '@/lib/events/EventManager';
-import { AuthEventType } from '@/types/events';
+import { AuthEventType } from '@/lib/events/types';
 
 interface AuthState {
   user: User | null;
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           dispatch({ type: 'SIGNED_IN', payload: session.user });
           
           // Use the proper payload format
-          eventManager.emit('auth:state-change' as AuthEventType, { 
+          eventManager.emit('auth:state-change', { 
             user: session.user
           });
           
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           dispatch({ type: 'SIGNED_OUT' });
           
           // Use the proper payload format
-          eventManager.emit('auth:state-change' as AuthEventType, { 
+          eventManager.emit('auth:state-change', { 
             user: null
           });
           

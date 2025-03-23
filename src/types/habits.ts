@@ -1,7 +1,7 @@
 
 export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink';
 
-export type MetricType = 'timer' | 'journal' | 'boolean' | string;
+export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating' | string;
 
 export interface HabitMetrics {
   type: MetricType;

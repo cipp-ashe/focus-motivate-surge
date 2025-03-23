@@ -1,7 +1,6 @@
 
 import { useEffect, useRef } from 'react';
 import { eventManager, EventType } from '@/lib/events/EventManager';
-import { EventPayloads } from '@/lib/events/types';
 
 /**
  * Custom hook to subscribe to events using the EventManager
@@ -12,7 +11,7 @@ import { EventPayloads } from '@/lib/events/types';
  */
 export function useEvent<T extends EventType>(
   eventType: T,
-  callback: (payload: EventPayloads[T]) => void
+  callback: (payload: any) => void
 ) {
   // Use a ref to prevent unnecessary resubscriptions when the callback reference changes
   const callbackRef = useRef(callback);

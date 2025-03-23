@@ -8,7 +8,8 @@ export type AuthEventType =
   | 'auth:sign-in'
   | 'auth:sign-out'
   | 'auth:signed-out'
-  | 'auth:logout';
+  | 'auth:logout'
+  | 'auth:login';
 
 // Timer events
 export type TimerEventType = 
@@ -27,7 +28,8 @@ export type TimerEventType =
   | 'timer:close'
   | 'timer:set-task'
   | 'timer:task-set'
-  | 'timer:metrics-update';
+  | 'timer:metrics-update'
+  | 'timer:update-metrics';
 
 // Task events
 export type TaskEventType = 
@@ -72,7 +74,9 @@ export type HabitEventType =
   | 'habit:dismissed'
   | 'habit:task-deleted'
   | 'habit:template-add'
-  | 'journal:open';
+  | 'journal:open'
+  | 'habit:create'
+  | 'habits:processed';
 
 // Voice note events
 export type VoiceNoteEventType =
@@ -87,7 +91,10 @@ export type VoiceNoteEventType =
 export type TagEventType =
   | 'tag:link'
   | 'tag:unlink'
-  | 'tags:force-update';
+  | 'tags:force-update'
+  | 'tag:create'
+  | 'tag:update'
+  | 'tag:delete';
 
 // Relationship events
 export type RelationshipEventType =
@@ -99,6 +106,21 @@ export type RelationshipEventType =
 // Miscellaneous events
 export type MiscEventType =
   | 'app:initialized'
+  | 'quote:link-task'
+  | 'app:ready'
+  | 'navigation:changed';
+
+// Journal events
+export type JournalEventType = 
+  | 'journal:create'
+  | 'journal:update'
+  | 'journal:delete'
+  | 'journal:open';
+
+// Quote events
+export type QuoteEventType = 
+  | 'quote:favorite'
+  | 'quote:unfavorite'
   | 'quote:link-task';
 
 // All event types combined
@@ -111,7 +133,9 @@ export type AllEventTypes =
   | VoiceNoteEventType
   | TagEventType
   | RelationshipEventType
-  | MiscEventType;
+  | MiscEventType
+  | JournalEventType
+  | QuoteEventType;
 
 // Generic event payload type
 export interface EventPayload {
@@ -124,6 +148,9 @@ export type EventHandler<T = any> = (payload: T) => void;
 // Map of event types to their payload types
 export interface EventPayloads {
   [key: string]: any;
+  'auth:state-change': { user: any | null };
+  'auth:login': { user?: any };
+  'auth:logout': undefined;
   'habit:schedule': {
     habitId: string;
     templateId: string;
@@ -132,4 +159,5 @@ export interface EventPayloads {
     date: string;
     metricType?: string;
   };
+  'timer:update-metrics': { taskId?: string, metrics?: any, taskName?: string };
 }

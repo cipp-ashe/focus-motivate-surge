@@ -1,5 +1,3 @@
-// Import and re-export all event types from the main events.ts
-import type { Task } from './tasks';
 
 // Event type constants
 export type TimerEventType = 
@@ -42,7 +40,10 @@ export type HabitEventType =
   | 'habit:template-update'
   | 'habit:template-delete'
   | 'habit:select'
-  | 'habit:task-deleted';
+  | 'habit:task-deleted'
+  | 'habit:journal-complete'
+  | 'habit:journal-deleted'
+  | 'habit:progress-update';
 
 export type RelationshipEventType = 
   | 'relationship:create'
