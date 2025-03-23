@@ -1,17 +1,35 @@
 
 import { useEffect, useRef } from 'react';
 
-export const useFocusTrap = () => {
+interface FocusTrapOptions {
+  autoFocus?: boolean;
+  returnFocusOnUnmount?: boolean;
+  preventScroll?: boolean;
+}
+
+export const useFocusTrap = (options: FocusTrapOptions = {}) => {
+  const {
+    autoFocus = true,
+    returnFocusOnUnmount = true,
+    preventScroll = true
+  } = options;
+  
   const containerRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    // Save the currently focused element to restore later if needed
+    if (returnFocusOnUnmount) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+    }
+    
     const container = containerRef.current;
     if (!container) return;
 
     // Store the original tabIndex values to restore them later
     const originalTabIndices = new Map<Element, string | null>();
     
-    // Ensure the container is focusable
+    // Add container to tab order if not already focusable
     if (!container.hasAttribute('tabindex')) {
       container.setAttribute('tabindex', '-1');
     }
@@ -45,10 +63,10 @@ export const useFocusTrap = () => {
         
         if (e.shiftKey && document.activeElement === firstElement) {
           e.preventDefault();
-          lastElement.focus();
+          lastElement.focus({ preventScroll });
         } else if (!e.shiftKey && document.activeElement === lastElement) {
           e.preventDefault();
-          firstElement.focus();
+          firstElement.focus({ preventScroll });
         }
       }
     };
@@ -56,14 +74,16 @@ export const useFocusTrap = () => {
     container.addEventListener('keydown', handleKeyDown);
     
     // Initial focus - delay to allow any animations to complete
-    setTimeout(() => {
-      const firstFocusable = focusableElements[0] as HTMLElement;
-      if (firstFocusable) {
-        firstFocusable.focus();
-      } else {
-        container.focus();
-      }
-    }, 50);
+    if (autoFocus) {
+      setTimeout(() => {
+        const firstFocusable = focusableElements[0] as HTMLElement;
+        if (firstFocusable) {
+          firstFocusable.focus({ preventScroll });
+        } else {
+          container.focus({ preventScroll });
+        }
+      }, 50);
+    }
     
     return () => {
       container.removeEventListener('keydown', handleKeyDown);
@@ -79,8 +99,13 @@ export const useFocusTrap = () => {
           }
         }
       });
+      
+      // Return focus to previously focused element
+      if (returnFocusOnUnmount && previousFocusRef.current) {
+        previousFocusRef.current.focus({ preventScroll });
+      }
     };
-  }, []);
+  }, [autoFocus, returnFocusOnUnmount, preventScroll]);
   
   return containerRef;
 };

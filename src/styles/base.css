@@ -4,6 +4,11 @@
     @apply border-border;
   }
   
+  *:focus, *:focus-visible, *:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
   /* Specific debugging class for theme troubleshooting */
   .theme-debug-element {
     content: 'theme-loaded';
@@ -33,6 +38,7 @@
   *::before,
   *::after {
     @apply transition-colors duration-300;
+    outline: none !important;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -59,7 +65,11 @@
     @apply text-primary hover:text-primary/80 transition-colors;
   }
   
-  /* Delete all focus-related styling to see if that's causing issues */
+  /* Explicitly remove all focus styles */
+  button, input, textarea, select, a, div, [tabindex], [role="button"] {
+    outline: none !important;
+    box-shadow: none !important;
+  }
   
   /* Improved Glass effect - unified for light and dark modes */
   .glass-effect {

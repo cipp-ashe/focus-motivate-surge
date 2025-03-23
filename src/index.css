@@ -1,13 +1,22 @@
 
-/* Force removal of all outlines */
-* {
+/* Force removal of all outlines - more aggressive approach */
+*, *:before, *:after {
   outline: none !important;
-}
-*:focus {
-  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-color: transparent !important;
   box-shadow: none !important;
 }
-*:focus-visible {
+
+*:focus, *:focus-visible, *:focus-within {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-style: none !important;
+  outline-color: transparent !important;
+  box-shadow: none !important;
+}
+
+button:focus, input:focus, textarea:focus, select:focus {
   outline: none !important;
   box-shadow: none !important;
 }

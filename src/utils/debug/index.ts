@@ -1,347 +1,245 @@
 
-// Debug utility constants and types
-import React from 'react';
+/**
+ * Debug utilities for development and troubleshooting
+ */
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { logger } from '@/utils/logManager';
 
-// Debug module types
-export type DebugModule = 'app' | 'ui' | 'data' | 'auth' | 'api' | 'state' | 'events';
-
-// Global debug configuration
-export const DEBUG_CONFIG = {
-  TRACE_DATA_FLOW: process.env.NODE_ENV === 'development',
-  MEASURE_PERFORMANCE: process.env.NODE_ENV === 'development',
-  TRACK_STATE_CHANGES: process.env.NODE_ENV === 'development',
-  VALIDATE_DATA: process.env.NODE_ENV === 'development',
-  RECORD_ASSERTIONS: true,
-  LOG_LEVEL: process.env.NODE_ENV === 'development' ? 'debug' : 'warn',
-};
-
-// Flag to check if we're in development mode
-export const IS_DEV = process.env.NODE_ENV === 'development';
-
-// Debug store for collecting events
+// Debug store to maintain debug state across components
 class DebugStore {
-  private events: any[] = [];
-  private maxEvents = 500;
+  private static instance: DebugStore;
+  private debugEnabled: boolean = false;
+  private debugLevel: 'info' | 'warn' | 'error' | 'verbose' = 'info';
+  private callbacks: Array<() => void> = [];
 
-  addEvent(event: any) {
-    this.events.unshift(event);
-    
-    // Keep the events list at a reasonable size
-    if (this.events.length > this.maxEvents) {
-      this.events = this.events.slice(0, this.maxEvents);
+  private constructor() {}
+
+  public static getInstance(): DebugStore {
+    if (!DebugStore.instance) {
+      DebugStore.instance = new DebugStore();
     }
+    return DebugStore.instance;
   }
 
-  getEvents() {
-    return [...this.events];
+  public isDebugEnabled(): boolean {
+    return this.debugEnabled;
   }
 
-  clear() {
-    this.events = [];
+  public getDebugLevel(): 'info' | 'warn' | 'error' | 'verbose' {
+    return this.debugLevel;
+  }
+
+  public enableDebug(level?: 'info' | 'warn' | 'error' | 'verbose'): void {
+    this.debugEnabled = true;
+    if (level) {
+      this.debugLevel = level;
+    }
+    this.notifySubscribers();
+  }
+
+  public disableDebug(): void {
+    this.debugEnabled = false;
+    this.notifySubscribers();
+  }
+
+  public subscribe(callback: () => void): () => void {
+    this.callbacks.push(callback);
+    return () => {
+      this.callbacks = this.callbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  private notifySubscribers(): void {
+    this.callbacks.forEach(callback => callback());
   }
 }
 
-// Create a singleton instance of the debug store
-export const debugStore = new DebugStore();
-
-// Debug context for providing debug tools
+// Create context for React components
 interface DebugContextType {
-  isDebugMode: boolean;
-  toggleDebugMode: () => void;
+  debugEnabled: boolean;
+  debugLevel: 'info' | 'warn' | 'error' | 'verbose';
+  enableDebug: (level?: 'info' | 'warn' | 'error' | 'verbose') => void;
+  disableDebug: () => void;
+  trace: (componentName: string, message: string) => void;
+  performanceStart: (operationName: string) => void;
+  performanceEnd: (operationName: string) => void;
+  trackStateChange: <T>(componentName: string, stateName: string, prevValue: T, newValue: T) => void;
+  validateInput: <T>(componentName: string, inputName: string, value: T, isValid: boolean) => boolean;
+  assert: (condition: boolean, message: string) => void;
 }
 
-const DebugContext = React.createContext<DebugContextType>({
-  isDebugMode: false,
-  toggleDebugMode: () => {},
-});
+const DebugContext = createContext<DebugContextType | undefined>(undefined);
 
-export const DebugProvider: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
-  const [isDebugMode, setIsDebugMode] = React.useState<boolean>(() => {
-    return localStorage.getItem('debug_mode') === 'true';
-  });
+// Provider component
+interface DebugProviderProps {
+  children: ReactNode;
+  initialDebugEnabled?: boolean;
+  initialDebugLevel?: 'info' | 'warn' | 'error' | 'verbose';
+}
 
-  const toggleDebugMode = React.useCallback(() => {
-    setIsDebugMode(prev => {
-      const newValue = !prev;
-      localStorage.setItem('debug_mode', String(newValue));
-      return newValue;
+export const DebugProvider: React.FC<DebugProviderProps> = ({
+  children,
+  initialDebugEnabled = false,
+  initialDebugLevel = 'info'
+}) => {
+  const debugStore = DebugStore.getInstance();
+  if (initialDebugEnabled) {
+    debugStore.enableDebug(initialDebugLevel);
+  }
+
+  const [debugEnabled, setDebugEnabled] = useState(debugStore.isDebugEnabled());
+  const [debugLevel, setDebugLevel] = useState(debugStore.getDebugLevel());
+
+  // Subscribe to store changes
+  React.useEffect(() => {
+    const unsubscribe = debugStore.subscribe(() => {
+      setDebugEnabled(debugStore.isDebugEnabled());
+      setDebugLevel(debugStore.getDebugLevel());
     });
+    return unsubscribe;
   }, []);
 
+  const enableDebug = useCallback((level?: 'info' | 'warn' | 'error' | 'verbose') => {
+    debugStore.enableDebug(level);
+  }, []);
+
+  const disableDebug = useCallback(() => {
+    debugStore.disableDebug();
+  }, []);
+
+  // Debug utility functions
+  const trace = useCallback((componentName: string, message: string) => {
+    if (debugEnabled) {
+      logger.debug(`[${componentName}] ${message}`);
+    }
+  }, [debugEnabled]);
+
+  const performanceStart = useCallback((operationName: string) => {
+    if (debugEnabled) {
+      console.time(`[PERF] ${operationName}`);
+    }
+  }, [debugEnabled]);
+
+  const performanceEnd = useCallback((operationName: string) => {
+    if (debugEnabled) {
+      console.timeEnd(`[PERF] ${operationName}`);
+    }
+  }, [debugEnabled]);
+
+  const trackStateChange = useCallback(<T,>(
+    componentName: string,
+    stateName: string,
+    prevValue: T,
+    newValue: T
+  ) => {
+    if (debugEnabled) {
+      console.group(`[STATE] ${componentName}.${stateName} changed`);
+      console.log('Previous:', prevValue);
+      console.log('Current:', newValue);
+      console.groupEnd();
+    }
+  }, [debugEnabled]);
+
+  const validateInput = useCallback(<T,>(
+    componentName: string,
+    inputName: string,
+    value: T,
+    isValid: boolean
+  ) => {
+    if (debugEnabled && !isValid) {
+      console.warn(`[VALIDATION] ${componentName}.${inputName} has invalid value:`, value);
+    }
+    return isValid;
+  }, [debugEnabled]);
+
+  const assert = useCallback((condition: boolean, message: string) => {
+    if (debugEnabled && !condition) {
+      console.error(`[ASSERTION FAILED] ${message}`);
+    }
+  }, [debugEnabled]);
+
+  const contextValue: DebugContextType = {
+    debugEnabled,
+    debugLevel,
+    enableDebug,
+    disableDebug,
+    trace,
+    performanceStart,
+    performanceEnd,
+    trackStateChange,
+    validateInput,
+    assert
+  };
+
   return (
-    <DebugContext.Provider value={{ isDebugMode, toggleDebugMode }}>
+    <DebugContext.Provider value={contextValue}>
       {children}
     </DebugContext.Provider>
   );
 };
 
-export const useDebug = () => React.useContext(DebugContext);
+// Hook for consuming debug context
+export const useDebug = () => {
+  const context = useContext(DebugContext);
+  if (context === undefined) {
+    throw new Error('useDebug must be used within a DebugProvider');
+  }
+  return context;
+};
 
-// Utility function to trace data flow
-export function traceData(
-  module: DebugModule,
-  component: string,
-  message: string,
-  data?: any
-) {
-  if (!DEBUG_CONFIG.TRACE_DATA_FLOW) return;
-
-  debugStore.addEvent({
-    type: 'data-flow',
-    module,
-    component,
-    message,
-    timestamp: Date.now(),
-    data,
-  });
-
-  logger.debug(`${module}:${component}`, message, data);
+// Higher-order component for adding debug boundary
+interface ErrorInfo {
+  componentStack: string;
 }
 
-// Utility function to measure performance
-export function measurePerformance<T>(
-  module: DebugModule,
-  component: string,
-  operation: string,
-  callback: () => T
-): T {
-  if (!DEBUG_CONFIG.MEASURE_PERFORMANCE) {
-    return callback();
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundaryComponent extends React.Component<
+  { children: ReactNode; fallback: React.ReactNode },
+  ErrorBoundaryState
+> {
+  constructor(props: { children: ReactNode; fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
-  const startTime = performance.now();
-  let result: T;
-  let error: Error | null = null;
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
 
-  try {
-    result = callback();
-  } catch (err) {
-    error = err instanceof Error ? err : new Error(String(err));
-    throw error;
-  } finally {
-    const endTime = performance.now();
-    const duration = endTime - startTime;
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    console.error('React Error Boundary caught an error:', error);
+    console.error('Component stack:', errorInfo.componentStack);
+  }
 
-    debugStore.addEvent({
-      type: 'performance',
-      module,
-      component,
-      message: `${operation} took ${duration.toFixed(2)}ms`,
-      timestamp: Date.now(),
-      data: {
-        operation,
-        duration,
-        hasError: !!error,
-        error: error ? error.message : null,
-      },
-    });
-
-    if (!error) {
-      logger.debug(
-        `${module}:${component}`,
-        `⏱️ ${operation}: ${duration.toFixed(2)}ms`
-      );
-    } else {
-      logger.error(
-        `${module}:${component}`,
-        `⏱️ ${operation} failed after ${duration.toFixed(2)}ms: ${error.message}`
-      );
+  render(): React.ReactNode {
+    if (this.state.hasError) {
+      return this.props.fallback;
     }
+    return this.props.children;
   }
-
-  return result!;
 }
 
-// Utility function to track state changes
-export function trackState(
-  module: DebugModule,
-  component: string,
-  stateName: string,
-  currentValue: any,
-  previousValue?: any
-) {
-  if (!DEBUG_CONFIG.TRACK_STATE_CHANGES) return;
-
-  debugStore.addEvent({
-    type: 'state-change',
-    module,
-    component,
-    message: `State "${stateName}" changed`,
-    timestamp: Date.now(),
-    data: {
-      state: stateName,
-      current: currentValue,
-      previous: previousValue,
-    },
-  });
-
-  logger.debug(
-    `${module}:${component}`,
-    `📊 State "${stateName}" changed:`,
-    previousValue !== undefined
-      ? { from: previousValue, to: currentValue }
-      : { value: currentValue }
-  );
-}
-
-// Utility function to validate data
-export function validateData(
-  data: any,
-  module: DebugModule,
-  component: string,
-  expectedFields: string[] = []
-): boolean {
-  if (!DEBUG_CONFIG.VALIDATE_DATA) return true;
-
-  const missingFields = expectedFields.filter(
-    field => data[field] === undefined || data[field] === null
-  );
-
-  const isValid = missingFields.length === 0;
-
-  if (!isValid) {
-    debugStore.addEvent({
-      type: 'validation',
-      module,
-      component,
-      message: `Data validation failed: missing required fields`,
-      timestamp: Date.now(),
-      data: {
-        missingFields,
-        data,
-      },
-    });
-
-    logger.warn(
-      `${module}:${component}`,
-      `❌ Data validation failed: missing required fields:`,
-      missingFields
-    );
-  }
-
-  return isValid;
-}
-
-// Utility function for assertions
-export function assertCondition(
-  condition: boolean,
-  module: DebugModule,
-  component: string,
-  message: string,
-  data?: any
-): boolean {
-  if (!DEBUG_CONFIG.RECORD_ASSERTIONS) return condition;
-
-  if (!condition) {
-    debugStore.addEvent({
-      type: 'assertion',
-      module,
-      component,
-      message: `Assertion failed: ${message}`,
-      timestamp: Date.now(),
-      data,
-    });
-
-    logger.warn(
-      `${module}:${component}`,
-      `⚠️ Assertion failed: ${message}`,
-      data
-    );
-  }
-
-  return condition;
-}
-
-// Error boundary HOC for components
-export function withErrorBoundary<P extends object>(
+export const withErrorBoundary = <P extends object>(
   Component: React.ComponentType<P>,
-  options: {
-    module: DebugModule;
-    component: string;
-    fallback?: React.ReactNode;
-    onError?: (error: Error, info: React.ErrorInfo) => void;
-  }
-): React.ComponentType<P> {
-  const { module, component, fallback, onError } = options;
-
-  class ErrorBoundary extends React.Component<
-    P,
-    { hasError: boolean; error: Error | null }
-  > {
-    constructor(props: P) {
-      super(props);
-      this.state = { hasError: false, error: null };
-    }
-
-    static getDerivedStateFromError(error: Error) {
-      return { hasError: true, error };
-    }
-
-    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-      debugStore.addEvent({
-        type: 'error',
-        module,
-        component,
-        message: `Component error: ${error.message}`,
-        timestamp: Date.now(),
-        data: {
-          error: {
-            message: error.message,
-            stack: error.stack,
-          },
-          componentStack: errorInfo.componentStack,
-        },
-      });
-
-      logger.error(
-        `${module}:${component}`,
-        `🚨 Component error: ${error.message}`,
-        {
-          error,
-          componentStack: errorInfo.componentStack,
-        }
-      );
-
-      if (onError) {
-        onError(error, errorInfo);
-      }
-    }
-
-    render() {
-      if (this.state.hasError) {
-        if (fallback) {
-          return fallback;
-        }
-        return (
-          <div className="p-4 border border-red-300 bg-red-50 text-red-800 rounded">
-            <h3 className="text-lg font-medium">Something went wrong</h3>
-            <p className="mt-1">
-              {this.state.error ? this.state.error.message : 'Unknown error'}
-            </p>
-          </div>
-        );
-      }
-
-      return <Component {...this.props} />;
-    }
-  }
-
-  ErrorBoundary.displayName = `withErrorBoundary(${
-    Component.displayName || Component.name || 'Component'
-  })`;
-
-  return ErrorBoundary as any;
-}
-
-// Export a utility function to create a debug logger
-export function createDebugLogger(namespace: string) {
-  return {
-    log: (...args: any[]) => logger.debug(namespace, ...args),
-    warn: (...args: any[]) => logger.warn(namespace, ...args),
-    error: (...args: any[]) => logger.error(namespace, ...args),
-    info: (...args: any[]) => logger.info(namespace, ...args),
+  FallbackComponent: React.ComponentType<{ error: Error | null }>
+): React.FC<P> => {
+  const WithErrorBoundary: React.FC<P> = (props) => {
+    return (
+      <ErrorBoundaryComponent
+        fallback={<FallbackComponent error={null} />}
+      >
+        <Component {...props} />
+      </ErrorBoundaryComponent>
+    );
   };
-}
+  
+  WithErrorBoundary.displayName = `WithErrorBoundary(${Component.displayName || Component.name || 'Component'})`;
+  return WithErrorBoundary;
+};
+
+// Exports
+export { DebugStore };
