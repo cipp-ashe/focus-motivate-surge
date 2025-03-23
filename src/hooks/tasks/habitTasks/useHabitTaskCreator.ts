@@ -1,6 +1,7 @@
+
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 
 /**
  * Hook for creating habit-related tasks
@@ -19,7 +20,7 @@ export const useHabitTaskCreator = () => {
       id: `habit-${habitId}-${date}`,
       name,
       description: `Task for habit on ${date}`,
-      taskType: 'habit' as any, // Fix the TaskType issue
+      taskType: 'habit' as TaskType,
       completed: false,
       duration,
       createdAt: new Date().toISOString(),

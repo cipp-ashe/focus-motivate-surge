@@ -81,15 +81,15 @@ export const useTimerTaskHandler = (navigate: NavigateFunction) => {
   useEffect(() => {
     // Listen for timer:set-task events from eventManager
     const unsubscribe = eventManager.on('timer:set-task', (payload) => {
-      // This now expects payload with id, name, duration, etc.
-      if (payload && typeof payload === 'object' && 'id' in payload) {
+      // Ensure we have a valid task to work with
+      if (payload && typeof payload === 'object' && 'id' in payload && 'name' in payload) {
         // Create a full Task object from the payload
         const task: Task = {
           id: payload.id as string,
           name: payload.name as string,
-          duration: payload.duration as number || 1500,
-          completed: payload.completed !== undefined ? payload.completed as boolean : false,
-          createdAt: payload.createdAt !== undefined ? payload.createdAt as string : new Date().toISOString(),
+          duration: (payload.duration as number) || 1500,
+          completed: payload.completed as boolean || false,
+          createdAt: (payload.createdAt as string) || new Date().toISOString(),
           taskType: 'timer' as TaskType
         };
         

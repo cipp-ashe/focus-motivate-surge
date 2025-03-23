@@ -79,6 +79,7 @@ export type EventType =
   | 'relationship:update'
   | 'relationship:batch-update'
   | 'quote:link-task'
+  | 'tag:link'
   
   // Wildcard for all events
   | '*';
@@ -124,13 +125,13 @@ export interface EventPayloads {
   
   // Timer events
   'timer:start': { taskId?: string; taskName: string; duration: number; currentTime?: number };
-  'timer:complete': { taskId?: string; taskName: string; metrics: any };
+  'timer:complete': { taskId?: string; taskName?: string; metrics?: any };
   'timer:reset': { taskId?: string; taskName: string; duration?: number };
   'timer:pause': { taskId?: string; taskName: string; timeLeft: number };
   'timer:resume': { taskId?: string; taskName: string; timeLeft: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
-  'timer:update-metrics': { taskId?: string; taskName?: string; metrics: any };
+  'timer:update-metrics': { taskId?: string; taskName?: string; metrics?: any };
   'timer:close': { taskName: string };
   'timer:set-task': { id: string; name: string; duration: number; completed?: boolean; createdAt?: string; tags?: any[] };
   'timer:tick': { taskName?: string; timeLeft?: number; remaining?: number };
@@ -139,11 +140,11 @@ export interface EventPayloads {
   'timer:task-set': { task: any };
   
   // Note events
-  'note:create': { title?: string; content: string; id?: string };
-  'note:update': { id: string; content: string };
+  'note:create': { title?: string; content: string; id?: string; noteId?: string };
+  'note:update': { id: string; content: string; noteId?: string; updates?: any };
   'note:deleted': { id: string };
   'note:view': { id: string };
-  'note:create-from-habit': { habitId: string; habitName: string; content: string; templateId?: string };
+  'note:create-from-habit': { habitId: string; habitName: string; content?: string; templateId?: string; description?: string };
   'note:create-from-voice': { voiceNoteId: string; content: string };
   'note:format': { contentType: string };
   'note:format-complete': { formattedContent: string };
@@ -167,6 +168,7 @@ export interface EventPayloads {
   'relationship:update': { relationId: string; updates: any };
   'relationship:batch-update': { entityId: string; entityType: string; relations: any[] };
   'quote:link-task': { quoteId: string; taskId: string };
+  'tag:link': { tagId: string; entityId: string; entityType: string };
   
   // Wildcard event
   '*': { type: EventType; payload: any };
@@ -222,6 +224,8 @@ export type HabitEventType = Extract<EventType,
   | 'habits:check-pending'
   | 'habit:template-add'
   | 'habit:dismissed'
+  | 'habit:custom-template-create'
+  | 'habit:custom-template-delete'
   | 'habit:journal-complete'
   | 'habit:journal-deleted'
   | 'habit:progress-update'
@@ -232,6 +236,17 @@ export type VoiceNoteEventType = Extract<EventType,
   | 'voice-note:created'
   | 'voice-note:deleted'
   | 'note:create-from-voice'
+>;
+
+// Note event types
+export type NoteEventType = Extract<EventType,
+  | 'note:create'
+  | 'note:update'
+  | 'note:deleted'
+  | 'note:view'
+  | 'note:create-from-habit'
+  | 'note:format'
+  | 'note:format-complete'
 >;
 
 // Helper type to get payload type for a specific event

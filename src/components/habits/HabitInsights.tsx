@@ -1,5 +1,4 @@
 
-// Only updating the component to use the correct props
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import InsightsTips from './insights/InsightsTips';
@@ -9,6 +8,7 @@ interface HabitInsightsProps {
   habit: HabitDetail;
 }
 
+// Make sure the InsightsTips component prop matches what we're passing
 const HabitInsights: React.FC<HabitInsightsProps> = ({ habit }) => {
   if (!habit) return null;
 
@@ -16,9 +16,9 @@ const HabitInsights: React.FC<HabitInsightsProps> = ({ habit }) => {
     <Card className="shadow-sm p-4">
       <h3 className="text-lg font-medium mb-2">Insights & Tips</h3>
       
-      {/* Convert habit to the expected format for InsightsTips */}
+      {/* Convert habit to match InsightsTips expected format */}
       <InsightsTips 
-        habit={{
+        habitData={{
           name: habit.name,
           description: habit.description,
           timePreference: habit.timePreference,

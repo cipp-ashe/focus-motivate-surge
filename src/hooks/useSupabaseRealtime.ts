@@ -1,9 +1,10 @@
+
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
-import { AllEventTypes, NoteEventType } from '@/lib/events/types';
+import { EventType } from '@/types/events';
 import { Task } from '@/types/tasks';
 
 export const useSupabaseRealtime = () => {
@@ -136,7 +137,7 @@ export const useSupabaseRealtime = () => {
           // Fix: Use proper property names
           eventManager.emit('note:update', { 
             id: payload.new.id,
-            noteId: payload.new.id,
+            content: payload.new.content || '', 
             updates: payload.new 
           });
         })
@@ -148,7 +149,7 @@ export const useSupabaseRealtime = () => {
         }, (payload) => {
           console.log('Note deleted:', payload);
           // Use 'note:deleted' which is the correct event name in our types
-          eventManager.emit('note:deleted' as NoteEventType, { id: payload.old.id });
+          eventManager.emit('note:deleted', { id: payload.old.id });
         })
         // Events
         .on('postgres_changes', {
@@ -161,8 +162,8 @@ export const useSupabaseRealtime = () => {
           try {
             const eventData = payload.new;
             if (!eventData.processed) {
-              // Emit the event locally - cast to AllEventTypes to maintain type safety
-              eventManager.emit(eventData.event_type as AllEventTypes, eventData.payload);
+              // Emit the event locally - cast to EventType to maintain type safety
+              eventManager.emit(eventData.event_type as EventType, eventData.payload);
               
               // Mark as processed
               supabase
