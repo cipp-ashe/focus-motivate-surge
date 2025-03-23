@@ -10,10 +10,12 @@ import { eventManager } from '@/lib/events/EventManager';
  * Track deprecated event usage patterns
  */
 export function trackEventBusUsage() {
-  console.warn(
+  console.error(
     "%c[DEPRECATED] eventBus has been removed", 
-    "color: red; font-weight: bold; background-color: yellow; padding: 2px 5px;",
-    "\nAll components must use eventManager directly."
+    "color: white; font-weight: bold; background-color: red; padding: 2px 5px;",
+    "\nAll components must use eventManager directly from @/lib/events/EventManager.",
+    "\nStack trace:",
+    new Error().stack
   );
   
   // Log all the currently registered event handlers to help identify migration needs
@@ -28,7 +30,9 @@ export function reportEventBusImport(component: string) {
   console.error(
     `%c[ERROR] ${component} is importing the removed eventBus`, 
     "color: white; font-weight: bold; background-color: red; padding: 2px 5px;",
-    "\nUpdate to use eventManager from @/lib/events/EventManager"
+    "\nUpdate to use eventManager from @/lib/events/EventManager",
+    "\nStack trace:",
+    new Error().stack
   );
   throw new Error(`eventBus has been removed. Use eventManager in ${component}`);
 }
@@ -40,7 +44,9 @@ export function reportEventBusUsage(component: string, method: string) {
   console.error(
     `%c[ERROR] ${component} using removed eventBus.${method}()`, 
     "color: white; font-weight: bold; background-color: red; padding: 2px 5px;",
-    "\nUpdate to use eventManager from @/lib/events/EventManager"
+    "\nUpdate to use eventManager from @/lib/events/EventManager",
+    "\nStack trace:",
+    new Error().stack
   );
   throw new Error(`eventBus has been removed. Use eventManager.${method} in ${component}`);
 }
@@ -51,26 +57,32 @@ export function reportEventBusUsage(component: string, method: string) {
 export function createMigrationHelper(componentName: string) {
   return {
     on: (...args: any[]) => {
-      console.warn(
+      console.error(
         `%c[DEPRECATED] ${componentName} using migration helper instead of eventManager.on`, 
-        "color: orange; font-weight: bold;",
-        "\nUpdate to import and use eventManager directly."
+        "color: white; font-weight: bold; background-color: red; padding: 2px 5px;",
+        "\nUpdate to import and use eventManager directly.",
+        "\nStack trace:",
+        new Error().stack
       );
       return eventManager.on(args[0], args[1]);
     },
     emit: (...args: any[]) => {
-      console.warn(
+      console.error(
         `%c[DEPRECATED] ${componentName} using migration helper instead of eventManager.emit`, 
-        "color: orange; font-weight: bold;",
-        "\nUpdate to import and use eventManager directly."
+        "color: white; font-weight: bold; background-color: red; padding: 2px 5px;",
+        "\nUpdate to import and use eventManager directly.",
+        "\nStack trace:",
+        new Error().stack
       );
       eventManager.emit(args[0], args[1]);
     },
     off: (...args: any[]) => {
-      console.warn(
+      console.error(
         `%c[DEPRECATED] ${componentName} using migration helper instead of eventManager.off`, 
-        "color: orange; font-weight: bold;",
-        "\nUpdate to import and use eventManager directly."
+        "color: white; font-weight: bold; background-color: red; padding: 2px 5px;",
+        "\nUpdate to import and use eventManager directly.",
+        "\nStack trace:",
+        new Error().stack
       );
       eventManager.off(args[0], args[1]);
     }
@@ -78,33 +90,36 @@ export function createMigrationHelper(componentName: string) {
 }
 
 /**
- * Mock version of eventBus that redirects to eventManager with warnings
+ * Mock version of eventBus that redirects to eventManager with errors
  * This is for backward compatibility and should be removed in future
  */
 export const eventBus = {
   on: (event: any, callback: any) => {
-    console.warn(
-      '%c[DEPRECATED] eventBus.on is deprecated', 
-      'color: orange; font-weight: bold;',
-      '\nUse eventManager.on instead. Stack trace:',
+    console.error(
+      '%c[DEPRECATED] eventBus.on is deprecated and will be removed soon', 
+      'color: white; font-weight: bold; background-color: red; padding: 2px 5px;',
+      '\nUse eventManager.on instead.',
+      '\nStack trace:',
       new Error().stack
     );
     return eventManager.on(event, callback);
   },
   emit: (event: any, payload: any) => {
-    console.warn(
-      '%c[DEPRECATED] eventBus.emit is deprecated', 
-      'color: orange; font-weight: bold;',
-      '\nUse eventManager.emit instead. Stack trace:',
+    console.error(
+      '%c[DEPRECATED] eventBus.emit is deprecated and will be removed soon', 
+      'color: white; font-weight: bold; background-color: red; padding: 2px 5px;',
+      '\nUse eventManager.emit instead.',
+      '\nStack trace:',
       new Error().stack
     );
     eventManager.emit(event, payload);
   },
   off: (event: any, callback: any) => {
-    console.warn(
-      '%c[DEPRECATED] eventBus.off is deprecated', 
-      'color: orange; font-weight: bold;',
-      '\nUse eventManager.off instead. Stack trace:',
+    console.error(
+      '%c[DEPRECATED] eventBus.off is deprecated and will be removed soon', 
+      'color: white; font-weight: bold; background-color: red; padding: 2px 5px;',
+      '\nUse eventManager.off instead.',
+      '\nStack trace:',
       new Error().stack
     );
     eventManager.off(event, callback);

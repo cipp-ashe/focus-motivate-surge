@@ -1,68 +1,66 @@
 
 import { useCallback } from 'react';
+import { Task, TaskType } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { Task } from '@/types/tasks';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Hook to process habit-related tasks
+ * Hook for processing habit tasks
  */
 export const useHabitTaskProcessor = () => {
-  // Process a habit task
-  const processHabitTask = useCallback((task: Task) => {
-    console.log('Processing habit task:', task);
-    return true;
+  /**
+   * Process tasks for a specific habit
+   */
+  const processHabitTasks = useCallback((
+    habitId: string,
+    date: string,
+    tasks: Task[]
+  ) => {
+    console.log(`Processing ${tasks.length} tasks for habit ${habitId} on ${date}`);
+    
+    // Find tasks for this habit and date
+    const habitTasks = tasks.filter(task => {
+      return task.relationships?.habitId === habitId && 
+             task.relationships?.date === date;
+    });
+    
+    return habitTasks;
   }, []);
-
-  // Check if a task is a habit task
-  const isHabitTask = useCallback((task: Task) => {
-    return task.relationships?.habitId !== undefined;
-  }, []);
-
-  // Get all habit tasks
-  const getHabitTasks = useCallback((tasks: Task[]) => {
-    return tasks.filter(isHabitTask);
-  }, [isHabitTask]);
-
-  // Handle habit schedule event
-  const handleHabitSchedule = useCallback((payload: {
-    habitId: string;
-    name: string;
-    duration: number;
-    templateId: string;
-    date: string;
-  }) => {
-    console.log('Handling habit schedule:', payload);
+  
+  /**
+   * Create a task for a habit
+   */
+  const createHabitTask = useCallback((
+    habitId: string,
+    name: string,
+    duration: number,
+    templateId: string,
+    date: string
+  ) => {
+    console.log(`Creating habit task: ${name} for habit ${habitId}`);
+    
     const task: Task = {
-      id: uuidv4(),
-      name: payload.name,
-      taskType: 'habit',
+      id: `habit-${habitId}-${date}`,
+      name,
+      description: `Habit task for ${date}`,
+      taskType: 'habit' as TaskType, // This should be a valid TaskType
+      duration,
       completed: false,
       createdAt: new Date().toISOString(),
       relationships: {
-        habitId: payload.habitId,
-        templateId: payload.templateId
+        habitId,
+        templateId,
+        date
       }
     };
     
-    // Emit task creation event
+    // Emit event to create task
     eventManager.emit('task:create', task);
     
-    return task;
+    return task.id;
   }, []);
-
-  // Process pending habit tasks
-  const processPendingTasks = useCallback(() => {
-    console.log('Processing pending habit tasks');
-    // Emit event to check pending tasks
-    eventManager.emit('habit:check-pending', {});
-  }, []);
-
+  
   return {
-    processHabitTask,
-    isHabitTask,
-    getHabitTasks,
-    handleHabitSchedule,
-    processPendingTasks
+    processHabitTasks,
+    createHabitTask
   };
 };

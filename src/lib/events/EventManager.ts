@@ -1,5 +1,5 @@
 
-import { EventType, EventPayload, EventCallback } from '@/types/events';
+import { EventType, EventPayloads, EventCallback } from '@/types/events';
 
 interface EventSubscription {
   callback: Function;
@@ -24,6 +24,16 @@ class EventManager {
    * @returns A function to unsubscribe from the event
    */
   on<T extends EventType>(eventType: T, callback: EventCallback<T>): () => void {
+    // Log warning if event type is not in the defined EventType union
+    if (!this.isValidEventType(eventType) && eventType !== '*') {
+      console.warn(
+        `%c[EventManager] Subscribing to unregistered event type: ${eventType}`, 
+        'color: orange; font-weight: bold;',
+        '\nStack trace:',
+        new Error().stack
+      );
+    }
+
     if (!this.events[eventType]) {
       this.events[eventType] = [];
     }
@@ -48,6 +58,16 @@ class EventManager {
    * @returns A function to unsubscribe from the event
    */
   once<T extends EventType>(eventType: T, callback: EventCallback<T>): () => void {
+    // Log warning if event type is not in the defined EventType union
+    if (!this.isValidEventType(eventType) && eventType !== '*') {
+      console.warn(
+        `%c[EventManager] Subscribing once to unregistered event type: ${eventType}`, 
+        'color: orange; font-weight: bold;',
+        '\nStack trace:',
+        new Error().stack
+      );
+    }
+
     if (!this.events[eventType]) {
       this.events[eventType] = [];
     }
@@ -85,7 +105,17 @@ class EventManager {
    * @param eventType The event to emit
    * @param payload The data to send with the event
    */
-  emit<T extends EventType>(eventType: T, payload: EventPayload<T>): void {
+  emit<T extends EventType>(eventType: T, payload: EventPayloads[T]): void {
+    // Log warning if event type is not in the defined EventType union
+    if (!this.isValidEventType(eventType)) {
+      console.warn(
+        `%c[EventManager] Emitting unregistered event type: ${eventType}`, 
+        'color: orange; font-weight: bold;',
+        '\nStack trace:',
+        new Error().stack
+      );
+    }
+    
     // Log event to console in debug mode
     if (this.debugMode) {
       console.log(`%c[EventManager] ${eventType}`, 'color: #8c54de', payload);
@@ -103,6 +133,25 @@ class EventManager {
     if (eventType !== '*' && this.events['*']) {
       this.executeCallbacks('*', { type: eventType, payload });
     }
+  }
+
+  /**
+   * Check if an event type is registered in our EventType union
+   */
+  private isValidEventType(type: string): boolean {
+    // This is a basic implementation - in a real system we'd validate against the actual union
+    // For now, we're using a list of known event types
+    const knownTypes = [
+      'habit:complete', 'habit:update', 'habit:template-update', 'habit:template-delete', 
+      'habit:schedule', 'habits:verify-tasks', 'habits:check-pending',
+      'task:create', 'task:update', 'task:delete', 'task:complete', 'task:select', 
+      'task:reload', 'task:dismiss', 'task:force-update',
+      'timer:start', 'timer:complete', 'timer:reset', 'timer:pause', 'timer:resume', 
+      'timer:expand', 'timer:collapse', 'timer:update-metrics', 'timer:close',
+      'tag:link', 'tag:unlink'
+    ];
+    
+    return knownTypes.includes(type);
   }
 
   /**

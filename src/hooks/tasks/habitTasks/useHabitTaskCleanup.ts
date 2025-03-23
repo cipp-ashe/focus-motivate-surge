@@ -26,8 +26,15 @@ export const useHabitTaskCleanup = () => {
     // This could emit an event to trigger cleanup
   }, []);
 
+  // Add the missing deleteHabitTask method
+  const deleteHabitTask = useCallback((taskId: string, reason?: string) => {
+    console.log(`Deleting habit task ${taskId}`, reason ? `Reason: ${reason}` : '');
+    eventManager.emit('task:delete', { taskId, reason });
+  }, []);
+
   return {
     cleanupOrphanedHabitTasks,
-    removeHabitTasks
+    removeHabitTasks,
+    deleteHabitTask
   };
 };

@@ -1,36 +1,14 @@
 
-import { useHabitTaskTracker } from './useHabitTaskTracker';
-import { useHabitTaskProcessor } from './useHabitTaskProcessor';
-import { useHabitTaskCleanup } from './useHabitTaskCleanup';
-import { useHabitTaskChecker } from './useHabitTaskChecker';
-import { useHabitTaskCreator } from './useHabitTaskCreator';
-import { Task } from '@/types/tasks';
-import { MutableRefObject } from 'react';
+// Export all habit task related hooks
+export { useHabitTaskCleanup } from './useHabitTaskCleanup';
+export { useHabitTaskProcessor } from './useHabitTaskProcessor';
+export { useHabitTaskChecker } from './useHabitTaskChecker';
+export { useHabitTaskTracker } from './useHabitTaskTracker';
+export { useTaskVerification as taskVerification } from './useTaskVerification';
 
-// Define return type for the scheduler hook
-export interface HabitTaskSchedulerReturn {
-  scheduledTasksRef: MutableRefObject<Record<string, string>>;
-  checkForMissingHabitTasks: () => void;
-}
+// Re-export from lib/storage for convenience
+import { taskStorage } from '@/lib/storage/taskStorage';
+export { taskStorage };
 
-/**
- * Re-export all habit task related hooks with consolidated interface
- */
-export {
-  useHabitTaskTracker,
-  useHabitTaskProcessor,
-  useHabitTaskCleanup,
-  useHabitTaskChecker,
-  useHabitTaskCreator
-};
-
-// Define the unified interface for task verification
-export interface TaskVerificationResult {
-  missingTasks: Task[];
-  duplicateTasks: Task[];
-  inconsistentTasks: Task[];
-}
-
-// Export a unified verification interface
-export { taskVerification } from '@/lib/verification/taskVerification';
-export { taskStorage } from '@/lib/storage/taskStorage';
+// Export the main creator
+export { useHabitTaskCreator } from './useHabitTaskCreator';

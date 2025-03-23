@@ -16,9 +16,9 @@ import {
 trackEventBusUsage();
 
 // Log stack trace to identify which component is importing this
-console.warn(
-  '%c[DEPRECATED] src/lib/eventBus.ts has been deprecated', 
-  'color: red; font-weight: bold;',
+console.error(
+  '%c[DEPRECATED] src/lib/eventBus.ts has been deprecated and will be removed', 
+  'color: white; font-weight: bold; background-color: red; padding: 2px 5px;',
   '\nStack trace:',
   new Error().stack
 );

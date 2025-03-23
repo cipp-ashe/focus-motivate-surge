@@ -29,3 +29,20 @@ export interface HabitStats {
   totalDays: number;
   completedDays: number;
 }
+
+// Add missing TimePreferenceObject for insights component
+export interface TimePreferenceObject {
+  type: string; 
+  description: string;
+}
+
+// For InsightsTips component
+export interface InsightsTipsProps {
+  habit: {
+    name?: string;
+    description?: string;
+    timePreference?: TimePreference | TimePreferenceObject;
+    insights?: Array<string | { type: string, description: string }>;
+    tips?: Array<string | { type: string, description: string }>;
+  };
+}
