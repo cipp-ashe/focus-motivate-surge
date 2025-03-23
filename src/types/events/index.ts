@@ -22,7 +22,9 @@ export type TaskEventType =
   | 'task:delete' 
   | 'task:complete'
   | 'task:select'
-  | 'task:force-update';
+  | 'task:force-update'
+  | 'task:reload'
+  | 'task:dismiss';
 
 export type HabitEventType = 
   | 'habit:template-add'
@@ -37,8 +39,13 @@ export type HabitEventType =
   | 'habit:tasks-sync'
   | 'habit:progress-update'
   | 'habits:verify-tasks'
+  | 'habits:check-pending'
   | 'habit:template-order-update'
-  | 'habit:select';
+  | 'habit:select'
+  | 'habit:complete'
+  | 'habit:custom-template-create'
+  | 'habit:custom-template-delete'
+  | 'journal:open';
 
 export type NoteEventType =
   | 'note:create'
@@ -65,8 +72,10 @@ export type TimerEventType =
   | 'timer:collapse'
   | 'timer:update-metrics'
   | 'timer:set-task'
+  | 'timer:task-set'
   | 'timer:metrics-update'
-  | 'timer:close';
+  | 'timer:close'
+  | 'timer:init';
 
 export type UIEventType =
   | 'ui:theme-change'
@@ -112,11 +121,13 @@ export interface EventPayloadMap {
   'task:complete': { taskId: string; metrics?: any };
   'task:select': string | null;
   'task:force-update': undefined;
+  'task:reload': {};
+  'task:dismiss': { taskId: string; reason?: string };
   
   // Habit events
-  'habit:template-add': { templateId: string };
-  'habit:template-update': ActiveTemplate;
-  'habit:template-delete': { templateId: string };
+  'habit:template-add': { templateId: string; isOriginatingAction?: boolean };
+  'habit:template-update': ActiveTemplate & { suppressToast?: boolean };
+  'habit:template-delete': { templateId: string; isOriginatingAction?: boolean };
   'habit:verify-tasks': {};
   'habit:check-pending': {};
   'habit:schedule': { 
@@ -125,6 +136,7 @@ export interface EventPayloadMap {
     duration: number; 
     templateId: string;
     date: string;
+    metricType?: string;
   };
   'habit:journal-complete': { habitId: string; templateId: string };
   'habit:journal-deleted': { habitId: string; templateId: string };
@@ -132,8 +144,13 @@ export interface EventPayloadMap {
   'habit:tasks-sync': any;
   'habit:progress-update': any;
   'habits:verify-tasks': any;
+  'habits:check-pending': any;
   'habit:template-order-update': any;
   'habit:select': any;
+  'habit:complete': any;
+  'habit:custom-template-create': any;
+  'habit:custom-template-delete': any;
+  'journal:open': any;
   
   // Note events
   'note:create': any;
@@ -201,12 +218,24 @@ export interface EventPayloadMap {
     createdAt?: string;
     tags?: any[];
   };
+  'timer:task-set': {
+    id: string;
+    name: string;
+    duration: number;
+    completed?: boolean;
+    createdAt?: string;
+    tags?: any[];
+  };
   'timer:metrics-update': {
     taskName: string;
     metrics: any;
   };
   'timer:close': {
     taskName: string;
+  };
+  'timer:init': {
+    taskName?: string;
+    duration?: number;
   };
   
   // UI events
@@ -241,3 +270,6 @@ export type EventPayload<T extends EventType> = T extends keyof EventPayloadMap
 
 // Callback function type for event handlers
 export type EventCallback<T extends EventType> = (payload: EventPayload<T>) => void;
+
+// Export type for the unsubscribe function
+export type EventUnsubscribe = () => void;

@@ -1,191 +1,111 @@
 
-import { EventType, EventCallback, EventPayload, EventPayloads, EventUnsubscribe } from '@/types/events';
+import mitt from 'mitt';
+import type { EventType, EventPayload, EventCallback, EventUnsubscribe } from '@/types/events';
+import { logger } from '@/utils/logManager';
 
 /**
- * EventManager singleton class
- * Provides a centralized event system for the application
+ * EventManager is a modern event management system for the application
+ * that replaces the legacy eventBus with a more typesafe implementation.
  */
 class EventManager {
-  private listeners: Map<EventType, Set<EventCallback<any>>> = new Map();
-  private onceListeners: Map<EventType, Set<EventCallback<any>>> = new Map();
-  private eventHistory: Map<EventType, any[]> = new Map();
-  private readonly historyLimit = 10;
+  private events = mitt<Record<EventType, any>>();
+  private eventCounts: Record<string, number> = {};
+  private debug = false;
 
-  /**
-   * Subscribe to an event
-   * @param eventType Event to subscribe to
-   * @param callback Function to call when the event is emitted
-   * @returns Function to unsubscribe from the event
-   */
-  on<T extends EventType>(eventType: T, callback: EventCallback<T>): EventUnsubscribe {
-    if (!this.listeners.has(eventType)) {
-      this.listeners.set(eventType, new Set());
-    }
-    
-    const listeners = this.listeners.get(eventType)!;
-    listeners.add(callback);
-    
-    // Return unsubscribe function
-    return () => {
-      listeners.delete(callback);
-      if (listeners.size === 0) {
-        this.listeners.delete(eventType);
-      }
-    };
+  constructor() {
+    this.resetEventCounts();
   }
 
   /**
-   * Subscribe to an event, but only receive it once
-   * @param eventType Event to subscribe to
-   * @param callback Function to call when the event is emitted
-   * @returns Function to unsubscribe from the event
+   * Enable or disable debug mode
    */
-  once<T extends EventType>(eventType: T, callback: EventCallback<T>): EventUnsubscribe {
-    if (!this.onceListeners.has(eventType)) {
-      this.onceListeners.set(eventType, new Set());
-    }
-    
-    const listeners = this.onceListeners.get(eventType)!;
-    listeners.add(callback);
-    
-    // Return unsubscribe function
-    return () => {
-      listeners.delete(callback);
-      if (listeners.size === 0) {
-        this.onceListeners.delete(eventType);
-      }
-    };
+  setDebug(enable: boolean): void {
+    this.debug = enable;
   }
 
   /**
-   * Remove a listener for an event
-   * @param eventType Event to unsubscribe from
-   * @param callback Function to remove
+   * Reset event counts, used for debugging
    */
-  off<T extends EventType>(eventType: T, callback: EventCallback<T>): void {
-    // Remove from normal listeners
-    const listeners = this.listeners.get(eventType);
-    if (listeners) {
-      listeners.delete(callback);
-      if (listeners.size === 0) {
-        this.listeners.delete(eventType);
-      }
-    }
-    
-    // Remove from once listeners
-    const onceListeners = this.onceListeners.get(eventType);
-    if (onceListeners) {
-      onceListeners.delete(callback);
-      if (onceListeners.size === 0) {
-        this.onceListeners.delete(eventType);
-      }
-    }
+  resetEventCounts(): void {
+    this.eventCounts = {};
   }
 
   /**
-   * Emit an event with optional payload
-   * @param eventType Event to emit
-   * @param payload Data to pass to event listeners
+   * Get the current count of all events
    */
-  emit<T extends EventType>(eventType: T, payload: EventPayload<T>): void {
-    console.log(`EventManager: Emitting ${eventType}`, payload);
+  getEventCounts(): Record<string, number> {
+    return { ...this.eventCounts };
+  }
+
+  /**
+   * Emit an event with a payload
+   */
+  emit<E extends EventType>(event: E, payload?: EventPayload<E>): void {
+    // Track event count
+    this.eventCounts[event] = (this.eventCounts[event] || 0) + 1;
     
-    // Add to history
-    if (!this.eventHistory.has(eventType)) {
-      this.eventHistory.set(eventType, []);
+    // Log event for debugging
+    if (this.debug) {
+      logger.debug('EventManager', `Emit: ${event}`, payload);
     }
     
-    const history = this.eventHistory.get(eventType)!;
-    history.push(payload);
+    // Dispatch event through mitt
+    this.events.emit(event, payload);
     
-    // Limit history size
-    if (history.length > this.historyLimit) {
-      history.shift();
-    }
-    
-    // Call normal listeners
-    const listeners = this.listeners.get(eventType);
-    if (listeners) {
-      listeners.forEach(callback => {
-        try {
-          callback(payload);
-        } catch (error) {
-          console.error(`Error in event listener for ${eventType}:`, error);
-        }
-      });
-    }
-    
-    // Call once listeners and then remove them
-    const onceListeners = this.onceListeners.get(eventType);
-    if (onceListeners && onceListeners.size > 0) {
-      const listenersArray = Array.from(onceListeners);
-      this.onceListeners.delete(eventType);
-      
-      listenersArray.forEach(callback => {
-        try {
-          callback(payload);
-        } catch (error) {
-          console.error(`Error in once event listener for ${eventType}:`, error);
-        }
+    // Also dispatch to wildcard listeners
+    if (event !== '*') {
+      this.events.emit('*', { 
+        eventType: event, 
+        payload,
+        timestamp: new Date().toISOString()
       });
     }
   }
 
   /**
-   * Get the most recent event payload for a specific event type
-   * @param eventType Event type to get history for
-   * @returns Most recent event payload or null if no history exists
+   * Listen for an event
    */
-  getLastEvent<T extends EventType>(eventType: T): EventPayload<T> | null {
-    const history = this.eventHistory.get(eventType);
-    if (!history || history.length === 0) return null;
-    return history[history.length - 1];
-  }
-
-  /**
-   * Get the event history for a specific event type
-   * @param eventType Event type to get history for
-   * @returns Array of event payloads or empty array if no history exists
-   */
-  getEventHistory<T extends EventType>(eventType: T): EventPayload<T>[] {
-    return this.eventHistory.get(eventType) || [];
-  }
-
-  /**
-   * Remove all listeners for a specific event type
-   * @param eventType Event type to clear listeners for
-   */
-  clearListeners(eventType: EventType): void {
-    this.listeners.delete(eventType);
-    this.onceListeners.delete(eventType);
-  }
-
-  /**
-   * Remove all listeners for all event types
-   */
-  clearAllListeners(): void {
-    this.listeners.clear();
-    this.onceListeners.clear();
-  }
-
-  /**
-   * Get a count of listeners for each event type
-   * @returns Record of event types and their listener counts
-   */
-  getListenerCounts(): Record<string, number> {
-    const counts: Record<string, number> = {};
+  on<E extends EventType>(event: E, handler: EventCallback<E>): EventUnsubscribe {
+    this.events.on(event, handler as any);
     
-    this.listeners.forEach((listeners, eventType) => {
-      counts[eventType] = (counts[eventType] || 0) + listeners.size;
-    });
+    return () => {
+      this.events.off(event, handler as any);
+    };
+  }
+
+  /**
+   * Remove an event listener
+   */
+  off<E extends EventType>(event: E, handler: EventCallback<E>): void {
+    this.events.off(event, handler as any);
+  }
+
+  /**
+   * Listen for an event only once
+   */
+  once<E extends EventType>(event: E, handler: EventCallback<E>): EventUnsubscribe {
+    const onceHandler = ((payload: any) => {
+      handler(payload);
+      this.off(event, onceHandler as any);
+    }) as any;
     
-    this.onceListeners.forEach((listeners, eventType) => {
-      counts[eventType] = (counts[eventType] || 0) + listeners.size;
-    });
+    this.on(event, onceHandler);
     
-    return counts;
+    return () => {
+      this.off(event, onceHandler);
+    };
+  }
+
+  /**
+   * Clear all event listeners
+   */
+  clear(): void {
+    this.events.all.clear();
   }
 }
 
-// Export a singleton instance
+// Singleton instance
 export const eventManager = new EventManager();
+
+// Export the class for testing
+export default EventManager;

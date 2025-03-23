@@ -12,7 +12,8 @@ export type {
   SystemEventType,
   NoteEventType,
   VoiceNoteEventType,
-  RelationshipEventType
+  RelationshipEventType,
+  EventUnsubscribe
 } from './events/index';
 
 // Legacy type aliases for backward compatibility

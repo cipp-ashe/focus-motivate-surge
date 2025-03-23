@@ -1,22 +1,40 @@
-
-import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayloads } from '@/types/events';
+import type { EventType, EventPayload } from '@/types/events';
 
-/**
- * Utility to monitor and log events
- */
-export const eventMonitor = () => {
-  // Log all events
-  const logAllEvents = (payload: { type: EventType; payload: any }) => {
-    console.log('Event triggered:', payload);
-    toast.info(`Event triggered: ${JSON.stringify(payload)}`);
-  };
-
-  // Subscribe to all events
-  eventManager.on('*', logAllEvents);
-
-  return {
-    logAllEvents
-  };
+// Simple event monitoring system for debugging
+export const eventMonitor = {
+  events: [] as Array<{ type: string; payload: any; timestamp: string }>,
+  
+  // Start monitoring events
+  startMonitoring() {
+    this.events = [];
+    
+    return eventManager.on('*', (data: { eventType: EventType; payload: any }) => {
+      this.events.push({
+        type: data.eventType,
+        payload: data.payload,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Keep only the most recent 100 events
+      if (this.events.length > 100) {
+        this.events.shift();
+      }
+    });
+  },
+  
+  // Get all captured events
+  getEvents() {
+    return [...this.events];
+  },
+  
+  // Filter events by type
+  getEventsByType(type: string) {
+    return this.events.filter(event => event.type === type);
+  },
+  
+  // Clear captured events
+  clearEvents() {
+    this.events = [];
+  }
 };

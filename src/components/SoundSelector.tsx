@@ -4,8 +4,16 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Loader2, Volume2 } from "lucide-react";
-import { SoundSelectorProps, SOUND_OPTIONS } from "../types/timer";
+import { SoundOption } from "../types/timer";
+import { SOUND_OPTIONS } from "../types/timer/constants";
 import { cn } from "@/lib/utils";
+
+export interface SoundSelectorProps {
+  selectedSound: SoundOption;
+  onSoundChange: (sound: SoundOption) => void;
+  onTestSound: () => void;
+  isLoadingAudio?: boolean;
+}
 
 export const SoundSelector = memo(({
   selectedSound,
@@ -20,20 +28,20 @@ export const SoundSelector = memo(({
         onValueChange={onSoundChange}
         className="flex flex-wrap justify-center gap-4"
       >
-        {Object.keys(SOUND_OPTIONS).map((sound) => (
-          <div key={sound} className="sound-option flex items-center space-x-2">
+        {SOUND_OPTIONS.map((option) => (
+          <div key={option.value} className="sound-option flex items-center space-x-2">
             <RadioGroupItem 
-              value={sound} 
-              id={sound}
+              value={option.value} 
+              id={option.value}
               disabled={isLoadingAudio}
-              aria-label={`Select ${sound} sound`}
+              aria-label={`Select ${option.label} sound`}
               className="radio-item"
             />
             <Label 
-              htmlFor={sound} 
+              htmlFor={option.value} 
               className="capitalize text-foreground/80 cursor-pointer radio-label hover:text-foreground"
             >
-              {sound}
+              {option.label}
             </Label>
           </div>
         ))}
