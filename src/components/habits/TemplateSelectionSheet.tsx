@@ -12,30 +12,30 @@ import { HabitTemplate, NewTemplate } from './types';
 
 export interface TemplateSelectionSheetProps {
   isOpen: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   customTemplates: HabitTemplate[];
   activeTemplateIds: string[];
   onSelectTemplate: (template: HabitTemplate) => void;
   onDeleteCustomTemplate: (templateId: string) => void;
   onCreateTemplate: (template: NewTemplate) => void;
-  onOpenChange?: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
+  allTemplates?: HabitTemplate[];
 }
 
 const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   isOpen,
-  onClose,
+  onOpenChange,
   customTemplates,
   activeTemplateIds,
   onSelectTemplate,
   onDeleteCustomTemplate,
   onCreateTemplate,
-  onOpenChange
+  onClose,
+  allTemplates
 }) => {
   return (
     <Sheet open={isOpen} onOpenChange={(open) => {
-      if (onOpenChange) {
-        onOpenChange(open);
-      }
+      onOpenChange(open);
       if (!open) {
         onClose();
       }
@@ -55,6 +55,7 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
             onSelectTemplate={onSelectTemplate}
             onDeleteCustomTemplate={onDeleteCustomTemplate}
             onCreateTemplate={onCreateTemplate}
+            allTemplates={allTemplates}
           />
         </div>
       </SheetContent>

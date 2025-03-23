@@ -1,26 +1,44 @@
 
-export interface TimerMetrics {
-  startTime: Date | string | null;
-  endTime: Date | string | null;
+/**
+ * Metrics for tracking timer state
+ */
+export interface TimerStateMetrics {
+  startTime: string | Date | null;
+  endTime: string | Date | null;
   pauseCount: number;
-  expectedTime: number;  // Renamed from originalDuration for clarity
+  expectedTime: number;
   actualDuration: number;
-  favoriteQuotes: string[]; // Changed from number to string[] to match TaskMetrics
   pausedTime: number;
-  lastPauseTimestamp: Date | string | null;
+  lastPauseTimestamp: Date | null;
   extensionTime: number;
-  netEffectiveTime: number;  // Computed as: actualDuration - pausedTime + extensionTime
-  efficiencyRatio: number;   // Computed as: (expectedTime / netEffectiveTime) * 100
-  completionStatus: string;  // Changed to string to be more flexible
+  netEffectiveTime: number;
+  efficiencyRatio: number;
+  completionStatus: string;
+  favoriteQuotes?: string[];
   isPaused: boolean;
   pausedTimeLeft: number | null;
-  completionDate?: string; // Added to match usage in ScreenshotTask
-  taskId?: string; // Adding this to support storing taskId in metrics
+  completionDate?: string;
+  taskId?: string;
 }
 
-export interface MetricsDisplayProps {
-  metrics: TimerMetrics;
-  taskName: string;
+/**
+ * Task completion metrics
+ */
+export interface TaskMetrics {
+  startTime?: string | Date;
+  endTime?: string | Date;
+  completionDate?: string | Date;
+  duration?: number;
+  actualDuration?: number;
+  pauseCount?: number;
+  pausedTime?: number;
+  extensionTime?: number;
+  notes?: string;
+  tags?: string[];
+  difficulty?: number;
+  satisfaction?: number;
+  energy?: number;
+  focus?: number;
+  distractions?: number;
+  [key: string]: any;
 }
-
-export type TimerStateMetrics = TimerMetrics;

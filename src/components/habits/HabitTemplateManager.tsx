@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { toast } from 'sonner';
-import { ActiveTemplate, HabitTemplate } from './types';
+import { ActiveTemplate, HabitTemplate, NewTemplate } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
 import { predefinedTemplates } from './data/templates';
@@ -64,13 +64,18 @@ const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
     }
   }, [activeTemplateIds, onAddTemplate, onRemoveTemplate]);
 
-  const handleCreateTemplate = useCallback(() => {
+  const handleCreateTemplate = useCallback((template: NewTemplate) => {
     // Close sheet and open custom template creation
     setIsOpen(false);
     // Emit event to create custom template
     eventManager.emit('habit:custom-template-create', { 
       id: `custom-${Date.now()}`, 
-      name: 'New Template'
+      name: template?.name || 'New Template',
+      defaultHabits: template?.habits || [],
+      defaultDays: template?.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      description: template?.description || 'Custom template',
+      category: 'Custom',
+      duration: null
     });
   }, []);
 

@@ -58,6 +58,31 @@ class EventManager {
   }
 
   /**
+   * Remove a listener for an event
+   * @param eventType Event to unsubscribe from
+   * @param callback Function to remove
+   */
+  off<T extends EventType>(eventType: T, callback: EventCallback<T>): void {
+    // Remove from normal listeners
+    const listeners = this.listeners.get(eventType);
+    if (listeners) {
+      listeners.delete(callback);
+      if (listeners.size === 0) {
+        this.listeners.delete(eventType);
+      }
+    }
+    
+    // Remove from once listeners
+    const onceListeners = this.onceListeners.get(eventType);
+    if (onceListeners) {
+      onceListeners.delete(callback);
+      if (onceListeners.size === 0) {
+        this.onceListeners.delete(eventType);
+      }
+    }
+  }
+
+  /**
    * Emit an event with optional payload
    * @param eventType Event to emit
    * @param payload Data to pass to event listeners
@@ -141,6 +166,24 @@ class EventManager {
   clearAllListeners(): void {
     this.listeners.clear();
     this.onceListeners.clear();
+  }
+
+  /**
+   * Get a count of listeners for each event type
+   * @returns Record of event types and their listener counts
+   */
+  getListenerCounts(): Record<string, number> {
+    const counts: Record<string, number> = {};
+    
+    this.listeners.forEach((listeners, eventType) => {
+      counts[eventType] = (counts[eventType] || 0) + listeners.size;
+    });
+    
+    this.onceListeners.forEach((listeners, eventType) => {
+      counts[eventType] = (counts[eventType] || 0) + listeners.size;
+    });
+    
+    return counts;
   }
 }
 

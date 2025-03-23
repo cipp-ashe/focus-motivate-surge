@@ -31,6 +31,8 @@ export type EventType =
   | 'habit:journal-complete'
   | 'habit:journal-deleted'
   | 'habit:task-create'
+  | 'habit:custom-template-create'
+  | 'habit:custom-template-delete'
   | 'journal:open'
   
   // Timer events
@@ -46,6 +48,7 @@ export type EventType =
   | 'timer:expand'
   | 'timer:collapse'
   | 'timer:update-metrics'
+  | 'timer:init'
   
   // UI events
   | 'ui:theme-change'
@@ -84,7 +87,7 @@ export interface EventPayloads {
   'habit:create': any;
   'habit:delete': { habitId: string };
   'habit:template-add': { templateId: string } | HabitTemplate;
-  'habit:template-update': ActiveTemplate;
+  'habit:template-update': ActiveTemplate & { suppressToast?: boolean };
   'habit:template-delete': { templateId: string; isOriginatingAction?: boolean };
   'habit:template-select': { templateId: string };
   'habit:check-pending': Record<string, any>;
@@ -107,6 +110,8 @@ export interface EventPayloads {
     date: string; 
     metricType?: string 
   };
+  'habit:custom-template-create': HabitTemplate & { suppressToast?: boolean };
+  'habit:custom-template-delete': { templateId: string };
   'journal:open': {
     habitId: string;
     habitName: string;
@@ -116,17 +121,18 @@ export interface EventPayloads {
   
   // Timer events
   'timer:start': { taskId?: string; taskName: string; duration: number; currentTime?: number };
-  'timer:pause': { taskId?: string; elapsedTime: number };
-  'timer:resume': { taskId?: string };
+  'timer:pause': { taskId?: string; taskName?: string; elapsedTime?: number; timeLeft?: number };
+  'timer:resume': { taskId?: string; taskName?: string; timeLeft?: number };
   'timer:stop': { taskId?: string; completed: boolean; metrics?: TaskMetrics };
-  'timer:reset': { taskId?: string; taskName: string; duration: number };
-  'timer:complete': { taskId?: string; metrics: TaskMetrics };
+  'timer:reset': { taskId?: string; taskName?: string; duration?: number };
+  'timer:complete': { taskId?: string; taskName?: string; metrics: TaskMetrics };
   'timer:extend': { taskId?: string; extensionTime: number };
   'timer:set-task': Task;
   'timer:tick': { taskName?: string; timeLeft?: number; remaining?: number };
   'timer:expand': { taskName: string };
   'timer:collapse': { taskName: string; saveNotes: boolean };
   'timer:update-metrics': { taskId: string; metrics: any; taskName?: string };
+  'timer:init': { taskName: string; duration: number };
   
   // UI events
   'ui:theme-change': { theme: 'light' | 'dark' | 'system' };
