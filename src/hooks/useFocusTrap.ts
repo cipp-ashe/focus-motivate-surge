@@ -1,103 +1,86 @@
-import { useEffect, useRef, useCallback } from 'react';
 
-interface UseFocusTrapOptions {
-  enabled: boolean;
-  onEscape?: () => void;
-}
+import { useEffect, useRef } from 'react';
 
-export const useFocusTrap = ({ enabled, onEscape }: UseFocusTrapOptions) => {
+export const useFocusTrap = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
 
-  const getFocusableElements = useCallback(() => {
-    if (!containerRef.current) return [];
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-    return Array.from(
-      containerRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter((element) => {
-      return (
-        !element.hasAttribute('disabled') &&
-        !element.hasAttribute('aria-hidden') &&
-        element.getAttribute('tabindex') !== '-1'
-      );
+    // Store the original tabIndex values to restore them later
+    const originalTabIndices = new Map<Element, string | null>();
+    
+    // Ensure the container is focusable
+    if (!container.hasAttribute('tabindex')) {
+      container.setAttribute('tabindex', '-1');
+    }
+    
+    // Find all normally focusable elements
+    const focusableElements = container.querySelectorAll(
+      'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+    // Make all elements outside the container not focusable
+    const allFocusableElements = document.querySelectorAll(
+      'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+    allFocusableElements.forEach(el => {
+      if (!container.contains(el)) {
+        originalTabIndices.set(el, el.getAttribute('tabindex'));
+        el.setAttribute('tabindex', '-1');
+      }
     });
-  }, []);
-
-  // Handle focus trap
-  useEffect(() => {
-    if (!enabled) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && onEscape) {
-        onEscape();
-        return;
-      }
-
-      if (event.key !== 'Tab') return;
-
-      const focusableElements = getFocusableElements();
-      if (focusableElements.length === 0) return;
-
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-
-      // Shift + Tab
-      if (event.shiftKey) {
-        if (document.activeElement === firstElement) {
-          event.preventDefault();
+    
+    // Handle focus transfer on tab press
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        const focusableElementsArray = Array.from(focusableElements) as HTMLElement[];
+        
+        if (focusableElementsArray.length === 0) return;
+        
+        const firstElement = focusableElementsArray[0];
+        const lastElement = focusableElementsArray[focusableElementsArray.length - 1];
+        
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
           lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
         }
-        return;
-      }
-
-      // Tab
-      if (document.activeElement === lastElement) {
-        event.preventDefault();
-        firstElement.focus();
       }
     };
-
-    // Store current active element
-    previousActiveElement.current = document.activeElement as HTMLElement;
-
-    // Set initial focus to the first focusable element
-    const focusableElements = getFocusableElements();
-    if (focusableElements.length > 0) {
-      focusableElements[0].focus();
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-
+    
+    container.addEventListener('keydown', handleKeyDown);
+    
+    // Initial focus - delay to allow any animations to complete
+    setTimeout(() => {
+      const firstFocusable = focusableElements[0] as HTMLElement;
+      if (firstFocusable) {
+        firstFocusable.focus();
+      } else {
+        container.focus();
+      }
+    }, 50);
+    
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      if (previousActiveElement.current) {
-        previousActiveElement.current.focus();
-      }
+      container.removeEventListener('keydown', handleKeyDown);
+      
+      // Restore original tabindex values
+      allFocusableElements.forEach(el => {
+        if (!container.contains(el)) {
+          const originalValue = originalTabIndices.get(el);
+          if (originalValue === null) {
+            el.removeAttribute('tabindex');
+          } else if (originalValue !== undefined) {
+            el.setAttribute('tabindex', originalValue);
+          }
+        }
+      });
     };
-  }, [enabled, onEscape, getFocusableElements]);
-
-  // Handle initial focus when the trap becomes enabled
-  useEffect(() => {
-    if (!enabled) return;
-
-    const focusableElements = getFocusableElements();
-    if (focusableElements.length > 0) {
-      focusableElements[0].focus();
-    }
-  }, [enabled, getFocusableElements]);
-
-  return {
-    containerRef,
-    getFocusableElements,
-  };
+  }, []);
+  
+  return containerRef;
 };
-
-// Helper functions for managing focus order
-export const focusOrder = (order: number) => ({
-  tabIndex: order,
-  style: { outline: 'none' } as const,
-});
-
-export const focusClass = "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none";

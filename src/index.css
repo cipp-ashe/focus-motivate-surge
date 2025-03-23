@@ -1,4 +1,17 @@
 
+/* Force removal of all outlines */
+* {
+  outline: none !important;
+}
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Base Tailwind imports */
 @tailwind base;
 @tailwind components;

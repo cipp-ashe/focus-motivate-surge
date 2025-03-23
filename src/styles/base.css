@@ -59,15 +59,7 @@
     @apply text-primary hover:text-primary/80 transition-colors;
   }
   
-  /* Improved focus styles that don't apply to everything */
-  :focus-visible {
-    @apply ring-2 ring-primary/50 ring-offset-1 outline-none;
-  }
-  
-  /* Remove default focus styles from all elements */
-  * {
-    outline: none;
-  }
+  /* Delete all focus-related styling to see if that's causing issues */
   
   /* Improved Glass effect - unified for light and dark modes */
   .glass-effect {

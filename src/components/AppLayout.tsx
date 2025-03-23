@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { Header } from '@/components/layout/Header';
@@ -21,7 +21,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   useThemeDebug('AppLayout');
   
   // Log theme changes but avoid DOM manipulation
-  useEffect(() => {
+  React.useEffect(() => {
     // Log theme application
     logger.debug('AppLayout', `Theme application: ${theme}`);
     
