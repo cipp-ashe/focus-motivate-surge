@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Star, Timer, BookOpen } from 'lucide-react';
-import { HabitDetail } from './types';
+import { HabitDetail, MetricType } from './types';
 import { toast } from 'sonner';
 import { eventBus } from '@/lib/eventBus';
 import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
@@ -81,7 +81,9 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   };
 
   const renderMetric = () => {
-    switch (habit.metrics.type) {
+    const metricType = habit.metrics?.type as MetricType;
+    
+    switch (metricType) {
       case 'boolean':
         return (
           <Checkbox

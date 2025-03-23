@@ -1,7 +1,7 @@
 
 export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink';
 
-export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating' | string;
+export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating';
 
 export interface HabitMetrics {
   type: MetricType;
@@ -31,6 +31,16 @@ export interface HabitLog {
   completed: boolean;
   value?: number | boolean;
   timestamp: string;
+}
+
+export interface HabitProgress {
+  id: string;
+  habitId: string;
+  date: string;
+  completed: boolean;
+  value?: number | boolean;
+  streak: number;
+  notes?: string;
 }
 
 export interface HabitStats {
