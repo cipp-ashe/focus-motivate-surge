@@ -1,7 +1,6 @@
 
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { HabitEventType } from '@/types/events';
 
 /**
  * A unified hook that provides habit-related event functions
@@ -9,7 +8,7 @@ import { HabitEventType } from '@/types/events';
 export const useHabitEvents = () => {
   // Complete a habit
   const completeHabit = useCallback((habitId: string, date: string, completed: boolean = true) => {
-    eventManager.emit('habit:complete' as HabitEventType, {
+    eventManager.emit('habit:complete', {
       habitId,
       date,
       completed
@@ -18,7 +17,7 @@ export const useHabitEvents = () => {
 
   // Trigger habit tasks check
   const checkPendingHabits = useCallback(() => {
-    eventManager.emit('habits:check-pending' as HabitEventType, {});
+    eventManager.emit('habits:check-pending', {});
   }, []);
 
   // Schedule a habit task
@@ -30,7 +29,7 @@ export const useHabitEvents = () => {
     date: string,
     metricType?: string
   ) => {
-    eventManager.emit('habit:schedule' as HabitEventType, {
+    eventManager.emit('habit:schedule', {
       habitId,
       templateId,
       name,
@@ -42,12 +41,12 @@ export const useHabitEvents = () => {
 
   // Update a habit template
   const updateHabitTemplate = useCallback((templateData: any) => {
-    eventManager.emit('habit:template-update' as HabitEventType, templateData);
+    eventManager.emit('habit:template-update', templateData);
   }, []);
 
   // Delete a habit template
   const deleteHabitTemplate = useCallback((templateId: string, isOriginatingAction: boolean = true) => {
-    eventManager.emit('habit:template-delete' as HabitEventType, {
+    eventManager.emit('habit:template-delete', {
       templateId,
       isOriginatingAction
     });
@@ -55,7 +54,7 @@ export const useHabitEvents = () => {
 
   // Add a habit template
   const addHabitTemplate = useCallback((templateId: string) => {
-    eventManager.emit('habit:template-add' as HabitEventType, {
+    eventManager.emit('habit:template-add', {
       id: templateId,
       templateId
     });
@@ -63,7 +62,7 @@ export const useHabitEvents = () => {
 
   // Open journal for a habit
   const openHabitJournal = useCallback((habitId: string, habitName: string, description?: string, templateId?: string) => {
-    eventManager.emit('journal:open' as HabitEventType, {
+    eventManager.emit('journal:open', {
       habitId,
       habitName,
       description,

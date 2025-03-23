@@ -8,7 +8,7 @@ import HabitTemplateManager from '@/components/habits/HabitTemplateManager';
 import { DayOfWeek, ActiveTemplate, HabitTemplate } from './types';
 import { eventManager } from '@/lib/events/EventManager';
 import { useHabitTaskIntegration } from '@/hooks/habits/useHabitTaskIntegration';
-import { EventHandler } from '@/lib/events/types';
+import { EventHandler } from '@/types/events'; // Updated import path
 import { motion } from 'framer-motion';
 
 /**
@@ -67,9 +67,9 @@ const HabitTracker: React.FC = () => {
   // Event listeners for template management
   useEffect(() => {
     // Handler for template add events
-    const handleTemplateAdd: EventHandler<'habit:template-add'> = (payload) => {
+    const handleTemplateAdd: EventHandler = (payload: any) => {
       console.log("HabitTracker: Detected template add event for", payload);
-      const templateId = payload.templateId;
+      const templateId = payload.templateId || payload.id;
       
       // Prevent duplicate processing of the same template
       if (processingTemplateId === templateId) {
@@ -180,7 +180,15 @@ const HabitTracker: React.FC = () => {
       variants={containerVariants}
     >
       <motion.div variants={itemVariants}>
-        <HabitTemplateManager activeTemplates={templates} />
+        <HabitTemplateManager 
+          activeTemplates={templates} 
+          onAddTemplate={addTemplate}
+          onRemoveTemplate={handleRemoveTemplate}
+          onConfigureTemplate={(template) => {
+            // Placeholder for template configuration
+            console.log("Configure template:", template);
+          }}
+        />
       </motion.div>
       
       <motion.div 

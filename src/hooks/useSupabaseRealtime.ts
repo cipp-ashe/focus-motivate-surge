@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { eventManager } from '@/lib/events/EventManager';
 import { useAuth } from '@/contexts/auth/AuthContext';
+import { toast } from 'sonner';
+import { eventManager } from '@/lib/events/EventManager';
 import { AllEventTypes, NoteEventType } from '@/lib/events/types';
 import { Task } from '@/types/tasks';
 

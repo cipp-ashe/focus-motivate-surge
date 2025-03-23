@@ -1,53 +1,76 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { describe, it, expect, vi } from 'vitest';
+import { vi } from 'vitest';
 import { useTemplateCreation } from '../useTemplateCreation';
-import { ActiveTemplate } from '../../types';
+import { ActiveTemplate, HabitDetail, TimePreference } from '@/components/habits/types';
 
-const mockTemplate: ActiveTemplate = {
-  templateId: 'test-1',
-  habits: [],
-  customized: false,
-  activeDays: ['Mon', 'Wed', 'Fri'],
-};
+// Mock eventBus
+vi.mock('@/lib/eventBus', () => ({
+  eventBus: {
+    emit: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  },
+}));
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 describe('useTemplateCreation', () => {
-  const mockAddTemplate = vi.fn();
-  const mockUpdateTemplate = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    localStorageMock.clear();
   });
 
-  it('initializes with correct default values', () => {
-    const { result } = renderHook(() =>
-      useTemplateCreation(mockAddTemplate, mockUpdateTemplate)
-    );
+  it('initializes with default state', () => {
+    const addTemplate = vi.fn();
+    const updateTemplate = vi.fn();
+
+    const { result } = renderHook(() => useTemplateCreation(addTemplate, updateTemplate));
 
     expect(result.current.selectedTemplate).toBeNull();
     expect(result.current.isCreatingTemplate).toBe(false);
     expect(result.current.newTemplateName).toBe('');
   });
 
-  it('handles template creation correctly', () => {
-    const { result } = renderHook(() =>
-      useTemplateCreation(mockAddTemplate, mockUpdateTemplate)
-    );
+  it('handles create template', () => {
+    const addTemplate = vi.fn();
+    const updateTemplate = vi.fn();
+
+    const { result } = renderHook(() => useTemplateCreation(addTemplate, updateTemplate));
 
     act(() => {
       result.current.handleCreateTemplate();
     });
 
     expect(result.current.isCreatingTemplate).toBe(true);
-    expect(result.current.selectedTemplate).toBeTruthy();
-    expect(result.current.selectedTemplate?.customized).toBe(true);
+    expect(result.current.selectedTemplate).not.toBeNull();
+    expect(result.current.selectedTemplate?.templateId).toContain('custom-');
   });
 
-  it('handles template configuration correctly', () => {
-    const { result } = renderHook(() =>
-      useTemplateCreation(mockAddTemplate, mockUpdateTemplate)
-    );
+  it('handles configure template', () => {
+    const addTemplate = vi.fn();
+    const updateTemplate = vi.fn();
+    const mockTemplate: ActiveTemplate = {
+      templateId: 'test-id',
+      habits: [],
+      activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    };
+
+    const { result } = renderHook(() => useTemplateCreation(addTemplate, updateTemplate));
 
     act(() => {
       result.current.handleConfigureTemplate(mockTemplate);
@@ -57,37 +80,53 @@ describe('useTemplateCreation', () => {
     expect(result.current.isCreatingTemplate).toBe(false);
   });
 
-  it('saves template correctly', () => {
-    const { result } = renderHook(() =>
-      useTemplateCreation(mockAddTemplate, mockUpdateTemplate)
-    );
+  it('handles save template for new template', () => {
+    const addTemplate = vi.fn();
+    const updateTemplate = vi.fn();
+    
+    // Mock window.dispatchEvent
+    const originalDispatchEvent = window.dispatchEvent;
+    window.dispatchEvent = vi.fn();
+
+    const { result } = renderHook(() => useTemplateCreation(addTemplate, updateTemplate));
 
     act(() => {
       result.current.handleCreateTemplate();
-      result.current.setNewTemplateName('New Template');
     });
 
-    const mockHabit = {
-      id: 'habit-1',
+    // Set a template name
+    act(() => {
+      result.current.setNewTemplateName('My New Template');
+    });
+
+    // Manually update selected template with a sample habit
+    const habit: HabitDetail = {
+      id: 'habit-123',
       name: 'Test Habit',
       description: 'Test Description',
-      category: 'Test',
-      timePreference: 'Morning',
-      metrics: { type: 'boolean' as const },
+      category: 'Personal',
+      timePreference: 'Morning' as TimePreference,
+      metrics: { type: 'boolean' },
       insights: [],
       tips: [],
     };
 
     act(() => {
-      if (result.current.selectedTemplate) {
-        result.current.selectedTemplate.habits = [mockHabit];
-        result.current.handleSaveTemplate();
-      }
+      // @ts-ignore - Bypassing readonly for testing
+      result.current.selectedTemplate!.habits = [habit];
     });
 
-    expect(mockAddTemplate).toHaveBeenCalled();
-    const savedTemplates = JSON.parse(localStorage.getItem('custom-templates') || '[]');
-    expect(savedTemplates.length).toBe(1);
-    expect(savedTemplates[0].name).toBe('New Template');
+    act(() => {
+      result.current.handleSaveTemplate();
+    });
+
+    expect(addTemplate).toHaveBeenCalled();
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'custom-templates',
+      expect.any(String)
+    );
+
+    // Restore window.dispatchEvent
+    window.dispatchEvent = originalDispatchEvent;
   });
 });

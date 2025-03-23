@@ -1,7 +1,6 @@
 
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { TimerEventType } from '@/types/events';
 
 /**
  * Hook for managing timer-related events
@@ -9,7 +8,7 @@ import { TimerEventType } from '@/types/events';
 export const useTimerEvents = () => {
   // Start timer with a task
   const startTimerWithTask = useCallback((taskId: string, taskName: string, duration: number) => {
-    eventManager.emit('timer:start' as TimerEventType, {
+    eventManager.emit('timer:start', {
       taskId,
       taskName,
       duration
@@ -18,7 +17,7 @@ export const useTimerEvents = () => {
 
   // Complete a timer session
   const completeTimerSession = useCallback((taskId: string, taskName: string, metrics: any) => {
-    eventManager.emit('timer:complete' as TimerEventType, {
+    eventManager.emit('timer:complete', {
       taskId,
       taskName, 
       metrics
@@ -27,7 +26,7 @@ export const useTimerEvents = () => {
 
   // Cancel a timer session
   const cancelTimerSession = useCallback((taskId: string, taskName: string) => {
-    eventManager.emit('timer:reset' as TimerEventType, {
+    eventManager.emit('timer:reset', {
       taskId,
       taskName
     });
@@ -35,7 +34,7 @@ export const useTimerEvents = () => {
 
   // Pause a timer session
   const pauseTimerSession = useCallback((taskId: string, taskName: string, timeLeft: number) => {
-    eventManager.emit('timer:pause' as TimerEventType, {
+    eventManager.emit('timer:pause', {
       taskId,
       taskName,
       timeLeft
@@ -44,7 +43,7 @@ export const useTimerEvents = () => {
 
   // Resume a timer session
   const resumeTimerSession = useCallback((taskId: string, taskName: string, timeLeft: number) => {
-    eventManager.emit('timer:resume' as TimerEventType, {
+    eventManager.emit('timer:resume', {
       taskId,
       taskName,
       timeLeft
@@ -53,14 +52,14 @@ export const useTimerEvents = () => {
 
   // Expand the timer view
   const expandTimer = useCallback((taskName: string) => {
-    eventManager.emit('timer:expand' as TimerEventType, {
+    eventManager.emit('timer:expand', {
       taskName
     });
   }, []);
 
   // Collapse the timer view
   const collapseTimer = useCallback((taskName: string, saveNotes: boolean = false) => {
-    eventManager.emit('timer:collapse' as TimerEventType, {
+    eventManager.emit('timer:collapse', {
       taskName,
       saveNotes
     });
@@ -68,7 +67,7 @@ export const useTimerEvents = () => {
 
   // Update timer metrics
   const updateTimerMetrics = useCallback((taskId: string, metrics: any, taskName?: string) => {
-    eventManager.emit('timer:update-metrics' as TimerEventType, {
+    eventManager.emit('timer:update-metrics', {
       taskId,
       metrics,
       taskName

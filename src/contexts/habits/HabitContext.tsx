@@ -3,7 +3,7 @@ import { createContext, useContext, useReducer, ReactNode, useEffect, useRef } f
 import { toast } from 'sonner';
 import { habitReducer } from './habitReducer';
 import { HabitState, HabitContextActions, initialState } from './types';
-import { useHabitEvents } from './useHabitEvents';
+import { useHabitEvents } from '@/hooks/habits/useHabitEvents';
 import { createHabitActions } from './useHabitActions';
 import { eventManager } from '@/lib/events/EventManager';
 

@@ -1,57 +1,30 @@
 
-import { useRef, RefObject } from 'react';
-import { TimerExpandedViewRef } from '@/types/timer';
-import { useTimerEvents } from './events/useTimerEvents';
-import { useTimerCountdown } from './events/useTimerCountdown';
-import { useTimerPauseResume } from './events/useTimerPauseResume';
-import { logger } from '@/utils/logManager';
+import { useEffect } from 'react';
+import { eventManager } from '@/lib/events/EventManager';
+import { useTimerEvents } from '@/hooks/timer/useTimerEvents';
 
-interface UseTimerEventListenersProps {
-  taskName: string;
-  setInternalMinutes: (minutes: number) => void;
-  setIsExpanded: (expanded: boolean) => void;
-  expandedViewRef: RefObject<TimerExpandedViewRef | null>;
-}
+export const useTimerEventListeners = () => {
+  const timerEvents = useTimerEvents();
 
-/**
- * Compose all timer event hooks into a single hook for easier use
- */
-export const useTimerEventListeners = ({
-  taskName,
-  setInternalMinutes,
-  setIsExpanded,
-  expandedViewRef,
-}: UseTimerEventListenersProps) => {
-  logger.debug('TimerEventListeners', `Setting up timer event listeners for task: ${taskName}`);
-  
-  // Set up countdown events (start, tick)
-  const { 
-    timeLeftRef, 
-    isRunningRef,
-    lastTickTimeRef 
-  } = useTimerCountdown({
-    taskName,
-    setInternalMinutes,
-  });
-  
-  // Set up pause/resume events
-  useTimerPauseResume({
-    taskName,
-    timeLeftRef,
-    isRunningRef,
-    lastTickTimeRef,
-  });
-  
-  // Set up expand/collapse events
-  useTimerEvents({
-    taskName,
-    setIsExpanded,
-    expandedViewRef,
-  });
-  
-  return {
-    timeLeftRef,
-    isRunningRef,
-    lastTickTimeRef,
-  };
+  useEffect(() => {
+    const handleTaskComplete = (data: any) => {
+      const { taskId, taskName, metrics } = data;
+      console.log('Timer: Task completed', { taskId, taskName, metrics });
+    };
+
+    const handleTimerStart = (data: any) => {
+      const { taskId, taskName, duration } = data;
+      console.log('Timer: Timer started', { taskId, taskName, duration });
+    };
+
+    const unsubComplete = eventManager.on('timer:complete', handleTaskComplete);
+    const unsubStart = eventManager.on('timer:start', handleTimerStart);
+
+    return () => {
+      unsubComplete();
+      unsubStart();
+    };
+  }, []);
+
+  return timerEvents;
 };

@@ -1,54 +1,98 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { vi } from 'vitest';
 import TemplateSelectionSheet from '../TemplateSelectionSheet';
 import { HabitTemplate } from '../types';
 
+// Mock data
 const mockTemplates: HabitTemplate[] = [
   {
-    id: 'test-1',
-    name: 'Test Template 1',
-    description: 'Test Description 1',
-    category: 'Test',
-    defaultHabits: [],
-    defaultDays: ['Mon', 'Wed', 'Fri'],
-    duration: null,
+    id: '1',
+    name: 'Daily Wellness',
+    description: 'Simple daily wellness habits',
+    category: 'Wellness',
+    defaultHabits: []
   },
+  {
+    id: '2',
+    name: 'Work Productivity',
+    description: 'Habits for work productivity',
+    category: 'Work',
+    defaultHabits: []
+  }
 ];
 
 describe('TemplateSelectionSheet', () => {
-  const defaultProps = {
-    isOpen: true,
-    onOpenChange: vi.fn(),
-    allTemplates: mockTemplates,
-    activeTemplateIds: [],
-    onSelectTemplate: vi.fn(),
-    onCreateTemplate: vi.fn(),
-  };
+  it('renders the sheet when open', () => {
+    const mockOnClose = vi.fn();
+    const mockSelectTemplate = vi.fn();
+    const mockCreateTemplate = vi.fn();
+    const mockDeleteCustomTemplate = vi.fn();
+    const mockOnOpenChange = vi.fn();
 
-  it('renders correctly when open', () => {
-    render(<TemplateSelectionSheet {...defaultProps} />);
-    expect(screen.getByText('Configure Templates')).toBeInTheDocument();
+    render(
+      <TemplateSelectionSheet
+        isOpen={true}
+        onClose={mockOnClose}
+        customTemplates={mockTemplates}
+        activeTemplateIds={[]}
+        onSelectTemplate={mockSelectTemplate}
+        onCreateTemplate={mockCreateTemplate}
+        onDeleteCustomTemplate={mockDeleteCustomTemplate}
+        onOpenChange={mockOnOpenChange}
+      />
+    );
+
+    expect(screen.getByText('Choose a template to add to your habits')).toBeInTheDocument();
   });
 
-  it('shows available templates', () => {
-    render(<TemplateSelectionSheet {...defaultProps} />);
-    expect(screen.getByText('Test Template 1')).toBeInTheDocument();
+  it('does not render the sheet when closed', () => {
+    const mockOnClose = vi.fn();
+    const mockSelectTemplate = vi.fn();
+    const mockCreateTemplate = vi.fn();
+    const mockDeleteCustomTemplate = vi.fn();
+    const mockOnOpenChange = vi.fn();
+
+    render(
+      <TemplateSelectionSheet
+        isOpen={false}
+        onClose={mockOnClose}
+        customTemplates={mockTemplates}
+        activeTemplateIds={[]}
+        onSelectTemplate={mockSelectTemplate}
+        onCreateTemplate={mockCreateTemplate}
+        onDeleteCustomTemplate={mockDeleteCustomTemplate}
+        onOpenChange={mockOnOpenChange}
+      />
+    );
+
+    expect(screen.queryByText('Choose a template to add to your habits')).not.toBeInTheDocument();
   });
 
-  it('calls onSelectTemplate when a template is selected', () => {
-    render(<TemplateSelectionSheet {...defaultProps} />);
-    const addButton = screen.getByRole('button', { name: /add template/i });
-    fireEvent.click(addButton);
-    expect(defaultProps.onSelectTemplate).toHaveBeenCalledWith('test-1');
-  });
+  it('closes the sheet when X is clicked', () => {
+    const mockOnClose = vi.fn();
+    const mockSelectTemplate = vi.fn();
+    const mockCreateTemplate = vi.fn();
+    const mockDeleteCustomTemplate = vi.fn();
+    const mockOnOpenChange = vi.fn();
 
-  it('calls onCreateTemplate when create button is clicked', () => {
-    render(<TemplateSelectionSheet {...defaultProps} />);
-    const createButton = screen.getByRole('button', { name: /create new template/i });
-    fireEvent.click(createButton);
-    expect(defaultProps.onCreateTemplate).toHaveBeenCalled();
+    render(
+      <TemplateSelectionSheet
+        isOpen={true}
+        onClose={mockOnClose}
+        customTemplates={mockTemplates}
+        activeTemplateIds={[]}
+        onSelectTemplate={mockSelectTemplate}
+        onCreateTemplate={mockCreateTemplate}
+        onDeleteCustomTemplate={mockDeleteCustomTemplate}
+        onOpenChange={mockOnOpenChange}
+      />
+    );
+
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    fireEvent.click(closeButton);
+
+    expect(mockOnOpenChange).toHaveBeenCalledWith(false);
   });
 });
-

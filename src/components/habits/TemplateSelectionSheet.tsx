@@ -10,7 +10,7 @@ import {
 import TabSection from './ManageTemplatesDialog/TabSection';
 import { HabitTemplate, NewTemplate } from './types';
 
-interface TemplateSelectionSheetProps {
+export interface TemplateSelectionSheetProps {
   isOpen: boolean;
   onClose: () => void;
   customTemplates: HabitTemplate[];
@@ -18,6 +18,7 @@ interface TemplateSelectionSheetProps {
   onSelectTemplate: (template: HabitTemplate) => void;
   onDeleteCustomTemplate: (templateId: string) => void;
   onCreateTemplate: (template: NewTemplate) => void;
+  onOpenChange?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
@@ -27,10 +28,18 @@ const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
   activeTemplateIds,
   onSelectTemplate,
   onDeleteCustomTemplate,
-  onCreateTemplate
+  onCreateTemplate,
+  onOpenChange
 }) => {
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet open={isOpen} onOpenChange={(open) => {
+      if (onOpenChange) {
+        onOpenChange(open);
+      }
+      if (!open) {
+        onClose();
+      }
+    }}>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Habit Templates</SheetTitle>

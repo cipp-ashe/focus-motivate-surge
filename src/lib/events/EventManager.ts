@@ -1,215 +1,149 @@
+import { v4 as uuidv4 } from 'uuid';
 
-import { supabase } from '@/lib/supabase/client';
-import { AllEventTypes, EventPayloads, EventHandler } from '@/types/events';
+export type EventType = string;
+export type EventPayload = any;
+export type EventCallback<T = any> = (payload: T) => void;
 
-export type EventType = AllEventTypes | string;
-
-type EventCallback<T = any> = (payload: T) => void;
-
-// Implement log throttling for persistence messages
-const createThrottledLogger = () => {
-  const lastLogTime: Record<string, number> = {};
-  const logIntervals: Record<string, number> = {
-    'auth': 5000, // Only log auth messages every 5 seconds
-  };
-
-  return (message: string, category: string = 'default') => {
-    const now = Date.now();
-    const interval = logIntervals[category] || 1000;
-    
-    if (!lastLogTime[message] || (now - lastLogTime[message]) > interval) {
-      console.log(message);
-      lastLogTime[message] = now;
-      return true;
-    }
-    return false;
-  };
-};
-
-const throttledLog = createThrottledLogger();
-
-class EventManager {
-  private listeners: Record<string, EventCallback[]>;
+/**
+ * A simple event manager for handling custom events
+ */
+export class EventManager {
+  private listeners: Map<EventType, { id: string; callback: EventCallback }[]> = new Map();
+  private eventStore: { id: string; event_type: EventType; payload: EventPayload; timestamp: string }[] = [];
+  private processedEventIds: Set<string> = new Set();
   
-  constructor() {
-    this.listeners = {};
-  }
-
   /**
-   * Subscribe to an event
+   * Subscribe to a specific event type
+   * @param eventType The event type to subscribe to
+   * @param callback The callback function to execute when the event is emitted
+   * @returns An unsubscribe function to remove the subscription
    */
-  on<T extends EventType>(event: T, callback: EventHandler<EventPayloads[T]>): () => void {
-    if (!this.listeners[event]) {
-      this.listeners[event] = [];
+  on<T extends EventType>(eventType: T, callback: EventCallback<T>): () => void {
+    const id = uuidv4();
+    
+    if (!this.listeners.has(eventType)) {
+      this.listeners.set(eventType, []);
     }
     
-    this.listeners[event].push(callback as EventCallback);
+    this.listeners.get(eventType)!.push({ id, callback });
     
-    // Return unsubscribe function
-    return () => this.off(event, callback);
+    return () => {
+      this.off(eventType, id);
+    };
   }
-
+  
   /**
-   * Unsubscribe from an event
+   * Unsubscribe from a specific event type using the subscription id
+   * @param eventType The event type to unsubscribe from
+   * @param id The id of the subscription to remove
    */
-  off<T extends EventType>(event: T, callback: EventHandler<EventPayloads[T]>): void {
-    if (!this.listeners[event]) return;
+  off(eventType: EventType, id: string): void {
+    if (!this.listeners.has(eventType)) return;
     
-    const index = this.listeners[event].indexOf(callback as EventCallback);
-    if (index !== -1) {
-      this.listeners[event].splice(index, 1);
-    }
+    const listeners = this.listeners.get(eventType)!;
+    this.listeners.set(eventType, listeners.filter(listener => listener.id !== id));
   }
-
+  
   /**
-   * Emit an event
+   * Emit an event to all subscribed listeners
+   * @param eventType The event type to emit
+   * @param payload The event payload
    */
-  emit<T extends EventType>(event: T, payload: EventPayloads[T]): void {
-    // Only log non-frequent events to reduce noise
-    const nonFrequentEvents = [
-      'task:create', 'task:delete', 'habit:template-update',
-      'auth:signed-in', 'auth:signed-out', 'app:initialized'
-    ];
+  emit<T extends EventType>(eventType: T, payload: any): void {
+    // Store the event
+    const eventId = uuidv4();
+    this.storeEvent(eventId, eventType, payload);
     
-    if (nonFrequentEvents.includes(event)) {
-      console.log(`Emitting event: ${event}`, payload);
-    }
+    // Notify listeners
+    if (!this.listeners.has(eventType)) return;
     
-    // Call local listeners
-    if (this.listeners[event]) {
-      for (const callback of this.listeners[event]) {
-        try {
-          callback(payload);
-        } catch (error) {
-          console.error(`Error in event listener for ${event}:`, error);
-        }
+    const listeners = this.listeners.get(eventType)!;
+    listeners.forEach(listener => {
+      try {
+        listener.callback(payload);
+      } catch (error) {
+        console.error(`Error in event listener for ${eventType}:`, error);
       }
-    }
+    });
+  }
+  
+  /**
+   * Store an event in the event store
+   * @param id The unique ID of the event
+   * @param eventType The event type
+   * @param payload The event payload
+   */
+  private storeEvent(id: string, eventType: EventType, payload: EventPayload): void {
+    const timestamp = new Date().toISOString();
+    this.eventStore.push({ id, event_type: eventType, payload, timestamp });
     
-    // Persist to Supabase if user is authenticated
-    this.persistEventToSupabase(event, payload);
+    // Persist to localStorage
+    this.persistEvents();
   }
-
+  
   /**
-   * For testing: Get listener counts
+   * Persist events to localStorage
    */
-  getListenerCounts(): Record<string, number> {
-    const counts: Record<string, number> = {};
-    for (const event in this.listeners) {
-      counts[event] = this.listeners[event].length;
-    }
-    return counts;
+  private persistEvents(): void {
+    localStorage.setItem('events', JSON.stringify(this.eventStore));
   }
-
+  
   /**
-   * For testing: Clear all event listeners
+   * Load events from localStorage
    */
-  clear(): void {
-    this.listeners = {};
-  }
-
-  /**
-   * Persist event to Supabase for cross-device synchronization
-   */
-  private async persistEventToSupabase<T extends EventType>(event: T, payload: EventPayloads[T]): Promise<void> {
-    try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        // Use throttled logging to reduce duplicate messages
-        throttledLog('User not authenticated, skipping event persistence', 'auth');
-        return;
-      }
-      
-      // Skip persistence for certain events to prevent loops
-      const skipPersistenceEvents = [
-        'timer:tick',
-        'timer:state-update',
-        'app:initialization-complete',
-        'app:initialized',
-        'page:timer-ready',
-        'nav:route-change'
-      ];
-      
-      if (skipPersistenceEvents.includes(event)) {
-        return;
-      }
-      
-      // Insert event into Supabase
-      const { error } = await supabase.from('events').insert({
-        user_id: user.id,
-        event_type: event,
-        payload,
-        processed: false
-      });
-      
-      if (error) {
-        console.error('Error persisting event to Supabase:', error);
-      }
-    } catch (error) {
-      console.error('Error in persistEventToSupabase:', error);
+  loadEvents(): void {
+    const storedEvents = localStorage.getItem('events');
+    if (storedEvents) {
+      this.eventStore = JSON.parse(storedEvents);
     }
   }
-
+  
   /**
-   * Fetch unprocessed events for current user
+   * Add an event to Supabase
+   * @param eventType The event type
+   * @param payload The event payload
+   */
+  async addEventToSupabase(eventType: EventType, payload: EventPayload): Promise<void> {
+    // Implementation would go here
+  }
+  
+  /**
+   * Fetch unprocessed events from local storage
    */
   async fetchEvents(limit: number = 10): Promise<any[]> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        return [];
-      }
-      
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('processed', false)
-        .order('created_at', { ascending: true })
-        .limit(limit);
-      
-      if (error) {
-        console.error('Error fetching events:', error);
-        return [];
-      }
-      
-      return data || [];
-    } catch (error) {
-      console.error('Error in fetchEvents:', error);
-      return [];
-    }
+    this.loadEvents();
+    
+    // Filter out processed events
+    const unprocessedEvents = this.eventStore.filter(event => !this.processedEventIds.has(event.id));
+    
+    // Limit the number of events to return
+    return unprocessedEvents.slice(0, limit);
   }
-
+  
   /**
    * Mark events as processed
+   * @param eventIds The IDs of the events to mark as processed
    */
-  async markEventsAsProcessed(eventIds: string[]): Promise<boolean> {
-    try {
-      if (eventIds.length === 0) return true;
-      
-      const { error } = await supabase
-        .from('events')
-        .update({ processed: true })
-        .in('id', eventIds);
-      
-      if (error) {
-        console.error('Error marking events as processed:', error);
-        return false;
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Error in markEventsAsProcessed:', error);
-      return false;
-    }
+  async markEventsAsProcessed(eventIds: string[]): Promise<void> {
+    eventIds.forEach(id => this.processedEventIds.add(id));
+    
+    // Remove processed events from local storage
+    this.eventStore = this.eventStore.filter(event => !eventIds.includes(event.id));
+    this.persistEvents();
+  }
+  
+  /**
+   * Clear all events from local storage
+   */
+  clearEvents(): void {
+    this.eventStore = [];
+    this.processedEventIds.clear();
+    localStorage.removeItem('events');
   }
 }
 
-// Create singleton instance
+// Export a singleton instance
 export const eventManager = new EventManager();
 
-// Export the EventType and EventPayloads types for use in other files
-export type { EventType, EventPayloads };
+// Export types (but without EventType to avoid conflict)
+export type { EventHandler, EventCallback, EventPayload };

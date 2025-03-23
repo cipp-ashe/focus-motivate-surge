@@ -4,8 +4,19 @@ import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitProgressResult } from '@/components/habits/types';
 
+// Define simplified progress type for internal storage
+interface SimpleProgress {
+  value: boolean | number;
+  streak: number;
+  date: string;
+  completed: boolean;
+}
+
+// Type for the progress map
+type ProgressMapType = Record<string, Record<string, Record<string, SimpleProgress>>>;
+
 export const useHabitProgress = () => {
-  const [progressMap, setProgressMap] = useState<Record<string, Record<string, Record<string, any>>>>({});
+  const [progressMap, setProgressMap] = useState<ProgressMapType>({});
   
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -66,7 +77,12 @@ export const useHabitProgress = () => {
       return { value: false, streak: 0, completed: false };
     }
     
-    return progressMap[templateId][habitId][today];
+    const progress = progressMap[templateId][habitId][today];
+    return { 
+      value: progress.value, 
+      streak: progress.streak, 
+      completed: progress.completed 
+    };
   }, [progressMap]);
 
   // Update progress for a specific habit
@@ -77,10 +93,18 @@ export const useHabitProgress = () => {
     const streak = value && !currentProgress.value ? (currentProgress.streak || 0) + 1 : currentProgress.streak || 0;
     
     setProgressMap(prev => {
+      // Create a deep copy of the previous state
       const updated = { ...prev };
-      if (!updated[templateId]) updated[templateId] = {};
-      if (!updated[templateId][habitId]) updated[templateId][habitId] = {};
       
+      // Initialize nested objects if they don't exist
+      if (!updated[templateId]) {
+        updated[templateId] = {};
+      }
+      if (!updated[templateId][habitId]) {
+        updated[templateId][habitId] = {};
+      }
+      
+      // Update the progress
       updated[templateId][habitId][today] = {
         value,
         streak,

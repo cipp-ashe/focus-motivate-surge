@@ -96,21 +96,23 @@ export interface TabSectionProps {
   onCreateTemplate: (template: NewTemplate) => void;
 }
 
+// Modified HabitProgress to accept the simpler format used in the code
+export interface HabitProgressResult {
+  value: number | boolean;
+  streak: number;
+  completed?: boolean;
+}
+
+// Updated to make id and habitId optional to match actual usage in the codebase
 export interface HabitProgress {
-  id: string;
-  habitId: string;
+  id?: string;
+  habitId?: string;
   date: string;
   completed: boolean;
   value?: number | boolean;
   notes?: string;
   streak: number;
   timestamp?: string;
-}
-
-export interface HabitProgressResult {
-  value: number | boolean;
-  streak: number;
-  completed?: boolean;
 }
 
 // Helper function to create an empty habit

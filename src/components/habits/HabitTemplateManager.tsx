@@ -8,7 +8,7 @@ import { eventManager } from '@/lib/events/EventManager';
 import TemplateSelectionSheet from './TemplateSelectionSheet';
 import { predefinedTemplates } from './data/templates';
 
-interface HabitTemplateManagerProps {
+export interface HabitTemplateManagerProps {
   activeTemplates: ActiveTemplate[];
   onAddTemplate: (template: ActiveTemplate) => void;
   onRemoveTemplate: (templateId: string) => void;

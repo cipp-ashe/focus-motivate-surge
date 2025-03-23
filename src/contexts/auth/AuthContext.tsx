@@ -1,158 +1,85 @@
-import React, { createContext, useContext, useEffect, useReducer, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
-import { AuthEventType } from '@/lib/events/types';
 
-interface AuthState {
+interface AuthContextType {
   user: User | null;
+  session: any | null;
   isLoading: boolean;
+  signIn: (email: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
-type AuthAction =
-  | { type: 'SIGNED_IN'; payload: User }
-  | { type: 'SIGNED_OUT' }
-  | { type: 'LOADING'; payload: boolean };
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export interface AuthContextProps {
-  state: AuthState;
-  user: User | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  signIn: (email: string) => Promise<boolean>;
-  signOut: () => Promise<boolean>;
-  signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
-}
-
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
-
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-  switch (action.type) {
-    case 'SIGNED_IN':
-      return { ...state, user: action.payload, isLoading: false };
-    case 'SIGNED_OUT':
-      return { ...state, user: null, isLoading: false };
-    case 'LOADING':
-      return { ...state, isLoading: action.payload };
-    default:
-      return state;
-  }
-};
-
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-const initialState: AuthState = {
-  user: null,
-  isLoading: true,
-};
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
-
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session && session.user) {
-          dispatch({ type: 'SIGNED_IN', payload: session.user });
-          
-          // Use the proper payload format
-          eventManager.emit('auth:state-change', { 
-            user: session.user
-          });
-          
-          console.log('User signed in via auth state change', session.user);
-        } else {
-          dispatch({ type: 'SIGNED_OUT' });
-          
-          // Use the proper payload format
-          eventManager.emit('auth:state-change', { 
-            user: null
-          });
-          
-          console.log('User signed out via auth state change');
-        }
+    const getSession = async () => {
+      try {
+        setIsLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        setSession(session);
+        setUser(session?.user || null);
+      } catch (error: any) {
+        console.error("Error getting session:", error.message);
+        toast.error(`Error getting session: ${error.message}`);
+      } finally {
+        setIsLoading(false);
       }
-    );
-
-    // Initial load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session && session.user) {
-        dispatch({ type: 'SIGNED_IN', payload: session.user });
-      } else {
-        dispatch({ type: 'SIGNED_OUT' });
-      }
-    }).finally(() => {
-      dispatch({ type: 'LOADING', payload: false });
-    });
-
-    return () => {
-      subscription?.unsubscribe();
     };
-  }, []);
-
-  const signInWithMagicLink = useCallback(async (email: string) => {
-    try {
-      dispatch({ type: 'LOADING', payload: true });
-      const { error } = await supabase.auth.signInWithOtp({ email });
-      return { error };
-    } catch (error) {
-      console.error('Unexpected error signing in with magic link:', error);
-      return { error: error instanceof Error ? error : new Error('Unknown error') };
-    } finally {
-      dispatch({ type: 'LOADING', payload: false });
-    }
-  }, []);
-
-  const signIn = useCallback(async (email: string) => {
-    try {
-      dispatch({ type: 'LOADING', payload: true });
-      const { error } = await supabase.auth.signInWithOtp({ email });
-
-      if (error) {
-        console.error('Error signing in:', error.message);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Unexpected error signing in:', error);
-      return false;
-    } finally {
-      dispatch({ type: 'LOADING', payload: false });
-    }
+    
+    getSession();
+    
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user || null);
+      setSession(session);
+    });
   }, []);
   
-  const signOut = useCallback(async () => {
+  const signIn = async (email: string) => {
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Error signing out:', error.message);
-        return false;
-      }
-      
-      // Use correct event type and payload
-      eventManager.emit('auth:logout', undefined);
-      
-      return true;
-    } catch (error) {
-      console.error('Unexpected error signing out:', error);
-      return false;
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOtp({ email });
+      if (error) throw error;
+      toast.success('Check your email for the magic link.');
+    } catch (error: any) {
+      console.error("Error signing in:", error.message);
+      toast.error(`Error signing in: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
-
-  const value: AuthContextProps = {
-    state,
-    user: state.user,
-    isLoading: state.isLoading,
-    isAuthenticated: !!state.user,
+  };
+  
+  const signOut = async () => {
+    try {
+      setIsLoading(true);
+      await supabase.auth.signOut();
+      setUser(null);
+      toast.success('Signed out successfully.');
+      eventManager.emit('auth:signed-out', {});
+    } catch (error: any) {
+      console.error("Error signing out:", error.message);
+      toast.error(`Error signing out: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const value: AuthContextType = {
+    user,
+    session,
+    isLoading,
     signIn,
     signOut,
-    signInWithMagicLink
   };
-
+  
   return (
     <AuthContext.Provider value={value}>
       {children}
@@ -160,10 +87,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-export const useAuth = (): AuthContextProps => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
