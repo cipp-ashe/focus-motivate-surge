@@ -19,7 +19,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   }, [location.pathname]);
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background">
+    <div className="flex flex-col min-h-screen w-full app-background">
       <Header />
       
       <div className="flex flex-1 w-full">

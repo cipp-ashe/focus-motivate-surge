@@ -11,11 +11,13 @@ import { TaskProvider, useTaskContext } from '@/contexts/tasks/TaskContext';
 import { ErrorBoundary } from 'react-error-boundary';
 import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
 import { TaskInput } from '@/components/tasks/TaskInput';
-import { Card, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card';
+import { CheckSquare } from 'lucide-react';
 
 const ErrorFallback = () => (
-  <div className="p-4 m-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md text-center">
-    <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">Error Loading Tasks</h2>
+  <div className="p-4 m-4 border border-red-300 bg-red-900/20 rounded-md text-center">
+    <h2 className="text-xl font-semibold text-red-400 mb-2">Error Loading Tasks</h2>
     <p>There was a problem loading the task manager. Please try again later or refresh the page.</p>
   </div>
 );
@@ -130,37 +132,39 @@ const TaskPageContent = () => {
   return (
     <>
       <div className="mb-6">
-        <div className="bg-card rounded-md p-4 shadow-sm">
-          <h2 className="text-xl font-semibold mb-2">Task Statistics</h2>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-muted/50 p-3 rounded-md">
-              <h3 className="text-sm font-medium">Total Tasks</h3>
-              <p className="text-2xl font-bold">{(taskContext?.items?.length || 0) + (taskContext?.completed?.length || 0)}</p>
+        <GlassCard>
+          <GlassCardContent>
+            <h2 className="text-xl font-semibold mb-2">Task Statistics</h2>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-secondary/50 p-3 rounded-md">
+                <h3 className="text-sm font-medium">Total Tasks</h3>
+                <p className="text-2xl font-bold">{(taskContext?.items?.length || 0) + (taskContext?.completed?.length || 0)}</p>
+              </div>
+              <div className="bg-secondary/50 p-3 rounded-md">
+                <h3 className="text-sm font-medium">Completed</h3>
+                <p className="text-2xl font-bold text-green-500">{taskContext?.completed?.length || 0}</p>
+              </div>
+              <div className="bg-secondary/50 p-3 rounded-md">
+                <h3 className="text-sm font-medium">Pending</h3>
+                <p className="text-2xl font-bold text-amber-500">{taskContext?.items?.length || 0}</p>
+              </div>
             </div>
-            <div className="bg-muted/50 p-3 rounded-md">
-              <h3 className="text-sm font-medium">Completed</h3>
-              <p className="text-2xl font-bold text-green-500">{taskContext?.completed?.length || 0}</p>
-            </div>
-            <div className="bg-muted/50 p-3 rounded-md">
-              <h3 className="text-sm font-medium">Pending</h3>
-              <p className="text-2xl font-bold text-amber-500">{taskContext?.items?.length || 0}</p>
-            </div>
-          </div>
-        </div>
+          </GlassCardContent>
+        </GlassCard>
       </div>
       
       <div className="grid grid-cols-1 gap-6">
-        <Card className="shadow-sm">
-          <CardContent className="p-4">
+        <GlassCard className="shadow-lg">
+          <GlassCardContent>
             <TaskInput 
               onTaskAdd={(task) => taskContext?.addTask?.(task)}
               onTasksAdd={(tasks) => tasks.forEach(task => taskContext?.addTask?.(task))}
             />
-          </CardContent>
-        </Card>
+          </GlassCardContent>
+        </GlassCard>
         
-        <Card className="overflow-hidden shadow-sm">
-          <CardContent className="p-0">
+        <GlassCard className="overflow-hidden shadow-lg">
+          <GlassCardContent className="p-0">
             {taskContext && (
               <UnifiedTaskView 
                 activeTasks={taskContext.items || []}
@@ -171,8 +175,8 @@ const TaskPageContent = () => {
                 onTasksAdd={(tasks) => tasks.forEach(task => taskContext.addTask?.(task))}
               />
             )}
-          </CardContent>
-        </Card>
+          </GlassCardContent>
+        </GlassCard>
       </div>
       
       <TaskEventListener 
@@ -233,10 +237,12 @@ const TaskPage = () => {
   console.log('TasksPage.tsx main component rendering');
   
   return (
-    <div className="container max-w-6xl mx-auto py-4 px-4">
-      <h1 className="text-2xl sm:text-3xl mb-5 font-bold" id="page-title">
-        Task Manager
-      </h1>
+    <div className="container max-w-6xl mx-auto py-4 px-4 animate-fade-in">
+      <PageHeader 
+        title="Task Manager" 
+        description="Organize your tasks, track progress, and boost productivity"
+        icon={CheckSquare}
+      />
       
       <TaskProvider>
         <ErrorBoundary FallbackComponent={ErrorFallback}>

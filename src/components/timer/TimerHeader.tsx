@@ -15,7 +15,7 @@ export const TimerHeader = memo(({ taskName, onCloseTimer }: TimerHeaderProps) =
     <div className="text-center">
       <h2 
         className={cn(
-          "font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 break-words whitespace-pre-wrap max-w-full px-2 tracking-tight",
+          "font-bold text-gradient-purple break-words whitespace-pre-wrap max-w-full px-2 tracking-tight",
           isMobile ? "text-xl" : "text-2xl sm:text-3xl"
         )}
       >

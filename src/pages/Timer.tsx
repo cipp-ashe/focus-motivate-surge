@@ -3,7 +3,6 @@ import { eventManager } from '@/lib/events/EventManager';
 import { Quote } from '@/types/timer';
 import { TaskProvider } from '@/contexts/tasks/TaskContext';
 import { TaskSelectionProvider } from '@/components/timer/providers/TaskSelectionProvider';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { TimerSection } from '@/components/timer/TimerSection';
@@ -19,6 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TimerConfigModal } from '@/components/timer/TimerConfigModal';
 import { useTimerModal } from '@/hooks/timer/useTimerModal';
+import { PageHeader } from '@/components/ui/page-header';
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card';
 
 export default function TimerPage() {
   const [favorites, setFavorites] = useState<Quote[]>([]);
@@ -36,21 +37,17 @@ export default function TimerPage() {
     <div className="container px-4 py-6 mx-auto animate-fade-in">
       <TaskProvider>
         <TaskSelectionProvider>
-          <header className="mb-6">
-            <h1 className="text-3xl font-bold flex items-center gap-2 bg-gradient-to-r from-purple-400 to-purple-600 text-transparent bg-clip-text">
-              <Clock className="h-8 w-8 text-purple-500" />
-              Focus Timer
-            </h1>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
-              Boost your productivity with our Pomodoro-style timer. Select a task, set your focus time, and track your progress.
-            </p>
-          </header>
+          <PageHeader
+            title="Focus Timer"
+            description="Boost your productivity with our Pomodoro-style timer. Select a task, set your focus time, and track your progress."
+            icon={Clock}
+          />
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Tasks Section - Left side (2/3 width on desktop) */}
             <div className="lg:col-span-2 space-y-6">
-              <Card className="shadow-md border-primary/10 overflow-hidden bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-4">
+              <GlassCard className="shadow-lg overflow-hidden">
+                <GlassCardContent className="p-4">
                   <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid grid-cols-2 mb-4">
                       <TabsTrigger value="tasks" className="flex items-center justify-center">
@@ -71,17 +68,17 @@ export default function TimerPage() {
                       <RecentSessionsList />
                     </TabsContent>
                   </Tabs>
-                </CardContent>
-              </Card>
+                </GlassCardContent>
+              </GlassCard>
             </div>
             
             {/* Timer Section - Right side (1/3 width on desktop) */}
             <div className="lg:col-span-1 space-y-6">
-              <Card className="shadow-md border-primary/10 overflow-hidden bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-0">
+              <GlassCard className="shadow-lg overflow-hidden">
+                <GlassCardContent className="p-0">
                   <TimerSection favorites={favorites} setFavorites={setFavorites} />
-                </CardContent>
-              </Card>
+                </GlassCardContent>
+              </GlassCard>
             </div>
           </div>
           
@@ -93,7 +90,6 @@ export default function TimerPage() {
   );
 }
 
-// Timer Tasks Panel component
 function TimerTasksPanel() {
   const taskContext = useTaskContext();
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -138,7 +134,6 @@ function TimerTasksPanel() {
   );
 }
 
-// Recent Sessions List Component - Shows actual completed timer tasks
 function RecentSessionsList() {
   const taskContext = useTaskContext();
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -201,7 +196,6 @@ function RecentSessionsList() {
   );
 }
 
-// Keep the existing function for backward compatibility
 export const fixTimerPageEmission = () => {
   useEffect(() => {
     // Fix the initialization event with a timestamp
