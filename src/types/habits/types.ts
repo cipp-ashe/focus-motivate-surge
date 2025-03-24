@@ -25,10 +25,11 @@ export const DAY_MAPPINGS: Record<DayOfWeekFull, DayOfWeek> = {
   'Saturday': 'Sat'
 };
 
-// Default active days (weekdays)
+// Default active days
 export const DEFAULT_WEEKDAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 export const DEFAULT_WEEKEND: DayOfWeek[] = ['Sat', 'Sun'];
 export const DEFAULT_ALL_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export const DEFAULT_ACTIVE_DAYS = DEFAULT_WEEKDAYS;
 
 // ===== Time and Category Definitions =====
 
@@ -106,9 +107,9 @@ export interface Habit {
 
 // Detailed habit with additional properties
 export interface HabitDetail extends Habit {
-  description?: string;
-  category?: string;
-  timePreference?: string;
+  description: string;
+  category: HabitCategory | string;
+  timePreference: TimePreference;
   metrics: {
     type: MetricType;
     goal?: number;
@@ -163,6 +164,7 @@ export interface HabitTemplate {
   color?: string;
   defaultDays?: DayOfWeek[];
   defaultHabits: HabitDetail[];
+  duration?: number | null;
 }
 
 // Active template instance that a user has added to their routine

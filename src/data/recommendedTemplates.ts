@@ -41,7 +41,7 @@ const createHabitDetail = (
  * Organized collection of recommended templates
  */
 const templates: Record<string, HabitTemplate> = {
-  // ===== Wellness Templates =====
+  // ===== Wellness & Mental Health Templates =====
   
   morningRoutine: {
     id: 'morning-routine',
@@ -88,9 +88,9 @@ const templates: Record<string, HabitTemplate> = {
     ]
   },
   
-  mindfulness: {
-    id: 'mindfulness',
-    name: 'Daily Mindfulness',
+  mindfulnessAndMentalHealth: {
+    id: 'mindfulness-mental-health',
+    name: 'Mindfulness & Mental Health',
     description: 'Cultivate presence and reduce stress',
     category: 'Mental Health',
     color: '#7E69AB',
@@ -140,6 +140,21 @@ const templates: Record<string, HabitTemplate> = {
           'Step away from screens',
           'Take deep breaths',
           'Notice your surroundings using all your senses'
+        ]
+      ),
+      createHabitDetail(
+        'daily-mood',
+        'Track Your Mood',
+        'Rate your mood and emotional state',
+        'rating',
+        'Mental Health',
+        'Evening',
+        5,
+        undefined,
+        [
+          'Be honest about how you feel',
+          'Notice patterns in your mood over time',
+          'Use insights to plan self-care'
         ]
       )
     ]

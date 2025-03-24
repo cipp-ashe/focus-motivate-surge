@@ -2,8 +2,8 @@
 /**
  * Unified Habit Type Definitions
  * 
- * This file centralizes all habit-related types to ensure consistency
- * across the application.
+ * This file re-exports the core types with additional context-specific types
+ * for easier importing throughout the application.
  */
 
 import { 
@@ -13,32 +13,6 @@ import {
   MetricType,
   ActiveTemplate
 } from './types';
-
-// Habit metrics definition with consistent goal property
-export interface HabitMetrics {
-  type: MetricType;
-  goal?: number;
-  unit?: string;
-  min?: number;
-  max?: number;
-}
-
-// Standardized habit progress interface
-export interface HabitProgress {
-  value: boolean | number;
-  streak: number;
-  date?: string;
-  completed?: boolean;
-}
-
-// Standardized template creation interface
-export interface CreateTemplateRequest {
-  name: string;
-  description: string;
-  habits: HabitDetail[];
-  activeDays: DayOfWeek[];
-  category?: string;
-}
 
 // Standardized habit completion event
 export interface HabitCompletionEvent {
@@ -70,7 +44,7 @@ export interface TemplateEventHandlers {
   updateTemplateDays: (data: { templateId: string; activeDays: string[] }) => void;
 }
 
-// Expose common types for direct import
+// Re-export common types for direct import
 export type {
   DayOfWeek,
   HabitTemplate,
