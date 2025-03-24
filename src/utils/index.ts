@@ -20,4 +20,7 @@ export * from './tasks';
 // Error handling utilities
 export * from './errorHandler';
 
+// Utility exports for app initialization
+export * from './appInitialization';
+
 // Add other utility exports here as they're created

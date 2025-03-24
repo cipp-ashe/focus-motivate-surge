@@ -18,11 +18,5 @@ export * from './task';
 export * from './note';
 export * from './timer';
 
-// Re-export specific types to avoid conflicts
-export * from './quote.types';
-
-// Re-export summary types
-export * from './summary';
-
 // Export metrics types
 export * from './metrics';

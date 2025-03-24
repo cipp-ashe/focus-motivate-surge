@@ -6,7 +6,7 @@
  */
 
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayload } from '@/types/events';
+import { EventType, EventPayload, EventUnsubscribe } from '@/types';
 
 /**
  * Emit an event with payload
@@ -24,7 +24,7 @@ export function emitEvent<E extends EventType>(
 export function subscribeToEvent<E extends EventType>(
   eventType: E,
   handler: (payload: EventPayload<E>) => void
-): () => void {
+): EventUnsubscribe {
   return eventManager.on(eventType, handler);
 }
 
@@ -34,9 +34,9 @@ export function subscribeToEvent<E extends EventType>(
 export function subscribeToEvents<E extends EventType>(
   eventTypes: E[],
   handler: (eventType: E, payload: EventPayload<E>) => void
-): () => void {
+): EventUnsubscribe {
   const unsubscribers = eventTypes.map(eventType => 
-    eventManager.on(eventType, (payload) => handler(eventType, payload))
+    eventManager.on(eventType, (payload: any) => handler(eventType, payload))
   );
   
   return () => unsubscribers.forEach(unsubscribe => unsubscribe());
@@ -48,8 +48,8 @@ export function subscribeToEvents<E extends EventType>(
 export function subscribeToEventOnce<E extends EventType>(
   eventType: E,
   handler: (payload: EventPayload<E>) => void
-): () => void {
-  const unsubscribe = eventManager.on(eventType, (payload) => {
+): EventUnsubscribe {
+  const unsubscribe = eventManager.on(eventType, (payload: any) => {
     handler(payload);
     unsubscribe();
   });

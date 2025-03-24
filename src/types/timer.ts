@@ -58,6 +58,38 @@ export interface TimerProps {
   onComplete?: (metrics: TimerMetrics) => void;
   onAddTime?: (minutes: number) => void;
   onDurationChange?: (newDuration: number) => void;
-  favorites?: string[];
-  setFavorites?: (newFavorites: string[]) => void;
+  favorites?: Quote[];
+  setFavorites?: (newFavorites: Quote[]) => void;
+}
+
+// Timer expanded view ref
+export interface TimerExpandedViewRef {
+  expand: () => void;
+  collapse: () => void;
+  toggleExpand: () => void;
+}
+
+// Timer circle props
+export interface TimerCircleProps {
+  isRunning: boolean;
+  isPaused: boolean;
+  progress: number;
+  timeLeft: number;
+  duration: number;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  onClick?: () => void;
+}
+
+// Sound option
+export type SoundOption = 'bell' | 'chime' | 'beep' | 'notification' | 'subtle' | 'none';
+
+// Quote
+export interface Quote {
+  id: string;
+  text: string;
+  author: string;
+  isFavorite: boolean;
+  category: string | string[];
+  task?: string;
+  timestamp?: string;
 }

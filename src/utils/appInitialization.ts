@@ -1,5 +1,6 @@
 
 import { eventManager } from '@/lib/events/EventManager';
+import { EventType, EventPayload } from '@/types';
 import { runDataMigration } from './migrations/typeMigration';
 
 // Feature flags
@@ -39,8 +40,8 @@ function setupEventSystem() {
     eventManager.setDebug(true);
     
     // Log all events for debugging
-    eventManager.on('*', ({ eventType, payload }) => {
-      console.debug(`[Event] ${eventType}`, payload);
+    eventManager.on('*', (data: { eventType: EventType; payload: any }) => {
+      console.debug(`[Event] ${data.eventType}`, data.payload);
     });
     
     console.log('Event debug mode enabled');
