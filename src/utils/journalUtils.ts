@@ -1,73 +1,48 @@
 
-import { Note } from "@/types/note";
-
 /**
- * Utility functions for journal operations
+ * Journal Utility Functions
+ * 
+ * Common utilities for working with journal entries
  */
 
-/**
- * Formats a date string for journal display
- */
-export const formatJournalDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-};
+import { eventManager } from '@/lib/events/EventManager';
 
 /**
- * Finds a journal entry for a habit on a specific date
+ * Save a journal entry
  */
-export const findJournalEntry = (
-  habitId: string,
-  date: string,
-  notes: Note[]
-): Note | undefined => {
-  return notes.find(note => {
-    const relationshipFound = note.relationships?.some(rel => 
-      rel.entityId === habitId && 
-      rel.metadata?.date === date
-    );
-    return relationshipFound;
-  });
-};
+export function saveJournalEntry(taskId: string, entry: string): void {
+  eventManager.emit('journal:save', { taskId, entry });
+}
 
 /**
- * Gets a list of journal entries for a habit
+ * Load a journal entry
  */
-export const getJournalEntriesForHabit = (
-  habitId: string,
-  notes: Note[],
-  limit?: number
-): Note[] => {
-  const entries = notes.filter(note => 
-    note.relationships?.some(rel => rel.entityId === habitId)
-  );
+export function loadJournalEntry(taskId: string): string | null {
+  try {
+    const entries = JSON.parse(localStorage.getItem('journal-entries') || '{}');
+    return entries[taskId] || null;
+  } catch (error) {
+    console.error('Error loading journal entry:', error);
+    return null;
+  }
+}
+
+/**
+ * Delete a journal entry
+ */
+export function deleteJournalEntry(taskId: string): void {
+  eventManager.emit('journal:delete', { taskId });
+}
+
+/**
+ * Format a journal entry for display
+ */
+export function formatJournalEntry(entry: string): string {
+  if (!entry) return '';
   
-  // Sort by date, newest first
-  const sorted = entries.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-  
-  return limit ? sorted.slice(0, limit) : sorted;
-};
-
-/**
- * Creates a new journal entry from template
- */
-export const createJournalEntryTemplate = (habitName: string): string => {
-  return `# ${habitName} - ${new Date().toLocaleDateString()}
-
-## Today's Progress
-*How did you do with this habit today?*
-
-## Challenges Faced
-*What made this habit difficult today?*
-
-## Tomorrow's Plan
-*How will you improve tomorrow?*
-`;
-};
+  // Simple formatting - could be expanded later
+  return entry
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+}

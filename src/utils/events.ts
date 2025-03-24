@@ -2,61 +2,57 @@
 /**
  * Event Utility Functions
  * 
- * Common utilities for working with events
+ * Common utilities for working with the event system
  */
 
 import { eventManager } from '@/lib/events/EventManager';
 import { EventType, EventPayload } from '@/types/events';
 
 /**
- * Safely emit an event with error handling
- * @param eventType The event type to emit
- * @param payload The event payload
- * @returns Boolean indicating if the event was successfully emitted
+ * Emit an event with payload
  */
-export function safeEmit<E extends EventType>(eventType: E, payload?: EventPayload<E>): boolean {
-  try {
-    eventManager.emit(eventType, payload);
-    return true;
-  } catch (error) {
-    console.error(`Error emitting event ${eventType}:`, error);
-    return false;
-  }
-}
-
-/**
- * Debounce an event emission
- * @param eventType The event type to emit
- * @param payload The event payload
- * @param delay The debounce delay in milliseconds
- * @returns A function to cancel the debounced emission
- */
-export function debounceEvent<E extends EventType>(
+export function emitEvent<E extends EventType>(
   eventType: E, 
-  payload?: EventPayload<E>, 
-  delay: number = 300
-): () => void {
-  const timeoutId = setTimeout(() => {
-    eventManager.emit(eventType, payload);
-  }, delay);
-  
-  return () => clearTimeout(timeoutId);
+  payload?: EventPayload<E>
+): void {
+  eventManager.emit(eventType, payload);
 }
 
 /**
- * Create a proxied event subscription that allows transformation of event data
- * @param sourceEvent The source event to subscribe to
- * @param targetEvent The target event to emit
- * @param transformFn Optional function to transform the payload
- * @returns A function to unsubscribe from the event
+ * Subscribe to an event
  */
-export function proxyEvent<S extends EventType, T extends EventType>(
-  sourceEvent: S,
-  targetEvent: T,
-  transformFn?: (payload: EventPayload<S>) => EventPayload<T>
-) {
-  return eventManager.on(sourceEvent, (payload) => {
-    const transformedPayload = transformFn ? transformFn(payload) : payload;
-    eventManager.emit(targetEvent, transformedPayload as EventPayload<T>);
+export function subscribeToEvent<E extends EventType>(
+  eventType: E,
+  handler: (payload: EventPayload<E>) => void
+): () => void {
+  return eventManager.on(eventType, handler);
+}
+
+/**
+ * Subscribe to multiple events with the same handler
+ */
+export function subscribeToEvents<E extends EventType>(
+  eventTypes: E[],
+  handler: (eventType: E, payload: EventPayload<E>) => void
+): () => void {
+  const unsubscribers = eventTypes.map(eventType => 
+    eventManager.on(eventType, (payload) => handler(eventType, payload))
+  );
+  
+  return () => unsubscribers.forEach(unsubscribe => unsubscribe());
+}
+
+/**
+ * One-time event subscription
+ */
+export function subscribeToEventOnce<E extends EventType>(
+  eventType: E,
+  handler: (payload: EventPayload<E>) => void
+): () => void {
+  const unsubscribe = eventManager.on(eventType, (payload) => {
+    handler(payload);
+    unsubscribe();
   });
+  
+  return unsubscribe;
 }

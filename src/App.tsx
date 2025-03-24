@@ -9,21 +9,23 @@ import { AuthProvider } from '@/contexts/auth/AuthContext';
 import { TaskProvider } from '@/contexts/tasks/TaskContext';
 import { Toaster as SonnerToaster } from 'sonner';
 import { queryClient } from '@/lib/query';
+import { setupGlobalErrorHandlers } from '@/utils/errorHandler';
+
+// Set up global error handlers
+setupGlobalErrorHandlers();
 
 export default function App() {
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TaskProvider>
-            <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-              <RouterProvider router={router} />
-              <Toaster />
-              <SonnerToaster position="bottom-right" />
-            </ThemeProvider>
-          </TaskProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TaskProvider>
+          <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
+            <RouterProvider router={router} />
+            <Toaster />
+            <SonnerToaster position="bottom-right" />
+          </ThemeProvider>
+        </TaskProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

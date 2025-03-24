@@ -19,21 +19,10 @@ export * from './note';
 export * from './timer';
 
 // Re-export specific types to avoid conflicts
-export { QuoteCategory, Quote } from './quote';
+export * from './quote.types';
 
 // Re-export summary types
 export * from './summary';
-
-// Export timer-specific types by category
-export * from './timer/models';
-export * from './timer/components';
-export * from './timer/state';
-export * from './timer/ui';
-export * from './timer/views';
-export * from './timer/constants';
-
-// Export reusable component types
-export * from './habitComponents';
 
 // Export metrics types
 export * from './metrics';

@@ -81,6 +81,9 @@ export const setupGlobalErrorHandlers = (): void => {
       event.error, 
       { message: event.message, filename: event.filename, lineno: event.lineno }
     );
+    
+    // Log to console
+    console.error('Uncaught error:', event.error);
   });
   
   // Handle unhandled promise rejections
@@ -91,6 +94,9 @@ export const setupGlobalErrorHandlers = (): void => {
       event.reason, 
       { promise: event.promise }
     );
+    
+    // Log to console
+    console.error('Unhandled promise rejection:', event.reason);
   });
   
   console.log('Global error handlers set up successfully');

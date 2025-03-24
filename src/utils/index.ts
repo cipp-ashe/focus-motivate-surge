@@ -17,4 +17,7 @@ export { cn } from '@/lib/utils';
 // Task utilities
 export * from './tasks';
 
+// Error handling utilities
+export * from './errorHandler';
+
 // Add other utility exports here as they're created
