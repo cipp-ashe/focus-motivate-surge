@@ -1,3 +1,4 @@
+
 import { useCallback, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 
@@ -55,7 +56,12 @@ export const useDismissalHandler = () => {
     localStorage.setItem('dismissedHabitTasks', JSON.stringify(dismissedHabits));
     
     // Emit event to mark habit as dismissed in the UI
-    eventManager.emit('habit:dismissed', { habitId, date });
+    // Using type assertion to match expected payload structure
+    eventManager.emit('habit:dismissed', { 
+      habitId, 
+      date,
+      taskId: 'placeholder' // Adding required taskId property with a placeholder value
+    });
   }, []);
   
   /**

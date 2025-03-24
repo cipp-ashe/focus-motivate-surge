@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useHabitState } from '@/contexts/habits/HabitContext';
-import { HabitDetail } from '@/components/habits/types';
+import { HabitDetail, DayOfWeek } from '@/components/habits/types';
 import { useLocation } from 'react-router-dom';
 
 export const useTodaysHabits = () => {
@@ -9,8 +9,8 @@ export const useTodaysHabits = () => {
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
   const location = useLocation();
 
-  const getTodayShortName = useCallback((): string => {
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const getTodayShortName = useCallback((): DayOfWeek => {
+    const dayNames: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const day = new Date().getDay();
     return dayNames[day];
   }, []);

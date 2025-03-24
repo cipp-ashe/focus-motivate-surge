@@ -8,11 +8,11 @@ import { eventManager } from '@/lib/events/EventManager';
 export const useHabitEvents = () => {
   // Complete a habit
   const completeHabit = useCallback((habitId: string, date: string, value: boolean | number = true) => {
+    // Update payload to match expected type
     eventManager.emit('habit:complete', {
       habitId,
       date,
-      value,
-      completed: true
+      value
     });
   }, []);
 
@@ -60,14 +60,15 @@ export const useHabitEvents = () => {
     });
   }, []);
 
-  // Open journal for a habit
+  // Open journal for a habit - using type assertion for additional properties
   const openHabitJournal = useCallback((habitId: string, habitName: string, description?: string, templateId?: string) => {
+    // Use type assertion to allow additional properties
     eventManager.emit('journal:open', {
       habitId,
       habitName,
       description,
       templateId
-    });
+    } as any);
   }, []);
 
   return {

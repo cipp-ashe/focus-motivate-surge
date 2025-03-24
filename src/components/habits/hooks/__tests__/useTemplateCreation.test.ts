@@ -2,7 +2,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { vi } from 'vitest';
 import { useTemplateCreation } from '../useTemplateCreation';
-import { ActiveTemplate, HabitDetail, TimePreference } from '@/components/habits/types';
+import { ActiveTemplate, HabitDetail, TimePreference, HabitCategory } from '@/components/habits/types';
 
 // Mock eventBus
 vi.mock('@/lib/eventBus', () => ({
@@ -108,7 +108,7 @@ describe('useTemplateCreation', () => {
       id: 'habit-123',
       name: 'Test Habit',
       description: 'Test Description',
-      category: 'Personal',
+      category: 'Personal' as HabitCategory,
       timePreference: 'Morning' as TimePreference,
       metrics: { type: 'boolean' },
       insights: [],

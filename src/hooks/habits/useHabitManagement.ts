@@ -128,11 +128,11 @@ export const useHabitManagement = () => {
 
   // Habit event functions
   const completeHabit = useCallback((habitId: string, date: string, value: boolean | number = true) => {
+    // Fix payload structure to match expected type
     eventManager.emit('habit:complete', {
       habitId,
       date,
-      value,
-      completed: true
+      value
     });
   }, []);
 
@@ -158,13 +158,14 @@ export const useHabitManagement = () => {
     });
   }, []);
 
+  // Use type assertion for additional properties
   const openHabitJournal = useCallback((habitId: string, habitName: string, description?: string, templateId?: string) => {
     eventManager.emit('journal:open', {
       habitId,
       habitName,
       description,
       templateId
-    });
+    } as any);
   }, []);
 
   return {

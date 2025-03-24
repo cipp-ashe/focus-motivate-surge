@@ -12,7 +12,10 @@ export type HabitEventType =
   | 'habit:template-add'
   | 'habit:template-order-update'
   | 'habits:check-pending'
-  | 'habit:create-note';
+  | 'habit:create-note'
+  | 'habit:dismiss'
+  | 'habit:dismissed'
+  | 'journal:open';
 
 // Habit task event definition
 export interface HabitTaskEvent {
@@ -39,7 +42,6 @@ export interface HabitEventPayloadMap {
     habitId: string; 
     date: string; 
     value: boolean | number;
-    completed: boolean;
   };
   'habit:schedule': HabitTaskEvent;
   'habit:template-update': any;
@@ -54,4 +56,14 @@ export interface HabitEventPayloadMap {
   'habit:template-order-update': any[];
   'habits:check-pending': any;
   'habit:create-note': HabitNoteData;
+  'habit:dismiss': {
+    habitId: string;
+    date: string;
+  };
+  'habit:dismissed': {
+    habitId: string;
+    taskId: string;
+    date: string;
+  };
+  'journal:open': HabitNoteData;
 }

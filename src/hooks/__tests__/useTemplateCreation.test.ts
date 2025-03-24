@@ -1,6 +1,7 @@
+
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTemplateCreation } from '../habits/useTemplateCreation';
-import { ActiveTemplate, DayOfWeek, TimePreference } from '@/components/habits/types';
+import { ActiveTemplate, DayOfWeek, TimePreference, HabitCategory } from '@/components/habits/types';
 
 describe('useTemplateCreation', () => {
   const mockAddTemplate = jest.fn();
@@ -81,7 +82,7 @@ describe('useTemplateCreation', () => {
       id: 'habit-123',
       name: 'Test Habit',
       description: 'Test Description',
-      category: 'Personal',
+      category: 'Personal' as HabitCategory,
       timePreference: 'Morning' as TimePreference,
       metrics: { type: 'boolean' },
       insights: [],

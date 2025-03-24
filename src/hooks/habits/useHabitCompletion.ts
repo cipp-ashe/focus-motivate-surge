@@ -17,11 +17,11 @@ export const useHabitCompletion = () => {
       emitHabitComplete(habitId, date, true);
       
       // Emit the legacy event format for backward compatibility
+      // Fix payload structure to match expected type
       eventManager.emit('habit:complete', { 
         habitId, 
         date, 
-        value: true, // Add the missing value property
-        completed: true 
+        value: true // Keep only properties that match the payload type
       });
       
       return true;
@@ -35,12 +35,11 @@ export const useHabitCompletion = () => {
   // Dismiss a habit for today
   const dismissHabit = useCallback((habitId: string, date: string) => {
     try {
-      // emit dismiss event
+      // Emit dismiss event with correct structure
       eventManager.emit('habit:dismiss', { 
         habitId, 
-        date,
-        value: false, // Add value property for consistency
-        dismissed: true 
+        date
+        // Remove value and dismissed properties that don't match payload type
       });
       return true;
     } catch (error) {

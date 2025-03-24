@@ -15,10 +15,10 @@ export const useSyncHandler = () => {
   // Handle habit completion
   const handleHabitComplete = useCallback((habitId: string, templateId: string, value: boolean | number) => {
     console.log('Handling habit completion', { habitId, templateId, value });
+    // Fix the payload structure by removing completed field
     eventManager.emit('habit:complete', {
       habitId,
       date: new Date().toISOString(),
-      completed: !!value,
       value
     });
   }, []);
