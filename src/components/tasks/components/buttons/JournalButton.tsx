@@ -21,7 +21,8 @@ export const JournalButton: React.FC<JournalButtonProps> = ({ task, onTaskAction
       description: task.description,
       templateId: task.relationships?.templateId,
       taskId: task.id,
-      date: task.relationships?.date || new Date().toISOString()
+      date: task.relationships?.date || new Date().toISOString(),
+      content: task.journalEntry
     });
   };
 

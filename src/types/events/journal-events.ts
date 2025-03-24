@@ -3,6 +3,9 @@
  * Journal-specific event types and payloads
  */
 
+import { Note } from '@/types/notes';
+import { Tag } from '@/types/notes';
+
 export type JournalEventType =
   | 'journal:create'
   | 'journal:update'
@@ -10,17 +13,13 @@ export type JournalEventType =
   | 'journal:complete'
   | 'journal:open';
 
-export interface JournalEntry {
-  id: string;
-  title: string;
-  content: string;
+// Standardized journal entry model (based on Note)
+export interface JournalEntry extends Note {
+  // Additional journal-specific fields
   habitId?: string;
   taskId?: string;
   templateId?: string;
   date: string;
-  createdAt: string;
-  updatedAt: string;
-  tags?: string[];
 }
 
 export interface JournalEventPayloadMap {
@@ -32,6 +31,7 @@ export interface JournalEventPayloadMap {
     title?: string;
     content?: string;
     date?: string;
+    tags?: Tag[];
   };
   'journal:update': {
     id: string;

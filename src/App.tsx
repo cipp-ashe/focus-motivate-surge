@@ -1,35 +1,50 @@
+import React, { useState, useEffect } from 'react';
+import { ThemeProvider } from './components/theme-provider';
+import { Toaster } from '@/components/ui/toaster';
+import { useTheme } from 'next-themes';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
+import { useHabitEvents } from '@/hooks/habits/useHabitEvents';
+import { useNoteActions } from '@/contexts/notes/NoteContext';
+import { JournalProvider } from './components/journal/JournalProvider';
 
-import React from 'react';
-import { RouterProvider } from 'react-router-dom';
-import { Toaster } from '@/components/ui/sonner';
-import { ThemeProvider } from '@/components/theme-provider';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { router } from './router';
-import DebugButton from './components/debug/DebugButton';
-import { AuthProvider } from '@/contexts/auth/AuthContext';
-
-// Create a new client for React Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000, // 1 minute
-      retry: 1,
-    },
-  },
-});
-
-function App() {
+const App: React.FC = () => {
+  const [mounted, setMounted] = useState(false);
+  const { setTheme } = useTheme();
+  const isMobile = useIsMobile();
+  const { forceTaskUpdate } = useTaskEvents();
+  const { checkPendingHabits } = useHabitEvents();
+  const { loadNotes } = useNoteActions();
+  
+  useEffect(() => {
+    setMounted(true);
+    
+    // Load initial theme from localStorage
+    const storedTheme = localStorage.getItem('vite-ui-theme');
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+    
+    // Force task update on app initialization
+    forceTaskUpdate();
+    
+    // Check for pending habits on app initialization
+    checkPendingHabits();
+    
+    // Load notes on app initialization
+    loadNotes();
+    
+    // Dispatch app initialized event
+    window.dispatchEvent(new Event('app-initialized'));
+  }, [setTheme, forceTaskUpdate, checkPendingHabits, loadNotes]);
+  
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="focus-notes-theme">
-        <AuthProvider>
-          <RouterProvider router={router} />
-          <Toaster position="top-right" richColors closeButton />
-          <DebugButton />
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <JournalProvider>
+        <Toaster />
+      </JournalProvider>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;
