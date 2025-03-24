@@ -1,7 +1,7 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Habit, STORAGE_KEY } from '@/types/habits/types';
+import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
 
 // Helper function to parse stored habits
 const parseStoredHabits = (storedHabits: string | null): Habit[] => {
@@ -20,6 +20,7 @@ export function useHabits() {
     const savedHabits = localStorage.getItem(STORAGE_KEY);
     return parseStoredHabits(savedHabits);
   });
+  const { processPendingTasks } = useHabitTaskProcessor();
 
   const saveHabits = useCallback((newHabits: Habit[]) => {
     try {
@@ -77,6 +78,11 @@ export function useHabits() {
     saveHabits(updatedHabits);
     toast.success("Habit updated!");
   }, [habits, saveHabits]);
+
+  useEffect(() => {
+    // When habits are loaded, check for pending tasks
+    processPendingTasks();
+  }, [habits, processPendingTasks]);
 
   return {
     habits,

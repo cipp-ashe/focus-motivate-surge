@@ -2,7 +2,6 @@ import React, { createContext, useContext, useReducer, ReactNode, useEffect, use
 import { toast } from 'sonner';
 import { taskReducer } from './taskReducer';
 import { taskState } from './taskState';
-import { useTaskEvents } from './useTaskEvents';
 import { useTaskPersistence } from './useTaskPersistence';
 import { useTaskNavigation } from './useTaskNavigation';
 import { Task, TaskStatus } from '@/types/tasks';
@@ -29,9 +28,13 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const initStartedRef = useRef(false);
   const habitCheckRef = useRef(false);
+  const [lastForceUpdateTime, setLastForceUpdateTime] = useState(0);
   
-  // Set up event handling
-  const { forceTasksReload } = useTaskEvents(state.items, state.completed, dispatch);
+  // Force reload of tasks from storage
+  const forceTasksReload = useCallback(() => {
+    console.log('TaskContext: Forcing task reload');
+    eventManager.emit('task:force-update', undefined);
+  }, []);
   
   // Set up persistence
   useTaskPersistence(state.items, state.completed);

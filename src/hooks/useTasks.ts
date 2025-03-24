@@ -2,6 +2,7 @@
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 import { Task } from '@/types/tasks';
+import { habitTaskOperations } from '@/lib/operations/tasks/habit';
 
 export function useTasks() {
   const taskContext = useTaskContext();
@@ -18,6 +19,7 @@ export function useTasks() {
     deleteTask: taskManager.deleteTask,
     completeTask: taskManager.completeTask,
     selectTask: taskManager.selectTask,
+    createHabitTask: habitTaskOperations.createHabitTask,
     tasks: taskContext.items,
     completedTasks: taskContext.completed
   };
