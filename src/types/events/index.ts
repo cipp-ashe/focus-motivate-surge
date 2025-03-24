@@ -1,38 +1,62 @@
 
-// Define custom event types for the app
-export type EventType = 
-  // Note events
-  | 'note:create' | 'note:update' | 'note:delete' | 'note:select' | 'note:create-from-habit'
-  | 'note:format' | 'note:format-complete' | 'note:view' | 'note:deleted'
-  
-  // Timer events
-  | 'timer:start' | 'timer:pause' | 'timer:resume' | 'timer:tick' | 'timer:complete'
-  | 'timer:reset' | 'timer:init' | 'timer:close' | 'timer:metrics-update'
-  
-  // Task events
-  | 'task:create' | 'task:update' | 'task:delete' | 'task:complete' | 'task:dismiss'
-  | 'task:reload' | 'task:force-update'
-  
-  // Habit events
-  | 'habit:template-delete' | 'habit:template-update' | 'habit:custom-template-delete'
-  | 'habit:dismissed' | 'habit:tasks-sync' | 'habits:verify-tasks' | 'habit:check-pending'
-  | 'habit:select' | 'habit:schedule'
-  
-  // Voice note events
-  | 'voice-note:created' | 'voice-note:deleted' | 'note:create-from-voice'
-  
-  // App events
-  | 'app:initialized'
-  
-  // Relationship events
-  | 'relationship:create' | 'relationship:delete' | 'relationship:update' | 'relationship:batch-update'
-  | 'tag:link' | 'tag:unlink' | 'quote:link-task'
-  
-  // Journal events
-  | 'journal:open';
+/**
+ * Event system unified exports
+ * This file maintains backward compatibility while organizing events into domains
+ */
 
-// Generic event payload interface
-export interface EventPayload<T extends EventType> {}
+// Import from base module
+import { EventUnsubscribe, BaseEventCallback } from './base';
 
-// Create a unified event handler type
-export type EventCallback<E extends EventType> = (payload: string) => void;
+// Import from domain-specific modules
+import { TaskEventType, TaskEventPayloadMap } from './task-events';
+import { HabitEventType, HabitEventPayloadMap, HabitTaskEvent, HabitNoteData } from './habit-events';
+import { NoteEventType, NoteEventPayloadMap } from './note-events';
+import { TimerEventType, TimerEventPayloadMap } from './timer-events';
+import { 
+  VoiceNoteEventType, VoiceNoteEventPayloadMap,
+  JournalEventType, JournalEventPayloadMap,
+  RelationshipEventType, RelationshipEventPayloadMap,
+  AppEventType, AppEventPayloadMap,
+  WildcardEventType, WildcardEventPayloadMap
+} from './misc-events';
+
+// Define all possible event types in the application
+export type EventType =
+  | TaskEventType
+  | HabitEventType
+  | NoteEventType
+  | TimerEventType
+  | VoiceNoteEventType
+  | JournalEventType
+  | RelationshipEventType
+  | AppEventType
+  | WildcardEventType;
+
+// Export this as a type for backward compatibility
+export type AllEventTypes = EventType;
+
+// Define the base payload interface for events by merging all domain payloads
+export interface EventPayloadMap extends
+  TaskEventPayloadMap,
+  HabitEventPayloadMap,
+  NoteEventPayloadMap,
+  TimerEventPayloadMap,
+  VoiceNoteEventPayloadMap,
+  JournalEventPayloadMap,
+  RelationshipEventPayloadMap,
+  AppEventPayloadMap,
+  WildcardEventPayloadMap {}
+
+// Generic type to get the appropriate payload for a given event type
+export type EventPayload<E extends EventType> = EventPayloadMap[E];
+
+// Type for all event callbacks
+export type EventCallback<E extends EventType> = (payload: EventPayloadMap[E]) => void;
+
+// Re-export domain-specific types for convenience
+export {
+  EventUnsubscribe,
+  HabitTaskEvent,
+  HabitNoteData,
+  VoiceNoteEventType
+};
