@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
-import { Timer } from '../Timer';
+import { Timer } from '../timer/Timer';
 import { Quote } from '@/types/timer';
 
 const mockQuote: Quote = {

@@ -22,6 +22,9 @@ export const useTimerControls = ({
   onComplete,
   onAddTime,
 }: UseTimerControlsParams) => {
+  // Log the TIMER_CONSTANTS to check if it exists
+  console.log("TIMER_CONSTANTS in useTimerControls:", TIMER_CONSTANTS);
+  
   const handleToggle = useCallback(() => {
     if (isRunning) {
       console.log("useTimerControls: Pausing timer");
