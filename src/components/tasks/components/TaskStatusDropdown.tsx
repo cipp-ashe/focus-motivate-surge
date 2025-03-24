@@ -1,22 +1,22 @@
-
 import React from 'react';
 import { Task, TaskStatus } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { 
-  CheckCircle, 
-  Clock, 
-  AlertTriangle, 
-  Play, 
-  XCircle, 
+import {
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Play,
+  XCircle,
   Circle,
-  ChevronDown
+  ChevronDown,
+  MinusCircle,
 } from 'lucide-react';
 
 interface TaskStatusDropdownProps {
@@ -24,53 +24,57 @@ interface TaskStatusDropdownProps {
   onStatusChange: (status: TaskStatus) => void;
 }
 
-export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
-  task,
-  onStatusChange
-}) => {
-  const getStatusDisplay = (status: TaskStatus = 'pending') => {
+export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({ task, onStatusChange }) => {
+  const getStatusDisplay = (status: TaskStatus = 'todo') => {
     switch (status) {
-      case 'pending':
-        return { 
-          label: 'Pending', 
+      case 'todo':
+        return {
+          label: 'Todo',
           icon: <Circle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-muted text-muted-foreground dark:bg-muted/30'
-        };
-      case 'started':
-        return { 
-          label: 'Started', 
-          icon: <Clock className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 dark:bg-blue-500/20'
+          class: 'bg-muted text-muted-foreground',
+          menuItemClass: '',
         };
       case 'in-progress':
-        return { 
-          label: 'In Progress', 
+        return {
+          label: 'In Progress',
           icon: <Play className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20' 
-        };
-      case 'delayed':
-        return { 
-          label: 'Delayed', 
-          icon: <AlertTriangle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 dark:bg-orange-500/20' 
+          class: 'bg-amber-500/10 text-amber-500',
+          menuItemClass: 'text-amber-500',
         };
       case 'completed':
-        return { 
-          label: 'Completed', 
+        return {
+          label: 'Completed',
           icon: <CheckCircle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-green-500/10 text-green-600 dark:text-green-400 dark:bg-green-500/20' 
+          class: 'bg-green-500/10 text-green-500',
+          menuItemClass: 'text-green-500',
+        };
+      case 'cancelled':
+        return {
+          label: 'Cancelled',
+          icon: <XCircle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-red-500/10 text-red-500',
+          menuItemClass: 'text-red-500',
+        };
+      case 'deferred':
+        return {
+          label: 'Deferred',
+          icon: <AlertTriangle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-orange-500/10 text-orange-500',
+          menuItemClass: 'text-orange-500',
         };
       case 'dismissed':
-        return { 
-          label: 'Dismissed', 
-          icon: <XCircle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-red-500/10 text-red-600 dark:text-red-400 dark:bg-red-500/20' 
+        return {
+          label: 'Dismissed',
+          icon: <MinusCircle className="h-3.5 w-3.5 mr-2" />,
+          class: 'bg-purple-500/10 text-purple-500',
+          menuItemClass: 'text-purple-500',
         };
       default:
-        return { 
-          label: 'Pending', 
+        return {
+          label: 'Todo',
           icon: <Circle className="h-3.5 w-3.5 mr-2" />,
-          class: 'bg-muted text-muted-foreground dark:bg-muted/30' 
+          class: 'bg-muted text-muted-foreground',
+          menuItemClass: '',
         };
     }
   };
@@ -78,67 +82,71 @@ export const TaskStatusDropdown: React.FC<TaskStatusDropdownProps> = ({
   const currentStatus = getStatusDisplay(task.status);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           size="sm"
           className={cn(
-            "h-7 px-2 text-xs flex items-center gap-1 border-muted/50 dark:border-muted/20",
+            'h-7 w-28 px-2 text-xs flex items-center justify-between gap-1 border-border/50',
             currentStatus.class
           )}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
         >
-          {currentStatus.icon}
-          {currentStatus.label}
-          <ChevronDown className="h-3 w-3 ml-1" />
+          <div className="flex items-center">
+            {currentStatus.icon}
+            <span className="whitespace-nowrap">{currentStatus.label}</span>
+          </div>
+          <ChevronDown className="h-3 w-3" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-40 dark:border-border/10"
+      <DropdownMenuContent
+        align="end"
+        side="bottom"
+        sideOffset={5}
+        className="w-28 border-border"
         onClick={(e) => e.stopPropagation()}
       >
-        <DropdownMenuItem 
-          onClick={() => onStatusChange('pending')}
-          className="text-xs"
-        >
+        <DropdownMenuItem onClick={() => onStatusChange('todo')} className="text-xs">
           <Circle className="h-3.5 w-3.5 mr-2" />
-          Pending
+          Todo
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => onStatusChange('started')}
-          className="text-xs"
-        >
-          <Clock className="h-3.5 w-3.5 mr-2" />
-          Started
-        </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => onStatusChange('in-progress')}
-          className="text-xs"
+          className={cn('text-xs', getStatusDisplay('in-progress').menuItemClass)}
         >
           <Play className="h-3.5 w-3.5 mr-2" />
           In Progress
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => onStatusChange('delayed')}
-          className="text-xs"
+        <DropdownMenuItem
+          onClick={() => onStatusChange('deferred')}
+          className={cn('text-xs', getStatusDisplay('deferred').menuItemClass)}
         >
           <AlertTriangle className="h-3.5 w-3.5 mr-2" />
-          Delayed
+          Deferred
         </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => onStatusChange('completed')}
-          className="text-xs text-green-600 dark:text-green-400"
+          className={cn('text-xs', getStatusDisplay('completed').menuItemClass)}
         >
           <CheckCircle className="h-3.5 w-3.5 mr-2" />
           Completed
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => onStatusChange('dismissed')}
-          className="text-xs text-red-600 dark:text-red-400"
+        <DropdownMenuItem
+          onClick={() => onStatusChange('cancelled')}
+          className={cn('text-xs', getStatusDisplay('cancelled').menuItemClass)}
         >
           <XCircle className="h-3.5 w-3.5 mr-2" />
+          Cancelled
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => onStatusChange('dismissed')}
+          className={cn('text-xs', getStatusDisplay('dismissed').menuItemClass)}
+        >
+          <MinusCircle className="h-3.5 w-3.5 mr-2" />
           Dismissed
         </DropdownMenuItem>
       </DropdownMenuContent>

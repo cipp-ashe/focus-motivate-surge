@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -27,6 +26,7 @@
     --radius: 0.5rem;
 
     /* Task type colors */
+    --regular: 215 30% 40%;
     --timer: 262 83% 58%;
     --journal: 40 100% 65%;
     --checklist: 195 100% 50%;
@@ -38,7 +38,7 @@
     --border-light: 0.1;
     --border-medium: 0.2;
     --border-strong: 0.4;
-    
+
     /* Z-index standardization */
     --z-dropdown: 100;
     --z-sticky: 50;
@@ -70,6 +70,7 @@
     --ring: 262 83% 58%;
 
     /* Task type colors */
+    --regular: 215 30% 60%;
     --timer: 262 83% 58%;
     --journal: 40 100% 65%;
     --checklist: 195 100% 50%;
@@ -82,7 +83,7 @@
     --border-medium: 0.2;
     --border-strong: 0.4;
   }
-  
+
   html,
   body,
   #root {
@@ -96,45 +97,102 @@
   .glass-card {
     @apply bg-card/70 backdrop-blur-lg border border-border shadow-sm;
   }
-  
+
   .text-gradient-purple {
     @apply bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent;
+  }
+
+  /* Task type color classes */
+  .task-icon-regular {
+    @apply text-[hsl(var(--regular))];
+  }
+
+  .task-icon-timer {
+    @apply text-[hsl(var(--timer))];
+  }
+
+  .task-icon-journal {
+    @apply text-[hsl(var(--journal))];
+  }
+
+  .task-icon-checklist {
+    @apply text-[hsl(var(--checklist))];
+  }
+
+  .task-icon-screenshot {
+    @apply text-[hsl(var(--screenshot))];
+  }
+
+  .task-icon-voicenote {
+    @apply text-[hsl(var(--voicenote))];
+  }
+
+  .task-icon-focus {
+    @apply text-[hsl(var(--focus))];
+  }
+
+  .task-bg-regular {
+    @apply bg-[hsla(var(--regular),0.2)];
+  }
+
+  .task-bg-timer {
+    @apply bg-[hsla(var(--timer),0.2)];
+  }
+
+  .task-bg-journal {
+    @apply bg-[hsla(var(--journal),0.2)];
+  }
+
+  .task-bg-checklist {
+    @apply bg-[hsla(var(--checklist),0.2)];
+  }
+
+  .task-bg-screenshot {
+    @apply bg-[hsla(var(--screenshot),0.2)];
+  }
+
+  .task-bg-voicenote {
+    @apply bg-[hsla(var(--voicenote),0.2)];
+  }
+
+  .task-bg-focus {
+    @apply bg-[hsla(var(--focus),0.2)];
   }
 
   /* Standard border styles */
   .border-theme-light {
     @apply border border-border/[var(--border-light)];
   }
-  
+
   .border-theme-medium {
     @apply border border-border/[var(--border-medium)];
   }
-  
+
   .border-theme-strong {
     @apply border border-border/[var(--border-strong)];
   }
-  
+
   /* Z-index utility classes */
   .z-dropdown {
     z-index: var(--z-dropdown);
   }
-  
+
   .z-sticky {
     z-index: var(--z-sticky);
   }
-  
+
   .z-drawer {
     z-index: var(--z-drawer);
   }
-  
+
   .z-modal {
     z-index: var(--z-modal);
   }
-  
+
   .z-toast {
     z-index: var(--z-toast);
   }
-  
+
   .z-tooltip {
     z-index: var(--z-tooltip);
   }
@@ -144,7 +202,7 @@
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in forwards;
   }
-  
+
   .app-background {
     @apply bg-background;
   }

@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { formatDistanceToNow } from 'date-fns';
@@ -29,43 +28,44 @@ export interface TaskContentProps {
   handleTaskAction: (e: React.MouseEvent<HTMLElement>, actionType?: string) => void;
 }
 
-export const TaskContent: React.FC<TaskContentProps> = React.memo(({
-  task,
-  isSelected,
-  isTimerView = false,
-  dialogOpeners,
-  handleTaskAction
-}) => {
-  // Handle checkbox changes with memoized callback
-  const handleCheckboxChange = useCallback((checked: boolean) => {
-    if (checked) {
-      handleTaskAction({} as React.MouseEvent<HTMLElement>, 'complete');
-    }
-  }, [handleTaskAction]);
+export const TaskContent: React.FC<TaskContentProps> = React.memo(
+  ({ task, isSelected, isTimerView = false, dialogOpeners, handleTaskAction }) => {
+    // Handle checkbox changes with memoized callback
+    const handleCheckboxChange = useCallback(
+      (checked: boolean) => {
+        if (checked) {
+          // Create a minimal event-like object that has the properties we need
+          const mockEvent = {
+            stopPropagation: () => {},
+            preventDefault: () => {},
+          } as React.MouseEvent<HTMLElement>;
 
-  return (
-    <div className="flex items-start gap-2 w-full overflow-hidden" data-testid="task-content">
-      <div className="flex-shrink-0">
-        <TaskCheckbox 
-          task={task} 
-          isTimerView={isTimerView} 
-          onCheck={handleCheckboxChange} 
-        />
+          // Change status to completed when checkbox is clicked
+          handleTaskAction(mockEvent, 'status-completed');
+        }
+      },
+      [handleTaskAction]
+    );
+
+    return (
+      <div className="flex items-start gap-2 w-full overflow-hidden" data-testid="task-content">
+        {/* Checkbox column - fixed width */}
+        <div className="w-5 flex-shrink-0">
+          <TaskCheckbox task={task} isTimerView={isTimerView} onCheck={handleCheckboxChange} />
+        </div>
+
+        {/* Main content column - flexible width */}
+        <div className="flex-grow min-w-0 overflow-hidden pr-2">
+          <TaskContentDisplay task={task} handleTaskAction={handleTaskAction} />
+        </div>
+
+        {/* Details column - only shown when needed */}
+        <div className="flex-shrink-0">
+          <TaskDetails task={task} isSelected={isSelected} dialogOpeners={dialogOpeners} />
+        </div>
       </div>
-      
-      <div className="flex-grow min-w-0 overflow-hidden">
-        <TaskContentDisplay task={task} handleTaskAction={handleTaskAction} />
-      </div>
-      
-      <div className="flex-shrink-0">
-        <TaskDetails
-          task={task}
-          isSelected={isSelected}
-          dialogOpeners={dialogOpeners}
-        />
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 TaskContent.displayName = 'TaskContent';

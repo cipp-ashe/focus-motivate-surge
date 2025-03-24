@@ -1,4 +1,3 @@
-
 import { Task } from '@/types/task';
 
 /**
@@ -13,7 +12,7 @@ export interface TaskContextState {
   selected: string | null;
   /** Whether the tasks have been loaded */
   isLoaded: boolean;
-  
+
   // Task operations
   /** Add a new task */
   addTask: (task: Task) => void;
@@ -25,6 +24,8 @@ export interface TaskContextState {
   completeTask: (taskId: string, metrics?: any) => void;
   /** Select a task */
   selectTask: (taskId: string | null) => void;
+  /** Dismiss a task */
+  dismissTask: (taskId: string, habitId?: string, date?: string) => void;
 }
 
 /**

@@ -1,13 +1,29 @@
-
 /**
  * Task types
  */
 
 // Task type
-export type TaskType = 'standard' | 'habit' | 'recurring' | 'checklist' | 'project';
+export type TaskType =
+  | 'standard'
+  | 'habit'
+  | 'journal'
+  | 'recurring'
+  | 'checklist'
+  | 'project'
+  | 'timer'
+  | 'regular'
+  | 'screenshot'
+  | 'voicenote'
+  | 'focus';
 
 // Task status
-export type TaskStatus = 'todo' | 'in-progress' | 'completed' | 'cancelled' | 'deferred';
+export type TaskStatus =
+  | 'todo'
+  | 'in-progress'
+  | 'completed'
+  | 'cancelled'
+  | 'deferred'
+  | 'dismissed';
 
 // Task priority
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';

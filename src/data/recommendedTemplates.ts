@@ -26,7 +26,7 @@ const createHabitDetail = (
   id,
   name,
   description,
-  category,
+  category: category as HabitCategory,
   timePreference,
   metrics: {
     type: metricType,

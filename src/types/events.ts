@@ -1,4 +1,3 @@
-
 /**
  * Event System Types
  */
@@ -16,17 +15,29 @@ export type EventType =
   | 'task:reload'
   | 'task:force-update'
   | 'task:add'
+  | 'task:dismiss'
   // Timer events
   | 'timer:init'
   | 'timer:expand'
   | 'timer:collapse'
   | 'timer:update-metrics'
   | 'timer:close'
+  | 'timer:set-task'
   // Habit events
   | 'habit:template-add'
   | 'habits:check-pending'
   | 'habit:complete'
   | 'habit:dismiss'
+  | 'habit:schedule'
+  | 'habit:template-update'
+  | 'habit:template-delete'
+  | 'habit:template-days-update'
+  | 'habit:template-order-update'
+  | 'habit:custom-template-create'
+  | 'habit:note-create'
+  | 'habit:journal-create'
+  // Journal events
+  | 'journal:open'
   // Note events
   | 'note:create'
   | 'notes:refresh'

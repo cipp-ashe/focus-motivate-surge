@@ -1,17 +1,13 @@
-
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
+import { componentTagger } from 'lovable-tagger';
 
 export default defineConfig(({ mode }) => ({
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
+  plugins: [react(), mode === 'development' && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   base: mode === 'development' ? '/' : './', // Required for electron
@@ -36,14 +32,14 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    host: "localhost", // Changed from "::" to "localhost"
+    host: 'localhost', // Changed from "::" to "localhost"
     port: 8080,
     strictPort: true,
     hmr: {
       protocol: 'ws', // Changed from 'wss' to 'ws' for standard WebSockets
       host: 'localhost',
       timeout: 30000,
-      clientPort: 8080
+      // Don't specify clientPort to let it use the same port as the server
     },
   },
   optimizeDeps: {

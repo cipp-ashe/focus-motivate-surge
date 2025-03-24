@@ -14,18 +14,26 @@ export * from './events';
 // Domain-specific types
 export * from './habit';
 export * from './task';
-export * from './note';
-export * from './timer';
+
+// Note: Explicitly re-export to avoid naming conflicts
+import * as NoteTypes from './note';
+export { NoteTypes };
+
+// Timer: Explicitly re-export to avoid naming conflicts
+import * as TimerTypes from './timer';
+export { TimerTypes };
 
 // Export metrics types
 export * from './metrics';
 
-<<<<<<< HEAD
 // Export component-specific types
 export * from './habitComponents';
-=======
-// Fix for the fs issue - re-export the correct types
-export * from './tasks';
-export * from './notes';
+
+// Export additional types with namespace to avoid conflicts
+import * as TasksTypes from './tasks';
+export { TasksTypes };
+
+import * as NotesTypes from './notes';
+export { NotesTypes };
+
 export * from './voiceNotes';
->>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b

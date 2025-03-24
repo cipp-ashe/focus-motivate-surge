@@ -1,7 +1,6 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/types/habits/types';
+import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/types/habit';
 import { eventManager } from '@/lib/events/EventManager';
 
 const STORAGE_KEY = 'habit-templates';
@@ -19,7 +18,7 @@ export const useTemplateManagement = () => {
   }, [activeTemplates]);
 
   const addTemplate = useCallback((template: HabitTemplate | ActiveTemplate | string) => {
-    setActiveTemplates(prev => {
+    setActiveTemplates((prev: ActiveTemplate[]) => {
       // Case 1: String templateId - fetch from recommended templates
       if (typeof template === 'string') {
         const templateId = template;
@@ -33,112 +32,111 @@ export const useTemplateManagement = () => {
           activeDays: DEFAULT_ACTIVE_DAYS,
           customized: false,
         };
-        
+
         toast.success('Template added successfully');
-        
+
         // Emit event for template addition using eventManager
         eventManager.emit('habit:template-update', newTemplate);
-        
+
         return [...prev, newTemplate];
       }
-      
+
       // Case 2: HabitTemplate object (from recommended templates)
       if ('id' in template && 'defaultHabits' in template) {
-        const exists = prev.some(t => t.templateId === template.id);
+        const habitTemplate = template as HabitTemplate;
+        const exists = prev.some((t) => t.templateId === habitTemplate.id);
         if (exists) {
           toast.error('Template already exists');
           return prev;
         }
-        
+
         const newTemplate: ActiveTemplate = {
-          templateId: template.id,
-          name: template.name,
-          description: template.description,
-          habits: template.defaultHabits,
-          activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
+          templateId: habitTemplate.id,
+          name: habitTemplate.name,
+          description: habitTemplate.description,
+          habits: habitTemplate.defaultHabits || [],
+          activeDays: habitTemplate.defaultDays || DEFAULT_ACTIVE_DAYS,
           customized: false,
-          relationships: {} // Add empty relationships object
         };
-        
+
         toast.success('Template added successfully');
-        
+
         // Emit event for template addition using eventManager
         eventManager.emit('habit:template-update', newTemplate);
-        
+
         return [...prev, newTemplate];
       }
-      
+
       // Case 3: ActiveTemplate object (pre-constructed template)
-      const exists = prev.some(t => t.templateId === template.templateId);
+      const activeTemplate = template as ActiveTemplate;
+      const exists = prev.some((t) => t.templateId === activeTemplate.templateId);
       if (exists) {
         toast.error('Template already exists');
         return prev;
       }
-      
+
       toast.success('Template added successfully');
-      
+
       // Emit event for template addition using eventManager
-      eventManager.emit('habit:template-update', template);
-      
+      eventManager.emit('habit:template-update', activeTemplate);
+
       // Trigger UI update
       setTimeout(() => {
         window.dispatchEvent(new Event('force-habits-update'));
       }, 100);
-      
-      return [...prev, template];
+
+      return [...prev, activeTemplate];
     });
   }, []);
 
   const updateTemplate = useCallback((templateId: string, updates: Partial<ActiveTemplate>) => {
-    setActiveTemplates(prev => {
-      const updated = prev.map(template =>
+    setActiveTemplates((prev) => {
+      const updated = prev.map((template) =>
         template.templateId === templateId
           ? { ...template, ...updates, customized: true }
           : template
       );
-      
+
       // Emit event for template update using eventManager
-      const updatedTemplate = updated.find(t => t.templateId === templateId);
+      const updatedTemplate = updated.find((t) => t.templateId === templateId);
       if (updatedTemplate) {
         eventManager.emit('habit:template-update', updatedTemplate);
       }
-      
+
       return updated;
     });
   }, []);
 
   const removeTemplate = useCallback((templateId: string) => {
-    setActiveTemplates(prev => 
-      prev.filter(template => template.templateId !== templateId)
-    );
-    
+    setActiveTemplates((prev) => prev.filter((template) => template.templateId !== templateId));
+
     // Emit event for template deletion using eventManager
     eventManager.emit('habit:template-delete', { templateId, isOriginatingAction: true });
-    
+
     toast.success('Template removed');
   }, []);
 
   const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
     setActiveTemplates(templates);
-    
+
     // Emit event for order update using eventManager
     eventManager.emit('habit:template-order-update', templates);
   }, []);
 
   const updateTemplateDays = useCallback((templateId: string, days: DayOfWeek[]) => {
-    setActiveTemplates(prev => {
-      const updated = prev.map(template =>
+    setActiveTemplates((prev) => {
+      const updated = prev.map((template) =>
         template.templateId === templateId
           ? { ...template, activeDays: days, customized: true }
           : template
       );
-      
+
       // Emit event for days update using eventManager
-      const updatedTemplate = updated.find(t => t.templateId === templateId);
+      const updatedTemplate = updated.find((t) => t.templateId === templateId);
       if (updatedTemplate) {
         eventManager.emit('habit:template-update', updatedTemplate);
       }
-      
+
       return updated;
     });
   }, []);

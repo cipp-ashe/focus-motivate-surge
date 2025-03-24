@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
-import { HabitProgress } from '@/types/habits/types';
+import { HabitProgress } from '@/types/habit';
 
 export const useHabitProgress = (habitId: string) => {
   const [progress, setProgress] = useState<HabitProgress>({
     value: false,
-    streak: 0
+    streak: 0,
   });
 
   useEffect(() => {
@@ -15,11 +14,11 @@ export const useHabitProgress = (habitId: string) => {
       // Simulated progress data
       const streak = Math.floor(Math.random() * 10);
       const completed = Math.random() > 0.5;
-      
+
       setProgress({
         value: completed,
         streak: streak,
-        completed
+        completed,
       });
     };
 

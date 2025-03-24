@@ -26,6 +26,10 @@ export type HabitCategory =
   | 'Social'
   | 'Creative'
   | 'Financial'
+  | 'Work'
+  | 'Productivity'
+  | 'Mental Health'
+  | 'Wellness'
   | 'Other';
 
 // Habit metric types
@@ -72,13 +76,10 @@ export interface HabitDetail {
   tips?: string[];
   order?: number;
   relationships?: {
-<<<<<<< HEAD
     templateId?: string;
-    [key: string]: any;
-=======
     taskId?: string;
     noteId?: string;
->>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b
+    [key: string]: any;
   };
 }
 
@@ -95,15 +96,9 @@ export interface HabitTemplate {
   presetType?: 'system' | 'custom';
   thumbnail?: string;
   order?: number;
-<<<<<<< HEAD
   duration?: number | null;
   defaultDays?: DayOfWeek[];
   suppressToast?: boolean;
-=======
-  category?: string;
-  defaultHabits?: HabitDetail[];
-  defaultDays?: DayOfWeek[];
->>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b
 }
 
 // Active template
@@ -147,16 +142,17 @@ export interface HabitCompletionEvent {
 export interface TemplateUpdateEvent {
   templateId: string;
   isOriginatingAction?: boolean;
+  updates?: Partial<ActiveTemplate>;
 }
 
 // Storage keys for habits
 export const STORAGE_KEY = 'habit-templates';
-<<<<<<< HEAD
+export const ACTIVE_TEMPLATES_KEY = 'active-habit-templates';
+export const CUSTOM_TEMPLATES_KEY = 'custom-habit-templates';
 
 // Default days constants
 export const DEFAULT_WEEKDAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 export const DEFAULT_ALL_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-export const DEFAULT_ACTIVE_DAYS = DEFAULT_WEEKDAYS;
 
 // Short day names for UI display
 export const SHORT_DAYS: Record<DayOfWeek, string> = {
@@ -169,10 +165,6 @@ export const SHORT_DAYS: Record<DayOfWeek, string> = {
   Sat: 'Sa',
 };
 
-// Storage keys
-export const ACTIVE_TEMPLATES_KEY = 'habit-templates';
-export const CUSTOM_TEMPLATES_KEY = 'custom-templates';
-
 // Habit log entry
 export interface HabitLog {
   date: string;
@@ -181,23 +173,9 @@ export interface HabitLog {
   notes?: string;
 }
 
-// Habit completion event type
-export interface HabitCompletionEvent {
-  habitId: string;
-  date: string;
-  value?: any;
-}
-
-// Template update event type
-export interface TemplateUpdateEvent {
-  templateId: string;
-  updates: Partial<ActiveTemplate>;
-=======
-export const ACTIVE_TEMPLATES_KEY = 'active-habit-templates';
-export const CUSTOM_TEMPLATES_KEY = 'custom-habit-templates';
-
-// Compatibility type for Habit (which is referenced in some files)
-export interface Habit extends HabitDetail {
-  // Add any additional fields needed for compatibility
->>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b
+// Habit progress type
+export interface HabitProgress {
+  value: boolean | number;
+  streak: number;
+  completed?: boolean;
 }
