@@ -14,8 +14,7 @@ export interface Habit {
   timePreference: string;
   metrics: {
     type: MetricType;
-    goal?: number;
-    target?: number; // Added target field for backward compatibility
+    goal: number;
     unit?: string;
   };
   completed: boolean;
@@ -41,7 +40,6 @@ export interface HabitDetail {
   metrics: {
     type: MetricType;
     goal?: number;
-    target?: number; // Added target field for backward compatibility
     unit?: string;
   };
   insights?: any[];
@@ -58,7 +56,6 @@ export const DEFAULT_ACTIVE_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 export interface HabitMetrics {
   type: MetricType;
   goal?: number;
-  target?: number;
   unit?: string;
 }
 

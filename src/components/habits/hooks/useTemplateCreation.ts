@@ -1,9 +1,8 @@
 
 import { useState } from 'react';
-import { ActiveTemplate, HabitTemplate, DayOfWeek } from '../types';
+import { ActiveTemplate, HabitTemplate, DayOfWeek } from '@/types/habits/types';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
-import { deprecate } from '@/utils/deprecation';
 
 export const useTemplateCreation = (
   addTemplate: (template: ActiveTemplate) => void,
@@ -62,7 +61,6 @@ export const useTemplateCreation = (
         category: 'Custom',
         defaultHabits: selectedTemplate.habits,
         defaultDays: selectedTemplate.activeDays,
-        duration: null,
       };
 
       // Save the custom template
@@ -70,13 +68,6 @@ export const useTemplateCreation = (
       const existingTemplates = existingTemplatesStr ? JSON.parse(existingTemplatesStr) : [];
       const updatedTemplates = [...existingTemplates, customTemplate];
       localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
-
-      // Log deprecation warning for direct eventBus usage
-      deprecate(
-        'useTemplateCreation',
-        'eventBus usage',
-        'Use eventManager from @/lib/events/EventManager instead'
-      );
 
       // Emit event for custom template creation with suppressToast
       eventManager.emit('habit:custom-template-create', { ...customTemplate, suppressToast: true });

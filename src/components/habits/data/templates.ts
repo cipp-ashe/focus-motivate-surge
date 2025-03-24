@@ -1,104 +1,152 @@
 
-import { HabitTemplate } from '../types';
+import { HabitTemplate } from '@/types/habits/types';
 
-export const predefinedTemplates: HabitTemplate[] = [
-  {
-    id: 'morning-routine',
-    name: 'Morning Routine',
-    description: 'Start your day with intention and energy',
-    category: 'Wellness',
-    defaultDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-    defaultHabits: [
-      {
-        id: 'morning-meditation',
-        name: 'Morning Meditation',
-        description: 'Start with a 5-10 minute meditation to center yourself',
-        category: 'Wellness',
-        timePreference: 'Morning',
-        metrics: { type: 'timer', target: 10, unit: 'minutes' }
-      },
-      {
-        id: 'morning-journal',
-        name: 'Morning Journal',
-        description: 'Write your intentions for the day',
-        category: 'Personal',
-        timePreference: 'Morning',
-        metrics: { type: 'journal' }
-      },
-      {
-        id: 'healthy-breakfast',
-        name: 'Healthy Breakfast',
-        description: 'Eat a nutritious breakfast',
-        category: 'Wellness',
-        timePreference: 'Morning',
-        metrics: { type: 'boolean' }
+// Sample exercise template
+export const exerciseTemplate: HabitTemplate = {
+  id: 'exercise-routine',
+  name: 'Daily Exercise Routine',
+  description: 'A complete daily exercise routine to keep you fit',
+  category: 'Health',
+  defaultDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+  defaultHabits: [
+    {
+      id: 'morning-stretch',
+      name: 'Morning Stretching',
+      description: 'Start your day with a 5-minute stretch routine',
+      category: 'Health',
+      timePreference: 'Morning',
+      metrics: {
+        type: 'timer',
+        goal: 300,
+        unit: 'seconds'
       }
-    ]
-  },
-  {
-    id: 'work-productivity',
-    name: 'Work Productivity',
-    description: 'Boost your productivity and focus during work',
-    category: 'Work',
-    defaultDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-    defaultHabits: [
-      {
-        id: 'priority-setting',
-        name: 'Set Daily Priorities',
-        description: 'Identify your top 3 priorities for the day',
-        category: 'Work',
-        timePreference: 'Morning',
-        metrics: { type: 'boolean' }
-      },
-      {
-        id: 'focus-blocks',
-        name: 'Focus Blocks',
-        description: 'Complete at least 3 focused work blocks of 25 minutes',
-        category: 'Work',
-        timePreference: 'Anytime',
-        metrics: { type: 'counter', target: 3 }
-      },
-      {
-        id: 'work-breaks',
-        name: 'Take Regular Breaks',
-        description: 'Step away from your desk for at least 5 minutes every hour',
-        category: 'Wellness',
-        timePreference: 'Anytime',
-        metrics: { type: 'counter', target: 8 }
+    },
+    {
+      id: 'cardio-workout',
+      name: 'Cardio Workout',
+      description: '20-minute cardio session',
+      category: 'Health',
+      timePreference: 'Afternoon',
+      metrics: {
+        type: 'timer',
+        goal: 1200,
+        unit: 'seconds'
       }
-    ]
-  },
-  {
-    id: 'evening-routine',
-    name: 'Evening Routine',
-    description: 'Wind down and prepare for restful sleep',
-    category: 'Wellness',
-    defaultDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    defaultHabits: [
-      {
-        id: 'screen-cutoff',
-        name: 'No Screens 1hr Before Bed',
-        description: 'Turn off all screens at least 1 hour before bedtime',
-        category: 'Wellness',
-        timePreference: 'Evening',
-        metrics: { type: 'boolean' }
-      },
-      {
-        id: 'evening-reading',
-        name: 'Read Before Bed',
-        description: 'Read a physical book for at least 20 minutes',
-        category: 'Learning',
-        timePreference: 'Evening',
-        metrics: { type: 'timer', target: 20, unit: 'minutes' }
-      },
-      {
-        id: 'tomorrow-prep',
-        name: 'Prepare for Tomorrow',
-        description: 'Lay out clothes, prepare lunch, review schedule',
-        category: 'Personal',
-        timePreference: 'Evening',
-        metrics: { type: 'boolean' }
+    },
+    {
+      id: 'strength-training',
+      name: 'Strength Training',
+      description: 'Focus on a different muscle group each day',
+      category: 'Health',
+      timePreference: 'Evening',
+      metrics: {
+        type: 'boolean'
       }
-    ]
-  }
+    },
+    {
+      id: 'daily-steps',
+      name: 'Daily Steps',
+      description: 'Reach your step goal',
+      category: 'Health',
+      timePreference: 'Anytime',
+      metrics: {
+        type: 'counter',
+        goal: 10000,
+        unit: 'steps'
+      }
+    }
+  ]
+};
+
+// Sample work productivity template
+export const productivityTemplate: HabitTemplate = {
+  id: 'work-productivity',
+  name: 'Work Productivity',
+  description: 'Boost your productivity at work',
+  category: 'Work',
+  defaultDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+  defaultHabits: [
+    {
+      id: 'morning-planning',
+      name: 'Morning Planning',
+      description: 'Plan your day in the morning',
+      category: 'Work',
+      timePreference: 'Morning',
+      metrics: {
+        type: 'journal'
+      }
+    },
+    {
+      id: 'deep-work',
+      name: 'Deep Work Session',
+      description: 'Focus on important tasks without distractions',
+      category: 'Work',
+      timePreference: 'Morning',
+      metrics: {
+        type: 'timer',
+        goal: 5400,
+        unit: 'seconds'
+      }
+    },
+    {
+      id: 'daily-reflection',
+      name: 'End-of-day Reflection',
+      description: 'Reflect on your accomplishments and plan for tomorrow',
+      category: 'Work',
+      timePreference: 'Evening',
+      metrics: {
+        type: 'journal'
+      }
+    }
+  ]
+};
+
+// Sample mindfulness template
+export const mindfulnessTemplate: HabitTemplate = {
+  id: 'mindfulness',
+  name: 'Daily Mindfulness',
+  description: 'Cultivate mindfulness and reduce stress',
+  category: 'Health',
+  defaultDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  defaultHabits: [
+    {
+      id: 'morning-meditation',
+      name: 'Morning Meditation',
+      description: '10-minute morning meditation',
+      category: 'Health',
+      timePreference: 'Morning',
+      metrics: {
+        type: 'timer',
+        goal: 600,
+        unit: 'seconds'
+      }
+    },
+    {
+      id: 'gratitude-journal',
+      name: 'Gratitude Journal',
+      description: 'Write down three things you are grateful for',
+      category: 'Personal',
+      timePreference: 'Evening',
+      metrics: {
+        type: 'journal'
+      }
+    },
+    {
+      id: 'daily-mood',
+      name: 'Track Your Mood',
+      description: 'Rate your mood and emotions',
+      category: 'Health',
+      timePreference: 'Evening',
+      metrics: {
+        type: 'rating',
+        goal: 5
+      }
+    }
+  ]
+};
+
+export const recommendedTemplates = [
+  exerciseTemplate,
+  productivityTemplate,
+  mindfulnessTemplate
 ];

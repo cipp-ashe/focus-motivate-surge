@@ -1,38 +1,32 @@
 
 /**
- * LEGACY EVENT BUS - For backwards compatibility only
+ * Modern EventBus Implementation
  * 
- * This is a legacy module that forwards to the new EventManager system.
- * Use the EventManager directly in new code.
+ * This module provides a streamlined event bus system that uses the EventManager
+ * internally. While we encourage direct use of EventManager in new code,
+ * this compatibility layer exists to minimize changes to components 
+ * that rely on the previous API.
  */
 
 import { eventManager } from '@/lib/events/EventManager';
-import { deprecate } from '@/utils/deprecation';
+import { EventType } from '@/types/events';
 
-const warnDeprecated = (method: string) => {
-  deprecate('eventBus', method, 'Use eventManager from @/lib/events/EventManager instead');
-};
-
-// Forward all methods to the new event manager
+// Forward all methods to the new event manager with more type safety
 export const eventBus = {
-  on(event: string, callback: (data: any) => void) {
-    warnDeprecated('on');
-    return eventManager.on(event as any, callback);
+  on<E extends EventType>(event: E, callback: (data: any) => void) {
+    return eventManager.on(event, callback);
   },
 
-  emit(event: string, data?: any) {
-    warnDeprecated('emit');
-    return eventManager.emit(event as any, data);
+  emit<E extends EventType>(event: E, data?: any) {
+    return eventManager.emit(event, data);
   },
 
-  once(event: string, callback: (data: any) => void) {
-    warnDeprecated('once');
-    return eventManager.once(event as any, callback);
+  once<E extends EventType>(event: E, callback: (data: any) => void) {
+    return eventManager.once(event, callback);
   },
 
-  off(event: string, callback?: (data: any) => void) {
-    warnDeprecated('off');
-    return eventManager.off(event as any, callback);
+  off<E extends EventType>(event: E, callback?: (data: any) => void) {
+    return eventManager.off(event, callback);
   }
 };
 

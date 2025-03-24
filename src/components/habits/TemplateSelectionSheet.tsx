@@ -1,165 +1,156 @@
 
-import React, { useState } from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, X } from "lucide-react";
-import { ActiveTemplate, HabitTemplate, NewTemplate } from './types';
-import ConfigComponent from './TemplateSelectionSheet/ConfigComponent';
+import React, { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getRecommendedTemplates } from './data/recommendedTemplates';
+import { HabitTemplate, NewTemplate } from '@/types/habits/types';
+import { DayOfWeek } from '@/types/habits/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { TemplateCard } from './TemplateCard';
+import { toast } from 'sonner';
 
-export interface TemplateSelectionSheetProps {
-  isOpen: boolean;
+interface TemplateSelectionSheetProps {
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  customTemplates: HabitTemplate[];
-  activeTemplateIds: string[];
   onSelectTemplate: (template: HabitTemplate) => void;
-  onDeleteCustomTemplate: (templateId: string) => void;
-  onCreateTemplate: (template: NewTemplate) => void;
-  onClose: () => void;
-  allTemplates?: HabitTemplate[];
+  existingTemplateIds?: string[];
 }
 
-const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
-  isOpen,
+export const TemplateSelectionSheet: React.FC<TemplateSelectionSheetProps> = ({
+  open,
   onOpenChange,
-  customTemplates,
-  activeTemplateIds,
   onSelectTemplate,
-  onDeleteCustomTemplate,
-  onCreateTemplate,
-  onClose,
-  allTemplates = []
+  existingTemplateIds = []
 }) => {
-  const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
-  const [configDialogOpen, setConfigDialogOpen] = useState(false);
-
-  const handleCloseConfig = () => {
-    setConfiguringTemplate(null);
-    setConfigDialogOpen(false);
-  };
-
-  return (
-    <>
-      <Sheet open={isOpen} onOpenChange={(open) => {
-        onOpenChange(open);
-        if (!open) {
-          onClose();
+  const [activeTab, setActiveTab] = useState('recommended');
+  const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
+  const [recommendedTemplates, setRecommendedTemplates] = useState<HabitTemplate[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Load templates when the sheet opens
+  useEffect(() => {
+    if (open) {
+      // Load recommended templates
+      setRecommendedTemplates(getRecommendedTemplates());
+      
+      // Load custom templates from localStorage
+      try {
+        const savedTemplates = localStorage.getItem('custom-templates');
+        if (savedTemplates) {
+          setCustomTemplates(JSON.parse(savedTemplates));
         }
-      }}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Habit Templates</SheetTitle>
-            <SheetDescription>
-              Choose a template to add to your habits
-            </SheetDescription>
-          </SheetHeader>
+      } catch (error) {
+        console.error('Error loading custom templates:', error);
+      }
+    }
+  }, [open]);
+  
+  // Filter templates based on search term
+  const filteredRecommended = recommendedTemplates.filter(template => 
+    template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    template.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const filteredCustom = customTemplates.filter(template => 
+    template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (template.category && template.category.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+  
+  // Handle template selection
+  const handleSelectTemplate = (template: HabitTemplate) => {
+    // Check if template is already added
+    if (existingTemplateIds.includes(template.id)) {
+      toast.error('This template is already added');
+      return;
+    }
+    
+    // Add the template
+    onSelectTemplate(template);
+    onOpenChange(false);
+    
+    // If it's a custom template, we'll add it to active templates with custom properties
+    if (customTemplates.some(t => t.id === template.id)) {
+      // This is handled by the parent component
+    }
+  };
+  
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-md md:max-w-lg">
+        <SheetHeader>
+          <SheetTitle>Select a Habit Template</SheetTitle>
+          <SheetDescription>
+            Choose from recommended templates or your custom templates
+          </SheetDescription>
+        </SheetHeader>
+        
+        <div className="my-4 relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search templates..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        
+        <Tabs defaultValue="recommended" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="recommended">Recommended</TabsTrigger>
+            <TabsTrigger value="custom">My Templates ({customTemplates.length})</TabsTrigger>
+          </TabsList>
           
-          <div className="h-full flex flex-col mt-6">
-            <Tabs defaultValue="predefined" className="flex-1 flex flex-col">
-              <div className="px-4 py-2 border-b">
-                <TabsList className="w-full grid grid-cols-2">
-                  <TabsTrigger value="predefined">Predefined</TabsTrigger>
-                  <TabsTrigger value="custom">Custom</TabsTrigger>
-                </TabsList>
+          <TabsContent value="recommended" className="h-[calc(100vh-220px)]">
+            <ScrollArea className="h-full pr-4">
+              <div className="grid grid-cols-1 gap-4">
+                {filteredRecommended.map(template => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    isActive={existingTemplateIds.includes(template.id)}
+                    onSelect={() => handleSelectTemplate(template)}
+                    isSelectionMode
+                  />
+                ))}
+                
+                {filteredRecommended.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No recommended templates match your search
+                  </div>
+                )}
               </div>
-
-              <TabsContent value="predefined" className="flex-1 p-0 m-0">
-                <ScrollArea className="h-full">
-                  <div className="p-4 grid gap-3">
-                    {allTemplates.map((template) => (
-                      <div
-                        key={template.id}
-                        className={`p-3 border rounded-md cursor-pointer transition-colors ${
-                          activeTemplateIds.includes(template.id)
-                            ? "bg-muted"
-                            : "hover:bg-muted/50"
-                        }`}
-                        onClick={() => onSelectTemplate(template)}
-                      >
-                        <h3 className="font-medium">{template.name}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {template.description}
-                        </p>
-                      </div>
-                    ))}
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="custom" className="h-[calc(100vh-220px)]">
+            <ScrollArea className="h-full pr-4">
+              <div className="grid grid-cols-1 gap-4">
+                {filteredCustom.map(template => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    isActive={existingTemplateIds.includes(template.id)}
+                    onSelect={() => handleSelectTemplate(template)}
+                    isSelectionMode
+                  />
+                ))}
+                
+                {filteredCustom.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {searchTerm ? 
+                      "No custom templates match your search" : 
+                      "You haven't created any custom templates yet"}
                   </div>
-                </ScrollArea>
-              </TabsContent>
-
-              <TabsContent value="custom" className="flex-1 p-0 m-0">
-                <ScrollArea className="h-full">
-                  <div className="p-4 grid gap-3">
-                    <Button
-                      variant="outline"
-                      className="flex items-center gap-2 h-auto py-3 justify-start"
-                      onClick={() => onCreateTemplate({ 
-                        name: 'New Template', 
-                        description: 'Custom template', 
-                        defaultHabits: [] 
-                      })}
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span>Create Custom Template</span>
-                    </Button>
-
-                    {customTemplates.map((template) => (
-                      <div
-                        key={template.id}
-                        className={`p-3 border rounded-md cursor-pointer transition-colors relative group ${
-                          activeTemplateIds.includes(template.id)
-                            ? "bg-muted"
-                            : "hover:bg-muted/50"
-                        }`}
-                        onClick={() => onSelectTemplate(template)}
-                      >
-                        <h3 className="font-medium">{template.name}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {template.description}
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteCustomTemplate(template.id);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Config dialog for template configuration */}
-      <ConfigComponent
-        configuringTemplate={configuringTemplate}
-        configDialogOpen={configDialogOpen}
-        onClose={handleCloseConfig}
-        onSelectTemplate={(templateId) => {
-          // Find and select the template
-          const template = [...allTemplates, ...customTemplates].find(t => t.id === templateId);
-          if (template) {
-            onSelectTemplate(template);
-          }
-        }}
-        onOpenChange={setConfigDialogOpen}
-      />
-    </>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      </SheetContent>
+    </Sheet>
   );
 };
-
-export default TemplateSelectionSheet;

@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Plus, AlarmClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { HabitDetail } from '@/types/habits';
+import { HabitDetail } from '@/types/habits/types';
 import { cn } from '@/lib/utils';
 
 interface TodaysHabitCardProps {

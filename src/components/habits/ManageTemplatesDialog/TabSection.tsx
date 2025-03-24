@@ -1,108 +1,112 @@
 
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { HabitTemplate, NewTemplate } from '../types';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { getRecommendedTemplates } from '../data/recommendedTemplates';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { TemplateCard } from '../TemplateCard';
+import { NewTemplateForm } from './NewTemplateForm';
+import { CustomTemplatesList } from './CustomTemplatesList';
+import { HabitTemplate, NewTemplate } from '@/types/habits/types';
+import { useHabitContext } from '@/contexts/habits/HabitContext';
+import { toast } from 'sonner';
 
-export interface TabSectionProps {
-  customTemplates: HabitTemplate[];
-  activeTemplateIds: string[];
-  onSelectTemplate: (template: HabitTemplate) => void;
-  onDeleteCustomTemplate: (templateId: string) => void;
-  onCreateTemplate: (template: NewTemplate) => void;
-  allTemplates?: HabitTemplate[];
-}
-
-const TabSection: React.FC<TabSectionProps> = ({
-  customTemplates,
-  activeTemplateIds,
-  onSelectTemplate,
-  onDeleteCustomTemplate,
-  onCreateTemplate,
-  allTemplates = []
-}) => {
+export const TabSection = () => {
+  const [activeTab, setActiveTab] = useState('recommended');
+  const { templates, addTemplate, customTemplates, addCustomTemplate, removeCustomTemplate } = useHabitContext();
+  const [recommendedTemplates, setRecommendedTemplates] = useState<HabitTemplate[]>(getRecommendedTemplates());
+  
+  // Handle adding a template to active templates
+  const handleAddTemplate = (template: HabitTemplate) => {
+    // Check if already added
+    const exists = templates.some(t => t.templateId === template.id);
+    if (exists) {
+      toast.error('Template already added');
+      return;
+    }
+    
+    // Add template to active templates
+    addTemplate({
+      templateId: template.id,
+      name: template.name,
+      description: template.description,
+      habits: template.defaultHabits,
+      activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      customized: false
+    });
+    
+    toast.success(`${template.name} template added`);
+  };
+  
+  // Handle creating a new custom template
+  const handleCreateTemplate = (template: NewTemplate) => {
+    // Create a unique ID
+    const templateId = `custom-${Date.now()}`;
+    
+    // Create the template object
+    const newTemplate: HabitTemplate = {
+      id: templateId,
+      name: template.name,
+      description: template.description,
+      category: template.category,
+      defaultHabits: template.habits,
+      defaultDays: template.defaultDays
+    };
+    
+    // Add to custom templates
+    addCustomTemplate(newTemplate);
+    
+    // Add to active templates
+    addTemplate({
+      templateId,
+      name: template.name,
+      description: template.description,
+      habits: template.habits,
+      activeDays: template.defaultDays,
+      customized: true
+    });
+    
+    toast.success('Custom template created and added');
+    
+    // Switch to the custom tab to show the new template
+    setActiveTab('custom');
+  };
+  
   return (
-    <Tabs defaultValue="predefined" className="flex-1 flex flex-col">
-      <div className="px-4 py-2 border-b">
-        <TabsList className="w-full grid grid-cols-2">
-          <TabsTrigger value="predefined">Predefined</TabsTrigger>
-          <TabsTrigger value="custom">Custom</TabsTrigger>
-        </TabsList>
-      </div>
-
-      <TabsContent value="predefined" className="flex-1 p-0 m-0">
-        <ScrollArea className="h-64">
-          <div className="p-4 grid gap-3">
-            {allTemplates.map((template) => (
-              <div
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList className="grid grid-cols-3 mb-4">
+        <TabsTrigger value="recommended">Recommended</TabsTrigger>
+        <TabsTrigger value="custom">My Templates</TabsTrigger>
+        <TabsTrigger value="create">Create New</TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="recommended" className="h-[50vh]">
+        <ScrollArea className="h-full pr-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {recommendedTemplates.map(template => (
+              <TemplateCard
                 key={template.id}
-                className={`p-3 border rounded-md cursor-pointer transition-colors ${
-                  activeTemplateIds.includes(template.id)
-                    ? "bg-muted"
-                    : "hover:bg-muted/50"
-                }`}
-                onClick={() => onSelectTemplate(template)}
-              >
-                <h3 className="font-medium">{template.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {template.description}
-                </p>
-              </div>
+                template={template}
+                isActive={templates.some(t => t.templateId === template.id)}
+                onAdd={() => handleAddTemplate(template)}
+              />
             ))}
           </div>
         </ScrollArea>
       </TabsContent>
-
-      <TabsContent value="custom" className="flex-1 p-0 m-0">
-        <ScrollArea className="h-64">
-          <div className="p-4 grid gap-3">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 h-auto py-3 justify-start"
-              onClick={() => onCreateTemplate({ 
-                name: 'New Template', 
-                description: 'Custom template', 
-                defaultHabits: [] 
-              })}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Create Custom Template</span>
-            </Button>
-
-            {customTemplates.map((template) => (
-              <div
-                key={template.id}
-                className={`p-3 border rounded-md cursor-pointer transition-colors relative group ${
-                  activeTemplateIds.includes(template.id)
-                    ? "bg-muted"
-                    : "hover:bg-muted/50"
-                }`}
-                onClick={() => onSelectTemplate(template)}
-              >
-                <h3 className="font-medium">{template.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {template.description}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteCustomTemplate(template.id);
-                  }}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
+      
+      <TabsContent value="custom" className="h-[50vh]">
+        <CustomTemplatesList
+          templates={customTemplates}
+          activeTemplateIds={templates.map(t => t.templateId)}
+          onAddTemplate={handleAddTemplate}
+          onRemoveTemplate={removeCustomTemplate}
+        />
+      </TabsContent>
+      
+      <TabsContent value="create" className="h-[50vh]">
+        <NewTemplateForm onCreateTemplate={handleCreateTemplate} />
       </TabsContent>
     </Tabs>
   );
 };
-
-export default TabSection;

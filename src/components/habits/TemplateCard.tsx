@@ -1,154 +1,136 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Timer, CheckCircle2, AlignJustify } from "lucide-react";
-import { ActiveTemplate, HabitDetail, HabitTemplate, HabitMetrics } from './types';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus, Check, Edit, Trash } from 'lucide-react';
+import { HabitTemplate } from '@/types/habits/types';
+import { HabitMetrics } from '@/types/habits/unified';
+import { Badge } from '@/components/ui/badge';
 
 interface TemplateCardProps {
-  title?: string;
-  description?: string;
-  habits?: HabitDetail[];
-  onAdd?: () => void;
-  onConfigure?: () => void;
+  template: HabitTemplate;
   isActive?: boolean;
-  // New props to support ActiveTemplateList usage
-  template?: ActiveTemplate;
-  templateInfo?: HabitTemplate | {
-    id: string;
-    name: string;
-    description: string;
-    defaultHabits: HabitDetail[];
-    defaultDays: string[];
-  };
-  onRemove?: () => void;
+  onSelect?: () => void;
+  onAdd?: () => void;
   onEdit?: () => void;
-  getProgress?: (habitId: string) => { value: boolean | number; streak: number; };
-  onHabitUpdate?: (habitId: string, value: any) => void;
+  onDelete?: () => void;
+  isSelectionMode?: boolean;
 }
 
-const TemplateCard: React.FC<TemplateCardProps> = ({
-  title,
-  description,
-  habits,
-  onAdd,
-  onConfigure,
-  isActive = false,
-  // Support for new props
+export const TemplateCard: React.FC<TemplateCardProps> = ({
   template,
-  templateInfo,
-  onRemove,
+  isActive = false,
+  onSelect,
+  onAdd,
   onEdit,
-  getProgress,
-  onHabitUpdate
+  onDelete,
+  isSelectionMode = false
 }) => {
-  // Use provided habits directly, or get them from template/templateInfo
-  const displayHabits = habits || 
-                        (template?.habits) || 
-                        (templateInfo?.defaultHabits) || 
-                        [];
-  
-  // Use provided title/description or get from template/templateInfo
-  const displayTitle = title || 
-                      (template?.name) || 
-                      (templateInfo?.name) || 
-                      "";
-  
-  const displayDescription = description || 
-                            (template?.description) || 
-                            (templateInfo?.description) || 
-                            "";
-
-  // Get icon based on habit metric type
-  const getHabitIcon = (metrics?: HabitMetrics) => {
-    if (!metrics) return <CheckCircle2 className="h-4 w-4" />;
-    
-    switch (metrics.type) {
-      case 'timer':
-        return <Timer className="h-4 w-4" />;
-      case 'journal':
-        return <AlignJustify className="h-4 w-4" />;
-      default:
-        return <CheckCircle2 className="h-4 w-4" />;
+  const handleAction = () => {
+    if (isSelectionMode && onSelect) {
+      onSelect();
+    } else if (onAdd) {
+      onAdd();
     }
   };
-
-  // Determine which footer buttons to show based on provided props
-  const renderFooterButtons = () => {
-    if (onRemove && onEdit) {
-      return (
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs"
-            onClick={onRemove}
-          >
-            Remove
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full text-xs"
-            onClick={onEdit}
-          >
-            Configure
-          </Button>
-        </>
-      );
-    }
-    
-    return (
-      <>
-        <Button
-          variant={isActive ? "outline" : "default"}
-          size="sm"
-          className="w-full text-xs"
-          onClick={onAdd}
-        >
-          {isActive ? "Remove" : "Add"}
-        </Button>
-        {onConfigure && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full text-xs"
-            onClick={onConfigure}
-          >
-            Configure
-          </Button>
-        )}
-      </>
-    );
-  };
-
+  
   return (
-    <Card className={`${isActive ? 'border-primary' : ''}`}>
-      <CardHeader>
-        <CardTitle className="text-base">{displayTitle}</CardTitle>
-        <CardDescription className="text-xs">{displayDescription}</CardDescription>
-      </CardHeader>
-      <CardContent className="text-sm space-y-2">
-        <p className="font-medium text-xs">Habits included:</p>
-        <ul className="space-y-1">
-          {displayHabits.slice(0, 3).map((habit) => (
-            <li key={habit.id} className="flex items-center gap-2 text-xs">
-              {getHabitIcon(habit.metrics)}
-              <span>{habit.name}</span>
-            </li>
-          ))}
-          {displayHabits.length > 3 && (
-            <li className="text-xs text-muted-foreground">
-              +{displayHabits.length - 3} more
-            </li>
+    <Card className={`transition-all ${isActive ? 'border-primary/40' : 'hover:border-primary/20'}`}>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-base">{template.name}</CardTitle>
+            <CardDescription className="text-xs mt-0.5">{template.description}</CardDescription>
+          </div>
+          
+          {template.category && (
+            <Badge variant="outline" className="text-xs h-5 font-normal">
+              {template.category}
+            </Badge>
           )}
-        </ul>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="pb-2">
+        <div className="text-xs text-muted-foreground">
+          <p>Contains {template.defaultHabits.length} habits</p>
+          
+          {template.defaultDays && (
+            <p className="mt-0.5">
+              Active: {template.defaultDays.join(', ')}
+            </p>
+          )}
+        </div>
+        
+        {/* Display a sample of habits */}
+        {template.defaultHabits.length > 0 && (
+          <div className="mt-2 space-y-1">
+            {template.defaultHabits.slice(0, 3).map((habit) => (
+              <div key={habit.id} className="text-xs flex justify-between items-center">
+                <span>{habit.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {habit.metrics.type}
+                </span>
+              </div>
+            ))}
+            {template.defaultHabits.length > 3 && (
+              <div className="text-xs text-muted-foreground italic">
+                + {template.defaultHabits.length - 3} more habits
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
-      <CardFooter className="flex gap-2">
-        {renderFooterButtons()}
+      
+      <CardFooter className="pt-2">
+        <div className="w-full flex justify-between">
+          {isSelectionMode ? (
+            <Button 
+              onClick={handleAction} 
+              variant={isActive ? "secondary" : "default"}
+              className="w-full"
+              disabled={isActive}
+            >
+              {isActive ? <Check className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+              {isActive ? 'Already Added' : 'Select Template'}
+            </Button>
+          ) : (
+            <>
+              <Button 
+                onClick={handleAction} 
+                variant={isActive ? "secondary" : "default"}
+                className="flex-1"
+                disabled={isActive}
+              >
+                {isActive ? <Check className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+                {isActive ? 'Added' : 'Add'}
+              </Button>
+              
+              {onEdit && (
+                <Button 
+                  onClick={onEdit} 
+                  variant="outline" 
+                  size="icon" 
+                  className="ml-2"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
+              
+              {onDelete && (
+                <Button 
+                  onClick={onDelete} 
+                  variant="outline" 
+                  size="icon" 
+                  className="ml-2"
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              )}
+            </>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );
 };
-
-export default TemplateCard;

@@ -1,110 +1,144 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { HabitDetail } from '@/types/habits';
+import TodaysHabitCard from './TodaysHabitCard';
+import { HabitDetail } from '@/types/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
-import HabitRow from './HabitRow';
-import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { getTodaysHabits } from '@/utils/habitUtils';
 
 interface TodaysHabitsSectionProps {
-  todaysHabits: HabitDetail[];
-  completedHabits: string[];
-  dismissedHabits: string[];
-  onHabitComplete: (habitId: string) => void;
-  onAddHabitToTasks: (habit: HabitDetail) => void;
-  templateId?: string;
+  templates: any[];
+  date?: Date;
 }
 
-const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
-  todaysHabits,
-  completedHabits,
-  dismissedHabits,
-  onHabitComplete,
-  onAddHabitToTasks,
-  templateId
+export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({ 
+  templates,
+  date = new Date()
 }) => {
-  const [selectedHabit, setSelectedHabit] = useState<string | null>(null);
+  const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
+  const [completedHabits, setCompletedHabits] = useState<Record<string, boolean>>({});
   
-  // Set up event listeners
+  // Get today's habits from templates
   useEffect(() => {
-    const handleHabitSelect = (habitId: string) => {
-      setSelectedHabit(habitId);
-    };
-    
-    const unsubscribe = eventManager.on('habit:select', handleHabitSelect);
-    return unsubscribe;
-  }, []);
+    if (templates && templates.length > 0) {
+      const habits = getTodaysHabits(templates, date);
+      setTodaysHabits(habits);
+      console.log('Today\'s habits:', habits);
+    }
+  }, [templates, date]);
   
-  if (!todaysHabits || todaysHabits.length === 0) {
+  // Mark habit as complete
+  const handleCompleteHabit = useCallback((habit: HabitDetail) => {
+    // Find the template this habit belongs to
+    const templateId = habit.relationships?.templateId;
+    
+    // Mark as complete locally
+    setCompletedHabits(prev => ({
+      ...prev,
+      [habit.id]: !prev[habit.id]
+    }));
+    
+    // Emit habit completion event
+    const dateStr = date.toISOString().split('T')[0];
+    eventManager.emit('habit:complete', {
+      habitId: habit.id,
+      date: dateStr,
+      value: true,
+      metricType: habit.metrics.type,
+      habitName: habit.name,
+      templateId
+    });
+    
+    // Show toast
+    if (!completedHabits[habit.id]) {
+      toast.success(`Marked "${habit.name}" as complete`);
+    } else {
+      toast.info(`Marked "${habit.name}" as incomplete`);
+    }
+  }, [completedHabits, date]);
+  
+  // Add habit to tasks
+  const handleAddToTasks = useCallback((habit: HabitDetail) => {
+    // Find the template this habit belongs to
+    const templateId = habit.relationships?.templateId;
+    
+    if (!templateId) {
+      toast.error('Missing template information');
+      return;
+    }
+    
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // For journal habits, open the journal
+    if (habit.metrics.type === 'journal') {
+      eventManager.emit('journal:open', {
+        habitId: habit.id,
+        habitName: habit.name,
+        templateId,
+        description: habit.description,
+        date: dateStr
+      });
+      return;
+    }
+    
+    // For other habit types, schedule a task
+    let duration = 0;
+    if (habit.metrics.type === 'timer' && habit.metrics.goal) {
+      duration = habit.metrics.goal;
+    } else {
+      // Default duration (25 minutes)
+      duration = 25 * 60;
+    }
+    
+    // Emit event to schedule the habit task
+    eventManager.emit('habit:schedule', {
+      habitId: habit.id,
+      templateId,
+      name: habit.name,
+      duration,
+      date: dateStr,
+      metricType: habit.metrics.type
+    });
+    
+    toast.success(`Added "${habit.name}" to your tasks`);
+  }, [date]);
+  
+  // No habits case
+  if (todaysHabits.length === 0) {
     return (
-      <Card className="shadow-sm h-full flex flex-col justify-center">
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">No habits scheduled for today</p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Today's Habits</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No habits scheduled for today</p>
+            <Button variant="outline" className="mt-4">Add Habit Template</Button>
+          </div>
         </CardContent>
       </Card>
     );
   }
-
-  // Filter out dismissed habits
-  const activeHabits = todaysHabits.filter(habit => !dismissedHabits.includes(habit.id));
-  
-  // Group completed vs. pending habits
-  const completed = activeHabits.filter(habit => completedHabits.includes(habit.id));
-  const pending = activeHabits.filter(habit => !completedHabits.includes(habit.id));
-  
-  // Completion percentage
-  const totalCount = activeHabits.length;
-  const completedCount = completed.length;
-  const completionPercentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   
   return (
-    <Card className="shadow-sm h-full flex flex-col">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex justify-between items-center">
-          <span>Today's Habits</span>
-          <span className={cn(
-            "text-sm font-medium px-2 py-0.5 rounded-md",
-            completionPercentage === 100 
-              ? "bg-green-500/20 text-green-700 dark:text-green-300" 
-              : "bg-amber-500/20 text-amber-700 dark:text-amber-300"
-          )}>
-            {completedCount}/{totalCount} ({completionPercentage}%)
-          </span>
-        </CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Today's Habits</CardTitle>
       </CardHeader>
-      
-      <CardContent className="p-0 flex-1 overflow-hidden flex flex-col">
-        <ScrollArea className="flex-1 h-[calc(100%-2rem)]">
-          <div className="p-3 space-y-2">
-            {/* Pending habits */}
-            {pending.map(habit => (
-              <HabitRow
-                key={habit.id}
-                habit={habit}
-                isCompleted={false}
-                isSelected={selectedHabit === habit.id}
-                onComplete={() => onHabitComplete(habit.id)}
-                onAddToTasks={() => onAddHabitToTasks(habit)}
-                templateId={templateId}
-              />
-            ))}
-            
-            {/* Completed habits */}
-            {completed.map(habit => (
-              <HabitRow
-                key={habit.id}
-                habit={habit}
-                isCompleted={true}
-                isSelected={selectedHabit === habit.id}
-                onComplete={() => onHabitComplete(habit.id)}
-                onAddToTasks={() => onAddHabitToTasks(habit)}
-                templateId={templateId}
-              />
-            ))}
-          </div>
-        </ScrollArea>
+      <CardContent>
+        <div className="space-y-2">
+          {todaysHabits.map(habit => (
+            <TodaysHabitCard
+              key={habit.id}
+              habit={habit}
+              isCompleted={!!completedHabits[habit.id]}
+              onComplete={() => handleCompleteHabit(habit)}
+              onAddToTasks={() => handleAddToTasks(habit)}
+            />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
