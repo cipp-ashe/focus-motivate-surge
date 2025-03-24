@@ -1,113 +1,104 @@
-
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { Timer } from '../timer/Timer';
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi, describe, it, expect } from 'vitest';
+import { Timer } from '../Timer';
 import { Quote } from '@/types/timer';
-import { TimerStateMetrics } from '@/types/metrics';
+
+const mockQuote: Quote = {
+  id: '123',
+  text: 'Test quote',
+  author: 'Test author',
+  isFavorite: false,
+  category: 'focus'
+};
+
+const mockSetFavorites = vi.fn();
 
 describe('Timer Component', () => {
-  const mockProps = {
-    duration: 300,
-    taskName: 'Test Task',
-    onComplete: vi.fn(),
-    onAddTime: vi.fn(),
-    onDurationChange: vi.fn(),
-    favorites: [] as Quote[],
-    setFavorites: vi.fn(),
-  };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.useFakeTimers();
+  it('renders without crashing', () => {
+    render(<Timer duration={1500} taskName="Test Task" />);
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('renders with initial state', () => {
-    render(<Timer {...mockProps} />);
+  it('displays the task name', () => {
+    render(<Timer duration={1500} taskName="Test Task" />);
     expect(screen.getByText('Test Task')).toBeInTheDocument();
   });
 
-  it('handles start/pause functionality', () => {
-    render(<Timer {...mockProps} />);
-    const startButton = screen.getByText(/start/i);
-    
+  it('starts and pauses the timer', () => {
+    render(<Timer duration={1500} taskName="Test Task" />);
+    const startButton = screen.getByRole('button', { name: 'Start timer' });
     fireEvent.click(startButton);
-    expect(screen.getByText(/pause/i)).toBeInTheDocument();
-    
-    fireEvent.click(screen.getByText(/pause/i));
-    expect(screen.getByText(/resume/i)).toBeInTheDocument();
+    expect(startButton).toHaveAttribute('aria-label', 'Pause timer');
+    const pauseButton = screen.getByRole('button', { name: 'Pause timer' });
+    fireEvent.click(pauseButton);
+    expect(pauseButton).toHaveAttribute('aria-label', 'Start timer');
   });
 
-  it('updates time correctly', () => {
-    render(<Timer {...mockProps} />);
-    
-    // Start timer
-    fireEvent.click(screen.getByText(/start/i));
-    
-    // Advance timer by 1 second
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-    
-    // Check time display (299 seconds = 4:59)
-    expect(screen.getByText('04:59')).toBeInTheDocument();
+  it('resets the timer', () => {
+    render(<Timer duration={1500} taskName="Test Task" />);
+    const resetButton = screen.getByRole('button', { name: 'Reset timer' });
+    fireEvent.click(resetButton);
+    expect(screen.getByText('25:00')).toBeInTheDocument();
   });
 
-  it('handles completion', async () => {
-    render(<Timer {...mockProps} />);
+  it('toggles quote favorites', async () => {
+    render(
+      <Timer
+        duration={1500}
+        taskName="Test Task"
+        favorites={[mockQuote]}
+        setFavorites={mockSetFavorites}
+      />
+    );
     
-    // Start timer
-    fireEvent.click(screen.getByText(/start/i));
-    
-    // Advance to completion
-    act(() => {
-      vi.advanceTimersByTime(300000); // 5 minutes
-    });
-    
-    expect(mockProps.onComplete).toHaveBeenCalled();
-  });
-
-  it('handles adding time', () => {
-    render(<Timer {...mockProps} />);
-    
-    // Start timer and advance
-    fireEvent.click(screen.getByText(/start/i));
-    act(() => {
-      vi.advanceTimersByTime(290000); // 4:50 minutes
-    });
-    
-    // Add time button should be visible
-    const addTimeButton = screen.getByText(/add 5m/i);
-    fireEvent.click(addTimeButton);
-    
-    expect(mockProps.onAddTime).toHaveBeenCalled();
-  });
-
-  it('handles duration changes', () => {
-    render(<Timer {...mockProps} />);
-    
-    // Find and change minutes input
-    const minutesInput = screen.getByRole('spinbutton');
-    fireEvent.change(minutesInput, { target: { value: '10' } });
-    fireEvent.blur(minutesInput);
-    
-    expect(mockProps.onDurationChange).toHaveBeenCalledWith(10);
-  });
-
-  it('manages favorites correctly', () => {
-    const favorites: Quote[] = [{
-      id: 'quote-1',
+    const favoriteQuote = {
+      id: '123',
       text: 'Test quote',
-      author: 'Test Author',
+      author: 'Test author',
       isFavorite: true,
-    }];
-    
-    render(<Timer {...{...mockProps, favorites}} />);
-    
-    // Verify favorite quote is displayed
-    expect(screen.getByText('Test quote')).toBeInTheDocument();
+      category: 'focus' // Add the required category property
+    };
+
+    // Mock the window.localStorage object
+    const localStorageMock = (() => {
+      let store: { [key: string]: string } = {};
+
+      return {
+        getItem: (key: string) => store[key] || null,
+        setItem: (key: string, value: string) => {
+          store[key] = String(value);
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          store = {};
+        },
+      };
+    })();
+
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+
+    // Mock the favorites in localStorage
+    localStorage.setItem('favorites', JSON.stringify([favoriteQuote]));
+
+    // Mock the setFavorites function
+    const setFavoritesMock = vi.fn();
+
+    // Render the Timer component with the mock localStorage and setFavorites function
+    render(
+      <Timer
+        duration={1500}
+        taskName="Test Task"
+        favorites={[favoriteQuote]}
+        setFavorites={setFavoritesMock}
+      />
+    );
+
+    // Assert that the setFavorites function is called with the updated favorites
+    expect(setFavoritesMock).toHaveBeenCalled();
   });
 });

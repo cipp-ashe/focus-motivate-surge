@@ -1,21 +1,25 @@
 
 // Consolidated timer type definitions
-import { TimerMetrics, TimerState, TimerAction } from './timer/state';
-import { TimerDisplayProps, TimerControlsProps, TimerProgressProps, TimerSessionProps, TimerMetricsDisplayProps, TimerPresetDuration, TimerPresetsProps } from './timer/ui';
-
-// Re-export types for easier imports elsewhere
-export type {
-  TimerMetrics,
-  TimerState,
-  TimerAction,
-  TimerDisplayProps,
-  TimerControlsProps,
-  TimerProgressProps,
+import { TimerState as TimerStateBase, TimerAction as TimerActionBase, TimerMetrics } from './timer/state';
+import { 
+  TimerDisplayProps, 
+  TimerControlsProps, 
+  TimerProgressProps, 
   TimerSessionProps,
   TimerMetricsDisplayProps,
   TimerPresetDuration,
   TimerPresetsProps
-};
+} from './timer/ui';
+import { TimerExpandedViewRef } from './timer/views';
+import { SoundOption, Quote, QuoteCategory } from './timer/models';
+import { 
+  TimerCircleProps,
+  MinutesInputProps,
+  TimerA11yProps,
+  ButtonA11yProps,
+  SoundSelectorProps,
+  TimerProps
+} from './timer/components';
 
 // Timer modes
 export type TimerMode = 'focus' | 'pomodoro' | 'countdown' | 'stopwatch';
@@ -23,21 +27,38 @@ export type TimerMode = 'focus' | 'pomodoro' | 'countdown' | 'stopwatch';
 // Timer status
 export type TimerStatus = 'idle' | 'active' | 'paused' | 'completed';
 
-// Added Quote related types since they're used in the timer
-export interface Quote {
-  id: string;
-  text: string;
-  author: string;
-  isFavorite: boolean;
-  category: QuoteCategory;
-}
+// Export all timer types from a single location
+export type {
+  // Base state definitions
+  TimerStateBase,
+  TimerActionBase,
+  TimerMetrics,
+  
+  // UI component props
+  TimerDisplayProps,
+  TimerControlsProps,
+  TimerProgressProps,
+  TimerSessionProps,
+  TimerMetricsDisplayProps,
+  TimerPresetDuration,
+  TimerPresetsProps,
+  
+  // Views
+  TimerExpandedViewRef,
+  
+  // Models
+  SoundOption,
+  Quote,
+  QuoteCategory,
+  
+  // Components
+  TimerCircleProps,
+  MinutesInputProps,
+  TimerA11yProps,
+  ButtonA11yProps,
+  SoundSelectorProps,
+  TimerProps
+};
 
-export type QuoteCategory = 
-  | 'focus' 
-  | 'motivation' 
-  | 'productivity' 
-  | 'wisdom'
-  | 'mindfulness'
-  | 'gratitude'
-  | 'reflection';
-
+// Re-export the TimerState from index.ts
+export type { TimerState, TimerAction } from './timer/index';

@@ -1,6 +1,5 @@
 
-import { TimerState } from '@/types/timer';
-import { TimerAction } from '@/types/timer/index';
+import { TimerState, TimerAction } from '@/types/timer';
 import { toISOString } from '@/lib/utils/dateUtils';
 import { 
   determineCompletionStatus, 

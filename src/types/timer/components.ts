@@ -30,13 +30,17 @@ export interface SoundSelectorProps {
 }
 
 export interface TimerCircleProps {
-  percentage: number;
+  percentage?: number;
   timeLeft: number;
-  duration: number;
+  duration?: number;
   isRunning: boolean;
   isPaused: boolean;
-  isComplete: boolean;
-  taskName: string;
+  isComplete?: boolean;
+  taskName?: string;
+  size?: 'normal' | 'large';
+  circumference?: number;
+  a11yProps?: React.AriaAttributes;
+  onClick?: () => void;
 }
 
 export interface TimerControlsProps {

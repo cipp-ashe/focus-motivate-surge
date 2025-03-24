@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useRef, useEffect, useReducer } from 'react';
-import { TimerState, TimerAction } from '@/types/timer/index';
+import { TimerState, TimerAction } from '@/types/timer';
 import { timerReducer } from './useTimerReducer';
 import { UseTimerOptions } from './types/UseTimerTypes';
 import { eventManager } from '@/lib/events/EventManager';

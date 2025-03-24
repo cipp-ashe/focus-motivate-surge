@@ -2,6 +2,7 @@
 // Timer state and action types
 import { TimerStateMetrics } from '../metrics';
 
+// Define the complete timer state
 export interface TimerState {
   timeLeft: number;
   isRunning: boolean;
