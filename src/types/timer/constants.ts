@@ -24,3 +24,15 @@ export const TIMER_CONSTANTS = {
   // Sound options
   DEFAULT_SOUND: 'bell'
 };
+
+/**
+ * Sound options available for timer notifications
+ */
+export const SOUND_OPTIONS = [
+  { value: 'bell', label: 'Bell' },
+  { value: 'chime', label: 'Chime' },
+  { value: 'gong', label: 'Gong' },
+  { value: 'notification', label: 'Notification' },
+  { value: 'success', label: 'Success' },
+  { value: 'none', label: 'None' }
+];

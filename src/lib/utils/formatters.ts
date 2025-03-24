@@ -1,87 +1,35 @@
 
 /**
- * Format a duration in seconds to a time display (mm:ss)
+ * Determines the completion status based on planned vs actual duration
+ * @param plannedDuration Planned duration in seconds
+ * @param actualDuration Actual duration in seconds
+ * @returns Completion status string
  */
-export const formatTimeDisplay = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
-
-/**
- * Format a time in seconds for display with optional custom format
- */
-export const formatTime = (seconds: number, showMinutesOnly: boolean = false): string => {
-  if (showMinutesOnly) {
-    const minutes = Math.ceil(seconds / 60);
-    return `${minutes}m`;
+export const determineCompletionStatus = (plannedDuration: number, actualDuration: number): string => {
+  if (!plannedDuration || !actualDuration) return "Completed";
+  
+  // If completed in less than 95% of the planned time
+  if (actualDuration < plannedDuration * 0.95) {
+    return "Completed Early";
   }
   
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
-/**
- * Format a percentage value for display
- */
-export const formatPercentage = (value: number): string => {
-  return `${Math.round(value * 100)}%`;
-};
-
-/**
- * Format a timestamp for display
- */
-export const formatTimestamp = (timestamp: string | Date | null): string => {
-  if (!timestamp) return '';
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-  return date.toLocaleString();
-};
-
-/**
- * Get a CSS class based on completion timing
- */
-export const getCompletionTimingClass = (efficiency: number | string): string => {
-  const efficiencyValue = typeof efficiency === 'string' ? 
-    parseFloat(efficiency.replace('%', '')) / 100 : efficiency;
-    
-  if (efficiencyValue >= 1.1) return 'text-red-500';
-  if (efficiencyValue > 0.9 && efficiencyValue < 1.1) return 'text-green-500';
-  return 'text-yellow-500';
-};
-
-/**
- * Determine completion status based on expected and actual times
- */
-export const determineCompletionStatus = (expectedTime: number, actualTime: number): string => {
-  const ratio = actualTime / expectedTime;
-  
-  if (ratio < 0.8) return 'Early';
-  if (ratio > 1.2) return 'Late';
-  return 'On Time';
-};
-
-/**
- * Calculate efficiency ratio (actual/expected)
- */
-export const calculateEfficiencyRatio = (expectedTime: number, actualTime: number): number => {
-  if (expectedTime === 0) return 1.0;
-  return parseFloat((actualTime / expectedTime).toFixed(2));
-};
-
-/**
- * Format a duration in a readable way
- */
-export const formatDuration = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${remainingSeconds}s`;
-  } else if (minutes > 0) {
-    return `${minutes}m ${remainingSeconds}s`;
-  } else {
-    return `${remainingSeconds}s`;
+  // If completed within 5% of the planned time
+  if (actualDuration <= plannedDuration * 1.05) {
+    return "Completed On Time";
   }
+  
+  // If completed in more than 105% of the planned time
+  return "Completed Late";
+};
+
+/**
+ * Calculates the efficiency ratio
+ * @param plannedDuration Planned duration in seconds
+ * @param actualDuration Actual duration in seconds
+ * @returns Efficiency ratio (planned/actual)
+ */
+export const calculateEfficiencyRatio = (plannedDuration: number, actualDuration: number): number => {
+  if (!plannedDuration || !actualDuration) return 1;
+  
+  return plannedDuration / actualDuration;
 };

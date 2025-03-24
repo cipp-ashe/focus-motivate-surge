@@ -12,7 +12,12 @@ type HabitAction =
   | { type: 'UPDATE_TEMPLATE_DAYS'; payload: { templateId: string; days: DayOfWeek[] } }
   | { type: 'ADD_CUSTOM_TEMPLATE'; payload: any }
   | { type: 'REMOVE_CUSTOM_TEMPLATE'; payload: string }
-  | { type: 'UPDATE_TEMPLATE_CUSTOMIZATION'; payload: { templateId: string; customized: boolean } };
+  | { type: 'UPDATE_TEMPLATE_CUSTOMIZATION'; payload: { templateId: string; customized: boolean } }
+  | { type: 'INITIALIZE_TEMPLATES'; payload: ActiveTemplate[] }
+  | { type: 'INITIALIZE_PROGRESS'; payload: Record<string, Record<string, boolean | number>> }
+  | { type: 'INITIALIZE_CUSTOM_TEMPLATES'; payload: any[] }
+  | { type: 'SET_LOADED'; payload: boolean }
+  | { type: 'RELOAD_TEMPLATES' };
 
 /**
  * Unified habit reducer that handles all template-related state updates
@@ -85,6 +90,30 @@ export const habitReducer = (state: HabitState, action: HabitAction): HabitState
             ? { ...template, customized: action.payload.customized }
             : template
         ),
+      };
+    case 'INITIALIZE_TEMPLATES':
+      return {
+        ...state,
+        templates: action.payload,
+      };
+    case 'INITIALIZE_PROGRESS':
+      return {
+        ...state,
+        progress: action.payload,
+      };
+    case 'INITIALIZE_CUSTOM_TEMPLATES':
+      return {
+        ...state,
+        customTemplates: action.payload,
+      };
+    case 'SET_LOADED':
+      return {
+        ...state,
+        isLoaded: action.payload,
+      };
+    case 'RELOAD_TEMPLATES':
+      return {
+        ...state,
       };
     default:
       return state;
