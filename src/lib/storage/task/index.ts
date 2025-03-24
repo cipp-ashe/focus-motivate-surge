@@ -8,11 +8,12 @@ import { Task } from '@/types/tasks';
 
 // Export all storage modules with a unified interface
 export const taskStorage = {
+  // First include all the existing storage modules
   ...activeTasksStorage,
   ...completedTasksStorage,
   ...taskRelationshipStorage,
   
-  // Export the migration utility 
+  // Add the migration utility after the modules are defined
   migrateTaskTypes,
   
   // Add a convenience method to load all tasks at once
