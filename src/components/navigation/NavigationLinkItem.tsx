@@ -11,6 +11,7 @@ interface NavigationLinkItemProps {
   isActive: boolean;
   showLabel?: boolean;
   className?: string;
+  onClick?: () => void;
 }
 
 export const NavigationLinkItem: React.FC<NavigationLinkItemProps> = ({
@@ -19,7 +20,8 @@ export const NavigationLinkItem: React.FC<NavigationLinkItemProps> = ({
   label,
   isActive,
   showLabel = true,
-  className
+  className,
+  onClick
 }) => {
   return (
     <Link 
@@ -29,6 +31,7 @@ export const NavigationLinkItem: React.FC<NavigationLinkItemProps> = ({
         isActive ? "text-primary" : "text-muted-foreground hover:text-primary",
         className
       )}
+      onClick={onClick}
     >
       <Icon className="h-5 w-5" />
       {showLabel && <span>{label}</span>}

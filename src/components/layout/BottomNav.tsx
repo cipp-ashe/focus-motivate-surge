@@ -1,8 +1,15 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ListTodo, Timer, Settings } from 'lucide-react';
+import { Home, ListTodo, Timer, Settings, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuTrigger,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
+import { NAV_CATEGORIES } from '@/components/navigation/navigationConfig';
 
 export const BottomNav = () => {
   const location = useLocation();
@@ -47,16 +54,34 @@ export const BottomNav = () => {
           <span className="text-xs mt-1">Timer</span>
         </Link>
         
-        <Link 
-          to="/settings" 
-          className={cn(
-            "flex flex-col items-center p-2",
-            isActive('/settings') && "text-primary"
-          )}
-        >
-          <Settings className="h-5 w-5" />
-          <span className="text-xs mt-1">Settings</span>
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button 
+              className={cn(
+                "flex flex-col items-center p-2 appearance-none bg-transparent border-none",
+                isActive('/settings') && "text-primary"
+              )}
+            >
+              <MoreHorizontal className="h-5 w-5" />
+              <span className="text-xs mt-1">More</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="mb-16 z-50 bg-background border border-border/40">
+            {Object.values(NAV_CATEGORIES).flatMap(category => 
+              category.items.map(item => (
+                <DropdownMenuItem key={item.path} asChild>
+                  <Link 
+                    to={item.path}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                </DropdownMenuItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );
