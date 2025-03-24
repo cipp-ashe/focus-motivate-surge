@@ -1,21 +1,24 @@
 
 /**
- * Habits Hooks
+ * Habit Hooks Index
  * 
- * This file exports all habit-related hooks for easier importing
+ * This file exports all habit-related hooks
  */
 
-// Main hooks
+// Core habit hooks
 export { useHabits } from './useHabits';
 export { useHabitEvents } from './useHabitEvents';
-export { useHabitCompletion } from './useHabitCompletion';
 export { useHabitProgress } from './useHabitProgress';
+export { useHabitCompletion } from './useHabitCompletion';
 export { useHabitRelationships } from './useHabitRelationships';
+
+// Template management hooks
 export { useTemplateCreation } from './useTemplateCreation';
 export { useTemplateManagement } from './useTemplateManagement';
 export { useTodaysHabits } from './useTodaysHabits';
+
+// Habit-task integration
 export { useHabitTaskIntegration } from './useHabitTaskIntegration';
-export { useHabitStorage } from './useHabitStorage';
 
 // Mutation hooks
 export { useCompletionMutation } from './useCompletionMutation';
