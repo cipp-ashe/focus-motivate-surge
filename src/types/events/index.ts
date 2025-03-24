@@ -21,7 +21,7 @@ import {
 } from './misc-events';
 
 // Re-export from misc-events to avoid conflict
-import { JournalEventPayloadMap as ImportedJournalEventPayloadMap } from './misc-events';
+import { JournalEventPayloadMap } from './misc-events';
 
 // Define all possible event types in the application
 export type EventType =
@@ -38,23 +38,23 @@ export type EventType =
 // Export this as a type for backward compatibility
 export type AllEventTypes = EventType;
 
-// Define the base payload interface for events by merging all domain payloads
-export interface EventPayloadMap extends
-  TaskEventPayloadMap,
-  HabitEventPayloadMap,
-  NoteEventPayloadMap,
-  TimerEventPayloadMap,
-  VoiceNoteEventPayloadMap,
-  ImportedJournalEventPayloadMap,
-  RelationshipEventPayloadMap,
-  AppEventPayloadMap,
-  WildcardEventPayloadMap {}
+// Define the base payload interface for events 
+export type EventPayloadMap = 
+  & TaskEventPayloadMap
+  & Omit<HabitEventPayloadMap, 'journal:open'> 
+  & NoteEventPayloadMap
+  & TimerEventPayloadMap
+  & VoiceNoteEventPayloadMap
+  & JournalEventPayloadMap
+  & RelationshipEventPayloadMap
+  & AppEventPayloadMap
+  & WildcardEventPayloadMap;
 
 // Generic type to get the appropriate payload for a given event type
-export type EventPayload<E extends EventType> = EventPayloadMap[E];
+export type EventPayload<E extends EventType> = E extends keyof EventPayloadMap ? EventPayloadMap[E] : never;
 
 // Type for all event callbacks
-export type EventCallback<E extends EventType> = (payload: EventPayloadMap[E]) => void;
+export type EventCallback<E extends EventType> = (payload: E extends keyof EventPayloadMap ? EventPayloadMap[E] : any) => void;
 
 // Re-export domain-specific types for convenience - using 'export type' syntax for isolatedModules compatibility
 export type { EventUnsubscribe };

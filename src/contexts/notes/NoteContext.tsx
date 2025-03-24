@@ -5,6 +5,7 @@ import { initialState } from './initialState';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 import type { Note } from '@/types/notes';
+import { useNoteActions, useNoteState } from './hooks';
 
 // Define context type
 interface NoteContextType {
@@ -68,12 +69,12 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const handleDeleteNote = (data: { id: string }) => {
-      dispatch({ type: 'DELETE_NOTE', payload: { id: data.id, title: "" } });
+      dispatch({ type: 'DELETE_NOTE', payload: data.id });
       toast.success('Note deleted');
     };
 
     const handleSelectNote = (data: { id: string | null }) => {
-      dispatch({ type: 'SET_SELECTED_NOTE', payload: data.id });
+      dispatch({ type: 'SELECT_NOTE', payload: data.id });
     };
 
     // Subscribe to events
@@ -97,3 +98,6 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </NoteContext.Provider>
   );
 };
+
+// Re-export the hooks for easier imports
+export { useNoteActions, useNoteState };
