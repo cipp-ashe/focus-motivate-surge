@@ -56,6 +56,40 @@ export const useTaskEvents = () => {
     });
   }, []);
   
+  // Show image in modal
+  const showTaskImage = useCallback((imageUrl: string, taskName: string) => {
+    eventManager.emit('task:show-image', {
+      imageUrl,
+      taskName
+    });
+  }, []);
+  
+  // Open checklist modal
+  const openTaskChecklist = useCallback((taskId: string, taskName: string, items: any[]) => {
+    eventManager.emit('task:open-checklist', {
+      taskId,
+      taskName,
+      items
+    });
+  }, []);
+  
+  // Open journal modal
+  const openTaskJournal = useCallback((taskId: string, taskName: string, entry: string = '') => {
+    eventManager.emit('task:open-journal', {
+      taskId,
+      taskName,
+      entry
+    });
+  }, []);
+  
+  // Open voice recorder modal
+  const openTaskVoiceRecorder = useCallback((taskId: string, taskName: string) => {
+    eventManager.emit('task:open-voice-recorder', {
+      taskId,
+      taskName
+    });
+  }, []);
+  
   return {
     forceTaskUpdate,
     createTask,
@@ -64,6 +98,10 @@ export const useTaskEvents = () => {
     completeTask,
     selectTask,
     dismissTask,
-    trackTaskTime
+    trackTaskTime,
+    showTaskImage,
+    openTaskChecklist,
+    openTaskJournal,
+    openTaskVoiceRecorder
   };
 };

@@ -16,7 +16,8 @@ export type HabitEventType =
   | 'habits:check-pending'
   | 'habit:custom-template-create'
   | 'habit:custom-template-delete'
-  | 'habit:note-create';
+  | 'habit:note-create'
+  | 'habit:journal-create';
 
 export interface HabitEventPayloadMap {
   'habit:complete': {
@@ -57,6 +58,13 @@ export interface HabitEventPayloadMap {
     habitName: string;
     content: string;
     templateId?: string;
+  };
+  'habit:journal-create': {
+    habitId: string;
+    habitName: string;
+    content: string;
+    templateId?: string;
+    date?: string;
   };
 }
 

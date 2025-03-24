@@ -100,7 +100,14 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
               variant="outline" 
               size="icon" 
               className="h-6 w-6 rounded-full"
-              onClick={() => toast.info(`Starting timer for ${formatTime(timerTarget)}`)}
+              onClick={() => {
+                eventManager.emit('timer:start', {
+                  taskId: habit.id,
+                  taskName: habit.name,
+                  duration: timerTarget
+                });
+                toast.info(`Starting timer for ${formatTime(timerTarget)}`);
+              }}
             >
               <Timer className="h-3 w-3" />
             </Button>

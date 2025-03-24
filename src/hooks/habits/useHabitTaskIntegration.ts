@@ -10,7 +10,7 @@ import { useCallback, useRef, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { taskOperations } from '@/lib/operations/tasks';
 import { useEvent } from '@/hooks/useEvent';
-import { MetricType, ActiveTemplate } from '@/types/habits';
+import { MetricType, ActiveTemplate } from '@/types/habits/types';
 import { HabitTaskEvent } from '@/types/events/habit-events';
 import { Task, TaskType } from '@/types/tasks';
 
@@ -108,7 +108,7 @@ export const useHabitTaskIntegration = () => {
       );
       
       if (habitTask && !habitTask.completed) {
-        taskOperations.completeTask(habitTask.id);
+        taskOperations.completeTask(habitTask.id, { value });
       }
     };
     
@@ -132,10 +132,93 @@ export const useHabitTaskIntegration = () => {
     return unsubscribe;
   }, [handleHabitComplete]);
   
+  /**
+   * Check for missing habit tasks and create them
+   */
+  const checkForMissingHabitTasks = useCallback(() => {
+    console.log('Checking for missing habit tasks...');
+    
+    // Get today's date string (YYYY-MM-DD)
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Get active templates and habits
+    try {
+      const templatesStr = localStorage.getItem('habit-templates');
+      if (!templatesStr) return;
+      
+      const templates: ActiveTemplate[] = JSON.parse(templatesStr);
+      if (!Array.isArray(templates)) return;
+      
+      // Check current day of week
+      const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
+      
+      // Get existing tasks
+      const tasksStr = localStorage.getItem('tasks');
+      const tasks: Task[] = tasksStr ? JSON.parse(tasksStr) : [];
+      
+      // Process each template that's active today
+      templates.forEach(template => {
+        if (!template.activeDays.includes(dayOfWeek as any)) return;
+        
+        // Process each habit in the template
+        template.habits.forEach(habit => {
+          // Generate key for this habit-date combination
+          const key = `${habit.id}-${today}`;
+          
+          // Skip if already scheduled
+          if (scheduledTasksRef.current.has(key)) return;
+          
+          // Check if task already exists
+          const taskExists = tasks.some(task => 
+            task.relationships?.habitId === habit.id && 
+            task.relationships?.date === today
+          );
+          
+          if (taskExists) {
+            // Track existing task
+            scheduledTasksRef.current.set(key, 'exists');
+            return;
+          }
+          
+          // Determine task type based on metric type
+          let taskType: TaskType = 'regular';
+          const metricType = habit.metrics?.type;
+          
+          if (metricType === 'timer') taskType = 'timer';
+          else if (metricType === 'journal') taskType = 'journal';
+          else if (metricType === 'counter') taskType = 'counter';
+          else if (metricType === 'rating') taskType = 'rating';
+          
+          // Create task for this habit
+          const taskId = taskOperations.createHabitTask(
+            habit.id,
+            template.templateId,
+            habit.name,
+            habit.metrics?.goal ? habit.metrics.goal * 60 : 1800, // Default 30 min or goal in seconds
+            today,
+            { 
+              suppressToast: true,
+              taskType,
+              metricType: metricType as MetricType
+            }
+          );
+          
+          if (taskId) {
+            scheduledTasksRef.current.set(key, taskId);
+            console.log(`Created missing habit task ${taskId} for ${habit.name}`);
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error checking for missing habit tasks:', error);
+    }
+  }, []);
+  
   return {
     scheduledTasksRef,
     syncHabitsWithTasks,
     handleHabitSchedule,
-    handleHabitComplete
+    handleHabitComplete,
+    checkForMissingHabitTasks
   };
 };

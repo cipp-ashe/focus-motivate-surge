@@ -1,7 +1,6 @@
 
 import { useEffect } from 'react';
 import { Task } from '@/types/tasks';
-import { eventManager } from '@/lib/events/EventManager';
 import { taskVerification } from '@/lib/verification/taskVerification';
 import { useEvent } from '@/hooks/useEvent';
 
@@ -34,6 +33,15 @@ export const useTaskEventListeners = (
   useEvent('habit:template-delete', eventHandlers.handleTemplateDelete);
   useEvent('habits:check-pending', eventHandlers.handleHabitCheck);
   useEvent('task:dismiss', eventHandlers.handleTaskDismiss);
+  
+  // Handle force update events
+  useEvent('task:force-update', () => {
+    forceTasksReload();
+  });
+  
+  useEvent('task:reload', () => {
+    forceTasksReload();
+  });
   
   // Handle window events that aren't migrated to eventManager yet
   useEffect(() => {

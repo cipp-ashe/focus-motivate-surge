@@ -15,7 +15,8 @@ export type NoteEventType =
   | 'note:create'
   | 'note:view'
   | 'note:deleted'
-  | 'notes:clear';
+  | 'notes:clear'
+  | 'notes:refresh';
 
 export interface NoteEventPayloadMap {
   'note:add': {
@@ -59,4 +60,5 @@ export interface NoteEventPayloadMap {
   'notes:clear': {
     reason?: string;
   };
+  'notes:refresh': undefined;
 }

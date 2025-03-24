@@ -8,7 +8,8 @@ export type JournalEventType =
   | 'journal:save'
   | 'journal:close'
   | 'journal:get'
-  | 'journal:list';
+  | 'journal:list'
+  | 'journal:create';
 
 export interface JournalEventPayloadMap {
   'journal:open': {
@@ -35,5 +36,13 @@ export interface JournalEventPayloadMap {
   'journal:list': {
     habitId?: string;
     limit?: number;
+  };
+  'journal:create': {
+    habitId?: string;
+    taskId?: string;
+    title?: string;
+    content: string;
+    templateId?: string;
+    date?: string;
   };
 }

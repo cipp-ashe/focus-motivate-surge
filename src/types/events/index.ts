@@ -11,6 +11,10 @@ import { JournalEventType, JournalEventPayloadMap } from './journal-events';
 import { HabitEventType, HabitEventPayloadMap } from './habit-events';
 import { NoteEventType, NoteEventPayloadMap } from './note-events';
 import { TimerEventType, TimerEventPayloadMap } from './timer-events';
+import { VoiceNoteEventType, VoiceNoteEventPayloadMap } from './misc-events';
+import { RelationshipEventType, RelationshipEventPayloadMap } from './misc-events';
+import { AppEventType, AppEventPayloadMap } from './misc-events';
+import { WildcardEventType, WildcardEventPayloadMap } from './misc-events';
 
 // Union of all event types
 export type EventType = 
@@ -18,7 +22,11 @@ export type EventType =
   | JournalEventType 
   | HabitEventType 
   | NoteEventType
-  | TimerEventType;
+  | TimerEventType
+  | VoiceNoteEventType
+  | RelationshipEventType
+  | AppEventType
+  | WildcardEventType;
 
 // Union of all event payload maps
 export interface EventPayloadMap extends 
@@ -26,7 +34,11 @@ export interface EventPayloadMap extends
   JournalEventPayloadMap,
   HabitEventPayloadMap,
   NoteEventPayloadMap,
-  TimerEventPayloadMap {}
+  TimerEventPayloadMap,
+  VoiceNoteEventPayloadMap,
+  RelationshipEventPayloadMap,
+  AppEventPayloadMap,
+  WildcardEventPayloadMap {}
 
 // Callback type for event handlers
 export type EventCallback<T extends EventType> = (payload: EventPayloadMap[T]) => void;
@@ -46,4 +58,5 @@ export * from './journal-events';
 export * from './habit-events';
 export * from './note-events';
 export * from './timer-events';
+export * from './misc-events';
 export * from './base';

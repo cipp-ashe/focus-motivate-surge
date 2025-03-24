@@ -13,7 +13,11 @@ export type TaskEventType =
   | 'task:select'
   | 'task:timer'
   | 'task:force-update'
-  | 'task:reload';
+  | 'task:reload'
+  | 'task:show-image'
+  | 'task:open-checklist'
+  | 'task:open-journal'
+  | 'task:open-voice-recorder';
 
 export interface TaskEventPayloadMap {
   'task:create': Task;
@@ -25,4 +29,8 @@ export interface TaskEventPayloadMap {
   'task:timer': { taskId: string; minutes: number; notes?: string };
   'task:force-update': undefined;
   'task:reload': undefined;
+  'task:show-image': { imageUrl: string; taskName: string };
+  'task:open-checklist': { taskId: string; taskName: string; items: any[] };
+  'task:open-journal': { taskId: string; taskName: string; entry: string };
+  'task:open-voice-recorder': { taskId: string; taskName: string };
 }

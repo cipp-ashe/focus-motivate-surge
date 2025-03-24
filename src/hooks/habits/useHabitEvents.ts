@@ -98,6 +98,17 @@ export const useHabitEvents = () => {
     });
   }, []);
 
+  // Create a journal entry for a habit
+  const createHabitJournal = useCallback((habitId: string, habitName: string, content: string, templateId?: string, date?: string) => {
+    eventManager.emit('habit:journal-create', {
+      habitId,
+      habitName,
+      content,
+      templateId,
+      date: date || new Date().toISOString()
+    });
+  }, []);
+
   // Dismiss habits
   const dismissHabit = useCallback((habitId: string, date: string) => {
     eventManager.emit('habit:dismiss', {
@@ -117,6 +128,7 @@ export const useHabitEvents = () => {
     updateTemplateOrder,
     openHabitJournal,
     createHabitNote,
+    createHabitJournal,
     dismissHabit
   };
 };
