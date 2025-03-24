@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { MetricType } from '@/types/habits';
+import { MetricType } from '@/types/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
 
 interface HabitMetricProps {
@@ -33,7 +34,10 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
 
   return (
     <div>
-      <button onClick={handleComplete}>
+      <button 
+        onClick={handleComplete}
+        className="px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded-md text-sm transition-colors"
+      >
         Complete {habitName}
       </button>
     </div>

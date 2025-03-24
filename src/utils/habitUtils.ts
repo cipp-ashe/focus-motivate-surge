@@ -2,7 +2,7 @@
 /**
  * Habit Utility Functions
  */
-import { HabitDetail } from '@/types/habits';
+import { HabitDetail } from '@/types/habits/types';
 
 /**
  * Gets the list of habits that should be active today

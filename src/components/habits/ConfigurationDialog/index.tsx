@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -9,10 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus, Save, BookTemplate } from "lucide-react";
-import { HabitDetail, DayOfWeek } from '../types';
-import DaySelector from './DaySelector';
+import { HabitDetail, DayOfWeek } from '@/types/habits/types';
+import { DaySelector } from '../DaySelector';
 import DraggableHabitList from './DraggableHabitList';
-import { cn } from '@/lib/utils';
 
 interface ConfigurationDialogProps {
   open: boolean;

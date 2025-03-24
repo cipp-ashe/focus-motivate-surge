@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
-import { ActiveTemplate, HabitTemplate, DayOfWeek } from '@/components/habits/types';
+import { ActiveTemplate, HabitTemplate, DayOfWeek } from '@/types/habits/types';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 export const useTemplateCreation = (
   addTemplate: (template: ActiveTemplate) => void,
@@ -15,7 +14,7 @@ export const useTemplateCreation = (
   const handleCreateTemplate = () => {
     const newTemplate: ActiveTemplate = {
       templateId: `custom-${Date.now()}`,
-      name: 'New Template', // Add required name property
+      name: 'New Template',
       habits: [],
       customized: true,
       activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
@@ -50,10 +49,8 @@ export const useTemplateCreation = (
     }
 
     if (isCreatingTemplate) {
-      // Create a unique ID for the template
       const templateId = `custom-${Date.now()}`;
       
-      // Create the template object for storage
       const customTemplate: HabitTemplate = {
         id: templateId,
         name: newTemplateName,
@@ -64,37 +61,31 @@ export const useTemplateCreation = (
         duration: null,
       };
 
-      // Save the custom template
       const existingTemplatesStr = localStorage.getItem('custom-templates');
       const existingTemplates = existingTemplatesStr ? JSON.parse(existingTemplatesStr) : [];
       const updatedTemplates = [...existingTemplates, customTemplate];
       localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
 
-      // Emit event for custom template creation with suppressToast
-      eventBus.emit('habit:custom-template-create', { ...customTemplate, suppressToast: true });
+      eventManager.emit('habit:custom-template-create', { ...customTemplate, suppressToast: true });
 
-      // Add the template to active templates
       const activeTemplate: ActiveTemplate = { 
         templateId: templateId,
         habits: selectedTemplate.habits,
         activeDays: selectedTemplate.activeDays,
         customized: true,
-        name: newTemplateName,  // Make sure we keep the name
-        description: 'Custom template' // Include the description
+        name: newTemplateName,
+        description: 'Custom template'
       };
       
-      // Add template to active templates - show toast here only
       addTemplate(activeTemplate);
       toast.success('Template created and added successfully');
       
       handleCloseTemplate();
       
-      // Emit the event with suppressToast to prevent duplicate toasts
-      eventBus.emit('habit:template-update', { ...activeTemplate, suppressToast: true });
+      eventManager.emit('habit:template-update', { ...activeTemplate, suppressToast: true });
       window.dispatchEvent(new Event('templatesUpdated'));
       window.dispatchEvent(new Event('force-habits-update'));
     } else {
-      // Update existing template - only show toast here
       updateTemplate(selectedTemplate.templateId, selectedTemplate);
       toast.success('Template updated successfully');
       handleCloseTemplate();

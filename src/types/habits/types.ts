@@ -20,7 +20,7 @@ export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'slider' 
 
 // Time preference and category types
 export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
-export type HabitCategory = 'Health' | 'Work' | 'Personal' | 'Learning' | 'Other';
+export type HabitCategory = 'Health' | 'Fitness' | 'Work' | 'Personal' | 'Learning' | 'Mental Health' | 'Wellness' | 'Other';
 
 // Habit interface
 export interface Habit {
@@ -31,11 +31,11 @@ export interface Habit {
   timePreference: string;
   metrics: {
     type: MetricType;
-    goal: number;
+    goal?: number;
     unit?: string;
   };
-  completed: boolean;
-  streak: number;
+  completed?: boolean;
+  streak?: number;
   lastCompleted?: string;
   order?: number;
 }
@@ -58,13 +58,13 @@ export interface HabitDetail {
   metrics: {
     type: MetricType;
     goal?: number;
+    target?: number;
     unit?: string;
     min?: number;
     max?: number;
-    target?: number;
   };
   insights?: any[];
-  tips?: any[];
+  tips?: string[];
   relationships?: {
     templateId?: string;
   };
@@ -81,7 +81,7 @@ export interface HabitMetrics {
 // Habit progress type
 export interface HabitProgress {
   value: boolean | number;
-  streak: number;
+  streak?: number;
   date?: string;
   completed?: boolean;
 }
@@ -89,7 +89,7 @@ export interface HabitProgress {
 // Active template definition
 export interface ActiveTemplate {
   templateId: string;
-  name?: string;
+  name: string;
   description?: string;
   habits: HabitDetail[];
   activeDays: DayOfWeek[];

@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/components/habits/types';
+import { ActiveTemplate, DayOfWeek, HabitTemplate, DEFAULT_ACTIVE_DAYS } from '@/types/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
 
 const STORAGE_KEY = 'habit-templates';
@@ -18,9 +18,31 @@ export const useTemplateManagement = () => {
     window.dispatchEvent(new Event('templatesUpdated'));
   }, [activeTemplates]);
 
-  const addTemplate = useCallback((template: HabitTemplate | ActiveTemplate) => {
+  const addTemplate = useCallback((template: HabitTemplate | ActiveTemplate | string) => {
     setActiveTemplates(prev => {
-      // Handle predefined template (HabitTemplate)
+      // Case 1: String templateId - fetch from recommended templates
+      if (typeof template === 'string') {
+        const templateId = template;
+        // Here you would typically fetch the template details from an API or local storage
+        // For now, we'll just create a placeholder template
+        const newTemplate: ActiveTemplate = {
+          templateId,
+          name: `Template ${templateId}`,
+          description: 'Template loaded from API',
+          habits: [],
+          activeDays: DEFAULT_ACTIVE_DAYS,
+          customized: false,
+        };
+        
+        toast.success('Template added successfully');
+        
+        // Emit event for template addition using eventManager
+        eventManager.emit('habit:template-update', newTemplate);
+        
+        return [...prev, newTemplate];
+      }
+      
+      // Case 2: HabitTemplate object (from recommended templates)
       if ('id' in template && 'defaultHabits' in template) {
         const exists = prev.some(t => t.templateId === template.id);
         if (exists) {
@@ -46,7 +68,7 @@ export const useTemplateManagement = () => {
         return [...prev, newTemplate];
       }
       
-      // Handle custom template (ActiveTemplate)
+      // Case 3: ActiveTemplate object (pre-constructed template)
       const exists = prev.some(t => t.templateId === template.templateId);
       if (exists) {
         toast.error('Template already exists');

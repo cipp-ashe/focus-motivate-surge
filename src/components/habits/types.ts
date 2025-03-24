@@ -1,3 +1,3 @@
 
-// Directly import from the canonical type source
+// Directly export all types from the canonical source
 export * from '@/types/habits/types';

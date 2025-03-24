@@ -6,14 +6,22 @@ import { DAYS_OF_WEEK, DayOfWeek, SHORT_DAYS } from '@/types/habits/types';
 interface DaySelectorProps {
   activeDays: DayOfWeek[];
   onUpdateDays: (days: DayOfWeek[]) => void;
+  selectedDays?: DayOfWeek[];
+  onChange?: (days: DayOfWeek[]) => void;
 }
 
 export const DaySelector: React.FC<DaySelectorProps> = ({
   activeDays,
   onUpdateDays,
+  selectedDays,
+  onChange,
 }) => {
+  // Support both prop patterns
+  const effectiveDays = selectedDays || activeDays;
+  const effectiveHandler = onChange || onUpdateDays;
+
   // Map short day names to full day names if needed
-  const normalizedDays = activeDays.map(day => {
+  const normalizedDays = effectiveDays.map(day => {
     // If it's a short day, make sure it's one of our valid short days
     if (SHORT_DAYS.includes(day as any)) {
       return day;
@@ -30,7 +38,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
     const validDays = values.filter((day): day is DayOfWeek => 
       DAYS_OF_WEEK.includes(day as any) || SHORT_DAYS.includes(day as any)
     );
-    onUpdateDays(validDays);
+    effectiveHandler(validDays);
   };
 
   return (

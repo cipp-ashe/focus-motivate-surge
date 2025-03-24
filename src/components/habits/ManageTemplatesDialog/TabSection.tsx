@@ -88,7 +88,7 @@ export const TabSection = () => {
                 key={template.id}
                 template={template}
                 isActive={templates.some(t => t.templateId === template.id)}
-                onSelect={() => handleAddTemplate(template)}
+                onAdd={() => handleAddTemplate(template)}
               />
             ))}
           </div>
