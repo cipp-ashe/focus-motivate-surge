@@ -1,6 +1,7 @@
 
 import { formatDate } from '@/lib/utils/formatters';
 import type { Note } from '@/types/notes';
+import JSZip from 'jszip';
 
 /**
  * Utility functions for downloading content
@@ -31,15 +32,14 @@ export const downloadNoteAsMarkdown = (note: Note): void => {
 };
 
 // Download all notes as a zip file
-export const downloadAllNotes = (notes: Note[]): void => {
+export const downloadAllNotes = async (notes: Note[]): Promise<void> => {
   if (!notes || notes.length === 0) {
     console.error('No notes to download');
     return;
   }
   
-  // Dynamic import for JSZip
-  import('jszip').then(JSZip => {
-    const zip = new JSZip.default();
+  try {
+    const zip = new JSZip();
     const notesFolder = zip.folder('notes');
     
     if (!notesFolder) {
@@ -57,17 +57,16 @@ export const downloadAllNotes = (notes: Note[]): void => {
       notesFolder.file(filename, markdownContent);
     });
     
-    zip.generateAsync({ type: 'blob' }).then(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `notes_export_${formatDate(new Date(), 'yyyy-MM-dd')}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    });
-  }).catch(err => {
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `notes_export_${formatDate(new Date(), 'yyyy-MM-dd')}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (err) {
     console.error('Error downloading notes:', err);
-  });
+  }
 };
