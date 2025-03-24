@@ -1,78 +1,115 @@
-import { Quote } from "@/types/timer/models";
-import { Tag } from "@/types/notes";
-import { quotes } from "@/data/quotes";
 
-// Journal type templates
-export interface JournalTemplate {
-  title: string;
-  prompts: string[];
-  placeholderText: string;
-  initialContent: string;
-}
+import { TagColor, EntityType } from '@/types/core';
+import { Quote } from '@/types/timer/models';
 
-// Use the central quotes collection and filter by relevant categories
-export const getJournalQuotes = (journalType: string): Quote[] => {
-  const categoryMap: Record<string, string[]> = {
-    gratitude: ['gratitude'],
-    reflection: ['reflection', 'learning'],
-    mindfulness: ['mindfulness', 'focus']
-  };
-  
-  const relevantCategories = categoryMap[journalType] || ['motivation', 'growth'];
-  
-  return quotes.filter(quote => {
-    // Handle both array and string category types
-    const categories = quote.category;
-    if (Array.isArray(categories)) {
-      return categories.some(cat => relevantCategories.includes(cat));
-    } else if (typeof categories === 'string') {
-      return relevantCategories.includes(categories);
-    }
-    return false;
-  });
-};
-
-export const journalTemplates: Record<string, JournalTemplate> = {
+// Journal templates with different prompts and formats
+export const journalTemplates = {
   gratitude: {
-    title: "Gratitude Journal",
+    name: 'Gratitude Journal',
+    description: 'Express gratitude for things in your life',
+    initialContent: '## Gratitude Journal\n\nToday, I am grateful for:\n\n1. \n2. \n3. \n\n### Reflections\n\n',
     prompts: [
-      "What are you grateful for today?",
-      "Who made a positive impact on your day?",
-      "What small joy did you experience?",
-      "What challenge are you thankful for?",
-      "What about your surroundings are you appreciative of?"
+      'What made you smile today?',
+      'Name three people who helped you recently and why you\'re grateful for them.',
+      'What simple pleasure are you thankful for?',
+      'What aspect of your health do you appreciate today?',
+      'What opportunity are you grateful for right now?'
     ],
-    placeholderText: "Write about what you're grateful for...",
-    initialContent: "## Today I'm grateful for:\n\n1. \n2. \n3. \n\n## Why these matter to me:\n\n"
+    tags: [
+      { name: 'gratitude', color: 'green' as TagColor },
+      { name: 'journal', color: 'blue' as TagColor }
+    ]
   },
+  
   reflection: {
-    title: "Reflection Journal",
+    name: 'Daily Reflection',
+    description: 'Reflect on your day and experiences',
+    initialContent: '## Daily Reflection\n\n### Today\'s highlights:\n\n- \n\n### Challenges faced:\n\n- \n\n### What I learned:\n\n- \n\n### Tomorrow, I will:\n\n- \n',
     prompts: [
-      "What went well today?",
-      "What challenged you?",
-      "What did you learn?",
-      "What would you do differently?",
-      "What are you looking forward to?"
+      'What was the most meaningful part of your day?',
+      'What challenged you today and how did you respond?',
+      'What would you do differently if you could repeat today?',
+      'What progress did you make toward your goals?',
+      'What did you learn about yourself today?'
     ],
-    placeholderText: "Reflect on your day...",
-    initialContent: "## Reflections:\n\n### What went well:\n\n\n### What challenged me:\n\n\n### What I learned:\n\n"
+    tags: [
+      { name: 'reflection', color: 'purple' as TagColor },
+      { name: 'journal', color: 'blue' as TagColor }
+    ]
   },
+  
   mindfulness: {
-    title: "Mindfulness Journal",
+    name: 'Mindfulness Journal',
+    description: 'Practice awareness and presence',
+    initialContent: '## Mindfulness Journal\n\n### Present moment awareness:\n\nRight now, I notice...\n\n- \n\n### Body scan:\n\n- \n\n### Thoughts and emotions:\n\n- \n\n### Intention for practice:\n\n- \n',
     prompts: [
-      "What are you noticing right now?",
-      "How does your body feel?",
-      "What emotions are present?",
-      "What thoughts are you observing?",
-      "What sensations are you aware of?"
+      'What sensations do you notice in your body right now?',
+      'Describe your breathing without changing it.',
+      'What emotions are present for you in this moment?',
+      'What thoughts keep recurring today?',
+      'How does your environment affect your state of mind right now?'
     ],
-    placeholderText: "Notice the present moment...",
-    initialContent: "## Present moment awareness:\n\n### I notice:\n\n\n### I feel:\n\n\n### I observe:\n\n"
+    tags: [
+      { name: 'mindfulness', color: 'teal' as TagColor },
+      { name: 'journal', color: 'blue' as TagColor }
+    ]
   }
 };
 
-// Standard journal tags
-export const getJournalTags = (journalType: string): Tag[] => [
-  { name: 'journal', color: 'default' },
-  { name: journalType, color: 'default' }
+// Journal tags for different journal types
+export const getJournalTags = (journalType: string) => {
+  switch (journalType) {
+    case 'gratitude':
+      return [
+        { name: 'gratitude', color: 'green' as TagColor },
+        { name: 'journal', color: 'blue' as TagColor }
+      ];
+    case 'reflection':
+      return [
+        { name: 'reflection', color: 'purple' as TagColor },
+        { name: 'journal', color: 'blue' as TagColor }
+      ];
+    case 'mindfulness':
+      return [
+        { name: 'mindfulness', color: 'teal' as TagColor },
+        { name: 'journal', color: 'blue' as TagColor }
+      ];
+    default:
+      return [
+        { name: 'journal', color: 'blue' as TagColor }
+      ];
+  }
+};
+
+// Example quotes for different journal types
+const gratitudeQuotes: Quote[] = [
+  { id: 'g1', text: 'Gratitude turns what we have into enough.', author: 'Aesop' },
+  { id: 'g2', text: 'Gratitude is the fairest blossom that springs from the soul.', author: 'Henry Ward Beecher' },
+  { id: 'g3', text: 'Gratitude is the healthiest of all human emotions.', author: 'Zig Ziglar' }
 ];
+
+const reflectionQuotes: Quote[] = [
+  { id: 'r1', text: 'By three methods we may learn wisdom: First, by reflection, which is noblest; Second, by imitation, which is easiest; and third by experience, which is the bitterest.', author: 'Confucius' },
+  { id: 'r2', text: 'Follow effective action with quiet reflection. From the quiet reflection will come even more effective action.', author: 'Peter Drucker' },
+  { id: 'r3', text: 'Reflection is the lamp of the heart. If it departs, the heart will have no light.', author: 'Imam Al-Haddad' }
+];
+
+const mindfulnessQuotes: Quote[] = [
+  { id: 'm1', text: 'The present moment is the only time over which we have dominion.', author: 'Thích Nhất Hạnh' },
+  { id: 'm2', text: 'The best way to capture moments is to pay attention. This is how we cultivate mindfulness.', author: 'Jon Kabat-Zinn' },
+  { id: 'm3', text: 'Mindfulness isn't difficult, we just need to remember to do it.', author: 'Sharon Salzberg' }
+];
+
+export const getJournalQuotes = (journalType: string): Quote[] => {
+  switch (journalType) {
+    case 'gratitude':
+      return gratitudeQuotes;
+    case 'reflection':
+      return reflectionQuotes;
+    case 'mindfulness':
+      return mindfulnessQuotes;
+    default:
+      // If no specific type, provide a mix
+      return [...gratitudeQuotes, ...reflectionQuotes, ...mindfulnessQuotes].slice(0, 3);
+  }
+};

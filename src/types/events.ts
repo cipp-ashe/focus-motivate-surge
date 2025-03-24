@@ -22,6 +22,14 @@ export type EventType =
   | 'habits:check-pending'
   | 'habits:verify-tasks'
   | 'habits:tasks-sync'
+  | 'habit:template-add'
+  | 'habit:template-remove'
+  | 'habit:template-days-update'
+  | 'habit:template-order-update'
+  | 'habit:dismiss'
+  | 'habit:tasks-sync'
+  | 'habit:custom-template-create'
+  | 'habit:custom-template-delete'
   
   // Note events
   | 'note:create'
@@ -32,6 +40,8 @@ export type EventType =
   | 'note:format'
   | 'note:format-complete'
   | 'note:create-from-voice'
+  | 'note:view'
+  | 'note:deleted'
   
   // Timer events
   | 'timer:start'
@@ -43,10 +53,18 @@ export type EventType =
   | 'timer:set-task'
   | 'timer:task-set'
   | 'timer:metrics-update'
+  | 'timer:init'
+  | 'timer:close'
+  | 'timer:expand'
+  | 'timer:collapse'
+  | 'timer:update-metrics'
   
   // Voice note events
   | 'voice-note:created'
   | 'voice-note:deleted'
+  
+  // Journal events
+  | 'journal:open'
   
   // Relationship events
   | 'relationship:create'
@@ -58,13 +76,17 @@ export type EventType =
   | 'quote:link-task'
   
   // App events
-  | 'app:initialized';
+  | 'app:initialized'
+  | '*';  // Wildcard for catch-all listeners
+
+// Export this as a type for backward compatibility
+export type AllEventTypes = EventType;
 
 // Define the base payload interface for events
 export interface EventPayloadMap {
   // Task events
-  'task:create': Task;
-  'task:update': { taskId: string; updates: Partial<Task> };
+  'task:create': any;
+  'task:update': { taskId: string; updates: Partial<any> };
   'task:delete': { taskId: string; reason?: string };
   'task:complete': { taskId: string; metrics?: any };
   'task:select': string;
@@ -77,15 +99,23 @@ export interface EventPayloadMap {
   'habit:complete': { habitId: string; date: string; value: any };
   'habit:select': { habitId: string };
   'habit:template-delete': { templateId: string; isOriginatingAction?: boolean };
-  'habit:template-update': ActiveTemplate;
+  'habit:template-update': any;
   'habit:check-pending': Record<string, any>;
   'habit:dismissed': { habitId: string; taskId: string; date: string };
   'habits:check-pending': Record<string, any>;
   'habits:verify-tasks': Record<string, any>;
   'habits:tasks-sync': Record<string, any>;
+  'habit:template-add': any;
+  'habit:template-remove': { templateId: string };
+  'habit:template-days-update': { templateId: string; days: any[] };
+  'habit:template-order-update': any[];
+  'habit:dismiss': { habitId: string; date: string };
+  'habit:tasks-sync': any;
+  'habit:custom-template-create': any;
+  'habit:custom-template-delete': { templateId: string };
   
   // Note events
-  'note:create': { id: string; title: string };
+  'note:create': { id: string; title: string; content?: string };
   'note:update': { id: string; updates: any };
   'note:delete': { id: string };
   'note:select': { id: string };
@@ -93,6 +123,8 @@ export interface EventPayloadMap {
   'note:format': { contentType: string };
   'note:format-complete': { formattedContent: string };
   'note:create-from-voice': { voiceNoteId: string };
+  'note:view': { id: string; title: string };
+  'note:deleted': { id: string };
   
   // Timer events
   'timer:start': { taskId?: string; taskName: string; duration: number };
@@ -101,13 +133,21 @@ export interface EventPayloadMap {
   'timer:tick': { timeLeft: number; taskName: string };
   'timer:complete': { taskId?: string; taskName: string; metrics: any };
   'timer:reset': { taskId?: string; taskName: string; duration?: number };
-  'timer:set-task': { id: string; name: string; duration: number; taskId?: string };
-  'timer:task-set': { id: string; name: string; duration: number; taskId?: string };
+  'timer:set-task': { id: string; name: string; duration: number; taskId?: string; completed?: boolean; createdAt?: string };
+  'timer:task-set': { id: string; name: string; duration: number; taskId?: string; completed?: boolean; createdAt?: string };
   'timer:metrics-update': Record<string, any>;
+  'timer:init': any;
+  'timer:close': any;
+  'timer:expand': any;
+  'timer:collapse': any;
+  'timer:update-metrics': any;
   
   // Voice note events
   'voice-note:created': { id: string; name: string; url: string; duration: number };
   'voice-note:deleted': { id: string };
+  
+  // Journal events
+  'journal:open': { habitId: string; habitName: string };
   
   // Relationship events
   'relationship:create': { entityId: string; entityType: string; relatedEntityId: string; relatedEntityType: string };
@@ -120,6 +160,7 @@ export interface EventPayloadMap {
   
   // App events
   'app:initialized': { timestamp: number };
+  '*': any;  // Type for wildcard events
 }
 
 // Generic type to get the appropriate payload for a given event type
@@ -127,6 +168,9 @@ export type EventPayload<E extends EventType> = EventPayloadMap[E];
 
 // Type for all event callbacks
 export type EventCallback<E extends EventType> = (payload: EventPayloadMap[E]) => void;
+
+// Type for event unsubscribe function
+export type EventUnsubscribe = () => void;
 
 // Type for HabitTaskEvent (needed for habit scheduling)
 export interface HabitTaskEvent {
@@ -145,6 +189,11 @@ export interface HabitNoteData {
   content: string;
   templateId?: string;
 }
+
+// Voice Note specific event types
+export type VoiceNoteEventType = 
+  | 'voice-note:created'
+  | 'voice-note:deleted';
 
 // Placeholder types referenced above (these should eventually be imported from their proper files)
 type Task = any;

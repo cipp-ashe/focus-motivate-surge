@@ -70,8 +70,8 @@ class EventManager {
     this.events.emit(event, payload);
     
     // Also dispatch to wildcard listeners
-    if (event !== '*') {
-      this.events.emit('*', { 
+    if (event !== '*' as EventType) {
+      this.events.emit('*' as EventType, { 
         eventType: event, 
         payload,
         timestamp: new Date().toISOString()
