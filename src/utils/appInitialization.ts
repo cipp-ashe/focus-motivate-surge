@@ -1,6 +1,6 @@
 
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayload } from '@/types';
+import { EventType } from '@/types/events';
 import { runDataMigration } from './migrations/typeMigration';
 
 // Feature flags

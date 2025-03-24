@@ -20,3 +20,8 @@ export * from './timer';
 
 // Export metrics types
 export * from './metrics';
+
+// Fix for the fs issue - re-export the correct types
+export * from './tasks';
+export * from './notes';
+export * from './voiceNotes';

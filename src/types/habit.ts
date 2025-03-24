@@ -12,6 +12,9 @@ export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 // Days of the week
 export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
 
+// Default active days
+export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
 // Habit category
 export type HabitCategory = 
   | 'Health' 
@@ -68,6 +71,11 @@ export interface HabitDetail {
   metrics: HabitMetrics;
   insights?: string[];
   tips?: string[];
+  order?: number;
+  relationships?: {
+    taskId?: string;
+    noteId?: string;
+  };
 }
 
 // Habit template
@@ -79,6 +87,9 @@ export interface HabitTemplate {
   presetType?: 'system' | 'custom';
   thumbnail?: string;
   order?: number;
+  category?: string;
+  defaultHabits?: HabitDetail[];
+  defaultDays?: DayOfWeek[];
 }
 
 // Active template
@@ -93,5 +104,26 @@ export interface ActiveTemplate {
   customized?: boolean;
 }
 
-// Storage key for habits
+// Habit completion event
+export interface HabitCompletionEvent {
+  habitId: string;
+  date: string;
+  value?: any;
+  metricType?: string;
+}
+
+// Template update event
+export interface TemplateUpdateEvent {
+  templateId: string;
+  isOriginatingAction?: boolean;
+}
+
+// Storage keys for habits
 export const STORAGE_KEY = 'habit-templates';
+export const ACTIVE_TEMPLATES_KEY = 'active-habit-templates';
+export const CUSTOM_TEMPLATES_KEY = 'custom-habit-templates';
+
+// Compatibility type for Habit (which is referenced in some files)
+export interface Habit extends HabitDetail {
+  // Add any additional fields needed for compatibility
+}
