@@ -5,7 +5,7 @@ import { initialState } from './initialState';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 import type { Note } from '@/types/notes';
-import { useNoteActions, useNoteState } from './hooks';
+import { deprecate } from '@/utils/deprecation';
 
 // Define context type
 interface NoteContextType {
@@ -99,5 +99,24 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-// Re-export the hooks for easier imports
-export { useNoteActions, useNoteState };
+// Import hooks from their new location for proper type checking
+import { useNoteActions as importedNoteActions, useNoteState as importedNoteState } from './hooks';
+
+// Export hooks with deprecation warnings for direct imports from NoteContext
+export const useNoteActions = () => {
+  deprecate(
+    'NoteContext', 
+    'Direct import of useNoteActions from NoteContext', 
+    'Import from @/contexts/notes/hooks instead'
+  );
+  return importedNoteActions();
+};
+
+export const useNoteState = () => {
+  deprecate(
+    'NoteContext', 
+    'Direct import of useNoteState from NoteContext', 
+    'Import from @/contexts/notes/hooks instead'
+  );
+  return importedNoteState();
+};
