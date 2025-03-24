@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Note } from "@/types/notes";
 import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
@@ -29,7 +30,7 @@ export const useJournal = ({
   const [randomPrompt, setRandomPrompt] = useState<string>("");
   const [existingNote, setExistingNote] = useState<Note | null>(null);
   const noteActions = useNoteActions();
-  const noteState = useNoteState();
+  const { notes } = useNoteState();
   
   // Determine journal type
   const journalType = getJournalType(habitName, description);
@@ -38,7 +39,7 @@ export const useJournal = ({
   
   // Initialize when opening
   useEffect(() => {
-    const note = findExistingJournalNote(habitId, noteState.items);
+    const note = findExistingJournalNote(habitId, notes);
     
     if (note) {
       // Use existing note content
@@ -49,7 +50,7 @@ export const useJournal = ({
       // No existing note, reset to template
       resetToNewNote();
     }
-  }, [habitId, noteState.items]);
+  }, [habitId, notes]);
   
   // Reset to a new note with template
   const resetToNewNote = () => {
@@ -68,8 +69,8 @@ export const useJournal = ({
   const handleSave = () => {
     // Check if we're updating an existing note
     if (existingNote) {
-      // Update the existing note
-      noteActions.updateNote(existingNote.id, content);
+      // Update the existing note with new content
+      noteActions.updateNote(existingNote.id, { content });
       
       toast.success(`Updated journal entry for: ${habitName}`, {
         description: "Your journal entry has been updated"

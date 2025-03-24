@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { noteReducer } from './noteReducer';
 import { initialState, Note } from './initialState';
 import { eventManager } from '@/lib/events/EventManager';
@@ -42,7 +42,7 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('notes', JSON.stringify(state.notes));
   }, [state.notes]);
 
-  const addNote = (note?: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addNote = useCallback((note?: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
     const newNote: Note = {
       id: crypto.randomUUID(),
@@ -50,14 +50,16 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       content: note?.content || '',
       createdAt: now,
       updatedAt: now,
-      tags: note?.tags || []
+      tags: note?.tags || [],
+      relationships: note?.relationships || []
     };
     
     dispatch({ type: 'ADD_NOTE', payload: newNote });
     eventManager.emit('note:create', { id: newNote.id });
-  };
+    return newNote;
+  }, []);
 
-  const updateNote = (id: string, updates: Partial<Note>) => {
+  const updateNote = useCallback((id: string, updates: Partial<Note>) => {
     dispatch({ 
       type: 'UPDATE_NOTE', 
       payload: { 
@@ -69,14 +71,14 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } 
     });
     eventManager.emit('note:update', { id, updates });
-  };
+  }, []);
 
-  const deleteNote = (id: string) => {
+  const deleteNote = useCallback((id: string) => {
     dispatch({ type: 'DELETE_NOTE', payload: id });
     eventManager.emit('note:delete', { id });
-  };
+  }, []);
 
-  const selectNote = (id: string | null) => {
+  const selectNote = useCallback((id: string | null) => {
     dispatch({ type: 'SELECT_NOTE', payload: id });
     if (id) {
       const note = state.notes.find(n => n.id === id);
@@ -84,29 +86,11 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         eventManager.emit('note:select', { id });
       }
     }
-  };
+  }, [state.notes]);
 
-  const getNoteById = (id: string) => {
+  const getNoteById = useCallback((id: string) => {
     return state.notes.find(note => note.id === id) || null;
-  };
-
-  // Sample data for testing
-  useEffect(() => {
-    // Load any saved notes or populate with sample data
-    if (state.notes.length === 0) {
-      // Add sample note if none exist
-      const sampleNote: Note = {
-        id: crypto.randomUUID(),
-        title: 'Welcome to Notes',
-        content: 'This is a sample note to help you get started. You can edit or delete it.',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tags: ['sample']
-      };
-      
-      dispatch({ type: 'SET_NOTES', payload: [sampleNote] });
-    }
-  }, [state.notes.length]);
+  }, [state.notes]);
 
   return (
     <NoteContext.Provider value={{

@@ -1,4 +1,7 @@
 
+import { TagColor } from '@/types/notes';
+import { EntityType } from '@/types/core';
+
 // Define the Note type
 export interface Note {
   id: string;
@@ -6,12 +9,20 @@ export interface Note {
   content: string;
   createdAt: string;
   updatedAt: string;
-  tags?: string[];
-  isArchived?: boolean;
-  pinned?: boolean;
+  tags: Tag[];
+  relationships?: {
+    entityId: string;
+    entityType: EntityType;
+  }[];
 }
 
-// Initial state for the notes context
+// Define the Tag type
+export interface Tag {
+  name: string;
+  color: TagColor;
+}
+
+// Define the initial state
 export interface NoteState {
   notes: Note[];
   selectedNoteId: string | null;
@@ -19,7 +30,7 @@ export interface NoteState {
   error: Error | null;
 }
 
-// Default initial state
+// Set the initial state
 export const initialState: NoteState = {
   notes: [],
   selectedNoteId: null,

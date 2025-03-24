@@ -10,18 +10,17 @@ export const Notes = () => {
   // Use state to track initialization
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Use the note context instead of using useNotes directly
+  // Use the note context
+  const { notes, selectedNoteId } = useNoteState();
   const { 
-    updateCurrentContent, 
-    selectNoteForEdit, 
     addNote, 
     updateNote, 
-    deleteNote, 
-    addTagToNote, 
-    removeTagFromNote 
+    deleteNote,
+    selectNote
   } = useNoteActions();
   
-  const { items: notes, selected: selectedNote, content: currentContent } = useNoteState();
+  // Local state to hold current content being edited
+  const [currentContent, setCurrentContent] = useState("");
   
   // Add comprehensive logging to monitor component rendering and state
   useEffect(() => {
@@ -64,16 +63,27 @@ export const Notes = () => {
     console.log('Notes state updated:', { 
       hasNotes: Array.isArray(notes) ? notes.length > 0 : false, 
       notesCount: Array.isArray(notes) ? notes.length : 'notes is not an array',
-      hasSelectedNote: !!selectedNote, 
-      selectedNoteId: selectedNote?.id || 'none',
+      hasSelectedNote: !!selectedNoteId, 
+      selectedNoteId: selectedNoteId || 'none',
       contentLength: currentContent?.length || 0,
       isInitialized
     });
-  }, [notes, selectedNote, currentContent, isInitialized]);
+  }, [notes, selectedNoteId, currentContent, isInitialized]);
+
+  // Helper function to update current content
+  const updateCurrentContent = (content: string) => {
+    setCurrentContent(content);
+  };
+  
+  // Helper function to select a note for editing
+  const selectNoteForEdit = (note: any) => {
+    selectNote(note.id);
+    setCurrentContent(note.content);
+  };
 
   const handleSave = () => {
     console.log('Attempting to save note', { 
-      hasSelectedNote: !!selectedNote,
+      hasSelectedNote: !!selectedNoteId,
       contentValid: !!currentContent?.trim()
     });
     
@@ -84,15 +94,16 @@ export const Notes = () => {
     }
     
     try {
-      if (selectedNote) {
-        console.log('Updating existing note:', selectedNote.id);
-        updateNote(selectedNote.id, currentContent);
-        // Event emitted by the updateNote action
+      if (selectedNoteId) {
+        console.log('Updating existing note:', selectedNoteId);
+        updateNote(selectedNoteId, { content: currentContent });
+        selectNote(null);
+        setCurrentContent("");
         toast.success('Note updated successfully');
       } else {
         console.log('Creating new note');
-        addNote();
-        // Event emitted by the addNote action
+        addNote({ content: currentContent });
+        setCurrentContent("");
         toast.success('Note created successfully');
       }
     } catch (error) {
@@ -106,7 +117,17 @@ export const Notes = () => {
     const handleNoteFromHabit = (data: any) => {
       console.log('Creating note from habit:', data);
       // Implement creation of note from habit data
-      // This would typically set content and then call addNote
+      if (data && data.content && data.habitId) {
+        addNote({ 
+          content: data.content,
+          title: `Journal: ${data.habitName || 'Habit'}`,
+          tags: [{ name: 'journal', color: 'blue' }],
+          relationships: [{
+            entityId: data.habitId,
+            entityType: 'habit'
+          }]
+        });
+      }
     };
     
     eventManager.on('note:create-from-habit', handleNoteFromHabit);
@@ -114,7 +135,12 @@ export const Notes = () => {
     return () => {
       eventManager.off('note:create-from-habit', handleNoteFromHabit);
     };
-  }, [addNote, updateCurrentContent]);
+  }, [addNote]);
+
+  // Find selected note
+  const selectedNote = selectedNoteId 
+    ? notes.find(note => note.id === selectedNoteId) 
+    : null;
 
   // Show loading state while initializing
   if (!isInitialized) {
@@ -130,10 +156,10 @@ export const Notes = () => {
     <div className="flex flex-col gap-4">
       <NotesEditor
         selectedNote={selectedNote}
-        content={currentContent || ''}
+        content={currentContent}
         onChange={updateCurrentContent}
         onSave={handleSave}
-        isEditing={!!selectedNote}
+        isEditing={!!selectedNoteId}
       />
       
       <SavedNotes
@@ -141,7 +167,11 @@ export const Notes = () => {
         onEditNote={selectNoteForEdit}
         onDeleteNote={deleteNote}
         onUpdateTagColor={(noteId, tagName, color) => {
-          addTagToNote(noteId, tagName, color);
+          updateNote(noteId, { 
+            tags: selectedNote?.tags?.map(tag => 
+              tag.name === tagName ? { ...tag, color } : tag
+            ) || []
+          });
         }}
       />
     </div>
