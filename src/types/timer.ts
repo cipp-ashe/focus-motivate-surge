@@ -14,21 +14,8 @@ export interface TimerProps {
   setFavorites?: React.Dispatch<React.SetStateAction<Quote[]>>;
 }
 
-export interface TimerState {
-  timeLeft: number;
-  isRunning: boolean;
-  isPaused: boolean;
-  isComplete: boolean;
-  startTime: Date | null;
-  endTime: Date | null;
-  pauseCount: number;
-  lastPauseTimestamp: Date | null;
-  pausedTimeTotal: number;
-  extensionTimeTotal: number;
-  metrics?: TimerStateMetrics;
-  showCompletion?: boolean;
-  completionCelebrated?: boolean;
-}
+// Re-export the standardized TimerState from index.ts
+export { TimerState } from './timer/index';
 
 // Re-export key types for backwards compatibility
 export type { Quote, SoundOption } from './timer/models';

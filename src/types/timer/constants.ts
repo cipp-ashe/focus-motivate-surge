@@ -1,18 +1,26 @@
 
+/**
+ * Timer constants used throughout the application
+ */
 export const TIMER_CONSTANTS = {
-  DEFAULT_DURATION: 25 * 60, // 25 minutes in seconds
-  MIN_DURATION: 1 * 60, // 1 minute in seconds
-  MAX_DURATION: 120 * 60, // 2 hours in seconds
+  // Default timer duration in minutes (25 minutes)
+  DEFAULT_DURATION_MINUTES: 25,
+  
+  // Default timer duration in seconds (25 minutes)
+  DEFAULT_DURATION: 25 * 60,
+  
+  // Minutes to add when using the "Add Time" button
   ADD_TIME_MINUTES: 5,
-  MAX_ADD_TIME_MINUTES: 30,
-  TICK_INTERVAL: 1000, // 1 second in milliseconds
+  
+  // Maximum timer duration in minutes
+  MAX_DURATION_MINUTES: 120,
+  
+  // Minimum timer duration in minutes
+  MIN_DURATION_MINUTES: 1,
+  
+  // Default break duration in minutes (5 minutes)
+  DEFAULT_BREAK_DURATION: 5 * 60,
+  
+  // Sound options
+  DEFAULT_SOUND: 'bell'
 };
-
-export const SOUND_OPTIONS = [
-  { value: 'bell', label: 'Bell' },
-  { value: 'chime', label: 'Chime' },
-  { value: 'gong', label: 'Gong' },
-  { value: 'notification', label: 'Notification' },
-  { value: 'success', label: 'Success' },
-  { value: 'none', label: 'None' }
-];

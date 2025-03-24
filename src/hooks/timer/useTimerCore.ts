@@ -5,6 +5,7 @@ import { timerReducer } from './useTimerReducer';
 import { UseTimerOptions } from './types/UseTimerTypes';
 import { eventManager } from '@/lib/events/EventManager';
 import { logger } from '@/utils/logManager';
+import { TIMER_CONSTANTS } from '@/types/timer/constants';
 
 export const useTimerCore = (options: UseTimerOptions | number = 25) => {
   // Convert options to standardized format
@@ -13,12 +14,13 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
     : options;
   
   // Extract values with defaults
-  const initialMinutes = initialOptions.initialMinutes ?? 25;
+  const initialMinutes = initialOptions.initialMinutes ?? TIMER_CONSTANTS.DEFAULT_DURATION_MINUTES;
   const onTimeUp = initialOptions.onTimeUp;
   
   // Convert minutes to seconds for internal use
   const initialDuration = initialMinutes * 60;
 
+  // Define initialState that matches the TimerState interface from index.ts
   const initialState: TimerState = {
     timeLeft: initialDuration,
     isRunning: false,
@@ -39,9 +41,7 @@ export const useTimerCore = (options: UseTimerOptions | number = 25) => {
       efficiencyRatio: 0,
       completionStatus: 'Completed On Time',
       isPaused: false,
-      pausedTimeLeft: null,
-      completionDate: undefined,
-      taskId: undefined
+      pausedTimeLeft: null
     }
   };
 

@@ -1,40 +1,63 @@
 
 import { TimerStateMetrics } from '@/types/metrics';
-import { TimerAction, TimerState } from '@/types/timer/index';
+import { TimerState, TimerAction } from '@/types/timer/index';
+import { Dispatch } from 'react';
 
+/**
+ * Options for initializing the useTimer hook
+ */
 export interface UseTimerOptions {
   initialMinutes?: number;
   onTimeUp?: () => void;
+  onDurationChange?: (minutes: number) => void;
+  taskId?: string;
+  taskName?: string;
 }
 
+/**
+ * Return type for the useTimer hook
+ */
 export interface UseTimerReturn {
-  state: TimerState;
-  dispatch: React.Dispatch<TimerAction>;
   timeLeft: number;
   minutes: number;
   isRunning: boolean;
-  isPaused: boolean;
-  showCompletion: boolean;
-  completionCelebrated: boolean;
   metrics: TimerStateMetrics;
-  startTimer: () => void;
-  pauseTimer: () => void;
-  resetTimer: () => Promise<void>;
-  extendTimer: (minutes: number) => void;
+  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
+  start: () => void;
+  pause: () => void;
+  reset: () => void;
+  addTime: (minutes: number) => void;
   setMinutes: (minutes: number) => void;
   completeTimer: () => Promise<void>;
-  updateMetrics: (updates: any) => void;
 }
 
+/**
+ * Props for the timer actions hook with legacy interface
+ */
+export interface TimerActionProps {
+  timeLeft: number;
+  metrics: TimerStateMetrics;
+  updateTimeLeft: (timeLeft: number) => void;
+  updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
+  setIsRunning: (isRunning: boolean) => void;
+  taskName?: string;
+}
+
+/**
+ * Props for the timer actions hook with reducer interface
+ */
 export interface UseTimerActionsProps {
-  dispatch: React.Dispatch<TimerAction>;
-  intervalRef?: React.MutableRefObject<NodeJS.Timeout | null>;
+  dispatch: Dispatch<TimerAction>;
+  state: TimerState;
   resetTimer?: () => Promise<void>;
   extendTimer?: (minutes: number) => void;
   setMinutes?: (minutes: number) => void;
-  updateMetrics?: (updates: any) => void;
+  taskName?: string;
 }
 
+/**
+ * Return type for the timer actions hook
+ */
 export interface UseTimerActionsReturn {
   startTimer: () => void;
   pauseTimer: () => void;
@@ -42,65 +65,5 @@ export interface UseTimerActionsReturn {
   extendTimer: (minutes: number) => void;
   setMinutes: (minutes: number) => void;
   completeTimer: () => Promise<void>;
-  updateMetrics: (updates: any) => void;
-}
-
-// Legacy interface to support existing code during transition
-export interface TimerActionProps {
-  timeLeft: number;
-  metrics: TimerStateMetrics;
-  updateTimeLeft: (timeLeft: number) => void;
   updateMetrics: (updates: Partial<TimerStateMetrics>) => void;
-  setIsRunning: (isRunning: boolean) => void;
-  resetTimer?: () => Promise<void>;
-  extendTimer?: (minutes: number) => void;
-  setMinutes?: (minutes: number) => void;
-}
-
-// Handlers
-export interface TimerHandlerFunctions {
-  start: () => void;
-  pause: () => void;
-  reset: () => Promise<void>;
-  addTime: (minutes: number) => void;
-  completeTimer: () => Promise<void>;
-}
-
-export interface TimerCallbackFunctions {
-  onAddTime?: (minutes: number) => void;
-  onComplete?: (metrics: TimerStateMetrics) => void;
-  onDurationChange?: (minutes: number) => void;
-}
-
-export interface TimerUIState {
-  isExpanded: boolean;
-  showCompletion: boolean;
-  showConfirmation: boolean;
-  completionMetrics: TimerStateMetrics | null;
-  selectedSound: string;
-  isLoadingAudio: boolean;
-}
-
-export interface TimerUIActions {
-  setIsExpanded: (expanded: boolean) => void;
-  setShowCompletion: (show: boolean) => void;
-  setShowConfirmation: (show: boolean) => void;
-  setCompletionMetrics: (metrics: any) => void;
-  testSound: () => void;
-  playSound: () => void;
-}
-
-export interface UseTimerHandlersReturn {
-  handleToggle: () => void;
-  handleAddTime: (minutes: number) => void;
-  handleReset: () => Promise<void>;
-  handleComplete: () => Promise<void>;
-  handleClose: () => void;
-  showResetConfirmation: () => void;
-  handlePause: () => void;
-}
-
-export interface UseTimerViewReturn {
-  getTimerCircleProps: () => any;
-  getTimerControlsProps: (size?: 'sm' | 'md' | 'lg') => any;
 }
