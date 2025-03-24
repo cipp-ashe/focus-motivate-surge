@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { HabitDetail } from '@/types/habits/types';
+import { HabitDetail } from '@/types/habit';
 
 interface InsightsTipsProps {
   name: string;

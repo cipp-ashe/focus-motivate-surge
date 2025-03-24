@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HabitDetail } from '@/types/habits';
+import { HabitDetail } from '@/types/habit';
 import { HabitMetric } from './HabitMetric';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

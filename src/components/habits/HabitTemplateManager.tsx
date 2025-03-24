@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { TemplateSelectionSheet } from './TemplateSelectionSheet';
-import { ActiveTemplate } from '@/types/habits/types';
+import { ActiveTemplate } from '@/types/habit';
 import { ActiveTemplateList } from './ActiveTemplateList';
 
 interface HabitTemplateManagerProps {

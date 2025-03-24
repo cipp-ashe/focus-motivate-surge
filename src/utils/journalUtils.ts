@@ -1,56 +1,73 @@
 
-/**
- * Journal Utilities
- * 
- * Functions for working with journal entries
- */
-import { JOURNAL_PROMPTS } from '@/components/habits/journal/constants';
+import { Note } from "@/types/note";
 
-// Get random prompts for a journal entry
-export const getRandomPrompts = (count: number = 3): string[] => {
-  const allPrompts = [
-    ...JOURNAL_PROMPTS.reflection,
-    ...JOURNAL_PROMPTS.motivation,
-    ...JOURNAL_PROMPTS.general
-  ];
-  
-  // Shuffle and select prompts
-  const shuffled = [...allPrompts].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+/**
+ * Utility functions for journal operations
+ */
+
+/**
+ * Formats a date string for journal display
+ */
+export const formatJournalDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 };
 
-// Generate a default journal template
-export const generateJournalTemplate = (habitName?: string): string => {
-  return `## ${habitName || 'Habit'} Reflection
+/**
+ * Finds a journal entry for a habit on a specific date
+ */
+export const findJournalEntry = (
+  habitId: string,
+  date: string,
+  notes: Note[]
+): Note | undefined => {
+  return notes.find(note => {
+    const relationshipFound = note.relationships?.some(rel => 
+      rel.entityId === habitId && 
+      rel.metadata?.date === date
+    );
+    return relationshipFound;
+  });
+};
 
-Write about your experience with this habit today...
+/**
+ * Gets a list of journal entries for a habit
+ */
+export const getJournalEntriesForHabit = (
+  habitId: string,
+  notes: Note[],
+  limit?: number
+): Note[] => {
+  const entries = notes.filter(note => 
+    note.relationships?.some(rel => rel.entityId === habitId)
+  );
+  
+  // Sort by date, newest first
+  const sorted = entries.sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  
+  return limit ? sorted.slice(0, limit) : sorted;
+};
 
-## Obstacles & Solutions
+/**
+ * Creates a new journal entry from template
+ */
+export const createJournalEntryTemplate = (habitName: string): string => {
+  return `# ${habitName} - ${new Date().toLocaleDateString()}
 
-What challenges did you face? How did you overcome them?
+## Today's Progress
+*How did you do with this habit today?*
+
+## Challenges Faced
+*What made this habit difficult today?*
 
 ## Tomorrow's Plan
-
-How will you improve tomorrow?
+*How will you improve tomorrow?*
 `;
-};
-
-// Create a function to extract key insights from journal text
-export const extractKeyInsights = (content: string): string[] => {
-  // Simple extraction based on structure - in a real app this could be more sophisticated
-  const paragraphs = content.split('\n\n');
-  const insights: string[] = [];
-  
-  paragraphs.forEach(para => {
-    // Look for bullet points, lists, or sections with insights
-    if (para.includes('*') || para.includes('-') || para.includes('#')) {
-      // Extract the first line as an insight
-      const lines = para.split('\n');
-      if (lines[0].trim().length > 0) {
-        insights.push(lines[0].replace(/[#\-*]/g, '').trim());
-      }
-    }
-  });
-  
-  return insights.slice(0, 3); // Return top 3 insights
 };

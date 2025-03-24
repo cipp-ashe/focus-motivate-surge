@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TemplateCard } from './TemplateCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getRecommendedTemplates } from '@/data/recommendedTemplates';
-import { HabitTemplate } from '@/types/habits/types';
+import { HabitTemplate } from '@/types/habit';
 
 interface TemplateSelectionSheetProps {
   open: boolean;

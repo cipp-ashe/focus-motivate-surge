@@ -45,3 +45,6 @@ export {
   useHabitTaskChecker,
   useHabitTaskCleanup
 } from './tasks/habitTasks';
+
+// Timer hooks
+export { useTimer } from './timer/useTimer';

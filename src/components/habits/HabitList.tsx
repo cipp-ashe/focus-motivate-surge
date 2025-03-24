@@ -3,7 +3,7 @@ import React from 'react';
 import { HabitCard } from './HabitCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import type { Habit } from '@/types/habits';
+import type { Habit } from '@/types/habit';
 
 interface HabitListProps {
   habits: Habit[];

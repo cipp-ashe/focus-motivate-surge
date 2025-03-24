@@ -7,9 +7,9 @@
  */
 
 // Import base types
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 import { HabitEventType, HabitEventPayloadMap } from './habit-events';
-import { MetricType } from '@/types/habits/types';
+import { MetricType } from '@/types/habit';
 
 // Define timer event types (imported from existing types if available)
 export type TimerEventType = 
