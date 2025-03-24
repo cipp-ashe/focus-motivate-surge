@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
   DialogContent,
@@ -27,11 +27,11 @@ export const JournalDialog: React.FC<JournalDialogProps> = ({
   onOpenChange,
   currentTask
 }) => {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [content, setContent] = React.useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState('');
 
   // Initialize content when dialog opens or task changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentTask) {
       setContent(currentTask.entry || '');
     }

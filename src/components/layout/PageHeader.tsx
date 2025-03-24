@@ -6,7 +6,7 @@ interface PageHeaderProps {
   className?: string;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ 
+export const PageHeader: React.FC<PageHeaderProps> = ({ 
   children, 
   className = "" 
 }) => {
@@ -16,5 +16,3 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     </header>
   );
 };
-
-export default PageHeader;

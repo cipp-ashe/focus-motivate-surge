@@ -9,7 +9,7 @@ interface PageTitleProps {
   className?: string;
 }
 
-const PageTitle: React.FC<PageTitleProps> = ({
+export const PageTitle: React.FC<PageTitleProps> = ({
   title,
   subtitle,
   icon,
@@ -31,5 +31,3 @@ const PageTitle: React.FC<PageTitleProps> = ({
     </div>
   );
 };
-
-export default PageTitle;
