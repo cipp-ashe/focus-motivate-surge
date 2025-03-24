@@ -1,19 +1,25 @@
-
 import mitt from 'mitt';
-import type { EventType, EventPayload, EventCallback, EventUnsubscribe } from '@/types/events';
+import type { EventType, EventPayload, EventCallback } from '@/types/events';
 import { logger } from '@/utils/logManager';
 
 /**
- * EventManager is a modern event management system for the application
- * that replaces the legacy eventBus with a more typesafe implementation.
+ * EventManager singleton for centralized event handling
  */
-class EventManager {
+export class EventManager {
+  private static instance: EventManager;
   private events = mitt<Record<EventType, any>>();
   private eventCounts: Record<string, number> = {};
   private debug = false;
 
-  constructor() {
+  private constructor() {
     this.resetEventCounts();
+  }
+
+  public static getInstance(): EventManager {
+    if (!EventManager.instance) {
+      EventManager.instance = new EventManager();
+    }
+    return EventManager.instance;
   }
 
   /**
@@ -121,8 +127,8 @@ class EventManager {
   }
 }
 
-// Singleton instance
-export const eventManager = new EventManager();
+// Export the singleton instance
+export const eventManager = EventManager.getInstance();
 
-// Export the class for testing
+// For testing purposes
 export default EventManager;

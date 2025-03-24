@@ -1,4 +1,3 @@
-
 import { 
   HabitTemplate, 
   HabitDetail, 
@@ -8,7 +7,7 @@ import {
   DEFAULT_WEEKDAYS,
   DEFAULT_ALL_DAYS,
   DayOfWeek
-} from '@/types/habits/types';
+} from '@/types/habits';
 
 /**
  * Helper function to create a habit detail with consistent structure

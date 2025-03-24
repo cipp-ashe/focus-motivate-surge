@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MetricType } from '@/types/habits/types';
+import { MetricType } from '@/types/habits';
 import { eventManager } from '@/lib/events/EventManager';
 
 interface HabitMetricProps {
