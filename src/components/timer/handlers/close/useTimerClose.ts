@@ -14,7 +14,7 @@ export const useTimerClose = ({
   // Handle timer close
   const handleClose = useCallback(() => {
     // Use eventManager to emit the close event
-    eventManager.emit('timer:close', { taskName });
+    eventManager.emit('timer:close', undefined);
     
     // Reset the timer
     reset();

@@ -16,6 +16,7 @@ import { HabitDetail } from '@/types/habits';
 import { NoteProvider } from '@/contexts/notes/NoteContext';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { motion } from 'framer-motion';
+import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-6 border border-red-300 bg-red-50/30 dark:bg-red-900/10 rounded-xl shadow-sm backdrop-blur-sm">
@@ -61,6 +62,7 @@ const HabitsPage = () => {
 const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
   const { templates } = useHabitContext();
   const { todaysHabits, refreshHabits } = useTodaysHabits();
+  const { handleHabitSchedule } = useHabitTaskProcessor();
   
   const { completeHabit, dismissHabit } = useHabitCompletion();
   
@@ -78,7 +80,7 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
   const handleAddHabitToTasks = (habit: HabitDetail) => {
     console.log('Adding habit to tasks:', habit.id, habit.name);
     
-    eventManager.emit('habit:schedule', {
+    handleHabitSchedule({
       habitId: habit.id,
       templateId: habit.relationships?.templateId || '',
       name: habit.name,

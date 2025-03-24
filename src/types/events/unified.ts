@@ -47,7 +47,8 @@ export type CoreEventType =
   | 'habit:template-delete'
   | 'habit:template-remove'
   | 'habit:dismissed'
-  | 'habit:select';
+  | 'habit:select'
+  | 'habit:schedule';
 
 // Define the unified event type that includes both core, habit and timer events
 export type EventType = CoreEventType | HabitEventType | TimerEventType | string;
@@ -88,6 +89,7 @@ export interface CoreEventPayloadMap {
   'habit:template-remove': { templateId: string };
   'habit:dismissed': { habitId: string; date: string };
   'habit:select': { habitId: string };
+  'habit:schedule': HabitTaskEvent;
 }
 
 // Combine core, habit and timer event payload maps

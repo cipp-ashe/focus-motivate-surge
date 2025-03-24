@@ -4,14 +4,12 @@ import { Task, TaskType } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitTaskEvent } from '@/types/events/unified';
 import { MetricType } from '@/types/habits/types';
-import { useHabitTaskCreator } from './useHabitTaskCreator';
+import { habitTaskOperations } from '@/lib/operations/tasks/habit';
 
 /**
  * Hook for processing habit tasks
  */
 export const useHabitTaskProcessor = () => {
-  const { createHabitTask } = useHabitTaskCreator();
-
   /**
    * Process tasks for a specific habit
    */
@@ -40,17 +38,17 @@ export const useHabitTaskProcessor = () => {
     const { habitId, name, duration, templateId, date, metricType } = event;
     
     // Process the habit task with metric type
-    const taskId = createHabitTask(
+    const taskId = habitTaskOperations.createHabitTask(
       habitId, 
       templateId, 
       name, 
-      date, 
       duration,
+      date,
       { metricType }
     );
     
     return taskId;
-  }, [createHabitTask]);
+  }, []);
 
   /**
    * Process any pending tasks
@@ -77,6 +75,29 @@ export const useHabitTaskProcessor = () => {
         date,
         templateId
       });
+    }
+
+    // Mark corresponding task as completed if it exists
+    const tasksStr = localStorage.getItem('tasks');
+    if (tasksStr) {
+      try {
+        const tasks = JSON.parse(tasksStr);
+        if (Array.isArray(tasks)) {
+          const habitTask = tasks.find(task => 
+            task.relationships?.habitId === habitId && 
+            task.relationships?.date === date
+          );
+          
+          if (habitTask && !habitTask.completed) {
+            eventManager.emit('task:complete', { 
+              taskId: habitTask.id,
+              metrics: { value }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing tasks:', e);
+      }
     }
   }, []);
   
