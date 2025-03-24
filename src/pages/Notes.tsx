@@ -24,7 +24,11 @@ const NotesContent = () => {
       if (selectedNoteId) {
         updateNote(selectedNoteId, { content: currentContent });
       } else {
-        addNote({ content: currentContent });
+        addNote({ 
+          title: 'Untitled Note', 
+          content: currentContent,
+          tags: [] 
+        });
       }
     }
   };

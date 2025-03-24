@@ -31,6 +31,7 @@ export type DifficultyLevel = 'easy' | 'medium' | 'hard' | 'expert';
 
 // Define tag colors
 export type TagColor =
+  | 'default'
   | 'red'
   | 'green'
   | 'blue'
@@ -43,10 +44,29 @@ export type TagColor =
   | 'indigo'
   | 'gray';
 
+// Define the Tag type
+export interface Tag {
+  id: string;
+  name: string;
+  color: TagColor;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// Define the TagRelation type
+export interface TagRelation {
+  id: string;
+  tagId: string;
+  entityId: string;
+  entityType: EntityType;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // Add isValidTagColor utility function
 export const isValidTagColor = (color: string): color is TagColor => {
   const validColors: TagColor[] = [
-    'red', 'green', 'blue', 'yellow', 'purple',
+    'default', 'red', 'green', 'blue', 'yellow', 'purple',
     'pink', 'orange', 'teal', 'cyan', 'indigo', 'gray'
   ];
   return validColors.includes(color as TagColor);
