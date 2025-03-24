@@ -14,11 +14,11 @@ export const NewTaskTypeSelector: React.FC<NewTaskTypeSelectorProps> = ({ onSele
     'regular',
     'timer',
     'checklist',
-    'counter',
-    'rating',
     'journal',
     'screenshot',
-    'voicenote'
+    'voicenote',
+    'counter' as TaskType,
+    'rating' as TaskType
   ];
   
   return (

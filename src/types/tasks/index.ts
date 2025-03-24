@@ -1,121 +1,70 @@
 
 /**
- * Unified Task Type System
- * 
- * This module defines all task-related types including both standard and integrated types
+ * Task Types Definition
  */
 
-// Basic task types - standard
-export type StandardTaskType = 
-  | 'regular' 
-  | 'checklist' 
+import { MetricType } from '../habits';
+
+// Unified task type
+export type TaskType = 
+  | 'regular'
+  | 'timer'
+  | 'checklist'
+  | 'journal'
+  | 'screenshot'
+  | 'voicenote'
+  | 'habit'
   | 'counter'
   | 'rating';
 
-// Integrated task types - these interface with other subsystems
-export type IntegratedTaskType = 
-  | 'timer' 
-  | 'journal' 
-  | 'screenshot' 
-  | 'voicenote';
-
-// Combined task type
-export type TaskType = 
-  | StandardTaskType 
-  | IntegratedTaskType;
-
-// Task priority
-export type TaskPriority = 'low' | 'medium' | 'high';
-
-// Task status
-export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'archived' | 'failed' | 'started' | 'delayed' | 'dismissed';
-
-// Checklist item for checklist tasks
-export interface ChecklistItem {
-  id: string;
-  text: string;
-  completed: boolean;
+// Tag definition
+export interface Tag {
+  name: string;
+  color?: string;
 }
 
-// Task relationships
-export interface TaskRelationships {
-  habitId?: string;
-  templateId?: string;
-  date?: string;
-  metricType?: string;
-  noteId?: string;
-  journalId?: string;
-  parentId?: string;
-  projectId?: string;
-  [key: string]: any;
-}
-
-// Task scheduling
-export interface TaskSchedule {
-  type: 'once' | 'daily' | 'weekly' | 'monthly';
-  startDate: string;
-  endDate?: string;
-  daysOfWeek?: number[]; // 0-6: Sunday-Saturday
-  time?: string; // HH:MM format
-}
-
-// Base task interface
+// Task definition
 export interface Task {
   id: string;
   name: string;
   description?: string;
   taskType: TaskType;
   completed: boolean;
+  duration: number;
   createdAt: string;
   completedAt?: string;
-  updatedAt?: string;
+  dismissedAt?: string;
+  clearReason?: 'completed' | 'dismissed' | 'manual';
+  priority?: 'low' | 'medium' | 'high';
   dueDate?: string;
-  priority?: TaskPriority;
-  status?: TaskStatus;
-  parentTaskId?: string;
-  tags?: string[];
-  
-  // Type-specific properties
-  duration?: number; // In seconds, for timer and time-tracked tasks
-  checklistItems?: ChecklistItem[]; // For checklist tasks
-  count?: number; // For counter tasks
-  target?: number; // Target value for counter tasks
-  rating?: number; // For rating tasks
-  scale?: number; // Rating scale (e.g. 1-5, 1-10)
-
-  // Integrated type properties
-  imageUrl?: string; // For screenshot tasks
-  imageType?: string; // For screenshot tasks
-  journalEntry?: string; // For journal tasks
-  voiceNoteUrl?: string; // For voice note tasks
-  voiceNoteText?: string; // Transcript for voice note tasks
-  
-  // Timer-specific properties
-  timerMinutes?: number;
+  tags?: Tag[];
+  recurrence?: any;
+  subtasks?: Task[];
+  parentId?: string;
+  relationships?: {
+    habitId?: string;
+    templateId?: string;
+    date?: string;
+    noteId?: string;
+    metricType?: MetricType;
+  };
+  journalEntry?: string;
   timerNotes?: string;
-
-  // Scheduling
-  schedule?: TaskSchedule;
-
-  // Relationships with other entities
-  relationships?: TaskRelationships;
+  timerMinutes?: number;
+  rating?: number;
+  count?: number;
+  voiceNoteUrl?: string;
+  voiceNoteText?: string;
+  voiceNoteDuration?: number;
 }
 
-// Task creation interface (without required id and timestamps)
-export type TaskCreationParams = Omit<Task, 'id' | 'createdAt'> & { id?: string };
-
-// Task update interface
-export type TaskUpdateParams = Partial<Task>;
-
-// Task filter options
-export interface TaskFilter {
-  completed?: boolean;
-  taskType?: TaskType | TaskType[];
-  dueDate?: { from?: string; to?: string };
-  priority?: TaskPriority | TaskPriority[];
-  tags?: string[];
-  search?: string;
+// Task relationship
+export interface TaskRelationship {
+  taskId: string;
+  entityId: string;
+  entityType: string;
+  relationshipType?: string;
+  metadata?: any;
 }
 
-// Storage key for tasks
-export const TASKS_STORAGE_KEY = 'tasks';
+export * from './extensions';

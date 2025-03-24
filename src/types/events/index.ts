@@ -1,69 +1,64 @@
 
 /**
- * Event system unified exports
+ * Event Types Module
+ * 
+ * This is the main entry point for all event-related types.
  */
 
-// Import from base module
-import { EventUnsubscribe, BaseEventCallback } from './base';
-
-// Import from domain-specific modules
+// Import all event type definitions
 import { TaskEventType, TaskEventPayloadMap } from './task-events';
-import { HabitEventType, HabitEventPayloadMap, HabitTaskEvent, HabitNoteData } from './habit-events';
-import { NoteEventType, NoteEventPayloadMap } from './note-events';
-import { TimerEventType, TimerEventPayloadMap } from './timer-events';
-import { 
-  VoiceNoteEventType, VoiceNoteEventPayloadMap,
-  RelationshipEventType, RelationshipEventPayloadMap,
-  AppEventType, AppEventPayloadMap,
-  WildcardEventType, WildcardEventPayloadMap
-} from './misc-events';
-
-// Import journal events
 import { JournalEventType, JournalEventPayloadMap } from './journal-events';
+import { HabitEventType, HabitEventPayloadMap } from './habit-events';
 
-// Define all possible event types in the application
-export type EventType =
-  | TaskEventType
-  | HabitEventType
-  | NoteEventType
-  | TimerEventType
-  | VoiceNoteEventType
-  | JournalEventType
-  | RelationshipEventType
-  | AppEventType
-  | WildcardEventType;
+// Define additional custom events
+export type CustomEventType = 
+  | 'tag:link'
+  | 'tag:unlink'
+  | 'habit:select'
+  | 'habit:dismissed'
+  | 'habit:tasks-sync'
+  | 'habit:check-pending'
+  | 'journal:create'
+  | 'journal:update'
+  | 'journal:delete'
+  | 'voice-note:create'
+  | 'task:add'
+  | 'timer:set-task'
+  | 'quote:link-task'
+  | 'relationship:batch-update';
 
-// Define the base payload interface for events 
-export type EventPayloadMap = 
-  & TaskEventPayloadMap
-  & HabitEventPayloadMap
-  & NoteEventPayloadMap
-  & TimerEventPayloadMap
-  & VoiceNoteEventPayloadMap
-  & JournalEventPayloadMap
-  & RelationshipEventPayloadMap
-  & AppEventPayloadMap
-  & WildcardEventPayloadMap;
+// Union of all event types
+export type EventType = 
+  | TaskEventType 
+  | JournalEventType 
+  | HabitEventType 
+  | CustomEventType;
 
-// Generic type to get the appropriate payload for a given event type
-export type EventPayload<E extends EventType> = E extends keyof EventPayloadMap ? EventPayloadMap[E] : never;
-
-// Type for all event callbacks
-export type EventCallback<E extends EventType> = (payload: E extends keyof EventPayloadMap ? EventPayloadMap[E] : any) => void;
-
-// Re-export domain-specific types for convenience - using 'export type' syntax for isolatedModules compatibility
-export type { EventUnsubscribe };
-export type { HabitTaskEvent };
-export type { HabitNoteData };
-export type { VoiceNoteEventType };
-export type { JournalEventType };
-export type { JournalEventPayloadMap } from './journal-events';
-
-// JournalEntry export for journal components
-export interface JournalEntry {
-  id: string;
-  content: string;
-  date: string;
-  habitId?: string;
-  templateId?: string;
+// Union of all event payload maps
+export interface EventPayloadMap extends 
+  TaskEventPayloadMap,
+  JournalEventPayloadMap,
+  HabitEventPayloadMap {
+  'tag:link': { taskId: string; tag: string };
+  'tag:unlink': { taskId: string; tag: string };
+  'habit:select': string;
+  'habit:dismissed': { habitId: string; date: string };
+  'habit:tasks-sync': undefined;
+  'habit:check-pending': any;
+  'journal:create': { id: string; content: string; date: string; habitId?: string };
+  'journal:update': { id: string; content: string };
+  'journal:delete': { id: string };
+  'voice-note:create': { id: string; text: string; audioUrl: string };
+  'task:add': { id: string; name: string };
+  'timer:set-task': { id: string; name: string; duration: number; taskId?: string; completed?: boolean; createdAt?: string };
+  'quote:link-task': { quoteId: string; taskId: string };
+  'relationship:batch-update': any;
 }
+
+// Callback type for event handlers
+export type EventCallback<T extends EventType> = (payload: EventPayloadMap[T]) => void;
+
+// Export all event-specific types
+export * from './task-events';
+export * from './journal-events';
+export * from './habit-events';

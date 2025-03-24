@@ -1,17 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Settings, Trash } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
-import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { ActiveTemplate, HabitDetail } from '@/types/habits';
+import { ActiveTemplate, HabitDetail } from '@/types/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
+import { useHabitContext } from '@/contexts/habits/HabitContext';
 
 interface HabitTemplateManagerProps {
   activeTemplates: ActiveTemplate[];
@@ -30,10 +29,10 @@ export const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
     description: ''
   });
   
-  const { createTemplate, updateTemplateDetails, deleteTemplate } = useTemplateManagement();
+  const { addTemplate, updateTemplate, removeTemplate } = useHabitContext();
   
   // Handle template creation
-  const handleCreateTemplate = () => {
+  const handleCreateTemplate = useCallback(() => {
     if (!newTemplate.name.trim()) {
       toast.error('Template name is required');
       return;
@@ -49,8 +48,8 @@ export const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
       activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
     };
     
-    // Call the create template function
-    createTemplate(template);
+    // Call the addTemplate function
+    addTemplate(template);
     
     // Emit event for custom template creation
     eventManager.emit('habit:custom-template-create', {
@@ -63,14 +62,14 @@ export const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
     setShowCreateDialog(false);
     
     toast.success('Custom template created');
-  };
+  }, [addTemplate, newTemplate]);
   
   // Handle template deletion
-  const handleDeleteTemplate = (templateId: string) => {
+  const handleDeleteTemplate = useCallback((templateId: string) => {
     // Confirm deletion
     if (window.confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
       // Call the delete template function
-      deleteTemplate(templateId);
+      removeTemplate(templateId);
       
       // Emit event for custom template deletion
       eventManager.emit('habit:custom-template-delete', { templateId });
@@ -80,28 +79,27 @@ export const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
       
       toast.success('Template deleted');
     }
-  };
+  }, [removeTemplate]);
   
   // Open template settings
-  const openTemplateSettings = (template: ActiveTemplate) => {
+  const openTemplateSettings = useCallback((template: ActiveTemplate) => {
     setSelectedTemplate(template);
     setShowSettingsDialog(true);
-  };
+  }, []);
   
   // Save template settings
-  const saveTemplateSettings = () => {
+  const saveTemplateSettings = useCallback(() => {
     if (!selectedTemplate) return;
     
     // Update template details
-    updateTemplateDetails(
+    updateTemplate(
       selectedTemplate.templateId,
-      selectedTemplate.name,
-      selectedTemplate.description || ''
+      selectedTemplate
     );
     
     setShowSettingsDialog(false);
     toast.success('Template settings updated');
-  };
+  }, [selectedTemplate, updateTemplate]);
   
   return (
     <>

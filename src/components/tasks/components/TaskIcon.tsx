@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Check, Clock, List, Maximize2, Mic, FileType, Star, Hash } from 'lucide-react';
-import { Task, TaskType } from '@/types/tasks';
+import { TaskType } from '@/types/tasks';
 
 interface TaskIconProps {
   taskType?: TaskType;
@@ -33,10 +33,10 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
     case 'journal':
       IconComponent = FileType;
       break;
-    case 'counter':
+    case 'counter' as TaskType:
       IconComponent = Hash;
       break;
-    case 'rating':
+    case 'rating' as TaskType:
       IconComponent = Star;
       break;
     case 'regular':
@@ -60,9 +60,9 @@ export const getTaskTypeLabel = (taskType?: TaskType): string => {
       return 'Journal';
     case 'voicenote':
       return 'Voice Note';
-    case 'counter':
+    case ('counter' as TaskType):
       return 'Counter';
-    case 'rating':
+    case ('rating' as TaskType):
       return 'Rating';
     case 'regular':
     default:
