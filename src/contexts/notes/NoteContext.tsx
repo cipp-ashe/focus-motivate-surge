@@ -1,122 +1,192 @@
 
-import React, { createContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { Note, Tag, createNote, createVoiceNote } from '@/types/notes';
 import { noteReducer } from './noteReducer';
-import { initialState } from './initialState';
-import { toast } from 'sonner';
+import { useEvent } from '@/hooks/useEvent';
 import { eventManager } from '@/lib/events/EventManager';
-import type { Note } from '@/types/notes';
-import { deprecate } from '@/utils/deprecation';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 
-// Define context type
-interface NoteContextType {
-  state: {
-    notes: Note[];
-    selectedNoteId: string | null;
-  };
-  dispatch: React.Dispatch<any>;
+// Define the state interface
+export interface NoteState {
+  notes: Note[];
+  selectedNoteId: string | null;
+  isLoaded: boolean;
 }
 
-// Create context with default value
-export const NoteContext = createContext<NoteContextType>({
-  state: initialState,
-  dispatch: () => null,
-});
+// Define the actions interface
+export interface NoteActions {
+  addNote: (note: Omit<Note, 'id'>) => string;
+  updateNote: (id: string, updates: Partial<Note>) => void;
+  deleteNote: (id: string) => void;
+  selectNote: (id: string | null) => void;
+  addVoiceNote: (audioUrl: string, duration: number, transcript?: string, title?: string) => string;
+}
 
-// Provider component
+// Initial state
+const initialState: NoteState = {
+  notes: [],
+  selectedNoteId: null,
+  isLoaded: false
+};
+
+// Create the contexts
+const NoteStateContext = createContext<NoteState | undefined>(undefined);
+const NoteActionsContext = createContext<NoteActions | undefined>(undefined);
+
+// Define action types
+type NoteAction =
+  | { type: 'LOAD_NOTES'; payload: Note[] }
+  | { type: 'ADD_NOTE'; payload: Note }
+  | { type: 'UPDATE_NOTE'; payload: { id: string; updates: Partial<Note> } }
+  | { type: 'DELETE_NOTE'; payload: string }
+  | { type: 'SELECT_NOTE'; payload: string | null };
+
 export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(noteReducer, initialState);
 
-  // Load notes from localStorage on initial render
+  // Load notes on initial render
   useEffect(() => {
-    try {
-      const savedNotes = localStorage.getItem('notes');
-      if (savedNotes) {
-        const parsedNotes = JSON.parse(savedNotes);
-        dispatch({ type: 'SET_NOTES', payload: parsedNotes });
+    const loadNotes = () => {
+      try {
+        const storedNotes = localStorage.getItem('notes');
+        if (storedNotes) {
+          const parsedNotes = JSON.parse(storedNotes);
+          dispatch({ type: 'LOAD_NOTES', payload: parsedNotes });
+        } else {
+          dispatch({ type: 'LOAD_NOTES', payload: [] });
+        }
+      } catch (error) {
+        console.error('Error loading notes:', error);
+        dispatch({ type: 'LOAD_NOTES', payload: [] });
       }
-    } catch (error) {
-      console.error('Error loading notes from localStorage:', error);
-      toast.error('Failed to load saved notes');
-    }
+    };
+
+    loadNotes();
   }, []);
 
-  // Save notes to localStorage whenever they change
+  // Save notes whenever they change
   useEffect(() => {
-    try {
-      localStorage.setItem('notes', JSON.stringify(state.notes));
-    } catch (error) {
-      console.error('Error saving notes to localStorage:', error);
-      toast.error('Failed to save notes');
-    }
-  }, [state.notes]);
-
-  // Set up event handlers
-  useEffect(() => {
-    const handleAddNote = (data: { note: Note }) => {
-      // Avoid duplicates
-      if (!state.notes.some(note => note.id === data.note.id)) {
-        dispatch({ type: 'ADD_NOTE', payload: data.note });
-        toast.success('Note added');
+    if (state.isLoaded) {
+      try {
+        localStorage.setItem('notes', JSON.stringify(state.notes));
+      } catch (error) {
+        console.error('Error saving notes:', error);
       }
-    };
+    }
+  }, [state.notes, state.isLoaded]);
 
-    const handleUpdateNote = (data: { id: string; updates: Partial<Note> }) => {
-      dispatch({ 
-        type: 'UPDATE_NOTE', 
-        payload: { id: data.id, updates: data.updates } 
-      });
-      toast.success('Note updated');
-    };
+  // Action handlers
+  const addNote = useCallback((noteData: Omit<Note, 'id'>): string => {
+    const id = uuidv4();
+    const note: Note = { id, ...noteData };
+    
+    dispatch({ type: 'ADD_NOTE', payload: note });
+    eventManager.emit('note:add', { note });
+    
+    return id;
+  }, []);
 
-    const handleDeleteNote = (data: { id: string }) => {
-      dispatch({ type: 'DELETE_NOTE', payload: data.id });
-      toast.success('Note deleted');
-    };
+  const updateNote = useCallback((id: string, updates: Partial<Note>) => {
+    dispatch({ type: 'UPDATE_NOTE', payload: { id, updates } });
+    eventManager.emit('note:update', { id, updates });
+  }, []);
 
-    const handleSelectNote = (data: { id: string | null }) => {
-      dispatch({ type: 'SELECT_NOTE', payload: data.id });
-    };
+  const deleteNote = useCallback((id: string) => {
+    dispatch({ type: 'DELETE_NOTE', payload: id });
+    eventManager.emit('note:delete', { id });
+  }, []);
 
-    // Subscribe to events
-    const unsubscribeAdd = eventManager.on('note:add', handleAddNote);
-    const unsubscribeUpdate = eventManager.on('note:update', handleUpdateNote);
-    const unsubscribeDelete = eventManager.on('note:delete', handleDeleteNote);
-    const unsubscribeSelect = eventManager.on('note:select', handleSelectNote);
+  const selectNote = useCallback((id: string | null) => {
+    dispatch({ type: 'SELECT_NOTE', payload: id });
+    eventManager.emit('note:select', { id });
+  }, []);
+  
+  // New method to add a voice note
+  const addVoiceNote = useCallback((
+    audioUrl: string, 
+    duration: number, 
+    transcript: string = '',
+    title: string = `Voice Note ${new Date().toLocaleString()}`
+  ): string => {
+    const voiceNoteData = createVoiceNote(
+      title,
+      audioUrl,
+      duration,
+      transcript,
+      [{ name: 'voice-note', color: 'red' }]
+    );
+    
+    const id = addNote(voiceNoteData);
+    
+    toast.success('Voice note saved');
+    eventManager.emit('voice-note:add', { id, audioUrl, duration, transcript });
+    
+    return id;
+  }, [addNote]);
 
-    return () => {
-      // Clean up event listeners
-      unsubscribeAdd();
-      unsubscribeUpdate();
-      unsubscribeDelete();
-      unsubscribeSelect();
-    };
-  }, [state.notes]);
+  // Handle events
+  useEvent('note:add', ({ note }) => {
+    if (!note.id) {
+      addNote(note);
+    }
+  });
+
+  useEvent('note:delete', ({ id }) => {
+    deleteNote(id);
+  });
+
+  useEvent('note:update', ({ id, updates }) => {
+    updateNote(id, updates);
+  });
+
+  useEvent('note:select', ({ id }) => {
+    selectNote(id);
+  });
+  
+  // New event handler for voice notes
+  useEvent('voice-note:create', ({ audioUrl, duration, transcript, title }) => {
+    addVoiceNote(audioUrl, duration, transcript, title);
+  });
+
+  const actions: NoteActions = {
+    addNote,
+    updateNote,
+    deleteNote,
+    selectNote,
+    addVoiceNote
+  };
 
   return (
-    <NoteContext.Provider value={{ state, dispatch }}>
-      {children}
-    </NoteContext.Provider>
+    <NoteStateContext.Provider value={state}>
+      <NoteActionsContext.Provider value={actions}>
+        {children}
+      </NoteActionsContext.Provider>
+    </NoteStateContext.Provider>
   );
 };
 
-// Import hooks from their new location for proper type checking
-import { useNoteActions as importedNoteActions, useNoteState as importedNoteState } from './hooks';
-
-// Export hooks with deprecation warnings for direct imports from NoteContext
-export const useNoteActions = () => {
-  deprecate(
-    'NoteContext', 
-    'Direct import of useNoteActions from NoteContext', 
-    'Import from @/contexts/notes/hooks instead'
-  );
-  return importedNoteActions();
-};
-
+// Custom hooks for accessing the contexts
 export const useNoteState = () => {
-  deprecate(
-    'NoteContext', 
-    'Direct import of useNoteState from NoteContext', 
-    'Import from @/contexts/notes/hooks instead'
-  );
-  return importedNoteState();
+  const context = useContext(NoteStateContext);
+  if (context === undefined) {
+    throw new Error('useNoteState must be used within a NoteProvider');
+  }
+  return context;
+};
+
+export const useNoteActions = () => {
+  const context = useContext(NoteActionsContext);
+  if (context === undefined) {
+    throw new Error('useNoteActions must be used within a NoteProvider');
+  }
+  return context;
+};
+
+// Combine state and actions for convenience
+export const useNotes = () => {
+  return {
+    ...useNoteState(),
+    ...useNoteActions()
+  };
 };

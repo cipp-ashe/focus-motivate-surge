@@ -1,7 +1,17 @@
 
 import React from 'react';
 import { TaskType } from '@/types/tasks';
-import { Timer, FileText, BookOpen, CheckSquare, Image, Mic, FileSpreadsheet } from 'lucide-react';
+import { 
+  Timer, 
+  FileText, 
+  BookOpen, 
+  CheckSquare, 
+  Image, 
+  Mic, 
+  BarChart3,
+  FileSpreadsheet,
+  Star
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TaskIconProps {
@@ -23,19 +33,26 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
     
     // Manual color mapping to ensure proper dark mode visibility
     switch (taskType) {
+      // Standard types
+      case 'regular':
+        return 'text-gray-700 dark:text-gray-300';
+      case 'checklist':
+        return 'text-sky-500 dark:text-sky-300';
+      case 'counter':
+        return 'text-amber-500 dark:text-amber-300';
+      case 'rating':
+        return 'text-yellow-500 dark:text-yellow-300';
+        
+      // Integrated types
       case 'timer':
         return 'text-violet-500 dark:text-violet-300';
       case 'journal':
-        return 'text-yellow-500 dark:text-yellow-300';
-      case 'checklist':
-        return 'text-sky-500 dark:text-sky-300';
+        return 'text-green-500 dark:text-green-300';
       case 'screenshot':
         return 'text-blue-500 dark:text-blue-300';
       case 'voicenote':
         return 'text-rose-500 dark:text-rose-300';
-      case 'focus':
-        return 'text-emerald-500 dark:text-emerald-300';
-      case 'regular':
+        
       default:
         return 'text-gray-700 dark:text-gray-300';
     }
@@ -43,19 +60,26 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   
   // Determine which icon to render based on task type
   switch (taskType) {
+    // Standard types
+    case 'regular':
+      return <FileText className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
+    case 'checklist':
+      return <CheckSquare className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
+    case 'counter':
+      return <BarChart3 className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
+    case 'rating':
+      return <Star className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
+      
+    // Integrated types
     case 'timer':
       return <Timer className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
     case 'journal':
       return <BookOpen className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
-    case 'checklist':
-      return <CheckSquare className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
     case 'screenshot':
       return <Image className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
     case 'voicenote':
       return <Mic className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
-    case 'focus':
-      return <FileSpreadsheet className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
-    case 'regular':
+      
     default:
       return <FileText className={cn(getColorClass(), className)} size={size} aria-hidden="true" />;
   }

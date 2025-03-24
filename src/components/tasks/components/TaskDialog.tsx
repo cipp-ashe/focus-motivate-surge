@@ -8,6 +8,7 @@ import { Task, TaskType, TaskStatus } from '@/types/tasks';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { eventManager } from '@/lib/events/EventManager';
+import { NewTaskTypeSelector } from './NewTaskTypeSelector';
 
 interface TaskDialogProps {
   isOpen: boolean;
@@ -100,24 +101,16 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               />
             </div>
             
+            <div className="grid gap-2">
+              <Label htmlFor="taskType">Task Type</Label>
+              <NewTaskTypeSelector 
+                value={taskType} 
+                onChange={setTaskType} 
+                showIntegratedTypes={true}
+              />
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="taskType">Task Type</Label>
-                <Select value={taskType} onValueChange={(value) => setTaskType(value as TaskType)}>
-                  <SelectTrigger id="taskType">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="regular">Regular</SelectItem>
-                    <SelectItem value="timer">Timer</SelectItem>
-                    <SelectItem value="checklist">Checklist</SelectItem>
-                    <SelectItem value="journal">Journal</SelectItem>
-                    <SelectItem value="habit">Habit</SelectItem>
-                    <SelectItem value="focus">Focus</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
               <div className="grid gap-2">
                 <Label htmlFor="status">Status</Label>
                 <Select value={status} onValueChange={(value) => setStatus(value as TaskStatus)}>
@@ -133,19 +126,19 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="duration">Duration (minutes)</Label>
-              <Input
-                id="duration"
-                type="number"
-                min="1"
-                max="240"
-                value={Math.floor(duration / 60)}
-                onChange={(e) => setDuration(parseInt(e.target.value) * 60)}
-                placeholder="Enter duration in minutes"
-              />
+              
+              <div className="grid gap-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  min="1"
+                  max="240"
+                  value={Math.floor(duration / 60)}
+                  onChange={(e) => setDuration(parseInt(e.target.value) * 60)}
+                  placeholder="Enter duration in minutes"
+                />
+              </div>
             </div>
           </div>
           
