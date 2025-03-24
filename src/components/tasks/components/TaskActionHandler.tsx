@@ -32,6 +32,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'dismiss':
+        // Use task:dismiss which is now in the EventType definition
         eventManager.emit('task:dismiss', { 
           taskId: task.id, 
           habitId: task.relationships?.habitId,

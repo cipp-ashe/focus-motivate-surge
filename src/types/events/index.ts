@@ -32,7 +32,13 @@ export type EventType =
   | JournalEventType
   | RelationshipEventType
   | AppEventType
-  | WildcardEventType;
+  | WildcardEventType
+  | 'task:create'
+  | 'task:select'
+  | 'task:timer'
+  | 'task:dismiss'
+  | 'habit:custom-template-create'
+  | 'habit:custom-template-delete';
 
 // Export this as a type for backward compatibility
 export type AllEventTypes = EventType;
@@ -62,3 +68,12 @@ export type { HabitNoteData };
 export type { VoiceNoteEventType };
 export type { JournalEventType };
 export type { JournalEventPayloadMap } from './journal-events';
+
+// JournalEntry export for backward compatibility
+export interface JournalEntry {
+  id: string;
+  content: string;
+  date: string;
+  habitId?: string;
+  templateId?: string;
+}

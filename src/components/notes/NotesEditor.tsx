@@ -1,186 +1,145 @@
-
-import React, { useCallback, forwardRef, ForwardedRef, useState, useEffect, useRef } from 'react';
-import { Save } from 'lucide-react';
-import { toast } from 'sonner';
-import type { Note } from '@/types/notes';
-import { MarkdownEditor } from '@/components/ui/markdown-editor/index';
-import { ActionButton } from '@/components/ui/action-button';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Note, createNote } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
-import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
+import TagInput from './TagInput';
+import NoteContent from './NoteContent';
+import { Editor } from '@tiptap/react';
+import { cn } from '@/lib/utils';
 
-interface NotesEditorProps {
-  selectedNote?: Note | null;
-  onNoteSaved?: () => void;
-  content?: string;
-  onChange?: (content: string) => void;
-  isEditing?: boolean;
-  onSave?: () => void;
-}
+export default function NotesEditor() {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [tags, setTags] = useState<{ name: string; color: string }[]>([]);
+  const [titleError, setTitleError] = useState(false);
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const [isEditorFocused, setIsEditorFocused] = useState(false);
+  const [isEditorEmpty, setIsEditorEmpty] = useState(true);
 
-export interface NotesEditorRef {
-  saveNotes: () => void;
-}
-
-export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
-  selectedNote,
-  onNoteSaved,
-  content: externalContent,
-  onChange: externalOnChange,
-  isEditing,
-  onSave: externalOnSave
-}, ref) => {
-  const [internalContent, setInternalContent] = useState('');
-  const [isToolbarAction, setIsToolbarAction] = useState(false);
-  const toolbarActionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const noteActions = useNoteActions();
-  
-  const content = externalContent !== undefined ? externalContent : internalContent;
-
+  // Reset title error when title changes
   useEffect(() => {
-    if (selectedNote && !externalContent) {
-      setInternalContent(selectedNote.content);
+    if (title.trim() !== '') {
+      setTitleError(false);
     }
-  }, [selectedNote, externalContent]);
+  }, [title]);
 
-  // Clean up any existing timeout on unmount
+  // Update editor state
   useEffect(() => {
-    return () => {
-      if (toolbarActionTimeoutRef.current) {
-        clearTimeout(toolbarActionTimeoutRef.current);
-      }
-    };
-  }, []);
+    if (editor) {
+      const updateIsEmpty = () => {
+        setIsEditorEmpty(editor.isEmpty);
+      };
 
-  const handleChange = (newContent: string | undefined) => {
-    if (newContent === undefined) return;
-    
-    if (externalOnChange) {
-      externalOnChange(newContent);
-    } else {
-      setInternalContent(newContent);
+      editor.on('update', updateIsEmpty);
+      editor.on('focus', () => setIsEditorFocused(true));
+      editor.on('blur', () => setIsEditorFocused(false));
+
+      return () => {
+        editor.off('update', updateIsEmpty);
+        editor.off('focus');
+        editor.off('blur');
+      };
+    }
+  }, [editor]);
+
+  // Handle title change
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+  };
+
+  // Handle content change
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+  };
+
+  // Handle tag change
+  const handleTagsChange = (newTags: { name: string; color: string }[]) => {
+    setTags(newTags);
+  };
+
+  // Clear form
+  const clearForm = () => {
+    setTitle('');
+    setContent('');
+    setTags([]);
+    if (editor) {
+      editor.commands.clearContent();
     }
   };
 
-  const handleBlur = useCallback(() => {
-    console.log('Editor blur event triggered, isToolbarAction:', isToolbarAction);
-    
-    if (isToolbarAction) {
-      console.log('Skipping autosave due to toolbar action');
+  // Add note
+  const addNote = () => {
+    if (title.trim() === '') {
+      setTitleError(true);
       return;
     }
-
-    if (content?.trim() && (!selectedNote || selectedNote.content !== content)) {
-      console.log('Auto-saving on blur...');
-      handleSave();
-    }
-  }, [content, selectedNote, isToolbarAction]);
-
-  const handleSave = useCallback(() => {
-    if (!content?.trim()) return;
-
-    try {
-      // If using external save handler, delegate to it
-      if (externalOnSave) {
-        externalOnSave();
-        return;
-      }
-
-      // Otherwise handle saving internally using the note actions from context
-      if (selectedNote) {
-        // Update existing note
-        noteActions.updateNote(selectedNote.id, { content });
-        // No need to check return value since this doesn't return a boolean
-        if (!isToolbarAction) {
-          toast.success("Note updated ✨", { duration: 1500 });
-        }
-      } else {
-        // Add new note with required fields
-        noteActions.addNote({ 
-          title: 'Untitled Note',
-          content, 
-          tags: [] 
-        });
-        
-        if (!isToolbarAction) {
-          toast.success("Note saved ✨", { duration: 1500 });
-        }
-      }
-
-      if (onNoteSaved) {
-        onNoteSaved();
-      }
-      
-      if (!externalContent) {
-        setInternalContent('');
-      }
-    } catch (error) {
-      console.error('Error saving note:', error);
-      toast.error('Unable to save note');
-    }
-  }, [content, externalOnSave, onNoteSaved, selectedNote, externalContent, isToolbarAction, noteActions]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleSave();
-    }
+    
+    // Create a new note with proper timestamps
+    const now = new Date().toISOString();
+    const newNote = {
+      title,
+      content,
+      tags: tags || [],
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    eventManager.emit('note:add', newNote);
+    clearForm();
   };
-
-  const handleToolbarAction = (action: string) => {
-    console.log('Toolbar action detected:', action);
-    setIsToolbarAction(true);
-    
-    // Emit the format event for note formatting, now using a properly defined event type
-    if (selectedNote) {
-      eventManager.emit('note:format', { 
-        contentType: action 
-      });
-    }
-    
-    if (toolbarActionTimeoutRef.current) {
-      clearTimeout(toolbarActionTimeoutRef.current);
-    }
-    
-    // Use a longer timeout to prevent auto-saving during formatting operations
-    toolbarActionTimeoutRef.current = setTimeout(() => {
-      console.log('Resetting toolbar action flag');
-      setIsToolbarAction(false);
-      
-      // Signal that formatting is complete with updated event type
-      if (selectedNote) {
-        eventManager.emit('note:format-complete', { 
-          formattedContent: content 
-        });
-      }
-    }, 3000); // Extended to 3 seconds for better safety with complex formatting
-  };
-
-  React.useImperativeHandle(ref, () => ({
-    saveNotes: handleSave
-  }));
 
   return (
-    <div className="flex flex-col gap-2 h-full notes-editor" onKeyDown={handleKeyDown}>
-      <div className="flex justify-end mb-2">
-        <ActionButton
-          icon={Save}
-          onClick={handleSave}
-        >
-          {isEditing ? 'Update' : 'Save'}
-        </ActionButton>
-      </div>
-      <div className="flex-1 min-h-0 overflow-hidden bg-background/50 rounded-lg border border-primary/10 shadow-inner">
-        <MarkdownEditor
-          value={content}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onToolbarAction={handleToolbarAction}
-          className="h-full markdown-editor"
-          preview="edit"
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="title" className={titleError ? 'text-destructive' : ''}>
+          Title {titleError && <span className="text-destructive">*</span>}
+        </Label>
+        <Input
+          id="title"
+          placeholder="Note title"
+          value={title}
+          onChange={handleTitleChange}
+          className={titleError ? 'border-destructive' : ''}
         />
+        {titleError && (
+          <p className="text-destructive text-sm">Title is required</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="content">Content</Label>
+        <div
+          className={cn(
+            'border rounded-md min-h-[200px] transition-colors',
+            isEditorFocused
+              ? 'border-primary ring-1 ring-ring'
+              : isEditorEmpty
+              ? 'border-input'
+              : 'border-input'
+          )}
+        >
+          <NoteContent
+            content={content}
+            onChange={handleContentChange}
+            setEditor={setEditor}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="tags">Tags</Label>
+        <TagInput tags={tags} onChange={handleTagsChange} />
+      </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button variant="outline" onClick={clearForm}>
+          Clear
+        </Button>
+        <Button onClick={addNote}>Add Note</Button>
       </div>
     </div>
   );
-});
-
-NotesEditor.displayName = 'NotesEditor';
+}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Star, Timer, BookOpen } from 'lucide-react';
 import { HabitDetail, MetricType } from './types';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
 import JournalModal from './journal/JournalModal';
 import { relationshipManager } from '@/lib/relationshipManager';

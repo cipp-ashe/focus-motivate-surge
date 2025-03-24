@@ -44,7 +44,7 @@ export type TaskType =
 export type TaskPriority = 'low' | 'medium' | 'high';
 
 // Task status
-export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'archived' | 'failed';
+export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'archived' | 'failed' | 'started' | 'delayed' | 'dismissed';
 
 // Checklist item for checklist tasks
 export interface ChecklistItem {
@@ -105,6 +105,10 @@ export interface Task {
   journalEntry?: string; // For journal tasks
   voiceNoteUrl?: string; // For voice note tasks
   voiceNoteText?: string; // Transcript for voice note tasks
+  
+  // Timer-specific properties
+  timerMinutes?: number;
+  timerNotes?: string;
 
   // Scheduling
   schedule?: TaskSchedule;

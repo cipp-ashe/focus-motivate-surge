@@ -1,143 +1,102 @@
 
 import { Task } from '@/types/tasks';
-import { Note } from '@/types/notes';
-import { EntityType } from '@/types/core';
-import { constants } from './constants';
-import { utils } from './utils';
 
-/**
- * Service for managing task relationships
- */
+// Define the storage key for task relationships
+const TASK_RELATIONSHIPS_KEY = 'task-relationships';
+
+// Define the relationship type
+interface TaskRelationship {
+  taskId: string;
+  entityId: string;
+  entityType: string;
+  relationshipType: string;
+  metadata?: Record<string, any>;
+}
+
+// Export the task relationship storage module
 export const taskRelationshipStorage = {
-  /**
-   * Check if a task exists for a specific habit and date
-   * @param habitId The ID of the habit
-   * @param date The date string
-   * @returns The task if found, or null
-   */
-  taskExists: (habitId: string, date: string): Task | null => {
+  // Get all relationships for a task
+  getTaskRelationships: (taskId: string): TaskRelationship[] => {
     try {
-      const tasks = utils.loadFromStorage<Task[]>(constants.ACTIVE_TASKS_KEY, []);
+      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      if (!relationshipsJson) return [];
       
-      // Find task for the given habit and date
-      const task = tasks.find((t: Task) => 
-        t.relationships?.habitId === habitId && 
-        t.relationships?.date === date
-      );
-      
-      return task || null;
+      const relationships: TaskRelationship[] = JSON.parse(relationshipsJson);
+      return relationships.filter(rel => rel.taskId === taskId);
     } catch (error) {
-      console.error('Error checking if task exists for habit:', error);
-      return null;
+      console.error('Error fetching task relationships:', error);
+      return [];
     }
   },
   
-  /**
-   * Delete all tasks related to a specific template
-   * @param templateId The ID of the template
-   * @returns True if successful, false otherwise
-   */
-  deleteTasksByTemplate: (templateId: string): boolean => {
+  // Add a relationship for a task
+  addTaskRelationship: (relationship: TaskRelationship): boolean => {
     try {
-      // Load active tasks
-      const tasks = utils.loadFromStorage<Task[]>(constants.ACTIVE_TASKS_KEY, []);
+      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      const relationships: TaskRelationship[] = relationshipsJson ? JSON.parse(relationshipsJson) : [];
       
-      // Filter out tasks related to the template
-      const remainingTasks = tasks.filter((task: Task) => 
-        task.relationships?.templateId !== templateId
+      // Check if relationship already exists
+      const exists = relationships.some(
+        rel => rel.taskId === relationship.taskId && 
+               rel.entityId === relationship.entityId &&
+               rel.relationshipType === relationship.relationshipType
       );
       
-      // Track if any changes were made
-      let changesMade = remainingTasks.length !== tasks.length;
-      
-      if (changesMade) {
-        // Save remaining tasks
-        utils.saveToStorage(constants.ACTIVE_TASKS_KEY, remainingTasks);
-        console.log(`Deleted ${tasks.length - remainingTasks.length} tasks for template ${templateId}`);
-      } else {
-        console.log(`No active tasks found for template ${templateId}`);
+      if (!exists) {
+        relationships.push(relationship);
+        localStorage.setItem(TASK_RELATIONSHIPS_KEY, JSON.stringify(relationships));
       }
-      
-      // Also remove from completed tasks
-      const completedTasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
-      const remainingCompleted = completedTasks.filter((task: Task) => 
-        task.relationships?.templateId !== templateId
-      );
-      
-      if (remainingCompleted.length !== completedTasks.length) {
-        utils.saveToStorage(constants.COMPLETED_TASKS_KEY, remainingCompleted);
-        console.log(`Deleted ${completedTasks.length - remainingCompleted.length} completed/dismissed tasks for template ${templateId}`);
-        changesMade = true;
-      }
-      
-      // Force UI update after cleaning up tasks
-      if (changesMade) {
-        window.dispatchEvent(new Event('force-task-update'));
-        window.dispatchEvent(new Event('templates-tasks-cleaned'));
-      }
-      
-      return changesMade;
-    } catch (error) {
-      console.error('Error deleting tasks by template:', error);
-      return false;
-    }
-  },
-  
-  /**
-   * Delete a specific completed/dismissed task
-   * @param taskId The ID of the task
-   * @returns True if successful, false otherwise
-   */
-  deleteCompletedTask: (taskId: string): boolean => {
-    try {
-      // Load completed tasks
-      const completedTasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
-      
-      // Check if task exists
-      const taskExists = completedTasks.some(task => task.id === taskId);
-      if (!taskExists) {
-        console.log(`Task ${taskId} not found in completed tasks`);
-        return false;
-      }
-      
-      // Filter out the task
-      const updatedTasks = completedTasks.filter(task => task.id !== taskId);
-      
-      // Save updated tasks
-      utils.saveToStorage(constants.COMPLETED_TASKS_KEY, updatedTasks);
-      console.log(`Deleted completed/dismissed task ${taskId}`);
       
       return true;
     } catch (error) {
-      console.error('Error deleting completed task:', error);
+      console.error('Error adding task relationship:', error);
       return false;
     }
   },
   
-  /**
-   * Get notes linked to a specific task
-   * @param taskId The ID of the task
-   * @returns Array of linked notes
-   */
-  getLinkedNotes: (taskId: string): Note[] => {
+  // Remove a relationship
+  removeTaskRelationship: (taskId: string, entityId: string, relationshipType?: string): boolean => {
     try {
-      // Load notes from localStorage
-      const notesJson = localStorage.getItem('notes');
-      if (!notesJson) return [];
+      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      if (!relationshipsJson) return false;
       
-      const notes: Note[] = JSON.parse(notesJson);
+      let relationships: TaskRelationship[] = JSON.parse(relationshipsJson);
       
-      // Filter notes linked to the task
-      return notes.filter(note => 
-        Array.isArray(note.relationships) && 
-        note.relationships.some(rel => 
-          rel.entityId === taskId && 
-          rel.entityType === EntityType.Task
-        )
-      );
+      // Filter out the relationship(s) to remove
+      relationships = relationships.filter(rel => {
+        if (rel.taskId !== taskId || rel.entityId !== entityId) return true;
+        if (relationshipType && rel.relationshipType !== relationshipType) return true;
+        return false;
+      });
+      
+      localStorage.setItem(TASK_RELATIONSHIPS_KEY, JSON.stringify(relationships));
+      return true;
     } catch (error) {
-      console.error('Error getting linked notes:', error);
+      console.error('Error removing task relationship:', error);
+      return false;
+    }
+  },
+  
+  // Get all tasks related to an entity
+  getRelatedTasks: (entityId: string, entityType?: string): Task[] => {
+    try {
+      // This function would ideally load tasks from task storage
+      // But to avoid circular imports, we'll just return the task IDs
+      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      if (!relationshipsJson) return [];
+      
+      const relationships: TaskRelationship[] = JSON.parse(relationshipsJson);
+      return relationships
+        .filter(rel => rel.entityId === entityId && (!entityType || rel.entityType === entityType))
+        .map(rel => ({ id: rel.taskId } as Task)); // Return minimal task objects
+    } catch (error) {
+      console.error('Error fetching related tasks:', error);
       return [];
     }
+  },
+  
+  // Clear all relationships for testing
+  _clearAllRelationships: (): void => {
+    localStorage.removeItem(TASK_RELATIONSHIPS_KEY);
   }
 };
