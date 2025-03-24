@@ -2,7 +2,7 @@
 /**
  * Task event types and payload definitions
  */
-import { Task, TaskType } from '@/types/tasks';
+import { Task } from '@/types/tasks';
 
 export type TaskEventType = 
   | 'task:create'

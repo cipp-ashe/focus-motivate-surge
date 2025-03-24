@@ -60,11 +60,6 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
   const checkForMissingHabitTasks = useCallback(() => {
     // Emit event to check pending habit tasks
     eventManager.emit('habits:check-pending', {});
-    
-    // Force task update
-    setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-    }, 100);
   }, []);
   
   return {

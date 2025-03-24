@@ -1,9 +1,9 @@
 
-import { MetricType } from '@/types/habits';
-
 /**
  * Habit event types and payload definitions
  */
+import { MetricType } from '@/types/habits/types';
+
 export type HabitEventType =
   | 'habit:complete'
   | 'habit:dismiss'

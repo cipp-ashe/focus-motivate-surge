@@ -62,10 +62,24 @@ export interface EventPayloadMap extends
   'quote:link-task': { quoteId: string; taskId: string };
   'relationship:batch-update': any;
   'habit:template-remove': { templateId: string };
+  'journal:open': { habitId: string; habitName: string; date: string; templateId?: string };
+  'journal:close': { habitId: string; saved: boolean };
+  'journal:get': { habitId: string; date?: string };
+  'journal:list': { habitId?: string };
+  'journal:save': { habitId: string; content: string; date?: string };
 }
 
 // Callback type for event handlers
 export type EventCallback<T extends EventType> = (payload: EventPayloadMap[T]) => void;
+
+// Event handling interface extensions
+export interface EventUnsubscribe {
+  (): void;
+}
+
+export interface EventPayload<T extends EventType> {
+  [key: string]: any;
+}
 
 // Export all event-specific types
 export * from './task-events';

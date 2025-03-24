@@ -2,7 +2,6 @@
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
-import { EventType } from '@/types/events';
 
 /**
  * A unified hook that provides task-related event functions
@@ -10,12 +9,9 @@ import { EventType } from '@/types/events';
 export const useTaskEvents = () => {
   // Force update task list
   const forceTaskUpdate = useCallback(() => {
-    console.log("TaskEvents: Force updating task list (debounced)");
+    console.log("TaskEvents: Force updating task list");
     
-    // Force update via window event (legacy method)
-    window.dispatchEvent(new Event('force-task-update'));
-    
-    // Also emit via event manager
+    // Emit via event manager
     eventManager.emit('task:reload', undefined);
   }, []);
   

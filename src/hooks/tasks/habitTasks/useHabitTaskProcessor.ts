@@ -2,8 +2,8 @@
 import { useCallback } from 'react';
 import { Task, TaskType } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { HabitTaskEvent } from '@/types/events';
-import { MetricType } from '@/components/habits/types';
+import { HabitTaskEvent } from '@/types/events/habit-events';
+import { MetricType } from '@/types/habits/types';
 
 /**
  * Hook for processing habit tasks
@@ -126,6 +126,6 @@ export const useHabitTaskProcessor = () => {
     handleHabitSchedule,
     processPendingTasks,
     handleHabitComplete,
-    processHabitTask: createHabitTask // Alias for backward compatibility with tests
+    processHabitTask: createHabitTask
   };
 };

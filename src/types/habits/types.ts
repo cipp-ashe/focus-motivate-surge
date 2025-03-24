@@ -58,7 +58,6 @@ export interface HabitDetail {
     type: MetricType;
     goal?: number;
     unit?: string;
-    target?: number; // Keeping for backward compatibility, but goal is preferred
     min?: number;
     max?: number;
   };

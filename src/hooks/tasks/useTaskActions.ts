@@ -22,7 +22,7 @@ export const useTaskActions = () => {
   // Delete a task
   const deleteTask = useCallback((taskId: string, reason?: string) => {
     console.log(`Deleting task ${taskId}`, reason ? `Reason: ${reason}` : '');
-    eventManager.emit('task:delete', { taskId });
+    eventManager.emit('task:delete', { taskId, reason });
   }, []);
 
   // Complete a task
@@ -46,7 +46,7 @@ export const useTaskActions = () => {
   // Check for pending habits
   const checkPendingHabits = useCallback(() => {
     console.log('Checking pending habits');
-    eventManager.emit('habit:check-pending', {});
+    eventManager.emit('habits:check-pending', {});
   }, []);
 
   return {

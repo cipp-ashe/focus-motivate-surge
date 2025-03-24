@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Star, Timer, BookOpen } from 'lucide-react';
-import { HabitDetail, MetricType } from '@/types/habits';
+import { HabitDetail, MetricType } from '@/types/habits/types';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
@@ -86,7 +87,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         );
       case 'timer':
         const timerValue = typeof progress.value === 'number' ? progress.value : 0;
-        const timerTarget = habit.metrics.goal || habit.metrics.target || 600;
+        const timerTarget = habit.metrics.goal || 600;
         return (
           <div className="flex items-center gap-2">
             <div className="space-y-0.5 w-16">
@@ -107,7 +108,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         );
       case 'counter':
         const countValue = typeof progress.value === 'number' ? progress.value : 0;
-        const countTarget = habit.metrics.goal || habit.metrics.target || 1;
+        const countTarget = habit.metrics.goal || 1;
         return (
           <div className="flex items-center gap-2">
             <div className="space-y-0.5 w-16">

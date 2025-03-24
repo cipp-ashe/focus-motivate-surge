@@ -1,5 +1,5 @@
 
-import { MetricType } from '@/types/habits';
+import { MetricType } from '@/types/habits/types';
 
 export interface HabitTaskEvent {
   habitId: string;
