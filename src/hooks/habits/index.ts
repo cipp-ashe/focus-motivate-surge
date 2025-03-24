@@ -6,16 +6,14 @@
  * making imports cleaner throughout the application.
  */
 
-// Core habit hooks
+// Export hooks from their source files
 export { useHabits } from './useHabits';
 export { useHabitEvents } from './useHabitEvents';
 export { useHabitTaskIntegration } from './useHabitTaskIntegration';
-
-// Template management
 export { useTodaysHabits } from './useTodaysHabits';
 export { useHabitCompletion } from './useHabitCompletion';
 
-// These will eventually be consolidated, but kept for now for backward compatibility
+// Legacy exports kept for backward compatibility
 export { useHabitProgress } from './useHabitProgress';
 export { useHabitRelationships } from './useHabitRelationships';
 export { useTemplateCreation } from './useTemplateCreation';

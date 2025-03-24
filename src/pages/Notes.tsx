@@ -7,7 +7,6 @@ import { PageHeader } from '@/components/ui/page-header';
 import { GlassCard, GlassCardHeader, GlassCardContent, GlassCardTitle } from '@/components/ui/glass-card';
 import { Book } from 'lucide-react';
 import { NoteProvider } from '@/contexts/notes/NoteContext';
-// Import from proper location - this is the correct way
 import { useNoteActions, useNoteState } from '@/contexts/notes/hooks';
 
 const NotesContent = () => {
@@ -29,7 +28,9 @@ const NotesContent = () => {
         addNote({ 
           title: 'Untitled Note', 
           content: currentContent,
-          tags: [] 
+          tags: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       }
     }

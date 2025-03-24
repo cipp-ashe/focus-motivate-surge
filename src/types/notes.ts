@@ -1,3 +1,4 @@
+
 import { EntityType } from './core';
 
 // Define allowed colors for tags

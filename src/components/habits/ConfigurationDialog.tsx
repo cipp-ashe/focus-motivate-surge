@@ -8,8 +8,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { DayOfWeek, HabitDetail } from '@/types/habits/types';
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DayOfWeek, HabitDetail } from '@/types/habits';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { DaySelector } from "./DaySelector";
 
@@ -46,14 +46,12 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
             <TabsTrigger value="days">Days</TabsTrigger>
           </TabsList>
           <Card className="border-none shadow-none">
-            <Card className="p-0">
-              <TabsContent value="days" className="p-4">
-                <DaySelector
-                  activeDays={activeDays}
-                  onUpdateDays={onUpdateDays}
-                />
-              </TabsContent>
-            </Card>
+            <TabsContent value="days" className="p-4">
+              <DaySelector
+                activeDays={activeDays}
+                onUpdateDays={onUpdateDays}
+              />
+            </TabsContent>
           </Card>
         </Tabs>
 

@@ -7,7 +7,7 @@
 import { ActiveTemplate, HabitDetail, MetricType, DayOfWeek, HabitCompletionEvent, TemplateUpdateEvent } from '@/types/habits';
 
 // Re-export essential types needed by other modules
-export { HabitCompletionEvent, TemplateUpdateEvent };
+export type { HabitCompletionEvent, TemplateUpdateEvent };
 
 // Additional export for backward compatibility
 export interface HabitProgress {
