@@ -10,7 +10,7 @@ import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventManager } from '@/lib/events/EventManager';
 import { useCountdownTimer } from '@/hooks/ui/useCountdownTimer';
 import { Task } from '@/types/tasks';
-import { formatTime } from '@/lib/utils/formatters';
+import { formatTimeDisplay } from '@/lib/utils/formatters';
 
 // Simple class to handle timer settings
 class TimerSettings {
@@ -45,17 +45,25 @@ export const TimerView: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [minutes, setMinutes] = useState(TimerSettings.getSettings().defaultMinutes);
   
+  // Use the countdown timer hook with correct props
   const { 
+    timeLeft, 
     isRunning, 
     isPaused, 
-    elapsedTime,
-    totalTime,
-    startTimer, 
-    pauseTimer, 
-    resumeTimer, 
-    stopTimer,
-    resetTimer
-  } = useCountdownTimer({ totalSeconds: minutes * 60 });
+    start: startTimer, 
+    pause: pauseTimer, 
+    reset: resetTimer
+  } = useCountdownTimer({
+    initialTime: minutes * 60,
+    interval: 1000,
+    autoStart: false,
+    onComplete: () => {
+      console.log('Timer completed');
+      if (timerTask && timerTask.id) {
+        handleCompleteTimer();
+      }
+    }
+  });
 
   // Lifecycle methods
   useEffect(() => {
@@ -166,6 +174,13 @@ export const TimerView: React.FC = () => {
     }
   }, [timerTask, updateTask, resetTimer]);
 
+  // Get resume function by calling start when paused
+  const resumeTimer = () => {
+    if (isPaused) {
+      startTimer();
+    }
+  };
+
   // Render timer controls
   const renderTimerControls = () => {
     if (!timerTask) {
@@ -266,7 +281,7 @@ export const TimerView: React.FC = () => {
             isPaused={isPaused}
           />
           <div className="mt-4 text-2xl font-medium">
-            {formatTime(totalTime - elapsedTime)}
+            {formatTimeDisplay(timeLeft)}
           </div>
         </div>
       </div>
@@ -325,7 +340,7 @@ export const TimerView: React.FC = () => {
           )}
           <div className="flex items-center mt-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4 mr-1" />
-            <span>{formatTime(minutes * 60)}</span>
+            <span>{formatTimeDisplay(minutes * 60)}</span>
           </div>
         </Card>
       )}

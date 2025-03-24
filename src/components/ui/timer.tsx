@@ -21,6 +21,8 @@ export const Timer: React.FC<TimerProps> = ({
 
   // Start the timer
   useEffect(() => {
+    console.log('Timer state:', { isRunning, isPaused, totalSeconds });
+    
     if (isRunning && !isPaused) {
       // Clear any existing interval
       if (intervalRef.current) {
@@ -50,7 +52,7 @@ export const Timer: React.FC<TimerProps> = ({
           clearInterval(intervalRef.current);
         }
       };
-    } else if (!isRunning || isPaused) {
+    } else if (!isRunning) {
       // Stop the timer
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -86,6 +88,7 @@ export const Timer: React.FC<TimerProps> = ({
           stroke="currentColor"
           strokeWidth="10"
           strokeOpacity="0.1"
+          className="dark:opacity-30"
         />
         
         {/* Progress circle */}
@@ -99,6 +102,7 @@ export const Timer: React.FC<TimerProps> = ({
           strokeDasharray="283"
           strokeDashoffset={283 - (283 * percentComplete) / 100}
           transform="rotate(-90 50 50)"
+          className="transition-all duration-1000 dark:text-purple-500"
         />
       </svg>
     </div>

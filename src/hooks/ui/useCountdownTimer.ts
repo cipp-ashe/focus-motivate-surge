@@ -29,26 +29,28 @@ export const useCountdownTimer = ({
   }, []);
 
   const start = useCallback(() => {
-    if (!isRunning && !isPaused) {
+    console.log('Starting timer with timeLeft:', timeLeft);
+    if (!isRunning) {
       startTimeRef.current = Date.now();
       setIsRunning(true);
-    } else if (isPaused) {
-      // Resume from pause
-      pausedTimeRef.current += Date.now() - (startTimeRef.current || Date.now());
-      startTimeRef.current = Date.now();
       setIsPaused(false);
-      setIsRunning(true);
     }
-  }, [isRunning, isPaused]);
+  }, [isRunning, timeLeft]);
 
   const pause = useCallback(() => {
+    console.log('Pausing timer with timeLeft:', timeLeft);
     if (isRunning) {
       setIsPaused(true);
       setIsRunning(false);
+      // Store the amount of time paused for later resuming
+      if (startTimeRef.current) {
+        pausedTimeRef.current += Date.now() - startTimeRef.current;
+      }
     }
-  }, [isRunning]);
+  }, [isRunning, timeLeft]);
 
   const reset = useCallback(() => {
+    console.log('Resetting timer to:', initialTime);
     clearTimer();
     setTimeLeft(initialTime);
     setIsRunning(false);
@@ -59,9 +61,11 @@ export const useCountdownTimer = ({
 
   useEffect(() => {
     if (isRunning) {
+      console.log('Timer running, setting interval');
       timerRef.current = window.setInterval(() => {
         setTimeLeft((prevTime) => {
           const newTime = prevTime - interval / 1000;
+          console.log('Timer tick, new time:', newTime);
           if (newTime <= 0) {
             clearTimer();
             setIsRunning(false);
@@ -79,6 +83,14 @@ export const useCountdownTimer = ({
 
     return clearTimer;
   }, [isRunning, interval, onComplete, clearTimer]);
+
+  // Update timeLeft when initialTime changes
+  useEffect(() => {
+    // Only reset the time if we're not running
+    if (!isRunning && !isPaused) {
+      setTimeLeft(initialTime);
+    }
+  }, [initialTime, isRunning, isPaused]);
 
   useEffect(() => {
     return () => {

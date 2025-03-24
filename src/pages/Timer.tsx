@@ -18,9 +18,12 @@ const Timer = () => {
       </PageHeader>
       
       <div className="grid gap-6">
-        <Card>
+        <Card className="dark:bg-card/90 border-border/40 dark:border-border/20">
           <CardHeader className="pb-3">
-            <CardTitle>Task Timer</CardTitle>
+            <CardTitle className="text-lg font-medium flex items-center gap-2">
+              <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
+              Task Timer
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <TimerView />
