@@ -1,61 +1,66 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useHabitState } from '@/contexts/habits/HabitContext';
-import { HabitDetail, DayOfWeek } from '@/components/habits/types';
-import { useLocation } from 'react-router-dom';
+/**
+ * Hook for retrieving today's habits
+ */
+
+import { useState, useCallback, useEffect } from 'react';
+import { useHabitContext } from '@/contexts/habits/HabitContext';
+import { HabitDetail, DayOfWeek } from '@/types/habits';
 
 export const useTodaysHabits = () => {
-  const { templates } = useHabitState();
+  const { templates } = useHabitContext();
   const [todaysHabits, setTodaysHabits] = useState<HabitDetail[]>([]);
-  const location = useLocation();
 
-  const getTodayShortName = useCallback((): DayOfWeek => {
-    const dayNames: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const day = new Date().getDay();
-    return dayNames[day];
+  // Get today's day of week
+  const getTodayName = useCallback((): DayOfWeek => {
+    const days: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return days[new Date().getDay()];
   }, []);
 
+  // Refresh habits for today
   const refreshHabits = useCallback(() => {
-    const todayShortName = getTodayShortName();
+    const today = getTodayName();
+    console.log(`Refreshing habits for ${today}`);
     
-    // Get all habits from templates active today
-    const habits: HabitDetail[] = [];
+    // Collect habits from all templates that are active today
+    const habitsForToday: HabitDetail[] = [];
     
     templates.forEach(template => {
-      if (template.activeDays.includes(todayShortName)) {
+      // Check if this template is active today
+      if (template.activeDays.includes(today)) {
+        // Add all habits from this template
         template.habits.forEach(habit => {
-          // Add templateId to habit for reference
-          const habitWithTemplate = {
+          // Add template relationship to each habit
+          const habitWithTemplate: HabitDetail = {
             ...habit,
             relationships: {
-              ...(habit.relationships || {}),
+              ...habit.relationships,
               templateId: template.templateId
             }
           };
-          habits.push(habitWithTemplate);
+          habitsForToday.push(habitWithTemplate);
         });
       }
     });
     
-    setTodaysHabits(habits);
-  }, [templates, getTodayShortName]);
+    // Sort habits by order if available
+    const sortedHabits = [...habitsForToday].sort((a, b) => {
+      const orderA = a.order || 0;
+      const orderB = b.order || 0;
+      return orderA - orderB;
+    });
+    
+    setTodaysHabits(sortedHabits);
+    return sortedHabits;
+  }, [templates, getTodayName]);
 
-  // Refresh habits when templates change or route changes
+  // Refresh habits when templates change
   useEffect(() => {
     refreshHabits();
-  }, [templates, location.pathname, refreshHabits]);
+  }, [templates, refreshHabits]);
 
-  // Listen for force-habits-update event
-  useEffect(() => {
-    const handleForceUpdate = () => {
-      refreshHabits();
-    };
-
-    window.addEventListener('force-habits-update', handleForceUpdate);
-    return () => {
-      window.removeEventListener('force-habits-update', handleForceUpdate);
-    };
-  }, [refreshHabits]);
-
-  return { todaysHabits, refreshHabits };
+  return {
+    todaysHabits,
+    refreshHabits
+  };
 };

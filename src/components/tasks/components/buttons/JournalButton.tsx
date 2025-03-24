@@ -14,15 +14,19 @@ export const JournalButton: React.FC<JournalButtonProps> = ({ task, onTaskAction
     // First call the generic task action handler
     onTaskAction(e, 'journal');
     
-    // Then emit the journal:open event with the relevant data
-    eventManager.emit('journal:open', {
+    // Prepare journal data from task
+    const journalData = {
       habitId: task.relationships?.habitId,
       habitName: task.name,
       description: task.description,
       templateId: task.relationships?.templateId,
       taskId: task.id,
-      date: task.relationships?.date || new Date().toISOString()
-    });
+      date: task.relationships?.date || new Date().toISOString(),
+      content: task.description || ''
+    };
+    
+    // Then emit the journal:open event with the relevant data
+    eventManager.emit('journal:open', journalData);
   };
 
   return (

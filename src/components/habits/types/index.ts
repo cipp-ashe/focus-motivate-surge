@@ -1,3 +1,8 @@
 
-// Re-export all types from the parent directory's types.ts file
-export * from '../types';
+/**
+ * @deprecated This file is kept for backward compatibility.
+ * Please import from '@/types/habits' instead.
+ */
+
+// Re-export everything from the new unified type system
+export * from '@/types/habits';

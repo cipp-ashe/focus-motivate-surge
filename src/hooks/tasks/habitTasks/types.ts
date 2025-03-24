@@ -1,5 +1,5 @@
 
-import { MetricType } from '@/components/habits/types';
+import { MetricType } from '@/types/habits';
 
 export interface HabitTaskEvent {
   habitId: string;
@@ -14,4 +14,9 @@ export interface HabitTaskOptions {
   suppressToast?: boolean;
   selectAfterCreate?: boolean;
   metricType?: MetricType;
+}
+
+export interface HabitTaskSchedulerReturn {
+  scheduledTasksRef: React.MutableRefObject<Map<string, string>>;
+  checkForMissingHabitTasks: () => void;
 }

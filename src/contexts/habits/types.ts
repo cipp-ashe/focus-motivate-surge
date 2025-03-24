@@ -1,12 +1,18 @@
 
-import { ActiveTemplate, DayOfWeek, HabitTemplate } from '@/components/habits/types';
+/**
+ * Habit Context Types
+ * 
+ * This module defines the types for the habit context state and actions.
+ */
+
+import { ActiveTemplate, DayOfWeek, HabitTemplate, HabitDetail } from '@/types/habits';
 
 /**
  * State interface for HabitContext
  */
 export interface HabitState {
   templates: ActiveTemplate[];
-  todaysHabits: any[]; // Keep this as 'any' for backward compatibility
+  todaysHabits: HabitDetail[];
   progress: Record<string, Record<string, boolean | number>>;
   customTemplates: HabitTemplate[];
   isLoaded: boolean;
@@ -16,15 +22,15 @@ export interface HabitState {
  * Actions interface for habit operations
  */
 export interface HabitContextActions {
-  addTemplate: (template: Omit<ActiveTemplate, 'templateId'>) => void;
+  addTemplate: (template: Partial<ActiveTemplate> & { habits: HabitDetail[] }) => void;
   updateTemplate: (templateId: string, updates: Partial<ActiveTemplate>) => void;
   removeTemplate: (templateId: string) => void;
   updateTemplateOrder: (templates: ActiveTemplate[]) => void;
   updateTemplateDays: (templateId: string, days: DayOfWeek[]) => void;
   addCustomTemplate: (template: Omit<HabitTemplate, 'id'>) => void;
   removeCustomTemplate: (templateId: string) => void;
-  reorderTemplates: (templates: ActiveTemplate[]) => void; // Added this line to match the implementation
-  findTemplateById: (templateId: string) => ActiveTemplate | undefined; // Added this missing function
+  reorderTemplates: (templates: ActiveTemplate[]) => void;
+  findTemplateById: (templateId: string) => ActiveTemplate | undefined;
   reloadTemplates: () => void;
 }
 

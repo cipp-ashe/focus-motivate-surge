@@ -1,19 +1,24 @@
 
 /**
- * Habit-related event types and payloads
+ * Consolidated Habit Event System
+ * 
+ * This module defines all habit-related events and their payloads,
+ * serving as the source of truth for the habit event system.
  */
 
-// Import metric type
-import { MetricType } from '@/components/habits/types';
+// Import the unified metric type
+import { MetricType, HabitDetail } from '@/types/habits';
 
-// Habit event type definitions
+// Comprehensive list of habit event types
 export type HabitEventType =
   | 'habit:complete'
   | 'habit:schedule'
   | 'habit:template-update'
   | 'habit:template-delete'
   | 'habit:template-add'
+  | 'habit:template-remove'
   | 'habit:template-order-update'
+  | 'habit:template-days-update'
   | 'habits:check-pending'
   | 'habit:create-note'
   | 'habit:dismiss'
@@ -40,7 +45,7 @@ export interface HabitNoteData {
   content?: string;
 }
 
-// Habit event payload definitions
+// Complete habit event payload map
 export interface HabitEventPayloadMap {
   'habit:complete': { 
     habitId: string; 
@@ -51,17 +56,41 @@ export interface HabitEventPayloadMap {
     templateId?: string;
   };
   'habit:schedule': HabitTaskEvent;
-  'habit:template-update': any;
+  'habit:template-update': {
+    templateId: string;
+    name?: string;
+    description?: string;
+    habits?: HabitDetail[];
+    activeDays?: string[];
+    customized?: boolean;
+    [key: string]: any;
+  };
   'habit:template-delete': { 
     templateId: string; 
     isOriginatingAction?: boolean;
   };
   'habit:template-add': { 
     templateId: string;
+    name?: string;
+    description?: string;
+    habits?: HabitDetail[];
+    activeDays?: string[];
+    customized?: boolean;
     id?: string;
   };
-  'habit:template-order-update': any[];
-  'habits:check-pending': any;
+  'habit:template-remove': {
+    templateId: string;
+  };
+  'habit:template-order-update': Array<{
+    templateId: string;
+    [key: string]: any;
+  }>;
+  'habit:template-days-update': {
+    templateId: string;
+    activeDays: string[];
+    [key: string]: any;
+  };
+  'habits:check-pending': Record<string, any>;
   'habit:create-note': HabitNoteData;
   'habit:dismiss': {
     habitId: string;
