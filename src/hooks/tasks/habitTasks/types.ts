@@ -1,5 +1,5 @@
 
-import { MetricType } from '@/types/habits/types';
+import { MetricType } from '@/types/habits';
 
 export interface HabitTaskEvent {
   habitId: string;
@@ -14,6 +14,7 @@ export interface HabitTaskOptions {
   suppressToast?: boolean;
   selectAfterCreate?: boolean;
   metricType?: MetricType;
+  taskType?: string;
 }
 
 export interface HabitTaskSchedulerReturn {

@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Star, Timer, BookOpen } from 'lucide-react';
-import { HabitDetail, MetricType } from './types';
+import { HabitDetail, MetricType } from '@/types/habits';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
@@ -34,24 +33,18 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   const [hasExistingEntry, setHasExistingEntry] = useState(false);
   const noteState = useNoteState();
 
-  // Check if there's an existing journal note whenever this component mounts
-  // or when the notes change or the habit changes
   useEffect(() => {
     const checkForExistingEntry = () => {
-      // Find any related notes for this habit
       const relatedEntities = relationshipManager.getRelatedEntities(habit.id, EntityType.Habit, EntityType.Note);
       
       if (relatedEntities.length > 0) {
-        // We have a relationship, but verify the note still exists
         const noteId = relatedEntities[0].id;
         const foundNote = noteState.notes.find(note => note.id === noteId);
         
         setHasExistingEntry(!!foundNote);
         console.log(`Habit ${habit.id} journal entry exists: ${!!foundNote}`);
         
-        // If the note doesn't exist but progress shows completed, update progress
         if (!foundNote && progress.value) {
-          // Find the template that contains this habit
           setTimeout(() => {
             console.log("No journal found but habit marked complete - updating state");
             onUpdate(false);
@@ -70,7 +63,6 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
   };
 
   const handleJournalComplete = () => {
-    // Mark the journal habit as completed
     onUpdate(true);
     setJournalModalOpen(false);
   };
@@ -94,7 +86,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         );
       case 'timer':
         const timerValue = typeof progress.value === 'number' ? progress.value : 0;
-        const timerTarget = habit.metrics.target || 600; // Default 10 minutes (in seconds)
+        const timerTarget = habit.metrics.goal || habit.metrics.target || 600;
         return (
           <div className="flex items-center gap-2">
             <div className="space-y-0.5 w-16">
@@ -115,7 +107,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
         );
       case 'counter':
         const countValue = typeof progress.value === 'number' ? progress.value : 0;
-        const countTarget = habit.metrics.target || 1;
+        const countTarget = habit.metrics.goal || habit.metrics.target || 1;
         return (
           <div className="flex items-center gap-2">
             <div className="space-y-0.5 w-16">
@@ -154,7 +146,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
               habitName={habit.name}
               description={habit.description}
               onComplete={handleJournalComplete}
-              templateId={templateId} // Pass the templateId
+              templateId={templateId}
             />
           </>
         );

@@ -3,7 +3,7 @@
  * Task Types Definition
  */
 
-import { MetricType } from '../habits';
+import { MetricType } from '@/types/habits';
 
 // Unified task type
 export type TaskType = 

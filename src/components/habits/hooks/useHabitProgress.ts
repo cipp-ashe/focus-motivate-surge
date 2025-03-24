@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { HabitProgress } from '@/types/habits/types';
+import { HabitProgress } from '@/types/habits';
 
 export const useHabitProgress = (habitId: string) => {
   const [progress, setProgress] = useState<HabitProgress>({

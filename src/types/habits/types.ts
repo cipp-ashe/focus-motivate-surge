@@ -12,6 +12,9 @@ export const SHORT_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'
 // Default active days
 export const DEFAULT_ACTIVE_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
+// Storage key for habits
+export const STORAGE_KEY = 'habits';
+
 // Metric type definition
 export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating';
 
@@ -55,6 +58,9 @@ export interface HabitDetail {
     type: MetricType;
     goal?: number;
     unit?: string;
+    target?: number; // Keeping for backward compatibility, but goal is preferred
+    min?: number;
+    max?: number;
   };
   insights?: any[];
   tips?: any[];
