@@ -1,21 +1,20 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import TodaysHabitCard from './TodaysHabitCard';
 import { HabitDetail } from '@/types/habits/types';
-import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
+import { HabitRow } from './HabitRow';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TodaysHabitsSectionProps {
   todaysHabits: HabitDetail[];
   completedHabits: string[];
   dismissedHabits: string[];
-  onHabitComplete: (habitId: string) => boolean;
-  onAddHabitToTasks: (habit: HabitDetail) => boolean;
+  onHabitComplete: (habitId: string) => void;
+  onAddHabitToTasks?: (habit: HabitDetail) => void;
   templateId?: string;
 }
 
-export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({ 
+export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
   todaysHabits,
   completedHabits,
   dismissedHabits,
@@ -23,45 +22,44 @@ export const TodaysHabitsSection: React.FC<TodaysHabitsSectionProps> = ({
   onAddHabitToTasks,
   templateId
 }) => {
-  const { handleHabitSchedule } = useHabitTaskProcessor();
-  
-  // No habits case
-  if (todaysHabits.length === 0) {
+  // Filter out dismissed habits
+  const habitsToShow = todaysHabits.filter(
+    habit => !dismissedHabits.includes(habit.id)
+  );
+
+  if (habitsToShow.length === 0) {
     return (
-      <Card>
+      <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-lg">Today's Habits</CardTitle>
+          <CardTitle>Today's Habits</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No habits scheduled for today</p>
-            <Button variant="outline" className="mt-4">Add Habit Template</Button>
-          </div>
+        <CardContent className="text-center text-muted-foreground py-8">
+          <p>No habits scheduled for today</p>
         </CardContent>
       </Card>
     );
   }
-  
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Today's Habits</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle>Today's Habits</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {todaysHabits.map(habit => (
-            <TodaysHabitCard
-              key={habit.id}
-              habit={habit}
-              isCompleted={completedHabits.includes(habit.id)}
-              onComplete={() => onHabitComplete(habit.id)}
-              onAddToTasks={() => onAddHabitToTasks(habit)}
-            />
-          ))}
-        </div>
+      <CardContent className="p-3">
+        <ScrollArea className="h-[calc(100vh-12rem-8rem)]">
+          <div className="space-y-3 pr-3">
+            {habitsToShow.map(habit => (
+              <HabitRow
+                key={habit.id}
+                habit={habit}
+                isCompleted={completedHabits.includes(habit.id)}
+                onComplete={() => onHabitComplete(habit.id)}
+                onAddToTasks={onAddHabitToTasks}
+              />
+            ))}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );
 };
-
-export default TodaysHabitsSection;

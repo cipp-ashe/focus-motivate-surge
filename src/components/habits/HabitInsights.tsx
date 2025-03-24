@@ -1,12 +1,69 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import InsightsTips from './insights/InsightsTips';
 import { HabitDetail } from '@/types/habits/types';
+
+interface InsightsTipsProps {
+  name: string;
+  description?: string;
+  timePreference?: string;
+  insights?: any[];
+  tips?: any[];
+}
+
+const InsightsTips: React.FC<InsightsTipsProps> = ({ 
+  name, 
+  description, 
+  timePreference, 
+  insights = [], 
+  tips = [] 
+}) => {
+  return (
+    <div className="space-y-3">
+      {insights && insights.length > 0 ? (
+        <div>
+          <h4 className="text-sm font-medium mb-1">Insights</h4>
+          <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
+            {insights.map((insight, i) => (
+              <li key={i}>{insight}</li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div>
+          <h4 className="text-sm font-medium mb-1">Insights</h4>
+          <p className="text-sm text-muted-foreground">
+            Track your progress to generate personalized insights.
+          </p>
+        </div>
+      )}
+      
+      {tips && tips.length > 0 ? (
+        <div>
+          <h4 className="text-sm font-medium mb-1">Tips</h4>
+          <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
+            {tips.map((tip, i) => (
+              <li key={i}>{tip}</li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div>
+          <h4 className="text-sm font-medium mb-1">Tips</h4>
+          <p className="text-sm text-muted-foreground">
+            {timePreference 
+              ? `Try to complete "${name}" during the ${timePreference.toLowerCase()} for best results.`
+              : `Consistency is key for building the "${name}" habit.`}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface HabitInsightsProps {
   habit: HabitDetail;
-  progress?: any[]; // Add progress prop to fix TS error
+  progress?: any[]; // Progress data if available
 }
 
 export const HabitInsights: React.FC<HabitInsightsProps> = ({ habit, progress }) => {

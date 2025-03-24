@@ -1,17 +1,56 @@
 
 import { useState, useEffect } from 'react';
-import { HabitDetail } from '@/components/habits/types';
-import { HabitProgress, HabitProgressResult } from '@/components/habits/types';
+import { HabitDetail, HabitProgress } from '@/types/habits/types';
+
+export interface HabitProgressResult {
+  progress: HabitProgress[];
+  streak: number;
+  completion: number;
+}
 
 /**
  * Hook to get and track a habit's progress history
  */
-export const useHabitProgress = (habit: HabitDetail) => {
+export const useHabitProgress = (habit?: HabitDetail) => {
   const [progressData, setProgressData] = useState<HabitProgressResult>({
     progress: [],
     streak: 0,
     completion: 0
   });
+
+  const getTodayProgress = (habitId: string, templateId: string) => {
+    // Current implementation returns mock data
+    return {
+      value: false,
+      streak: 0,
+      date: new Date().toISOString().split('T')[0],
+      completed: false,
+    };
+  };
+
+  const updateProgress = (habitId: string, templateId: string, value: boolean | number) => {
+    // This would be implemented to update the progress in storage
+    console.log(`Updating progress for habit ${habitId} in template ${templateId} to ${value}`);
+    return true;
+  };
+
+  const getWeeklyProgress = (habitId: string, templateId: string) => {
+    // Return a week's worth of progress data
+    const today = new Date();
+    const weeklyData = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      weeklyData.push({
+        date: date.toISOString().split('T')[0],
+        completed: false,
+        value: false
+      });
+    }
+    
+    return weeklyData;
+  };
 
   // Load progress data for this habit
   useEffect(() => {
@@ -60,5 +99,10 @@ export const useHabitProgress = (habit: HabitDetail) => {
     });
   }, [habit?.id]);
 
-  return progressData;
+  return {
+    ...progressData,
+    getTodayProgress,
+    updateProgress,
+    getWeeklyProgress
+  };
 };

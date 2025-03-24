@@ -5,7 +5,7 @@ export { useLocalStorage } from './useLocalStorage';
 export { useToast } from './use-toast';
 export { useIsMobile } from './ui/useIsMobile';
 
-// Feature-specific hooks
+// Feature-specific hooks - Habits
 export { useHabits } from './habits/useHabits';
 export { useHabitEvents } from './habits/useHabitEvents';
 export { useHabitCompletion } from './habits/useHabitCompletion';
@@ -15,6 +15,7 @@ export { useTemplateCreation } from './habits/useTemplateCreation';
 export { useTemplateManagement } from './habits/useTemplateManagement';
 export { useTodaysHabits } from './habits/useTodaysHabits';
 export { useUnifiedHabitEvents } from './habits/useUnifiedHabitEvents';
+export { useHabitTaskIntegration } from './habits/useHabitTaskIntegration';
 
 // Task-related hooks
 export { useTasks } from './useTasks';

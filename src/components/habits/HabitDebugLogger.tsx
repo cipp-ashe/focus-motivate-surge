@@ -1,24 +1,30 @@
 
-import { useEffect } from 'react';
-import { ActiveTemplate, HabitDetail } from './types';
-import { logger } from '@/utils/logManager';
+import React from 'react';
+import { ActiveTemplate, HabitDetail } from '@/types/habits/types';
 
 interface HabitDebugLoggerProps {
-  templates: ActiveTemplate[];
-  todaysHabits: HabitDetail[];
+  templates?: ActiveTemplate[];
+  todaysHabits?: HabitDetail[];
 }
 
-// This component doesn't render anything - it just logs debug info
-const HabitDebugLogger: React.FC<HabitDebugLoggerProps> = ({ 
-  templates, 
-  todaysHabits 
+export const HabitDebugLogger: React.FC<HabitDebugLoggerProps> = ({ 
+  templates = [], 
+  todaysHabits = [] 
 }) => {
-  useEffect(() => {
-    logger.debug("HabitDebugLogger", "Active templates:", templates);
-    logger.debug("HabitDebugLogger", "Today's habits:", todaysHabits);
-  }, [templates, todaysHabits]);
-  
-  return null;
-};
+  // Only render in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return null;
+  }
 
-export default HabitDebugLogger;
+  return (
+    <div className="hidden">
+      {/* Hidden debug information for development */}
+      <div data-testid="habit-debug-templates">
+        {JSON.stringify(templates)}
+      </div>
+      <div data-testid="habit-debug-habits">
+        {JSON.stringify(todaysHabits)}
+      </div>
+    </div>
+  );
+};

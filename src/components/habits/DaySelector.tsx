@@ -1,45 +1,59 @@
 
 import React from 'react';
-import { DayOfWeek } from '@/components/habits/types';
-import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { DAYS_OF_WEEK, DayOfWeek, SHORT_DAYS } from '@/types/habits/types';
 
 interface DaySelectorProps {
-  selectedDays: DayOfWeek[];
-  onChange: (days: DayOfWeek[]) => void;
-  className?: string;
+  activeDays: DayOfWeek[];
+  onUpdateDays: (days: DayOfWeek[]) => void;
 }
 
-const DaySelector: React.FC<DaySelectorProps> = ({ 
-  selectedDays, 
-  onChange,
-  className = ''
+export const DaySelector: React.FC<DaySelectorProps> = ({
+  activeDays,
+  onUpdateDays,
 }) => {
-  const days: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
-  const toggleDay = (day: DayOfWeek) => {
-    if (selectedDays.includes(day)) {
-      onChange(selectedDays.filter(d => d !== day));
-    } else {
-      onChange([...selectedDays, day]);
+  // Map short day names to full day names if needed
+  const normalizedDays = activeDays.map(day => {
+    // If it's a short day, make sure it's one of our valid short days
+    if (SHORT_DAYS.includes(day as any)) {
+      return day;
     }
+    // If it's a full day, make sure it's one of our valid full days
+    if (DAYS_OF_WEEK.includes(day as any)) {
+      return day;
+    }
+    // Default to Monday if invalid
+    return 'Mon';
+  });
+
+  const handleDayToggle = (values: string[]) => {
+    const validDays = values.filter((day): day is DayOfWeek => 
+      DAYS_OF_WEEK.includes(day as any) || SHORT_DAYS.includes(day as any)
+    );
+    onUpdateDays(validDays);
   };
-  
+
   return (
-    <div className={`flex flex-wrap gap-1 ${className}`}>
-      {days.map(day => (
-        <Button
-          key={day}
-          type="button"
-          variant={selectedDays.includes(day) ? "default" : "outline"}
-          size="sm"
-          className="h-8 w-8 p-0 rounded-full"
-          onClick={() => toggleDay(day)}
-        >
-          {day.charAt(0)}
-        </Button>
-      ))}
-    </div>
+    <ToggleGroup 
+      type="multiple"
+      className="flex flex-wrap justify-center sm:justify-start gap-1.5"
+      value={normalizedDays}
+      onValueChange={handleDayToggle}
+    >
+      {DAYS_OF_WEEK.map((day, index) => {
+        const shortDay = SHORT_DAYS[index];
+        return (
+          <ToggleGroupItem
+            key={day}
+            value={shortDay}
+            aria-label={`Toggle ${day}`}
+            className="flex-1 min-w-[40px] h-10 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-muted transition-colors"
+          >
+            <span className="hidden sm:inline">{shortDay}</span>
+            <span className="sm:hidden">{shortDay.charAt(0)}</span>
+          </ToggleGroupItem>
+        );
+      })}
+    </ToggleGroup>
   );
 };
-
-export default DaySelector;

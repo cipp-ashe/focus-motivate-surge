@@ -10,7 +10,4 @@ export { TemplateSelectionSheet } from './TemplateSelectionSheet';
 export { ActiveTemplateList } from './ActiveTemplateList';
 export { TemplateCard } from './TemplateCard';
 export { TodaysHabitsSection } from './TodaysHabitsSection';
-
-// Import for the debug logger used in Habits.tsx
-import { HabitDebugLogger } from './HabitDebugLogger';
-export { HabitDebugLogger };
+export { HabitDebugLogger } from './HabitDebugLogger';

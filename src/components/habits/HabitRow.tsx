@@ -1,58 +1,81 @@
 
 import React from 'react';
-import { GripVertical, Trash2 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { HabitDetail } from '@/types/habits/types';
 import { HabitMetric } from './HabitMetric';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 interface HabitRowProps {
   habit: HabitDetail;
   isCompleted?: boolean;
-  onComplete?: () => void;
-  onDelete?: () => void;
-  dragHandleProps?: any;
+  onComplete: () => void;
+  onAddToTasks?: (habit: HabitDetail) => void;
+  onDismiss?: () => void;
 }
 
 export const HabitRow: React.FC<HabitRowProps> = ({
   habit,
   isCompleted = false,
   onComplete,
-  onDelete,
-  dragHandleProps,
+  onAddToTasks,
+  onDismiss
 }) => {
   return (
-    <Card className="p-4 mb-2 border-theme-medium">
-      <div className="flex items-center gap-4">
-        {dragHandleProps && (
-          <div {...dragHandleProps} className="cursor-grab">
-            <GripVertical className="h-5 w-5 text-muted-foreground" />
+    <Card className="mb-3">
+      <CardContent className="p-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-medium">{habit.name}</h3>
+              {onDismiss && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={onDismiss}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Dismiss</span>
+                </Button>
+              )}
+            </div>
+            {habit.description && (
+              <p className="text-sm text-muted-foreground mt-1">{habit.description}</p>
+            )}
+            
+            <div className="flex justify-between items-center mt-2">
+              <div className="text-xs text-muted-foreground">
+                {habit.timePreference || 'Anytime'}
+              </div>
+              {habit.category && (
+                <div className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  {habit.category}
+                </div>
+              )}
+            </div>
           </div>
-        )}
-        {onDelete && (
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={onDelete}
-            className="text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-        <div className="flex-1">
-          <h3 className="text-sm font-medium">{habit.name}</h3>
-          {habit.description && (
-            <p className="text-xs text-muted-foreground">{habit.description}</p>
-          )}
         </div>
-        <div>
-          <HabitMetric
+        
+        <div className="mt-2 flex gap-2">
+          <HabitMetric 
             habit={habit}
             isCompleted={isCompleted}
-            onComplete={onComplete || (() => {})}
+            onComplete={onComplete}
           />
+          
+          {onAddToTasks && !isCompleted && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onAddToTasks(habit)}
+              className="whitespace-nowrap"
+            >
+              Add to Tasks
+            </Button>
+          )}
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 };
