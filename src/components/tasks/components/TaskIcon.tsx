@@ -37,6 +37,7 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   const iconProps = {
     className: cn(className, colorClass),
     size,
+    'aria-hidden': 'true',
   };
 
   switch (iconType) {
@@ -54,6 +55,8 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
       return <ClipboardList {...iconProps} />;
     case 'habit':
       return <CheckCircle2 {...iconProps} />;
+    case 'standard':
+    case 'regular':
     default:
       return <CheckSquare {...iconProps} />;
   }
@@ -75,6 +78,8 @@ export const getTaskTypeLabel = (type: TaskType): string => {
       return 'Checklist';
     case 'habit':
       return 'Habit';
+    case 'standard':
+    case 'regular':
     default:
       return 'Task';
   }

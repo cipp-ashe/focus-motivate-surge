@@ -12,22 +12,23 @@ export function useTaskTypeColor() {
   const getIconColorClass = (type: TaskType = 'regular'): string => {
     switch (type) {
       case 'timer':
-        return 'task-icon-timer';
+        return 'text-[hsl(var(--timer))] dark:text-[hsl(var(--timer))]';
       case 'journal':
-        return 'task-icon-journal';
+        return 'text-[hsl(var(--journal))] dark:text-[hsl(var(--journal))]';
       case 'checklist':
-        return 'task-icon-checklist';
+        return 'text-[hsl(var(--checklist))] dark:text-[hsl(var(--checklist))]';
       case 'screenshot':
-        return 'task-icon-screenshot';
+        return 'text-[hsl(var(--screenshot))] dark:text-[hsl(var(--screenshot))]';
       case 'voicenote':
-        return 'task-icon-voicenote';
+        return 'text-[hsl(var(--voicenote))] dark:text-[hsl(var(--voicenote))]';
       case 'focus':
-        return 'task-icon-focus';
+        return 'text-[hsl(var(--focus))] dark:text-[hsl(var(--focus))]';
       case 'habit':
-        return 'task-icon-habit text-purple-500';
+        return 'text-purple-500 dark:text-purple-400';
       case 'regular':
+      case 'standard':
       default:
-        return 'task-icon-regular';
+        return 'text-[hsl(var(--regular))] dark:text-[hsl(var(--regular))]';
     }
   };
 
@@ -37,22 +38,23 @@ export function useTaskTypeColor() {
   const getBackgroundColorClass = (type: TaskType = 'regular'): string => {
     switch (type) {
       case 'timer':
-        return 'task-bg-timer';
+        return 'bg-[hsla(var(--timer),0.1)] dark:bg-[hsla(var(--timer),0.05)]';
       case 'journal':
-        return 'task-bg-journal';
+        return 'bg-[hsla(var(--journal),0.1)] dark:bg-[hsla(var(--journal),0.05)]';
       case 'checklist':
-        return 'task-bg-checklist';
+        return 'bg-[hsla(var(--checklist),0.1)] dark:bg-[hsla(var(--checklist),0.05)]';
       case 'screenshot':
-        return 'task-bg-screenshot';
+        return 'bg-[hsla(var(--screenshot),0.1)] dark:bg-[hsla(var(--screenshot),0.05)]';
       case 'voicenote':
-        return 'task-bg-voicenote';
+        return 'bg-[hsla(var(--voicenote),0.1)] dark:bg-[hsla(var(--voicenote),0.05)]';
       case 'focus':
-        return 'task-bg-focus';
+        return 'bg-[hsla(var(--focus),0.1)] dark:bg-[hsla(var(--focus),0.05)]';
       case 'habit':
-        return 'task-bg-habit bg-purple-100 dark:bg-purple-900/20';
+        return 'bg-purple-100 dark:bg-purple-900/20';
       case 'regular':
+      case 'standard':
       default:
-        return 'task-bg-regular';
+        return 'bg-[hsla(var(--regular),0.1)] dark:bg-[hsla(var(--regular),0.05)]';
     }
   };
 
@@ -76,6 +78,7 @@ export function useTaskTypeColor() {
       case 'habit':
         return 'border-purple-300 dark:border-purple-800';
       case 'regular':
+      case 'standard':
       default:
         return 'border-[hsl(var(--regular))]';
     }

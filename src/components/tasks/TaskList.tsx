@@ -47,7 +47,7 @@ export const TaskList: React.FC<TaskListProps> = ({
     return (
       <div className={cn("space-y-3", className)}>
         {Array.from({ length: loadingCount }).map((_, index) => (
-          <div key={index} className="flex items-center space-x-4 p-3 border rounded-md">
+          <div key={index} className="flex items-center space-x-4 p-3 border rounded-md bg-card/50 dark:bg-card/30 animate-pulse">
             <Skeleton className="h-4 w-4 rounded-full" />
             <div className="space-y-2 flex-1">
               <Skeleton className="h-4 w-3/4" />
@@ -60,7 +60,16 @@ export const TaskList: React.FC<TaskListProps> = ({
   }
 
   if (!tasks || tasks.length === 0) {
-    return <div className={className}>{emptyState}</div>;
+    return (
+      <div className={cn("p-4 text-center text-muted-foreground", className)}>
+        {emptyState || (
+          <div className="py-8">
+            <p className="text-lg font-medium mb-2">No tasks found</p>
+            <p className="text-sm">Create a new task to get started</p>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (

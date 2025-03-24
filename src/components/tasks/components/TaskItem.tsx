@@ -39,13 +39,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const { selectTask, selected } = useTaskContext();
   const [isHovered, setIsHovered] = useState(false);
   const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
-  const { getBorderColorClass } = useTaskTypeColor();
+  const { getBorderColorClass, getBackgroundColorClass } = useTaskTypeColor();
 
   const taskIsSelected = isSelected || selected === task.id;
   const taskType = task.taskType || 'regular';
   
   // Get border color based on task type
   const borderColorClass = getBorderColorClass(taskType);
+  const bgColorClass = getBackgroundColorClass(taskType);
 
   const handleSelectTask = useCallback(() => {
     if (onSelect) {
@@ -82,11 +83,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         'relative rounded-md border p-3 transition-all w-full overflow-hidden',
         'min-h-[4.5rem] flex flex-col justify-between',
         taskIsSelected
-          ? `border-primary/50 bg-primary/5 dark:bg-primary/10 dark:border-primary/30 ${borderColorClass}/60`
-          : `border-border/[var(--border-medium)] dark:border-border/[var(--border-medium)] hover:border-border ${borderColorClass}/30`,
+          ? `border-primary/50 dark:border-primary/30 ${borderColorClass}/60 bg-primary/5 dark:bg-primary/10`
+          : `border-border/[var(--border-medium)] dark:border-border/[var(--border-medium)] hover:border-border dark:hover:border-border/80 ${borderColorClass}/30 ${bgColorClass}`,
         isHovered &&
           !taskIsSelected &&
-          'border-border dark:border-border bg-card/80 dark:bg-card/50',
+          'border-border dark:border-border/80 bg-card/80 dark:bg-card/30',
         'md:max-w-full'
       )}
       onMouseEnter={() => setIsHovered(true)}

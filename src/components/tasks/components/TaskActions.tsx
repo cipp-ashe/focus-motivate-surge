@@ -47,7 +47,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-foreground bg-primary/10"
+          className="h-7 w-7 text-muted-foreground hover:text-foreground bg-primary/10 dark:bg-primary/20"
           onClick={(e) => {
             e.stopPropagation();
             handleTaskAction(e as React.MouseEvent<Element, MouseEvent>, 'timer');
@@ -82,13 +82,13 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground dark:hover:text-foreground dark:hover:bg-muted/30"
             >
               <MoreVertical className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-2">
-            <div className="text-sm font-medium mb-2 pb-1 border-b">Task Actions</div>
+          <PopoverContent className="w-48 p-2 border-border dark:border-border/60">
+            <div className="text-sm font-medium mb-2 pb-1 border-b dark:border-border/40">Task Actions</div>
             <div className="grid grid-cols-2 gap-1">
               <Button
                 variant="ghost"
@@ -126,7 +126,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 justify-start text-xs text-muted-foreground"
+                className="h-8 justify-start text-xs text-destructive dark:text-destructive/90"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete();
@@ -143,7 +143,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7 text-muted-foreground hover:text-red-500"
+        className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400"
         onClick={handleDismiss}
         aria-label="Dismiss task"
       >

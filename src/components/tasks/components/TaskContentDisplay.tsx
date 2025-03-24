@@ -85,7 +85,7 @@ export const TaskContentDisplay = React.memo(
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+              className="h-7 px-2 text-xs text-blue-500 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:hover:text-blue-300"
               onClick={(e) => handleSpecializedContent(e, 'checklist')}
             >
               <ClipboardList className="h-3.5 w-3.5 mr-1" />
@@ -97,7 +97,7 @@ export const TaskContentDisplay = React.memo(
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs text-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950"
+              className="h-7 px-2 text-xs text-amber-500 dark:text-amber-400 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 dark:hover:text-amber-300"
               onClick={(e) => handleSpecializedContent(e, 'journal')}
             >
               <FileText className="h-3.5 w-3.5 mr-1" />
@@ -109,7 +109,7 @@ export const TaskContentDisplay = React.memo(
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950"
+              className="h-7 px-2 text-xs text-cyan-500 dark:text-cyan-400 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 dark:hover:text-cyan-300"
               onClick={(e) => handleSpecializedContent(e, 'screenshot')}
             >
               <Image className="h-3.5 w-3.5 mr-1" />
@@ -121,7 +121,7 @@ export const TaskContentDisplay = React.memo(
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950"
+              className="h-7 px-2 text-xs text-rose-500 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 dark:hover:text-rose-300"
               onClick={(e) => handleSpecializedContent(e, 'voicenote')}
             >
               <Mic className="h-3.5 w-3.5 mr-1" />
@@ -133,7 +133,7 @@ export const TaskContentDisplay = React.memo(
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs text-purple-500 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950"
+              className="h-7 px-2 text-xs text-purple-500 dark:text-purple-400 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/30 dark:hover:text-purple-300"
               onClick={(e) => handleSpecializedContent(e, 'timer')}
             >
               <Clock className="h-3.5 w-3.5 mr-1" />

@@ -44,19 +44,47 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
   const getStatusInfo = (status: TaskStatus = 'pending') => {
     switch (status) {
       case 'pending':
-        return { label: 'Not Started', icon: <Square className="h-3.5 w-3.5 mr-1" />, className: "bg-gray-500/10 hover:bg-gray-500/20 text-gray-500" };
+        return { 
+          label: 'Not Started', 
+          icon: <Square className="h-3.5 w-3.5 mr-1" />, 
+          className: "bg-gray-500/10 hover:bg-gray-500/20 text-gray-500 dark:text-gray-400 dark:hover:bg-gray-500/10" 
+        };
       case 'started':
-        return { label: 'Started', icon: <ArrowRight className="h-3.5 w-3.5 mr-1" />, className: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-500" };
+        return { 
+          label: 'Started', 
+          icon: <ArrowRight className="h-3.5 w-3.5 mr-1" />, 
+          className: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 dark:text-blue-400 dark:hover:bg-blue-500/10" 
+        };
       case 'in-progress':
-        return { label: 'In Progress', icon: <Play className="h-3.5 w-3.5 mr-1" />, className: "bg-amber-500/10 hover:bg-amber-500/20 text-amber-500" };
+        return { 
+          label: 'In Progress', 
+          icon: <Play className="h-3.5 w-3.5 mr-1" />, 
+          className: "bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 dark:text-amber-400 dark:hover:bg-amber-500/10" 
+        };
       case 'delayed':
-        return { label: 'Delayed', icon: <AlertTriangle className="h-3.5 w-3.5 mr-1" />, className: "bg-orange-500/10 hover:bg-orange-500/20 text-orange-500" };
+        return { 
+          label: 'Delayed', 
+          icon: <AlertTriangle className="h-3.5 w-3.5 mr-1" />, 
+          className: "bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 dark:text-orange-400 dark:hover:bg-orange-500/10" 
+        };
       case 'completed':
-        return { label: 'Complete', icon: <Check className="h-3.5 w-3.5 mr-1" />, className: "bg-green-500/10 hover:bg-green-500/20 text-green-500" };
+        return { 
+          label: 'Complete', 
+          icon: <Check className="h-3.5 w-3.5 mr-1" />, 
+          className: "bg-green-500/10 hover:bg-green-500/20 text-green-500 dark:text-green-400 dark:hover:bg-green-500/10" 
+        };
       case 'dismissed':
-        return { label: 'Dismissed', icon: <X className="h-3.5 w-3.5 mr-1" />, className: "bg-red-500/10 hover:bg-red-500/20 text-red-500" };
+        return { 
+          label: 'Dismissed', 
+          icon: <X className="h-3.5 w-3.5 mr-1" />, 
+          className: "bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 dark:hover:bg-red-500/10" 
+        };
       default:
-        return { label: 'Not Started', icon: <Square className="h-3.5 w-3.5 mr-1" />, className: "bg-gray-500/10 hover:bg-gray-500/20 text-gray-500" };
+        return { 
+          label: 'Not Started', 
+          icon: <Square className="h-3.5 w-3.5 mr-1" />, 
+          className: "bg-gray-500/10 hover:bg-gray-500/20 text-gray-500 dark:text-gray-400 dark:hover:bg-gray-500/10" 
+        };
     }
   };
 
@@ -129,7 +157,7 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
         <Button
           variant="outline"
           size="sm"
-          className={`h-7 px-2 flex items-center gap-1 text-xs ${statusInfo.className}`}
+          className={`h-7 px-2 flex items-center gap-1 text-xs border-border/50 dark:border-border/30 ${statusInfo.className}`}
           onClick={(e) => {
             e.stopPropagation();
           }}
@@ -141,46 +169,46 @@ export const StatusDropdownMenu: React.FC<StatusDropdownMenuProps> = ({ task, on
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-36 bg-popover z-50 shadow-md border border-border/30"
+        className="w-36 bg-popover z-50 shadow-md border border-border/30 dark:border-border/20"
       >
         <DropdownMenuItem
           onClick={(e) => handleStatusChange(e, 'pending')}
-          className="text-xs cursor-pointer"
+          className="text-xs cursor-pointer dark:hover:bg-muted/50"
         >
           <Square className="h-3.5 w-3.5 mr-2" />
           Not Started
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(e) => handleStatusChange(e, 'started')}
-          className="text-xs cursor-pointer"
+          className="text-xs cursor-pointer text-blue-500 dark:text-blue-400 dark:hover:bg-muted/50"
         >
           <ArrowRight className="h-3.5 w-3.5 mr-2" />
           Started
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(e) => handleStatusChange(e, 'in-progress')}
-          className="text-xs cursor-pointer"
+          className="text-xs cursor-pointer text-amber-500 dark:text-amber-400 dark:hover:bg-muted/50"
         >
           <Play className="h-3.5 w-3.5 mr-2" />
           In Progress
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(e) => handleStatusChange(e, 'delayed')}
-          className="text-xs cursor-pointer"
+          className="text-xs cursor-pointer text-orange-500 dark:text-orange-400 dark:hover:bg-muted/50"
         >
           <AlertTriangle className="h-3.5 w-3.5 mr-2" />
           Delayed
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(e) => handleStatusChange(e, 'completed')}
-          className="text-xs cursor-pointer text-green-600"
+          className="text-xs cursor-pointer text-green-600 dark:text-green-400 dark:hover:bg-muted/50"
         >
           <Check className="h-3.5 w-3.5 mr-2" />
           Complete
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(e) => handleStatusChange(e, 'dismissed')}
-          className="text-xs cursor-pointer text-red-500"
+          className="text-xs cursor-pointer text-red-500 dark:text-red-400 dark:hover:bg-muted/50"
         >
           <X className="h-3.5 w-3.5 mr-2" />
           Dismissed
