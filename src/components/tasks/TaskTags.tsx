@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tag } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
+import { cn } from '@/lib/utils';
 
 interface TaskTagsProps {
   tags: Tag[];
@@ -99,19 +100,37 @@ export const TaskTags: React.FC<TaskTagsProps> = ({
     lg: 'text-sm px-3 py-1',
   };
   
+  // Get color class for a tag
+  const getTagColorClass = (color: string) => {
+    const colorMap: Record<string, string> = {
+      default: 'bg-primary/10 text-primary hover:bg-primary/20',
+      red: 'bg-red-500/10 text-red-500 hover:bg-red-500/20',
+      green: 'bg-green-500/10 text-green-500 hover:bg-green-500/20',
+      blue: 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20',
+      yellow: 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20',
+      purple: 'bg-purple-500/10 text-purple-500 hover:bg-purple-500/20',
+      pink: 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20',
+      orange: 'bg-orange-500/10 text-orange-500 hover:bg-orange-500/20',
+      teal: 'bg-teal-500/10 text-teal-500 hover:bg-teal-500/20',
+      cyan: 'bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500/20',
+      indigo: 'bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20',
+      gray: 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20'
+    };
+    
+    return colorMap[color] || colorMap.default;
+  };
+  
   return (
     <div className={`flex flex-wrap gap-1.5 ${className}`} onClick={preventPropagation}>
       {localTags.map((tag) => (
         <Badge
           key={tag.id}
-          variant={variant}
-          className={`
-            cursor-pointer
-            transition-all
-            hover:opacity-90
-            ${sizeClasses[size]}
-            ${tag.color ? `bg-${tag.color}-500 hover:bg-${tag.color}-600` : ''}
-          `}
+          variant="outline"
+          className={cn(
+            "cursor-pointer transition-all hover:opacity-90",
+            sizeClasses[size],
+            getTagColorClass(tag.color)
+          )}
           onClick={() => handleTagClick(tag)}
         >
           {tag.name}

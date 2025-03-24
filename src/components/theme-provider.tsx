@@ -35,7 +35,7 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement
     
-    // Remove both theme classes
+    // Remove both theme classes first
     root.classList.remove("light", "dark")
 
     // Store the theme preference
@@ -47,8 +47,12 @@ export function ThemeProvider({
         ? "dark"
         : "light"
       root.classList.add(systemTheme)
+      
+      // Also add a data attribute for components that need to know the actual theme
+      root.setAttribute('data-applied-theme', systemTheme)
     } else {
       root.classList.add(theme)
+      root.setAttribute('data-applied-theme', theme)
     }
   }, [theme, storageKey])
 
@@ -60,9 +64,9 @@ export function ThemeProvider({
       const handleChange = () => {
         const root = window.document.documentElement
         root.classList.remove("light", "dark")
-        root.classList.add(
-          mediaQuery.matches ? "dark" : "light"
-        )
+        const newTheme = mediaQuery.matches ? "dark" : "light"
+        root.classList.add(newTheme)
+        root.setAttribute('data-applied-theme', newTheme)
       }
       
       mediaQuery.addEventListener("change", handleChange)

@@ -25,7 +25,7 @@ export function GlassCardContent({ children, className, ...props }: GlassCardPro
 
 export function GlassCardHeader({ children, className, ...props }: GlassCardProps) {
   return (
-    <CardHeader className={cn("px-4 py-3", className)} {...props}>
+    <CardHeader className={cn("px-4 py-3 border-b border-border/40", className)} {...props}>
       {children}
     </CardHeader>
   );

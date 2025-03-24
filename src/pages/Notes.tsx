@@ -43,7 +43,7 @@ const NotesContent = () => {
         />
         
         <GlassCard>
-          <GlassCardHeader className="px-4 py-3 border-b border-border/40">
+          <GlassCardHeader>
             <GlassCardTitle className="text-xl">My Notes</GlassCardTitle>
           </GlassCardHeader>
           <GlassCardContent className="p-0">
@@ -61,10 +61,10 @@ const NotesContent = () => {
 };
 
 const ErrorFallback = ({ error }: { error: Error }) => (
-  <div className="p-4 border border-red-300 bg-red-900/20 rounded-md">
-    <h2 className="text-xl font-semibold text-red-400 mb-2">Error Loading Notes</h2>
+  <div className="p-4 border border-destructive/30 bg-destructive/10 rounded-md">
+    <h2 className="text-xl font-semibold text-destructive mb-2">Error Loading Notes</h2>
     <p className="mb-2">There was a problem loading the notes component.</p>
-    <details className="text-sm text-gray-400">
+    <details className="text-sm text-muted-foreground">
       <summary>Technical Details</summary>
       <p className="mt-1">{error.message}</p>
     </details>

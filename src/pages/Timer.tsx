@@ -4,7 +4,6 @@ import { Quote } from '@/types/timer';
 import { TaskProvider } from '@/contexts/tasks/TaskContext';
 import { TaskSelectionProvider } from '@/components/timer/providers/TaskSelectionProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { TimerSection } from '@/components/timer/TimerSection';
 import { TimerView } from '@/components/tasks/TimerView';
 import { 
@@ -46,7 +45,7 @@ export default function TimerPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Tasks Section - Left side (2/3 width on desktop) */}
             <div className="lg:col-span-2 space-y-6">
-              <GlassCard className="shadow-lg overflow-hidden">
+              <GlassCard className="overflow-hidden">
                 <GlassCardContent className="p-4">
                   <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid grid-cols-2 mb-4">
@@ -74,7 +73,7 @@ export default function TimerPage() {
             
             {/* Timer Section - Right side (1/3 width on desktop) */}
             <div className="lg:col-span-1 space-y-6">
-              <GlassCard className="shadow-lg overflow-hidden">
+              <GlassCard className="overflow-hidden">
                 <GlassCardContent className="p-0">
                   <TimerSection favorites={favorites} setFavorites={setFavorites} />
                 </GlassCardContent>

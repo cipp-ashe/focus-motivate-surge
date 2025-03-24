@@ -24,7 +24,7 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="focus-notes-theme">
         <AuthProvider>
           <RouterProvider router={router} />
-          <Toaster position="top-right" richColors />
+          <Toaster position="top-right" richColors closeButton />
           <DebugButton />
         </AuthProvider>
       </ThemeProvider>

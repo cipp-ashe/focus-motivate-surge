@@ -12,11 +12,11 @@ export const Header = () => {
   };
   
   return (
-    <header className="border-b border-border/40 bg-card/30 backdrop-blur-md">
+    <header className="border-b border-border bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="text-xl font-bold flex items-center gap-2 text-gradient-purple">
-            <Clock className="h-5 w-5 text-purple-500" />
+            <Clock className="h-5 w-5 text-primary" />
             <span>FlowTime</span>
           </Link>
         </div>
