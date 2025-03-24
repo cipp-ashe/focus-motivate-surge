@@ -2,15 +2,15 @@
 /**
  * Habit Utility Functions
  */
-import { HabitDetail } from '@/types/habits/types';
+import { HabitDetail, DayOfWeek, SHORT_DAYS } from '@/types/habits/types';
 
 /**
  * Gets the list of habits that should be active today
  */
 export const getTodaysHabits = (templates: any[], date: Date = new Date()): HabitDetail[] => {
-  // Get the current day of the week
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const todayName = dayNames[date.getDay()];
+  // Get the current day of the week as a short day name
+  const dayNames = SHORT_DAYS;
+  const todayName = dayNames[date.getDay()] as DayOfWeek;
   
   // Collect all habits from templates that are active today
   const todaysHabits: HabitDetail[] = [];
@@ -56,8 +56,7 @@ export const isHabitDueToday = (habit: HabitDetail, templates: any[]): boolean =
   if (!template) return false;
   
   // Check if the template is active today
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const todayName = dayNames[new Date().getDay()];
+  const todayName = SHORT_DAYS[new Date().getDay()] as DayOfWeek;
   
   return template.activeDays.includes(todayName);
 };

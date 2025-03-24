@@ -1,57 +1,111 @@
 
 /**
- * Habit types definition
- * Central source of truth for all habit-related types
+ * Comprehensive Habit Type System
+ * Central source of truth for all habit and template related types
  */
 
-// Day of week type
-export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
-export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-export const SHORT_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+// ===== Day of Week Definitions =====
 
-// Default active days
-export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+// Full day names for display
+export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+export type DayOfWeekFull = typeof DAYS_OF_WEEK[number];
 
-// Storage key for habits
-export const STORAGE_KEY = 'habits';
+// Short day names for compact display and storage
+export const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+export type DayOfWeek = typeof SHORT_DAYS[number];
 
-// Metric type definition
+// Mapping between full and short day names
+export const DAY_MAPPINGS: Record<DayOfWeekFull, DayOfWeek> = {
+  'Sunday': 'Sun',
+  'Monday': 'Mon',
+  'Tuesday': 'Tue',
+  'Wednesday': 'Wed',
+  'Thursday': 'Thu',
+  'Friday': 'Fri',
+  'Saturday': 'Sat'
+};
+
+// Default active days (weekdays)
+export const DEFAULT_WEEKDAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+export const DEFAULT_WEEKEND: DayOfWeek[] = ['Sat', 'Sun'];
+export const DEFAULT_ALL_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// ===== Time and Category Definitions =====
+
+// Time preferences for habits
+export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
+export const TIME_PREFERENCES: TimePreference[] = ['Morning', 'Afternoon', 'Evening', 'Anytime'];
+
+// Categories for habits and templates
+export type HabitCategory = 
+  | 'Health' 
+  | 'Fitness' 
+  | 'Work' 
+  | 'Personal' 
+  | 'Learning' 
+  | 'Mental Health' 
+  | 'Wellness' 
+  | 'Productivity'
+  | 'Mindfulness'
+  | 'Nutrition'
+  | 'Sleep'
+  | 'Social'
+  | 'Creativity'
+  | 'Finance'
+  | 'Other';
+
+export const HABIT_CATEGORIES: HabitCategory[] = [
+  'Health',
+  'Fitness',
+  'Work',
+  'Personal',
+  'Learning',
+  'Mental Health',
+  'Wellness',
+  'Productivity',
+  'Mindfulness',
+  'Nutrition',
+  'Sleep',
+  'Social',
+  'Creativity',
+  'Finance',
+  'Other'
+];
+
+// ===== Metric Types and Definitions =====
+
+// All possible metric types for habits
 export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'slider' | 'rating' | 'number';
 
-// Time preference and category types
-export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
-export type HabitCategory = 'Health' | 'Fitness' | 'Work' | 'Personal' | 'Learning' | 'Mental Health' | 'Wellness' | 'Other';
+// Mapping between metric types and task types for integration
+export const METRIC_TO_TASK_TYPE: Record<MetricType, string> = {
+  'timer': 'timer',
+  'journal': 'journal',
+  'boolean': 'todo',
+  'counter': 'counter',
+  'slider': 'rating',
+  'rating': 'rating',
+  'number': 'counter'
+};
 
-// Habit interface
+// ===== Core Habit Types =====
+
+// Base habit interface
 export interface Habit {
   id: string;
   name: string;
   description: string;
-  category: string;
-  timePreference: string;
-  metrics: {
-    type: MetricType;
-    goal?: number;
-    unit?: string;
-  };
+  category: HabitCategory | string;
+  timePreference: TimePreference;
+  metrics: HabitMetrics;
   completed?: boolean;
   streak?: number;
   lastCompleted?: string;
   order?: number;
 }
 
-// Habit completion record
-export interface HabitCompletion {
-  habitId: string;
-  date: string;
-  value: boolean | number;
-  notes?: string;
-}
-
-// Habit detail (used in many components)
-export interface HabitDetail {
-  id: string;
-  name: string;
+// Detailed habit with additional properties
+export interface HabitDetail extends Habit {
   description?: string;
   category?: string;
   timePreference?: string;
@@ -71,14 +125,25 @@ export interface HabitDetail {
   order?: number;
 }
 
-// Habit metrics type
+// Habit metrics configuration
 export interface HabitMetrics {
   type: MetricType;
   goal?: number;
   unit?: string;
+  min?: number;
+  max?: number;
+  target?: number;
 }
 
-// Habit progress type
+// Habit completion record
+export interface HabitCompletion {
+  habitId: string;
+  date: string;
+  value: boolean | number;
+  notes?: string;
+}
+
+// Progress tracking for a habit
 export interface HabitProgress {
   value: boolean | number;
   streak?: number;
@@ -86,7 +151,21 @@ export interface HabitProgress {
   completed?: boolean;
 }
 
-// Active template definition
+// ===== Template Types =====
+
+// Definition of a habit template (blueprint for creating habits)
+export interface HabitTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: HabitCategory | string;
+  icon?: string;
+  color?: string;
+  defaultDays?: DayOfWeek[];
+  defaultHabits: HabitDetail[];
+}
+
+// Active template instance that a user has added to their routine
 export interface ActiveTemplate {
   templateId: string;
   name: string;
@@ -97,19 +176,7 @@ export interface ActiveTemplate {
   relationships?: Record<string, any>;
 }
 
-// Habit template definition
-export interface HabitTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  icon?: string;
-  color?: string;
-  defaultDays?: DayOfWeek[];
-  defaultHabits: HabitDetail[];
-}
-
-// New template for creation
+// Template for creating a new custom template
 export interface NewTemplate {
   name: string;
   description: string;
@@ -117,3 +184,9 @@ export interface NewTemplate {
   defaultDays: DayOfWeek[];
   category: string;
 }
+
+// ===== Storage Constants =====
+export const STORAGE_KEY = 'habits';
+export const ACTIVE_TEMPLATES_KEY = 'active-templates';
+export const CUSTOM_TEMPLATES_KEY = 'custom-templates';
+export const HABIT_PROGRESS_KEY = 'habit-progress';

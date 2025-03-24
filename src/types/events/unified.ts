@@ -1,3 +1,4 @@
+
 /**
  * Unified Event Types
  * 
@@ -6,10 +7,24 @@
  */
 
 // Import base types
-import { Task, TaskType } from '@/types/tasks';
+import { Task } from '@/types/tasks';
 import { HabitEventType, HabitEventPayloadMap } from './habit-events';
 import { MetricType } from '@/types/habits/types';
-import { TimerEventType, TimerEventPayloadMap } from './timer-events';
+
+// Define timer event types (imported from existing types if available)
+export type TimerEventType = 
+  | 'timer:tick' 
+  | 'timer:init' 
+  | 'timer:close' 
+  | 'timer:start';
+
+// Basic timer event payload map (expand as needed)
+export interface TimerEventPayloadMap {
+  'timer:tick': { timeLeft: number; taskId?: string; taskName?: string };
+  'timer:init': { duration?: number; taskId?: string; taskName?: string };
+  'timer:close': undefined;
+  'timer:start': { taskId?: string; taskName?: string; duration?: number };
+}
 
 // Define the core event types
 export type CoreEventType =
@@ -29,10 +44,6 @@ export type CoreEventType =
   | 'habits:check-pending'
   | 'tag:link'
   | 'tag:unlink'
-  | 'timer:tick'
-  | 'timer:init'
-  | 'timer:close'
-  | 'timer:start'
   | 'app:initialized'
   | 'journal:open'
   | 'journal:update'
@@ -43,9 +54,6 @@ export type CoreEventType =
   | 'relationship:update'
   | 'relationship:batch-update'
   | 'quote:link-task'
-  | 'habit:template-delete'
-  | 'habit:template-remove'
-  | 'habit:dismissed'
   | 'habit:select'
   | 'habit:schedule';
 
@@ -70,10 +78,6 @@ export interface CoreEventPayloadMap {
   'habits:check-pending': any;
   'tag:link': { tagId: string; entityId: string; entityType: string };
   'tag:unlink': { tagId: string; entityId: string; entityType: string };
-  'timer:tick': { timeLeft: number; taskId?: string; taskName?: string };
-  'timer:init': { duration?: number; taskId?: string; taskName?: string };
-  'timer:close': undefined;
-  'timer:start': { taskId?: string; taskName?: string; duration?: number };
   'app:initialized': { userId?: string };
   'journal:open': { habitId: string; habitName: string; description?: string; templateId?: string; date?: string };
   'journal:update': { id: string; content: string; title?: string };
@@ -84,9 +88,6 @@ export interface CoreEventPayloadMap {
   'relationship:update': { entityId: string; relatedId: string; type: string };
   'relationship:batch-update': { entityId: string; relatedIds: string[]; type: string };
   'quote:link-task': { quoteId: string; taskId: string };
-  'habit:template-delete': { templateId: string; isOriginatingAction?: boolean };
-  'habit:template-remove': { templateId: string };
-  'habit:dismissed': { habitId: string; date: string };
   'habit:select': { habitId: string };
   'habit:schedule': HabitTaskEvent;
 }

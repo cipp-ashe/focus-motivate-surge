@@ -1,74 +1,88 @@
 
 /**
- * Habit event types and payload definitions
+ * Habit Event Types
+ * 
+ * Centralizes all habit-related event types and payloads
  */
-import { MetricType } from '@/types/habits/types';
-import { HabitCompletionEvent, TemplateUpdateEvent } from '@/types/habits/unified';
-import { HabitTaskEvent } from './unified';
+import { ActiveTemplate, DayOfWeek, HabitDetail, MetricType } from '../habits/types';
 
+// Define all habit-related event types
 export type HabitEventType =
   | 'habit:complete'
   | 'habit:dismiss'
+  | 'habit:template-add'
   | 'habit:template-update'
   | 'habit:template-delete'
-  | 'habit:template-add'
   | 'habit:template-days-update'
   | 'habit:template-order-update'
-  | 'habit:schedule'
-  | 'habits:check-pending'
-  | 'habit:custom-template-create'
-  | 'habit:custom-template-delete'
-  | 'habit:note-create'
-  | 'habit:journal-create'
-  | 'journal:open';
+  | 'habit:custom-template-add'
+  | 'habit:custom-template-delete';
 
+// Define payload types for each event
 export interface HabitEventPayloadMap {
-  'habit:complete': HabitCompletionEvent;
+  'habit:complete': {
+    habitId: string;
+    date: string;
+    value: boolean | number;
+    metricType?: MetricType;
+    habitName?: string;
+    templateId?: string;
+  };
   'habit:dismiss': {
     habitId: string;
     date: string;
+    templateId?: string;
   };
-  'habit:template-update': TemplateUpdateEvent;
+  'habit:template-add': Partial<ActiveTemplate> & { templateId: string };
+  'habit:template-update': {
+    templateId: string;
+    name?: string;
+    description?: string;
+    habits?: HabitDetail[];
+    activeDays?: DayOfWeek[];
+    customized?: boolean;
+    suppressToast?: boolean;
+  };
   'habit:template-delete': {
     templateId: string;
     isOriginatingAction?: boolean;
   };
-  'habit:template-add': {
-    templateId: string;
-    name?: string;
-    description?: string;
-    habits?: any[];
-    activeDays?: string[];
-    customized?: boolean;
-    suppressToast?: boolean;
-  };
   'habit:template-days-update': {
     templateId: string;
-    activeDays: string[];
+    activeDays: DayOfWeek[];
   };
-  'habit:template-order-update': any[];
-  'habit:schedule': HabitTaskEvent;
-  'habits:check-pending': any;
-  'habit:custom-template-create': { name: string; description?: string; };
-  'habit:custom-template-delete': { templateId: string; suppressToast?: boolean; };
-  'habit:note-create': {
-    habitId: string;
-    habitName: string;
-    content: string;
-    templateId?: string;
+  'habit:template-order-update': ActiveTemplate[];
+  'habit:custom-template-add': {
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    defaultHabits: HabitDetail[];
+    defaultDays: DayOfWeek[];
   };
-  'habit:journal-create': {
-    habitId: string;
-    habitName: string;
-    content: string;
-    templateId?: string;
-    date?: string;
+  'habit:custom-template-delete': {
+    templateId: string;
+    suppressToast?: boolean;
   };
-  'journal:open': {
-    habitId: string;
-    habitName: string;
-    description?: string;
-    templateId?: string;
-    date?: string;
-  };
+}
+
+// Standardized habit completion event
+export interface HabitCompletionEvent {
+  habitId: string;
+  date: string;
+  value: boolean | number;
+  metricType?: MetricType;
+  habitName?: string;
+  templateId?: string;
+}
+
+// Standardized template update event
+export interface TemplateUpdateEvent {
+  templateId: string;
+  name?: string;
+  description?: string;
+  habits?: HabitDetail[];
+  activeDays?: DayOfWeek[];
+  customized?: boolean;
+  suppressToast?: boolean;
 }

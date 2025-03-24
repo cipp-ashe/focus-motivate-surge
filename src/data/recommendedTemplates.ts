@@ -1,18 +1,29 @@
 
-import { HabitTemplate, MetricType } from '@/types/habits/types';
+import { 
+  HabitTemplate, 
+  HabitDetail, 
+  MetricType,
+  HabitCategory,
+  TimePreference,
+  DEFAULT_WEEKDAYS,
+  DEFAULT_ALL_DAYS,
+  DayOfWeek
+} from '@/types/habits/types';
 
-// Helper function to create a habit detail
+/**
+ * Helper function to create a habit detail with consistent structure
+ */
 const createHabitDetail = (
   id: string,
   name: string,
   description: string,
   metricType: MetricType,
-  category: string,
-  timePreference: string,
+  category: HabitCategory | string,
+  timePreference: TimePreference,
   goal?: number,
   unit?: string,
-  tips?: string[]
-) => ({
+  tips: string[] = []
+): HabitDetail => ({
   id,
   name,
   description,
@@ -23,59 +34,68 @@ const createHabitDetail = (
     goal,
     unit
   },
-  tips: tips || []
+  tips
 });
 
-// Sample recommended templates
-const templates: HabitTemplate[] = [
-  {
+/**
+ * Organized collection of recommended templates
+ */
+const templates: Record<string, HabitTemplate> = {
+  // ===== Wellness Templates =====
+  
+  morningRoutine: {
     id: 'morning-routine',
     name: 'Morning Routine',
-    description: 'Start your day with a refreshing routine',
+    description: 'Start your day with intention and energy',
     category: 'Wellness',
-    defaultDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    color: '#9b87f5',
+    icon: 'sun',
+    defaultDays: DEFAULT_WEEKDAYS,
     defaultHabits: [
       createHabitDetail(
         'morning-water',
         'Drink Water',
-        'Hydrate after waking up',
+        'Start your day with hydration',
         'boolean',
         'Health',
         'Morning',
         undefined,
         undefined,
-        ['Drink a full glass of water right after waking up', 'Keep a water bottle by your bed']
+        ['Keep a water bottle by your bed', 'Add lemon for vitamin C and flavor']
       ),
       createHabitDetail(
         'morning-stretch',
         'Morning Stretch',
-        '5-minute stretch to wake up body',
+        'Gentle stretching to wake up your body',
         'timer',
-        'Health',
+        'Fitness',
         'Morning',
         300,
         'seconds',
-        ['Focus on gentle movements', 'Don\'t force any stretches', 'Breathe deeply during each stretch']
+        ['Focus on gentle movements', 'Breathe deeply during each stretch']
       ),
       createHabitDetail(
-        'morning-journal',
-        'Gratitude Journal',
-        'Write down 3 things you are grateful for',
+        'morning-planning',
+        'Plan Your Day',
+        'Set intentions and priorities for the day',
         'journal',
-        'Mental Health',
+        'Productivity',
         'Morning',
         undefined,
         undefined,
-        ['Be specific about what you appreciate', 'Include both small joys and bigger blessings', 'Try to find new things each day']
+        ['Write down your top 3 priorities', 'Review your calendar for the day']
       )
     ]
   },
-  {
+  
+  mindfulness: {
     id: 'mindfulness',
-    name: 'Mindfulness',
-    description: 'Track your mindfulness habits',
-    category: 'Wellbeing',
-    defaultDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    name: 'Daily Mindfulness',
+    description: 'Cultivate presence and reduce stress',
+    category: 'Mental Health',
+    color: '#7E69AB',
+    icon: 'brain',
+    defaultDays: DEFAULT_ALL_DAYS,
     defaultHabits: [
       createHabitDetail(
         'meditation',
@@ -88,77 +108,156 @@ const templates: HabitTemplate[] = [
         'seconds',
         [
           'Find a quiet space where you won\'t be disturbed',
-          'Focus on your breath, counting each inhale and exhale',
-          'If your mind wanders, gently bring it back to your breath',
-          'Start with just 5 minutes if 10 feels too long'
+          'Focus on your breath',
+          'If your mind wanders, gently bring it back'
         ]
       ),
       createHabitDetail(
-        'gratitude-journal',
+        'gratitude',
         'Gratitude Journal',
-        'Write down things you are grateful for',
+        'Note things you\'re thankful for',
         'journal',
         'Mental Health',
         'Evening',
         undefined,
         undefined,
         [
-          'Aim to write down 3 things you\'re grateful for each day',
+          'Write down 3 things you\'re grateful for',
           'Be specific about what you appreciate and why',
-          'Include both small daily joys and bigger blessings',
-          'Try to find new things to be grateful for each day'
+          'Include both small joys and bigger blessings'
+        ]
+      ),
+      createHabitDetail(
+        'mindful-moment',
+        'Mindful Moment',
+        'Take a mindful break during the day',
+        'timer',
+        'Mental Health',
+        'Afternoon',
+        180,
+        'seconds',
+        [
+          'Step away from screens',
+          'Take deep breaths',
+          'Notice your surroundings using all your senses'
         ]
       )
     ]
   },
-  {
-    id: 'fitness',
+
+  // ===== Fitness Templates =====
+  
+  fitnessTracker: {
+    id: 'fitness-tracker',
     name: 'Fitness Tracker',
-    description: 'Track your fitness activities',
+    description: 'Track your daily exercise and activity',
     category: 'Fitness',
+    color: '#0EA5E9',
+    icon: 'dumbbell',
     defaultDays: ['Mon', 'Wed', 'Fri'],
     defaultHabits: [
       createHabitDetail(
-        'fitness-cardio',
+        'cardio-workout',
         'Cardio Exercise',
-        '30 minutes of cardio',
+        'Get your heart rate up',
         'timer',
         'Fitness',
         'Anytime',
         1800,
         'seconds',
-        ['Choose an activity you enjoy', 'Maintain a moderate pace', 'Stay hydrated during your workout']
+        ['Choose an activity you enjoy', 'Aim for moderate intensity']
       ),
       createHabitDetail(
-        'fitness-strength',
+        'strength-training',
         'Strength Training',
-        'Resistance or weight training',
+        'Build muscle and bone density',
         'boolean',
         'Fitness',
         'Anytime',
         undefined,
         undefined,
-        ['Focus on proper form', 'Start with lighter weights', 'Gradually increase intensity over time']
+        ['Focus on proper form', 'Start with lighter weights and build up']
       ),
       createHabitDetail(
-        'fitness-steps',
+        'daily-steps',
         'Daily Steps',
-        'Track your daily step count',
-        'number',
+        'Track your movement throughout the day',
+        'counter',
         'Fitness',
         'Evening',
         10000,
         'steps',
-        ['Take short walking breaks throughout the day', 'Use stairs instead of elevators', 'Park farther away from entrances']
+        ['Take short walking breaks', 'Use stairs instead of elevators']
+      ),
+      createHabitDetail(
+        'workout-rating',
+        'Rate Your Workout',
+        'Track your perceived exertion and satisfaction',
+        'rating',
+        'Fitness',
+        'Evening',
+        5,
+        undefined,
+        ['Consider both effort and enjoyment', 'Use this to adjust future workouts']
       )
     ]
   },
-  {
+  
+  // ===== Productivity Templates =====
+  
+  workProductivity: {
+    id: 'work-productivity',
+    name: 'Work Productivity',
+    description: 'Boost your focus and output at work',
+    category: 'Productivity',
+    color: '#F97316',
+    icon: 'briefcase',
+    defaultDays: DEFAULT_WEEKDAYS,
+    defaultHabits: [
+      createHabitDetail(
+        'deep-work',
+        'Deep Work Session',
+        'Focused work without distractions',
+        'timer',
+        'Work',
+        'Morning',
+        5400,
+        'seconds',
+        ['Turn off notifications', 'Define a clear objective before starting']
+      ),
+      createHabitDetail(
+        'task-review',
+        'Review Task List',
+        'Update and prioritize your tasks',
+        'boolean',
+        'Work',
+        'Morning',
+        undefined,
+        undefined,
+        ['Identify your top 3 priorities', 'Be realistic about what you can accomplish']
+      ),
+      createHabitDetail(
+        'work-reflection',
+        'End-of-Day Reflection',
+        'Review accomplishments and plan for tomorrow',
+        'journal',
+        'Work',
+        'Evening',
+        undefined,
+        undefined,
+        ['Note what went well', 'Identify what could improve', 'Set intentions for tomorrow']
+      )
+    ]
+  },
+  
+  dailyReview: {
     id: 'daily-review',
     name: 'Daily Review',
-    description: 'Track your daily review habits',
+    description: 'Reflect on your day and plan for success',
     category: 'Productivity',
-    defaultDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    color: '#D946EF',
+    icon: 'clipboard-check',
+    defaultDays: DEFAULT_ALL_DAYS,
     defaultHabits: [
       createHabitDetail(
         'morning-review',
@@ -170,10 +269,9 @@ const templates: HabitTemplate[] = [
         undefined,
         undefined,
         [
-          'Do this first thing in the morning before checking emails',
-          'Review your top 3 priorities for the day',
-          'Scan your calendar for important meetings',
-          'Set your intention for the day'
+          'Do this before checking emails',
+          'Review your top 3 priorities',
+          'Check your calendar for important meetings'
         ]
       ),
       createHabitDetail(
@@ -186,16 +284,25 @@ const templates: HabitTemplate[] = [
         undefined,
         undefined,
         [
-          'Review what went well today and what could improve',
+          'Review what went well today',
           'Note any unfinished tasks to move to tomorrow',
-          'Set your priorities for tomorrow',
           'End with a moment of gratitude'
         ]
       ),
     ]
   }
-];
+};
 
+/**
+ * Returns all recommended templates
+ */
 export const getRecommendedTemplates = (): HabitTemplate[] => {
-  return templates;
+  return Object.values(templates);
+};
+
+/**
+ * Returns a specific template by ID
+ */
+export const getTemplateById = (id: string): HabitTemplate | undefined => {
+  return Object.values(templates).find(template => template.id === id);
 };
