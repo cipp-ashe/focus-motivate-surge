@@ -6,7 +6,7 @@
  */
 
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventPayload } from '@/types';
+import { EventType, EventPayload } from '@/types/events';
 
 /**
  * Safely emit an event with error handling

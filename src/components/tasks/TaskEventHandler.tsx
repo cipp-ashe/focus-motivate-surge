@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 import { eventManager } from '@/lib/events/EventManager';
 
 interface TaskEventHandlerProps {

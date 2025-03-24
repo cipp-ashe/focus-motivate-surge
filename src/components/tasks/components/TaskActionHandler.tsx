@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Task, TaskStatus } from '@/types/tasks';
+import { Task, TaskStatus } from '@/types/task';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 

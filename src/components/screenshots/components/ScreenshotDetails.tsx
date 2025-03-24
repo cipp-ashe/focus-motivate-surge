@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Task } from "@/types/tasks";
+import { Task } from "@/types/task";
 import { Badge } from "@/components/ui/badge";
 import { 
   Calendar, 

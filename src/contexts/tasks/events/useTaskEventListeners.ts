@@ -1,6 +1,5 @@
-
 import { useEffect } from 'react';
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 import { taskVerification } from '@/lib/verification/taskVerification';
 import { useEvent } from '@/hooks/useEvent';
 

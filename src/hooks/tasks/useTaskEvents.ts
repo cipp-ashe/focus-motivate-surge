@@ -1,7 +1,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 
 /**
  * Hook for subscribing to task-related events

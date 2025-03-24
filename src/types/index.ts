@@ -9,10 +9,12 @@
 // Core types
 export * from './core';
 
+// Event system types
+export * from './events';
+
 // Domain-specific types
 export * from './habit';
 export * from './task';
 export * from './note';
 export * from './timer';
 export * from './quote';
-

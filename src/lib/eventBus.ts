@@ -7,7 +7,7 @@
  */
 
 import { eventManager } from './events/EventManager';
-import { EventType, EventPayload, EventUnsubscribe } from '@/types';
+import { EventType, EventPayload, EventUnsubscribe } from '@/types/events';
 
 // Re-export the event manager instance as the event bus for backward compatibility
 export const eventBus = {

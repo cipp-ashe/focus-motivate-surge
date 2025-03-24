@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 import { useEvent } from '@/hooks/useEvent';
 import { useUnifiedMediaHandlers } from './useUnifiedMediaHandlers';
 
