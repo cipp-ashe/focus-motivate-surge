@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
@@ -154,7 +155,7 @@ const TaskPageContent = () => {
       </div>
       
       <div className="grid grid-cols-1 gap-6">
-        <GlassCard className="shadow-lg">
+        <GlassCard className="shadow-sm">
           <GlassCardContent>
             <TaskInput 
               onTaskAdd={(task) => taskContext?.addTask?.(task)}
@@ -163,7 +164,7 @@ const TaskPageContent = () => {
           </GlassCardContent>
         </GlassCard>
         
-        <GlassCard className="overflow-hidden shadow-lg">
+        <GlassCard className="overflow-hidden shadow-sm">
           <GlassCardContent className="p-0">
             {taskContext && (
               <UnifiedTaskView 

@@ -1,96 +1,94 @@
-import React, { createContext, useContext, useReducer, Dispatch } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+
+import React, { createContext, useReducer, useEffect } from 'react';
+import { noteReducer } from './noteReducer';
+import { initialState } from './initialState';
 import { toast } from 'sonner';
-import { Note } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
+import type { Note } from '@/types/notes';
 
-// Define the state type
-interface NoteState {
-  notes: Note[];
-  selectedNoteId: string | null;
+// Define context type
+interface NoteContextType {
+  state: {
+    notes: Note[];
+    selectedNoteId: string | null;
+  };
+  dispatch: React.Dispatch<any>;
 }
 
-// Define the action types
-type NoteAction =
-  | { type: 'ADD_NOTE'; payload: Note }
-  | { type: 'UPDATE_NOTE'; payload: { id: string; updates: Partial<Note> } }
-  | { type: 'DELETE_NOTE'; payload: { id: string; title: string } }
-  | { type: 'SELECT_NOTE'; payload: string }
-  | { type: 'CLEAR_NOTES' };
+// Create context with default value
+export const NoteContext = createContext<NoteContextType>({
+  state: initialState,
+  dispatch: () => null,
+});
 
-// Define the reducer function
-const noteReducer = (state: NoteState, action: NoteAction): NoteState => {
-  switch (action.type) {
-    case 'ADD_NOTE':
-      return { ...state, notes: [...state.notes, action.payload] };
-    case 'UPDATE_NOTE':
-      return {
-        ...state,
-        notes: state.notes.map(note =>
-          note.id === action.payload.id ? { ...note, ...action.payload.updates } : note
-        ),
-      };
-    case 'DELETE_NOTE':
-      return {
-        ...state,
-        notes: state.notes.filter(note => note.id !== action.payload.id),
-        selectedNoteId: state.selectedNoteId === action.payload.id ? null : state.selectedNoteId,
-      };
-    case 'SELECT_NOTE':
-      return { ...state, selectedNoteId: action.payload };
-    case 'CLEAR_NOTES':
-      return { ...state, notes: [], selectedNoteId: null };
-    default:
-      return state;
-  }
-};
-
-// Define the initial state
-const initialState: NoteState = {
-  notes: [],
-  selectedNoteId: null,
-};
-
-// Create the context
-interface NoteContextProps {
-  state: NoteState;
-  dispatch: Dispatch<NoteAction>;
-}
-
-const NoteContext = createContext<NoteContextProps | undefined>(undefined);
-
-// Create a provider component
-interface NoteProviderProps {
-  children: React.ReactNode;
-}
-
-export const NoteProvider: React.FC<NoteProviderProps> = ({ children }) => {
+// Provider component
+export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(noteReducer, initialState);
 
-  // Load notes from localStorage on initialization
-  React.useEffect(() => {
+  // Load notes from localStorage on initial render
+  useEffect(() => {
     try {
-      const storedNotes = localStorage.getItem('notes');
-      if (storedNotes) {
-        const parsedNotes = JSON.parse(storedNotes) as Note[];
-        parsedNotes.forEach(note => {
-          dispatch({ type: 'ADD_NOTE', payload: note });
-        });
+      const savedNotes = localStorage.getItem('notes');
+      if (savedNotes) {
+        const parsedNotes = JSON.parse(savedNotes);
+        dispatch({ type: 'SET_NOTES', payload: parsedNotes });
       }
     } catch (error) {
-      console.error('Failed to load notes from localStorage', error);
-      toast.error('Failed to load notes');
+      console.error('Error loading notes from localStorage:', error);
+      toast.error('Failed to load saved notes');
     }
-  }, [dispatch]);
+  }, []);
 
-  // Save notes to localStorage whenever the notes change
-  React.useEffect(() => {
+  // Save notes to localStorage whenever they change
+  useEffect(() => {
     try {
       localStorage.setItem('notes', JSON.stringify(state.notes));
     } catch (error) {
-      console.error('Failed to save notes to localStorage', error);
+      console.error('Error saving notes to localStorage:', error);
       toast.error('Failed to save notes');
     }
+  }, [state.notes]);
+
+  // Set up event handlers
+  useEffect(() => {
+    const handleAddNote = (data: { note: Note }) => {
+      // Avoid duplicates
+      if (!state.notes.some(note => note.id === data.note.id)) {
+        dispatch({ type: 'ADD_NOTE', payload: data.note });
+        toast.success('Note added');
+      }
+    };
+
+    const handleUpdateNote = (data: { id: string; updates: Partial<Note> }) => {
+      dispatch({ 
+        type: 'UPDATE_NOTE', 
+        payload: { id: data.id, updates: data.updates } 
+      });
+      toast.success('Note updated');
+    };
+
+    const handleDeleteNote = (data: { id: string }) => {
+      dispatch({ type: 'DELETE_NOTE', payload: { id: data.id, title: "" } });
+      toast.success('Note deleted');
+    };
+
+    const handleSelectNote = (data: { id: string | null }) => {
+      dispatch({ type: 'SET_SELECTED_NOTE', payload: data.id });
+    };
+
+    // Subscribe to events
+    const unsubscribeAdd = eventManager.on('note:add', handleAddNote);
+    const unsubscribeUpdate = eventManager.on('note:update', handleUpdateNote);
+    const unsubscribeDelete = eventManager.on('note:delete', handleDeleteNote);
+    const unsubscribeSelect = eventManager.on('note:select', handleSelectNote);
+
+    return () => {
+      // Clean up event listeners
+      unsubscribeAdd();
+      unsubscribeUpdate();
+      unsubscribeDelete();
+      unsubscribeSelect();
+    };
   }, [state.notes]);
 
   return (
@@ -98,58 +96,4 @@ export const NoteProvider: React.FC<NoteProviderProps> = ({ children }) => {
       {children}
     </NoteContext.Provider>
   );
-};
-
-// Create custom hooks to use the context
-export const useNoteState = () => {
-  const context = useContext(NoteContext);
-  if (!context) {
-    throw new Error('useNoteState must be used within a NoteProvider');
-  }
-  return context.state;
-};
-
-export const useNoteDispatch = () => {
-  const context = useContext(NoteContext);
-  if (!context) {
-    throw new Error('useNoteDispatch must be used within a NoteProvider');
-  }
-  return context.dispatch;
-};
-
-// Define action functions
-export const addNote = (dispatch: Dispatch<NoteAction>) => (note: Omit<Note, 'id'>) => {
-  const id = uuidv4();
-  const newNote: Note = { id, ...note };
-  dispatch({ type: 'ADD_NOTE', payload: newNote });
-  toast.success('Note added successfully');
-  eventManager.emit('note:add', { ...newNote, content: newNote.content || '' });
-};
-
-export const updateNote = (dispatch: Dispatch<NoteAction>) => (id: string, updates: Partial<Note>) => {
-  dispatch({ type: 'UPDATE_NOTE', payload: { id, updates } });
-  toast.success('Note updated successfully');
-  eventManager.emit('note:update', { id, updates });
-};
-
-export const deleteNote = (dispatch: Dispatch<NoteAction>) => (id: string) => {
-  if (!id) return;
-  
-  dispatch({ 
-    type: 'DELETE_NOTE', 
-    payload: { id, title: "" } 
-  });
-  
-  toast.success('Note deleted successfully');
-  eventManager.emit('note:delete', { id });
-};
-
-export const selectNote = (dispatch: Dispatch<NoteAction>) => (id: string) => {
-  dispatch({ type: 'SELECT_NOTE', payload: id });
-};
-
-export const clearNotes = (dispatch: Dispatch<NoteAction>) => () => {
-  dispatch({ type: 'CLEAR_NOTES' });
-  toast.success('All notes cleared successfully');
-  eventManager.emit('notes:clear', {});
 };

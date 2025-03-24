@@ -13,7 +13,7 @@ interface HabitCardProps {
 
 export const HabitCard: React.FC<HabitCardProps> = ({ habit, onToggle }) => {
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg h-full">
+    <Card className="overflow-hidden transition-all hover:shadow-lg h-full border border-border/40 bg-card text-card-foreground">
       <CardContent className="p-6 flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">
           <div>

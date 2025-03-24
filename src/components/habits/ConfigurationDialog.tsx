@@ -59,7 +59,7 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
     <Dialog open={open} onOpenChange={(isOpen) => {
       if (!isOpen) onClose();
     }}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md border border-border/40 bg-card text-card-foreground">
         <DialogHeader>
           <DialogTitle>Configure Template</DialogTitle>
           <DialogDescription>
@@ -91,13 +91,13 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
 
           <div className="space-y-2">
             <Label>Habits</Label>
-            <ScrollArea className="h-48 border rounded-md p-2">
+            <ScrollArea className="h-48 border border-border/40 rounded-md p-2">
               {habits.length === 0 ? (
                 <p className="text-sm text-muted-foreground p-2">No habits configured yet.</p>
               ) : (
                 <div className="space-y-2">
                   {habits.map((habit) => (
-                    <div key={habit.id} className="p-2 border rounded-md">
+                    <div key={habit.id} className="p-2 border border-border/40 rounded-md">
                       <h4 className="font-medium">{habit.name}</h4>
                       {habit.description && (
                         <p className="text-sm text-muted-foreground mt-1">

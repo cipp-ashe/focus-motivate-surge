@@ -1,3 +1,4 @@
+
 import { useCallback, useContext } from 'react';
 import { NoteContext } from './NoteContext';
 import type { Note } from '@/types/notes';
@@ -16,7 +17,7 @@ export const useNoteActions = () => {
     };
 
     dispatch({ type: 'ADD_NOTE', payload: newNote });
-    eventManager.emit('note:add', newNote);
+    eventManager.emit('note:add', { note: newNote });
     toast.success('Note added successfully');
   }, [dispatch]);
 
