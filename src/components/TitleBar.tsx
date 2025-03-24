@@ -15,7 +15,7 @@ export const TitleBar = () => {
   };
 
   return (
-    <div className={`h-8 bg-background border-b flex items-center justify-between ${isMobile ? 'px-2' : 'px-4'} fixed top-0 left-0 right-0 titlebar-drag-region`}>
+    <div className={`h-8 bg-background border-b border-theme-light flex items-center justify-between ${isMobile ? 'px-2' : 'px-4'} fixed top-0 left-0 right-0 titlebar-drag-region`}>
       <div className="text-sm font-medium text-muted-foreground">
         {!isMobile && "FlowTime"}
       </div>

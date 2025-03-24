@@ -1,93 +1,60 @@
-
 import React from 'react';
-import { Task } from '@/types/tasks';
-import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
-import { TaskActionButton } from './TaskActionButton';
-import { formatTime } from '@/lib/utils/formatters';
+import { Link, useLocation } from 'react-router-dom';
+import { Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface TaskHeaderProps {
-  task: Task;
-  editingTaskId: string | null;
-  inputValue: string;
-  durationInMinutes: number;
-  onTaskAction: (e: React.MouseEvent<HTMLButtonElement>, actionType?: string) => void;
-  handleLocalChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleLocalBlur: () => void;
-  handleLocalKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  preventPropagation: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
-  onDurationClick?: (e: React.MouseEvent<HTMLElement>) => void;
-  dialogOpeners?: {
-    checklist?: (taskId: string, taskName: string, items: any[]) => void;
-    journal?: (taskId: string, taskName: string, entry: string) => void;
-    screenshot?: (imageUrl: string, taskName: string) => void;
-    voicenote?: (taskId: string, taskName: string) => void;
+export const Header = () => {
+  const location = useLocation();
+  
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
-}
-
-const TaskHeader: React.FC<TaskHeaderProps> = ({
-  task,
-  editingTaskId,
-  inputValue,
-  durationInMinutes,
-  onTaskAction,
-  handleLocalChange,
-  handleLocalBlur,
-  handleLocalKeyDown,
-  preventPropagation,
-  onDurationClick,
-  dialogOpeners
-}) => {
-  const isEditing = editingTaskId === task.id;
   
   return (
-    <div className="flex items-center justify-between p-3 pb-1">
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        {isEditing ? (
-          <input
-            type="text"
-            className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-primary"
-            value={inputValue}
-            onChange={handleLocalChange}
-            onBlur={handleLocalBlur}
-            onKeyDown={handleLocalKeyDown}
-            onClick={preventPropagation}
-            autoFocus
-          />
-        ) : (
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <h3 className="font-semibold truncate">{task.name}</h3>
-            
-            {task.taskType === 'timer' && durationInMinutes > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="h-6 px-2 py-0 text-xs"
-                onClick={onDurationClick}
-              >
-                {formatTime(durationInMinutes * 60, true)}
-              </Button>
+    <header className="border-b border-theme-medium bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center">
+          <Link to="/" className="text-xl font-bold flex items-center gap-2 text-gradient-purple">
+            <Clock className="h-5 w-5 text-primary" />
+            <span>FlowTime</span>
+          </Link>
+        </div>
+        
+        <nav className="hidden md:flex items-center space-x-6">
+          <Link 
+            to="/" 
+            className={cn("font-medium transition-colors", 
+              isActive('/') ? "text-primary" : "text-muted-foreground hover:text-primary/80"
             )}
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-2 h-7 w-7 p-0"
-              onClick={(e) => onTaskAction(e, 'edit')}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        )}
+          >
+            Home
+          </Link>
+          <Link 
+            to="/tasks" 
+            className={cn("font-medium transition-colors", 
+              isActive('/tasks') ? "text-primary" : "text-muted-foreground hover:text-primary/80"
+            )}
+          >
+            Tasks
+          </Link>
+          <Link 
+            to="/timer" 
+            className={cn("font-medium transition-colors", 
+              isActive('/timer') ? "text-primary" : "text-muted-foreground hover:text-primary/80"
+            )}
+          >
+            Timer
+          </Link>
+          <Link 
+            to="/settings" 
+            className={cn("font-medium transition-colors", 
+              isActive('/settings') ? "text-primary" : "text-muted-foreground hover:text-primary/80"
+            )}
+          >
+            Settings
+          </Link>
+        </nav>
       </div>
-      
-      <TaskActionButton 
-        task={task}
-        onTaskAction={onTaskAction}
-        dialogOpeners={dialogOpeners}
-      />
-    </div>
+    </header>
   );
 };
-
-export default TaskHeader;
