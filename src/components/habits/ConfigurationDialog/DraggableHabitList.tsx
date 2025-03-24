@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Grip, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HabitForm from "./HabitForm";
-import { HabitDetail, MetricType } from '../types';
+import { HabitDetail } from '@/types/habit';
+import { DraggableHabitProps, HabitDragItem } from '@/types/habitComponents';
 
 interface DraggableHabitListProps {
   habits: HabitDetail[];

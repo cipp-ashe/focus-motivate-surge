@@ -1,7 +1,7 @@
-
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
-import { ActiveTemplate } from '@/components/habits/types';
+import { ActiveTemplate, HabitDetail, DayOfWeek } from '@/types/habit';
+import { TemplateUpdateEvent } from '@/types/events/habit-events';
 
 export const useTemplateEventHandlers = (
   templates: ActiveTemplate[],

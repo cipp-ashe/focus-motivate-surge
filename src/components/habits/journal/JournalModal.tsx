@@ -1,25 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from 'sonner';
-import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import MDEditor from '@uiw/react-md-editor';
+import { useEvent } from '@/hooks';
+import { DEFAULT_JOURNAL_CONTENT, DEFAULT_JOURNAL_TAGS, JOURNAL_PROMPTS } from './constants';
+import { useToast } from '@/hooks/use-toast';
+import { v4 as uuidv4 } from 'uuid';
+import { Tag } from '@/types/note';
+import useQuote from '@/hooks/useQuote';
+import { JournalModalProps } from '@/types/habitComponents';
 import { useCompletionMutation } from '@/hooks/habits/useCompletionMutation';
 import { useDismissMutation } from '@/hooks/habits/useDismissMutation';
-import { useHabitContext } from '@/contexts/habits/HabitContext';
-import { HabitDetail } from '@/types/habits/types';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { useQuote } from './useQuote';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 
 interface JournalModalProps {
   open: boolean;

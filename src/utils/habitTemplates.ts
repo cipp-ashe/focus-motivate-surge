@@ -1,4 +1,3 @@
-
 /**
  * Habit Template Utilities
  * 
@@ -87,4 +86,10 @@ export const createEmptyTemplate = (
     [],
     DEFAULT_ACTIVE_DAYS
   );
+};
+
+// Export habitTemplates so it can be imported
+export const habitTemplates = {
+  // Default templates would go here
+  getDefaultTemplates: () => []
 };

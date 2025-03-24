@@ -1,158 +1,74 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import { useAuth } from '@/contexts/auth/AuthContext';
-import { ActiveTemplate, HabitDetail } from '@/components/habits/types';
-import { migrateHabitTemplate } from '@/lib/migrations/habitTemplates';
-import { toast } from 'sonner';
+/**
+ * Hook for managing habit storage
+ */
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { ActiveTemplate, HabitTemplate, ACTIVE_TEMPLATES_KEY, CUSTOM_TEMPLATES_KEY } from '@/types/habit';
+import { migrateAllTemplates } from '@/lib/migrations/habitTemplates';
 
-export const useHabitStorage = () => {
-  const [templates, setTemplates] = useState<ActiveTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
-
-  // Load templates from either localStorage or Supabase
-  const loadTemplates = useCallback(async () => {
-    setIsLoading(true);
-    
-    try {
-      if (user) {
-        // Load from Supabase if user is authenticated
-        const { data, error } = await supabase
-          .from('habit_templates')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('is_active', true);
-          
-        if (error) {
-          throw error;
-        }
-        
-        // Convert from database format to application format
-        if (data) {
-          const convertedTemplates = data.map(item => {
-            // Parse habits from JSON string
-            const habits = item.habits ? JSON.parse(item.habits) : [];
-            
-            // Create ActiveTemplate structure
-            const template: ActiveTemplate = {
-              templateId: item.id,
-              name: item.name,
-              description: item.description,
-              activeDays: item.days || [],
-              customized: true,
-              habits
-            };
-            
-            // Ensure consistent structure
-            return migrateHabitTemplate(template);
-          });
-          
-          setTemplates(convertedTemplates);
-        }
-      } else {
-        // Load from localStorage if not authenticated
-        const savedTemplates = localStorage.getItem('habit-templates');
-        if (savedTemplates) {
-          const parsedTemplates = JSON.parse(savedTemplates);
-          // Ensure consistent structure
-          const migratedTemplates = parsedTemplates.map(migrateHabitTemplate);
-          setTemplates(migratedTemplates);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading habit templates:', error);
-      toast.error('Failed to load habit templates');
-      
-      // Fallback to localStorage in case of error
-      const savedTemplates = localStorage.getItem('habit-templates');
-      if (savedTemplates) {
-        try {
-          const parsedTemplates = JSON.parse(savedTemplates);
-          const migratedTemplates = parsedTemplates.map(migrateHabitTemplate);
-          setTemplates(migratedTemplates);
-        } catch (e) {
-          console.error('Error parsing localStorage templates:', e);
-        }
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
+export function useHabitStorage() {
+  const [activeTemplates, setActiveTemplates] = useLocalStorage<ActiveTemplate[]>(
+    ACTIVE_TEMPLATES_KEY,
+    []
+  );
   
-  // Save templates to either localStorage or Supabase
-  const saveTemplates = useCallback(async (newTemplates: ActiveTemplate[]) => {
-    try {
-      // Always save to localStorage as a backup
-      localStorage.setItem('habit-templates', JSON.stringify(newTemplates));
-      
-      // If authenticated, also save to Supabase
-      if (user) {
-        // Convert templates to database format
-        const dbTemplates = newTemplates.map(template => ({
-          id: template.templateId,
-          user_id: user.id,
-          name: template.name || 'Unnamed Template',
-          description: template.description || '',
-          days: template.activeDays || [],
-          habits: JSON.stringify(template.habits || []),
-          is_active: true
-        }));
-        
-        // Upsert to Supabase
-        const { error } = await supabase
-          .from('habit_templates')
-          .upsert(dbTemplates, { onConflict: 'id' });
-          
-        if (error) {
-          throw error;
-        }
-      }
-      
-      // Update state
-      setTemplates(newTemplates);
-    } catch (error) {
-      console.error('Error saving habit templates:', error);
-      toast.error('Failed to save habit templates');
-    }
-  }, [user]);
+  const [customTemplates, setCustomTemplates] = useLocalStorage<HabitTemplate[]>(
+    CUSTOM_TEMPLATES_KEY,
+    []
+  );
   
-  // Delete a template
-  const deleteTemplate = useCallback(async (templateId: string) => {
-    try {
-      // Remove from state and localStorage
-      const updatedTemplates = templates.filter(t => t.templateId !== templateId);
-      localStorage.setItem('habit-templates', JSON.stringify(updatedTemplates));
-      setTemplates(updatedTemplates);
-      
-      // If authenticated, also delete from Supabase
-      if (user) {
-        // Mark as inactive rather than deleting
-        const { error } = await supabase
-          .from('habit_templates')
-          .update({ is_active: false })
-          .eq('id', templateId)
-          .eq('user_id', user.id);
-          
-        if (error) {
-          throw error;
-        }
-      }
-    } catch (error) {
-      console.error('Error deleting habit template:', error);
-      toast.error('Failed to delete habit template');
-    }
-  }, [templates, user]);
-  
-  // Load templates on component mount and when user changes
-  useEffect(() => {
-    loadTemplates();
-  }, [loadTemplates]);
-  
-  return {
-    templates,
-    isLoading,
-    saveTemplates,
-    deleteTemplate,
-    refreshTemplates: loadTemplates
+  // Function to initialize templates with migration
+  const initializeTemplates = () => {
+    const migratedTemplates = migrateAllTemplates(activeTemplates);
+    setActiveTemplates(migratedTemplates);
   };
-};
+
+  // Function to add a new active template
+  const addActiveTemplate = (template: ActiveTemplate) => {
+    setActiveTemplates((prevTemplates) => [...prevTemplates, template]);
+  };
+
+  // Function to update an existing active template
+  const updateActiveTemplate = (updatedTemplate: ActiveTemplate) => {
+    setActiveTemplates((prevTemplates) =>
+      prevTemplates.map((template) =>
+        template.templateId === updatedTemplate.templateId ? updatedTemplate : template
+      )
+    );
+  };
+
+  // Function to delete an active template
+  const deleteActiveTemplate = (templateId: string) => {
+    setActiveTemplates((prevTemplates) =>
+      prevTemplates.filter((template) => template.templateId !== templateId)
+    );
+  };
+
+  // Function to update the order of active templates
+  const updateActiveTemplateOrder = (updatedTemplates: ActiveTemplate[]) => {
+    setActiveTemplates(updatedTemplates);
+  };
+
+  // Function to add a new custom template
+  const addCustomTemplate = (template: HabitTemplate) => {
+    setCustomTemplates((prevTemplates) => [...prevTemplates, template]);
+  };
+
+  // Function to delete a custom template
+  const deleteCustomTemplate = (templateId: string) => {
+    setCustomTemplates((prevTemplates) =>
+      prevTemplates.filter((template) => template.id !== templateId)
+    );
+  };
+
+  return {
+    activeTemplates,
+    customTemplates,
+    initializeTemplates,
+    addActiveTemplate,
+    updateActiveTemplate,
+    deleteActiveTemplate,
+    updateActiveTemplateOrder,
+    addCustomTemplate,
+    deleteCustomTemplate,
+  };
+}

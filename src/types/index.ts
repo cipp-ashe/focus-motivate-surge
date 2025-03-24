@@ -10,44 +10,36 @@
 export * from './core';
 
 // Domain-specific types
-export { 
+export type { 
   // Habit types
-  DayOfWeek, DayOfWeekFull, DAYS_OF_WEEK, SHORT_DAYS, DAY_MAPPINGS,
-  DEFAULT_WEEKDAYS, DEFAULT_WEEKEND, DEFAULT_ALL_DAYS, DEFAULT_ACTIVE_DAYS,
-  TimePreference, TIME_PREFERENCES,
-  HabitCategory, HABIT_CATEGORIES,
-  MetricType, METRIC_TO_TASK_TYPE,
+  DayOfWeek, DayOfWeekFull, HabitCategory, TimePreference, MetricType,
   Habit, HabitDetail, HabitMetrics, HabitCompletion, HabitProgress, HabitLog,
   HabitTemplate, ActiveTemplate, NewTemplate,
-  HabitCompletionEvent, TemplateUpdateEvent,
-  STORAGE_KEY as HABIT_STORAGE_KEY, ACTIVE_TEMPLATES_KEY, CUSTOM_TEMPLATES_KEY, HABIT_PROGRESS_KEY
+  HabitCompletionEvent, TemplateUpdateEvent, 
 } from './habit';
 
-export {
+export type {
   // Task types
   TaskType, TaskStatus, Task, ChecklistItem, TaskMetrics, TaskRelationship,
-  TaskState, TaskContextState, STORAGE_KEYS as TASK_STORAGE_KEYS,
-  Tag as TaskTag
+  TaskState, TaskContextState
 } from './task';
 
-export {
+export type {
   // Note types
   TagColor, Tag, Relationship, NoteContentType, AudioMetadata, Note,
-  isValidTagColor, createNote, createVoiceNote, STORAGE_KEY as NOTE_STORAGE_KEY,
   VoiceNote, VoiceNoteState
 } from './note';
 
-export {
+export type {
   // Timer types
-  TimerMode, TimerStatus, SoundOption, QuoteCategory, Quote, TIMER_CONSTANTS, SOUND_OPTIONS,
+  TimerMode, TimerStatus, SoundOption, QuoteCategory, Quote, 
   TimerState, TimerAction, TimerStateMetrics, TimerMetrics, TimerExpandedViewRef,
   TimerDisplayProps, TimerControlsProps, TimerProgressProps, TimerSessionProps, TimerMetricsDisplayProps,
   TimerPresetDuration, TimerPresetsProps, TimerCircleProps, MinutesInputProps, TimerA11yProps,
   ButtonA11yProps, SoundSelectorProps, TimerProps,
-  convertTimerMetricsToTaskMetrics, convertTaskMetricsToTimerMetrics
 } from './timer';
 
-export {
+export type {
   // Event types
   EventType, EventPayload, EventCallback, 
   TimerEventType, CoreEventType, HabitEventType,
@@ -55,11 +47,19 @@ export {
   HabitTaskEvent, HabitEventPayloadMap
 } from './event';
 
-// State types
-export * from './state';
+// Constants
+export { 
+  DAYS_OF_WEEK, SHORT_DAYS, DAY_MAPPINGS,
+  DEFAULT_WEEKDAYS, DEFAULT_WEEKEND, DEFAULT_ALL_DAYS, DEFAULT_ACTIVE_DAYS,
+  TIME_PREFERENCES, HABIT_CATEGORIES, METRIC_TO_TASK_TYPE,
+  STORAGE_KEY as HABIT_STORAGE_KEY, ACTIVE_TEMPLATES_KEY, CUSTOM_TEMPLATES_KEY, HABIT_PROGRESS_KEY,
+  TIMER_CONSTANTS, SOUND_OPTIONS
+} from './habit';
 
-// Metrics types
-export * from './metrics';
+export { TASK_STORAGE_KEYS } from './task';
 
-// Summary types
-export * from './summary';
+// Utility functions
+export { 
+  isValidTagColor, createNote, createVoiceNote,
+  convertTimerMetricsToTaskMetrics, convertTaskMetricsToTimerMetrics
+} from './note';

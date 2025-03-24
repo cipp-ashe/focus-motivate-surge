@@ -1,8 +1,7 @@
-
 import { useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
-import { ActiveTemplate } from '@/components/habits/types';
+import { ActiveTemplate, HabitTemplate } from '@/types/habit';
 import { habitTemplates } from '@/utils/habitTemplates';
 
 export const useTemplateQueueHandler = (
