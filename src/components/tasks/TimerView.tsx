@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTasks } from '@/contexts/tasks/TaskContext';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks'; // Using the Task type from the correct location
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { TimerConfetti } from '@/components/timer/TimerConfetti';
 
 const TimerView: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
-  const { getTask, updateTask } = useTasks();
+  const taskContext = useTaskContext();
   const [task, setTask] = useState<Task | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(0);
@@ -40,14 +40,14 @@ const TimerView: React.FC = () => {
 
   useEffect(() => {
     if (taskId) {
-      const fetchedTask = getTask(taskId);
+      const fetchedTask = taskContext.items.find(t => t.id === taskId);
       if (fetchedTask) {
         setTask(fetchedTask);
         setTime(fetchedTask.timer || 0);
         setNotes(fetchedTask.notes || '');
       }
     }
-  }, [taskId, getTask]);
+  }, [taskId, taskContext.items]);
 
   useEffect(() => {
     if (isRunning) {
@@ -87,7 +87,7 @@ const TimerView: React.FC = () => {
     setShowConfetti(true);
 
     // Update the task with the final timer value and completion status
-    await updateTask(task.id, {
+    await taskContext.updateTask(task.id, {
       timer: time,
       completed: true,
       completedAt: new Date().toISOString(),
@@ -132,7 +132,7 @@ const TimerView: React.FC = () => {
     if (!task) return;
 
     // Update the task with the current notes
-    await updateTask(task.id, {
+    await taskContext.updateTask(task.id, {
       notes: notes,
       timer: time,
     });

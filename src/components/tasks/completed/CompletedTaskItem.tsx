@@ -1,10 +1,9 @@
 
-// Fixing imports to resolve type issues
 import React from 'react';
 import { Check, ChevronsUpDown, GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Task } from '@/types/tasks'; // Updated to use Task instead of TaskDetail
+import { Task } from '@/types/tasks'; 
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
@@ -24,7 +23,7 @@ const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
   onRestore,
   dragHandleProps,
 }) => {
-  const taskTypeColor = useTaskTypeColor(task.type);
+  const taskTypeColor = useTaskTypeColor(task.taskType);
 
   return (
     <Card className="mb-2 border-theme-medium">
@@ -47,9 +46,9 @@ const CompletedTaskItem: React.FC<CompletedTaskItemProps> = ({
           <div className="text-xs text-muted-foreground">
             Completed on {format(new Date(task.completedAt || task.createdAt), 'MMM dd, yyyy')}
           </div>
-          {task.type && (
+          {task.taskType && (
             <Badge variant="secondary" className="mt-1" style={{ backgroundColor: taskTypeColor }}>
-              {task.type}
+              {task.taskType}
             </Badge>
           )}
         </div>
