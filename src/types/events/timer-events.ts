@@ -10,7 +10,8 @@ export type TimerEventType =
   | 'timer:extend'
   | 'timer:reset'
   | 'timer:set-task'
-  | 'timer:update-metrics';
+  | 'timer:update-metrics'
+  | 'timer:task-set';  // Added missing event type
 
 export interface TimerEventPayloadMap {
   'timer:start': { 
@@ -56,5 +57,11 @@ export interface TimerEventPayloadMap {
       originalDuration?: number;
       actualDuration?: number;
     };
+  };
+  'timer:task-set': {  // Added missing event payload type
+    id: string;
+    name: string;
+    duration: number;
+    taskId: string;
   };
 }

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ChecklistItem } from '@/types/tasks';
 import { X, Plus, Save } from 'lucide-react';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
@@ -78,8 +78,8 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
         items: checklistItems
       });
       
-      // Emit the event with the proper structure
-      eventBus.emit('task:update', {
+      // Use eventManager instead of eventBus
+      eventManager.emit('task:update', {
         taskId: currentTask.taskId,
         updates: { 
           checklistItems: checklistItems,
@@ -96,10 +96,6 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
     if (e.key === 'Enter') {
       handleAddItem();
     }
-  };
-
-  const handleClose = () => {
-    onOpenChange(false);
   };
 
   return (

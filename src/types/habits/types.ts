@@ -10,7 +10,7 @@ export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursd
 export const SHORT_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Default active days
-export const DEFAULT_ACTIVE_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
 // Storage key for habits
 export const STORAGE_KEY = 'habits';
@@ -101,7 +101,7 @@ export interface HabitTemplate {
   category: string;
   icon?: string;
   color?: string;
-  defaultDays?: string[];
+  defaultDays?: DayOfWeek[];
   defaultHabits: HabitDetail[];
 }
 

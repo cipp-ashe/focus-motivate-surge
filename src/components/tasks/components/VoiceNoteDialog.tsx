@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { 
   Dialog,
@@ -70,7 +70,7 @@ export const VoiceNoteDialog: React.FC<VoiceNoteDialogProps> = ({
       name: editedName.trim()
     };
 
-    eventBus.emit('task:update', { 
+    eventManager.emit('task:update', { 
       taskId: task.id, 
       updates 
     });
@@ -153,50 +153,42 @@ export const VoiceNoteDialog: React.FC<VoiceNoteDialogProps> = ({
             )}
           </div>
         </DialogHeader>
-        
-        <div className="mt-6 flex flex-col items-center justify-center space-y-4">
-          {task.voiceNoteUrl ? (
-            <>
-              <div className="w-full max-w-xs bg-muted/40 rounded-full h-2 overflow-hidden">
-                <div 
-                  className="bg-primary h-full"
-                  style={{ width: isPlaying ? '100%' : '0%', transition: 'width 0.1s linear' }}
-                ></div>
+
+        {task.voiceNoteUrl && (
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="bg-muted rounded-md p-4 flex items-center justify-between">
+              <Volume2 className="h-5 w-5 text-primary mr-2" />
+              <div className="flex-1">
+                <div className="h-2 bg-primary/20 rounded-full relative">
+                  <div className="h-full bg-primary rounded-full" style={{ width: isPlaying ? '50%' : '0%' }} />
+                </div>
               </div>
-              
               <Button
-                size="lg"
                 variant="outline"
-                className="rounded-full h-16 w-16"
+                size="sm"
+                className="ml-2"
                 onClick={togglePlayback}
               >
-                {isPlaying ? (
-                  <Pause className="h-8 w-8" />
-                ) : (
-                  <Play className="h-8 w-8 ml-1" />
-                )}
+                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               </Button>
-              
-              {task.voiceNoteDuration && (
-                <div className="text-sm text-muted-foreground">
-                  Duration: {Math.floor(task.voiceNoteDuration / 60)}:{(task.voiceNoteDuration % 60).toString().padStart(2, '0')}
-                </div>
-              )}
-              
-              {task.voiceNoteText && (
-                <div className="mt-4 p-4 bg-muted/20 rounded-md w-full">
-                  <h3 className="text-sm font-medium mb-1">Transcription:</h3>
-                  <p className="text-sm text-muted-foreground">{task.voiceNoteText}</p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <Volume2 className="h-12 w-12 mb-2 opacity-30" />
-              <p>No voice recording available</p>
             </div>
-          )}
-        </div>
+            
+            <div className="text-sm text-muted-foreground">
+              {task.voiceNoteDuration ? (
+                <span>Duration: {Math.floor(task.voiceNoteDuration / 60)}:{(task.voiceNoteDuration % 60).toString().padStart(2, '0')}</span>
+              ) : (
+                <span>Voice note recorded for task</span>
+              )}
+            </div>
+            
+            {task.voiceNoteText && (
+              <div className="mt-2">
+                <h4 className="text-sm font-medium mb-1">Transcription:</h4>
+                <div className="bg-muted/50 p-3 rounded text-sm">{task.voiceNoteText}</div>
+              </div>
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

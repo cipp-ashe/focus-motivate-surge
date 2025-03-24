@@ -5,7 +5,7 @@
  * This module defines the types for the habit context state and actions.
  */
 
-import { ActiveTemplate, DayOfWeek, HabitTemplate, HabitDetail } from '@/types/habits';
+import { ActiveTemplate, DayOfWeek, HabitTemplate, HabitDetail } from '@/types/habits/types';
 
 /**
  * State interface for HabitContext

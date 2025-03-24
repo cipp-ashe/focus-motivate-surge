@@ -62,31 +62,15 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
     
     const lastUpdateTimeRef = { current: 0 };
     
-    // Handle force update events
-    const handleForceUpdate = () => {
-      if (!isMountedRef.current) return;
-      
-      const now = Date.now();
-      if (now - lastUpdateTimeRef.current < 1000) {
-        return;
-      }
-      
-      lastUpdateTimeRef.current = now;
-      onForceUpdate();
-    };
-    
-    // Register window event listeners
-    window.addEventListener('force-task-update', handleForceUpdate);
-    
-    // Listen for timer task setting events
-    const timerTaskHandler = (event: CustomEvent) => {
-      console.log('TaskEventHandler: Received timer:set-task event', event.detail);
+    // Handle timer task setting events
+    const handleTimerTaskSet = (payload: any) => {
+      console.log('TaskEventHandler: Received timer:set-task event', payload);
       
       // Force a reload to ensure UI consistency
       setTimeout(onForceUpdate, 100);
     };
     
-    window.addEventListener('timer:set-task', timerTaskHandler as EventListener);
+    const unsubscribeTimerTask = eventManager.on('timer:set-task', handleTimerTaskSet);
     
     return () => {
       isMountedRef.current = false;
@@ -96,10 +80,7 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       unsubscribeUpdate();
       unsubscribeDelete();
       unsubscribeComplete();
-      
-      // Remove window event listeners
-      window.removeEventListener('force-task-update', handleForceUpdate);
-      window.removeEventListener('timer:set-task', timerTaskHandler as EventListener);
+      unsubscribeTimerTask();
     };
   }, [onTaskCreate, onTaskUpdate, onTaskDelete, onTaskComplete, onForceUpdate]);
   

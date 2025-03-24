@@ -21,7 +21,9 @@ export type TaskType =
   | 'weekly'
   | 'monthly'
   | 'yearly'
-  | 'reminder';
+  | 'reminder'
+  | 'counter'  // Added missing task type
+  | 'rating';   // Added missing task type
 
 /**
  * Task status to track progress
@@ -103,6 +105,8 @@ export interface Task {
     date?: string;
     /** ID of the note associated with this task */
     noteId?: string;
+    /** Metric type for habit tasks */
+    metricType?: string;
   };
   /** Task performance metrics */
   metrics?: TaskMetrics;
@@ -137,6 +141,27 @@ export interface Task {
   voiceNoteUrl?: string;
   /** Duration of the voice note in seconds */
   voiceNoteDuration?: number;
+  
+  /** Journal entry for journal tasks */
+  journalEntry?: string;
+  /** Notes for timer tasks */
+  timerNotes?: string;
+  /** Minutes for timer tasks */
+  timerMinutes?: number;
+  /** Rating value for rating tasks */
+  rating?: number;
+  /** Count value for counter tasks */
+  count?: number;
+  /** Parent task ID for subtasks */
+  parentId?: string;
+  /** Subtasks list */
+  subtasks?: Task[];
+  /** Task priority */
+  priority?: 'low' | 'medium' | 'high';
+  /** Task due date */
+  dueDate?: string;
+  /** Task recurrence pattern */
+  recurrence?: any;
 }
 
 /**

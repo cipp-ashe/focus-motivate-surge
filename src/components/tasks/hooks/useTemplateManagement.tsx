@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 // Add HabitTemplate type
 interface HabitTemplate {
@@ -37,12 +37,12 @@ export const useTemplateManagement = () => {
     };
     
     if (isNewTemplate) {
-      eventBus.emit('habit:template-add' as any, newTemplate);
+      eventManager.emit('habit:template-add', newTemplate);
       toast.success("Habit template created.", {
         duration: 3000,
       });
     } else {
-      eventBus.emit('habit:template-update' as any, newTemplate);
+      eventManager.emit('habit:template-update', newTemplate);
       toast.success("Habit template updated.", {
         duration: 3000,
       });
@@ -53,7 +53,7 @@ export const useTemplateManagement = () => {
   
   const handleTemplateDelete = () => {
     console.log('Deleting template:', templateData);
-    eventBus.emit('habit:template-delete' as any, { templateId: templateData.id });
+    eventManager.emit('habit:template-delete', { templateId: templateData.id });
     setDialogOpen(false);
     toast.success("Habit template deleted.", {
       duration: 3000,

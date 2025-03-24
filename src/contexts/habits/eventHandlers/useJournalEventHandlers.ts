@@ -1,7 +1,7 @@
 
 import { eventManager } from '@/lib/events/EventManager';
 import { relationshipManager } from '@/lib/relationshipManager';
-import { ActiveTemplate } from '@/components/habits/types';
+import { ActiveTemplate } from '@/types/habits/types';
 import { EntityType } from '@/types/core';
 
 export const useJournalEventHandlers = (
