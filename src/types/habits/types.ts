@@ -16,7 +16,7 @@ export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fr
 export const STORAGE_KEY = 'habits';
 
 // Metric type definition
-export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating';
+export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'slider' | 'rating' | 'number';
 
 // Time preference and category types
 export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
@@ -37,6 +37,7 @@ export interface Habit {
   completed: boolean;
   streak: number;
   lastCompleted?: string;
+  order?: number;
 }
 
 // Habit completion record
@@ -60,12 +61,14 @@ export interface HabitDetail {
     unit?: string;
     min?: number;
     max?: number;
+    target?: number;
   };
   insights?: any[];
   tips?: any[];
   relationships?: {
     templateId?: string;
   };
+  order?: number;
 }
 
 // Habit metrics type
@@ -91,6 +94,7 @@ export interface ActiveTemplate {
   habits: HabitDetail[];
   activeDays: DayOfWeek[];
   customized?: boolean;
+  relationships?: Record<string, any>;
 }
 
 // Habit template definition

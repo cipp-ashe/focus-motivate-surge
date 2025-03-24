@@ -3,21 +3,21 @@ import React from 'react';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HabitDetail } from './types';
-import HabitMetric from './HabitMetric';
+import { HabitDetail } from '@/types/habits/types';
+import { HabitMetric } from './HabitMetric';
 
 interface HabitRowProps {
   habit: HabitDetail;
-  value: boolean | number;
-  onUpdate: (value: boolean | number) => void;
+  isCompleted?: boolean;
+  onComplete?: () => void;
   onDelete?: () => void;
   dragHandleProps?: any;
 }
 
-const HabitRow: React.FC<HabitRowProps> = ({
+export const HabitRow: React.FC<HabitRowProps> = ({
   habit,
-  value,
-  onUpdate,
+  isCompleted = false,
+  onComplete,
   onDelete,
   dragHandleProps,
 }) => {
@@ -41,17 +41,18 @@ const HabitRow: React.FC<HabitRowProps> = ({
         )}
         <div className="flex-1">
           <h3 className="text-sm font-medium">{habit.name}</h3>
+          {habit.description && (
+            <p className="text-xs text-muted-foreground">{habit.description}</p>
+          )}
         </div>
         <div>
           <HabitMetric
             habit={habit}
-            progress={{ value, streak: 0 }}
-            onUpdate={onUpdate}
+            isCompleted={isCompleted}
+            onComplete={onComplete || (() => {})}
           />
         </div>
       </div>
     </Card>
   );
 };
-
-export default HabitRow;

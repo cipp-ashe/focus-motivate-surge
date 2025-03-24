@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Textarea } from '@/components/ui/textarea';
 import { MetricType, HabitDetail } from '@/types/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
 
@@ -19,8 +18,7 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
   onComplete
 }) => {
   const [value, setValue] = useState<number | string>('');
-  const [journalText, setJournalText] = useState('');
-  const metricType = habit.metricType || 'boolean';
+  const metricType = habit.metrics?.type || 'boolean';
   
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
@@ -33,7 +31,7 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
       value: metricType === 'boolean' ? true : value,
       metricType,
       habitName: habit.name,
-      templateId: habit.templateId
+      templateId: habit.relationships?.templateId
     };
     
     // Emit habit completion event
@@ -48,22 +46,22 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
       habitId: habit.id,
       habitName: habit.name,
       date: today,
-      templateId: habit.templateId
+      templateId: habit.relationships?.templateId
     });
   };
   
   const handleScheduleTimer = () => {
     // If the habit has a predefined duration, use that
-    const duration = habit.duration || 25 * 60; // Default 25 minutes
+    const duration = habit.metrics?.goal || 25 * 60; // Default 25 minutes
     
     // Emit event to schedule timer task for this habit
     eventManager.emit('habit:schedule', {
       habitId: habit.id,
       name: habit.name,
       duration: duration,
-      templateId: habit.templateId,
+      templateId: habit.relationships?.templateId || '',
       date: today,
-      metricType: habit.metricType
+      metricType: habit.metrics?.type
     });
   };
   
@@ -86,15 +84,16 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
         );
         
       case 'number':
+      case 'counter':
         return (
           <div className="space-y-2">
             <Input
               type="number"
               value={value.toString()}
               onChange={(e) => setValue(Number(e.target.value))}
-              placeholder={`Enter ${habit.unit || 'value'}`}
-              min={habit.min}
-              max={habit.max}
+              placeholder={`Enter ${habit.metrics?.unit || 'value'}`}
+              min={habit.metrics?.min}
+              max={habit.metrics?.max}
             />
             <Button 
               onClick={handleComplete}
@@ -108,18 +107,19 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
         );
         
       case 'slider':
+      case 'rating':
         return (
           <div className="space-y-4">
             <Slider
               value={[typeof value === 'number' ? value : 0]}
               onValueChange={(vals) => setValue(vals[0])}
-              min={habit.min || 0}
-              max={habit.max || 10}
+              min={habit.metrics?.min || 0}
+              max={habit.metrics?.max || 10}
               step={1}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{habit.min || 0}</span>
-              <span>{habit.max || 10}</span>
+              <span>{habit.metrics?.min || 0}</span>
+              <span>{habit.metrics?.max || 10}</span>
             </div>
             <Button 
               onClick={handleComplete}
@@ -138,7 +138,7 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
             variant="default"
             className="w-full"
           >
-            Start Timer ({Math.floor((habit.duration || 25 * 60) / 60)} min)
+            Start Timer ({Math.floor((habit.metrics?.goal || 25 * 60) / 60)} min)
           </Button>
         );
         

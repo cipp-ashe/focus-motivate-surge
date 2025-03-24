@@ -44,6 +44,9 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
       return <ClipboardList {...iconProps} />;
     case 'habit':
       return <CheckCircle2 {...iconProps} />;
+    case 'counter':
+    case 'rating':
+      return <LayoutList {...iconProps} />;
     default:
       return <CheckSquare {...iconProps} />;
   }

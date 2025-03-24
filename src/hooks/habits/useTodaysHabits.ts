@@ -5,7 +5,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useHabitContext } from '@/contexts/habits/HabitContext';
-import { HabitDetail, DayOfWeek } from '@/types/habits';
+import { HabitDetail, DayOfWeek } from '@/types/habits/types';
 
 export const useTodaysHabits = () => {
   const { templates } = useHabitContext();

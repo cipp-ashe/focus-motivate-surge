@@ -10,7 +10,7 @@ import { ActiveTemplate, HabitDetail } from '@/types/habits/types';
 import { useHabitContext } from '@/contexts/habits/HabitContext';
 import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
 
-const HabitTracker: React.FC = () => {
+export const HabitTracker: React.FC = () => {
   const { templates, addTemplate: addTemplateContext, updateTemplate: updateTemplateContext, removeTemplate: removeTemplateContext } = useHabitContext();
 
   // Template management functions
@@ -58,5 +58,3 @@ const HabitTracker: React.FC = () => {
     </div>
   );
 };
-
-export default HabitTracker;

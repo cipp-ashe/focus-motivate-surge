@@ -2,14 +2,14 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import InsightsTips from './insights/InsightsTips';
-import type { HabitDetail } from './types';
+import { HabitDetail } from '@/types/habits/types';
 
 interface HabitInsightsProps {
   habit: HabitDetail;
   progress?: any[]; // Add progress prop to fix TS error
 }
 
-const HabitInsights: React.FC<HabitInsightsProps> = ({ habit, progress }) => {
+export const HabitInsights: React.FC<HabitInsightsProps> = ({ habit, progress }) => {
   if (!habit) return null;
 
   return (
@@ -26,5 +26,3 @@ const HabitInsights: React.FC<HabitInsightsProps> = ({ habit, progress }) => {
     </Card>
   );
 };
-
-export default HabitInsights;
