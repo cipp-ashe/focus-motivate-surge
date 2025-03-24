@@ -17,16 +17,16 @@ const FeatureCard = ({
   link: string; 
 }) => {
   return (
-    <Card className="shadow-sm border-border/[var(--border-medium)]">
+    <Card className="shadow-sm border-theme-medium">
       <CardHeader>
-        <Icon className="h-8 w-8 mb-2" />
+        <Icon className="h-8 w-8 mb-2 text-primary" />
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground">{description}</p>
       </CardContent>
       <CardFooter>
-        <Button asChild variant="outline">
+        <Button asChild variant="purple">
           <Link to={link}>Learn more</Link>
         </Button>
       </CardFooter>

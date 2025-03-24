@@ -17,9 +17,9 @@ const QuickAccessItem: React.FC<QuickAccessItemProps> = ({
 }) => {
   return (
     <Link to={to}>
-      <Card className="hover:bg-muted/30 transition-colors border-border/[var(--border-light)]">
+      <Card className="hover:bg-muted/30 transition-colors border-theme-light">
         <CardContent className="flex flex-col items-center justify-center p-4 gap-2">
-          <Icon className="w-5 h-5" />
+          <Icon className="w-5 h-5 text-primary" />
           <span className="text-sm font-medium">{label}</span>
         </CardContent>
       </Card>
@@ -64,7 +64,7 @@ const QuickAccessSection: React.FC = () => {
   return (
     <section className="mb-16">
       <div className="flex items-center gap-3 mb-6">
-        <LayoutDashboard className="h-6 w-6" />
+        <LayoutDashboard className="h-6 w-6 text-primary" />
         <h2 className="text-2xl font-bold">Quick Access</h2>
       </div>
       

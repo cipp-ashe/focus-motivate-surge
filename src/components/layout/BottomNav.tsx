@@ -12,7 +12,7 @@ export const BottomNav = () => {
   };
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 border-t border-border/[var(--border-medium)] p-2 z-50 md:hidden bg-background/90 backdrop-blur-md">
+    <nav className="fixed bottom-0 left-0 right-0 border-t border-theme-medium p-2 z-50 md:hidden bg-background/90 backdrop-blur-md">
       <div className="flex items-center justify-between">
         <Link 
           to="/" 

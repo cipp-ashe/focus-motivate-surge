@@ -22,7 +22,7 @@ const HabitRow: React.FC<HabitRowProps> = ({
   dragHandleProps,
 }) => {
   return (
-    <Card className="p-4 mb-2 border-border/[var(--border-medium)]">
+    <Card className="p-4 mb-2 border-theme-medium">
       <div className="flex items-center gap-4">
         {dragHandleProps && (
           <div {...dragHandleProps} className="cursor-grab">

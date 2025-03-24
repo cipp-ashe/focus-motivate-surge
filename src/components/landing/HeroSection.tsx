@@ -13,7 +13,7 @@ const HeroSection: React.FC = () => {
           A productivity tool that helps you manage tasks, track time, and build habits.
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
-          <Button asChild size="lg">
+          <Button asChild size="lg" variant="purple">
             <Link to="/tasks">
               <Zap className="mr-2 h-5 w-5" />
               Get Started
