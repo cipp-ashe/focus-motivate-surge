@@ -1,19 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { X, Pencil, Save } from 'lucide-react';
-import { eventBus } from '@/lib/eventBus';
-import { MarkdownEditor } from '@/components/ui/markdown-editor';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { marked } from 'marked';
+import { eventManager } from '@/lib/events/EventManager';
+import { useNoteActions } from '@/contexts/notes/hooks';
+import { EntityType } from '@/types/core';
 
 interface JournalDialogProps {
   isOpen: boolean;
@@ -22,179 +15,99 @@ interface JournalDialogProps {
     taskId: string;
     taskName: string;
     entry: string;
-  } | null;
+  };
 }
 
-export const JournalDialog: React.FC<JournalDialogProps> = ({
-  isOpen,
+const JournalDialog: React.FC<JournalDialogProps> = ({ 
+  isOpen, 
   onOpenChange,
   currentTask
 }) => {
-  const [journalContent, setJournalContent] = useState('');
-  const [activeTab, setActiveTab] = useState<string>("write");
-  const [isEditing, setIsEditing] = useState(false);
-  const isNewEntry = !currentTask?.entry;
-
+  const [journalContent, setJournalContent] = useState("");
+  const { addNote, updateNote } = useNoteActions();
+  
   useEffect(() => {
-    if (currentTask) {
-      console.log('JournalDialog: Setting content from currentTask:', currentTask);
-      setJournalContent(currentTask.entry || '');
-      
-      // For new entries, start in edit mode with writing tab active
-      if (!currentTask.entry) {
-        setIsEditing(true);
-        setActiveTab("write");
-      } else {
-        // For existing entries, start in preview mode
-        setIsEditing(false);
-        setActiveTab("preview");
-      }
+    if (currentTask?.entry) {
+      setJournalContent(currentTask.entry);
+    } else {
+      setJournalContent("");
     }
   }, [currentTask]);
-
-  const saveJournal = () => {
-    if (currentTask && journalContent.trim()) {
-      console.log('Saving journal entry for task:', {
-        taskId: currentTask.taskId,
-        entry: journalContent
-      });
-      
-      // Emit task update event with proper structure
-      eventBus.emit('task:update', {
+  
+  const handleSave = () => {
+    if (!journalContent.trim()) {
+      toast.error("Journal entry cannot be empty");
+      return;
+    }
+    
+    try {
+      // Update task with journal entry
+      eventManager.emit('task:update', {
         taskId: currentTask.taskId,
         updates: { 
-          journalEntry: journalContent.trim(),
-          taskType: 'journal' 
+          journalEntry: journalContent 
         }
       });
       
-      toast.success(`Saved journal entry for: ${currentTask.taskName}`);
-      setIsEditing(false);
-      onOpenChange(false);
-    }
-  };
-
-  const handleClose = () => {
-    onOpenChange(false);
-  };
-  
-  const handleEdit = () => {
-    setIsEditing(true);
-    setActiveTab("write");
-  };
-  
-  const handleCancel = () => {
-    if (isEditing) {
-      if (isNewEntry) {
-        onOpenChange(false);
-      } else {
-        setIsEditing(false);
-        setActiveTab("preview");
-        if (currentTask) {
-          setJournalContent(currentTask.entry || '');
+      // Also update any corresponding note or create a new one
+      const now = new Date().toISOString();
+      
+      // Create a relationship to the task
+      const relationship = {
+        entityId: currentTask.taskId,
+        entityType: EntityType.Task,
+        metadata: {
+          date: now
         }
-      }
-    } else {
+      };
+      
+      // Create or update a note for this journal entry
+      // We'll create a new one for simplicity in this implementation
+      addNote({
+        title: `Journal: ${currentTask.taskName}`,
+        content: journalContent,
+        tags: [{ name: 'journal', color: 'blue' }],
+        relationships: [relationship],
+        createdAt: now,
+        updatedAt: now
+      });
+      
+      toast.success("Journal entry saved");
       onOpenChange(false);
+    } catch (error) {
+      console.error("Error saving journal entry:", error);
+      toast.error("Failed to save journal entry");
     }
   };
-
-  // Title text based on whether it's a new or existing entry
-  const dialogTitle = isNewEntry 
-    ? `New Journal Entry: ${currentTask?.taskName}` 
-    : `${currentTask?.taskName} - Journal Entry`;
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader className="flex justify-between items-center">
-          <DialogTitle>{dialogTitle}</DialogTitle>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleClose}
-            className="absolute right-4 top-4"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </Button>
+      <DialogContent className="sm:max-w-[625px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Journal Entry: {currentTask?.taskName}</DialogTitle>
         </DialogHeader>
         
-        {isEditing ? (
-          <>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-2 mb-4">
-                <TabsTrigger value="write">Write</TabsTrigger>
-                <TabsTrigger value="preview">Preview</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="write" className="h-[60vh]">
-                <MarkdownEditor
-                  value={journalContent}
-                  onChange={(value) => setJournalContent(value || '')}
-                  placeholder={isNewEntry ? "What are your thoughts about this task?" : "Write your thoughts here..."}
-                  height="100%"
-                  preview="edit"
-                />
-              </TabsContent>
-              
-              <TabsContent value="preview" className="h-[60vh] overflow-y-auto p-4 border rounded-md">
-                {journalContent ? (
-                  <div 
-                    className="prose prose-sm dark:prose-invert max-w-none" 
-                    dangerouslySetInnerHTML={{ __html: marked.parse(journalContent) }} 
-                  />
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    Nothing to preview yet. Start writing in the editor!
-                  </p>
-                )}
-              </TabsContent>
-            </Tabs>
-            
-            <DialogFooter className="pt-4">
-              <div className="flex justify-end gap-2 w-full">
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={saveJournal} 
-                  type="button"
-                  disabled={!journalContent.trim()}
-                >
-                  <Save className="h-4 w-4 mr-2" /> Save Journal Entry
-                </Button>
-              </div>
-            </DialogFooter>
-          </>
-        ) : (
-          <>
-            <div className="h-[60vh] overflow-y-auto p-4 border rounded-md">
-              {journalContent ? (
-                <div 
-                  className="prose prose-sm dark:prose-invert max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: marked.parse(journalContent) }} 
-                />
-              ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  No journal entry yet. Click edit to start writing.
-                </p>
-              )}
-            </div>
-            
-            <DialogFooter className="pt-4">
-              <div className="flex justify-end gap-2 w-full">
-                <Button variant="outline" onClick={handleClose}>
-                  Close
-                </Button>
-                <Button onClick={handleEdit}>
-                  <Pencil className="h-4 w-4 mr-2" /> Edit Journal Entry
-                </Button>
-              </div>
-            </DialogFooter>
-          </>
-        )}
+        <div className="py-4">
+          <Textarea
+            value={journalContent}
+            onChange={(e) => setJournalContent(e.target.value)}
+            className="min-h-[300px] p-4"
+            placeholder="Write your journal entry here..."
+            autoFocus
+          />
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            Save Entry
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
+
+export default JournalDialog;

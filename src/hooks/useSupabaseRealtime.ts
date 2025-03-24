@@ -1,8 +1,10 @@
+
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Note } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
+import { JournalEntry } from '@/types/events';
 
 const useSupabaseRealtime = () => {
   useEffect(() => {
@@ -13,13 +15,12 @@ const useSupabaseRealtime = () => {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notes' },
         (payload) => {
-          console.log('Change received!', payload)
+          console.log('Note change received!', payload)
           if (payload.eventType === 'INSERT') {
             // Emit a 'note:add' event when a new note is inserted
-            eventManager.emit('note:add', payload.new as Note);
+            eventManager.emit('note:add', { note: payload.new as Note });
           } else if (payload.eventType === 'UPDATE') {
             // Emit a 'note:update' event when a note is updated
-            // The payload.new contains the updated note data
             eventManager.emit('note:update', {
               id: payload.new.id,
               updates: payload.new
@@ -42,10 +43,9 @@ const useSupabaseRealtime = () => {
           console.log('Task change received!', payload)
           if (payload.eventType === 'INSERT') {
             // Emit a 'task:add' event when a new task is inserted
-            eventManager.emit('task:add', payload.new as Task);
+            eventManager.emit('task:add', { task: payload.new as Task });
           } else if (payload.eventType === 'UPDATE') {
             // Emit a 'task:update' event when a task is updated
-            // The payload.new contains the updated task data
             eventManager.emit('task:update', {
               taskId: payload.new.id,
               updates: payload.new
@@ -59,6 +59,7 @@ const useSupabaseRealtime = () => {
       .subscribe()
 
     // Fetch initial data and set up real-time subscription for journals
+    // (journals will be handled as specialized notes in our system)
     const journalsSubscription = supabase
       .channel('public:journals')
       .on(
@@ -66,20 +67,45 @@ const useSupabaseRealtime = () => {
         { event: '*', schema: 'public', table: 'journals' },
         (payload) => {
           console.log('Journal change received!', payload);
+          const data = payload.new || payload.old;
+          
+          // Check if it has journal-specific properties
+          const isJournal = data && (data.habitId || data.taskId);
+          
           if (payload.eventType === 'INSERT') {
-            // Emit a 'journal:create' event when a new journal is inserted
-            eventManager.emit('journal:create', payload.new);
+            // If it's a journal-specific entry, emit both journal and note events
+            if (isJournal) {
+              eventManager.emit('journal:create', payload.new);
+              // Also emit a note:add event with the journal as a note
+              eventManager.emit('note:add', { note: payload.new as Note });
+            } else {
+              // Just a regular note
+              eventManager.emit('note:add', { note: payload.new as Note });
+            }
           } else if (payload.eventType === 'UPDATE') {
-            // Emit a 'journal:update' event when a journal is updated
-            // The payload.new contains the updated journal data
+            // Handle updates
             const row = payload.new as any;
-            eventManager.emit('journal:update', {
+            
+            if (isJournal) {
+              eventManager.emit('journal:update', {
+                id: row.id,
+                updates: row
+              });
+            }
+            
+            // Always emit note update for any type of note
+            eventManager.emit('note:update', {
               id: row.id,
-              updates: row.content
+              updates: row
             });
           } else if (payload.eventType === 'DELETE') {
-            // Emit a 'journal:delete' event when a journal is deleted
-            eventManager.emit('journal:delete', { id: payload.old.id });
+            // Handle deletion
+            if (isJournal) {
+              eventManager.emit('journal:delete', { id: payload.old.id });
+            }
+            
+            // Always emit note deletion event
+            eventManager.emit('note:delete', { id: payload.old.id });
           }
         }
       )

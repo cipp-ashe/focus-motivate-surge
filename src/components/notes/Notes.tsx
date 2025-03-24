@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { NotesEditor } from './NotesEditor';
 import { SavedNotes } from './SavedNotes';
 import { toast } from 'sonner';
-import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
+import { useNoteActions, useNoteState } from '@/contexts/notes/hooks';
 import { eventManager } from '@/lib/events/EventManager';
 import { Note, Tag, TagColor } from '@/types/notes';
 import { EntityType } from '@/types/core';
+import { JournalEntry } from '@/types/events';
 
 export const Notes = () => {
   // Use state to track initialization
@@ -124,10 +125,13 @@ export const Notes = () => {
         toast.success('Note updated successfully');
       } else {
         console.log('Creating new note');
+        const now = new Date().toISOString();
         addNote({ 
           title: 'Untitled Note', 
           content: currentContent,
-          tags: [] 
+          tags: [],
+          createdAt: now,
+          updatedAt: now
         });
         setCurrentContent("");
         toast.success('Note created successfully');
@@ -140,25 +144,80 @@ export const Notes = () => {
 
   // Listen for journal-related events that should create notes
   useEffect(() => {
+    const handleJournalCreate = (data: any) => {
+      console.log('Creating note from journal event:', data);
+      if (data && data.content && (data.habitId || data.taskId)) {
+        const now = new Date().toISOString();
+        const relationships = [];
+        
+        // Add habit relationship if present
+        if (data.habitId) {
+          relationships.push({
+            entityId: data.habitId,
+            entityType: EntityType.Habit,
+            metadata: {
+              templateId: data.templateId,
+              date: data.date || now
+            }
+          });
+        }
+        
+        // Add task relationship if present
+        if (data.taskId) {
+          relationships.push({
+            entityId: data.taskId,
+            entityType: EntityType.Task,
+            metadata: {
+              date: data.date || now
+            }
+          });
+        }
+        
+        // Create tags for the note
+        const tags = [{ name: 'journal', color: 'blue' as TagColor }];
+        
+        // Add the note
+        addNote({ 
+          content: data.content,
+          title: `Journal: ${data.habitName || data.title || 'Entry'}`,
+          tags,
+          relationships,
+          createdAt: now,
+          updatedAt: now
+        });
+      }
+    };
+    
+    // Handle habit notes
     const handleNoteFromHabit = (data: any) => {
       console.log('Creating note from habit:', data);
-      // Implement creation of note from habit data
       if (data && data.content && data.habitId) {
+        const now = new Date().toISOString();
+        
         addNote({ 
           content: data.content,
           title: `Journal: ${data.habitName || 'Habit'}`,
           tags: [{ name: 'journal', color: 'blue' as TagColor }],
           relationships: [{
             entityId: data.habitId,
-            entityType: 'habit' as EntityType
-          }]
+            entityType: EntityType.Habit,
+            metadata: {
+              templateId: data.templateId,
+              date: now
+            }
+          }],
+          createdAt: now,
+          updatedAt: now
         });
       }
     };
     
+    // Subscribe to both journal events and notes from habits
+    eventManager.on('journal:create', handleJournalCreate);
     eventManager.on('note:create-from-habit', handleNoteFromHabit);
     
     return () => {
+      eventManager.off('journal:create', handleJournalCreate);
       eventManager.off('note:create-from-habit', handleNoteFromHabit);
     };
   }, [addNote]);

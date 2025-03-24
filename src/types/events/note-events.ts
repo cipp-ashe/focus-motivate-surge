@@ -1,5 +1,6 @@
 
 // Note domain event types
+import { Note, Tag } from '@/types/notes';
 
 export type NoteEventType =
   | 'note:add'
@@ -10,15 +11,17 @@ export type NoteEventType =
   | 'note:format-complete'
   | 'note:create-from-habit'
   | 'note:create'
+  | 'note:view'
+  | 'note:deleted'
   | 'notes:clear';
 
 export interface NoteEventPayloadMap {
   'note:add': {
-    note: any;
+    note: Note;
   };
   'note:update': {
     id: string;
-    updates: any;
+    updates: Partial<Note>;
   };
   'note:delete': {
     id: string;
@@ -42,6 +45,14 @@ export interface NoteEventPayloadMap {
     id: string;
     title: string;
     content: string;
+    tags?: Tag[];
+  };
+  'note:view': {
+    id: string;
+    title: string;
+  };
+  'note:deleted': {
+    id: string;
   };
   'notes:clear': {
     reason?: string;

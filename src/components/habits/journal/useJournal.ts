@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Note } from "@/types/notes";
+import { Note, Tag, TagColor } from "@/types/notes";
 import { useNoteActions, useNoteState } from "@/contexts/notes/hooks";
 import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { findExistingJournalNote, getJournalType, getTemplateForType } from "./u
 import { getJournalQuotes, getJournalTags } from "./constants";
 import { Quote } from "@/types/timer/models";
 import { EntityType } from "@/types/core";
+import { JournalEntry } from "@/types/events";
 
 interface UseJournalProps {
   habitId: string;
@@ -46,7 +47,12 @@ export const useJournal = ({
     let note: Note | undefined;
     
     if (taskId) {
-      note = notes.find(n => n.relationships?.taskId === taskId);
+      note = notes.find(n => 
+        n.relationships?.some(r => 
+          r.metadata?.taskId === taskId ||
+          (r.entityType === EntityType.Task && r.entityId === taskId)
+        )
+      );
     }
     
     if (!note && habitId) {
@@ -79,11 +85,49 @@ export const useJournal = ({
   };
   
   const handleSave = () => {
+    const now = new Date().toISOString();
+    
+    // Create relationships array for tracking connections
+    const relationships = [
+      {
+        entityId: habitId,
+        entityType: EntityType.Habit,
+        metadata: {
+          templateId,
+          date: now,
+          journalType
+        }
+      }
+    ];
+    
+    // Add task relationship if applicable
+    if (taskId) {
+      relationships.push({
+        entityId: taskId,
+        entityType: EntityType.Task,
+        metadata: {
+          taskId,
+          date: now
+        }
+      });
+    }
+    
+    // Create tags for journal entry
+    const journalTags: Tag[] = [
+      { name: 'journal', color: 'blue' as TagColor },
+      { name: journalType, color: 
+        journalType === 'gratitude' ? 'green' : 
+        journalType === 'reflection' ? 'purple' : 
+        journalType === 'mindfulness' ? 'teal' : 'blue' as TagColor 
+      }
+    ];
+    
     if (existingNote) {
       // Update the existing note with new content
       noteActions.updateNote(existingNote.id, { 
         content,
-        updatedAt: new Date().toISOString()
+        updatedAt: now,
+        relationships
       });
       
       // If this was from a task, update the task's journal entry
@@ -93,7 +137,7 @@ export const useJournal = ({
           updates: {
             journalEntry: content,
             completed: true,
-            completedAt: new Date().toISOString()
+            completedAt: now
           }
         });
       }
@@ -102,29 +146,48 @@ export const useJournal = ({
         description: "Your journal entry has been updated"
       });
     } else {
-      // Emit journal create event
+      // Create a new journal entry as a note
+      const journalEntry: Omit<Note, 'id'> = {
+        title: `Journal: ${habitName}`,
+        content,
+        createdAt: now,
+        updatedAt: now,
+        tags: journalTags,
+        relationships
+      };
+      
+      // Add the note
+      const noteId = noteActions.addNote(journalEntry);
+      
+      // Also emit journal:create event for compatibility
       eventManager.emit('journal:create', {
         habitId,
         habitName,
         taskId,
         templateId,
         content,
-        date: new Date().toISOString()
+        date: now
       });
       
-      // Also update the task if this is from a task
+      // Update the task if this is from a task
       if (taskId) {
         eventManager.emit('task:update', {
           taskId,
           updates: {
             journalEntry: content,
             completed: true,
-            completedAt: new Date().toISOString()
+            completedAt: now
           }
         });
       }
       
-      // Mark as completed if not already
+      // Mark habit as completed if not already
+      eventManager.emit('habit:complete', {
+        habitId,
+        date: now.split('T')[0], // Just the date part
+        value: true
+      });
+      
       onComplete();
       
       toast.success(`Created new journal entry for: ${habitName}`, {

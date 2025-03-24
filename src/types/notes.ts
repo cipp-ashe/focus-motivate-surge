@@ -30,6 +30,8 @@ export interface Relationship {
     templateId?: string;
     date?: string;
     metricType?: string;
+    taskId?: string; // Added support for task relationships
+    habitId?: string; // Added support for habit relationships
     [key: string]: any;
   };
 }
@@ -52,4 +54,22 @@ export function isValidTagColor(color: string): boolean {
     'purple', 'pink', 'orange', 'teal', 'cyan', 
     'indigo', 'gray'
   ].includes(color);
+}
+
+// Create a standard function to create a new note
+export function createNote(
+  title: string, 
+  content: string, 
+  tags: Tag[] = [],
+  relationships?: Relationship[]
+): Omit<Note, 'id'> {
+  const now = new Date().toISOString();
+  return {
+    title,
+    content,
+    createdAt: now,
+    updatedAt: now,
+    tags,
+    relationships
+  };
 }
