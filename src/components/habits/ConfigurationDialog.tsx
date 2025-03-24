@@ -2,16 +2,15 @@ import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Save, BookTemplate } from "lucide-react";
-import { HabitDetail, DayOfWeek } from '@/types/habits/types';
-import { DaySelector } from './DaySelector';
-import { cn } from '@/lib/utils';
+import { DayOfWeek, HabitDetail } from '@/types/habits/types';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { DaySelector } from "./DaySelector";
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -20,9 +19,7 @@ interface ConfigurationDialogProps {
   activeDays: DayOfWeek[];
   onUpdateDays: (days: DayOfWeek[]) => void;
   onSave: () => void;
-  onSaveAsTemplate?: () => void;
-  templateName?: string;
-  onTemplateNameChange?: (name: string) => void;
+  onSaveAsTemplate: () => void;
 }
 
 const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
@@ -32,94 +29,39 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
   activeDays,
   onUpdateDays,
   onSave,
-  onSaveAsTemplate,
-  templateName = '',
-  onTemplateNameChange
+  onSaveAsTemplate
 }) => {
-  const [localDays, setLocalDays] = useState<DayOfWeek[]>(activeDays);
-  const [localName, setLocalName] = useState(templateName);
-
-  const handleDaysChange = (days: DayOfWeek[]) => {
-    setLocalDays(days);
-    if (onUpdateDays) {
-      onUpdateDays(days);
-    }
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalName(e.target.value);
-    if (onTemplateNameChange) {
-      onTemplateNameChange(e.target.value);
-    }
-  };
+  const [selectedTab, setSelectedTab] = useState("days");
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) onClose();
-    }}>
-      <DialogContent className="max-w-md border border-border/40 bg-card text-card-foreground">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Configure Template</DialogTitle>
-          <DialogDescription>
-            Configure the active days and habits for this template.
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4 space-y-4">
-          {onTemplateNameChange && (
-            <div className="space-y-2">
-              <Label htmlFor="template-name">Template Name</Label>
-              <Input
-                id="template-name"
-                value={localName}
-                onChange={handleNameChange}
-                placeholder="Enter template name"
-              />
-            </div>
-          )}
+        <Tabs defaultValue="days" value={selectedTab} onValueChange={setSelectedTab}>
+          <TabsList>
+            <TabsTrigger value="days">Days</TabsTrigger>
+          </TabsList>
+          <Card className="border-none shadow-none">
+            <Card className="p-0">
+              <TabsContent value="days" className="p-4">
+                <DaySelector
+                  activeDays={activeDays}
+                  onUpdateDays={onUpdateDays}
+                />
+              </TabsContent>
+            </Card>
+          </Card>
+        </Tabs>
 
-          <div className="space-y-2">
-            <Label>Active Days</Label>
-            <DaySelector
-              selectedDays={localDays}
-              onChange={handleDaysChange}
-              className="mt-1"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Habits</Label>
-            <ScrollArea className="h-48 border border-border/40 rounded-md p-2">
-              {habits.length === 0 ? (
-                <p className="text-sm text-muted-foreground p-2">No habits configured yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {habits.map((habit) => (
-                    <div key={habit.id} className="p-2 border border-border/40 rounded-md">
-                      <h4 className="font-medium">{habit.name}</h4>
-                      {habit.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {habit.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          {onSaveAsTemplate && (
-            <Button variant="outline" onClick={onSaveAsTemplate}>
-              <BookTemplate className={cn('w-4 h-4 mr-2')} />
-              Save as Template
-            </Button>
-          )}
-          <Button onClick={onSave}>
-            <Save className={cn('w-4 h-4 mr-2')} />
-            Save Configuration
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={onSaveAsTemplate}>
+            Save as Template
+          </Button>
+          <Button type="button" onClick={onSave}>
+            Save
           </Button>
         </DialogFooter>
       </DialogContent>

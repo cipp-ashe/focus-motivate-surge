@@ -1,7 +1,15 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { HabitProgress } from '@/types/habits/unified';
 import { eventManager } from '@/lib/events/EventManager';
+
+const mockProgress = {
+  '2023-01-01': { date: '2023-01-01', value: true, streak: 1 },
+  '2023-01-02': { date: '2023-01-02', value: true, streak: 2 },
+  '2023-01-03': { date: '2023-01-03', value: true, streak: 3 },
+  '2023-01-04': { date: '2023-01-04', value: false, streak: 0 },
+  '2023-01-05': { date: '2023-01-05', value: true, streak: 1 },
+  '2023-01-06': { date: '2023-01-06', value: true, streak: 2 },
+};
 
 export const useHabitProgress = (habitId: string) => {
   const [progress, setProgress] = useState<HabitProgress[]>([]);

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { getRecommendedTemplates } from '../data/recommendedTemplates';
+import { getRecommendedTemplates } from '@/data/recommendedTemplates';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TemplateCard } from '../TemplateCard';
 import { NewTemplateForm } from './NewTemplateForm';
@@ -88,7 +88,7 @@ export const TabSection = () => {
                 key={template.id}
                 template={template}
                 isActive={templates.some(t => t.templateId === template.id)}
-                onAdd={() => handleAddTemplate(template)}
+                onSelect={() => handleAddTemplate(template)}
               />
             ))}
           </div>

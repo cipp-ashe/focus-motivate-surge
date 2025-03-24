@@ -8,13 +8,18 @@ import { useHabitContext } from '@/contexts/habits/HabitContext';
 import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
 
 export const HabitTracker: React.FC = () => {
-  const { templates, addTemplate: addTemplateContext, updateTemplate: updateTemplateContext, removeTemplate: removeTemplateContext } = useHabitContext();
+  const { templates, addTemplate: addTemplateContext, removeTemplate: removeTemplateContext } = useHabitContext();
 
   // Template management functions
   const { activeTemplates, addTemplate, updateTemplate, removeTemplate, updateTemplateOrder, updateTemplateDays } = useTemplateManagement();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState('calendar');
+
+  // Handle adding a template by ID
+  const handleAddTemplate = (templateId: string) => {
+    addTemplate(templateId);
+  };
 
   return (
     <div className="space-y-4">
@@ -45,7 +50,7 @@ export const HabitTracker: React.FC = () => {
           <div className="h-full">
             <HabitTemplateManager 
               activeTemplates={activeTemplates}
-              addTemplate={(templateId: string) => addTemplate(templateId)}
+              addTemplate={handleAddTemplate}
               removeTemplate={removeTemplate}
               configureTemplate={(template) => updateTemplate(template.templateId, template)}
             />

@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HabitDetail, DayOfWeek } from '@/types/habits/types';
-import { DaySelector } from '@/components/habits/DaySelector';
+import { DaySelector } from '../DaySelector';
 
 interface NewTemplateFormProps {
   onCreateTemplate: (template: {
