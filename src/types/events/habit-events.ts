@@ -3,6 +3,9 @@
  * Habit-related event types and payloads
  */
 
+// Import metric type
+import { MetricType } from '@/components/habits/types';
+
 // Habit event type definitions
 export type HabitEventType =
   | 'habit:complete'
@@ -24,7 +27,7 @@ export interface HabitTaskEvent {
   name: string;
   duration: number;
   date: string;
-  metricType?: string;
+  metricType?: MetricType;
 }
 
 // Habit note data definition
@@ -34,6 +37,7 @@ export interface HabitNoteData {
   description?: string;
   templateId?: string;
   date?: string;
+  metricType?: MetricType;
 }
 
 // Habit event payload definitions
@@ -42,6 +46,9 @@ export interface HabitEventPayloadMap {
     habitId: string; 
     date: string; 
     value: boolean | number;
+    metricType?: MetricType;
+    habitName?: string;
+    templateId?: string;
   };
   'habit:schedule': HabitTaskEvent;
   'habit:template-update': any;

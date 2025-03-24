@@ -3,13 +3,26 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PencilIcon } from 'lucide-react';
 import { TaskButtonProps } from './ButtonTypes';
+import { eventManager } from '@/lib/events/EventManager';
 
 export interface JournalButtonProps extends TaskButtonProps {}
 
 export const JournalButton: React.FC<JournalButtonProps> = ({ task, onTaskAction }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+    
+    // First call the generic task action handler
     onTaskAction(e, 'journal');
+    
+    // Then emit the journal:open event with the relevant data
+    eventManager.emit('journal:open', {
+      habitId: task.relationships?.habitId,
+      habitName: task.name,
+      description: task.description,
+      templateId: task.relationships?.templateId,
+      taskId: task.id,
+      date: task.relationships?.date || new Date().toISOString()
+    });
   };
 
   return (

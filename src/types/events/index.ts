@@ -14,14 +14,13 @@ import { NoteEventType, NoteEventPayloadMap } from './note-events';
 import { TimerEventType, TimerEventPayloadMap } from './timer-events';
 import { 
   VoiceNoteEventType, VoiceNoteEventPayloadMap,
-  JournalEventType,
   RelationshipEventType, RelationshipEventPayloadMap,
   AppEventType, AppEventPayloadMap,
   WildcardEventType, WildcardEventPayloadMap
 } from './misc-events';
 
-// Re-export from misc-events to avoid conflict
-import { JournalEventPayloadMap } from './misc-events';
+// Import journal events
+import { JournalEventType, JournalEventPayloadMap } from './journal-events';
 
 // Define all possible event types in the application
 export type EventType =
@@ -41,7 +40,7 @@ export type AllEventTypes = EventType;
 // Define the base payload interface for events 
 export type EventPayloadMap = 
   & TaskEventPayloadMap
-  & Omit<HabitEventPayloadMap, 'journal:open'> 
+  & HabitEventPayloadMap
   & NoteEventPayloadMap
   & TimerEventPayloadMap
   & VoiceNoteEventPayloadMap
@@ -62,4 +61,5 @@ export type { HabitTaskEvent };
 export type { HabitNoteData };
 export type { VoiceNoteEventType };
 export type { JournalEventType };
-export type { JournalEventPayloadMap } from './misc-events';
+export type { JournalEventPayloadMap } from './journal-events';
+

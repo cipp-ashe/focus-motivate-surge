@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Note } from "@/types/notes";
-import { useNoteActions, useNoteState } from "@/contexts/notes/NoteContext";
+import { useNoteActions, useNoteState } from "@/contexts/notes/hooks";
 import { eventManager } from "@/lib/events/EventManager";
 import { toast } from "sonner";
 import { findExistingJournalNote, getJournalType, getTemplateForType } from "./utils";
@@ -14,6 +14,7 @@ interface UseJournalProps {
   habitName: string;
   description?: string;
   templateId?: string;
+  taskId?: string;
   onComplete: () => void;
   onClose: () => void;
 }
@@ -23,6 +24,7 @@ export const useJournal = ({
   habitName,
   description = "",
   templateId,
+  taskId,
   onComplete,
   onClose
 }: UseJournalProps) => {
@@ -40,7 +42,16 @@ export const useJournal = ({
   
   // Initialize when opening
   useEffect(() => {
-    const note = findExistingJournalNote(habitId, notes);
+    // Check for existing note by task ID first (preferred), then by habit ID
+    let note: Note | undefined;
+    
+    if (taskId) {
+      note = notes.find(n => n.relationships?.taskId === taskId);
+    }
+    
+    if (!note && habitId) {
+      note = findExistingJournalNote(habitId, notes);
+    }
     
     if (note) {
       // Use existing note content
@@ -51,7 +62,7 @@ export const useJournal = ({
       // No existing note, reset to template
       resetToNewNote();
     }
-  }, [habitId, notes]);
+  }, [habitId, taskId, notes]);
   
   // Reset to a new note with template
   const resetToNewNote = () => {
@@ -68,22 +79,50 @@ export const useJournal = ({
   };
   
   const handleSave = () => {
-    // Check if we're updating an existing note
     if (existingNote) {
       // Update the existing note with new content
-      noteActions.updateNote(existingNote.id, { content });
+      noteActions.updateNote(existingNote.id, { 
+        content,
+        updatedAt: new Date().toISOString()
+      });
+      
+      // If this was from a task, update the task's journal entry
+      if (taskId) {
+        eventManager.emit('task:update', {
+          taskId,
+          updates: {
+            journalEntry: content,
+            completed: true,
+            completedAt: new Date().toISOString()
+          }
+        });
+      }
       
       toast.success(`Updated journal entry for: ${habitName}`, {
         description: "Your journal entry has been updated"
       });
     } else {
-      // Emit event to create a note from the habit
-      eventManager.emit('note:create-from-habit', {
+      // Emit journal create event
+      eventManager.emit('journal:create', {
         habitId,
         habitName,
+        taskId,
+        templateId,
         content,
-        templateId
+        date: new Date().toISOString()
       });
+      
+      // Also update the task if this is from a task
+      if (taskId) {
+        eventManager.emit('task:update', {
+          taskId,
+          updates: {
+            journalEntry: content,
+            completed: true,
+            completedAt: new Date().toISOString()
+          }
+        });
+      }
       
       // Mark as completed if not already
       onComplete();

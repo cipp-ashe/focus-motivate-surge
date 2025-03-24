@@ -1,6 +1,7 @@
 
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
+import { MetricType } from '@/components/habits/types';
 
 /**
  * Hook to integrate habits with tasks
@@ -22,13 +23,15 @@ export const useHabitTaskIntegration = () => {
     habitId: string,
     name: string,
     duration: number,
-    templateId: string
+    templateId: string,
+    metricType: MetricType = 'boolean'
   ) => {
     eventManager.emit('habit:schedule', {
       habitId,
       name,
       duration,
       templateId,
+      metricType,
       date: new Date().toISOString()
     });
   }, []);

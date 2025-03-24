@@ -14,6 +14,7 @@ interface JournalModalProps {
   description?: string;
   onComplete: () => void;
   templateId?: string;
+  taskId?: string;
 }
 
 const JournalModal: React.FC<JournalModalProps> = ({
@@ -23,7 +24,8 @@ const JournalModal: React.FC<JournalModalProps> = ({
   habitName,
   description = "",
   onComplete,
-  templateId
+  templateId,
+  taskId
 }) => {
   const {
     content,
@@ -38,6 +40,7 @@ const JournalModal: React.FC<JournalModalProps> = ({
     habitName,
     description,
     templateId,
+    taskId,
     onComplete,
     onClose: () => onOpenChange(false)
   });

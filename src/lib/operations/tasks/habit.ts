@@ -29,6 +29,7 @@ export const habitTaskOperations = {
       suppressToast?: boolean;
       selectAfterCreate?: boolean;
       taskType?: TaskType;
+      metricType?: string;
     } = {}
   ): string | null {
     if (!habitId || !name || !date) {
@@ -50,9 +51,13 @@ export const habitTaskOperations = {
         return existingTask.id;
       }
       
-      // Always use the specified taskType instead of a default 'habit' type
-      // This ensures the task appears under the proper category in the UI
-      const taskType = options.taskType || 'regular';
+      // Determine task type based on metric type
+      let taskType = options.taskType || 'regular';
+      
+      // If it's a journal metric type, set task type to journal
+      if (options.metricType === 'journal') {
+        taskType = 'journal';
+      }
       
       // Create new task with proper taskType and include createdAt
       const task = createTaskOperations.createTask({
@@ -60,12 +65,13 @@ export const habitTaskOperations = {
         description: `Habit task for ${date}`,
         completed: false,
         duration,
-        taskType: taskType, // Use the specified task type
+        taskType, // Use the determined task type
         createdAt: new Date().toISOString(), // Add the createdAt property
         relationships: {
           habitId,
           templateId,
-          date
+          date,
+          metricType: options.metricType // Store the metric type in relationships
         }
       }, {
         suppressToast: options.suppressToast,
@@ -85,6 +91,15 @@ export const habitTaskOperations = {
         if (templateId) {
           eventManager.emit('tag:link', {
             tagId: templateId,
+            entityId: task.id,
+            entityType: 'task'
+          });
+        }
+        
+        // If it's a journal task, add journal tag
+        if (taskType === 'journal') {
+          eventManager.emit('tag:link', {
+            tagId: 'journal',
             entityId: task.id,
             entityType: 'task'
           });
