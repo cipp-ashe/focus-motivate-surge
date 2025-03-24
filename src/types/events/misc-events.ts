@@ -1,60 +1,86 @@
 
 /**
- * Miscellaneous event types and payloads
+ * Miscellaneous event types grouped together
  */
 
-// Voice note event type definitions
+// VoiceNote event types
 export type VoiceNoteEventType =
-  | 'voice-note:created'
-  | 'voice-note:deleted';
+  | 'voicenote:create'
+  | 'voicenote:update'
+  | 'voicenote:delete'
+  | 'voicenote:record'
+  | 'voicenote:stop'
+  | 'voicenote:playback';
 
-// Journal event type definitions
-export type JournalEventType = 'journal:open';
+// Journal event types
+export type JournalEventType =
+  | 'journal:create'
+  | 'journal:update'
+  | 'journal:delete'
+  | 'journal:open'
+  | 'journal:save'
+  | 'journal:template'
+  | 'journal:prompt';
 
-// Relationship event type definitions
+// Relationship event types
 export type RelationshipEventType =
   | 'relationship:create'
-  | 'relationship:delete'
   | 'relationship:update'
-  | 'relationship:batch-update'
-  | 'tag:link'
-  | 'tag:unlink'
-  | 'quote:link-task';
+  | 'relationship:delete';
 
-// App event type definitions
-export type AppEventType = 'app:initialized';
+// App-level event types
+export type AppEventType =
+  | 'app:init'
+  | 'app:ready'
+  | 'app:error'
+  | 'app:theme-change'
+  | 'app:route-change'
+  | 'app:notification'
+  | 'app:user-settings'
+  | 'app:logout'
+  | 'app:login';
 
-// Special wildcard event type
+// Wildcard event type for listening to all events
 export type WildcardEventType = '*';
 
-// Payload definitions for voice note events
+// Event payload maps
 export interface VoiceNoteEventPayloadMap {
-  'voice-note:created': { id: string; name: string; url: string; duration: number };
-  'voice-note:deleted': { id: string };
+  'voicenote:create': { id: string; taskId?: string; duration: number };
+  'voicenote:update': { id: string; updates: any };
+  'voicenote:delete': { id: string };
+  'voicenote:record': { id: string; taskId?: string };
+  'voicenote:stop': { id: string; duration: number; url: string };
+  'voicenote:playback': { id: string; action: 'play' | 'pause' | 'stop' };
 }
 
-// Payload definitions for journal events
 export interface JournalEventPayloadMap {
-  'journal:open': { habitId: string; habitName: string };
+  'journal:create': { id: string; title: string; content?: string; tags?: string[] };
+  'journal:update': { id: string; updates: any };
+  'journal:delete': { id: string };
+  'journal:open': { habitId?: string; habitName?: string; description?: string; templateId?: string };
+  'journal:save': { id: string; content: string };
+  'journal:template': { templateId: string; content: string };
+  'journal:prompt': { prompt: string };
 }
 
-// Payload definitions for relationship events
 export interface RelationshipEventPayloadMap {
-  'relationship:create': { entityId: string; entityType: string; relatedEntityId: string; relatedEntityType: string };
-  'relationship:delete': { entityId: string; entityType: string; relatedEntityId: string; relatedEntityType: string };
-  'relationship:update': { entityId: string; entityType: string; updates: any };
-  'relationship:batch-update': { entityId: string; entityType: string; relationships: any[] };
-  'tag:link': { tagId: string; entityId: string; entityType: string };
-  'tag:unlink': { tagId: string; entityId: string; entityType: string };
-  'quote:link-task': { quoteId: string; taskId: string };
+  'relationship:create': { type: string; sourceId: string; targetId: string; metadata?: any };
+  'relationship:update': { type: string; sourceId: string; targetId: string; updates: any };
+  'relationship:delete': { type: string; sourceId: string; targetId: string };
 }
 
-// Payload definitions for app events
 export interface AppEventPayloadMap {
-  'app:initialized': { timestamp: string };
+  'app:init': undefined;
+  'app:ready': undefined;
+  'app:error': { message: string; code?: string; details?: any };
+  'app:theme-change': { theme: 'light' | 'dark' | 'system' };
+  'app:route-change': { path: string; previousPath?: string };
+  'app:notification': { message: string; type?: 'info' | 'success' | 'warning' | 'error' };
+  'app:user-settings': { settings: any };
+  'app:logout': undefined;
+  'app:login': { userId: string };
 }
 
-// Payload definition for wildcard events
 export interface WildcardEventPayloadMap {
-  '*': any;
+  '*': { eventType: string; payload: any; timestamp: string };
 }

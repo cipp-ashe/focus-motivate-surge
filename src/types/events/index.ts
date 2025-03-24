@@ -53,10 +53,9 @@ export type EventPayload<E extends EventType> = EventPayloadMap[E];
 // Type for all event callbacks
 export type EventCallback<E extends EventType> = (payload: EventPayloadMap[E]) => void;
 
-// Re-export domain-specific types for convenience
-export {
-  EventUnsubscribe,
-  HabitTaskEvent,
-  HabitNoteData,
-  VoiceNoteEventType
-};
+// Re-export domain-specific types for convenience - using 'export type' syntax for isolatedModules compatibility
+export type { EventUnsubscribe };
+export type { HabitTaskEvent };
+export type { HabitNoteData };
+export type { VoiceNoteEventType };
+
