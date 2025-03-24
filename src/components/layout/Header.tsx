@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 export const Header = () => {
   return (
-    <header className="border-b border-theme-medium bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+    <header className="border-b border-theme-medium bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="text-xl font-bold flex items-center gap-2 text-gradient-purple">

@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ListTodo, Timer, Settings, MoreHorizontal } from 'lucide-react';
+import { Home, ListTodo, BookOpen, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   DropdownMenu, 
@@ -13,9 +13,18 @@ import { NAV_CATEGORIES } from '@/components/navigation/navigationConfig';
 
 export const BottomNav = () => {
   const location = useLocation();
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
   
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+  
+  const toggleDropdown = (category: string) => {
+    if (openCategory === category) {
+      setOpenCategory(null);
+    } else {
+      setOpenCategory(category);
+    }
   };
   
   return (
@@ -32,54 +41,126 @@ export const BottomNav = () => {
           <span className="text-xs mt-1">Home</span>
         </Link>
         
-        <Link 
-          to="/tasks" 
-          className={cn(
-            "flex flex-col items-center p-2",
-            isActive('/tasks') ? "text-primary" : "text-muted-foreground hover:text-primary"
-          )}
-        >
-          <ListTodo className="h-5 w-5" />
-          <span className="text-xs mt-1">Tasks</span>
-        </Link>
-        
-        <Link 
-          to="/timer" 
-          className={cn(
-            "flex flex-col items-center p-2",
-            isActive('/timer') ? "text-primary" : "text-muted-foreground hover:text-primary"
-          )}
-        >
-          <Timer className="h-5 w-5" />
-          <span className="text-xs mt-1">Timer</span>
-        </Link>
-        
-        <DropdownMenu>
+        {/* Tasks Dropdown */}
+        <DropdownMenu open={openCategory === 'tasks'} onOpenChange={() => toggleDropdown('tasks')}>
           <DropdownMenuTrigger asChild>
             <button 
               className={cn(
                 "flex flex-col items-center p-2 appearance-none bg-transparent border-none",
-                isActive('/settings') ? "text-primary" : "text-muted-foreground hover:text-primary"
+                location.pathname.startsWith('/tasks') || location.pathname === '/timer' 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-primary"
               )}
             >
-              <MoreHorizontal className="h-5 w-5" />
-              <span className="text-xs mt-1">More</span>
+              <ListTodo className="h-5 w-5" />
+              <span className="text-xs mt-1 flex items-center">
+                Tasks
+                {openCategory === 'tasks' ? (
+                  <ChevronUp className="h-3 w-3 ml-1" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                )}
+              </span>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="mb-16 z-50 bg-background border border-border/40">
-            {Object.values(NAV_CATEGORIES).flatMap(category => 
-              category.items.map(item => (
-                <DropdownMenuItem key={item.path} asChild>
-                  <Link 
-                    to={item.path}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                </DropdownMenuItem>
-              ))
-            )}
+          <DropdownMenuContent
+            align="center"
+            className="w-48 mt-2 z-50 bg-background border border-border/40"
+            style={{ marginBottom: '60px' }}
+          >
+            {NAV_CATEGORIES.tasks.items.map(item => (
+              <DropdownMenuItem key={item.path} asChild>
+                <Link 
+                  to={item.path}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        {/* Notes Dropdown */}
+        <DropdownMenu open={openCategory === 'notes'} onOpenChange={() => toggleDropdown('notes')}>
+          <DropdownMenuTrigger asChild>
+            <button 
+              className={cn(
+                "flex flex-col items-center p-2 appearance-none bg-transparent border-none",
+                location.pathname.startsWith('/notes') || location.pathname === '/voice-notes' 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-primary"
+              )}
+            >
+              <BookOpen className="h-5 w-5" />
+              <span className="text-xs mt-1 flex items-center">
+                Notes
+                {openCategory === 'notes' ? (
+                  <ChevronUp className="h-3 w-3 ml-1" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                )}
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="center"
+            className="w-48 mt-2 z-50 bg-background border border-border/40"
+            style={{ marginBottom: '60px' }}
+          >
+            {NAV_CATEGORIES.notes.items.map(item => (
+              <DropdownMenuItem key={item.path} asChild>
+                <Link 
+                  to={item.path}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        {/* Settings Dropdown */}
+        <DropdownMenu open={openCategory === 'settings'} onOpenChange={() => toggleDropdown('settings')}>
+          <DropdownMenuTrigger asChild>
+            <button 
+              className={cn(
+                "flex flex-col items-center p-2 appearance-none bg-transparent border-none",
+                location.pathname.startsWith('/settings') || location.pathname === '/habits' 
+                  ? "text-primary" 
+                  : "text-muted-foreground hover:text-primary"
+              )}
+            >
+              <Settings className="h-5 w-5" />
+              <span className="text-xs mt-1 flex items-center">
+                Settings
+                {openCategory === 'settings' ? (
+                  <ChevronUp className="h-3 w-3 ml-1" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                )}
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="center"
+            className="w-48 mt-2 z-50 bg-background border border-border/40"
+            style={{ marginBottom: '60px' }}
+          >
+            {NAV_CATEGORIES.settings.items.map(item => (
+              <DropdownMenuItem key={item.path} asChild>
+                <Link 
+                  to={item.path}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

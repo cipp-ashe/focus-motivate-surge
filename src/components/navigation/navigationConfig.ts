@@ -11,9 +11,10 @@ import {
 } from 'lucide-react';
 import { NavItem } from './NavigationDropdown';
 
+// Organize items with proper nesting
 export const TASKS_ITEMS: NavItem[] = [
   { path: '/tasks', icon: ListTodo, label: 'Task List' },
-  { path: '/timer', icon: Clock, label: 'Timer' },
+  { path: '/timer', icon: Clock, label: 'Timer' }, // Timer as a task item
   { path: '/screenshots', icon: Image, label: 'Screenshots' }
 ];
 

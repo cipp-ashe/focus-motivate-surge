@@ -38,6 +38,14 @@
     --border-light: 0.1;
     --border-medium: 0.2;
     --border-strong: 0.4;
+    
+    /* Z-index standardization */
+    --z-dropdown: 100;
+    --z-sticky: 50;
+    --z-drawer: 200;
+    --z-modal: 300;
+    --z-toast: 400;
+    --z-tooltip: 500;
   }
 
   .dark {
@@ -104,6 +112,31 @@
   
   .border-theme-strong {
     @apply border border-border/[var(--border-strong)];
+  }
+  
+  /* Z-index utility classes */
+  .z-dropdown {
+    z-index: var(--z-dropdown);
+  }
+  
+  .z-sticky {
+    z-index: var(--z-sticky);
+  }
+  
+  .z-drawer {
+    z-index: var(--z-drawer);
+  }
+  
+  .z-modal {
+    z-index: var(--z-modal);
+  }
+  
+  .z-toast {
+    z-index: var(--z-toast);
+  }
+  
+  .z-tooltip {
+    z-index: var(--z-tooltip);
   }
 }
 

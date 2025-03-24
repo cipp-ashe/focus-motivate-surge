@@ -21,7 +21,7 @@ export const HeaderNav: React.FC = () => {
         className="font-medium"
       />
       
-      {/* Dynamic category dropdowns */}
+      {/* Dynamic category dropdowns with improved z-index handling */}
       {Object.entries(NAV_CATEGORIES).map(([key, category]) => (
         <NavigationDropdown
           key={key}
