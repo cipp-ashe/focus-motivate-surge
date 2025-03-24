@@ -1,44 +1,52 @@
 
-// Various miscellaneous event types for the application
+/**
+ * Miscellaneous event types that don't fit in other categories
+ */
 
-// Voice Note Events
+// Voice note related events
 export type VoiceNoteEventType = 
-  | 'voice-note:add'
-  | 'voice-note:delete'
-  | 'voice-note:update'
-  | 'voice-note:transcript';
+  | 'voice-note:start-recording'
+  | 'voice-note:stop-recording'
+  | 'voice-note:save'
+  | 'voice-note:play'
+  | 'voice-note:delete';
 
 export interface VoiceNoteEventPayloadMap {
-  'voice-note:add': {
-    id: string;
+  'voice-note:start-recording': {
+    taskId?: string;
+    reference?: string;
+  };
+  'voice-note:stop-recording': {
+    taskId?: string;
+  };
+  'voice-note:save': {
+    taskId: string;
+    taskName: string;
     audioUrl: string;
-    text?: string;
     duration: number;
-    createdAt: string;
+  };
+  'voice-note:play': {
+    audioUrl: string;
   };
   'voice-note:delete': {
-    id: string;
-  };
-  'voice-note:update': {
-    id: string;
-    updates: Partial<any>;
-  };
-  'voice-note:transcript': {
-    id: string;
-    text: string;
+    taskId: string;
+    audioUrl: string;
   };
 }
 
-// Relationship Events
-export type RelationshipEventType = 
+// Relationship related events
+export type RelationshipEventType =
   | 'relationship:create'
   | 'relationship:update'
   | 'relationship:delete';
 
 export interface RelationshipEventPayloadMap {
   'relationship:create': {
-    name: string;
-    type: string;
+    sourceType: string;
+    sourceId: string;
+    targetType: string;
+    targetId: string;
+    relationshipType: string;
   };
   'relationship:update': {
     id: string;
@@ -49,29 +57,44 @@ export interface RelationshipEventPayloadMap {
   };
 }
 
-// App-level Events
-export type AppEventType = 
+// App-wide events
+export type AppEventType =
   | 'app:initialized'
+  | 'app:theme-change'
+  | 'app:user-login'
+  | 'app:user-logout'
   | 'app:error'
-  | 'app:settings-changed';
+  | 'app:notification';
 
 export interface AppEventPayloadMap {
-  'app:initialized': {
-    timestamp: string;
+  'app:initialized': undefined;
+  'app:theme-change': {
+    theme: 'light' | 'dark' | 'system';
   };
+  'app:user-login': {
+    userId: string;
+    email?: string;
+  };
+  'app:user-logout': undefined;
   'app:error': {
+    code: string;
     message: string;
-    stack?: string;
+    details?: any;
   };
-  'app:settings-changed': {
-    key: string;
-    value: any;
+  'app:notification': {
+    type: 'info' | 'success' | 'warning' | 'error';
+    message: string;
+    duration?: number;
   };
 }
 
-// Wildcard Events (for special handlers)
+// Wildcard events (used for debugging and analytics)
 export type WildcardEventType = '*';
 
 export interface WildcardEventPayloadMap {
-  '*': any;
+  '*': {
+    eventType: string;
+    payload: any;
+    timestamp: string;
+  };
 }
