@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { DayOfWeek, HabitDetail } from '@/types/habits';
+import { DayOfWeek, HabitDetail } from '@/types/habit';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { DaySelector } from "./DaySelector";

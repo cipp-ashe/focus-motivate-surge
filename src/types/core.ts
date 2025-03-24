@@ -1,37 +1,72 @@
 
-// Define entity types used across the application
-export const EntityType = {
-  Task: 'task' as const,
-  Note: 'note' as const,
-  Habit: 'habit' as const,
-  Timer: 'timer' as const,
-  Tag: 'tag' as const,
-  Profile: 'profile' as const,
-  VoiceNote: 'voice-note' as const,
-  Screenshot: 'screenshot' as const
-} as const;
+/**
+ * Core Types
+ * Fundamental types used across the application
+ */
 
-// Type for EntityType values
-export type EntityType = typeof EntityType[keyof typeof EntityType];
+// Entity types for relationships
+export enum EntityType {
+  Task = 'task',
+  Habit = 'habit',
+  HabitTemplate = 'habit-template',
+  Note = 'note',
+  VoiceNote = 'voice-note',
+  Timer = 'timer',
+  Tag = 'tag',
+  Quote = 'quote',
+  Journal = 'journal',
+  User = 'user'
+}
 
-// Common date format type
-export type DateFormat = 'yyyy-MM-dd' | 'MM/dd/yyyy' | 'dd/MM/yyyy' | 'MMM dd, yyyy';
+// Relationship types
+export type RelationType = 
+  | 'tag-entity'
+  | 'quote-task'
+  | 'template-habit'
+  | 'habit-journal'
+  | 'habit-task'
+  | 'voice-note-transcription'
+  | 'task-note'
+  | 'habit-note'
+  | 'source';
 
-// Common status types
-export type Status = 'active' | 'completed' | 'archived' | 'pending' | 'deleted';
+// Entity relationship
+export interface EntityRelationship {
+  sourceId: string;
+  sourceType: EntityType;
+  targetId: string;
+  targetType: EntityType;
+  relationType: RelationType;
+}
 
-// Common day of week type
-export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+// Base state context
+export interface StateContext {
+  tasks: {
+    items: any[];
+    completed: any[];
+    selected: string | null;
+  };
+  habits: {
+    templates: any[];
+    todaysHabits: any[];
+    progress: Record<string, Record<string, boolean | number>>;
+  };
+  notes: {
+    items: any[];
+    selected: string | null;
+  };
+  relationships: EntityRelationship[];
+}
 
-// Common time of day type
-export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
-
-// Common difficulty level type
-export type DifficultyLevel = 'easy' | 'medium' | 'hard' | 'expert';
-
-// Define tag colors
-export type TagColor =
+// Color palette
+export type Color = 
   | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info'
   | 'red'
   | 'green'
   | 'blue'
@@ -44,54 +79,18 @@ export type TagColor =
   | 'indigo'
   | 'gray';
 
-// Define the Tag type
-export interface Tag {
-  id: string;
-  name: string;
-  color: TagColor;
-  createdAt: string;
-  updatedAt?: string;
+// Standard size options
+export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+// Daily summary types
+export interface DailySummary {
+  date: string;
+  completedTasks: any[];
+  unfinishedTasks: any[];
+  totalTimeSpent: number;
+  totalPlannedTime: number;
+  totalPauses: number;
+  averageEfficiency: number;
+  favoriteQuotes: any[];
+  notes?: any;
 }
-
-// Define the TagRelation type
-export interface TagRelation {
-  id: string;
-  tagId: string;
-  entityId: string;
-  entityType: EntityType;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Add isValidTagColor utility function
-export const isValidTagColor = (color: string): color is TagColor => {
-  const validColors: TagColor[] = [
-    'default', 'red', 'green', 'blue', 'yellow', 'purple',
-    'pink', 'orange', 'teal', 'cyan', 'indigo', 'gray'
-  ];
-  return validColors.includes(color as TagColor);
-};
-
-/**
- * Initialize the data store with required schema and default values
- * This function is called when the application is first loaded
- * or when the data store needs to be reset
- */
-export const initializeDataStore = (): boolean => {
-  try {
-    // Initialize schema version
-    localStorage.setItem('schema-version', '1.0');
-    
-    // Initialize entity relationships (empty object)
-    localStorage.setItem('entity-relations', JSON.stringify({}));
-    
-    // Initialize tag relationships (empty object)
-    localStorage.setItem('tag-relations', JSON.stringify({}));
-    
-    // Return success
-    return true;
-  } catch (error) {
-    console.error('Failed to initialize data store:', error);
-    return false;
-  }
-};

@@ -1,7 +1,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { HabitCompletionEvent, TemplateUpdateEvent } from '@/types/habits/unified';
+import { HabitCompletionEvent, TemplateUpdateEvent } from '@/types/habit';
 
 /**
  * Hook for subscribing to habit-related events

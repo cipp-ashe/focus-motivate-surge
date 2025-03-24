@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { toast } from 'sonner';
-import { ActiveTemplate } from '@/types/habits';
+import { ActiveTemplate } from '@/types/habit';
 import ConfigurationDialog from '../ConfigurationDialog';
 
 interface ConfigComponentProps {
