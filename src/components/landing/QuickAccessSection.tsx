@@ -17,7 +17,7 @@ const QuickAccessItem: React.FC<QuickAccessItemProps> = ({
 }) => {
   return (
     <Link to={to}>
-      <Card className="hover:bg-muted/30 transition-colors">
+      <Card className="hover:bg-muted/30 transition-colors border-border/[var(--border-light)]">
         <CardContent className="flex flex-col items-center justify-center p-4 gap-2">
           <Icon className="w-5 h-5" />
           <span className="text-sm font-medium">{label}</span>

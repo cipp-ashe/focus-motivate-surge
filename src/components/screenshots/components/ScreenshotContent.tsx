@@ -113,7 +113,7 @@ export const ScreenshotContent: React.FC<ScreenshotContentProps> = ({
         </Badge>
         
         {completionDate && (
-          <Badge variant="outline" className="text-xs bg-green-50 flex items-center gap-1">
+          <Badge variant="outline" className="text-xs bg-secondary/50 flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             Completed: {formatTaskDate(completionDate)}
           </Badge>

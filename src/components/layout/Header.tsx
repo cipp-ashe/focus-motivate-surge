@@ -12,7 +12,7 @@ export const Header = () => {
   };
   
   return (
-    <header className="border-b border-border bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
+    <header className="border-b border-border/[var(--border-medium)] bg-background/90 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="text-xl font-bold flex items-center gap-2 text-gradient-purple">
@@ -21,7 +21,7 @@ export const Header = () => {
           </Link>
         </div>
         
-        <nav className="flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-6">
           <Link 
             to="/" 
             className={cn("font-medium transition-colors", 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
 import { eventBus } from "@/lib/eventBus";
@@ -170,7 +171,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
         relative cursor-pointer transition-all duration-300 group overflow-visible
         ${isSelected 
           ? 'bg-accent/20 border-primary/40 shadow-lg shadow-primary/5' 
-          : 'bg-card/40 border-primary/10 hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01]'
+          : 'bg-card/40 border-border/[var(--border-medium)] hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01]'
         }
       `}
       onClick={handleTaskClick}

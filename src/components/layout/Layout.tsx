@@ -2,6 +2,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
+import { BottomNav } from './BottomNav';
 
 const Layout: React.FC = () => {
   return (
@@ -12,6 +13,7 @@ const Layout: React.FC = () => {
           <Outlet />
         </div>
       </main>
+      <BottomNav />
     </div>
   );
 };

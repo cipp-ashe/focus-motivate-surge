@@ -33,6 +33,11 @@
     --screenshot: 210 100% 50%;
     --voicenote: 350 100% 65%;
     --focus: 140 100% 40%;
+
+    /* Border opacity levels */
+    --border-light: 0.1;
+    --border-medium: 0.2;
+    --border-strong: 0.4;
   }
 
   .dark {
@@ -63,6 +68,11 @@
     --screenshot: 210 100% 50%;
     --voicenote: 350 100% 65%;
     --focus: 140 100% 40%;
+
+    /* Border opacity levels */
+    --border-light: 0.1;
+    --border-medium: 0.2;
+    --border-strong: 0.4;
   }
   
   html,
@@ -81,6 +91,19 @@
   
   .text-gradient-purple {
     @apply bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent;
+  }
+
+  /* Standard border styles */
+  .border-theme-light {
+    @apply border border-border/[var(--border-light)];
+  }
+  
+  .border-theme-medium {
+    @apply border border-border/[var(--border-medium)];
+  }
+  
+  .border-theme-strong {
+    @apply border border-border/[var(--border-strong)];
   }
 }
 
