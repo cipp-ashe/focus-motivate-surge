@@ -1,85 +1,61 @@
+import React, { useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { ActiveTemplate } from '@/types/habits/types';
+import { Button } from '@/components/ui/button';
+import { TemplateCard } from './TemplateCard';
+import { Edit, Trash2 } from 'lucide-react';
 
-import React from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { ActiveTemplate } from './types';
-import { HabitTemplate } from './types';
-import { habitTemplates } from '../../utils/habitTemplates';
-import TemplateCard from './TemplateCard';
-import HabitInsights from './HabitInsights';
-
-interface DraggableTemplateListProps {
-  activeTemplates: ActiveTemplate[];
-  showInsights: boolean;
-  insightTemplateId: string | null;
-  onDragStart: (e: React.DragEvent, index: number) => void;
-  onDragOver: (e: React.DragEvent, index: number) => void;
-  onDragEnd: () => void;
-  onRemove: (templateId: string) => void;
-  onToggleInsights: (template: ActiveTemplate) => void;
-  getTodayProgress: (habitId: string, templateId: string) => { value: boolean | number; streak: number; };
-  onHabitUpdate: (habitId: string, templateId: string, value: boolean | number) => void;
-  getWeeklyProgress: (habitId: string, templateId: string) => any[];
-  onCreateTemplate: () => void;
-  onEdit: (template: ActiveTemplate) => void;
+interface TemplateDragListProps {
+  templates: ActiveTemplate[];
+  onTemplateOrderChange: (newOrder: ActiveTemplate[]) => void;
+  onRemoveTemplate: (templateId: string) => void;
+  onConfigureTemplate: (template: any) => void;
 }
 
-const DraggableTemplateList: React.FC<DraggableTemplateListProps> = ({
-  activeTemplates,
-  showInsights,
-  insightTemplateId,
-  onDragStart,
-  onDragOver,
-  onDragEnd,
-  onRemove,
-  onToggleInsights,
-  getTodayProgress,
-  onHabitUpdate,
-  getWeeklyProgress,
-  onCreateTemplate,
-  onEdit,
+export const TemplateDragList: React.FC<TemplateDragListProps> = ({
+  templates,
+  onTemplateOrderChange,
+  onRemoveTemplate,
+  onConfigureTemplate
 }) => {
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const items = Array.from(templates);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    onTemplateOrderChange(items);
+  };
+
   return (
-    <div className="space-y-4">      
-      <div className="space-y-2">
-        {activeTemplates.map((template, index) => {
-          const templateInfo = habitTemplates.find(t => t.id === template.templateId);
-          if (!templateInfo) return null;
-
-          return (
-            <div
-              key={template.templateId}
-              draggable
-              onDragStart={(e) => onDragStart(e, index)}
-              onDragOver={(e) => onDragOver(e, index)}
-              onDragEnd={onDragEnd}
-              className="cursor-grab active:cursor-grabbing"
-            >
-              <TemplateCard
-                template={template}
-                templateInfo={templateInfo}
-                onRemove={() => onRemove(template.templateId)}
-                onEdit={() => onEdit(template)}
-                getProgress={(habitId) => getTodayProgress(habitId, template.templateId)}
-                onHabitUpdate={(habitId, value) => onHabitUpdate(habitId, template.templateId, value)}
-              />
-
-              {showInsights && insightTemplateId === template.templateId && (
-                <div className="mt-2">
-                  <HabitInsights
-                    habit={template.habits[0]}
-                    progress={template.habits.map(habit => 
-                      getWeeklyProgress(habit.id, template.templateId)
-                    ).flat()}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="templates">
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+            {templates.map((template, index) => (
+              <Draggable key={template.templateId} draggableId={template.templateId} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    <TemplateCard
+                      template={template}
+                      onRemove={() => onRemoveTemplate(template.templateId)}
+                      onConfigure={() => onConfigureTemplate(template)}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 };
-
-export default DraggableTemplateList;

@@ -3,7 +3,6 @@ import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { ChecklistItem, Task } from '@/types/tasks';
-import { TaskEventListener } from '@/components/tasks/event-handlers/TaskEventListener';
 import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
 import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
@@ -179,14 +178,6 @@ const TaskPageContent = () => {
           </GlassCardContent>
         </GlassCard>
       </div>
-      
-      <TaskEventListener 
-        onShowImage={handleShowImage}
-        onOpenChecklist={handleOpenChecklist}
-        onOpenJournal={handleOpenJournal}
-        onOpenVoiceRecorder={handleOpenVoiceRecorder}
-        onTaskUpdate={handleTaskUpdate}
-      />
       
       {currentChecklistTask && (
         <ChecklistDialog 

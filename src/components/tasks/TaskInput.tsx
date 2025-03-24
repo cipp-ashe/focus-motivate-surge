@@ -1,139 +1,105 @@
 
-import React from 'react';
-import { Task, TaskType } from '@/types/tasks';
-import { TagInputSection } from './inputs/TagInputSection';
-import { MultipleTasksInput } from './inputs/MultipleTasksInput';
-import { HabitTemplateDialog } from './inputs/HabitTemplateDialog';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
-import { TaskInputRow } from './inputs/TaskInputRow';
-import { useTaskCreation } from './hooks/useTaskCreation';
-import { useTemplateManagement } from './hooks/useTemplateManagement';
+import React, { useState, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { PlusCircle, Timer, MoreHorizontal } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+import { Task } from '@/types/tasks';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 
 interface TaskInputProps {
   onTaskAdd: (task: Task) => void;
-  onTasksAdd: (tasks: Task[]) => void;
-  defaultTaskType?: TaskType;
-  simplifiedView?: boolean;
+  onTasksAdd?: (tasks: Task[]) => void;
 }
 
-export const TaskInput: React.FC<TaskInputProps> = ({ 
-  onTaskAdd, 
-  onTasksAdd, 
-  defaultTaskType, 
-  simplifiedView 
-}) => {
-  const { toast } = useToast();
-  const { forceTaskUpdate } = useTaskEvents();
+export const TaskInput: React.FC<TaskInputProps> = ({ onTaskAdd, onTasksAdd }) => {
+  const [taskName, setTaskName] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const taskManager = useUnifiedTaskManager();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!taskName.trim()) return;
+    
+    const newTask: Task = {
+      id: uuidv4(),
+      name: taskName.trim(),
+      createdAt: new Date().toISOString(),
+      completed: false,
+      taskType: 'regular'
+    };
+    
+    onTaskAdd(newTask);
+    setTaskName('');
+    
+    // Set focus back to input
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
   
-  // Task Context for getting habit tasks
-  const { items: tasks } = useTaskContext();
-  
-  // Use our custom hooks
-  const {
-    taskName,
-    taskType,
-    isAddingMultiple,
-    multipleTasksInput,
-    tags,
-    handleTaskNameChange,
-    handleTaskTypeChange,
-    handleMultipleTasksInputChange,
-    handleAddTag,
-    handleRemoveTag,
-    handleAddTask,
-    handleAddMultipleTasks,
-    toggleMultipleInput
-  } = useTaskCreation({ onTaskAdd, onTasksAdd, defaultTaskType });
-  
-  const {
-    dialogOpen,
-    setDialogOpen,
-    templateData,
-    setTemplateData,
-    isNewTemplate,
-    handleTemplateSave,
-    handleTemplateDelete,
-    handleTemplateCreate
-  } = useTemplateManagement();
-  
-  // UI Rendering for simplified view (Timer page)
-  if (simplifiedView) {
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Input
-            type="text"
-            placeholder="Add a timer task"
-            value={taskName}
-            onChange={handleTaskNameChange}
-            className="flex-grow"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleAddTask();
-              }
-            }}
-          />
-          <Button 
-            onClick={handleAddTask}
-            variant="default"
-          >
-            Add Timer
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  // UI Rendering for full view
+  const handleAddTimerTask = useCallback(() => {
+    if (!taskName.trim()) return;
+    
+    const newTask: Task = {
+      id: uuidv4(),
+      name: taskName.trim(),
+      createdAt: new Date().toISOString(),
+      completed: false,
+      taskType: 'timer',
+      duration: 25 * 60 // Default 25 minutes
+    };
+    
+    onTaskAdd(newTask);
+    setTaskName('');
+    
+    // Set focus back to input
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [taskName, onTaskAdd]);
+
   return (
-    <div className="flex flex-col gap-4">
-      {/* Main Task Input Row */}
-      <TaskInputRow
-        taskName={taskName}
-        taskType={taskType}
-        onTaskNameChange={handleTaskNameChange}
-        onTaskTypeChange={handleTaskTypeChange}
-        onAddTask={handleAddTask}
-        onToggleMultipleInput={toggleMultipleInput}
-      />
-      
-      {/* Tags Component - only show if user has started typing */}
-      {taskName.trim().length > 0 && (
-        <TagInputSection 
-          tags={tags}
-          onAddTag={handleAddTag}
-          onRemoveTag={handleRemoveTag}
-        />
-      )}
-      
-      {/* Multiple Tasks Input */}
-      {isAddingMultiple && (
-        <MultipleTasksInput
-          value={multipleTasksInput}
-          onChange={handleMultipleTasksInputChange}
-          onSubmit={handleAddMultipleTasks}
-          onCancel={() => toggleMultipleInput()}
-        />
-      )}
-      
-      {/* Habit Template Dialog */}
-      <HabitTemplateDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        template={templateData}
-        isNewTemplate={isNewTemplate}
-        onNameChange={(name) => setTemplateData({...templateData, name})}
-        onDescriptionChange={(description) => setTemplateData({...templateData, description})}
-        onScheduleChange={(schedule) => setTemplateData({...templateData, schedule})}
-        onTagsChange={(tags) => setTemplateData({...templateData, tags})}
-        onActiveChange={(active) => setTemplateData({...templateData, active})}
-        onSave={handleTemplateSave}
-        onDelete={handleTemplateDelete}
-      />
-    </div>
+    <form onSubmit={handleSubmit} className="relative">
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Input
+            ref={inputRef}
+            type="text"
+            placeholder="Add a new task..."
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full"
+          />
+        </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" type="button" size="icon">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleAddTimerTask}>
+              <Timer className="mr-2 h-4 w-4" />
+              Add as Timer Task
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        <Button type="submit" size="icon">
+          <PlusCircle className="h-4 w-4" />
+        </Button>
+      </div>
+    </form>
   );
 };

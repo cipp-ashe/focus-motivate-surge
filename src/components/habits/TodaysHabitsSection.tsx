@@ -1,12 +1,9 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import TodaysHabitCard from './TodaysHabitCard';
 import { HabitDetail } from '@/types/habits/types';
-import { eventManager } from '@/lib/events/EventManager';
-import { toast } from 'sonner';
-import { getTodaysHabits } from '@/utils/habitUtils';
 import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
 
 interface TodaysHabitsSectionProps {

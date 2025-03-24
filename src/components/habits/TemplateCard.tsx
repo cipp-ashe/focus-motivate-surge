@@ -1,136 +1,50 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Check, Edit, Trash } from 'lucide-react';
-import { HabitTemplate } from '@/types/habits/types';
-import { HabitMetrics } from '@/types/habits/unified';
-import { Badge } from '@/components/ui/badge';
+import { Trash2, Settings } from 'lucide-react';
+import { ActiveTemplate } from '@/types/habits/types';
 
 interface TemplateCardProps {
-  template: HabitTemplate;
-  isActive?: boolean;
-  onSelect?: () => void;
-  onAdd?: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  isSelectionMode?: boolean;
+  template: ActiveTemplate;
+  onRemove: () => void;
+  onConfigure: () => void;
 }
 
 export const TemplateCard: React.FC<TemplateCardProps> = ({
   template,
-  isActive = false,
-  onSelect,
-  onAdd,
-  onEdit,
-  onDelete,
-  isSelectionMode = false
+  onRemove,
+  onConfigure
 }) => {
-  const handleAction = () => {
-    if (isSelectionMode && onSelect) {
-      onSelect();
-    } else if (onAdd) {
-      onAdd();
-    }
-  };
-  
   return (
-    <Card className={`transition-all ${isActive ? 'border-primary/40' : 'hover:border-primary/20'}`}>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-base">{template.name}</CardTitle>
-            <CardDescription className="text-xs mt-0.5">{template.description}</CardDescription>
-          </div>
-          
-          {template.category && (
-            <Badge variant="outline" className="text-xs h-5 font-normal">
-              {template.category}
-            </Badge>
-          )}
+    <Card className="overflow-hidden">
+      <CardHeader className="px-4 py-3 flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-base font-medium line-clamp-1">{template.name}</CardTitle>
+        <div className="flex items-center space-x-1">
+          <Button variant="ghost" size="icon" onClick={onConfigure} className="h-8 w-8">
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onRemove} className="h-8 w-8 text-destructive">
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
-      
-      <CardContent className="pb-2">
-        <div className="text-xs text-muted-foreground">
-          <p>Contains {template.defaultHabits.length} habits</p>
-          
-          {template.defaultDays && (
-            <p className="mt-0.5">
-              Active: {template.defaultDays.join(', ')}
-            </p>
-          )}
-        </div>
-        
-        {/* Display a sample of habits */}
-        {template.defaultHabits.length > 0 && (
-          <div className="mt-2 space-y-1">
-            {template.defaultHabits.slice(0, 3).map((habit) => (
-              <div key={habit.id} className="text-xs flex justify-between items-center">
-                <span>{habit.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {habit.metrics.type}
-                </span>
-              </div>
+      <CardContent className="px-4 py-2 text-xs text-muted-foreground">
+        <p className="line-clamp-2">{template.description || 'No description provided'}</p>
+        <div className="mt-2">
+          <p className="font-medium text-xs">Active days:</p>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {template.activeDays.map((day) => (
+              <span key={day} className="bg-secondary/50 rounded-full px-2 py-0.5 text-xs">
+                {day.substring(0, 3)}
+              </span>
             ))}
-            {template.defaultHabits.length > 3 && (
-              <div className="text-xs text-muted-foreground italic">
-                + {template.defaultHabits.length - 3} more habits
-              </div>
+            {template.activeDays.length === 0 && (
+              <span className="text-xs text-muted-foreground">No active days selected</span>
             )}
           </div>
-        )}
-      </CardContent>
-      
-      <CardFooter className="pt-2">
-        <div className="w-full flex justify-between">
-          {isSelectionMode ? (
-            <Button 
-              onClick={handleAction} 
-              variant={isActive ? "secondary" : "default"}
-              className="w-full"
-              disabled={isActive}
-            >
-              {isActive ? <Check className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-              {isActive ? 'Already Added' : 'Select Template'}
-            </Button>
-          ) : (
-            <>
-              <Button 
-                onClick={handleAction} 
-                variant={isActive ? "secondary" : "default"}
-                className="flex-1"
-                disabled={isActive}
-              >
-                {isActive ? <Check className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-                {isActive ? 'Added' : 'Add'}
-              </Button>
-              
-              {onEdit && (
-                <Button 
-                  onClick={onEdit} 
-                  variant="outline" 
-                  size="icon" 
-                  className="ml-2"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-              
-              {onDelete && (
-                <Button 
-                  onClick={onDelete} 
-                  variant="outline" 
-                  size="icon" 
-                  className="ml-2"
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              )}
-            </>
-          )}
         </div>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };

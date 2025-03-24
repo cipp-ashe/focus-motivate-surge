@@ -1,19 +1,13 @@
 
-/**
- * Unified hooks barrel file for easier imports
- */
+// Core hooks for application-wide use
+export { useEvent } from './useEvent';
+export { useLocalStorage } from './useLocalStorage';
+export { useToast } from './use-toast';
+export { useIsMobile } from './ui/useIsMobile';
 
-// Core hooks
-export { useEvent, useEvents } from './useEvent';
-
-// Task management hooks
-export { useTaskManagement } from './tasks/useTaskManagement';
-
-// Habit management hooks
-export { useHabitManagement } from './habits/useHabitManagement';
-
-// Timer management hooks
-export { useTimerManagement } from './timer/useTimerManagement';
-
-// Note management hooks
-export { useNoteManagement } from './notes/useNoteManagement';
+// Feature-specific hooks
+export { useHabits } from './habits/useHabits';
+export { useTemplateManagement } from './habits/useTemplateManagement';
+export { useTasks } from './useTasks';
+export { useUnifiedTaskManager } from './tasks/useUnifiedTaskManager';
+export { useJournalService } from './journal/useJournalService';

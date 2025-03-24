@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { HabitTemplateManager } from './HabitTemplateManager';
 import { ActiveTemplate, HabitDetail } from '@/types/habits/types';
 import { useHabitContext } from '@/contexts/habits/HabitContext';
-import { CalendarDateRangePicker } from '@/components/dashboard/date-range-picker';
-import { getTodaysHabits } from '@/utils/habitUtils';
 import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
 
 const HabitTracker: React.FC = () => {
@@ -36,9 +34,11 @@ const HabitTracker: React.FC = () => {
               <CardDescription>Track your habit streaks over time</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
-              <CalendarDateRangePicker
-                date={selectedDate}
-                onDateChange={setSelectedDate}
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                className="rounded-md border"
               />
             </CardContent>
           </Card>

@@ -1,131 +1,121 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Task } from '@/types/tasks';
-import { eventManager } from '@/lib/events/EventManager';
-import { v4 as uuidv4 } from 'uuid';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Task, TaskType } from '@/types/tasks';
 import { TaskTypeSelector } from './TaskTypeSelector';
-import { toast } from 'sonner';
 
 interface TaskDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  initialTask?: Task | null;
-  onSaveTask?: (task: Task) => void;
+  task?: Task;
+  onSave: (task: Task) => void;
+  onCancel?: () => void;
+  mode?: 'create' | 'edit';
 }
 
 export const TaskDialog: React.FC<TaskDialogProps> = ({
-  open,
+  isOpen,
   onOpenChange,
-  initialTask,
-  onSaveTask
+  task,
+  onSave,
+  onCancel,
+  mode = 'create'
 }) => {
-  const [task, setTask] = useState<Partial<Task>>({
-    name: '',
-    taskType: 'regular',
-    completed: false,
-    createdAt: new Date().toISOString()
-  });
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [taskType, setTaskType] = useState<TaskType>('regular');
   
-  // Update local state when initialTask changes
+  // Reset form when task changes or dialog opens/closes
   useEffect(() => {
-    if (initialTask) {
-      setTask(initialTask);
-    } else {
-      setTask({
-        name: '',
-        taskType: 'regular',
-        completed: false,
-        createdAt: new Date().toISOString()
-      });
+    if (isOpen && task) {
+      setName(task.name || '');
+      setDescription(task.description || '');
+      setTaskType(task.taskType || 'regular');
+    } else if (isOpen && !task) {
+      // Reset form for new task
+      setName('');
+      setDescription('');
+      setTaskType('regular');
     }
-  }, [initialTask, open]);
+  }, [isOpen, task]);
   
   const handleSave = () => {
-    if (!task.name) {
-      toast.error('Task name is required');
-      return;
-    }
+    if (!name.trim()) return;
     
-    if (initialTask) {
-      // Update existing task
-      eventManager.emit('task:update', {
-        taskId: initialTask.id,
-        updates: task
-      });
-    } else {
-      // Create new task
-      const newTask: Task = {
-        id: uuidv4(),
-        name: task.name || 'New Task',
-        description: task.description || '',
-        taskType: task.taskType || 'regular',
-        completed: false,
-        createdAt: new Date().toISOString()
-      };
-      
-      eventManager.emit('task:create', newTask);
-      
-      if (onSaveTask) {
-        onSaveTask(newTask);
-      }
-    }
+    const updatedTask: Task = {
+      ...task,
+      name: name.trim(),
+      description: description.trim(),
+      taskType
+    } as Task;
     
-    // Close the dialog
+    onSave(updatedTask);
+    onOpenChange(false);
+  };
+  
+  const handleCancel = () => {
+    if (onCancel) onCancel();
     onOpenChange(false);
   };
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{initialTask ? 'Edit Task' : 'Create Task'}</DialogTitle>
+          <DialogTitle>{mode === 'create' ? 'Create Task' : 'Edit Task'}</DialogTitle>
+          <DialogDescription>
+            {mode === 'create' 
+              ? 'Add a new task to your list' 
+              : 'Update the details of your task'}
+          </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium">
               Task Name
             </label>
             <Input
               id="name"
-              value={task.name || ''}
-              onChange={(e) => setTask({ ...task, name: e.target.value })}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Enter task name"
             />
           </div>
           
-          <div className="grid gap-2">
+          <div className="space-y-2">
             <label htmlFor="description" className="text-sm font-medium">
               Description (Optional)
             </label>
-            <Input
+            <Textarea
               id="description"
-              value={task.description || ''}
-              onChange={(e) => setTask({ ...task, description: e.target.value })}
-              placeholder="Enter description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add more details about this task"
+              rows={3}
             />
           </div>
           
-          <div className="grid gap-2">
+          <div className="space-y-2">
             <label className="text-sm font-medium">
               Task Type
             </label>
             <TaskTypeSelector
-              value={task.taskType || 'regular'}
-              onChange={(type) => setTask({ ...task, taskType: type })}
+              value={taskType}
+              onChange={setTaskType}
             />
           </div>
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>
-            {initialTask ? 'Update' : 'Create'}
+          <Button onClick={handleSave} disabled={!name.trim()}>
+            {mode === 'create' ? 'Create' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>

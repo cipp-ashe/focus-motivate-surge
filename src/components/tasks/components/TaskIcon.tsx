@@ -1,71 +1,50 @@
 
 import React from 'react';
-import { Check, Clock, List, Maximize2, Mic, FileType, Star, Hash } from 'lucide-react';
+import { 
+  CheckSquare, 
+  Clock, 
+  Image, 
+  FileText, 
+  Mic, 
+  Focus, 
+  CheckCircle2, 
+  ClipboardList, 
+  LayoutList 
+} from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 
 interface TaskIconProps {
-  taskType?: TaskType;
+  type?: TaskType;
   className?: string;
   size?: number;
 }
 
 export const TaskIcon: React.FC<TaskIconProps> = ({ 
-  taskType = 'regular', 
+  type = 'regular', 
   className = '', 
   size = 16 
 }) => {
-  // Select icon based on task type
-  let IconComponent;
+  const iconProps = {
+    className,
+    size
+  };
   
-  switch (taskType) {
+  switch (type) {
     case 'timer':
-      IconComponent = Clock;
-      break;
-    case 'checklist':
-      IconComponent = List;
-      break;
+      return <Clock {...iconProps} />;
     case 'screenshot':
-      IconComponent = Maximize2;
-      break;
-    case 'voicenote':
-      IconComponent = Mic;
-      break;
+      return <Image {...iconProps} />;
     case 'journal':
-      IconComponent = FileType;
-      break;
-    case 'counter' as TaskType:
-      IconComponent = Hash;
-      break;
-    case 'rating' as TaskType:
-      IconComponent = Star;
-      break;
-    case 'regular':
-    default:
-      IconComponent = Check;
-      break;
-  }
-  
-  return <IconComponent size={size} className={className} />;
-};
-
-export const getTaskTypeLabel = (taskType?: TaskType): string => {
-  switch (taskType) {
-    case 'timer':
-      return 'Timer';
+      return <FileText {...iconProps} />;
+    case 'voicenote':
+      return <Mic {...iconProps} />;
+    case 'focus':
+      return <Focus {...iconProps} />;
     case 'checklist':
-      return 'Checklist';
-    case 'screenshot':
-      return 'Screenshot';
-    case 'journal':
-      return 'Journal';
-    case 'voicenote':
-      return 'Voice Note';
-    case ('counter' as TaskType):
-      return 'Counter';
-    case ('rating' as TaskType):
-      return 'Rating';
-    case 'regular':
+      return <ClipboardList {...iconProps} />;
+    case 'habit':
+      return <CheckCircle2 {...iconProps} />;
     default:
-      return 'Regular';
+      return <CheckSquare {...iconProps} />;
   }
 };

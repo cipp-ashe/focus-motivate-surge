@@ -1,10 +1,14 @@
 
-// Export all habit components
-export { default as ActiveTemplateList } from './ActiveTemplateList';
-export { default as HabitTemplateManager } from './HabitTemplateManager';
-export { default as HabitTracker } from './HabitTracker';
+// Export habit components
+export { HabitTracker } from './HabitTracker';
+export { HabitTemplateManager } from './HabitTemplateManager';
+export { HabitInsights } from './HabitInsights';
+export { HabitFormField } from './HabitFormField';
+export { HabitMetric } from './HabitMetric';
+export { HabitList } from './HabitList';
+export { HabitRow } from './HabitRow';
+export { DaySelector } from './DaySelector';
+export { TemplateSelectionSheet } from './TemplateSelectionSheet';
+export { ActiveTemplateList } from './ActiveTemplateList';
+export { TemplateCard } from './TemplateCard';
 export { TodaysHabitsSection } from './TodaysHabitsSection';
-export { TodaysHabitCard } from './TodaysHabitCard';
-export { default as HabitDebugLogger } from './HabitDebugLogger';
-export { default as DaySelector } from './ConfigurationDialog/DaySelector';
-export { default as TemplateSelectionSheet } from './TemplateSelectionSheet';
