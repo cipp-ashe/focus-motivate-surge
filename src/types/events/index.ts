@@ -40,6 +40,19 @@ export interface EventPayloadMap extends
   AppEventPayloadMap,
   WildcardEventPayloadMap {}
 
+// Journal entry type
+export interface JournalEntry {
+  id: string;
+  content: string;
+  date: string;
+  habitId?: string;
+  templateId?: string;
+  taskId?: string;
+  title?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Callback type for event handlers
 export type EventCallback<T extends EventType> = (payload: EventPayloadMap[T]) => void;
 

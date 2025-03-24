@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitTaskEvent, HabitTaskSchedulerReturn } from './types';
 import { useEvent } from '@/hooks/useEvent';
@@ -34,10 +34,7 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
         name,
         date,
         duration,
-        { 
-          suppressToast: true,
-          metricType
-        }
+        { metricType }
       );
       
       if (taskId) {
@@ -53,17 +50,21 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
     }
   }, [createHabitTask]);
   
-  // Set up event listeners with the new system
-  useEvent('habit:schedule', handleHabitSchedule);
-  
   // Check for missing habit tasks
   const checkForMissingHabitTasks = useCallback(() => {
-    // Emit event to check pending habit tasks
+    console.log('Checking for missing habit tasks...');
+    
+    // For now, just emit the check pending event
+    // Actual implementation would involve checking local storage
     eventManager.emit('habits:check-pending', {});
   }, []);
   
+  // Listen for 'habit:schedule' events
+  useEvent('habit:schedule', handleHabitSchedule);
+  
   return {
     scheduledTasksRef,
+    handleHabitSchedule,
     checkForMissingHabitTasks
   };
 };
