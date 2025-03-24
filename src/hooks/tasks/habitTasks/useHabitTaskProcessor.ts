@@ -105,17 +105,17 @@ export const useHabitTaskProcessor = () => {
    * Handler for habit completion events
    */
   const handleHabitComplete = useCallback((payload: any) => {
-    const { habitId, date, value } = payload;
+    const { habitId, date, value, metricType, habitName, templateId } = payload;
     console.log(`Handling habit completion for ${habitId} on ${date} with value:`, value);
     
     // For journal habit completion, we need special handling
-    if (payload.metricType === 'journal') {
+    if (metricType === 'journal') {
       // Emit journal open event
       eventManager.emit('journal:open', {
         habitId,
-        habitName: payload.habitName || 'Journal Entry',
+        habitName: habitName || 'Journal Entry',
         date,
-        templateId: payload.templateId
+        templateId
       });
     }
   }, []);

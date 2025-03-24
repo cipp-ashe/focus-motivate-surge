@@ -5,6 +5,7 @@ import { useNoteActions, useNoteState } from '@/contexts/notes/hooks';
 import { Note } from '@/types/notes';
 import { toast } from 'sonner';
 import { EntityType } from '@/types/core';
+import { JournalEntry } from '@/types/events/journal-events';
 
 /**
  * Core service hook for journal entries
@@ -12,7 +13,7 @@ import { EntityType } from '@/types/core';
  */
 export const useJournalService = () => {
   const { notes } = useNoteState();
-  const { addNote, updateNote, deleteNote } = useNoteActions();
+  const { addNote, updateNote, deleteNote, loadNotes } = useNoteActions();
 
   /**
    * Find a journal entry by various criteria
@@ -35,7 +36,7 @@ export const useJournalService = () => {
       if (note.relationships) {
         // Match by task ID
         if (criteria.taskId && 
-            note.relationships.find(rel => 
+            note.relationships.some(rel => 
               rel.entityId === criteria.taskId && 
               rel.entityType === EntityType.Task
             )) {
@@ -44,13 +45,15 @@ export const useJournalService = () => {
 
         // Match by habit ID
         if (criteria.habitId && 
-            note.relationships.find(rel => 
+            note.relationships.some(rel => 
               rel.entityId === criteria.habitId && 
               rel.entityType === EntityType.Habit
             )) {
           // If date is provided, also check the date
           if (criteria.date) {
-            return note.relationships.some(rel => rel.metadata?.date === criteria.date);
+            return note.relationships.some(rel => 
+              rel.metadata?.date === criteria.date
+            );
           }
           return true;
         }
@@ -184,6 +187,78 @@ export const useJournalService = () => {
   }, [findJournalEntry, updateNote, addNote]);
 
   /**
+   * Update an existing journal entry
+   */
+  const updateJournalEntry = useCallback((
+    id: string,
+    updates: Partial<JournalEntry>
+  ): boolean => {
+    // Find the journal entry
+    const entry = findJournalEntry({ id });
+    
+    if (!entry) {
+      console.error(`Journal entry with ID ${id} not found`);
+      return false;
+    }
+    
+    // Update the note
+    updateNote(id, {
+      ...updates,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // If there's a task ID in the relationships, update the task's journal entry
+    const taskRelationship = entry.relationships?.find(rel => 
+      rel.entityType === EntityType.Task
+    );
+    
+    if (taskRelationship && updates.content) {
+      eventManager.emit('task:update', {
+        taskId: taskRelationship.entityId,
+        updates: {
+          journalEntry: updates.content
+        }
+      });
+    }
+    
+    return true;
+  }, [findJournalEntry, updateNote]);
+
+  /**
+   * Delete a journal entry
+   */
+  const deleteJournalEntry = useCallback((
+    id: string
+  ): boolean => {
+    // Find the journal entry
+    const entry = findJournalEntry({ id });
+    
+    if (!entry) {
+      console.error(`Journal entry with ID ${id} not found`);
+      return false;
+    }
+    
+    // Delete the note
+    deleteNote(id);
+    
+    // If there's a task ID in the relationships, update the task's journal entry
+    const taskRelationship = entry.relationships?.find(rel => 
+      rel.entityType === EntityType.Task
+    );
+    
+    if (taskRelationship) {
+      eventManager.emit('task:update', {
+        taskId: taskRelationship.entityId,
+        updates: {
+          journalEntry: ''
+        }
+      });
+    }
+    
+    return true;
+  }, [findJournalEntry, deleteNote]);
+
+  /**
    * Open journal entry for editing
    */
   const openJournalEntry = useCallback((payload: {
@@ -193,10 +268,10 @@ export const useJournalService = () => {
     templateId?: string;
     taskId?: string;
     date?: string;
+    content?: string;
   }) => {
     console.log('Opening journal entry:', payload);
-    // This is a placeholder - the actual journal dialog component
-    // will respond to this event
+    eventManager.emit('journal:open', payload);
   }, []);
 
   /**
@@ -227,19 +302,34 @@ export const useJournalService = () => {
   const setupEventListeners = useCallback(() => {
     // This is meant to be called in a useEffect in a component
     const createUnsubscribe = eventManager.on('journal:create', createJournalEntry);
+    const updateUnsubscribe = eventManager.on('journal:update', 
+      ({ id, updates }) => updateJournalEntry(id, updates)
+    );
+    const deleteUnsubscribe = eventManager.on('journal:delete', 
+      ({ id }) => deleteJournalEntry(id)
+    );
     const openUnsubscribe = eventManager.on('journal:open', openJournalEntry);
     
     // Return cleanup function
     return () => {
       createUnsubscribe();
+      updateUnsubscribe();
+      deleteUnsubscribe();
       openUnsubscribe();
     };
-  }, [createJournalEntry, openJournalEntry]);
+  }, [createJournalEntry, updateJournalEntry, deleteJournalEntry, openJournalEntry]);
 
   return {
     findJournalEntry,
     createJournalEntry,
+    updateJournalEntry,
+    deleteJournalEntry,
+    openJournalEntry,
     handleJournalTaskCompletion,
-    setupEventListeners
+    setupEventListeners,
+    loadJournalEntries: loadNotes, // Alias for convenience
+    journalEntries: notes.filter(note => 
+      note.tags?.some(tag => tag.name === 'journal')
+    )
   };
 };

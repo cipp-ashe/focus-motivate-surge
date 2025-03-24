@@ -38,6 +38,7 @@ export interface HabitNoteData {
   templateId?: string;
   date?: string;
   metricType?: MetricType;
+  content?: string;
 }
 
 // Habit event payload definitions
