@@ -128,9 +128,6 @@ export interface Task {
     format: string;
   };
   
-  /** Journal entry content for journal tasks */
-  journalEntry?: string;
-  
   /** Checklist items for checklist tasks */
   checklistItems?: ChecklistItem[];
   

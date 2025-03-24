@@ -77,9 +77,6 @@ export interface Task {
     format: string;
   };
   
-  // Journal task specific field
-  journalEntry?: string;
-  
   // Checklist task specific field
   checklistItems?: ChecklistItem[];
   

@@ -5,15 +5,6 @@
 
 import { Note, Tag } from '@/types/notes';
 
-// We'll unify journal entries as extended notes
-export interface JournalEntry extends Note {
-  // Additional journal-specific fields
-  habitId?: string;
-  taskId?: string;
-  templateId?: string;
-  date: string; // ISO string date
-}
-
 export type JournalEventType =
   | 'journal:create'
   | 'journal:update'
@@ -34,7 +25,7 @@ export interface JournalEventPayloadMap {
   };
   'journal:update': {
     id: string;
-    updates: Partial<JournalEntry>;
+    updates: Partial<Note>;
   };
   'journal:delete': {
     id: string;

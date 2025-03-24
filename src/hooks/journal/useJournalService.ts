@@ -5,7 +5,6 @@ import { useNoteActions, useNoteState } from '@/contexts/notes/hooks';
 import { Note, Tag, Relationship } from '@/types/notes';
 import { toast } from 'sonner';
 import { EntityType } from '@/types/core';
-import { JournalEntry } from '@/types/events/journal-events';
 
 /**
  * Core service hook for journal entries
@@ -110,12 +109,11 @@ export const useJournalService = () => {
         updatedAt: new Date().toISOString()
       });
 
-      // Update task if needed
+      // Update task completion status if needed
       if (taskId) {
         eventManager.emit('task:update', {
           taskId,
           updates: {
-            journalEntry: content,
             completed: true,
             completedAt: new Date().toISOString()
           }
@@ -171,15 +169,14 @@ export const useJournalService = () => {
 
     addNote({ id, ...newNote });
 
-    // Update task if needed
+    // Update task completion status if needed
     if (taskId) {
       eventManager.emit('task:update', {
-        taskId,
-        updates: {
-          journalEntry: content,
-          completed: true,
-          completedAt: new Date().toISOString()
-        }
+          taskId,
+          updates: {
+            completed: true,
+            completedAt: new Date().toISOString()
+          }
       });
     }
 
@@ -192,7 +189,7 @@ export const useJournalService = () => {
    */
   const updateJournalEntry = useCallback((
     id: string,
-    updates: Partial<JournalEntry>
+    updates: Partial<Note>
   ): boolean => {
     // Find the journal entry
     const entry = findJournalEntry({ id });
@@ -207,20 +204,6 @@ export const useJournalService = () => {
       ...updates,
       updatedAt: new Date().toISOString()
     });
-    
-    // If there's a task ID in the relationships, update the task's journal entry
-    const taskRelationship = entry.relationships?.find(rel => 
-      rel.entityType === EntityType.Task
-    );
-    
-    if (taskRelationship && updates.content) {
-      eventManager.emit('task:update', {
-        taskId: taskRelationship.entityId,
-        updates: {
-          journalEntry: updates.content
-        }
-      });
-    }
     
     return true;
   }, [findJournalEntry, updateNote]);
@@ -241,20 +224,6 @@ export const useJournalService = () => {
     
     // Delete the note
     deleteNote(id);
-    
-    // If there's a task ID in the relationships, update the task's journal entry
-    const taskRelationship = entry.relationships?.find(rel => 
-      rel.entityType === EntityType.Task
-    );
-    
-    if (taskRelationship) {
-      eventManager.emit('task:update', {
-        taskId: taskRelationship.entityId,
-        updates: {
-          journalEntry: ''
-        }
-      });
-    }
     
     return true;
   }, [findJournalEntry, deleteNote]);
@@ -280,21 +249,17 @@ export const useJournalService = () => {
    */
   const handleJournalTaskCompletion = useCallback((taskId: string, taskData: {
     name: string;
-    journalEntry?: string;
     relationships?: {
       habitId?: string;
       templateId?: string;
       date?: string;
     }
   }) => {
-    if (!taskData.journalEntry) return;
-    
     createJournalEntry({
       habitId: taskData.relationships?.habitId,
       habitName: taskData.name,
       taskId,
       templateId: taskData.relationships?.templateId,
-      content: taskData.journalEntry,
       date: taskData.relationships?.date
     });
   }, [createJournalEntry]);

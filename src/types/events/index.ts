@@ -20,7 +20,7 @@ import {
 } from './misc-events';
 
 // Import journal events
-import { JournalEventType, JournalEventPayloadMap, JournalEntry } from './journal-events';
+import { JournalEventType, JournalEventPayloadMap } from './journal-events';
 
 // Define all possible event types in the application
 export type EventType =
@@ -60,5 +60,5 @@ export type { EventUnsubscribe };
 export type { HabitTaskEvent };
 export type { HabitNoteData };
 export type { VoiceNoteEventType };
-export type { JournalEventType, JournalEntry };
+export type { JournalEventType };
 export type { JournalEventPayloadMap } from './journal-events';

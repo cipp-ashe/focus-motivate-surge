@@ -7,7 +7,6 @@ import { useNoteActions, useNoteState } from '@/contexts/notes/hooks';
 import { eventManager } from '@/lib/events/EventManager';
 import { Note, Tag, TagColor } from '@/types/notes';
 import { EntityType } from '@/types/core';
-import { JournalEntry } from '@/types/events';
 
 export const Notes = () => {
   // Use state to track initialization
@@ -146,7 +145,7 @@ export const Notes = () => {
   useEffect(() => {
     const handleJournalCreate = (data: any) => {
       console.log('Creating note from journal event:', data);
-      if (data && data.content && (data.habitId || data.taskId)) {
+      if (data && (data.habitId || data.taskId)) {
         const now = new Date().toISOString();
         const relationships = [];
         
@@ -178,7 +177,7 @@ export const Notes = () => {
         
         // Add the note
         addNote({ 
-          content: data.content,
+          content: data.content || '',
           title: `Journal: ${data.habitName || data.title || 'Entry'}`,
           tags,
           relationships,
@@ -191,11 +190,11 @@ export const Notes = () => {
     // Handle habit notes
     const handleNoteFromHabit = (data: any) => {
       console.log('Creating note from habit:', data);
-      if (data && data.content && data.habitId) {
+      if (data && data.habitId) {
         const now = new Date().toISOString();
         
         addNote({ 
-          content: data.content,
+          content: data.content || '',
           title: `Journal: ${data.habitName || 'Habit'}`,
           tags: [{ name: 'journal', color: 'blue' as TagColor }],
           relationships: [{
