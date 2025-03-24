@@ -1,20 +1,22 @@
 
 /**
- * Habit Hooks Barrel File
+ * Habits Hooks
  * 
- * This file exports all habit-related hooks from a central location,
- * making imports cleaner throughout the application.
+ * This file exports all habit-related hooks for easier importing
  */
 
-// Export hooks from their source files
+// Main hooks
 export { useHabits } from './useHabits';
 export { useHabitEvents } from './useHabitEvents';
-export { useHabitTaskIntegration } from './useHabitTaskIntegration';
-export { useTodaysHabits } from './useTodaysHabits';
 export { useHabitCompletion } from './useHabitCompletion';
-
-// Legacy exports kept for backward compatibility
 export { useHabitProgress } from './useHabitProgress';
 export { useHabitRelationships } from './useHabitRelationships';
 export { useTemplateCreation } from './useTemplateCreation';
 export { useTemplateManagement } from './useTemplateManagement';
+export { useTodaysHabits } from './useTodaysHabits';
+export { useHabitTaskIntegration } from './useHabitTaskIntegration';
+export { useHabitStorage } from './useHabitStorage';
+
+// Mutation hooks
+export { useCompletionMutation } from './useCompletionMutation';
+export { useDismissMutation } from './useDismissMutation';

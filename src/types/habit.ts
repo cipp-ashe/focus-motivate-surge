@@ -1,16 +1,20 @@
 
 /**
  * Unified Habit Type System
- * Single source of truth for all habit-related types
+ * Single source of truth for all habit and template related types
  */
 
 // ===== Day of Week Definitions =====
+
+// Full day names for display
 export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 export type DayOfWeekFull = typeof DAYS_OF_WEEK[number];
 
+// Short day names for compact display and storage
 export const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 export type DayOfWeek = typeof SHORT_DAYS[number];
 
+// Mapping between full and short day names
 export const DAY_MAPPINGS: Record<DayOfWeekFull, DayOfWeek> = {
   'Sunday': 'Sun',
   'Monday': 'Mon',
@@ -27,10 +31,13 @@ export const DEFAULT_WEEKEND: DayOfWeek[] = ['Sat', 'Sun'];
 export const DEFAULT_ALL_DAYS: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export const DEFAULT_ACTIVE_DAYS = DEFAULT_WEEKDAYS;
 
-// ===== Core Type Definitions =====
+// ===== Time and Category Definitions =====
+
+// Time preferences for habits
 export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
 export const TIME_PREFERENCES: TimePreference[] = ['Morning', 'Afternoon', 'Evening', 'Anytime'];
 
+// Categories for habits and templates
 export type HabitCategory = 
   | 'Health' 
   | 'Fitness' 
@@ -49,13 +56,29 @@ export type HabitCategory =
   | 'Other';
 
 export const HABIT_CATEGORIES: HabitCategory[] = [
-  'Health', 'Fitness', 'Work', 'Personal', 'Learning', 'Mental Health',
-  'Wellness', 'Productivity', 'Mindfulness', 'Nutrition', 'Sleep',
-  'Social', 'Creativity', 'Finance', 'Other'
+  'Health',
+  'Fitness',
+  'Work',
+  'Personal',
+  'Learning',
+  'Mental Health',
+  'Wellness',
+  'Productivity',
+  'Mindfulness',
+  'Nutrition',
+  'Sleep',
+  'Social',
+  'Creativity',
+  'Finance',
+  'Other'
 ];
 
+// ===== Metric Types and Definitions =====
+
+// All possible metric types for habits
 export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'slider' | 'rating' | 'number';
 
+// Mapping between metric types and task types for integration
 export const METRIC_TO_TASK_TYPE: Record<MetricType, string> = {
   'timer': 'timer',
   'journal': 'journal',
@@ -66,7 +89,9 @@ export const METRIC_TO_TASK_TYPE: Record<MetricType, string> = {
   'number': 'counter'
 };
 
-// ===== Core Interfaces =====
+// ===== Core Habit Types =====
+
+// Base habit interface
 export interface Habit {
   id: string;
   name: string;
@@ -80,6 +105,28 @@ export interface Habit {
   order?: number;
 }
 
+// Detailed habit with additional properties
+export interface HabitDetail extends Habit {
+  description: string;
+  category: HabitCategory | string;
+  timePreference: TimePreference;
+  metrics: {
+    type: MetricType;
+    goal?: number;
+    target?: number;
+    unit?: string;
+    min?: number;
+    max?: number;
+  };
+  insights?: any[];
+  tips?: string[];
+  relationships?: {
+    templateId?: string;
+  };
+  order?: number;
+}
+
+// Habit metrics configuration
 export interface HabitMetrics {
   type: MetricType;
   goal?: number;
@@ -89,24 +136,33 @@ export interface HabitMetrics {
   target?: number;
 }
 
-export interface HabitDetail extends Habit {
-  metrics: {
-    type: MetricType;
-    goal?: number;
-    target?: number;
-    unit?: string;
-    min?: number;
-    max?: number;
-  };
-  insights?: string[] | any[];
-  tips?: string[];
-  relationships?: {
-    templateId?: string;
-  };
-  order?: number;
+// Habit completion record
+export interface HabitCompletion {
+  habitId: string;
+  date: string;
+  value: boolean | number;
+  notes?: string;
+}
+
+// Progress tracking for a habit
+export interface HabitProgress {
+  value: boolean | number;
+  streak?: number;
+  date?: string;
+  completed?: boolean;
+}
+
+// Habit logs for tracking completion history
+export interface HabitLog {
+  habitId: string;
+  date: string;
+  completed: boolean;
+  value?: boolean | number;
 }
 
 // ===== Template Types =====
+
+// Definition of a habit template (blueprint for creating habits)
 export interface HabitTemplate {
   id: string;
   name: string;
@@ -119,6 +175,7 @@ export interface HabitTemplate {
   duration?: number | null;
 }
 
+// Active template instance that a user has added to their routine
 export interface ActiveTemplate {
   templateId: string;
   name: string;
@@ -129,6 +186,7 @@ export interface ActiveTemplate {
   relationships?: Record<string, any>;
 }
 
+// Template for creating a new custom template
 export interface NewTemplate {
   name: string;
   description: string;
@@ -137,7 +195,7 @@ export interface NewTemplate {
   category: string;
 }
 
-// ===== Event Types =====
+// Event for habit completion
 export interface HabitCompletionEvent {
   habitId: string;
   date: string;
@@ -147,6 +205,7 @@ export interface HabitCompletionEvent {
   templateId?: string;
 }
 
+// Event for template updates
 export interface TemplateUpdateEvent {
   templateId: string;
   name?: string;
@@ -155,54 +214,6 @@ export interface TemplateUpdateEvent {
   activeDays?: DayOfWeek[];
   customized?: boolean;
   suppressToast?: boolean;
-}
-
-// ===== Progress Types =====
-export interface HabitProgress {
-  value: boolean | number;
-  streak?: number;
-  date?: string;
-  completed?: boolean;
-}
-
-// ===== Task Integration Types =====
-export interface HabitTaskOptions {
-  metricType?: MetricType;
-  taskType?: string;
-  suppressToast?: boolean;
-  selectAfterCreate?: boolean;
-  duration?: number;
-}
-
-export interface HabitTaskIntegrationReturn {
-  scheduledTasksRef: React.MutableRefObject<Map<string, string>>;
-  createHabitTask: (
-    habitId: string,
-    templateId: string,
-    name: string,
-    date: string,
-    duration?: number,
-    options?: HabitTaskOptions
-  ) => string | null;
-  handleHabitSchedule: (event: any) => string | null;
-  handleHabitComplete: (payload: any) => void;
-  syncHabitsWithTasks: () => boolean;
-  checkForMissingHabitTasks: () => void;
-}
-
-export interface HabitTaskProgress {
-  value: boolean | number;
-  streak: number;
-  date: string;
-  completed: boolean;
-}
-
-export interface HabitProgressMap {
-  [templateId: string]: {
-    [habitId: string]: {
-      [date: string]: HabitTaskProgress;
-    };
-  };
 }
 
 // ===== Storage Constants =====

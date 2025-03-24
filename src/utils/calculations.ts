@@ -85,11 +85,3 @@ export const computeHabitStreak = (logs: HabitLog[]): number => {
   
   return streak;
 };
-
-// Missing HabitLog type, let's add it here
-export interface HabitLog {
-  habitId: string;
-  date: string;
-  completed: boolean;
-  value?: boolean | number;
-}

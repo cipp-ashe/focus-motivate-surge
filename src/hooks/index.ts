@@ -10,6 +10,7 @@ export { useEvent } from './useEvent';
 export { useLocalStorage } from './useLocalStorage';
 export { useToast } from './use-toast';
 export { useIsMobile } from './ui/useIsMobile';
+export { useUserPreferences } from './useUserPreferences';
 
 // Re-export habit hooks
 export {
@@ -21,7 +22,9 @@ export {
   useTemplateCreation,
   useTemplateManagement,
   useTodaysHabits,
-  useHabitTaskIntegration
+  useHabitTaskIntegration,
+  useCompletionMutation,
+  useDismissMutation
 } from './habits';
 
 // Task hooks
@@ -31,11 +34,14 @@ export { useTaskManager } from './tasks/useTaskManager';
 export { useTaskActions } from './tasks/useTaskActions';
 export { useTaskEvents } from './tasks/useTaskEvents';
 export { useTaskManagement } from './tasks/useTaskManagement';
+export { useTaskCreation } from './tasks/useTaskCreation';
 
 // Journal hooks
 export { useJournalService } from './journal/useJournalService';
 
 // Habit-task integration hooks
-export { useHabitTaskProcessor } from './tasks/habitTasks/useHabitTaskProcessor';
-export { useHabitTaskChecker } from './tasks/habitTasks/useHabitTaskChecker';
-export { useHabitTaskCleanup } from './tasks/habitTasks/useHabitTaskCleanup';
+export {
+  useHabitTaskProcessor,
+  useHabitTaskChecker,
+  useHabitTaskCleanup
+} from './tasks/habitTasks';

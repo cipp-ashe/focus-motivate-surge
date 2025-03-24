@@ -82,6 +82,19 @@ export type Color =
 // Standard size options
 export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
+// Tag definition
+export interface Tag {
+  name: string;
+  color: Color;
+}
+
+// Tag relation for connecting tags to entities
+export interface TagRelation {
+  tagId: string;
+  entityId: string;
+  entityType: EntityType;
+}
+
 // Daily summary types
 export interface DailySummary {
   date: string;
