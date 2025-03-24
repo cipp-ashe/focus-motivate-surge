@@ -1,6 +1,6 @@
 
 import { TagColor, EntityType } from '@/types/core';
-import { Quote } from '@/types/timer/models';
+import { Quote, QuoteCategory } from '@/types/timer/models';
 
 // Journal templates with different prompts and formats
 export const journalTemplates = {
@@ -83,21 +83,21 @@ export const getJournalTags = (journalType: string) => {
 
 // Example quotes for different journal types - FIXED to match the Quote interface
 const gratitudeQuotes: Quote[] = [
-  { id: 'g1', text: 'Gratitude turns what we have into enough.', author: 'Aesop', isFavorite: false, category: 'gratitude' },
-  { id: 'g2', text: 'Gratitude is the fairest blossom that springs from the soul.', author: 'Henry Ward Beecher', isFavorite: false, category: 'gratitude' },
-  { id: 'g3', text: 'Gratitude is the healthiest of all human emotions.', author: 'Zig Ziglar', isFavorite: false, category: 'gratitude' }
+  { id: 'g1', text: 'Gratitude turns what we have into enough.', author: 'Aesop', isFavorite: false, category: 'gratitude' as QuoteCategory },
+  { id: 'g2', text: 'Gratitude is the fairest blossom that springs from the soul.', author: 'Henry Ward Beecher', isFavorite: false, category: 'gratitude' as QuoteCategory },
+  { id: 'g3', text: 'Gratitude is the healthiest of all human emotions.', author: 'Zig Ziglar', isFavorite: false, category: 'gratitude' as QuoteCategory }
 ];
 
 const reflectionQuotes: Quote[] = [
-  { id: 'r1', text: 'By three methods we may learn wisdom: First, by reflection, which is noblest; Second, by imitation, which is easiest; and third by experience, which is the bitterest.', author: 'Confucius', isFavorite: false, category: 'reflection' },
-  { id: 'r2', text: 'Follow effective action with quiet reflection. From the quiet reflection will come even more effective action.', author: 'Peter Drucker', isFavorite: false, category: 'reflection' },
-  { id: 'r3', text: 'Reflection is the lamp of the heart. If it departs, the heart will have no light.', author: 'Imam Al-Haddad', isFavorite: false, category: 'reflection' }
+  { id: 'r1', text: 'By three methods we may learn wisdom: First, by reflection, which is noblest; Second, by imitation, which is easiest; and third by experience, which is the bitterest.', author: 'Confucius', isFavorite: false, category: 'reflection' as QuoteCategory },
+  { id: 'r2', text: 'Follow effective action with quiet reflection. From the quiet reflection will come even more effective action.', author: 'Peter Drucker', isFavorite: false, category: 'reflection' as QuoteCategory },
+  { id: 'r3', text: 'Reflection is the lamp of the heart. If it departs, the heart will have no light.', author: 'Imam Al-Haddad', isFavorite: false, category: 'reflection' as QuoteCategory }
 ];
 
 const mindfulnessQuotes: Quote[] = [
-  { id: 'm1', text: 'The present moment is the only time over which we have dominion.', author: 'Thích Nhất Hạnh', isFavorite: false, category: 'mindfulness' },
-  { id: 'm2', text: 'The best way to capture moments is to pay attention. This is how we cultivate mindfulness.', author: 'Jon Kabat-Zinn', isFavorite: false, category: 'mindfulness' },
-  { id: 'm3', text: 'Mindfulness isn't difficult, we just need to remember to do it.', author: 'Sharon Salzberg', isFavorite: false, category: 'mindfulness' }
+  { id: 'm1', text: 'The present moment is the only time over which we have dominion.', author: 'Thích Nhất Hạnh', isFavorite: false, category: 'mindfulness' as QuoteCategory },
+  { id: 'm2', text: 'The best way to capture moments is to pay attention. This is how we cultivate mindfulness.', author: 'Jon Kabat-Zinn', isFavorite: false, category: 'mindfulness' as QuoteCategory },
+  { id: 'm3', text: 'Mindfulness isn\'t difficult, we just need to remember to do it.', author: 'Sharon Salzberg', isFavorite: false, category: 'mindfulness' as QuoteCategory }
 ];
 
 export const getJournalQuotes = (journalType: string): Quote[] => {
