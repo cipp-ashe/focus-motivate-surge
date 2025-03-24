@@ -3,19 +3,27 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NotesTabsView } from '@/components/notes/NotesTabsView';
 import { useTheme } from '@/components/theme-provider';
-import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
-import { NoteContextProvider } from '@/contexts/notes/NoteContext';
+import { useNoteActions, useNoteState, NoteProvider } from '@/contexts/notes/NoteContext';
 import { ErrorBoundary } from 'react-error-boundary';
 
 const NotesContent = () => {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('all');
-  const { updateCurrentContent, addNote } = useNoteActions();
-  const { content: currentContent } = useNoteState();
+  const { updateNote, addNote } = useNoteActions();
+  const { notes, selectedNoteId } = useNoteState();
+  const [currentContent, setCurrentContent] = useState('');
+
+  const handleUpdateCurrentContent = (content: string) => {
+    setCurrentContent(content);
+  };
 
   const handleSave = () => {
     if (currentContent?.trim()) {
-      addNote();
+      if (selectedNoteId) {
+        updateNote(selectedNoteId, { content: currentContent });
+      } else {
+        addNote({ content: currentContent });
+      }
     }
   };
 
@@ -31,10 +39,10 @@ const NotesContent = () => {
           </CardHeader>
           <CardContent className="p-0">
             <NotesTabsView 
-              content={currentContent || ''}
-              onChange={updateCurrentContent}
+              content={currentContent}
+              onChange={handleUpdateCurrentContent}
               onSave={handleSave}
-              isEditing={false}
+              isEditing={!!selectedNoteId}
             />
           </CardContent>
         </Card>
@@ -57,9 +65,9 @@ const ErrorFallback = ({ error }: { error: Error }) => (
 const Notes = () => {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <NoteContextProvider>
+      <NoteProvider>
         <NotesContent />
-      </NoteContextProvider>
+      </NoteProvider>
     </ErrorBoundary>
   );
 };

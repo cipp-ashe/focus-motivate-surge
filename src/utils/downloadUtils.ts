@@ -1,5 +1,6 @@
 
 import { formatDate } from '@/lib/utils/formatters';
+import type { Note } from '@/types/notes';
 
 /**
  * Utility functions for downloading content
@@ -19,25 +20,26 @@ export const downloadContent = (filename: string, content: string, contentType =
 };
 
 // Download a single note as markdown
-export const downloadNoteAsMarkdown = (title: string, content: string): void => {
-  const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+export const downloadNoteAsMarkdown = (note: Note): void => {
+  const safeTitle = note.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
   const filename = `${safeTitle}_${formatDate(new Date(), 'yyyy-MM-dd')}.md`;
   
-  let markdownContent = `# ${title}\n\n`;
-  markdownContent += content;
+  let markdownContent = `# ${note.title}\n\n`;
+  markdownContent += note.content;
   
   downloadContent(filename, markdownContent, 'text/markdown');
 };
 
 // Download all notes as a zip file
-export const downloadAllNotes = (notes: any[]): void => {
+export const downloadAllNotes = (notes: Note[]): void => {
   if (!notes || notes.length === 0) {
     console.error('No notes to download');
     return;
   }
   
-  import('jszip').then(({ default: JSZip }) => {
-    const zip = new JSZip();
+  // Dynamic import for JSZip
+  import('jszip').then(JSZip => {
+    const zip = new JSZip.default();
     const notesFolder = zip.folder('notes');
     
     if (!notesFolder) {

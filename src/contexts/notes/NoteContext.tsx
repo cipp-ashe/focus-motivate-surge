@@ -1,13 +1,16 @@
 
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { noteReducer } from './noteReducer';
-import { initialState, Note, NoteState } from './initialState';
-import { v4 as uuidv4 } from 'uuid';
+import { initialState, Note } from './initialState';
 import { eventManager } from '@/lib/events/EventManager';
 
 // Define the context type
-interface NoteContextType extends NoteState {
-  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void;
+interface NoteContextType {
+  notes: Note[];
+  selectedNoteId: string | null;
+  isLoading: boolean;
+  error: Error | null;
+  addNote: (note?: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateNote: (id: string, updates: Partial<Note>) => void;
   deleteNote: (id: string) => void;
   selectNote: (id: string | null) => void;
@@ -21,20 +24,40 @@ const NoteContext = createContext<NoteContextType | null>(null);
 export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(noteReducer, initialState);
 
-  const addNote = useCallback((note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
+  // Load notes from localStorage on mount
+  useEffect(() => {
+    try {
+      const storedNotes = localStorage.getItem('notes');
+      if (storedNotes) {
+        dispatch({ type: 'SET_NOTES', payload: JSON.parse(storedNotes) });
+      }
+    } catch (error) {
+      console.error('Error loading notes from localStorage:', error);
+      dispatch({ type: 'ERROR', payload: error as Error });
+    }
+  }, []);
+
+  // Save notes to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('notes', JSON.stringify(state.notes));
+  }, [state.notes]);
+
+  const addNote = (note?: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
     const newNote: Note = {
-      id: uuidv4(),
-      ...note,
+      id: crypto.randomUUID(),
+      title: note?.title || 'Untitled Note',
+      content: note?.content || '',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      tags: note?.tags || []
     };
     
     dispatch({ type: 'ADD_NOTE', payload: newNote });
-    eventManager.emit('note:create', newNote);
-  }, []);
+    eventManager.emit('note:create', { id: newNote.id });
+  };
 
-  const updateNote = useCallback((id: string, updates: Partial<Note>) => {
+  const updateNote = (id: string, updates: Partial<Note>) => {
     dispatch({ 
       type: 'UPDATE_NOTE', 
       payload: { 
@@ -46,43 +69,34 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } 
     });
     eventManager.emit('note:update', { id, updates });
-  }, []);
+  };
 
-  const deleteNote = useCallback((id: string) => {
+  const deleteNote = (id: string) => {
     dispatch({ type: 'DELETE_NOTE', payload: id });
     eventManager.emit('note:delete', { id });
-  }, []);
+  };
 
-  const selectNote = useCallback((id: string | null) => {
+  const selectNote = (id: string | null) => {
     dispatch({ type: 'SELECT_NOTE', payload: id });
     if (id) {
       const note = state.notes.find(n => n.id === id);
       if (note) {
-        eventManager.emit('note:select', { id, title: note.title });
+        eventManager.emit('note:select', { id });
       }
     }
-  }, [state.notes]);
+  };
 
-  const getNoteById = useCallback((id: string) => {
+  const getNoteById = (id: string) => {
     return state.notes.find(note => note.id === id) || null;
-  }, [state.notes]);
+  };
 
   // Sample data for testing
-  React.useEffect(() => {
+  useEffect(() => {
     // Load any saved notes or populate with sample data
-    const savedNotes = localStorage.getItem('notes');
-    
-    if (savedNotes) {
-      try {
-        const parsed = JSON.parse(savedNotes);
-        dispatch({ type: 'SET_NOTES', payload: parsed });
-      } catch (e) {
-        console.error('Error loading saved notes', e);
-      }
-    } else {
+    if (state.notes.length === 0) {
       // Add sample note if none exist
       const sampleNote: Note = {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         title: 'Welcome to Notes',
         content: 'This is a sample note to help you get started. You can edit or delete it.',
         createdAt: new Date().toISOString(),
@@ -92,12 +106,7 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       dispatch({ type: 'SET_NOTES', payload: [sampleNote] });
     }
-  }, []);
-
-  // Save notes to localStorage when they change
-  React.useEffect(() => {
-    localStorage.setItem('notes', JSON.stringify(state.notes));
-  }, [state.notes]);
+  }, [state.notes.length]);
 
   return (
     <NoteContext.Provider value={{
@@ -113,7 +122,7 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-// Custom hooks to use the context
+// Custom hook to use the context
 export const useNoteContext = (): NoteContextType => {
   const context = useContext(NoteContext);
   if (!context) {
