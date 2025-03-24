@@ -59,6 +59,8 @@ describe('useTemplateCreation', () => {
     expect(result.current.isCreatingTemplate).toBe(true);
     expect(result.current.selectedTemplate).not.toBeNull();
     expect(result.current.selectedTemplate?.templateId).toContain('custom-');
+    expect(result.current.selectedTemplate?.name).toBe('New Template');
+    expect(result.current.selectedTemplate?.customized).toBe(true);
   });
 
   it('handles configure template', () => {
@@ -66,8 +68,10 @@ describe('useTemplateCreation', () => {
     const updateTemplate = vi.fn();
     const mockTemplate: ActiveTemplate = {
       templateId: 'test-id',
+      name: 'Test Template',
       habits: [],
       activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      customized: true
     };
 
     const { result } = renderHook(() => useTemplateCreation(addTemplate, updateTemplate));

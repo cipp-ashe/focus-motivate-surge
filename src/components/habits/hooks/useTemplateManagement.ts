@@ -29,6 +29,8 @@ export const useTemplateManagement = () => {
         
         const newTemplate: ActiveTemplate = {
           templateId: template.id,
+          name: template.name || 'Unnamed Template',
+          description: template.description || 'Template description',
           habits: template.defaultHabits,
           activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
           customized: false,

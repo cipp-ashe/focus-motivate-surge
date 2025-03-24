@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ActiveTemplate, HabitTemplate, DayOfWeek } from '../types';
 import { toast } from 'sonner';
@@ -15,6 +14,7 @@ export const useTemplateCreation = (
   const handleCreateTemplate = () => {
     const newTemplate: ActiveTemplate = {
       templateId: `custom-${Date.now()}`,
+      name: 'New Template',
       habits: [],
       customized: true,
       activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],

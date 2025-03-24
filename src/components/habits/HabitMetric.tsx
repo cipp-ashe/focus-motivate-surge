@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -44,7 +43,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
       if (relatedEntities.length > 0) {
         // We have a relationship, but verify the note still exists
         const noteId = relatedEntities[0].id;
-        const foundNote = noteState.items.find(note => note.id === noteId);
+        const foundNote = noteState.notes.find(note => note.id === noteId);
         
         setHasExistingEntry(!!foundNote);
         console.log(`Habit ${habit.id} journal entry exists: ${!!foundNote}`);
@@ -63,7 +62,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
     };
     
     checkForExistingEntry();
-  }, [habit.id, noteState.items, progress.value, onUpdate]);
+  }, [habit.id, noteState.notes, progress.value, onUpdate]);
 
   const handleOpenJournal = () => {
     setJournalModalOpen(true);
