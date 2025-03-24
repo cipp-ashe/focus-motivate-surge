@@ -1,16 +1,17 @@
-import { Task, TaskMetrics } from '@/types/tasks';
-import { Subtask } from '@/types/subtasks';
+
+import { Task } from '@/types/tasks';
+import { TaskMetrics } from '@/types/metrics';
 import { formatDate, formatDuration } from '@/lib/utils/formatters';
 
 /**
  * Utility functions for formatting task summaries
  */
 
-export function formatSubtasks(subtasks: Subtask[]): string {
-  if (!subtasks || subtasks.length === 0) return 'No subtasks';
+export function formatChecklistItems(checklistItems: any[]): string {
+  if (!checklistItems || checklistItems.length === 0) return 'No checklist items';
   
-  return subtasks.map(subtask => {
-    return `- ${subtask.name} (${subtask.completed ? 'Completed' : 'Pending'})`;
+  return checklistItems.map(item => {
+    return `- ${item.text} (${item.completed ? 'Completed' : 'Pending'})`;
   }).join('\n');
 }
 
@@ -20,7 +21,7 @@ export function formatTaskMetrics(metrics: TaskMetrics): string {
   if (metrics.startTime) summary += `Start Time: ${formatDate(metrics.startTime)}\n`;
   if (metrics.endTime) summary += `End Time: ${formatDate(metrics.endTime)}\n`;
   if (metrics.actualDuration) summary += `Actual Duration: ${formatDuration(metrics.actualDuration)}\n`;
-  if (metrics.estimatedDuration) summary += `Estimated Duration: ${formatDuration(metrics.estimatedDuration)}\n`;
+  if (metrics.expectedTime) summary += `Estimated Duration: ${formatDuration(metrics.expectedTime)}\n`;
   if (metrics.pausedTime) summary += `Paused Time: ${formatDuration(metrics.pausedTime)}\n`;
   if (metrics.extensionTime) summary += `Extension Time: ${formatDuration(metrics.extensionTime)}\n`;
   if (metrics.netEffectiveTime) summary += `Net Effective Time: ${formatDuration(metrics.netEffectiveTime)}\n`;
@@ -34,21 +35,20 @@ export function formatTaskWithMetrics(task: Task, metrics?: TaskMetrics): string
   // Add basic task data
   if (task.description) summary += `Description: ${task.description}\n`;
   if (task.status) summary += `Status: ${task.status}\n`;
-  if (task.priority) summary += `Priority: ${task.priority}\n`;
   
   // Add dates
   if (task.createdAt) summary += `Created: ${formatDate(task.createdAt)}\n`;
-  if (task.scheduledDate) summary += `Scheduled: ${formatDate(task.scheduledDate)}\n`;
-  if (task.completedDate) summary += `Completed: ${formatDate(task.completedDate)}\n`;
+  if (task.relationships?.date) summary += `Scheduled: ${formatDate(task.relationships.date)}\n`;
+  if (task.completedAt) summary += `Completed: ${formatDate(task.completedAt)}\n`;
   
   // Add metrics if available
   if (metrics) {
     summary += `\n--- Metrics ---\n${formatTaskMetrics(metrics)}`;
   }
   
-  // Add subtasks
-  if (task.subtasks && task.subtasks.length > 0) {
-    summary += `\n--- Subtasks ---\n${formatSubtasks(task.subtasks)}`;
+  // Add checklist items
+  if (task.checklistItems && task.checklistItems.length > 0) {
+    summary += `\n--- Checklist Items ---\n${formatChecklistItems(task.checklistItems)}`;
   }
   
   return summary;
