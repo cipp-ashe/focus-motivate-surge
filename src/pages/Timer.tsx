@@ -5,7 +5,7 @@ import { TaskProvider } from '@/contexts/tasks/TaskContext';
 import { TaskSelectionProvider } from '@/components/timer/providers/TaskSelectionProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TimerSection } from '@/components/timer/TimerSection';
-import { TimerView } from '@/components/tasks/TimerView';
+import TimerView from '@/components/tasks/TimerView';
 import { 
   Clock, 
   BarChart, 
@@ -25,7 +25,6 @@ export default function TimerPage() {
   const [activeTab, setActiveTab] = useState('tasks');
   const { isOpen, setIsOpen } = useTimerModal();
 
-  // Emit initialization event
   useEffect(() => {
     eventManager.emit('app:initialized', {
       timestamp: new Date().toISOString()
@@ -43,7 +42,6 @@ export default function TimerPage() {
           />
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Tasks Section - Left side (2/3 width on desktop) */}
             <div className="lg:col-span-2 space-y-6">
               <GlassCard className="overflow-hidden">
                 <GlassCardContent className="p-4">
@@ -71,7 +69,6 @@ export default function TimerPage() {
               </GlassCard>
             </div>
             
-            {/* Timer Section - Right side (1/3 width on desktop) */}
             <div className="lg:col-span-1 space-y-6">
               <GlassCard className="overflow-hidden">
                 <GlassCardContent className="p-0">
@@ -81,7 +78,6 @@ export default function TimerPage() {
             </div>
           </div>
           
-          {/* Timer Configuration Modal */}
           <TimerConfigModal open={isOpen} onOpenChange={setIsOpen} />
         </TaskSelectionProvider>
       </TaskProvider>
@@ -93,10 +89,8 @@ function TimerTasksPanel() {
   const taskContext = useTaskContext();
   const [forceUpdate, setForceUpdate] = useState(0);
   
-  // Listen for task status updates
   useEffect(() => {
     const handleTaskUpdate = (event: CustomEvent) => {
-      // Force refresh list when tasks are updated
       setForceUpdate(prev => prev + 1);
     };
     
@@ -122,13 +116,7 @@ function TimerTasksPanel() {
   
   return (
     <div className="h-full flex flex-col">
-      <TimerView 
-        key={`timer-view-${forceUpdate}`} // Force re-render when tasks are updated
-        tasks={taskContext?.items || []} 
-        selectedTaskId={taskContext?.selected || null}
-        onTaskAdd={handleTaskAdd}
-        onTasksAdd={handleTasksAdd}
-      />
+      <TimerView key={`timer-view-${forceUpdate}`} />
     </div>
   );
 }
@@ -138,10 +126,8 @@ function RecentSessionsList() {
   const [forceUpdate, setForceUpdate] = useState(0);
   const completedTasks = taskContext?.completed || [];
   
-  // Listen for task completion events
   useEffect(() => {
     const handleTaskComplete = () => {
-      // Force refresh list when tasks are completed
       setForceUpdate(prev => prev + 1);
     };
     
@@ -151,7 +137,6 @@ function RecentSessionsList() {
     };
   }, []);
   
-  // Filter to only get timer type tasks
   const completedTimerTasks = completedTasks.filter(
     task => task.taskType === 'timer' || task.taskType === 'focus'
   );
@@ -197,7 +182,6 @@ function RecentSessionsList() {
 
 export const fixTimerPageEmission = () => {
   useEffect(() => {
-    // Fix the initialization event with a timestamp
     eventManager.emit('app:initialized', {
       timestamp: new Date().toISOString()
     });

@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTasks } from '@/contexts/tasks/TasksContext';
-import { TaskDetail } from '@/components/tasks/types';
+import { useTasks } from '@/contexts/tasks/TaskContext';
+import { Task } from '@/types/tasks'; // Using the Task type from the correct location
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +14,7 @@ import { TimerConfetti } from '@/components/timer/TimerConfetti';
 const TimerView: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const { getTask, updateTask } = useTasks();
-  const [task, setTask] = useState<TaskDetail | null>(null);
+  const [task, setTask] = useState<Task | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(0);
   const [notes, setNotes] = useState('');
@@ -86,18 +87,23 @@ const TimerView: React.FC = () => {
     setShowConfetti(true);
 
     // Update the task with the final timer value and completion status
-    await updateTask({
-      ...task,
+    await updateTask(task.id, {
       timer: time,
       completed: true,
-      completedAt: new Date(),
+      completedAt: new Date().toISOString(),
       notes: notes,
     });
 
     // Optimistically update the local state
     setTask((prevTask) => {
       if (prevTask) {
-        return { ...prevTask, completed: true, completedAt: new Date(), timer: time, notes: notes };
+        return { 
+          ...prevTask, 
+          completed: true, 
+          completedAt: new Date().toISOString(), 
+          timer: time, 
+          notes: notes 
+        };
       }
       return prevTask;
     });
@@ -126,8 +132,7 @@ const TimerView: React.FC = () => {
     if (!task) return;
 
     // Update the task with the current notes
-    await updateTask({
-      ...task,
+    await updateTask(task.id, {
       notes: notes,
       timer: time,
     });

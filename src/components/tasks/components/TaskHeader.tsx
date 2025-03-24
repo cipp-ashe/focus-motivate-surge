@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export const Header = () => {
+export const TaskHeader = () => {
   const location = useLocation();
   
   const isActive = (path: string) => {
@@ -58,3 +59,5 @@ export const Header = () => {
     </header>
   );
 };
+
+export default TaskHeader;

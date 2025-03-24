@@ -1,17 +1,18 @@
-// Fixing error on line 49 where a function expects 2 args but gets 1
+
+// Fixing imports to resolve type issues
 import React from 'react';
 import { Check, ChevronsUpDown, GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TaskDetail } from '../types';
+import { Task } from '@/types/tasks'; // Updated to use Task instead of TaskDetail
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
 
 interface CompletedTaskItemProps {
-  task: TaskDetail;
+  task: Task;
   onDelete?: (taskId: string) => void;
-  onEdit?: (task: TaskDetail) => void;
+  onEdit?: (task: Task) => void;
   onRestore?: (taskId: string) => void;
   dragHandleProps?: any;
 }
