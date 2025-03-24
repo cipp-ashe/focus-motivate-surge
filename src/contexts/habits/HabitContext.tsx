@@ -1,176 +1,139 @@
-
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { type HabitState, type HabitContextActions, type HabitContext as HabitContextType, initialState } from './types';
-import { habitReducer } from './habitReducer';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ActiveTemplate, HabitTemplate } from '@/types/habits/types';
 import { eventManager } from '@/lib/events/EventManager';
-import { ActiveTemplate, DayOfWeek } from '@/types/habits/types';
 
-// Create the context
-const HabitContext = createContext<HabitContextType>({} as HabitContextType);
+// Define context type
+interface HabitContextProps {
+  templates: ActiveTemplate[];
+  customTemplates: HabitTemplate[];
+  addTemplate: (template: Partial<ActiveTemplate> & { templateId: string }) => void;
+  updateTemplate: (template: { templateId: string; name?: string; description?: string; habits?: any[]; activeDays?: string[]; customized?: boolean; suppressToast?: boolean; }) => void;
+  removeTemplate: (templateId: string) => void;
+  addCustomTemplate: (template: HabitTemplate) => void;
+  removeCustomTemplate: (templateId: string) => void;
+  updateTemplateOrder: (templates: ActiveTemplate[]) => void;
+  updateTemplateDays: (data: { templateId: string; activeDays: string[] }) => void;
+}
 
-// Provider component
+// Create context with default values
+const HabitContext = createContext<HabitContextProps>({
+  templates: [],
+  customTemplates: [],
+  addTemplate: () => {},
+  updateTemplate: () => {},
+  removeTemplate: () => {},
+  addCustomTemplate: () => {},
+  removeCustomTemplate: () => {},
+  updateTemplateOrder: () => {},
+  updateTemplateDays: () => {},
+});
+
+// Create context provider
 export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(habitReducer, initialState);
-
-  // Load templates from localStorage on init
-  useEffect(() => {
+  const [templates, setTemplates] = useState<ActiveTemplate[]>(() => {
     try {
-      const storedTemplates = localStorage.getItem('habit-templates');
-      const storedProgress = localStorage.getItem('habit-progress');
-      const storedCustomTemplates = localStorage.getItem('custom-templates');
-
-      if (storedTemplates) {
-        dispatch({ type: 'INITIALIZE_TEMPLATES', payload: JSON.parse(storedTemplates) });
-      }
-
-      if (storedProgress) {
-        dispatch({ type: 'INITIALIZE_PROGRESS', payload: JSON.parse(storedProgress) });
-      }
-
-      if (storedCustomTemplates) {
-        dispatch({ type: 'INITIALIZE_CUSTOM_TEMPLATES', payload: JSON.parse(storedCustomTemplates) });
-      }
-
-      dispatch({ type: 'SET_LOADED', payload: true });
+      const storedTemplates = localStorage.getItem('activeTemplates');
+      return storedTemplates ? JSON.parse(storedTemplates) : [];
     } catch (error) {
-      console.error('Error loading habit data:', error);
+      console.error("Error loading templates from localStorage:", error);
+      return [];
     }
-  }, []);
+  });
+  
+  const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>(() => {
+    try {
+      const storedTemplates = localStorage.getItem('customTemplates');
+      return storedTemplates ? JSON.parse(storedTemplates) : [];
+    } catch (error) {
+      console.error("Error loading custom templates from localStorage:", error);
+      return [];
+    }
+  });
 
-  // Actions
-  const addTemplate = (template: ActiveTemplate) => {
-    dispatch({ type: 'ADD_TEMPLATE', payload: template });
+  useEffect(() => {
+    localStorage.setItem('activeTemplates', JSON.stringify(templates));
+  }, [templates]);
+  
+  useEffect(() => {
+    localStorage.setItem('customTemplates', JSON.stringify(customTemplates));
+  }, [customTemplates]);
+
+  const addTemplate = (template: Partial<ActiveTemplate> & { templateId: string }) => {
+    setTemplates(prevTemplates => {
+      const newTemplate = { ...template, customized: false };
+      return [...prevTemplates, newTemplate as ActiveTemplate];
+    });
+    
+    // Emit event for other listeners
     eventManager.emit('habit:template-add', template);
   };
 
-  const updateTemplate = (templateId: string, updates: Partial<ActiveTemplate>) => {
-    dispatch({ 
-      type: 'UPDATE_TEMPLATE', 
-      payload: { templateId, updates } 
+  const updateTemplate = (template: { templateId: string; name?: string; description?: string; habits?: any[]; activeDays?: string[]; customized?: boolean; suppressToast?: boolean; }) => {
+    setTemplates(prevTemplates => {
+      return prevTemplates.map(t => {
+        if (t.templateId === template.templateId) {
+          return { ...t, ...template, customized: true };
+        }
+        return t;
+      });
     });
-    eventManager.emit('habit:template-update', { templateId, ...updates });
+    
+    // Emit event for other listeners
+    eventManager.emit('habit:template-update', template);
   };
 
   const removeTemplate = (templateId: string) => {
-    dispatch({ type: 'REMOVE_TEMPLATE', payload: templateId });
-    eventManager.emit('habit:template-remove', { templateId });
+    setTemplates(prevTemplates => {
+      const updatedTemplates = prevTemplates.filter(template => template.templateId !== templateId);
+      return updatedTemplates;
+    });
+    
+    // Emit event for other listeners
+    eventManager.emit('habit:template-delete', { templateId, isOriginatingAction: true });
+  };
+  
+  const addCustomTemplate = (template: HabitTemplate) => {
+    setCustomTemplates(prevTemplates => [...prevTemplates, template]);
+  };
+  
+  const removeCustomTemplate = (templateId: string) => {
+    setCustomTemplates(prevTemplates => prevTemplates.filter(template => template.id !== templateId));
+    
+    // Also remove from active templates if it's there
+    setTemplates(prevTemplates => prevTemplates.filter(template => template.templateId !== templateId));
   };
 
   const updateTemplateOrder = (templates: ActiveTemplate[]) => {
-    dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
+    setTemplates(templates);
+    
+    // Emit event for other listeners
+    eventManager.emit('habit:template-order-update', templates);
   };
 
-  const updateTemplateDays = (templateId: string, days: DayOfWeek[]) => {
-    dispatch({ 
-      type: 'UPDATE_TEMPLATE_DAYS', 
-      payload: { templateId, days } 
+  const updateTemplateDays = (data: { templateId: string; activeDays: string[] }) => {
+    setTemplates(prevTemplates => {
+      return prevTemplates.map(template => {
+        if (template.templateId === data.templateId) {
+          return {
+            ...template,
+            activeDays: data.activeDays,
+            customized: true
+          };
+        }
+        return template;
+      });
     });
-    eventManager.emit('habit:template-days-update', { templateId, days });
-  };
 
-  const addCustomTemplate = (template: any) => {
-    dispatch({ type: 'ADD_CUSTOM_TEMPLATE', payload: template });
-  };
-
-  const removeCustomTemplate = (templateId: string) => {
-    dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: templateId });
-  };
-  
-  const reorderTemplates = (templates: ActiveTemplate[]) => {
-    dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
-  };
-  
-  const findTemplateById = (templateId: string) => {
-    return state.templates.find(t => t.templateId === templateId);
-  };
-  
-  const reloadTemplates = () => {
-    dispatch({ type: 'RELOAD_TEMPLATES' });
-  };
-
-  // Save to localStorage on state change
-  useEffect(() => {
-    if (state.isLoaded) {
-      localStorage.setItem('habit-templates', JSON.stringify(state.templates));
-      localStorage.setItem('habit-progress', JSON.stringify(state.progress));
-      localStorage.setItem('custom-templates', JSON.stringify(state.customTemplates));
-    }
-  }, [state.templates, state.progress, state.customTemplates, state.isLoaded]);
-
-  // Combine state and actions
-  const contextValue: HabitContextType = {
-    ...state,
-    addTemplate,
-    updateTemplate,
-    removeTemplate,
-    updateTemplateOrder,
-    updateTemplateDays,
-    addCustomTemplate,
-    removeCustomTemplate,
-    reorderTemplates,
-    findTemplateById,
-    reloadTemplates
+    // Also emit the event for other listeners
+    eventManager.emit('habit:template-days-update', data);
   };
 
   return (
-    <HabitContext.Provider value={contextValue}>
+    <HabitContext.Provider value={{ templates, customTemplates, addTemplate, updateTemplate, removeTemplate, addCustomTemplate, removeCustomTemplate, updateTemplateOrder, updateTemplateDays }}>
       {children}
     </HabitContext.Provider>
   );
 };
 
-// Custom hook to use the habit context
-export const useHabitContext = () => {
-  const context = useContext(HabitContext);
-  if (context === undefined) {
-    throw new Error('useHabitContext must be used within a HabitProvider');
-  }
-  return context;
-};
-
-// Separate hooks for state and actions
-export const useHabitState = () => {
-  const { 
-    templates, 
-    todaysHabits, 
-    progress, 
-    customTemplates, 
-    isLoaded 
-  } = useHabitContext();
-  
-  return { 
-    templates, 
-    todaysHabits, 
-    progress, 
-    customTemplates, 
-    isLoaded 
-  };
-};
-
-export const useHabitActions = () => {
-  const { 
-    addTemplate,
-    updateTemplate,
-    removeTemplate,
-    updateTemplateOrder,
-    updateTemplateDays,
-    addCustomTemplate,
-    removeCustomTemplate,
-    reorderTemplates,
-    findTemplateById,
-    reloadTemplates
-  } = useHabitContext();
-  
-  return {
-    addTemplate,
-    updateTemplate,
-    removeTemplate,
-    updateTemplateOrder,
-    updateTemplateDays,
-    addCustomTemplate,
-    removeCustomTemplate,
-    reorderTemplates,
-    findTemplateById,
-    reloadTemplates
-  };
-};
+// Create custom hook to use context
+export const useHabitContext = () => useContext(HabitContext);

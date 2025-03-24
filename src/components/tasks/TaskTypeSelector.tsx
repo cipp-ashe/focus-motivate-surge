@@ -1,77 +1,41 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Button } from '@/components/ui/button';
 import { TaskType } from '@/types/tasks';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import TaskIcon from './components/TaskIcon';
+import { CheckSquare, Clock, Image, FileText, Mic, Focus, CheckCircle2, ClipboardList } from 'lucide-react';
+import { TaskIcon } from './components/TaskIcon';
 
-/**
- * Props for the TaskTypeSelector component
- * @interface TaskTypeSelectorProps
- * @property {TaskType} value - The currently selected task type
- * @property {function} onChange - Callback function when task type changes
- */
 interface TaskTypeSelectorProps {
   value: TaskType;
-  onChange: (value: TaskType) => void;
+  onChange: (type: TaskType) => void;
 }
 
-/**
- * Task type information including labels
- */
-const taskTypes: Array<{ type: TaskType; label: string }> = [
-  { type: 'regular', label: 'Regular Task' },
-  { type: 'timer', label: 'Focused Timer' },
-  { type: 'journal', label: 'Journal Entry' },
-  { type: 'checklist', label: 'Checklist' }
-];
-
-/**
- * A component that renders a dropdown for selecting task types
- * 
- * This component provides a visual selector for different task types, each with
- * its own icon and label. It handles internal open/close state and calls the provided
- * onChange handler when a selection is made.
- * 
- * @param {TaskTypeSelectorProps} props - Component props
- * @returns {JSX.Element} A select dropdown for task types
- */
-export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({
-  value,
-  onChange
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  const handleChange = (newValue: string) => {
-    onChange(newValue as TaskType);
-    setIsOpen(false); // Close the select after selection
-  };
+export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onChange }) => {
+  const types: { type: TaskType; icon: React.ReactNode; label: string }[] = [
+    { type: 'regular', icon: <CheckSquare className="h-4 w-4" />, label: 'Task' },
+    { type: 'timer', icon: <Clock className="h-4 w-4" />, label: 'Timer' },
+    { type: 'screenshot', icon: <Image className="h-4 w-4" />, label: 'Screenshot' },
+    { type: 'journal', icon: <FileText className="h-4 w-4" />, label: 'Journal' },
+    { type: 'voicenote', icon: <Mic className="h-4 w-4" />, label: 'Voice' },
+    { type: 'focus', icon: <Focus className="h-4 w-4" />, label: 'Focus' },
+    { type: 'habit', icon: <CheckCircle2 className="h-4 w-4" />, label: 'Habit' },
+    { type: 'checklist', icon: <ClipboardList className="h-4 w-4" />, label: 'Checklist' }
+  ];
 
   return (
-    <Select 
-      value={value} 
-      onValueChange={handleChange} 
-      open={isOpen} 
-      onOpenChange={setIsOpen}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select task type" />
-      </SelectTrigger>
-      <SelectContent className="bg-background/95 backdrop-blur-sm border-border/50">
-        {taskTypes.map(({ type, label }) => (
-          <SelectItem key={type} value={type} className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <TaskIcon taskType={type} size={16} />
-              <span>{label}</span>
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="flex flex-wrap gap-2">
+      {types.map(({ type, icon, label }) => (
+        <Button
+          key={type}
+          variant={value === type ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onChange(type)}
+          className="flex items-center gap-1"
+        >
+          {icon}
+          <span>{label}</span>
+        </Button>
+      ))}
+    </div>
   );
 };

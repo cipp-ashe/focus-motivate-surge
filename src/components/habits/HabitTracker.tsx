@@ -3,10 +3,7 @@ import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
 import { HabitTemplateManager } from './HabitTemplateManager';
-import { ActiveTemplate, HabitDetail } from '@/types/habits/types';
 import { useHabitContext } from '@/contexts/habits/HabitContext';
 import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
 
@@ -48,7 +45,7 @@ export const HabitTracker: React.FC = () => {
           <div className="h-full">
             <HabitTemplateManager 
               activeTemplates={activeTemplates}
-              addTemplate={addTemplate}
+              addTemplate={(templateId: string) => addTemplate(templateId)}
               removeTemplate={removeTemplate}
               configureTemplate={(template) => updateTemplate(template.templateId, template)}
             />

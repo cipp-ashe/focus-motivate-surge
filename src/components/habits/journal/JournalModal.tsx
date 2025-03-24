@@ -1,100 +1,173 @@
-
-import React from "react";
-import { Card } from "@/components/ui/card";
-import { useJournal } from "./useJournal";
-import JournalHeader from "./JournalHeader";
-import JournalEditor from "./JournalEditor";
-import JournalFooter from "./JournalFooter";
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from 'sonner';
+import { useJournalService } from '@/hooks/journal/useJournalService';
+import { useEvent } from '@/hooks/useEvent';
+import { EntityType } from '@/types/core';
+import { Quote } from '@/types/timer';
+import { v4 as uuidv4 } from 'uuid';
 
 interface JournalModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  habitId: string;
-  habitName: string;
-  description?: string;
-  onComplete: () => void;
+  onClose: () => void;
+  habitId?: string;
+  habitName?: string;
   templateId?: string;
   taskId?: string;
+  date?: string;
 }
 
-const JournalModal: React.FC<JournalModalProps> = ({
+export const JournalModal: React.FC<JournalModalProps> = ({
   open,
-  onOpenChange,
+  onClose,
   habitId,
   habitName,
-  description = "",
-  onComplete,
   templateId,
-  taskId
+  taskId,
+  date
 }) => {
-  const {
-    content,
-    setContent,
-    randomQuote,
-    randomPrompt,
-    existingNote,
-    template,
-    handleSave
-  } = useJournal({
-    habitId,
-    habitName,
-    description,
-    templateId,
-    taskId,
-    onComplete,
-    onClose: () => onOpenChange(false)
+  const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [journalId, setJournalId] = useState<string | null>(null);
+  const { createJournalEntry, updateJournalEntry } = useJournalService();
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  
+  // Load journal entry if it exists
+  useEffect(() => {
+    if (open && (habitId || taskId)) {
+      // Fetch journal entry by habitId and date
+      const fetchJournal = async () => {
+        // Create a unique ID for the journal entry
+        const newJournalId = uuidv4();
+        setJournalId(newJournalId);
+        
+        // Set default title
+        setTitle(`Journal Entry`);
+      };
+      
+      fetchJournal();
+    } else {
+      setContent('');
+      setTitle('');
+      setJournalId(null);
+      setSelectedQuote(null);
+    }
+  }, [open, habitId, taskId, createJournalEntry]);
+  
+  // Handle journal creation
+  useEvent('journal:create', (data) => {
+    if (data && data.habitId === habitId) {
+      setContent(data.content || '');
+    }
   });
-
-  if (!open) return null;
+  
+  // Handle journal updates
+  const handleSave = async () => {
+    if (!content.trim()) {
+      toast.error('Journal entry cannot be empty');
+      return;
+    }
+    
+    try {
+      if (journalId) {
+        // Update existing journal entry
+        await updateJournalEntry({ id: journalId, content, title });
+        toast.success('Journal entry updated successfully');
+      } else {
+        // Create new journal entry
+        await createJournalEntry({
+          habitId,
+          habitName,
+          templateId,
+          taskId,
+          date,
+          content
+        });
+        toast.success('Journal entry created successfully');
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+      toast.error('Failed to save journal entry');
+    }
+  };
+  
+  // Handle quote selection
+  const handleQuoteSelect = useCallback((quote: Quote) => {
+    setSelectedQuote(quote);
+    setContent(`${content}\n\n> ${quote.text} - ${quote.author}`);
+  }, [content]);
+  
+  // Sample quotes
+  const quotes = [
+    { 
+      id: "quote1",
+      text: "The secret of getting ahead is getting started.",
+      author: "Mark Twain",
+      isFavorite: false
+    },
+    { 
+      id: "quote2",
+      text: "The journey of a thousand miles begins with one step.",
+      author: "Lao Tzu",
+      isFavorite: false
+    }
+  ];
   
   return (
-    <div 
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50"
-    >
-      {/* Overlay/Backdrop */}
-      <div 
-        className="fixed inset-0 bg-background/95 backdrop-blur-md" 
-        aria-hidden="true"
-      />
-      
-      {/* Content */}
-      <div className="relative h-full overflow-y-auto">
-        <div className="container mx-auto p-6 flex flex-col gap-6 min-h-screen max-w-[1200px]">
-          {/* Header Section with Quote */}
-          <Card className="bg-card/90 backdrop-blur-md shadow-lg p-6 border-primary/20">
-            <JournalHeader
-              title={template.title}
-              isExistingNote={!!existingNote}
-              quote={randomQuote}
-              prompt={randomPrompt}
-              onClose={() => onOpenChange(false)}
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Journal Entry</DialogTitle>
+          <DialogDescription>
+            Write your thoughts and reflections.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="journal-content">Content</Label>
+            <Textarea
+              id="journal-content"
+              placeholder="Write your journal entry here..."
+              className="min-h-[150px]"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
             />
-          </Card>
-
-          {/* Editor Section */}
-          <Card className="bg-card/90 backdrop-blur-md shadow-lg border-primary/20 flex-1 min-h-[500px]">
-            <div className="p-6 h-full flex flex-col">
-              <JournalEditor 
-                content={content} 
-                onChange={setContent} 
-              />
-            </div>
-          </Card>
-
-          {/* Footer with Actions */}
-          <Card className="bg-card/90 backdrop-blur-md shadow-lg p-4 border-primary/20">
-            <JournalFooter
-              isExistingNote={!!existingNote}
-              onSave={handleSave}
-              onCancel={() => onOpenChange(false)}
-            />
-          </Card>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Inspirational Quotes</Label>
+            <ScrollArea className="h-40">
+              <div className="grid grid-cols-1 gap-2 p-2">
+                {quotes.map((quote) => (
+                  <Button
+                    key={quote.id}
+                    variant="outline"
+                    className="justify-start text-sm"
+                    onClick={() => handleQuoteSelect(quote)}
+                  >
+                    {quote.text} - {quote.author}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
-      </div>
-    </div>
+        
+        <Button onClick={handleSave}>Save Entry</Button>
+      </DialogContent>
+    </Dialog>
   );
 };
-
-export default JournalModal;

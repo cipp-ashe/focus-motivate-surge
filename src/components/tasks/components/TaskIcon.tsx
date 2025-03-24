@@ -13,23 +13,28 @@ import {
 } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 
-interface TaskIconProps {
+export interface TaskIconProps {
   type?: TaskType;
+  taskType?: TaskType; // Added for backward compatibility
   className?: string;
   size?: number;
 }
 
 export const TaskIcon: React.FC<TaskIconProps> = ({ 
-  type = 'regular', 
+  type, 
+  taskType,
   className = '', 
   size = 16 
 }) => {
+  // Use type if provided, otherwise fall back to taskType
+  const iconType = type || taskType || 'regular';
+  
   const iconProps = {
     className,
     size
   };
   
-  switch (type) {
+  switch (iconType) {
     case 'timer':
       return <Clock {...iconProps} />;
     case 'screenshot':
@@ -49,5 +54,20 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
       return <LayoutList {...iconProps} />;
     default:
       return <CheckSquare {...iconProps} />;
+  }
+};
+
+export const getTaskTypeLabel = (type: TaskType): string => {
+  switch (type) {
+    case 'timer': return 'Timer';
+    case 'screenshot': return 'Screenshot';
+    case 'journal': return 'Journal';
+    case 'voicenote': return 'Voice Note';
+    case 'focus': return 'Focus';
+    case 'checklist': return 'Checklist';
+    case 'habit': return 'Habit';
+    case 'counter': return 'Counter';
+    case 'rating': return 'Rating';
+    default: return 'Task';
   }
 };

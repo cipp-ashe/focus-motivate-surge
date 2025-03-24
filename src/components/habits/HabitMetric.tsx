@@ -25,13 +25,16 @@ export const HabitMetric: React.FC<HabitMetricProps> = ({
   
   const handleComplete = () => {
     // Different handling based on metric type
+    const completionValue = metricType === 'boolean' ? true : 
+                           (typeof value === 'string' && value !== '') ? Number(value) : value;
+    
     const completionPayload = {
       habitId: habit.id,
       date: today,
-      value: metricType === 'boolean' ? true : value,
+      value: completionValue,
       metricType,
       habitName: habit.name,
-      templateId: habit.relationships?.templateId
+      templateId: habit.relationships?.templateId || ''
     };
     
     // Emit habit completion event

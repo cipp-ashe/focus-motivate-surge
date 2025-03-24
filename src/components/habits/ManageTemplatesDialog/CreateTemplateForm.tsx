@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { HabitDetail, DayOfWeek } from '@/components/habits/types';
-import DaySelector from '@/components/habits/DaySelector';
+import { HabitDetail, DayOfWeek } from '@/types/habits/types';
+import { DaySelector } from '@/components/habits/DaySelector';
 
 interface CreateTemplateFormProps {
   onSubmit: (data: {

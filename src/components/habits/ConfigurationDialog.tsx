@@ -1,19 +1,17 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { HabitDetail, DayOfWeek } from './types';
-import DaySelector from './DaySelector';
+import { Plus, Save, BookTemplate } from "lucide-react";
+import { HabitDetail, DayOfWeek } from '@/types/habits/types';
+import { DaySelector } from './DaySelector';
+import { cn } from '@/lib/utils';
 
 interface ConfigurationDialogProps {
   open: boolean;
@@ -115,10 +113,14 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
         <DialogFooter className="gap-2 sm:gap-0">
           {onSaveAsTemplate && (
             <Button variant="outline" onClick={onSaveAsTemplate}>
+              <BookTemplate className={cn('w-4 h-4 mr-2')} />
               Save as Template
             </Button>
           )}
-          <Button onClick={onSave}>Save Configuration</Button>
+          <Button onClick={onSave}>
+            <Save className={cn('w-4 h-4 mr-2')} />
+            Save Configuration
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
