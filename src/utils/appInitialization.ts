@@ -65,13 +65,17 @@ function runDataMigrations() {
   
   if (migrationsRun !== 'true') {
     console.log('Running data migrations...');
-    const result = runDataMigration();
-    
-    if (result) {
-      localStorage.setItem('data-migrations-run', 'true');
-      console.log('Data migrations completed successfully');
-    } else {
-      console.error('Data migrations failed');
+    try {
+      const result = runDataMigration();
+      
+      if (result) {
+        localStorage.setItem('data-migrations-run', 'true');
+        console.log('Data migrations completed successfully');
+      } else {
+        console.error('Data migrations failed');
+      }
+    } catch (error) {
+      console.error('Error running data migrations:', error);
     }
   } else {
     console.log('Data migrations already run, skipping');

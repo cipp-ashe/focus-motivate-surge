@@ -11,7 +11,9 @@ export const taskStorage = {
   ...activeTasksStorage,
   ...completedTasksStorage,
   ...taskRelationshipStorage,
-  migrateTaskTypes, // Export the migration utility
+  
+  // Export the migration utility 
+  migrateTaskTypes,
   
   // Add a convenience method to load all tasks at once
   loadAllTasks: (): { active: Task[], completed: Task[] } => {

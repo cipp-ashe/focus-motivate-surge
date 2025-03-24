@@ -13,7 +13,7 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="system" storageKey="ui-theme">
       <Layout>
         <Outlet />
         <Toaster />
