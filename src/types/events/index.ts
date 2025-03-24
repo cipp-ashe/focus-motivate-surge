@@ -1,4 +1,3 @@
-
 /**
  * Event system unified exports
  * This file maintains backward compatibility while organizing events into domains
@@ -59,3 +58,20 @@ export type { HabitTaskEvent };
 export type { HabitNoteData };
 export type { VoiceNoteEventType };
 
+// We can fix this by updating the JournalEventPayloadMap interface
+export interface JournalEventPayloadMap {
+  'journal:create': {
+    title: string;
+    content: string;
+    tags?: string[];
+  };
+  'journal:update': {
+    id: string;
+    updates: any;
+  };
+  'journal:delete': {
+    id: string;
+  };
+  // Make this type match the one in HabitEventPayloadMap
+  'journal:open': import('./habit-events').HabitNoteData;
+}

@@ -1,192 +1,96 @@
-
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useAuth } from '@/contexts/auth/AuthContext';
-import { toast } from 'sonner';
+import { Note } from '@/types/notes';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType } from '@/types/events';
 import { Task } from '@/types/tasks';
 
-export const useSupabaseRealtime = () => {
-  const { user } = useAuth();
-  const channelsRef = useRef<any[]>([]);
-  const isInitializedRef = useRef(false);
-
+const useSupabaseRealtime = () => {
   useEffect(() => {
-    // Only set up channels if user is authenticated and we haven't initialized yet
-    if (!user || isInitializedRef.current) return;
-    
-    isInitializedRef.current = true;
-    console.log("Setting up Supabase realtime channels");
-
-    // Clean up function to remove channels on unmount
-    const cleanupChannels = () => {
-      channelsRef.current.forEach(channel => {
-        supabase.removeChannel(channel);
-      });
-      channelsRef.current = [];
-      isInitializedRef.current = false;
-    };
-
-    // Set up a single combined channel for all tables
-    try {
-      const combinedChannel = supabase.channel('public-changes')
-        // Tasks
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'tasks',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('New task created:', payload);
-          // Create a properly typed Task object with required fields
-          const taskData: Task = {
-            id: payload.new.id,
-            name: payload.new.name || 'Untitled Task',
-            completed: payload.new.completed || false,
-            createdAt: payload.new.createdAt || new Date().toISOString(),
-            ...payload.new
-          };
-          eventManager.emit('task:create', taskData);
-        })
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'tasks',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('Task updated:', payload);
-          eventManager.emit('task:update', { 
-            taskId: payload.new.id, 
-            updates: payload.new 
-          });
-        })
-        .on('postgres_changes', {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'tasks',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('Task deleted:', payload);
-          eventManager.emit('task:delete', { 
-            taskId: payload.old.id
-          });
-        })
-        // Habit templates
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'habit_templates',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('New template created:', payload);
-          // Fix: Use the correct payload format with id field
-          eventManager.emit('habit:template-add', { 
-            id: payload.new.id,
-            templateId: payload.new.id
-          });
-        })
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'habit_templates',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('Template updated:', payload);
-          // Ensure the payload has a templateId property
-          const updatedTemplate = {
-            ...payload.new,
-            templateId: payload.new.id
-          };
-          eventManager.emit('habit:template-update', updatedTemplate);
-        })
-        .on('postgres_changes', {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'habit_templates',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('Template deleted:', payload);
-          eventManager.emit('habit:template-delete', { 
-            templateId: payload.old.id,
-            isOriginatingAction: false
-          });
-        })
-        // Notes
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notes',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('New note created:', payload);
-          // Ensure the payload includes all required properties
-          eventManager.emit('note:create', {
-            id: payload.new.id,
-            title: payload.new.title || 'Untitled',
-            content: payload.new.content || ''
-          });
-        })
-        .on('postgres_changes', {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'notes',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('Note updated:', payload);
-          // Fix: Use proper property names
-          eventManager.emit('note:update', { 
-            id: payload.new.id,
-            content: payload.new.content || '', 
-            updates: payload.new 
-          });
-        })
-        .on('postgres_changes', {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'notes',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('Note deleted:', payload);
-          // Use 'note:deleted' which is the correct event name in our types
-          eventManager.emit('note:deleted', { id: payload.old.id });
-        })
-        // Events
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'events',
-          filter: user ? `user_id=eq.${user.id}` : undefined
-        }, (payload) => {
-          console.log('New event received:', payload);
-          try {
-            const eventData = payload.new;
-            if (!eventData.processed) {
-              // Emit the event locally - cast to EventType to maintain type safety
-              eventManager.emit(eventData.event_type as EventType, eventData.payload);
-              
-              // Mark as processed
-              supabase
-                .from('events')
-                .update({ processed: true })
-                .eq('id', eventData.id)
-                .then(({ error }) => {
-                  if (error) console.error('Error marking event as processed:', error);
-                });
-            }
-          } catch (error) {
-            console.error('Error processing realtime event:', error);
+    // Subscribe to changes in the notes table
+    const notesSubscription = supabase
+      .channel('public:notes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notes' },
+        (payload) => {
+          console.log('Change received!', payload)
+          if (payload.eventType === 'INSERT') {
+            // Emit a 'note:add' event when a new note is inserted
+            eventManager.emit('note:add', payload.new as Note);
+          } else if (payload.eventType === 'UPDATE') {
+            // Emit a 'note:update' event when a note is updated
+            // The payload.new contains the updated note data
+            eventManager.emit('note:update', {
+              id: payload.new.id,
+              updates: payload.new
+            });
+          } else if (payload.eventType === 'DELETE') {
+            // Emit a 'note:delete' event when a note is deleted
+            eventManager.emit('note:delete', { id: payload.old.id });
           }
-        })
-        .subscribe();
+        }
+      )
+      .subscribe()
 
-      channelsRef.current.push(combinedChannel);
-      console.log('Supabase realtime channel established');
-    } catch (error) {
-      console.error('Error setting up Supabase realtime:', error);
+    // Subscribe to changes in the tasks table
+    const tasksSubscription = supabase
+      .channel('public:tasks')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks' },
+        (payload) => {
+          console.log('Task change received!', payload)
+          if (payload.eventType === 'INSERT') {
+            // Emit a 'task:add' event when a new task is inserted
+            eventManager.emit('task:add', payload.new as Task);
+          } else if (payload.eventType === 'UPDATE') {
+            // Emit a 'task:update' event when a task is updated
+            // The payload.new contains the updated task data
+            eventManager.emit('task:update', {
+              taskId: payload.new.id,
+              updates: payload.new
+            });
+          } else if (payload.eventType === 'DELETE') {
+            // Emit a 'task:delete' event when a task is deleted
+            eventManager.emit('task:delete', { taskId: payload.old.id });
+          }
+        }
+      )
+      .subscribe()
+
+    // Fetch initial data and set up real-time subscription for journals
+    const journalsSubscription = supabase
+      .channel('public:journals')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'journals' },
+        (payload) => {
+          console.log('Journal change received!', payload);
+          if (payload.eventType === 'INSERT') {
+            // Emit a 'journal:create' event when a new journal is inserted
+            eventManager.emit('journal:create', payload.new);
+          } else if (payload.eventType === 'UPDATE') {
+            // Emit a 'journal:update' event when a journal is updated
+            // The payload.new contains the updated journal data
+            const row = payload.new as any;
+            eventManager.emit('journal:update', {
+              id: row.id,
+              updates: row.content
+            });
+          } else if (payload.eventType === 'DELETE') {
+            // Emit a 'journal:delete' event when a journal is deleted
+            eventManager.emit('journal:delete', { id: payload.old.id });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(notesSubscription)
+      supabase.removeChannel(tasksSubscription)
+      supabase.removeChannel(journalsSubscription)
     }
+  }, [])
+}
 
-    // Clean up on unmount
-    return cleanupChannels;
-  }, [user]);
-};
+export default useSupabaseRealtime

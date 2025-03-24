@@ -1,209 +1,344 @@
-
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { Task } from '@/types/tasks'; // Using the Task type from the correct location
+import React, { useState, useEffect, useCallback } from 'react';
+import { Task } from '@/types/tasks';
+import { eventManager } from '@/lib/events/EventManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Pencil, CheckCheck, Clock, CalendarClock, PlusCircle, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
-import { Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-import { format } from 'date-fns';
-import { TimerConfetti } from '@/components/timer/TimerConfetti';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-const TimerView: React.FC = () => {
-  const { taskId } = useParams<{ taskId: string }>();
-  const taskContext = useTaskContext();
-  const [task, setTask] = useState<Task | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [time, setTime] = useState(0);
-  const [notes, setNotes] = useState('');
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const navigate = useNavigate();
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+interface TimerViewProps {
+  onTaskSelect?: (taskId: string) => void;
+}
 
+const TimerView: React.FC<TimerViewProps> = ({ onTaskSelect }) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [currentNotes, setCurrentNotes] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+
+  // Load all tasks marked for timer or focus
   useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
+    // Listen for task:timer events
+    const unsubscribe = eventManager.on('task:timer', (data: Task) => {
+      console.log('TimerView received task:timer event', data);
+      // Update tasks list with the new task
+      setTasks(prev => {
+        // If task already exists, replace it
+        const exists = prev.some(t => t.id === data.id);
+        if (exists) {
+          return prev.map(t => t.id === data.id ? data : t);
+        }
+        // Otherwise add it to the list
+        return [...prev, data];
       });
+    });
+
+    // Initial load of timer tasks from localStorage
+    const loadTasks = () => {
+      try {
+        const storedTasks = localStorage.getItem('timer-tasks');
+        if (storedTasks) {
+          const parsedTasks = JSON.parse(storedTasks);
+          setTasks(parsedTasks);
+        }
+      } catch (error) {
+        console.error('Error loading timer tasks:', error);
+      }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    loadTasks();
+    
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
+  // Save tasks to localStorage when they change
   useEffect(() => {
-    if (taskId) {
-      const fetchedTask = taskContext.items.find(t => t.id === taskId);
-      if (fetchedTask) {
-        setTask(fetchedTask);
-        setTime(fetchedTask.timer || 0);
-        setNotes(fetchedTask.notes || '');
-      }
+    try {
+      localStorage.setItem('timer-tasks', JSON.stringify(tasks));
+    } catch (error) {
+      console.error('Error saving timer tasks:', error);
     }
-  }, [taskId, taskContext.items]);
+  }, [tasks]);
 
-  useEffect(() => {
-    if (isRunning) {
-      timerRef.current = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+  const handleAddTask = () => {
+    if (!newTaskName.trim()) {
+      toast.error("Task name cannot be empty");
+      return;
     }
 
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+    const newTask: Task = {
+      id: `timer-${Date.now()}`,
+      name: newTaskName.trim(),
+      description: newTaskDescription.trim(),
+      createdAt: new Date().toISOString(),
+      completed: false,
+      taskType: 'timer',
+      timerMinutes: 25,
+      timerSeconds: 0,
+      timerNotes: ""
     };
-  }, [isRunning]);
 
-  const startTimer = () => {
-    setIsRunning(true);
+    setTasks(prev => [...prev, newTask]);
+    setNewTaskName("");
+    setNewTaskDescription("");
+    setIsAddingTask(false);
+    toast.success("Task added successfully");
+
+    // Emit task:add event
+    eventManager.emit('task:add', newTask);
   };
 
-  const pauseTimer = () => {
-    setIsRunning(false);
+  const handleSelectTask = (task: Task) => {
+    setSelectedTask(task);
+    if (onTaskSelect) {
+      onTaskSelect(task.id);
+    }
+
+    // Emit task:select event
+    eventManager.emit('task:select', { taskId: task.id });
   };
 
-  const resetTimer = () => {
-    setIsRunning(false);
-    setTime(0);
+  const handleEditNotes = (task: Task) => {
+    setCurrentNotes(task.timerNotes || "");
+    setEditingTaskId(task.id);
+    setNotesDialogOpen(true);
   };
 
-  const completeTask = async () => {
-    if (!task) return;
+  const handleSaveNotes = () => {
+    if (!editingTaskId) return;
 
-    setIsRunning(false);
-    setShowConfetti(true);
-
-    // Update the task with the final timer value and completion status
-    await taskContext.updateTask(task.id, {
-      timer: time,
-      completed: true,
-      completedAt: new Date().toISOString(),
-      notes: notes,
-    });
-
-    // Optimistically update the local state
-    setTask((prevTask) => {
-      if (prevTask) {
-        return { 
-          ...prevTask, 
-          completed: true, 
-          completedAt: new Date().toISOString(), 
-          timer: time, 
-          notes: notes 
-        };
+    setTasks(prev => prev.map(task => {
+      if (task.id === editingTaskId) {
+        return { ...task, timerNotes: currentNotes };
       }
-      return prevTask;
+      return task;
+    }));
+
+    // Update task notes
+    eventManager.emit('task:update', { 
+      taskId: editingTaskId, 
+      updates: { timerNotes: currentNotes }
     });
 
-    setTimeout(() => {
-      setShowConfetti(false);
-      navigate('/tasks');
-    }, 3000);
+    setNotesDialogOpen(false);
+    setCurrentNotes("");
+    setEditingTaskId(null);
+    toast.success("Notes saved successfully");
   };
 
-  const formatTime = (totalSeconds: number): string => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+  const handleDeleteTask = (taskId: string) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+    
+    // If the deleted task was selected, deselect it
+    if (selectedTask?.id === taskId) {
+      setSelectedTask(null);
+    }
 
-    return [hours, minutes, seconds]
-      .map((t) => t.toString().padStart(2, '0'))
-      .join(':');
+    // Emit task:delete event
+    eventManager.emit('task:delete', { taskId });
+    toast.success("Task removed from timer list");
   };
-
-  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
-  };
-
-  const saveNotes = async () => {
-    if (!task) return;
-
-    // Update the task with the current notes
-    await taskContext.updateTask(task.id, {
-      notes: notes,
-      timer: time,
-    });
-
-    // Optimistically update the local state
-    setTask((prevTask) => {
-      if (prevTask) {
-        return { ...prevTask, notes: notes, timer: time };
-      }
-      return prevTask;
-    });
-  };
-
-  if (!task) {
-    return (
-      <Card>
-        <CardContent className="flex items-center space-x-4">
-          <AlertTriangle className="h-5 w-5 text-red-500" />
-          <p>Task not found or loading...</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
-    <div>
-      <TimerConfetti show={showConfetti} width={windowSize.width} height={windowSize.height} />
-      <Card>
-        <CardContent className="flex flex-col gap-4">
-          <h2 className="text-2xl font-bold">{task.name}</h2>
-          <p className="text-muted-foreground">
-            Created on {format(new Date(task.createdAt), 'PPP')}
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-medium">Timer Tasks</h2>
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={() => setIsAddingTask(true)}
+          className="flex items-center gap-1"
+        >
+          <PlusCircle className="h-4 w-4" />
+          <span>Add</span>
+        </Button>
+      </div>
+
+      {isAddingTask ? (
+        <Card className="mb-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">New Timer Task</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Label htmlFor="task-name">Task Name</Label>
+                <Input
+                  id="task-name"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  placeholder="What do you want to work on?"
+                  className="w-full"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="task-description">Description (Optional)</Label>
+                <Textarea
+                  id="task-description"
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  placeholder="Add some details..."
+                  className="min-h-[80px]"
+                />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsAddingTask(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={handleAddTask}
+            >
+              Save Task
+            </Button>
+          </CardFooter>
+        </Card>
+      ) : tasks.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-lg">
+          <Clock className="h-12 w-12 text-muted-foreground/50 mb-4" />
+          <h3 className="text-lg font-medium mb-2">No Timer Tasks</h3>
+          <p className="text-muted-foreground mb-4">
+            Add tasks that you want to track time for
           </p>
-          <div className="flex items-center space-x-2">
-            <Clock className="h-5 w-5" />
-            <span>{formatTime(time)}</span>
-          </div>
-          <div className="flex space-x-4">
-            {!task.completed && (
-              <>
-                {!isRunning ? (
-                  <Button variant="purple" onClick={startTimer}>
-                    Start
-                  </Button>
-                ) : (
-                  <Button variant="secondary" onClick={pauseTimer}>
-                    Pause
-                  </Button>
+          <Button 
+            onClick={() => setIsAddingTask(true)}
+            className="flex items-center gap-2"
+          >
+            <PlusCircle className="h-4 w-4" />
+            <span>Add Timer Task</span>
+          </Button>
+        </div>
+      ) : (
+        <ScrollArea className="flex-1">
+          <div className="space-y-2 pb-4">
+            {tasks.map((task) => (
+              <div 
+                key={task.id}
+                className={cn(
+                  "flex items-start p-3 rounded-lg border cursor-pointer transition-colors",
+                  selectedTask?.id === task.id 
+                    ? "bg-primary/10 border-primary/30" 
+                    : "hover:bg-accent/50 border-border/50"
                 )}
-                <Button variant="ghost" onClick={resetTimer}>
-                  Reset
+                onClick={() => handleSelectTask(task)}
+              >
+                <div className="flex-1">
+                  <div className="flex items-center">
+                    <h3 className="font-medium text-base">{task.name}</h3>
+                    {task.timerNotes && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-5 w-5 ml-1 text-muted-foreground"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditNotes(task);
+                        }}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  {task.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                      {task.description}
+                    </p>
+                  )}
+                  <div className="flex mt-2 gap-2">
+                    <span className="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 text-xs font-medium text-purple-800 dark:text-purple-300">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {task.timerMinutes || 25} min
+                    </span>
+                    {!task.timerNotes && (
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="h-5 px-2 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditNotes(task);
+                        }}
+                      >
+                        Add notes
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2 h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteTask(task.id);
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    <line x1="10" x2="10" y1="11" y2="17" />
+                    <line x1="14" x2="14" y1="11" y2="17" />
+                  </svg>
                 </Button>
-                <Button variant="default" onClick={completeTask}>
-                  Complete Task
-                  <CheckCircle className="ml-2 h-4 w-4" />
-                </Button>
-              </>
-            )}
+              </div>
+            ))}
           </div>
-          <div>
-            <Textarea
-              placeholder="Add notes about this task..."
-              value={notes}
-              onChange={handleNotesChange}
-            />
-            <Button variant="outline" className="mt-2" onClick={saveNotes}>
+        </ScrollArea>
+      )}
+
+      <Dialog open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Task Notes</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes for this timer session</Label>
+              <Textarea
+                id="notes"
+                value={currentNotes}
+                onChange={(e) => setCurrentNotes(e.target.value)}
+                placeholder="What do you want to accomplish during this session?"
+                className="min-h-[150px]"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setNotesDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveNotes}
+            >
               Save Notes
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

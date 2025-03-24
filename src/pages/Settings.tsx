@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,12 +6,14 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
-import { ArrowRight, LogIn, MoonStar, Sun, User, PaintBucket, Info, AlertTriangle, Bug } from 'lucide-react';
+import { ArrowRight, LogIn, MoonStar, Sun, User, PaintBucket, Info, AlertTriangle, Bug, Settings as SettingsIcon } from 'lucide-react';
 import { useTheme } from '@/components/theme-provider';
 import { useDataInitialization } from '@/hooks/data/useDataInitialization';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { useDebug } from '@/utils/debug/logger';
+import { PageHeader } from '@/components/ui/page-header';
+import { GlassCard, GlassCardContent, GlassCardHeader, GlassCardTitle } from '@/components/ui/glass-card';
 
 const Settings = () => {
   const { user, isAuthenticated, signOut } = useAuth();
@@ -31,31 +34,35 @@ const Settings = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8 text-gradient-primary">Settings</h1>
+    <div className="container mx-auto px-4 py-6 max-w-3xl animate-fade-in">
+      <PageHeader 
+        title="Settings" 
+        description="Customize your app experience and manage account details" 
+        icon={SettingsIcon}
+      />
       
       {/* Authentication Card */}
-      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
+      <GlassCard className="mb-8">
+        <GlassCardHeader>
+          <GlassCardTitle className="flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
             Account
-          </CardTitle>
+          </GlassCardTitle>
           <CardDescription>
             {isAuthenticated 
               ? "Manage your account settings" 
               : "Sign in to sync your data across devices"}
           </CardDescription>
-        </CardHeader>
-        <CardContent>
+        </GlassCardHeader>
+        <GlassCardContent>
           {isAuthenticated ? (
-            <div className="space-y-3 p-4 rounded-lg bg-muted/30">
+            <div className="space-y-3 p-4 rounded-lg bg-secondary/30">
               <p><span className="font-medium">Email:</span> {user?.email}</p>
               <p><span className="font-medium">Account ID:</span> <span className="text-xs text-muted-foreground">{user?.id}</span></p>
               <p><span className="font-medium">Last Sign In:</span> {user?.last_sign_in_at && new Date(user.last_sign_in_at).toLocaleString()}</p>
             </div>
           ) : (
-            <div className="space-y-4 p-4 rounded-lg bg-muted/30">
+            <div className="space-y-4 p-4 rounded-lg bg-secondary/30">
               <p className="text-muted-foreground">
                 You're currently using Focus Notes without an account. Your data is stored locally on this device only.
               </p>
@@ -64,14 +71,13 @@ const Settings = () => {
               </p>
             </div>
           )}
-        </CardContent>
-        <CardFooter className="pt-2">
+          
           {isAuthenticated ? (
-            <Button variant="destructive" onClick={signOut} className="w-full sm:w-auto">
+            <Button variant="destructive" onClick={signOut} className="w-full sm:w-auto mt-4">
               Sign Out
             </Button>
           ) : (
-            <Button asChild className="w-full sm:w-auto bg-primary hover:bg-primary/90 shadow button-glow">
+            <Button asChild className="w-full sm:w-auto bg-primary hover:bg-primary/90 shadow button-glow mt-4">
               <Link to="/auth" className="flex items-center gap-2">
                 <LogIn className="h-4 w-4" />
                 Sign In / Create Account
@@ -79,20 +85,20 @@ const Settings = () => {
               </Link>
             </Button>
           )}
-        </CardFooter>
-      </Card>
+        </GlassCardContent>
+      </GlassCard>
       
       {/* Theme Settings */}
-      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
+      <GlassCard className="mb-8">
+        <GlassCardHeader>
+          <GlassCardTitle className="flex items-center gap-2">
             <PaintBucket className="h-5 w-5 text-primary" />
             Appearance
-          </CardTitle>
+          </GlassCardTitle>
           <CardDescription>Customize the app's appearance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
+        </GlassCardHeader>
+        <GlassCardContent>
+          <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
             <div className="space-y-1">
               <Label htmlFor="dark-mode" className="text-base font-medium flex items-center gap-2">
                 {isDark ? <MoonStar className="h-4 w-4 text-purple-400" /> : <Sun className="h-4 w-4 text-amber-400" />}
@@ -111,20 +117,20 @@ const Settings = () => {
               className="data-[state=checked]:bg-primary"
             />
           </div>
-        </CardContent>
-      </Card>
+        </GlassCardContent>
+      </GlassCard>
       
       {/* Debug Mode Settings */}
-      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
+      <GlassCard className="mb-8">
+        <GlassCardHeader>
+          <GlassCardTitle className="flex items-center gap-2">
             <Bug className="h-5 w-5 text-primary" />
             Developer Tools
-          </CardTitle>
+          </GlassCardTitle>
           <CardDescription>Debug and developer settings</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
+        </GlassCardHeader>
+        <GlassCardContent>
+          <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
             <div className="space-y-1">
               <Label htmlFor="debug-mode" className="text-base font-medium flex items-center gap-2">
                 <Bug className="h-4 w-4 text-blue-500" />
@@ -141,20 +147,20 @@ const Settings = () => {
               className="data-[state=checked]:bg-primary"
             />
           </div>
-        </CardContent>
-      </Card>
+        </GlassCardContent>
+      </GlassCard>
       
       {/* Data Management */}
-      <Card className="mb-8 card-hover-effect bg-card shadow-sm border border-border">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
+      <GlassCard className="mb-8">
+        <GlassCardHeader>
+          <GlassCardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
             Data Management
-          </CardTitle>
+          </GlassCardTitle>
           <CardDescription>Manage your application data</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 rounded-lg bg-muted/30 space-y-3">
+        </GlassCardHeader>
+        <GlassCardContent>
+          <div className="p-4 rounded-lg bg-secondary/30 space-y-3">
             <div className="space-y-2">
               <h3 className="font-medium">Reset Application Data</h3>
               <p className="text-sm text-muted-foreground">
@@ -186,20 +192,20 @@ const Settings = () => {
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </CardContent>
-      </Card>
+        </GlassCardContent>
+      </GlassCard>
       
       {/* About Section */}
-      <Card className="bg-card shadow-sm border border-border card-hover-effect">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
+      <GlassCard>
+        <GlassCardHeader>
+          <GlassCardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5 text-primary" />
             About
-          </CardTitle>
+          </GlassCardTitle>
           <CardDescription>Focus Notes App</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 rounded-lg bg-muted/30 space-y-3">
+        </GlassCardHeader>
+        <GlassCardContent>
+          <div className="p-4 rounded-lg bg-secondary/30 space-y-3">
             <p className="text-sm font-medium">
               Version 1.0.0
             </p>
@@ -207,8 +213,8 @@ const Settings = () => {
               A productivity application for managing tasks, tracking time, and building habits.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </GlassCardContent>
+      </GlassCard>
     </div>
   );
 };

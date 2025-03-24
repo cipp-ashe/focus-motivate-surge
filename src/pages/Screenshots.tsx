@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ScreenshotUpload } from "@/components/screenshots/ScreenshotUpload";
@@ -8,9 +9,11 @@ import { validateImage, sanitizeFileName } from "@/utils/imageUtils";
 import { taskStorage } from "@/lib/storage/taskStorage";
 import { useTaskManager } from "@/hooks/tasks/useTaskManager";
 import { useIsMobile } from "@/hooks/ui/useIsMobile";
-import { Info, Camera, Upload } from "lucide-react";
+import { Info, Camera, Upload, Image } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard, GlassCardContent } from "@/components/ui/glass-card";
 import {
   Sheet,
   SheetContent,
@@ -124,10 +127,12 @@ const Screenshots = () => {
 
   if (isMobile) {
     return (
-      <div className="container mx-auto py-4 px-3">
-        <h1 className="text-xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-          Screenshot Manager
-        </h1>
+      <div className="container mx-auto py-4 px-3 animate-fade-in">
+        <PageHeader
+          title="Screenshot Manager"
+          description="Capture and organize screenshots from your device"
+          icon={Image}
+        />
         
         <MobileInstructions />
         
@@ -184,21 +189,27 @@ const Screenshots = () => {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-        Screenshot Manager
-      </h1>
+    <div className="container mx-auto py-6 px-4 animate-fade-in">
+      <PageHeader
+        title="Screenshot Manager"
+        description="Capture and organize screenshots from your device"
+        icon={Image}
+      />
       
       <div className="grid grid-cols-1 gap-8">
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Upload Screenshot</h2>
-          <ScreenshotUpload onImageUpload={handleImageUpload} />
-        </div>
+        <GlassCard>
+          <GlassCardContent>
+            <h2 className="text-lg font-medium mb-4">Upload Screenshot</h2>
+            <ScreenshotUpload onImageUpload={handleImageUpload} />
+          </GlassCardContent>
+        </GlassCard>
         
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium">Your Screenshots</h2>
-          <ScreenshotList tasks={tasks} />
-        </div>
+        <GlassCard>
+          <GlassCardContent>
+            <h2 className="text-lg font-medium mb-4">Your Screenshots</h2>
+            <ScreenshotList tasks={tasks} />
+          </GlassCardContent>
+        </GlassCard>
       </div>
     </div>
   );

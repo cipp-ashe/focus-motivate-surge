@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Mic } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Mic, FileAudio } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VoiceRecorder from '@/components/voiceNotes/VoiceRecorder';
 import VoiceNotesList from '@/components/voiceNotes/VoiceNotesList';
 import { ErrorBoundary } from 'react-error-boundary';
 import { VoiceNotesProvider } from '@/contexts/voiceNotes/VoiceNotesContext';
+import { PageHeader } from '@/components/ui/page-header';
+import { GlassCard, GlassCardContent, GlassCardHeader, GlassCardTitle } from '@/components/ui/glass-card';
 
 const ErrorFallback = ({ error }: { error: Error }) => (
   <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-900/20 rounded-md">
@@ -24,8 +25,12 @@ const VoiceNotesPage = () => {
 
   return (
     <VoiceNotesProvider>
-      <div className="container py-6 px-4 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Voice Notes</h1>
+      <div className="container py-6 px-4 max-w-4xl mx-auto animate-fade-in">
+        <PageHeader 
+          title="Voice Notes" 
+          description="Record and manage voice memos and audio notes" 
+          icon={FileAudio}
+        />
         
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <Tabs defaultValue="recorder" value={activeTab} onValueChange={setActiveTab}>
@@ -38,29 +43,29 @@ const VoiceNotesPage = () => {
             </TabsList>
             
             <TabsContent value="recorder">
-              <Card className="border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-medium">Record Voice Note</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-3">
+              <GlassCard>
+                <GlassCardHeader>
+                  <GlassCardTitle className="text-lg font-medium">Record Voice Note</GlassCardTitle>
+                </GlassCardHeader>
+                <GlassCardContent className="pt-3">
                   <ErrorBoundary FallbackComponent={ErrorFallback}>
                     <VoiceRecorder onComplete={() => setActiveTab("notes")} />
                   </ErrorBoundary>
-                </CardContent>
-              </Card>
+                </GlassCardContent>
+              </GlassCard>
             </TabsContent>
             
             <TabsContent value="notes">
-              <Card className="border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-medium">Your Voice Notes</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-3">
+              <GlassCard>
+                <GlassCardHeader>
+                  <GlassCardTitle className="text-lg font-medium">Your Voice Notes</GlassCardTitle>
+                </GlassCardHeader>
+                <GlassCardContent className="pt-3">
                   <ErrorBoundary FallbackComponent={ErrorFallback}>
                     <VoiceNotesList />
                   </ErrorBoundary>
-                </CardContent>
-              </Card>
+                </GlassCardContent>
+              </GlassCard>
             </TabsContent>
           </Tabs>
         </ErrorBoundary>

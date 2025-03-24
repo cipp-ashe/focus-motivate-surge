@@ -1,4 +1,3 @@
-
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTemplateCreation } from '../habits/useTemplateCreation';
 import { ActiveTemplate, DayOfWeek, TimePreference, HabitCategory } from '@/components/habits/types';
@@ -79,14 +78,16 @@ describe('useTemplateCreation', () => {
     });
 
     const habit = {
-      id: 'habit-123',
+      id: 'habit-1',
       name: 'Test Habit',
-      description: 'Test Description',
-      category: 'Personal' as HabitCategory,
+      description: 'A test habit',
+      category: 'Health' as HabitCategory,
       timePreference: 'Morning' as TimePreference,
-      metrics: { type: 'boolean' },
+      metrics: {
+        type: 'boolean' as MetricType,
+      },
       insights: [],
-      tips: [],
+      tips: []
     };
 
     act(() => {
