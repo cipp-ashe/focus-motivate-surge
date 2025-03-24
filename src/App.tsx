@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { router } from './router';
 import DebugButton from './components/debug/DebugButton';
+import { AuthProvider } from '@/contexts/auth/AuthContext';
 
 // Create a new client for React Query
 const queryClient = new QueryClient({
@@ -21,9 +22,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="focus-notes-theme">
-        <RouterProvider router={router} />
-        <Toaster position="top-right" richColors />
-        <DebugButton />
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <Toaster position="top-right" richColors />
+          <DebugButton />
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
