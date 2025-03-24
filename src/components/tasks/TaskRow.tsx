@@ -1,8 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
 import { eventManager } from "@/lib/events/EventManager";
 import { Card } from "@/components/ui/card";
 import { TaskContent } from "./components/TaskContent";
+import { useTaskTypeColor } from "@/hooks/useTaskTypeColor";
+import { cn } from "@/lib/utils";
 
 /**
  * Props for the TaskRow component
@@ -56,6 +59,11 @@ export const TaskRow: React.FC<TaskRowProps> = ({
 }) => {
   const durationInMinutes = Math.round(Number(task.duration || 1500) / 60);
   const [inputValue, setInputValue] = useState(durationInMinutes.toString());
+  const { getBorderColorClass, getBackgroundColorClass } = useTaskTypeColor();
+  
+  // Get task type specific styling
+  const borderClass = getBorderColorClass(task.taskType || 'regular');
+  const bgClass = getBackgroundColorClass(task.taskType || 'regular');
 
   // Update input value when task duration changes
   useEffect(() => {
@@ -166,13 +174,14 @@ export const TaskRow: React.FC<TaskRowProps> = ({
 
   return (
     <Card
-      className={`
-        relative cursor-pointer transition-all duration-300 group overflow-visible
-        ${isSelected 
-          ? 'bg-accent/20 border-primary/40 shadow-lg shadow-primary/5' 
-          : 'bg-card/40 border-border/[var(--border-medium)] hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01]'
-        }
-      `}
+      className={cn(
+        'relative cursor-pointer transition-all duration-300 group overflow-visible',
+        'min-h-[4.5rem] flex flex-col justify-between w-full',
+        isSelected 
+          ? `bg-accent/20 border-primary/40 shadow-lg shadow-primary/5 ${borderClass}` 
+          : `bg-card/40 border-border/[var(--border-medium)] hover:border-primary/30 hover:bg-accent/10 hover:shadow-md hover:scale-[1.01] ${bgClass} ${borderClass}/30`,
+        'md:max-w-full'
+      )}
       onClick={handleTaskClick}
       data-task-id={task.id}
       data-task-type={task.taskType}

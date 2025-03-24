@@ -1,9 +1,12 @@
+
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { cn } from '@/lib/utils';
 import { TaskIcon } from './TaskIcon';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Clock, Image, FileText, Mic, ClipboardList } from 'lucide-react';
 
 interface TaskContentDisplayProps {
   task: Task;
@@ -19,28 +22,18 @@ export const TaskContentDisplay = React.memo(
     const timeAgo = createdAt ? formatDistanceToNow(new Date(createdAt), { addSuffix: true }) : '';
 
     // Handle specialized content click
-    const handleSpecializedContent = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSpecializedContent = (e: React.MouseEvent<HTMLButtonElement>, type: string) => {
       e.stopPropagation();
-
       if (!handleTaskAction) return;
-
-      if (task.taskType === 'checklist') {
-        handleTaskAction(e, 'checklist');
-      } else if (task.taskType === 'journal') {
-        handleTaskAction(e, 'journal');
-      } else if (task.taskType === 'screenshot' && task.imageUrl) {
-        handleTaskAction(e, 'screenshot');
-      } else if (task.taskType === 'voicenote') {
-        handleTaskAction(e, 'voicenote');
-      }
+      handleTaskAction(e, type);
     };
 
-    // Special content indicator
-    const hasSpecialContent =
-      (task.taskType === 'checklist' && task.checklistItems?.length) ||
-      (task.taskType === 'journal' && task.journalEntry) ||
-      (task.taskType === 'screenshot' && task.imageUrl) ||
-      (task.taskType === 'voicenote' && task.voiceNoteUrl);
+    // Determine if task has special content
+    const hasChecklistContent = task.taskType === 'checklist' && task.checklistItems?.length;
+    const hasJournalContent = task.taskType === 'journal' && task.journalEntry;
+    const hasScreenshotContent = task.taskType === 'screenshot' && task.imageUrl;
+    const hasVoiceNoteContent = task.taskType === 'voicenote' && task.voiceNoteUrl;
+    const hasTimerContent = task.taskType === 'timer';
 
     return (
       <div className="flex-1 min-w-0" data-testid="task-content-display">
@@ -86,16 +79,68 @@ export const TaskContentDisplay = React.memo(
           )}
         </div>
 
-        {/* Special content link */}
-        {hasSpecialContent && (
-          <button
-            onClick={handleSpecializedContent}
-            className="text-xs text-primary hover:underline mt-1.5 text-left"
-            aria-label={`View ${task.taskType} content`}
-          >
-            View {task.taskType} content
-          </button>
-        )}
+        {/* Special content action buttons */}
+        <div className="flex flex-wrap gap-1 mt-2">
+          {hasChecklistContent && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950"
+              onClick={(e) => handleSpecializedContent(e, 'checklist')}
+            >
+              <ClipboardList className="h-3.5 w-3.5 mr-1" />
+              Checklist
+            </Button>
+          )}
+          
+          {hasJournalContent && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950"
+              onClick={(e) => handleSpecializedContent(e, 'journal')}
+            >
+              <FileText className="h-3.5 w-3.5 mr-1" />
+              Journal
+            </Button>
+          )}
+          
+          {hasScreenshotContent && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950"
+              onClick={(e) => handleSpecializedContent(e, 'screenshot')}
+            >
+              <Image className="h-3.5 w-3.5 mr-1" />
+              Image
+            </Button>
+          )}
+          
+          {hasVoiceNoteContent && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950"
+              onClick={(e) => handleSpecializedContent(e, 'voicenote')}
+            >
+              <Mic className="h-3.5 w-3.5 mr-1" />
+              Voice
+            </Button>
+          )}
+          
+          {hasTimerContent && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-purple-500 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950"
+              onClick={(e) => handleSpecializedContent(e, 'timer')}
+            >
+              <Clock className="h-3.5 w-3.5 mr-1" />
+              Timer
+            </Button>
+          )}
+        </div>
       </div>
     );
   }

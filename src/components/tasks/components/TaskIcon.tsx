@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   CheckSquare,
@@ -8,10 +9,10 @@ import {
   Focus,
   CheckCircle2,
   ClipboardList,
-  LayoutList,
 } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 import { cn } from '@/lib/utils';
+import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
 
 export interface TaskIconProps {
   type?: TaskType;
@@ -26,30 +27,13 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   className = '',
   size = 16,
 }) => {
+  const { getIconColorClass } = useTaskTypeColor();
+  
   // Use type if provided, otherwise fall back to taskType
   const iconType = type || taskType || 'regular';
 
   // Get the appropriate color class based on task type
-  const getColorClass = (type: string): string => {
-    switch (type) {
-      case 'timer':
-        return 'task-icon-timer';
-      case 'journal':
-        return 'task-icon-journal';
-      case 'checklist':
-        return 'task-icon-checklist';
-      case 'screenshot':
-        return 'task-icon-screenshot';
-      case 'voicenote':
-        return 'task-icon-voicenote';
-      case 'focus':
-        return 'task-icon-focus';
-      default:
-        return '';
-    }
-  };
-
-  const colorClass = getColorClass(iconType);
+  const colorClass = getIconColorClass(iconType);
   const iconProps = {
     className: cn(className, colorClass),
     size,

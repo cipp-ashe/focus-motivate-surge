@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,6 +34,7 @@
     --screenshot: 210 100% 50%;
     --voicenote: 350 100% 65%;
     --focus: 140 100% 40%;
+    --habit: 262 83% 58%;
 
     /* Border opacity levels */
     --border-light: 0.1;
@@ -77,6 +79,7 @@
     --screenshot: 210 100% 50%;
     --voicenote: 350 100% 65%;
     --focus: 140 100% 40%;
+    --habit: 262 83% 58%;
 
     /* Border opacity levels */
     --border-light: 0.1;
@@ -131,32 +134,40 @@
     @apply text-[hsl(var(--focus))];
   }
 
+  .task-icon-habit {
+    @apply text-[hsl(var(--habit))];
+  }
+
   .task-bg-regular {
-    @apply bg-[hsla(var(--regular),0.2)];
+    @apply bg-[hsla(var(--regular),0.1)];
   }
 
   .task-bg-timer {
-    @apply bg-[hsla(var(--timer),0.2)];
+    @apply bg-[hsla(var(--timer),0.1)];
   }
 
   .task-bg-journal {
-    @apply bg-[hsla(var(--journal),0.2)];
+    @apply bg-[hsla(var(--journal),0.1)];
   }
 
   .task-bg-checklist {
-    @apply bg-[hsla(var(--checklist),0.2)];
+    @apply bg-[hsla(var(--checklist),0.1)];
   }
 
   .task-bg-screenshot {
-    @apply bg-[hsla(var(--screenshot),0.2)];
+    @apply bg-[hsla(var(--screenshot),0.1)];
   }
 
   .task-bg-voicenote {
-    @apply bg-[hsla(var(--voicenote),0.2)];
+    @apply bg-[hsla(var(--voicenote),0.1)];
   }
 
   .task-bg-focus {
-    @apply bg-[hsla(var(--focus),0.2)];
+    @apply bg-[hsla(var(--focus),0.1)];
+  }
+  
+  .task-bg-habit {
+    @apply bg-[hsla(var(--habit),0.1)];
   }
 
   /* Standard border styles */
@@ -205,5 +216,24 @@
 
   .app-background {
     @apply bg-background;
+  }
+  
+  /* Responsive overflow handling for task lists */
+  .task-list-container {
+    @apply space-y-2 overflow-y-auto overflow-x-hidden max-h-[70vh] md:max-h-none;
+  }
+  
+  /* Task card responsive styling */
+  .task-card {
+    @apply relative border rounded-md p-3 transition-all;
+    @apply overflow-visible md:overflow-hidden;
+    @apply min-h-[4.5rem] flex flex-col justify-between;
+    @apply w-full md:max-w-none;
+  }
+  
+  /* Task action buttons */
+  .task-action-button {
+    @apply h-7 w-7 p-0 rounded-full transition-colors;
+    @apply flex items-center justify-center;
   }
 }

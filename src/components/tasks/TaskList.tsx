@@ -64,21 +64,23 @@ export const TaskList: React.FC<TaskListProps> = ({
   }
 
   return (
-    <div className={cn("space-y-2", className)}>
-      {tasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          isSelected={selectedTaskId === task.id}
-          onSelect={() => handleTaskSelect(task.id)}
-          onDelete={() => {
-            handleDelete({ taskId: task.id });
-          }}
-          onUpdate={(updates) => handleTaskUpdate({ taskId: task.id, updates })}
-          onComplete={(metrics) => handleTaskComplete({ taskId: task.id, metrics })}
-          dialogOpeners={dialogOpeners}
-        />
-      ))}
+    <div className={cn("task-list-container", className)}>
+      <div className="grid grid-cols-1 gap-2 w-full">
+        {tasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            isSelected={selectedTaskId === task.id}
+            onSelect={() => handleTaskSelect(task.id)}
+            onDelete={() => {
+              handleDelete({ taskId: task.id });
+            }}
+            onUpdate={(updates) => handleTaskUpdate({ taskId: task.id, updates })}
+            onComplete={(metrics) => handleTaskComplete({ taskId: task.id, metrics })}
+            dialogOpeners={dialogOpeners}
+          />
+        ))}
+      </div>
     </div>
   );
 };

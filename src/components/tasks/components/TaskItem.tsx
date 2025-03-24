@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { cn } from '@/lib/utils';
@@ -5,6 +6,7 @@ import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { TaskActions } from './TaskActions';
 import { TaskContent } from './TaskContent';
 import { useTaskActionHandler } from './TaskActionHandler';
+import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
 
 export interface TaskItemProps {
   task: Task;
@@ -37,8 +39,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const { selectTask, selected } = useTaskContext();
   const [isHovered, setIsHovered] = useState(false);
   const { handleTaskAction } = useTaskActionHandler(task, onOpenTaskDialog);
+  const { getBorderColorClass } = useTaskTypeColor();
 
   const taskIsSelected = isSelected || selected === task.id;
+  const taskType = task.taskType || 'regular';
+  
+  // Get border color based on task type
+  const borderColorClass = getBorderColorClass(taskType);
 
   const handleSelectTask = useCallback(() => {
     if (onSelect) {
@@ -72,13 +79,15 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   return (
     <div
       className={cn(
-        'relative rounded-md border p-3 transition-all',
+        'relative rounded-md border p-3 transition-all w-full overflow-hidden',
+        'min-h-[4.5rem] flex flex-col justify-between',
         taskIsSelected
-          ? 'border-primary/50 bg-primary/5 dark:bg-primary/10 dark:border-primary/30'
-          : 'border-border/[var(--border-medium)] dark:border-border/[var(--border-medium)] hover:border-border',
+          ? `border-primary/50 bg-primary/5 dark:bg-primary/10 dark:border-primary/30 ${borderColorClass}/60`
+          : `border-border/[var(--border-medium)] dark:border-border/[var(--border-medium)] hover:border-border ${borderColorClass}/30`,
         isHovered &&
           !taskIsSelected &&
-          'border-border dark:border-border bg-card/80 dark:bg-card/50'
+          'border-border dark:border-border bg-card/80 dark:bg-card/50',
+        'md:max-w-full'
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -87,6 +96,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       tabIndex={0}
       role="button"
       data-selected={taskIsSelected}
+      data-task-type={taskType}
       aria-label={`Task: ${task.name}`}
     >
       <TaskContent
