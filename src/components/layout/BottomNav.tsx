@@ -25,7 +25,7 @@ export const BottomNav = () => {
           to="/" 
           className={cn(
             "flex flex-col items-center p-2",
-            isActive('/') && "text-primary"
+            isActive('/') ? "text-primary" : "text-muted-foreground hover:text-primary"
           )}
         >
           <Home className="h-5 w-5" />
@@ -36,7 +36,7 @@ export const BottomNav = () => {
           to="/tasks" 
           className={cn(
             "flex flex-col items-center p-2",
-            isActive('/tasks') && "text-primary"
+            isActive('/tasks') ? "text-primary" : "text-muted-foreground hover:text-primary"
           )}
         >
           <ListTodo className="h-5 w-5" />
@@ -47,7 +47,7 @@ export const BottomNav = () => {
           to="/timer" 
           className={cn(
             "flex flex-col items-center p-2",
-            isActive('/timer') && "text-primary"
+            isActive('/timer') ? "text-primary" : "text-muted-foreground hover:text-primary"
           )}
         >
           <Timer className="h-5 w-5" />
@@ -59,7 +59,7 @@ export const BottomNav = () => {
             <button 
               className={cn(
                 "flex flex-col items-center p-2 appearance-none bg-transparent border-none",
-                isActive('/settings') && "text-primary"
+                isActive('/settings') ? "text-primary" : "text-muted-foreground hover:text-primary"
               )}
             >
               <MoreHorizontal className="h-5 w-5" />

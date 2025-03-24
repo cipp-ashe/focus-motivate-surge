@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Clock } from 'lucide-react';
 import { HeaderNav } from '@/components/navigation/HeaderNav';
 import { MobileNav } from '@/components/navigation/MobileNav';
+import { cn } from '@/lib/utils';
 
 export const Header = () => {
   return (
