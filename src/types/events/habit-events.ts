@@ -3,6 +3,7 @@
  * Habit event types and payload definitions
  */
 import { MetricType } from '@/types/habits/types';
+import { HabitCompletionEvent, TemplateUpdateEvent } from '@/types/habits/unified';
 
 export type HabitEventType =
   | 'habit:complete'
@@ -17,32 +18,28 @@ export type HabitEventType =
   | 'habit:custom-template-create'
   | 'habit:custom-template-delete'
   | 'habit:note-create'
-  | 'habit:journal-create';
+  | 'habit:journal-create'
+  | 'journal:open';
 
 export interface HabitEventPayloadMap {
-  'habit:complete': {
-    habitId: string;
-    date: string;
-    value: boolean | number;
-    metricType?: MetricType;
-    habitName?: string;
-    templateId?: string;
-  };
+  'habit:complete': HabitCompletionEvent;
   'habit:dismiss': {
     habitId: string;
     date: string;
   };
-  'habit:template-update': {
-    templateId: string;
-    [key: string]: any;
-  };
+  'habit:template-update': TemplateUpdateEvent;
   'habit:template-delete': {
     templateId: string;
     isOriginatingAction?: boolean;
   };
   'habit:template-add': {
     templateId: string;
-    [key: string]: any;
+    name?: string;
+    description?: string;
+    habits?: any[];
+    activeDays?: string[];
+    customized?: boolean;
+    suppressToast?: boolean;
   };
   'habit:template-days-update': {
     templateId: string;
@@ -52,7 +49,7 @@ export interface HabitEventPayloadMap {
   'habit:schedule': HabitTaskEvent;
   'habits:check-pending': any;
   'habit:custom-template-create': { name: string; description?: string; };
-  'habit:custom-template-delete': { templateId: string; };
+  'habit:custom-template-delete': { templateId: string; suppressToast?: boolean; };
   'habit:note-create': {
     habitId: string;
     habitName: string;
@@ -63,6 +60,13 @@ export interface HabitEventPayloadMap {
     habitId: string;
     habitName: string;
     content: string;
+    templateId?: string;
+    date?: string;
+  };
+  'journal:open': {
+    habitId: string;
+    habitName: string;
+    description?: string;
     templateId?: string;
     date?: string;
   };

@@ -176,7 +176,7 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
           </div>
         );
       default:
-        return null;
+        return <span className="text-xs text-muted-foreground">Unknown metric type</span>;
     }
   };
 

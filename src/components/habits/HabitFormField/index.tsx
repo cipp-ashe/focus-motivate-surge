@@ -34,10 +34,9 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
         ...(value === 'timer' && { 
           unit: 'seconds',
           goal: 600, // Default 10 minutes
-          target: 600, // For backward compatibility
           min: 60,
         }),
-        ...(value === 'counter' && { goal: 1, target: 1 }),
+        ...(value === 'counter' && { goal: 1 }),
         ...(value === 'rating' && { min: 1, max: 5 }),
       },
     };
@@ -50,7 +49,6 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
       metrics: {
         ...habit.metrics,
         goal: seconds,
-        target: seconds, // For backward compatibility
       },
     });
   };
@@ -144,7 +142,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
               {habit.metrics.type === 'timer' && (
                 <div className="flex-1">
                   <MinutesInput
-                    minutes={Math.round((habit.metrics.goal || habit.metrics.target || 600) / 60)}
+                    minutes={Math.round((habit.metrics.goal || 600) / 60)}
                     onMinutesChange={handleMinutesChange}
                     minMinutes={1}
                     maxMinutes={60}
@@ -156,7 +154,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
                 <Input
                   type="number"
                   placeholder="Target"
-                  value={habit.metrics.goal || habit.metrics.target || ''}
+                  value={habit.metrics.goal || ''}
                   onChange={(e) => {
                     const value = parseInt(e.target.value);
                     if (!isNaN(value)) {
@@ -164,7 +162,6 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
                         metrics: {
                           ...habit.metrics,
                           goal: value,
-                          target: value, // For backward compatibility
                         },
                       });
                     }
@@ -239,7 +236,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
             {habit.metrics.type === 'timer' && (
               <div className="flex-1">
                 <MinutesInput
-                  minutes={Math.round((habit.metrics.goal || habit.metrics.target || 600) / 60)}
+                  minutes={Math.round((habit.metrics.goal || 600) / 60)}
                   onMinutesChange={handleMinutesChange}
                   minMinutes={1}
                   maxMinutes={60}
@@ -251,7 +248,7 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
               <Input
                 type="number"
                 placeholder="Target"
-                value={habit.metrics.goal || habit.metrics.target || ''}
+                value={habit.metrics.goal || ''}
                 onChange={(e) => {
                   const value = parseInt(e.target.value);
                   if (!isNaN(value)) {
@@ -259,7 +256,6 @@ const HabitFormField: React.FC<HabitFormFieldProps> = ({
                       metrics: {
                         ...habit.metrics,
                         goal: value,
-                        target: value, // For backward compatibility
                       },
                     });
                   }
