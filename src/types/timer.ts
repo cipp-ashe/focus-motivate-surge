@@ -3,93 +3,97 @@
  * Timer Types
  */
 
-// Timer state
-export interface TimerState {
-  isRunning: boolean;
-  isPaused: boolean;
-  isComplete: boolean;
-  timeRemaining: number;
-  duration: number;
-  startTime: number | null;
-  pauseTime: number | null;
-  endTime: number | null;
-  totalPausedTime: number;
-  additionalTime: number;
-}
-
-// Timer metrics
-export interface TimerMetrics {
+// Timer state metrics
+export interface TimerStateMetrics {
   startTime: string;
-  endTime: string;
-  completionDate: string;
+  endTime: string | null;
+  completionDate: string | null;
   actualDuration: number;
   pausedTime: number;
   extensionTime: number;
   netEffectiveTime: number;
-  completionStatus: 'completed' | 'abandoned' | 'extended';
-  taskId?: string;
-}
-
-// Timer settings
-export interface TimerSettings {
-  autoStartBreak: boolean;
-  soundEnabled: boolean;
-  soundVolume: number;
-  notificationsEnabled: boolean;
-  theme: 'default' | 'minimal' | 'focused';
-  soundType: 'bell' | 'chime' | 'ding';
-}
-
-// Timer UI Components
-export interface TimerComponentProps {
-  models?: any;
-  components?: any;
-  constants?: any;
-  ui?: any;
-  views?: any;
-  state?: any;
-}
-
-// Timer props
-export interface TimerProps {
-  duration: number;
-  taskName: string;
-  taskId?: string;
-  onComplete?: (metrics: TimerMetrics) => void;
-  onAddTime?: (minutes: number) => void;
-  onDurationChange?: (newDuration: number) => void;
-  favorites?: Quote[];
-  setFavorites?: (newFavorites: Quote[]) => void;
-}
-
-// Timer expanded view ref
-export interface TimerExpandedViewRef {
-  expand: () => void;
-  collapse: () => void;
-  toggleExpand: () => void;
-}
-
-// Timer circle props
-export interface TimerCircleProps {
-  isRunning: boolean;
+  completionStatus: 'completed' | 'abandoned' | 'extended' | null;
   isPaused: boolean;
-  progress: number;
-  timeLeft: number;
-  duration: number;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  onClick?: () => void;
+  taskId?: string;
+  
+  // Additional metrics properties needed by components
+  expectedTime?: number;
+  pauseCount?: number;
+  lastPauseTimestamp?: string;
+  favoriteQuotes?: string[];
+  pausedTimeLeft?: number;
+  efficiencyRatio?: number;
 }
 
-// Sound option
-export type SoundOption = 'bell' | 'chime' | 'beep' | 'notification' | 'subtle' | 'none';
+// Sound options
+export type SoundOption = 'bell' | 'chime' | 'ding' | 'beep' | 'success' | 'none';
 
-// Quote
+// Quote category
+export type QuoteCategory = 
+  | 'motivation'
+  | 'focus'
+  | 'productivity'
+  | 'success'
+  | 'mindfulness'
+  | 'creativity'
+  | 'learning';
+
+// Quote type
 export interface Quote {
   id: string;
   text: string;
   author: string;
-  isFavorite: boolean;
-  category: string | string[];
-  task?: string;
-  timestamp?: string;
+  category: QuoteCategory | QuoteCategory[];
+  favorite?: boolean;
+}
+
+// Timer state
+export interface TimerState {
+  isRunning: boolean;
+  isPaused: boolean;
+  minutes: number;
+  internalMinutes: number;
+  showCompletion: boolean;
+  showConfirmation: boolean;
+  isExpanded: boolean;
+  selectedSound: SoundOption;
+  completionCelebrated: boolean;
+  completionMetrics: any | null;
+  
+  // These were missing in TimerState but referenced
+  timeLeft: number;
+  metrics: TimerStateMetrics;
+}
+
+// Timer action
+export type TimerAction =
+  | { type: 'START' }
+  | { type: 'PAUSE' }
+  | { type: 'RESET' }
+  | { type: 'UPDATE_TIME_LEFT'; payload: number }
+  | { type: 'UPDATE_MINUTES'; payload: number }
+  | { type: 'UPDATE_INTERNAL_MINUTES'; payload: number }
+  | { type: 'UPDATE_METRICS'; payload: Partial<TimerStateMetrics> }
+  | { type: 'SET_EXPANDED'; payload: boolean }
+  | { type: 'SET_SELECTED_SOUND'; payload: SoundOption }
+  | { type: 'SET_SHOW_COMPLETION'; payload: boolean }
+  | { type: 'SET_SHOW_CONFIRMATION'; payload: boolean }
+  | { type: 'SET_COMPLETION_METRICS'; payload: any }
+  | { type: 'SET_PAUSED_TIME_LEFT'; payload: number }
+  | { type: 'SET_COMPLETION_CELEBRATED'; payload: boolean };
+
+// Timer expanded view ref type
+export interface TimerExpandedViewRef {
+  toggleExpansion: () => void;
+  isExpanded: boolean;
+}
+
+// Timer view props extended by TimerBody
+export interface TimerCircleProps {
+  isRunning: boolean;
+  timeLeft: number;
+  minutes: number;
+  percentage?: number;
+  isComplete?: boolean;
+  taskName?: string;
 }

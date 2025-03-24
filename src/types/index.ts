@@ -20,5 +20,12 @@ export * from './timer';
 // Export metrics types
 export * from './metrics';
 
+<<<<<<< HEAD
 // Export component-specific types
 export * from './habitComponents';
+=======
+// Fix for the fs issue - re-export the correct types
+export * from './tasks';
+export * from './notes';
+export * from './voiceNotes';
+>>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b

@@ -9,6 +9,7 @@ export interface Tag {
   name: string;
   color?: string;
   description?: string;
+  createdAt?: string;
 }
 
 // Tag relation between entities
@@ -17,7 +18,14 @@ export interface TagRelation {
   tagId: string;
   entityId: string;
   entityType: 'task' | 'note' | 'habit';
+  createdAt?: string;
 }
+
+// Entity type enum
+export type EntityType = 'task' | 'note' | 'habit' | 'timer' | 'journal';
+
+// Color type
+export type Color = 'default' | 'red' | 'green' | 'blue' | 'purple' | 'yellow' | 'orange' | 'cyan' | 'pink';
 
 // Core relationship types
 export interface Relationship {
@@ -51,4 +59,32 @@ export interface DailySummary {
   notes: number;
   journalEntries: number;
   mood?: 'great' | 'good' | 'neutral' | 'bad' | 'terrible';
+}
+
+/**
+ * Initialize the data store with default values
+ * @returns boolean indicating if initialization was successful
+ */
+export function initializeDataStore(): boolean {
+  try {
+    // Set schema version
+    if (!localStorage.getItem('schema-version')) {
+      localStorage.setItem('schema-version', '1.0');
+    }
+    
+    // Initialize entity relations
+    if (!localStorage.getItem('entity-relations')) {
+      localStorage.setItem('entity-relations', JSON.stringify([]));
+    }
+    
+    // Initialize tag relations
+    if (!localStorage.getItem('tag-relations')) {
+      localStorage.setItem('tag-relations', JSON.stringify([]));
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize data store:', error);
+    return false;
+  }
 }

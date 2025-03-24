@@ -11,6 +11,9 @@ export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'custom';
 // Days of the week
 export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
 
+// Default active days
+export const DEFAULT_ACTIVE_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
 // Habit category
 export type HabitCategory =
   | 'Health'
@@ -69,8 +72,13 @@ export interface HabitDetail {
   tips?: string[];
   order?: number;
   relationships?: {
+<<<<<<< HEAD
     templateId?: string;
     [key: string]: any;
+=======
+    taskId?: string;
+    noteId?: string;
+>>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b
   };
 }
 
@@ -87,9 +95,15 @@ export interface HabitTemplate {
   presetType?: 'system' | 'custom';
   thumbnail?: string;
   order?: number;
+<<<<<<< HEAD
   duration?: number | null;
   defaultDays?: DayOfWeek[];
   suppressToast?: boolean;
+=======
+  category?: string;
+  defaultHabits?: HabitDetail[];
+  defaultDays?: DayOfWeek[];
+>>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b
 }
 
 // Active template
@@ -121,8 +135,23 @@ export interface Habit {
   lastCompleted: Date | null;
 }
 
-// Storage key for habits
+// Habit completion event
+export interface HabitCompletionEvent {
+  habitId: string;
+  date: string;
+  value?: any;
+  metricType?: string;
+}
+
+// Template update event
+export interface TemplateUpdateEvent {
+  templateId: string;
+  isOriginatingAction?: boolean;
+}
+
+// Storage keys for habits
 export const STORAGE_KEY = 'habit-templates';
+<<<<<<< HEAD
 
 // Default days constants
 export const DEFAULT_WEEKDAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -163,4 +192,12 @@ export interface HabitCompletionEvent {
 export interface TemplateUpdateEvent {
   templateId: string;
   updates: Partial<ActiveTemplate>;
+=======
+export const ACTIVE_TEMPLATES_KEY = 'active-habit-templates';
+export const CUSTOM_TEMPLATES_KEY = 'custom-habit-templates';
+
+// Compatibility type for Habit (which is referenced in some files)
+export interface Habit extends HabitDetail {
+  // Add any additional fields needed for compatibility
+>>>>>>> 8f6e595f3ffae8276aadd62cf9467a167da4c55b
 }
