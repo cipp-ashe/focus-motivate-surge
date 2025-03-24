@@ -1,7 +1,6 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Task } from '@/types/tasks';
-import { eventManager } from '@/lib/events/EventManager';
 import { useEvent } from '@/hooks/useEvent';
 
 interface TaskEventListenerProps {
@@ -22,56 +21,34 @@ export const TaskEventListener: React.FC<TaskEventListenerProps> = ({
   // Use our new useEvent hook to subscribe to task:update events
   useEvent('task:update', onTaskUpdate);
 
-  useEffect(() => {
-    // Type for custom events that we'll need to handle
-    type CustomEventWithDetail<T = any> = CustomEvent<T>;
+  // Handle specialized events
+  useEvent('task:show-image', (payload: { imageUrl: string, taskName: string }) => {
+    const { imageUrl, taskName } = payload;
+    if (imageUrl && taskName) {
+      onShowImage(imageUrl, taskName);
+    }
+  });
 
-    // Handle show image event
-    const handleShowImage = (event: CustomEventWithDetail) => {
-      const { imageUrl, taskName } = event.detail || {};
-      if (imageUrl && taskName) {
-        onShowImage(imageUrl, taskName);
-      }
-    };
+  useEvent('task:open-checklist', (payload: { taskId: string, taskName: string, items: any[] }) => {
+    const { taskId, taskName, items } = payload;
+    if (taskId && taskName && items) {
+      onOpenChecklist(taskId, taskName, items);
+    }
+  });
 
-    // Handle open checklist event
-    const handleOpenChecklist = (event: CustomEventWithDetail) => {
-      const { taskId, taskName, items } = event.detail || {};
-      if (taskId && taskName && items) {
-        onOpenChecklist(taskId, taskName, items);
-      }
-    };
+  useEvent('task:open-journal', (payload: { taskId: string, taskName: string, entry: string }) => {
+    const { taskId, taskName, entry } = payload;
+    if (taskId && taskName) {
+      onOpenJournal(taskId, taskName, entry || '');
+    }
+  });
 
-    // Handle open journal event
-    const handleOpenJournal = (event: CustomEventWithDetail) => {
-      const { taskId, taskName, entry } = event.detail || {};
-      if (taskId && taskName) {
-        onOpenJournal(taskId, taskName, entry || '');
-      }
-    };
-
-    // Handle open voice recorder event
-    const handleOpenVoiceRecorder = (event: CustomEventWithDetail) => {
-      const { taskId, taskName } = event.detail || {};
-      if (taskId && taskName) {
-        onOpenVoiceRecorder(taskId, taskName);
-      }
-    };
-
-    // Add event listeners for window events
-    window.addEventListener('show-image', handleShowImage as EventListener);
-    window.addEventListener('open-checklist', handleOpenChecklist as EventListener);
-    window.addEventListener('open-journal', handleOpenJournal as EventListener);
-    window.addEventListener('open-voice-recorder', handleOpenVoiceRecorder as EventListener);
-
-    // Clean up event listeners
-    return () => {
-      window.removeEventListener('show-image', handleShowImage as EventListener);
-      window.removeEventListener('open-checklist', handleOpenChecklist as EventListener);
-      window.removeEventListener('open-journal', handleOpenJournal as EventListener);
-      window.removeEventListener('open-voice-recorder', handleOpenVoiceRecorder as EventListener);
-    };
-  }, [onShowImage, onOpenChecklist, onOpenJournal, onOpenVoiceRecorder]);
+  useEvent('task:open-voice-recorder', (payload: { taskId: string, taskName: string }) => {
+    const { taskId, taskName } = payload;
+    if (taskId && taskName) {
+      onOpenVoiceRecorder(taskId, taskName);
+    }
+  });
 
   // This component doesn't render anything
   return null;

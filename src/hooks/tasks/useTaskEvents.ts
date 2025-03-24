@@ -10,8 +10,6 @@ export const useTaskEvents = () => {
   // Force update task list
   const forceTaskUpdate = useCallback(() => {
     console.log("TaskEvents: Force updating task list");
-    
-    // Emit via event manager
     eventManager.emit('task:reload', undefined);
   }, []);
   
@@ -49,6 +47,15 @@ export const useTaskEvents = () => {
     });
   }, []);
   
+  // Track time spent on task
+  const trackTaskTime = useCallback((taskId: string, minutes: number, notes?: string) => {
+    eventManager.emit('task:timer', { 
+      taskId, 
+      minutes, 
+      notes
+    });
+  }, []);
+  
   return {
     forceTaskUpdate,
     createTask,
@@ -56,6 +63,7 @@ export const useTaskEvents = () => {
     deleteTask,
     completeTask,
     selectTask,
-    dismissTask
+    dismissTask,
+    trackTaskTime
   };
 };

@@ -4,11 +4,14 @@ import { Task, TaskType } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitTaskEvent } from '@/types/events/habit-events';
 import { MetricType } from '@/types/habits/types';
+import { useHabitTaskCreator } from './useHabitTaskCreator';
 
 /**
  * Hook for processing habit tasks
  */
 export const useHabitTaskProcessor = () => {
+  const { createHabitTask } = useHabitTaskCreator();
+
   /**
    * Process tasks for a specific habit
    */
@@ -27,50 +30,6 @@ export const useHabitTaskProcessor = () => {
     
     return habitTasks;
   }, []);
-  
-  /**
-   * Create a task for a habit based on its metric type
-   */
-  const createHabitTask = useCallback((
-    habitId: string,
-    name: string,
-    duration: number,
-    templateId: string,
-    date: string,
-    metricType: MetricType = 'boolean'
-  ) => {
-    console.log(`Creating habit task: ${name} for habit ${habitId} with metric type: ${metricType}`);
-    
-    // Determine task type based on metric type
-    let taskType: TaskType = 'habit';
-    
-    if (metricType === 'journal') {
-      taskType = 'journal';
-    } else if (metricType === 'timer') {
-      taskType = 'timer';
-    }
-    
-    const task: Task = {
-      id: `habit-${habitId}-${date}`,
-      name,
-      description: `Habit task for ${date}`,
-      taskType,
-      duration,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      relationships: {
-        habitId,
-        templateId,
-        date,
-        metricType
-      }
-    };
-    
-    // Emit event to create task
-    eventManager.emit('task:create', task);
-    
-    return task.id;
-  }, []);
 
   /**
    * Handle habit schedule events
@@ -83,11 +42,11 @@ export const useHabitTaskProcessor = () => {
     // Process the habit task with metric type
     const taskId = createHabitTask(
       habitId, 
-      name, 
-      duration, 
       templateId, 
+      name, 
       date, 
-      metricType || 'boolean'
+      duration,
+      { metricType }
     );
     
     return taskId;
@@ -98,7 +57,8 @@ export const useHabitTaskProcessor = () => {
    */
   const processPendingTasks = useCallback(() => {
     console.log('Processing pending habit tasks');
-    // Implementation would check for pending tasks and create them
+    // Emit event to check pending habit tasks
+    eventManager.emit('habits:check-pending', {});
   }, []);
 
   /**
@@ -122,10 +82,8 @@ export const useHabitTaskProcessor = () => {
   
   return {
     processHabitTasks,
-    createHabitTask,
     handleHabitSchedule,
     processPendingTasks,
-    handleHabitComplete,
-    processHabitTask: createHabitTask
+    handleHabitComplete
   };
 };

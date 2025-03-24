@@ -1,6 +1,6 @@
 
 /**
- * Simplified Habit Events Hook
+ * Unified Habit Events Hook
  * 
  * This hook provides a clean interface for emitting habit-related events
  * by leveraging the consolidated types and event system.
@@ -8,7 +8,7 @@
 
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { MetricType, HabitDetail, DayOfWeek, ActiveTemplate } from '@/types/habits';
+import { MetricType, DayOfWeek, ActiveTemplate } from '@/types/habits/types';
 
 /**
  * A unified hook that provides habit-related event functions
@@ -88,6 +88,16 @@ export const useHabitEvents = () => {
     });
   }, []);
 
+  // Create a note for a habit
+  const createHabitNote = useCallback((habitId: string, habitName: string, content: string, templateId?: string) => {
+    eventManager.emit('habit:note-create', {
+      habitId,
+      habitName,
+      content,
+      templateId
+    });
+  }, []);
+
   // Dismiss habits
   const dismissHabit = useCallback((habitId: string, date: string) => {
     eventManager.emit('habit:dismiss', {
@@ -106,6 +116,7 @@ export const useHabitEvents = () => {
     updateTemplateDays,
     updateTemplateOrder,
     openHabitJournal,
+    createHabitNote,
     dismissHabit
   };
 };

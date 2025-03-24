@@ -1,9 +1,9 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { taskOperations } from '@/lib/operations/taskOperations';
 import { HabitTaskEvent, HabitTaskSchedulerReturn } from './types';
 import { useEvent } from '@/hooks/useEvent';
+import { useHabitTaskCreator } from './useHabitTaskCreator';
 
 /**
  * Hook for scheduling habit tasks with proper error handling
@@ -11,6 +11,7 @@ import { useEvent } from '@/hooks/useEvent';
 export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
   // Track which habit tasks have been scheduled to avoid duplicates
   const scheduledTasksRef = useRef<Map<string, string>>(new Map());
+  const { createHabitTask } = useHabitTaskCreator();
   
   // Handle habit schedule events
   const handleHabitSchedule = useCallback((event: HabitTaskEvent) => {
@@ -27,16 +28,15 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
     
     try {
       // Create the habit task
-      const taskId = taskOperations.createHabitTask(
+      const taskId = createHabitTask(
         habitId,
         templateId,
         name,
-        duration,
         date,
+        duration,
         { 
           suppressToast: true,
-          taskType: metricType === 'timer' ? 'timer' : 
-                    metricType === 'journal' ? 'journal' : 'regular'
+          metricType
         }
       );
       
@@ -51,7 +51,7 @@ export const useHabitTaskScheduler = (): HabitTaskSchedulerReturn => {
       console.error('Error scheduling habit task:', error);
       return null;
     }
-  }, []);
+  }, [createHabitTask]);
   
   // Set up event listeners with the new system
   useEvent('habit:schedule', handleHabitSchedule);

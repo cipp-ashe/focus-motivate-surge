@@ -15,7 +15,8 @@ export type HabitEventType =
   | 'habit:schedule'
   | 'habits:check-pending'
   | 'habit:custom-template-create'
-  | 'habit:custom-template-delete';
+  | 'habit:custom-template-delete'
+  | 'habit:note-create';
 
 export interface HabitEventPayloadMap {
   'habit:complete': {
@@ -51,6 +52,12 @@ export interface HabitEventPayloadMap {
   'habits:check-pending': any;
   'habit:custom-template-create': { name: string; description?: string; };
   'habit:custom-template-delete': { templateId: string; };
+  'habit:note-create': {
+    habitId: string;
+    habitName: string;
+    content: string;
+    templateId?: string;
+  };
 }
 
 export interface HabitTaskEvent {
@@ -60,10 +67,4 @@ export interface HabitTaskEvent {
   duration: number;
   date: string;
   metricType?: MetricType;
-}
-
-export interface HabitNoteData {
-  habitId: string;
-  date: string;
-  content: string;
 }

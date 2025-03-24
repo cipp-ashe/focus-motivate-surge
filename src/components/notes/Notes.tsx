@@ -7,6 +7,7 @@ import { useNoteActions, useNoteState } from '@/contexts/notes/hooks';
 import { eventManager } from '@/lib/events/EventManager';
 import { Note, Tag, TagColor } from '@/types/notes';
 import { EntityType } from '@/types/core';
+import { useEvent } from '@/hooks/useEvent';
 
 export const Notes = () => {
   // Use state to track initialization
@@ -43,8 +44,8 @@ export const Notes = () => {
           const parsedNotes = JSON.parse(savedNotes);
           console.log('Notes parsed successfully:', Array.isArray(parsedNotes) ? `${parsedNotes.length} notes` : 'not an array');
           
-          // Dispatch event to ensure notes are loaded
-          window.dispatchEvent(new Event('notesUpdated'));
+          // Use event manager instead of window events
+          eventManager.emit('notes:refresh', undefined);
         } catch (e) {
           console.error('Failed to parse notes from localStorage:', e);
         }
@@ -142,84 +143,73 @@ export const Notes = () => {
   };
 
   // Listen for journal-related events that should create notes
-  useEffect(() => {
-    const handleJournalCreate = (data: any) => {
-      console.log('Creating note from journal event:', data);
-      if (data && (data.habitId || data.taskId)) {
-        const now = new Date().toISOString();
-        const relationships = [];
-        
-        // Add habit relationship if present
-        if (data.habitId) {
-          relationships.push({
-            entityId: data.habitId,
-            entityType: EntityType.Habit,
-            metadata: {
-              templateId: data.templateId,
-              date: data.date || now
-            }
-          });
-        }
-        
-        // Add task relationship if present
-        if (data.taskId) {
-          relationships.push({
-            entityId: data.taskId,
-            entityType: EntityType.Task,
-            metadata: {
-              date: data.date || now
-            }
-          });
-        }
-        
-        // Create tags for the note
-        const tags = [{ name: 'journal', color: 'blue' as TagColor }];
-        
-        // Add the note
-        addNote({ 
-          content: data.content || '',
-          title: `Journal: ${data.habitName || data.title || 'Entry'}`,
-          tags,
-          relationships,
-          createdAt: now,
-          updatedAt: now
+  useEvent('journal:create', (data) => {
+    console.log('Creating note from journal event:', data);
+    if (data && (data.habitId || data.taskId)) {
+      const now = new Date().toISOString();
+      const relationships = [];
+      
+      // Add habit relationship if present
+      if (data.habitId) {
+        relationships.push({
+          entityId: data.habitId,
+          entityType: EntityType.Habit,
+          metadata: {
+            templateId: data.templateId,
+            date: data.date || now
+          }
         });
       }
-    };
-    
-    // Handle habit notes
-    const handleNoteFromHabit = (data: any) => {
-      console.log('Creating note from habit:', data);
-      if (data && data.habitId) {
-        const now = new Date().toISOString();
-        
-        addNote({ 
-          content: data.content || '',
-          title: `Journal: ${data.habitName || 'Habit'}`,
-          tags: [{ name: 'journal', color: 'blue' as TagColor }],
-          relationships: [{
-            entityId: data.habitId,
-            entityType: EntityType.Habit,
-            metadata: {
-              templateId: data.templateId,
-              date: now
-            }
-          }],
-          createdAt: now,
-          updatedAt: now
+      
+      // Add task relationship if present
+      if (data.taskId) {
+        relationships.push({
+          entityId: data.taskId,
+          entityType: EntityType.Task,
+          metadata: {
+            date: data.date || now
+          }
         });
       }
-    };
-    
-    // Subscribe to both journal events and notes from habits
-    eventManager.on('journal:create', handleJournalCreate);
-    eventManager.on('note:create-from-habit', handleNoteFromHabit);
-    
-    return () => {
-      eventManager.off('journal:create', handleJournalCreate);
-      eventManager.off('note:create-from-habit', handleNoteFromHabit);
-    };
-  }, [addNote]);
+      
+      // Create tags for the note
+      const tags = [{ name: 'journal', color: 'blue' as TagColor }];
+      
+      // Add the note
+      addNote({ 
+        content: data.content || '',
+        title: `Journal: ${data.habitName || data.title || 'Entry'}`,
+        tags,
+        relationships,
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+  });
+  
+  // Handle the new habit:note-create event
+  useEvent('habit:note-create', (data) => {
+    console.log('Creating note from habit:', data);
+    if (data && data.habitId) {
+      const now = new Date().toISOString();
+      
+      addNote({ 
+        content: data.content || '',
+        title: `Journal: ${data.habitName || 'Habit'}`,
+        tags: [{ name: 'journal', color: 'blue' as TagColor }],
+        relationships: [{
+          entityId: data.habitId,
+          entityType: EntityType.Habit,
+          metadata: {
+            templateId: data.templateId,
+            date: now
+          }
+        }],
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+  });
 
   // Find selected note
   const selectedNote = selectedNoteId 

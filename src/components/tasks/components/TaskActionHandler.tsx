@@ -10,7 +10,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
     e.stopPropagation();
     console.log("Deleting task:", task.id);
     
-    // Emit deletion event with the correct payload structure
+    // Emit deletion event
     eventManager.emit('task:delete', { taskId: task.id });
     
     // Show toast notification
@@ -32,7 +32,6 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'dismiss':
-        // Use task:dismiss which is now in the EventType definition
         eventManager.emit('task:dismiss', { 
           taskId: task.id, 
           habitId: task.relationships?.habitId,
@@ -53,7 +52,6 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'timer':
-        // Create a proper Task object to pass to the timer with required fields
         eventManager.emit('timer:set-task', {
           id: task.id,
           name: task.name,

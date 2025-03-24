@@ -1,5 +1,7 @@
 
-// Note domain event types
+/**
+ * Note event types and payload definitions
+ */
 import { Note, Tag } from '@/types/notes';
 
 export type NoteEventType =
