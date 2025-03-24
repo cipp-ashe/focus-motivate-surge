@@ -21,7 +21,7 @@ interface HabitMetricProps {
   habit: HabitDetail;
   progress: ProgressResult;
   onUpdate: (value: boolean | number) => void;
-  templateId?: string; // Add templateId prop
+  templateId?: string;
 }
 
 const HabitMetric: React.FC<HabitMetricProps> = ({
@@ -103,8 +103,8 @@ const HabitMetric: React.FC<HabitMetricProps> = ({
               onClick={() => {
                 eventManager.emit('timer:start', {
                   taskId: habit.id,
-                  taskName: habit.name,
-                  duration: timerTarget
+                  minutes: Math.ceil(timerTarget / 60),
+                  taskName: habit.name
                 });
                 toast.info(`Starting timer for ${formatTime(timerTarget)}`);
               }}

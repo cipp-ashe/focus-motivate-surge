@@ -13,8 +13,7 @@ interface UnifiedMediaHandlersProps {
 /**
  * Unified hook for media event handlers
  * 
- * This hook consolidates custom event handlers and DOM event listeners
- * for handling media-related events (images, checklists, journals, voice recordings)
+ * This hook consolidates event handlers for media-related task actions
  */
 export const useUnifiedMediaHandlers = ({
   onShowImage,

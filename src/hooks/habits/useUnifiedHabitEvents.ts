@@ -6,10 +6,7 @@ import { MetricType, DayOfWeek, ActiveTemplate } from '@/types/habits/types';
 /**
  * Unified hook for habit events
  * 
- * This hook consolidates functionality from:
- * - useHabitEvents
- * - useHabitActions
- * - useSyncHandler
+ * This hook provides a comprehensive API for all habit-related events
  */
 export const useUnifiedHabitEvents = () => {
   // Complete a habit
@@ -94,7 +91,7 @@ export const useUnifiedHabitEvents = () => {
     });
   }, []);
 
-  // Create a note for a habit
+  // Note/Journal creation
   const createHabitNote = useCallback((habitId: string, habitName: string, content: string, templateId?: string) => {
     eventManager.emit('habit:note-create', {
       habitId,
@@ -104,7 +101,6 @@ export const useUnifiedHabitEvents = () => {
     });
   }, []);
 
-  // Create a journal entry for a habit
   const createHabitJournal = useCallback((habitId: string, habitName: string, content: string, templateId?: string, date?: string) => {
     eventManager.emit('habit:journal-create', {
       habitId,

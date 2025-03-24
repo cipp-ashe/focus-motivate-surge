@@ -1,20 +1,16 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { taskOperations } from '@/lib/operations/tasks';
 import { useEvent } from '@/hooks/useEvent';
 import { MetricType, ActiveTemplate } from '@/types/habits/types';
-import { HabitTaskEvent } from '@/types/events/habit-events';
 import { Task, TaskType } from '@/types/tasks';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Unified hook for habit-task integration
  * 
- * This hook consolidates functionality from:
- * - useHabitTaskIntegration
- * - useHabitTaskProcessor
- * - useHabitTaskScheduler
- * - useHabitTaskCreator
+ * This hook consolidates all functionality related to the integration
+ * between habits and tasks
  */
 export const useUnifiedHabitTaskIntegration = () => {
   // Track which habit tasks have been scheduled to avoid duplicates
@@ -49,8 +45,10 @@ export const useUnifiedHabitTaskIntegration = () => {
       taskType = options.taskType as TaskType;
     }
     
+    const taskId = `habit-${habitId}-${date}`;
+    
     const newTask: Task = {
-      id: `habit-${habitId}-${date}`,
+      id: taskId,
       name,
       description: `Task for habit on ${date}`,
       taskType,
@@ -73,13 +71,13 @@ export const useUnifiedHabitTaskIntegration = () => {
       eventManager.emit('task:select', newTask.id);
     }
     
-    return newTask.id;
+    return taskId;
   }, []);
   
   /**
    * Handle habit schedule events
    */
-  const handleHabitSchedule = useCallback((event: HabitTaskEvent) => {
+  const handleHabitSchedule = useCallback((event: any) => {
     const { habitId, templateId, name, duration, date, metricType } = event;
     
     // Generate a unique key for this habit-date combination
@@ -119,25 +117,6 @@ export const useUnifiedHabitTaskIntegration = () => {
   }, [createHabitTask]);
   
   /**
-   * Process tasks for a specific habit
-   */
-  const processHabitTasks = useCallback((
-    habitId: string,
-    date: string,
-    tasks: Task[]
-  ) => {
-    console.log(`Processing ${tasks.length} tasks for habit ${habitId} on ${date}`);
-    
-    // Find tasks for this habit and date
-    const habitTasks = tasks.filter(task => {
-      return task.relationships?.habitId === habitId && 
-             task.relationships?.date === date;
-    });
-    
-    return habitTasks;
-  }, []);
-  
-  /**
    * Handle habit completion events
    */
   const handleHabitComplete = useCallback((payload: any) => {
@@ -163,7 +142,10 @@ export const useUnifiedHabitTaskIntegration = () => {
       );
       
       if (habitTask && !habitTask.completed) {
-        taskOperations.completeTask(habitTask.id, { value });
+        eventManager.emit('task:complete', { 
+          taskId: habitTask.id,
+          metrics: { value }
+        });
       }
     };
     
@@ -179,23 +161,6 @@ export const useUnifiedHabitTaskIntegration = () => {
         console.error('Error parsing tasks:', e);
       }
     }
-  }, []);
-  
-  /**
-   * Sync habits with tasks
-   */
-  const syncHabitsWithTasks = useCallback((templates?: ActiveTemplate[]) => {
-    console.log('Syncing habits with tasks...');
-    
-    // Check for missing habit tasks
-    eventManager.emit('habits:check-pending', {});
-    
-    // Force task update
-    setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-    }, 100);
-    
-    return true;
   }, []);
   
   /**
@@ -246,14 +211,22 @@ export const useUnifiedHabitTaskIntegration = () => {
             return;
           }
           
-          // Determine task type based on metric type
+          // Determine task type and duration based on metric type
           let taskType: TaskType = 'regular';
+          let duration = 1800; // Default 30 min
+          
           const metricType = habit.metrics?.type;
           
-          if (metricType === 'timer') taskType = 'timer';
-          else if (metricType === 'journal') taskType = 'journal';
-          else if (metricType === 'counter') taskType = 'counter';
-          else if (metricType === 'rating') taskType = 'rating';
+          if (metricType === 'timer') {
+            taskType = 'timer';
+            duration = habit.metrics?.goal ? habit.metrics.goal * 60 : 1800;
+          } else if (metricType === 'journal') {
+            taskType = 'journal';
+          } else if (metricType === 'counter') {
+            taskType = 'counter';
+          } else if (metricType === 'rating') {
+            taskType = 'rating';
+          }
           
           // Create task for this habit
           const taskId = createHabitTask(
@@ -261,7 +234,7 @@ export const useUnifiedHabitTaskIntegration = () => {
             template.templateId,
             habit.name,
             today,
-            habit.metrics?.goal ? habit.metrics.goal * 60 : 1800, // Default 30 min or goal in seconds
+            duration,
             { 
               suppressToast: true,
               taskType,
@@ -280,6 +253,23 @@ export const useUnifiedHabitTaskIntegration = () => {
     }
   }, [createHabitTask]);
   
+  /**
+   * Sync habits with tasks
+   */
+  const syncHabitsWithTasks = useCallback(() => {
+    console.log('Syncing habits with tasks...');
+    
+    // Check for missing habit tasks
+    checkForMissingHabitTasks();
+    
+    // Force task update
+    setTimeout(() => {
+      window.dispatchEvent(new Event('force-task-update'));
+    }, 100);
+    
+    return true;
+  }, [checkForMissingHabitTasks]);
+  
   // Set up event listeners
   useEvent('habit:schedule', handleHabitSchedule);
   useEffect(() => {
@@ -291,7 +281,6 @@ export const useUnifiedHabitTaskIntegration = () => {
     scheduledTasksRef,
     createHabitTask,
     handleHabitSchedule,
-    processHabitTasks,
     handleHabitComplete,
     syncHabitsWithTasks,
     checkForMissingHabitTasks

@@ -7,10 +7,7 @@ import { ActiveTemplate } from '@/types/habits/types';
 /**
  * Unified hook for template event handlers
  * 
- * This consolidates functionality from:
- * - useTemplateEventHandlers
- * - useTemplateManagement
- * - useHabitActions (template management section)
+ * This consolidates all template-related event handling in one place
  */
 export const useUnifiedTemplateHandlers = (
   templates: ActiveTemplate[],
@@ -18,7 +15,7 @@ export const useUnifiedTemplateHandlers = (
 ) => {
   // Add a template
   const addTemplate = useCallback((template: Partial<ActiveTemplate> & { templateId: string }) => {
-    console.log("Event received: habit:template-add", template);
+    console.log("Adding template:", template);
     
     dispatch({ type: 'ADD_TEMPLATE', payload: template });
     
@@ -33,8 +30,8 @@ export const useUnifiedTemplateHandlers = (
   }, [templates, dispatch]);
 
   // Update a template
-  const handleTemplateUpdate = useCallback((template: any) => {
-    console.log("Event received: habit:template-update", template);
+  const updateTemplate = useCallback((template: any) => {
+    console.log("Updating template:", template);
     
     if (template.templateId) {
       dispatch({ 
@@ -56,13 +53,11 @@ export const useUnifiedTemplateHandlers = (
   }, [templates, dispatch]);
 
   // Delete a template
-  const handleTemplateDelete = useCallback((data: { 
+  const deleteTemplate = useCallback((data: { 
     templateId: string; 
     isOriginatingAction?: boolean;
   }) => {
-    console.log("Event received: habit:template-delete", data.templateId, {
-      isOriginatingAction: data.isOriginatingAction
-    });
+    console.log("Deleting template:", data.templateId);
     
     // Update state via reducer
     dispatch({ type: 'REMOVE_TEMPLATE', payload: data.templateId });
@@ -88,15 +83,15 @@ export const useUnifiedTemplateHandlers = (
   }, [templates, dispatch]);
 
   // Update template order
-  const handleTemplateOrderUpdate = useCallback((templates: ActiveTemplate[]) => {
-    console.log("Event received: habit:template-order-update", templates);
+  const updateTemplateOrder = useCallback((templates: ActiveTemplate[]) => {
+    console.log("Updating template order");
     dispatch({ type: 'UPDATE_TEMPLATE_ORDER', payload: templates });
     localStorage.setItem('habit-templates', JSON.stringify(templates));
   }, [dispatch]);
 
   // Update template days
-  const handleTemplateDaysUpdate = useCallback((payload: { templateId: string; activeDays: string[] }) => {
-    console.log("Event received: habit:template-days-update", payload);
+  const updateTemplateDays = useCallback((payload: { templateId: string; activeDays: string[] }) => {
+    console.log("Updating template days for", payload.templateId);
     
     const { templateId, activeDays } = payload;
     
@@ -120,11 +115,11 @@ export const useUnifiedTemplateHandlers = (
   }, [templates, dispatch]);
 
   // Handle custom template deletion
-  const handleCustomTemplateDelete = useCallback((data: { 
+  const deleteCustomTemplate = useCallback((data: { 
     templateId: string;
     suppressToast?: boolean;
   }) => {
-    console.log("Event received: habit:custom-template-delete", data.templateId);
+    console.log("Deleting custom template:", data.templateId);
     dispatch({ type: 'REMOVE_CUSTOM_TEMPLATE', payload: data.templateId });
     
     // Fixed: Use templateId instead of id
@@ -137,12 +132,34 @@ export const useUnifiedTemplateHandlers = (
     }
   }, [templates, dispatch]);
 
+  // Handle all template-related events
+  const setupEventListeners = useCallback(() => {
+    // Register event handlers
+    eventManager.on('habit:template-add', addTemplate);
+    eventManager.on('habit:template-update', updateTemplate);
+    eventManager.on('habit:template-delete', deleteTemplate);
+    eventManager.on('habit:template-order-update', updateTemplateOrder);
+    eventManager.on('habit:template-days-update', updateTemplateDays);
+    eventManager.on('habit:custom-template-delete', deleteCustomTemplate);
+    
+    // Return cleanup function
+    return () => {
+      eventManager.off('habit:template-add', addTemplate);
+      eventManager.off('habit:template-update', updateTemplate);
+      eventManager.off('habit:template-delete', deleteTemplate);
+      eventManager.off('habit:template-order-update', updateTemplateOrder);
+      eventManager.off('habit:template-days-update', updateTemplateDays);
+      eventManager.off('habit:custom-template-delete', deleteCustomTemplate);
+    };
+  }, [addTemplate, updateTemplate, deleteTemplate, updateTemplateOrder, updateTemplateDays, deleteCustomTemplate]);
+
   return {
     addTemplate,
-    handleTemplateUpdate,
-    handleTemplateDelete,
-    handleTemplateOrderUpdate,
-    handleTemplateDaysUpdate,
-    handleCustomTemplateDelete
+    updateTemplate,
+    deleteTemplate,
+    updateTemplateOrder,
+    updateTemplateDays,
+    deleteCustomTemplate,
+    setupEventListeners
   };
 };

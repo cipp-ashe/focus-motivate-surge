@@ -7,10 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * Unified hook for task events and actions
  * 
- * This hook consolidates functionality from previously separate hooks:
- * - useTaskEvents
- * - useTaskActions
- * - useTaskManager
+ * This hook provides a comprehensive API for all task-related events and actions
  */
 export const useUnifiedTaskEvents = () => {
   // Create a new task with ID and timestamp
@@ -74,7 +71,7 @@ export const useUnifiedTaskEvents = () => {
     eventManager.emit('task:reload', undefined);
   }, []);
   
-  // Show image in modal
+  // Media-related event emitters
   const showTaskImage = useCallback((imageUrl: string, taskName: string) => {
     eventManager.emit('task:show-image', {
       imageUrl,
@@ -82,7 +79,6 @@ export const useUnifiedTaskEvents = () => {
     });
   }, []);
   
-  // Open checklist modal
   const openTaskChecklist = useCallback((taskId: string, taskName: string, items: any[]) => {
     eventManager.emit('task:open-checklist', {
       taskId,
@@ -91,7 +87,6 @@ export const useUnifiedTaskEvents = () => {
     });
   }, []);
   
-  // Open journal modal
   const openTaskJournal = useCallback((taskId: string, taskName: string, entry: string = '') => {
     eventManager.emit('task:open-journal', {
       taskId,
@@ -100,7 +95,6 @@ export const useUnifiedTaskEvents = () => {
     });
   }, []);
   
-  // Open voice recorder modal
   const openTaskVoiceRecorder = useCallback((taskId: string, taskName: string) => {
     eventManager.emit('task:open-voice-recorder', {
       taskId,
@@ -108,7 +102,7 @@ export const useUnifiedTaskEvents = () => {
     });
   }, []);
   
-  // Check pending habits
+  // Habit integration
   const checkPendingHabits = useCallback(() => {
     console.log('Checking pending habits');
     eventManager.emit('habits:check-pending', {});
@@ -125,7 +119,7 @@ export const useUnifiedTaskEvents = () => {
     trackTaskTime,
     forceTaskUpdate,
     
-    // Modal actions
+    // Media actions
     showTaskImage,
     openTaskChecklist,
     openTaskJournal,

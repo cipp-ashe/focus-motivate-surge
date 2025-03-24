@@ -15,9 +15,7 @@ interface UnifiedTaskEventListenerProps {
 /**
  * Unified component for listening to task-related events
  * 
- * This component consolidates functionality from:
- * - TaskEventListener
- * - Media event handlers
+ * This component consolidates all task event handling in one place
  */
 export const UnifiedTaskEventListener: React.FC<UnifiedTaskEventListenerProps> = ({
   onShowImage,
@@ -26,7 +24,7 @@ export const UnifiedTaskEventListener: React.FC<UnifiedTaskEventListenerProps> =
   onOpenVoiceRecorder,
   onTaskUpdate
 }) => {
-  // Reference to track if a modal is open
+  // Reference to track if a modal is open to prevent event loops
   const isModalOpenRef = useRef(false);
 
   // Use our unified media handlers

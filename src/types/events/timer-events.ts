@@ -24,7 +24,13 @@ export interface TimerEventPayloadMap {
   };
   'timer:complete': { 
     taskId?: string; 
-    metrics?: any;
+    metrics?: {
+      totalTime?: number;
+      pauseCount?: number;
+      extensionCount?: number;
+      originalDuration?: number;
+      actualDuration?: number;
+    };
   };
   'timer:extend': { 
     taskId?: string; 
@@ -43,6 +49,12 @@ export interface TimerEventPayloadMap {
   };
   'timer:update-metrics': { 
     taskId?: string; 
-    metrics: any;
+    metrics: {
+      totalTime?: number;
+      pauseCount?: number;
+      extensionCount?: number;
+      originalDuration?: number;
+      actualDuration?: number;
+    };
   };
 }
