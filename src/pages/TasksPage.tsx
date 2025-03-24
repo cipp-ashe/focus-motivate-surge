@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 import { TaskProvider, useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { TaskEventHandler } from '@/components/tasks/TaskEventHandler';

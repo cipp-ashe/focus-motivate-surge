@@ -1,5 +1,5 @@
 
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 
 export interface TaskEventHandlerProps {
   items: Task[];

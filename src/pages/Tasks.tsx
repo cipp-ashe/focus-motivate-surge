@@ -1,8 +1,7 @@
-
 import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
-import { ChecklistItem, Task } from '@/types/tasks';
+import { ChecklistItem, Task } from '@/types/task';
 import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
 import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';

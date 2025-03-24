@@ -5,7 +5,7 @@ import { completedTasksStorage } from './completedTasksStorage';
 import { taskRelationshipStorage } from './taskRelationshipStorage';
 import { constants } from './constants';
 import { migrateTaskTypes } from './taskMigration';
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 
 // Export all storage modules with a unified interface
 export const taskStorage = {

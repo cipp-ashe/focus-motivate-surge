@@ -1,5 +1,5 @@
 
-import { Task } from '@/types/tasks';
+import { Task } from '@/types/task';
 
 /**
  * TaskContextState interface for the task context
