@@ -1,5 +1,6 @@
+
 import mitt from 'mitt';
-import type { EventType, EventPayload, EventCallback } from '@/types/events';
+import type { EventType, EventPayload, EventCallback, EventUnsubscribe } from '@/types/events';
 import { logger } from '@/utils/logManager';
 
 /**
@@ -15,6 +16,9 @@ export class EventManager {
     this.resetEventCounts();
   }
 
+  /**
+   * Get the singleton instance
+   */
   public static getInstance(): EventManager {
     if (!EventManager.instance) {
       EventManager.instance = new EventManager();

@@ -59,9 +59,12 @@ export const HabitRow: React.FC<HabitRowProps> = ({
         
         <div className="mt-2 flex gap-2">
           <HabitMetric 
-            habit={habit}
-            isCompleted={isCompleted}
-            onComplete={onComplete}
+            habitId={habit.id}
+            date={new Date().toISOString()}
+            metricType={habit.metrics.type}
+            value={habit.metrics.type === 'boolean' ? true : (habit.metrics.target || 1)}
+            habitName={habit.name}
+            templateId={habit.relationships?.templateId}
           />
           
           {onAddToTasks && !isCompleted && (
