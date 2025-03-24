@@ -1,7 +1,6 @@
-
 /**
  * Types Index
- * 
+ *
  * This file re-exports all types from the various type modules
  * to provide a single import point for consumers.
  */
@@ -20,3 +19,6 @@ export * from './timer';
 
 // Export metrics types
 export * from './metrics';
+
+// Export component-specific types
+export * from './habitComponents';

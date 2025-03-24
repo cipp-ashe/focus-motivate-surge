@@ -1,13 +1,13 @@
-import { 
-  HabitTemplate, 
-  HabitDetail, 
+import {
+  HabitTemplate,
+  HabitDetail,
   MetricType,
   HabitCategory,
   TimePreference,
   DEFAULT_WEEKDAYS,
   DEFAULT_ALL_DAYS,
-  DayOfWeek
-} from '@/types/habits';
+  DayOfWeek,
+} from '@/types/habit';
 
 /**
  * Helper function to create a habit detail with consistent structure
@@ -31,9 +31,9 @@ const createHabitDetail = (
   metrics: {
     type: metricType,
     goal,
-    unit
+    unit,
   },
-  tips
+  tips,
 });
 
 /**
@@ -41,7 +41,7 @@ const createHabitDetail = (
  */
 const templates: Record<string, HabitTemplate> = {
   // ===== Wellness & Mental Health Templates =====
-  
+
   morningRoutine: {
     id: 'morning-routine',
     name: 'Morning Routine',
@@ -83,10 +83,10 @@ const templates: Record<string, HabitTemplate> = {
         undefined,
         undefined,
         ['Write down your top 3 priorities', 'Review your calendar for the day']
-      )
-    ]
+      ),
+    ],
   },
-  
+
   mindfulnessAndMentalHealth: {
     id: 'mindfulness-mental-health',
     name: 'Mindfulness & Mental Health',
@@ -106,24 +106,24 @@ const templates: Record<string, HabitTemplate> = {
         600,
         'seconds',
         [
-          'Find a quiet space where you won\'t be disturbed',
+          "Find a quiet space where you won't be disturbed",
           'Focus on your breath',
-          'If your mind wanders, gently bring it back'
+          'If your mind wanders, gently bring it back',
         ]
       ),
       createHabitDetail(
         'gratitude',
         'Gratitude Journal',
-        'Note things you\'re thankful for',
+        "Note things you're thankful for",
         'journal',
         'Mental Health',
         'Evening',
         undefined,
         undefined,
         [
-          'Write down 3 things you\'re grateful for',
+          "Write down 3 things you're grateful for",
           'Be specific about what you appreciate and why',
-          'Include both small joys and bigger blessings'
+          'Include both small joys and bigger blessings',
         ]
       ),
       createHabitDetail(
@@ -138,7 +138,7 @@ const templates: Record<string, HabitTemplate> = {
         [
           'Step away from screens',
           'Take deep breaths',
-          'Notice your surroundings using all your senses'
+          'Notice your surroundings using all your senses',
         ]
       ),
       createHabitDetail(
@@ -153,14 +153,14 @@ const templates: Record<string, HabitTemplate> = {
         [
           'Be honest about how you feel',
           'Notice patterns in your mood over time',
-          'Use insights to plan self-care'
+          'Use insights to plan self-care',
         ]
-      )
-    ]
+      ),
+    ],
   },
 
   // ===== Fitness Templates =====
-  
+
   fitnessTracker: {
     id: 'fitness-tracker',
     name: 'Fitness Tracker',
@@ -213,12 +213,12 @@ const templates: Record<string, HabitTemplate> = {
         5,
         undefined,
         ['Consider both effort and enjoyment', 'Use this to adjust future workouts']
-      )
-    ]
+      ),
+    ],
   },
-  
+
   // ===== Productivity Templates =====
-  
+
   workProductivity: {
     id: 'work-productivity',
     name: 'Work Productivity',
@@ -260,10 +260,10 @@ const templates: Record<string, HabitTemplate> = {
         undefined,
         undefined,
         ['Note what went well', 'Identify what could improve', 'Set intentions for tomorrow']
-      )
-    ]
+      ),
+    ],
   },
-  
+
   dailyReview: {
     id: 'daily-review',
     name: 'Daily Review',
@@ -285,7 +285,7 @@ const templates: Record<string, HabitTemplate> = {
         [
           'Do this before checking emails',
           'Review your top 3 priorities',
-          'Check your calendar for important meetings'
+          'Check your calendar for important meetings',
         ]
       ),
       createHabitDetail(
@@ -300,11 +300,11 @@ const templates: Record<string, HabitTemplate> = {
         [
           'Review what went well today',
           'Note any unfinished tasks to move to tomorrow',
-          'End with a moment of gratitude'
+          'End with a moment of gratitude',
         ]
       ),
-    ]
-  }
+    ],
+  },
 };
 
 /**
@@ -318,5 +318,5 @@ export const getRecommendedTemplates = (): HabitTemplate[] => {
  * Returns a specific template by ID
  */
 export const getTemplateById = (id: string): HabitTemplate | undefined => {
-  return Object.values(templates).find(template => template.id === id);
+  return Object.values(templates).find((template) => template.id === id);
 };

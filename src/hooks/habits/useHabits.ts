@@ -1,7 +1,6 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Habit, STORAGE_KEY } from '@/types/habits/types';
+import { Habit, STORAGE_KEY } from '@/types/habit';
 import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
 
 // Helper function to parse stored habits
@@ -34,51 +33,61 @@ export function useHabits() {
     }
   }, []);
 
-  const addHabit = useCallback((habit: Omit<Habit, 'id' | 'completed' | 'streak' | 'lastCompleted'>) => {
-    const newHabit: Habit = {
-      ...habit,
-      id: Date.now().toString(),
-      completed: false,
-      streak: 0,
-      lastCompleted: null,
-    };
-    
-    saveHabits([newHabit, ...habits]);
-    toast.success("New habit created!");
-  }, [habits, saveHabits]);
+  const addHabit = useCallback(
+    (habit: Omit<Habit, 'id' | 'completed' | 'streak' | 'lastCompleted'>) => {
+      const newHabit: Habit = {
+        ...habit,
+        id: Date.now().toString(),
+        completed: false,
+        streak: 0,
+        lastCompleted: null,
+      };
 
-  const toggleHabit = useCallback((habitId: string) => {
-    const updatedHabits = habits.map((habit) =>
-      habit.id === habitId
-        ? {
-            ...habit,
-            completed: !habit.completed,
-            streak: habit.completed ? habit.streak - 1 : habit.streak + 1,
-            lastCompleted: habit.completed ? null : new Date(),
-          }
-        : habit
-    );
-    
-    saveHabits(updatedHabits);
-    toast.success("Habit status updated!");
-  }, [habits, saveHabits]);
+      saveHabits([newHabit, ...habits]);
+      toast.success('New habit created!');
+    },
+    [habits, saveHabits]
+  );
 
-  const deleteHabit = useCallback((habitId: string) => {
-    const newHabits = habits.filter(habit => habit.id !== habitId);
-    saveHabits(newHabits);
-    toast.success("Habit deleted!");
-  }, [habits, saveHabits]);
+  const toggleHabit = useCallback(
+    (habitId: string) => {
+      const updatedHabits = habits.map((habit) =>
+        habit.id === habitId
+          ? {
+              ...habit,
+              completed: !habit.completed,
+              streak: habit.completed ? habit.streak - 1 : habit.streak + 1,
+              lastCompleted: habit.completed ? null : new Date(),
+            }
+          : habit
+      );
 
-  const updateHabit = useCallback((habitId: string, updates: Partial<Habit>) => {
-    const updatedHabits = habits.map(habit =>
-      habit.id === habitId
-        ? { ...habit, ...updates }
-        : habit
-    );
-    
-    saveHabits(updatedHabits);
-    toast.success("Habit updated!");
-  }, [habits, saveHabits]);
+      saveHabits(updatedHabits);
+      toast.success('Habit status updated!');
+    },
+    [habits, saveHabits]
+  );
+
+  const deleteHabit = useCallback(
+    (habitId: string) => {
+      const newHabits = habits.filter((habit) => habit.id !== habitId);
+      saveHabits(newHabits);
+      toast.success('Habit deleted!');
+    },
+    [habits, saveHabits]
+  );
+
+  const updateHabit = useCallback(
+    (habitId: string, updates: Partial<Habit>) => {
+      const updatedHabits = habits.map((habit) =>
+        habit.id === habitId ? { ...habit, ...updates } : habit
+      );
+
+      saveHabits(updatedHabits);
+      toast.success('Habit updated!');
+    },
+    [habits, saveHabits]
+  );
 
   useEffect(() => {
     // When habits are loaded, check for pending tasks

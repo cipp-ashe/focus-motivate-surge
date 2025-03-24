@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ActiveTemplate, HabitTemplate, DayOfWeek } from '@/types/habits/types';
+import { ActiveTemplate, HabitTemplate, DayOfWeek } from '@/types/habit';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 
 export const useTemplateCreation = (
   addTemplate: (template: ActiveTemplate) => void,
-  updateTemplate: (templateId: string, template: Partial<ActiveTemplate>) => void,
+  updateTemplate: (templateId: string, template: Partial<ActiveTemplate>) => void
 ) => {
   const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
@@ -37,7 +37,7 @@ export const useTemplateCreation = (
 
   const handleSaveTemplate = () => {
     if (!selectedTemplate) return;
-    
+
     if (!newTemplateName.trim() && isCreatingTemplate) {
       toast.error('Please enter a template name');
       return;
@@ -50,7 +50,7 @@ export const useTemplateCreation = (
 
     if (isCreatingTemplate) {
       const templateId = `custom-${Date.now()}`;
-      
+
       const customTemplate: HabitTemplate = {
         id: templateId,
         name: newTemplateName,
@@ -68,20 +68,20 @@ export const useTemplateCreation = (
 
       eventManager.emit('habit:custom-template-create', { ...customTemplate, suppressToast: true });
 
-      const activeTemplate: ActiveTemplate = { 
+      const activeTemplate: ActiveTemplate = {
         templateId: templateId,
         habits: selectedTemplate.habits,
         activeDays: selectedTemplate.activeDays,
         customized: true,
         name: newTemplateName,
-        description: 'Custom template'
+        description: 'Custom template',
       };
-      
+
       addTemplate(activeTemplate);
       toast.success('Template created and added successfully');
-      
+
       handleCloseTemplate();
-      
+
       eventManager.emit('habit:template-update', { ...activeTemplate, suppressToast: true });
       window.dispatchEvent(new Event('templatesUpdated'));
       window.dispatchEvent(new Event('force-habits-update'));

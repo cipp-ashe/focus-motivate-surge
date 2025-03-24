@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { HabitTemplate } from '../types';
+import { HabitTemplate } from '@/types/habit';
 
 export const useTemplateLoader = (isOpen: boolean) => {
   const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
@@ -18,14 +17,14 @@ export const useTemplateLoader = (isOpen: boolean) => {
     };
 
     setCustomTemplates(loadCustomTemplates());
-    
+
     // Also listen for template updates
     const handleTemplatesUpdated = () => {
       setCustomTemplates(loadCustomTemplates());
     };
-    
+
     window.addEventListener('templatesUpdated', handleTemplatesUpdated);
-    
+
     return () => {
       window.removeEventListener('templatesUpdated', handleTemplatesUpdated);
     };
