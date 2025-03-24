@@ -1,23 +1,28 @@
 
-import React, { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import Layout from './components/layout/Layout';
-import { Toaster } from './components/ui/sonner'; // Updated import path
-import { ThemeProvider } from './components/theme-provider'; // Updated import path
-import { initializeApplication } from './utils/appInitialization';
+import React from 'react';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/toaster';
+import { Router } from '@/router';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query';
+import { AuthProvider } from '@/contexts/auth/AuthContext';
+import { TaskProvider } from '@/contexts/tasks/TaskContext';
+import { Sonner } from '@/components/sonner';
 
 export default function App() {
-  // Run initialization on app startup
-  useEffect(() => {
-    initializeApplication();
-  }, []);
-
   return (
-    <ThemeProvider defaultTheme="system" storageKey="ui-theme">
-      <Layout>
-        <Outlet />
-        <Toaster />
-      </Layout>
-    </ThemeProvider>
+    <>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TaskProvider>
+            <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
+              <Router />
+              <Toaster />
+              <Sonner />
+            </ThemeProvider>
+          </TaskProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </>
   );
 }

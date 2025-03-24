@@ -2,158 +2,133 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Task, TaskType, TaskStatus } from '@/types/tasks';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { NewTaskTypeSelector } from './NewTaskTypeSelector';
+import { v4 as uuidv4 } from 'uuid';
+import { Input } from '@/components/ui/input';
+import { TaskTypeSelector } from './TaskTypeSelector';
+import { toast } from 'sonner';
 
 interface TaskDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  task?: Task | null;
-  onSave: (task: Partial<Task>) => void;
-  mode?: 'create' | 'edit';
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialTask?: Task | null;
+  onSaveTask?: (task: Task) => void;
 }
 
 export const TaskDialog: React.FC<TaskDialogProps> = ({
-  isOpen,
-  onClose,
-  task,
-  onSave,
-  mode = 'create'
+  open,
+  onOpenChange,
+  initialTask,
+  onSaveTask
 }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [taskType, setTaskType] = useState<TaskType>('regular');
-  const [status, setStatus] = useState<TaskStatus>('pending');
-  const [duration, setDuration] = useState<number>(1500); // 25 minutes default
+  const [task, setTask] = useState<Partial<Task>>({
+    name: '',
+    taskType: 'regular',
+    completed: false,
+    createdAt: new Date().toISOString()
+  });
   
-  // Initialize form with task data when editing
+  // Update local state when initialTask changes
   useEffect(() => {
-    if (task && mode === 'edit') {
-      setName(task.name || '');
-      setDescription(task.description || '');
-      setTaskType(task.taskType || 'regular');
-      setStatus(task.status || 'pending');
-      setDuration(task.duration || 1500);
+    if (initialTask) {
+      setTask(initialTask);
     } else {
-      // Reset form for new task
-      setName('');
-      setDescription('');
-      setTaskType('regular');
-      setStatus('pending');
-      setDuration(1500);
+      setTask({
+        name: '',
+        taskType: 'regular',
+        completed: false,
+        createdAt: new Date().toISOString()
+      });
     }
-  }, [task, mode, isOpen]);
+  }, [initialTask, open]);
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = () => {
+    if (!task.name) {
+      toast.error('Task name is required');
+      return;
+    }
     
-    const updatedTask: Partial<Task> = {
-      name,
-      description,
-      taskType,
-      status,
-      duration
-    };
+    if (initialTask) {
+      // Update existing task
+      eventManager.emit('task:update', {
+        taskId: initialTask.id,
+        updates: task
+      });
+    } else {
+      // Create new task
+      const newTask: Task = {
+        id: uuidv4(),
+        name: task.name || 'New Task',
+        description: task.description || '',
+        taskType: task.taskType || 'regular',
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+      
+      eventManager.emit('task:create', newTask);
+      
+      if (onSaveTask) {
+        onSaveTask(newTask);
+      }
+    }
     
-    onSave(updatedTask);
-    onClose();
-    
-    // Emit event for analytics or other components
-    eventManager.emit(mode === 'create' ? 'task:create' : 'task:update', {
-      ...(task ? { taskId: task.id } : {}),
-      ...(mode === 'create' ? updatedTask : { updates: updatedTask })
-    });
+    // Close the dialog
+    onOpenChange(false);
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{mode === 'create' ? 'Create New Task' : 'Edit Task'}</DialogTitle>
+          <DialogTitle>{initialTask ? 'Edit Task' : 'Create Task'}</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Task Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter task name"
-                required
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter task description"
-                rows={3}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="taskType">Task Type</Label>
-              <NewTaskTypeSelector 
-                value={taskType} 
-                onChange={setTaskType} 
-                showIntegratedTypes={true}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={status} onValueChange={(value) => setStatus(value as TaskStatus)}>
-                  <SelectTrigger id="status">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="started">Started</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="delayed">Delayed</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="duration">Duration (minutes)</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  min="1"
-                  max="240"
-                  value={Math.floor(duration / 60)}
-                  onChange={(e) => setDuration(parseInt(e.target.value) * 60)}
-                  placeholder="Enter duration in minutes"
-                />
-              </div>
-            </div>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              Task Name
+            </label>
+            <Input
+              id="name"
+              value={task.name || ''}
+              onChange={(e) => setTask({ ...task, name: e.target.value })}
+              placeholder="Enter task name"
+            />
           </div>
           
-          <DialogFooter>
-            <Button variant="outline" type="button" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {mode === 'create' ? 'Create Task' : 'Update Task'}
-            </Button>
-          </DialogFooter>
-        </form>
+          <div className="grid gap-2">
+            <label htmlFor="description" className="text-sm font-medium">
+              Description (Optional)
+            </label>
+            <Input
+              id="description"
+              value={task.description || ''}
+              onChange={(e) => setTask({ ...task, description: e.target.value })}
+              placeholder="Enter description"
+            />
+          </div>
+          
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">
+              Task Type
+            </label>
+            <TaskTypeSelector
+              value={task.taskType || 'regular'}
+              onChange={(type) => setTask({ ...task, taskType: type })}
+            />
+          </div>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            {initialTask ? 'Update' : 'Create'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
-
-export default TaskDialog;

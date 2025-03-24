@@ -1,66 +1,28 @@
 
-// Task domain event types
+/**
+ * Task event types and payload definitions
+ */
+import { Task, TaskType } from '@/types/tasks';
 
-export type TaskEventType =
-  | 'task:add'
+export type TaskEventType = 
+  | 'task:create'
   | 'task:update'
   | 'task:delete'
   | 'task:complete'
-  | 'task:uncomplete'
+  | 'task:dismiss'
+  | 'task:select'
   | 'task:timer'
-  | 'task:status-change'
-  | 'task:selected'
-  | 'task:unselected'
-  | 'task:reorder'
-  | 'task:import'
-  | 'task:checklist-update'
-  | 'task:journal-update';
+  | 'task:force-update'
+  | 'task:reload';
 
 export interface TaskEventPayloadMap {
-  'task:add': {
-    task: any;
-  };
-  'task:update': {
-    taskId: string;
-    updates: any;
-  };
-  'task:delete': {
-    taskId: string;
-  };
-  'task:complete': {
-    taskId: string;
-    metrics?: any;
-  };
-  'task:uncomplete': {
-    taskId: string;
-  };
-  'task:timer': {
-    taskId: string;
-    minutes: number;
-    notes?: string;
-  };
-  'task:status-change': {
-    taskId: string;
-    status: string;
-  };
-  'task:selected': {
-    taskId: string;
-  };
-  'task:unselected': {
-    taskId: string;
-  };
-  'task:reorder': {
-    taskIds: string[];
-  };
-  'task:import': {
-    tasks: any[];
-  };
-  'task:checklist-update': {
-    taskId: string;
-    items: any[];
-  };
-  'task:journal-update': {
-    taskId: string;
-    entry: string;
-  };
+  'task:create': Task;
+  'task:update': { taskId: string; updates: Partial<Task> };
+  'task:delete': { taskId: string; reason?: string };
+  'task:complete': { taskId: string; metrics?: any };
+  'task:dismiss': { taskId: string; habitId?: string; date?: string };
+  'task:select': string | null;
+  'task:timer': { taskId: string; minutes: number; notes?: string };
+  'task:force-update': undefined;
+  'task:reload': undefined;
 }

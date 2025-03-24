@@ -1,145 +1,186 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useCallback, useEffect, useState } from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Note, createNote } from '@/types/notes';
-import { eventManager } from '@/lib/events/EventManager';
-import TagInput from './TagInput';
-import NoteContent from './NoteContent';
-import { Editor } from '@tiptap/react';
-import { cn } from '@/lib/utils';
+import { Note } from '@/types/notes';
+import { toast } from 'sonner';
+import { noteStorage } from '@/lib/storage/noteStorage';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
-export default function NotesEditor() {
+interface NotesEditorProps {
+  noteId?: string;
+  initialNote?: Note;
+  onSave?: (note: Note) => void;
+  onCancel?: () => void;
+}
+
+export const NotesEditor: React.FC<NotesEditorProps> = ({
+  noteId,
+  initialNote,
+  onSave,
+  onCancel
+}) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [tags, setTags] = useState<{ name: string; color: string }[]>([]);
-  const [titleError, setTitleError] = useState(false);
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const [isEditorFocused, setIsEditorFocused] = useState(false);
-  const [isEditorEmpty, setIsEditorEmpty] = useState(true);
-
-  // Reset title error when title changes
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  
+  // Populate form with initial note data if provided
   useEffect(() => {
-    if (title.trim() !== '') {
-      setTitleError(false);
+    if (initialNote) {
+      setTitle(initialNote.title || '');
+      setContent(initialNote.content || '');
+      setTags(initialNote.tags || []);
+    } else if (noteId) {
+      // Fetch note by ID if not provided but ID is available
+      const note = noteStorage.getNoteById(noteId);
+      if (note) {
+        setTitle(note.title || '');
+        setContent(note.content || '');
+        setTags(note.tags || []);
+      }
     }
-  }, [title]);
-
-  // Update editor state
-  useEffect(() => {
-    if (editor) {
-      const updateIsEmpty = () => {
-        setIsEditorEmpty(editor.isEmpty);
-      };
-
-      editor.on('update', updateIsEmpty);
-      editor.on('focus', () => setIsEditorFocused(true));
-      editor.on('blur', () => setIsEditorFocused(false));
-
-      return () => {
-        editor.off('update', updateIsEmpty);
-        editor.off('focus');
-        editor.off('blur');
-      };
+  }, [initialNote, noteId]);
+  
+  // Add a tag
+  const addTag = useCallback(() => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
     }
-  }, [editor]);
-
-  // Handle title change
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  };
-
-  // Handle content change
-  const handleContentChange = (newContent: string) => {
-    setContent(newContent);
-  };
-
-  // Handle tag change
-  const handleTagsChange = (newTags: { name: string; color: string }[]) => {
-    setTags(newTags);
-  };
-
-  // Clear form
-  const clearForm = () => {
-    setTitle('');
-    setContent('');
-    setTags([]);
-    if (editor) {
-      editor.commands.clearContent();
+  }, [tagInput, tags]);
+  
+  // Handle Enter key in tag input
+  const handleTagKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
     }
-  };
-
-  // Add note
-  const addNote = () => {
-    if (title.trim() === '') {
-      setTitleError(true);
+  }, [addTag]);
+  
+  // Remove a tag
+  const removeTag = useCallback((tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  }, [tags]);
+  
+  // Save the note
+  const handleSave = useCallback(() => {
+    if (!title.trim()) {
+      toast.error('Please enter a title for the note');
       return;
     }
     
-    // Create a new note with proper timestamps
-    const now = new Date().toISOString();
-    const newNote = {
-      title,
-      content,
-      tags: tags || [],
-      createdAt: now,
-      updatedAt: now
-    };
-    
-    eventManager.emit('note:add', newNote);
-    clearForm();
-  };
-
+    try {
+      const noteData: Note = {
+        id: noteId || uuidv4(),
+        title: title.trim(),
+        content: content.trim(),
+        tags,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // If updating an existing note, preserve creation date
+      if (noteId) {
+        const existingNote = noteStorage.getNoteById(noteId);
+        if (existingNote) {
+          noteData.createdAt = existingNote.createdAt;
+        }
+      }
+      
+      // Save the note
+      noteStorage.saveNote(noteData);
+      
+      // Call onSave callback if provided
+      if (onSave) {
+        onSave(noteData);
+      }
+      
+      toast.success('Note saved successfully');
+    } catch (error) {
+      console.error('Error saving note:', error);
+      toast.error('Failed to save note');
+    }
+  }, [title, content, tags, noteId, onSave]);
+  
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title" className={titleError ? 'text-destructive' : ''}>
-          Title {titleError && <span className="text-destructive">*</span>}
-        </Label>
-        <Input
-          id="title"
-          placeholder="Note title"
-          value={title}
-          onChange={handleTitleChange}
-          className={titleError ? 'border-destructive' : ''}
-        />
-        {titleError && (
-          <p className="text-destructive text-sm">Title is required</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="content">Content</Label>
-        <div
-          className={cn(
-            'border rounded-md min-h-[200px] transition-colors',
-            isEditorFocused
-              ? 'border-primary ring-1 ring-ring'
-              : isEditorEmpty
-              ? 'border-input'
-              : 'border-input'
-          )}
-        >
-          <NoteContent
-            content={content}
-            onChange={handleContentChange}
-            setEditor={setEditor}
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{noteId ? 'Edit Note' : 'Create New Note'}</CardTitle>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <label htmlFor="title" className="text-sm font-medium">
+            Title
+          </label>
+          <Input
+            id="title"
+            placeholder="Note title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="tags">Tags</Label>
-        <TagInput tags={tags} onChange={handleTagsChange} />
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" onClick={clearForm}>
-          Clear
+        
+        <div className="space-y-2">
+          <label htmlFor="content" className="text-sm font-medium">
+            Content
+          </label>
+          <Textarea
+            id="content"
+            placeholder="Start typing your note here..."
+            rows={8}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[200px]"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <label htmlFor="tags" className="text-sm font-medium">
+            Tags
+          </label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          <div className="flex space-x-2">
+            <Input
+              id="tags"
+              placeholder="Add a tag"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+            />
+            <Button type="button" variant="outline" onClick={addTag}>
+              Add
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
         </Button>
-        <Button onClick={addNote}>Add Note</Button>
-      </div>
-    </div>
+        <Button onClick={handleSave}>
+          Save Note
+        </Button>
+      </CardFooter>
+    </Card>
   );
-}
+};

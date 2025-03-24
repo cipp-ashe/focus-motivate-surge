@@ -1,47 +1,39 @@
 
 /**
- * Journal-specific event types and payloads
+ * Journal event types and payload definitions
  */
 
-import { Note, Tag } from '@/types/notes';
-
 export type JournalEventType =
-  | 'journal:create'
-  | 'journal:update'
-  | 'journal:delete'
-  | 'journal:complete'
-  | 'journal:open';
+  | 'journal:open'
+  | 'journal:save'
+  | 'journal:close'
+  | 'journal:get'
+  | 'journal:list';
 
 export interface JournalEventPayloadMap {
-  'journal:create': {
-    habitId?: string;
-    habitName?: string;
-    taskId?: string;
-    templateId?: string;
-    title?: string;
-    content?: string;
-    date?: string;
-    tags?: Tag[];
-  };
-  'journal:update': {
-    id: string;
-    updates: Partial<Note>;
-  };
-  'journal:delete': {
-    id: string;
-  };
-  'journal:complete': {
-    id: string;
-    habitId?: string;
-    taskId?: string;
-  };
   'journal:open': {
     habitId?: string;
     habitName?: string;
-    description?: string;
     templateId?: string;
-    taskId?: string;
+    description?: string;
     date?: string;
-    content?: string;
+    taskId?: string;
+  };
+  'journal:save': {
+    id?: string;
+    content: string;
+    date: string;
+    habitId?: string;
+    templateId?: string;
+    journalType?: 'habit' | 'task';
+  };
+  'journal:close': undefined;
+  'journal:get': {
+    habitId: string;
+    date: string;
+  };
+  'journal:list': {
+    habitId?: string;
+    limit?: number;
   };
 }

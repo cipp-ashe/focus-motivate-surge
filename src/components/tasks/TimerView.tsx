@@ -1,223 +1,217 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Task } from '@/types/tasks';
-import { eventManager } from '@/lib/events/EventManager';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
-import { Play, Pause, Skip, Square, Check } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Task } from '@/types/tasks';
 import { toast } from 'sonner';
+import { eventManager } from '@/lib/events/EventManager';
+import { Timer } from '@/components/timer/Timer';
+import { Textarea } from '@/components/ui/textarea';
+import { useTaskManager } from '@/hooks/tasks/useTaskManager';
+import { timerSettingsStorage } from '@/lib/storage/timerSettings';
 
-// Let's fix the TimerView component
-// We'll focus on the event handlers and task type
+interface TimerViewProps {
+  isVisible: boolean;
+  onClose?: () => void;
+}
 
-const TimerView = () => {
-  // State for timer
-  const [currentTask, setCurrentTask] = useState<Task | null>(null);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [secondsRemaining, setSecondsRemaining] = useState(0);
-  const [notes, setNotes] = useState('');
-  const timerRef = useRef<number | null>(null);
+export const TimerView: React.FC<TimerViewProps> = ({ isVisible, onClose }) => {
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [timerNotes, setTimerNotes] = useState<string>('');
+  const [timeElapsed, setTimeElapsed] = useState<number>(0);
+  const { updateTask } = useTaskManager();
   
-  // Set up timer task event listener
+  // Listen for timer:set-task events
   useEffect(() => {
-    // Handle timer task
-    const handleSetTimerTask = (task: any) => {
-      // Store the task
+    // Set up event listener for timer task
+    const handleTimerTask = (task: Task) => {
+      console.log('Timer view: Received task for timer', task);
+      
       if (!task || !task.id) {
-        console.error('Invalid task for timer:', task);
+        console.error('Invalid task data received');
         return;
       }
       
-      console.log('Setting timer task:', task);
+      setActiveTask(task);
       
-      // Make sure task has all the properties we need
-      const fullTask: Task = {
-        id: task.id,
-        name: task.name,
-        completed: task.completed || false,
-        createdAt: task.createdAt || new Date().toISOString(),
-        taskType: task.taskType || 'timer',
-        duration: task.duration || 1500, // Default to 25 minutes
-        ...task
-      };
+      // Load existing timer notes if available
+      if (task.timerNotes) {
+        setTimerNotes(task.timerNotes);
+      } else {
+        setTimerNotes('');
+      }
       
-      setCurrentTask(fullTask);
+      // Set default timer duration from task or use saved settings
+      const settings = timerSettingsStorage.loadSettings();
+      const defaultDuration = settings?.defaultFocusMinutes || 25;
       
-      // Set the initial time from the task
-      const duration = fullTask.duration || 1500; // Default to 25 minutes
-      setSecondsRemaining(duration);
-      
-      // Notify the user
-      toast.success(`Timer set for: ${fullTask.name}`);
+      // Emit timer task event
+      eventManager.emit('task:timer', {
+        taskId: task.id,
+        minutes: task.timerMinutes || task.duration ? Math.floor(task.duration / 60) : defaultDuration,
+        notes: task.timerNotes
+      });
     };
     
-    // Add event listener
-    const unsubscribe = eventManager.on('timer:set-task', handleSetTimerTask);
+    const unsubscribe = eventManager.on('timer:set-task', handleTimerTask);
     
-    // Clean up event listener
     return () => {
       unsubscribe();
     };
   }, []);
   
-  // Handle timer logic
-  const startTimer = () => {
-    setIsTimerRunning(true);
-    timerRef.current = window.setInterval(() => {
-      setSecondsRemaining((prevSeconds) => {
-        if (prevSeconds <= 0) {
-          clearInterval(timerRef.current!);
-          setIsTimerRunning(false);
-          toast.success('Timer completed!');
-          return 0;
-        }
-        return prevSeconds - 1;
+  // Save timer notes
+  const saveTimerNotes = useCallback(() => {
+    if (!activeTask) return;
+    
+    // Update the task with the notes
+    if (updateTask) {
+      updateTask(activeTask.id, {
+        timerNotes
       });
-    }, 1000);
-  };
+      
+      toast.success('Timer notes saved');
+    }
+  }, [activeTask, timerNotes, updateTask]);
   
-  const pauseTimer = () => {
-    setIsTimerRunning(false);
-    clearInterval(timerRef.current!);
-  };
-  
-  const resetTimer = () => {
-    setIsTimerRunning(false);
-    clearInterval(timerRef.current!);
-    setSecondsRemaining(currentTask?.duration || 1500);
-    setNotes('');
-  };
-  
-  // Format time
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedSeconds = String(remainingSeconds).padStart(2, '0');
-    return `${formattedMinutes}:${formattedSeconds}`;
-  };
+  // Clear the active task
+  const clearActiveTask = useCallback(() => {
+    if (timeElapsed > 0 && activeTask) {
+      // Save time spent before clearing
+      const timeSpentMinutes = Math.floor(timeElapsed / 60);
+      console.log(`Logging ${timeSpentMinutes} minutes for task ${activeTask.id}`);
+      
+      // Update the task with time spent data
+      if (updateTask) {
+        updateTask(activeTask.id, {
+          timerNotes,
+          duration: (activeTask.duration || 0) + timeElapsed
+        });
+      }
+    }
+    
+    setActiveTask(null);
+    setTimerNotes('');
+    setTimeElapsed(0);
+    
+    if (onClose) {
+      onClose();
+    }
+  }, [activeTask, timeElapsed, timerNotes, updateTask, onClose]);
   
   // Handle task completion
-  const handleCompleteTask = () => {
-    if (!currentTask) return;
+  const completeTask = useCallback(() => {
+    if (!activeTask) return;
     
-    // Calculate time spent
-    const timeSpent = (currentTask.duration || 0) - secondsRemaining;
+    // Calculate time metrics
+    const timeSpentMinutes = Math.floor(timeElapsed / 60);
     
-    // Create metrics
+    // Mark task as selected first to ensure UI updates
+    eventManager.emit('task:select', activeTask.id);
+    
+    // Create metrics object
     const metrics = {
-      timeSpent,
-      timerMinutes: Math.ceil(timeSpent / 60),
-      notes: notes || undefined,
+      timeSpent: timeElapsed,
+      completionTime: new Date().toISOString(),
+      timeSpentMinutes
     };
     
-    // Emit task completion event
-    eventManager.emit('task:complete', { 
-      taskId: currentTask.id,
-      metrics 
+    // Save the notes first
+    if (timerNotes && updateTask) {
+      updateTask(activeTask.id, { timerNotes });
+    }
+    
+    // Emit complete event with metrics
+    eventManager.emit('task:complete', {
+      taskId: activeTask.id,
+      metrics
     });
     
-    // Reset timer
-    resetTimer();
+    toast.success(`Task "${activeTask.name}" completed with ${timeSpentMinutes} minutes logged`);
     
-    // Show toast
-    toast.success(`Completed: ${currentTask.name}`);
-  };
-  
-  // Handle selecting task
-  const handleSelectTask = () => {
-    if (!currentTask) return;
+    // Clear the active task
+    setActiveTask(null);
+    setTimerNotes('');
+    setTimeElapsed(0);
     
-    eventManager.emit('task:select', currentTask.id);
-  };
-  
-  // Update notes
-  const updateNotes = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
-    
-    // Update the current task in memory
-    if (currentTask) {
-      setCurrentTask({
-        ...currentTask,
-        timerNotes: e.target.value
-      });
+    if (onClose) {
+      onClose();
     }
-  };
+  }, [activeTask, timeElapsed, timerNotes, updateTask, onClose]);
   
-  // Render method
+  // Track elapsed time from Timer component
+  const handleTimeUpdate = useCallback((elapsed: number) => {
+    setTimeElapsed(elapsed);
+  }, []);
+  
+  if (!isVisible) {
+    return null;
+  }
+  
   return (
-    <Card className="w-full">
-      <CardContent className="p-5">
-        {/* Task Display */}
-        {currentTask ? (
-          <div>
-            <h2 className="text-lg font-semibold">{currentTask.name}</h2>
-            <p className="text-muted-foreground">
-              Time Remaining: {formatTime(secondsRemaining)}
-            </p>
-          </div>
-        ) : (
-          <p className="text-muted-foreground">No task selected. Set a timer from the task list.</p>
-        )}
-        
-        {/* Notes section */}
-        <div className="mt-4">
-          <Textarea
-            placeholder="Add notes about your session..."
-            className="resize-none"
-            value={notes}
-            onChange={updateNotes}
-          />
-        </div>
-        
-        {/* Controls */}
-        <div className="flex flex-wrap gap-2 mt-4 justify-between">
-          <div className="flex flex-wrap gap-2">
-            {isTimerRunning ? (
-              <Button
-                variant="outline"
-                size="default"
-                onClick={pauseTimer}
-              >
-                <Pause className="h-4 w-4 mr-2" />
-                Pause
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="default"
-                onClick={startTimer}
-                disabled={!currentTask}
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Start
-              </Button>
-            )}
-            
-            <Button
-              variant="outline"
-              size="default"
-              onClick={resetTimer}
-              disabled={!currentTask}
-            >
-              <Square className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
-          </div>
-          
-          <Button
-            variant="default"
-            size="default"
-            onClick={handleCompleteTask}
-            disabled={!currentTask}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Complete
-          </Button>
+    <Card className="w-full md:max-w-md">
+      <CardHeader>
+        <CardTitle>
+          {activeTask ? `Timer: ${activeTask.name}` : 'Timer'}
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-4">
+          {activeTask ? (
+            <>
+              <Timer 
+                initialMinutes={activeTask.timerMinutes || 25}
+                onTimeUpdate={handleTimeUpdate}
+              />
+              
+              <div className="mt-4">
+                <Textarea
+                  placeholder="Add notes about your progress..."
+                  value={timerNotes}
+                  onChange={(e) => setTimerNotes(e.target.value)}
+                  className="min-h-[100px]"
+                />
+              </div>
+            </>
+          ) : (
+            <div className="text-center p-4">
+              <p>No task selected for the timer.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Select a task and click the timer icon to start timing.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
+      
+      <CardFooter className="flex justify-between">
+        <Button 
+          variant="outline" 
+          onClick={clearActiveTask}
+        >
+          Cancel
+        </Button>
+        
+        <div className="space-x-2">
+          {activeTask && (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={saveTimerNotes}
+              >
+                Save Notes
+              </Button>
+              
+              <Button 
+                onClick={completeTask}
+              >
+                Complete Task
+              </Button>
+            </>
+          )}
+        </div>
+      </CardFooter>
     </Card>
   );
 };
-
-export default TimerView;

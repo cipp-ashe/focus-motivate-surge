@@ -1,7 +1,6 @@
 
 /**
  * Event system unified exports
- * This file maintains backward compatibility while organizing events into domains
  */
 
 // Import from base module
@@ -32,16 +31,7 @@ export type EventType =
   | JournalEventType
   | RelationshipEventType
   | AppEventType
-  | WildcardEventType
-  | 'task:create'
-  | 'task:select'
-  | 'task:timer'
-  | 'task:dismiss'
-  | 'habit:custom-template-create'
-  | 'habit:custom-template-delete';
-
-// Export this as a type for backward compatibility
-export type AllEventTypes = EventType;
+  | WildcardEventType;
 
 // Define the base payload interface for events 
 export type EventPayloadMap = 
@@ -69,7 +59,7 @@ export type { VoiceNoteEventType };
 export type { JournalEventType };
 export type { JournalEventPayloadMap } from './journal-events';
 
-// JournalEntry export for backward compatibility
+// JournalEntry export for journal components
 export interface JournalEntry {
   id: string;
   content: string;

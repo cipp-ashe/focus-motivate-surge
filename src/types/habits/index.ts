@@ -2,11 +2,11 @@
 /**
  * Habit Types Module
  * 
- * This is the main entry point for habit-related types. It re-exports
- * everything from the unified type system.
+ * This is the main entry point for habit-related types.
  */
 
 export * from './unified';
 
-// Legacy type alias for backward compatibility during transition
+// Export MetricType for backward compatibility during transition
+// This type is used in many places and will be phased out gradually
 export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating';

@@ -59,7 +59,8 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
           name: task.name,
           duration: typeof task.duration === 'number' ? task.duration : 1500, // Default to 25 min if not set
           completed: task.completed || false,
-          createdAt: task.createdAt || new Date().toISOString()
+          createdAt: task.createdAt || new Date().toISOString(),
+          taskType: task.taskType
         });
         toast.info(`Timer set for task: ${task.name}`);
         break;

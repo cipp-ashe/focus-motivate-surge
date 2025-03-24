@@ -1,211 +1,165 @@
 
-import { useState, useEffect } from "react";
-import { Note, Tag, TagColor } from "@/types/notes";
-import { useNoteActions, useNoteState } from "@/contexts/notes/hooks";
-import { eventManager } from "@/lib/events/EventManager";
-import { toast } from "sonner";
-import { findExistingJournalNote, getJournalType, getTemplateForType } from "./utils";
-import { getJournalQuotes, getJournalTags } from "./constants";
-import { Quote } from "@/types/timer/models";
-import { EntityType } from "@/types/core";
-import { JournalEntry } from "@/types/events";
+import { useState, useEffect, useCallback } from 'react';
+import { journalStorage } from '@/lib/storage/journalStorage';
+import { eventManager } from '@/lib/events/EventManager';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
+import { JournalEntry } from '@/types/events';
 
-interface UseJournalProps {
-  habitId: string;
-  habitName: string;
-  description?: string;
-  templateId?: string;
-  taskId?: string;
-  onComplete: () => void;
-  onClose: () => void;
-}
-
-export const useJournal = ({
-  habitId,
-  habitName,
-  description = "",
-  templateId,
-  taskId,
-  onComplete,
-  onClose
-}: UseJournalProps) => {
-  const [content, setContent] = useState("");
-  const [randomQuote, setRandomQuote] = useState<Quote | null>(null);
-  const [randomPrompt, setRandomPrompt] = useState<string>("");
-  const [existingNote, setExistingNote] = useState<Note | null>(null);
-  const noteActions = useNoteActions();
-  const { notes } = useNoteState();
+export const useJournal = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [journalId, setJournalId] = useState<string | null>(null);
+  const [content, setContent] = useState('');
+  const [habitId, setHabitId] = useState<string | null>(null);
+  const [habitName, setHabitName] = useState<string>('');
+  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [journalType, setJournalType] = useState<'habit' | 'task'>('habit');
   
-  // Determine journal type
-  const journalType = getJournalType(habitName, description);
-  const template = getTemplateForType(journalType);
-  const relevantQuotes = getJournalQuotes(journalType);
-  
-  // Initialize when opening
+  // Set up event listeners
   useEffect(() => {
-    // Check for existing note by task ID first (preferred), then by habit ID
-    let note: Note | undefined;
-    
-    if (taskId) {
-      note = notes.find(n => 
-        n.relationships?.some(r => 
-          r.metadata?.taskId === taskId ||
-          (r.entityType === EntityType.Task && r.entityId === taskId)
-        )
-      );
-    }
-    
-    if (!note && habitId) {
-      note = findExistingJournalNote(habitId, notes);
-    }
-    
-    if (note) {
-      // Use existing note content
-      setExistingNote(note);
-      setContent(note.content);
-      console.log("Found existing journal note:", note);
-    } else {
-      // No existing note, reset to template
-      resetToNewNote();
-    }
-  }, [habitId, taskId, notes]);
-  
-  // Reset to a new note with template
-  const resetToNewNote = () => {
-    setExistingNote(null);
-    setContent(template.initialContent);
-    
-    // Select random quote from our filtered quotes
-    const randomIndex = Math.floor(Math.random() * relevantQuotes.length);
-    setRandomQuote(relevantQuotes[randomIndex] || null);
-    
-    // Select random prompt
-    const promptIndex = Math.floor(Math.random() * template.prompts.length);
-    setRandomPrompt(template.prompts[promptIndex]);
-  };
-  
-  const handleSave = () => {
-    const now = new Date().toISOString();
-    
-    // Create relationships array for tracking connections
-    const relationships = [
-      {
-        entityId: habitId,
-        entityType: EntityType.Habit,
-        metadata: {
-          templateId,
-          date: now,
-          journalType
-        }
-      }
-    ];
-    
-    // Add task relationship if applicable
-    if (taskId) {
-      relationships.push({
-        entityId: taskId,
-        entityType: EntityType.Task,
-        metadata: {
-          taskId,
-          date: now
-        }
-      });
-    }
-    
-    // Create tags for journal entry
-    const journalTags: Tag[] = [
-      { name: 'journal', color: 'blue' as TagColor },
-      { name: journalType, color: 
-        journalType === 'gratitude' ? 'green' : 
-        journalType === 'reflection' ? 'purple' : 
-        journalType === 'mindfulness' ? 'teal' : 'blue' as TagColor 
-      }
-    ];
-    
-    if (existingNote) {
-      // Update the existing note with new content
-      noteActions.updateNote(existingNote.id, { 
-        content,
-        updatedAt: now,
-        relationships
-      });
+    const handleJournalOpen = (data: any) => {
+      console.log('Journal: Received open event', data);
       
-      // If this was from a task, update the task's journal entry
+      // Extract data from the event
+      const {
+        habitId: eventHabitId,
+        habitName: eventHabitName,
+        templateId: eventTemplateId,
+        description,
+        date: eventDate,
+        taskId
+      } = data;
+      
+      // Set journal type
       if (taskId) {
-        eventManager.emit('task:update', {
-          taskId,
-          updates: {
-            journalEntry: content,
-            completed: true,
-            completedAt: now
-          }
-        });
+        setJournalType('task');
+      } else {
+        setJournalType('habit');
       }
       
-      toast.success(`Updated journal entry for: ${habitName}`, {
-        description: "Your journal entry has been updated"
-      });
-    } else {
-      // Create a new journal entry as a note
-      const journalEntry: Omit<Note, 'id'> = {
-        title: `Journal: ${habitName}`,
+      // Set component state
+      setHabitId(eventHabitId || null);
+      setHabitName(eventHabitName || description || 'Journal Entry');
+      setTemplateId(eventTemplateId || null);
+      setDate(eventDate || new Date().toISOString().split('T')[0]);
+      
+      // Try to load existing entry for this habit/date
+      if (eventHabitId && eventDate) {
+        const existingEntry = journalStorage.getEntryForHabitOnDate(eventHabitId, eventDate);
+        
+        if (existingEntry) {
+          setContent(existingEntry.content);
+          setJournalId(existingEntry.id);
+        } else {
+          setContent('');
+          setJournalId(null);
+        }
+      } else {
+        setContent('');
+        setJournalId(null);
+      }
+      
+      // Open the journal
+      setIsOpen(true);
+    };
+    
+    const handleJournalClose = () => {
+      setIsOpen(false);
+    };
+    
+    const handleJournalGet = (data: any) => {
+      const { habitId, date } = data;
+      const entry = journalStorage.getEntryForHabitOnDate(habitId, date);
+      return entry;
+    };
+    
+    // Subscribe to events
+    const unsubscribeOpen = eventManager.on('journal:open', handleJournalOpen);
+    const unsubscribeClose = eventManager.on('journal:close', handleJournalClose);
+    const unsubscribeGet = eventManager.on('journal:get', handleJournalGet);
+    
+    return () => {
+      unsubscribeOpen();
+      unsubscribeClose();
+      unsubscribeGet();
+    };
+  }, []);
+  
+  // Save journal entry
+  const saveJournalEntry = useCallback(() => {
+    if (!content.trim()) {
+      toast.error('Please add some content before saving');
+      return false;
+    }
+    
+    try {
+      // Create entry object
+      const entry: JournalEntry = {
+        id: journalId || uuidv4(),
         content,
-        createdAt: now,
-        updatedAt: now,
-        tags: journalTags,
-        relationships
+        date,
+        habitId: habitId || undefined,
+        templateId: templateId || undefined
       };
       
-      // Add the note
-      const noteId = noteActions.addNote(journalEntry);
+      // Save using storage
+      journalStorage.saveEntry(entry);
       
-      // Also emit journal:create event for compatibility
-      eventManager.emit('journal:create', {
-        habitId,
-        habitName,
-        taskId,
-        templateId,
+      // Set ID for future reference
+      setJournalId(entry.id);
+      
+      // Emit event for journaling activity
+      const payload: any = {
+        id: entry.id,
         content,
-        date: now
-      });
+        date,
+        journalType
+      };
       
-      // Update the task if this is from a task
-      if (taskId) {
-        eventManager.emit('task:update', {
-          taskId,
-          updates: {
-            journalEntry: content,
-            completed: true,
-            completedAt: now
-          }
-        });
+      if (journalType === 'habit') {
+        payload.habitId = habitId;
+        payload.templateId = templateId;
+      } else {
+        payload.taskId = habitId; // For task journals
       }
       
-      // Mark habit as completed if not already
-      eventManager.emit('habit:complete', {
-        habitId,
-        date: now.split('T')[0], // Just the date part
-        value: true
-      });
+      eventManager.emit('journal:save', payload);
       
-      onComplete();
-      
-      toast.success(`Created new journal entry for: ${habitName}`, {
-        description: "Your journal entry has been saved"
-      });
+      toast.success('Journal entry saved');
+      return true;
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+      toast.error('Failed to save journal entry');
+      return false;
     }
-    
-    onClose();
-  };
-
+  }, [content, date, habitId, templateId, journalId, journalType]);
+  
+  // Close journal
+  const closeJournal = useCallback(() => {
+    setIsOpen(false);
+    eventManager.emit('journal:close', undefined);
+  }, []);
+  
+  // Handle save and close
+  const handleSaveAndClose = useCallback(() => {
+    const success = saveJournalEntry();
+    if (success) {
+      closeJournal();
+    }
+  }, [saveJournalEntry, closeJournal]);
+  
   return {
+    isOpen,
     content,
     setContent,
-    randomQuote,
-    randomPrompt,
-    existingNote,
+    habitId,
+    habitName,
+    templateId,
+    date,
     journalType,
-    template,
-    handleSave
+    saveJournalEntry,
+    closeJournal,
+    handleSaveAndClose
   };
 };

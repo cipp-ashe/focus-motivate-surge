@@ -44,9 +44,7 @@ export const migrateTaskTypes = () => {
  */
 const isValidTaskType = (taskType: string): taskType is TaskType => {
   const validTypes: TaskType[] = [
-    'timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'counter', 'rating',
-    'habit', 'todo', 'exercise', 'reading', 'meditation', 'check-in', 'daily', 
-    'weekly', 'monthly', 'yearly', 'reminder'
+    'timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'counter', 'rating'
   ];
   return validTypes.includes(taskType as TaskType);
 };

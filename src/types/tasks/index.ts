@@ -19,26 +19,10 @@ export type IntegratedTaskType =
   | 'screenshot' 
   | 'voicenote';
 
-// Legacy task types - maintained for backwards compatibility  
-export type LegacyTaskType = 
-  | 'habit' 
-  | 'todo' 
-  | 'focus' 
-  | 'exercise' 
-  | 'reading' 
-  | 'meditation' 
-  | 'check-in'
-  | 'daily' 
-  | 'weekly' 
-  | 'monthly' 
-  | 'yearly' 
-  | 'reminder';
-
 // Combined task type
 export type TaskType = 
   | StandardTaskType 
-  | IntegratedTaskType 
-  | LegacyTaskType;
+  | IntegratedTaskType;
 
 // Task priority
 export type TaskPriority = 'low' | 'medium' | 'high';

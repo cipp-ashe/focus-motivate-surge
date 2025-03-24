@@ -1,185 +1,276 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { PlusCircle, Settings, Trash } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
 import { toast } from 'sonner';
-import { ActiveTemplate, HabitTemplate, NewTemplate } from './types';
+import { v4 as uuidv4 } from 'uuid';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { ActiveTemplate, HabitDetail } from '@/types/habits';
 import { eventManager } from '@/lib/events/EventManager';
-import TemplateSelectionSheet from './TemplateSelectionSheet';
-import ConfigurationDialog from './ConfigurationDialog';
-import { predefinedTemplates } from './data/templates';
 
-export interface HabitTemplateManagerProps {
+interface HabitTemplateManagerProps {
   activeTemplates: ActiveTemplate[];
-  onAddTemplate: (template: ActiveTemplate) => void;
-  onRemoveTemplate: (templateId: string) => void;
-  onConfigureTemplate: (template: ActiveTemplate) => void;
+  showTemplateSearch?: boolean;
 }
 
-const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
-  activeTemplates,
-  onAddTemplate,
-  onRemoveTemplate,
-  onConfigureTemplate,
+export const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({ 
+  activeTemplates, 
+  showTemplateSearch = true
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [customTemplates, setCustomTemplates] = useState<HabitTemplate[]>([]);
-  const [activeTemplateIds, setActiveTemplateIds] = useState<string[]>([]);
-  const [configuringTemplate, setConfiguringTemplate] = useState<ActiveTemplate | null>(null);
-  const [configDialogOpen, setConfigDialogOpen] = useState(false);
-
-  // Load custom templates
-  useEffect(() => {
-    try {
-      const savedTemplates = localStorage.getItem('custom-templates');
-      if (savedTemplates) {
-        setCustomTemplates(JSON.parse(savedTemplates));
-      }
-    } catch (error) {
-      console.error('Failed to load custom templates:', error);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ActiveTemplate | null>(null);
+  const [newTemplate, setNewTemplate] = useState({
+    name: '',
+    description: ''
+  });
+  
+  const { createTemplate, updateTemplateDetails, deleteTemplate } = useTemplateManagement();
+  
+  // Handle template creation
+  const handleCreateTemplate = () => {
+    if (!newTemplate.name.trim()) {
+      toast.error('Template name is required');
+      return;
     }
-  }, []);
-
-  // Update active template IDs when activeTemplates changes
-  useEffect(() => {
-    setActiveTemplateIds(activeTemplates.map(t => t.templateId));
-  }, [activeTemplates]);
-
-  const handleSelectTemplate = useCallback((template: HabitTemplate) => {
-    const isActive = activeTemplateIds.includes(template.id);
     
-    if (isActive) {
-      // Remove template
-      onRemoveTemplate(template.id);
-      toast.success(`Removed ${template.name} template`);
-    } else {
-      // Add template
-      const activeTemplate: ActiveTemplate = {
-        templateId: template.id,
-        habits: template.defaultHabits || [],
-        activeDays: template.defaultDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        customized: false,
-        name: template.name,
-        description: template.description
-      };
-      onAddTemplate(activeTemplate);
-      toast.success(`Added ${template.name} template`);
-    }
-  }, [activeTemplateIds, onAddTemplate, onRemoveTemplate]);
-
-  const handleCreateTemplate = useCallback((template: NewTemplate) => {
-    // Close sheet and open custom template creation
-    setIsOpen(false);
-    // Emit event to create custom template
-    eventManager.emit('habit:custom-template-create', { 
-      id: `custom-${Date.now()}`, 
-      name: template?.name || 'New Template',
-      defaultHabits: template?.habits || [],
-      defaultDays: template?.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-      description: template?.description || 'Custom template',
-      category: 'Custom',
-      duration: null
+    const templateId = uuidv4();
+    const template: ActiveTemplate = {
+      templateId,
+      name: newTemplate.name.trim(),
+      description: newTemplate.description.trim(),
+      habits: [],
+      customized: true,
+      activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+    };
+    
+    // Call the create template function
+    createTemplate(template);
+    
+    // Emit event for custom template creation
+    eventManager.emit('habit:custom-template-create', {
+      name: newTemplate.name,
+      description: newTemplate.description
     });
-  }, []);
-
-  const handleDeleteCustomTemplate = useCallback((templateId: string) => {
-    // Remove from active templates if it's active
-    if (activeTemplateIds.includes(templateId)) {
-      onRemoveTemplate(templateId);
+    
+    // Reset form and close dialog
+    setNewTemplate({ name: '', description: '' });
+    setShowCreateDialog(false);
+    
+    toast.success('Custom template created');
+  };
+  
+  // Handle template deletion
+  const handleDeleteTemplate = (templateId: string) => {
+    // Confirm deletion
+    if (window.confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+      // Call the delete template function
+      deleteTemplate(templateId);
+      
+      // Emit event for custom template deletion
+      eventManager.emit('habit:custom-template-delete', { templateId });
+      
+      setSelectedTemplate(null);
+      setShowSettingsDialog(false);
+      
+      toast.success('Template deleted');
     }
+  };
+  
+  // Open template settings
+  const openTemplateSettings = (template: ActiveTemplate) => {
+    setSelectedTemplate(template);
+    setShowSettingsDialog(true);
+  };
+  
+  // Save template settings
+  const saveTemplateSettings = () => {
+    if (!selectedTemplate) return;
     
-    // Remove from storage
-    const updatedTemplates = customTemplates.filter(t => t.id !== templateId);
-    setCustomTemplates(updatedTemplates);
-    localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
+    // Update template details
+    updateTemplateDetails(
+      selectedTemplate.templateId,
+      selectedTemplate.name,
+      selectedTemplate.description || ''
+    );
     
-    // Emit event
-    eventManager.emit('habit:custom-template-delete', { templateId });
-    toast.success('Custom template deleted');
-  }, [activeTemplateIds, customTemplates, onRemoveTemplate]);
-
-  const handleCloseTemplateSheet = useCallback(() => {
-    // Reload custom templates when sheet closes
-    try {
-      const savedTemplates = localStorage.getItem('custom-templates');
-      if (savedTemplates) {
-        setCustomTemplates(JSON.parse(savedTemplates));
-      }
-    } catch (error) {
-      console.error('Failed to load custom templates:', error);
-    }
-  }, []);
-
-  const handleConfigureTemplate = useCallback((template: ActiveTemplate) => {
-    setConfiguringTemplate(template);
-    setConfigDialogOpen(true);
-  }, []);
-
-  const handleSaveConfiguration = useCallback(() => {
-    if (!configuringTemplate) return;
-    
-    onConfigureTemplate(configuringTemplate);
-    setConfigDialogOpen(false);
-    setConfiguringTemplate(null);
-    toast.success('Template configuration updated');
-  }, [configuringTemplate, onConfigureTemplate]);
-
-  const handleUpdateTemplateDays = useCallback((days: string[]) => {
-    if (!configuringTemplate) return;
-    
-    setConfiguringTemplate(prev => {
-      if (!prev) return null;
-      return { ...prev, activeDays: days as any[] };
-    });
-  }, [configuringTemplate]);
-
+    setShowSettingsDialog(false);
+    toast.success('Template settings updated');
+  };
+  
   return (
-    <div>
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-sm font-semibold">Habit Templates</h2>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-8 px-2"
-            onClick={() => setIsOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            <span className="text-xs">Add Template</span>
+    <>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Your Habit Templates</h2>
+          <Button variant="outline" size="sm" onClick={() => setShowCreateDialog(true)}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Template
           </Button>
         </div>
+        
+        {activeTemplates.length === 0 ? (
+          <Card className="border border-dashed">
+            <CardContent className="py-8 text-center">
+              <p className="text-muted-foreground">
+                No custom templates yet. Create your first template to get started.
+              </p>
+              <Button 
+                variant="outline" 
+                className="mt-4" 
+                onClick={() => setShowCreateDialog(true)}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Create Template
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {activeTemplates.map((template) => (
+              <Card key={template.templateId} className="flex flex-col">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{template.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 py-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {template.description || 'No description'}
+                  </p>
+                  <div className="mt-2">
+                    <p className="text-xs text-muted-foreground">
+                      {template.habits.length} habits • {template.activeDays.join(', ')}
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-2">
+                  <div className="flex space-x-2 w-full justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openTemplateSettings(template)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span className="sr-only">Settings</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteTemplate(template.templateId)}
+                    >
+                      <Trash className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-
-      <TemplateSelectionSheet 
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-        allTemplates={predefinedTemplates}
-        activeTemplateIds={activeTemplateIds}
-        onSelectTemplate={handleSelectTemplate}
-        onCreateTemplate={handleCreateTemplate}
-        customTemplates={customTemplates}
-        onDeleteCustomTemplate={handleDeleteCustomTemplate}
-        onClose={handleCloseTemplateSheet}
-      />
       
-      {configuringTemplate && (
-        <ConfigurationDialog
-          open={configDialogOpen}
-          onClose={() => {
-            setConfigDialogOpen(false);
-            setConfiguringTemplate(null);
-          }}
-          habits={configuringTemplate.habits}
-          activeDays={configuringTemplate.activeDays}
-          onUpdateDays={handleUpdateTemplateDays}
-          onSave={handleSaveConfiguration}
-          onSaveAsTemplate={() => {
-            toast.info("Save as template feature coming soon");
-          }}
-        />
-      )}
-    </div>
+      {/* Create Template Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Custom Template</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Template Name</Label>
+              <Input
+                id="name"
+                value={newTemplate.name}
+                onChange={(e) => setNewTemplate({...newTemplate, name: e.target.value})}
+                placeholder="Daily Fitness"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Textarea
+                id="description"
+                value={newTemplate.description}
+                onChange={(e) => setNewTemplate({...newTemplate, description: e.target.value})}
+                placeholder="A collection of daily fitness habits"
+                rows={3}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateTemplate}>
+              Create Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Template Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Template Settings</DialogTitle>
+          </DialogHeader>
+          
+          {selectedTemplate && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Template Name</Label>
+                <Input
+                  id="edit-name"
+                  value={selectedTemplate.name}
+                  onChange={(e) => setSelectedTemplate({
+                    ...selectedTemplate,
+                    name: e.target.value
+                  })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={selectedTemplate.description || ''}
+                  onChange={(e) => setSelectedTemplate({
+                    ...selectedTemplate,
+                    description: e.target.value
+                  })}
+                  rows={3}
+                />
+              </div>
+              
+              <div className="pt-4">
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteTemplate(selectedTemplate.templateId)}
+                  className="w-full"
+                >
+                  <Trash className="h-4 w-4 mr-2" />
+                  Delete Template
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveTemplateSettings}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
-
-export default HabitTemplateManager;
