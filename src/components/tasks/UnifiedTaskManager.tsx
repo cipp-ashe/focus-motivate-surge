@@ -4,7 +4,7 @@ import { Task } from '@/types/tasks';
 import { TaskList } from './TaskList';
 import { UnifiedTaskEventListener } from './event-handlers/UnifiedTaskEventListener';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { useUnifiedTaskEvents } from '@/hooks/tasks/useUnifiedTaskEvents';
+import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface UnifiedTaskManagerProps {
@@ -34,8 +34,8 @@ export const UnifiedTaskManager: React.FC<UnifiedTaskManagerProps> = ({
   const [loading, setLoading] = useState(false);
   const [forceUpdate, setForceUpdate] = useState(0);
   
-  // Use our unified task events hook
-  const taskEvents = useUnifiedTaskEvents();
+  // Use our unified task manager hook
+  const taskManager = useUnifiedTaskManager();
   
   // Task Filtering - simplified without the missing hooks
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
@@ -47,8 +47,8 @@ export const UnifiedTaskManager: React.FC<UnifiedTaskManagerProps> = ({
 
   const handleTaskSelect = useCallback((taskId: string) => {
     console.log(`TaskManager: Selecting task ${taskId}`);
-    taskEvents.selectTask(taskId);
-  }, [taskEvents]);
+    taskManager.selectTask(taskId);
+  }, [taskManager]);
   
   const handleForceUpdate = useCallback(() => {
     setForceUpdate(prev => prev + 1);
@@ -57,20 +57,20 @@ export const UnifiedTaskManager: React.FC<UnifiedTaskManagerProps> = ({
   // Task update handler
   const handleTaskUpdate = useCallback((data: { taskId: string; updates: Partial<Task> }) => {
     console.log('TaskManager: Handling task update', data);
-    taskEvents.updateTask(data.taskId, data.updates);
-  }, [taskEvents]);
+    taskManager.updateTask(data.taskId, data.updates);
+  }, [taskManager]);
 
   // Task delete handler
   const handleTaskDelete = useCallback((data: { taskId: string }) => {
     console.log('TaskManager: Handling task delete', data);
-    taskEvents.deleteTask(data.taskId);
-  }, [taskEvents]);
+    taskManager.deleteTask(data.taskId);
+  }, [taskManager]);
 
   // Task complete handler
   const handleTaskComplete = useCallback((data: { taskId: string; metrics?: any }) => {
     console.log('TaskManager: Handling task complete', data);
-    taskEvents.completeTask(data.taskId, data.metrics);
-  }, [taskEvents]);
+    taskManager.completeTask(data.taskId, data.metrics);
+  }, [taskManager]);
 
   // Calculate task counts
   const taskCounts = {

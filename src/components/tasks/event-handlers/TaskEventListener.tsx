@@ -2,6 +2,7 @@
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { useEvent } from '@/hooks/useEvent';
+import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 
 interface TaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;

@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
+import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 
 // Global flag to prevent duplicate event handling
 let eventHandlersInitialized = false;
