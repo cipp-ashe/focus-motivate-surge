@@ -1,45 +1,47 @@
 
 import { useCallback } from 'react';
-import { format } from 'date-fns';
-import { HabitLog, HabitStats } from '@/types/habits'; 
-import { eventManager } from '@/lib/events/EventManager';
-import { computeHabitStreak } from '@/utils/habits/streakCalculator'; 
 import { toast } from 'sonner';
+import { eventManager } from '@/lib/events/EventManager';
+import { useHabitEvents } from './useHabitEvents';
 
+/**
+ * Hook for handling habit completion actions
+ */
 export const useHabitCompletion = () => {
+  const { completeHabit: emitHabitComplete } = useHabitEvents();
+
+  // Complete a habit
   const completeHabit = useCallback((habitId: string, date: string) => {
     try {
-      // Format the completion date for display
-      const formattedDate = format(new Date(date), 'yyyy-MM-dd');
+      // Emit completion event with value=true
+      emitHabitComplete(habitId, date, true);
       
-      // Emit event to mark habit as completed for the given date
-      eventManager.emit('habit:complete', {
-        habitId,
-        date: formattedDate,
-        completed: true // Add this required property
+      // Emit the legacy event format for backward compatibility
+      eventManager.emit('habit:complete', { 
+        habitId, 
+        date, 
+        value: true, // Add the missing value property
+        completed: true 
       });
       
-      // Return success
       return true;
     } catch (error) {
       console.error('Error completing habit:', error);
-      toast.error('Failed to mark habit as completed');
+      toast.error('Failed to complete habit');
       return false;
     }
-  }, []);
+  }, [emitHabitComplete]);
 
+  // Dismiss a habit for today
   const dismissHabit = useCallback((habitId: string, date: string) => {
     try {
-      // Format the dismissal date for display
-      const formattedDate = format(new Date(date), 'yyyy-MM-dd');
-      
-      // Emit event to mark habit as dismissed for the given date
-      eventManager.emit('habit:dismissed', {
-        habitId,
-        date: formattedDate,
+      // emit dismiss event
+      eventManager.emit('habit:dismiss', { 
+        habitId, 
+        date,
+        value: false, // Add value property for consistency
+        dismissed: true 
       });
-      
-      // Return success
       return true;
     } catch (error) {
       console.error('Error dismissing habit:', error);
@@ -48,26 +50,8 @@ export const useHabitCompletion = () => {
     }
   }, []);
 
-  const getHabitStats = useCallback((logs: HabitLog[]): HabitStats => {
-    // Calculate streak from logs
-    const streak = computeHabitStreak(logs);
-    
-    // Calculate completion rate
-    const totalDays = logs.length;
-    const completedDays = logs.filter(log => log.completed).length;
-    const completionRate = totalDays > 0 ? (completedDays / totalDays) * 100 : 0;
-    
-    return {
-      streak,
-      completionRate: Math.round(completionRate),
-      totalDays,
-      completedDays
-    };
-  }, []);
-
   return {
     completeHabit,
-    dismissHabit,
-    getHabitStats
+    dismissHabit
   };
 };

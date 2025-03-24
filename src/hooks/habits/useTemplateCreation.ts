@@ -15,6 +15,7 @@ export const useTemplateCreation = (
   const handleCreateTemplate = () => {
     const newTemplate: ActiveTemplate = {
       templateId: `custom-${Date.now()}`,
+      name: 'New Template', // Add required name property
       habits: [],
       customized: true,
       activeDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
@@ -49,8 +50,12 @@ export const useTemplateCreation = (
     }
 
     if (isCreatingTemplate) {
+      // Create a unique ID for the template
+      const templateId = `custom-${Date.now()}`;
+      
+      // Create the template object for storage
       const customTemplate: HabitTemplate = {
-        id: selectedTemplate.templateId,
+        id: templateId,
         name: newTemplateName,
         description: 'Custom template',
         category: 'Custom',
@@ -59,28 +64,42 @@ export const useTemplateCreation = (
         duration: null,
       };
 
+      // Save the custom template
       const existingTemplatesStr = localStorage.getItem('custom-templates');
       const existingTemplates = existingTemplatesStr ? JSON.parse(existingTemplatesStr) : [];
       const updatedTemplates = [...existingTemplates, customTemplate];
       localStorage.setItem('custom-templates', JSON.stringify(updatedTemplates));
 
-      // Emit event for custom template creation
-      eventBus.emit('habit:custom-template-create', customTemplate);
+      // Emit event for custom template creation with suppressToast
+      eventBus.emit('habit:custom-template-create', { ...customTemplate, suppressToast: true });
 
-      const updatedTemplate = { 
-        ...selectedTemplate,
-        name: newTemplateName,
+      // Add the template to active templates
+      const activeTemplate: ActiveTemplate = { 
+        templateId: templateId,
+        habits: selectedTemplate.habits,
+        activeDays: selectedTemplate.activeDays,
         customized: true,
+        name: newTemplateName,  // Make sure we keep the name
+        description: 'Custom template' // Include the description
       };
-      addTemplate(updatedTemplate);
-      toast.success('Template saved successfully');
+      
+      // Add template to active templates - show toast here only
+      addTemplate(activeTemplate);
+      toast.success('Template created and added successfully');
+      
       handleCloseTemplate();
+      
+      // Emit the event with suppressToast to prevent duplicate toasts
+      eventBus.emit('habit:template-update', { ...activeTemplate, suppressToast: true });
       window.dispatchEvent(new Event('templatesUpdated'));
+      window.dispatchEvent(new Event('force-habits-update'));
     } else {
+      // Update existing template - only show toast here
       updateTemplate(selectedTemplate.templateId, selectedTemplate);
       toast.success('Template updated successfully');
       handleCloseTemplate();
       window.dispatchEvent(new Event('templatesUpdated'));
+      window.dispatchEvent(new Event('force-habits-update'));
     }
   };
 

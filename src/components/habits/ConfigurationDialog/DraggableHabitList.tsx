@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -56,7 +57,9 @@ const DraggableHabitList: React.FC<DraggableHabitListProps> = ({
 
           <HabitForm
             habit={habit}
+            index={index}
             onUpdate={(updates) => onUpdateHabit(index, updates)}
+            onDeleteHabit={onDeleteHabit}
           />
         </Card>
       ))}

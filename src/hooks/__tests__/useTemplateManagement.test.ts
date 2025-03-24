@@ -1,72 +1,161 @@
 import { renderHook, act } from '@testing-library/react-hooks';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { useTemplateManagement } from '@/components/habits/hooks/useTemplateManagement';
+import { useTemplateManagement } from '../habits/useTemplateManagement';
 import { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
+
+// Mock localStorage
+const mockLocalStorage = (() => {
+  let store = {};
+  return {
+    getItem: jest.fn((key) => store[key] || null),
+    setItem: jest.fn((key, value) => {
+      store[key] = value;
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    })
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+window.dispatchEvent = jest.fn();
 
 describe('useTemplateManagement', () => {
   beforeEach(() => {
-    localStorage.clear();
-    vi.clearAllMocks();
+    mockLocalStorage.clear();
+    jest.clearAllMocks();
   });
-
-  const mockTemplate: ActiveTemplate = {
-    templateId: 'test-1',
-    habits: [],
-    customized: false,
-    activeDays: ['Mon', 'Wed', 'Fri'] as DayOfWeek[],
-  };
 
   it('should initialize with empty templates', () => {
     const { result } = renderHook(() => useTemplateManagement());
     expect(result.current.activeTemplates).toEqual([]);
   });
 
-  it('should add template correctly', () => {
+  it('should add a template', () => {
     const { result } = renderHook(() => useTemplateManagement());
 
+    const template: ActiveTemplate = {
+      templateId: 'test-template',
+      name: 'Test Template', // Added required name
+      habits: [],
+      customized: false,
+      activeDays: ['Mon', 'Tue'] as DayOfWeek[]
+    };
+
     act(() => {
-      result.current.addTemplate(mockTemplate);
+      result.current.addTemplate(template);
     });
 
     expect(result.current.activeTemplates).toHaveLength(1);
-    expect(result.current.activeTemplates[0]).toEqual(mockTemplate);
+    expect(result.current.activeTemplates[0]).toEqual(template);
   });
 
-  it('should update template correctly', () => {
+  it('should update a template', () => {
     const { result } = renderHook(() => useTemplateManagement());
-    const updatedDays: DayOfWeek[] = ['Mon', 'Tue'];
+
+    const initialTemplate: ActiveTemplate = {
+      templateId: 'test-template',
+      name: 'Test Template',
+      habits: [],
+      customized: false,
+      activeDays: ['Mon', 'Tue'] as DayOfWeek[]
+    };
 
     act(() => {
-      result.current.addTemplate(mockTemplate);
-      result.current.updateTemplateDays(mockTemplate.templateId, updatedDays);
+      result.current.addTemplate(initialTemplate);
     });
 
-    expect(result.current.activeTemplates[0].activeDays).toEqual(updatedDays);
+    const updates = {
+      name: 'Updated Template',
+      activeDays: ['Wed', 'Thu'] as DayOfWeek[]
+    };
+
+    act(() => {
+      result.current.updateTemplate(initialTemplate.templateId, updates);
+    });
+
+    expect(result.current.activeTemplates).toHaveLength(1);
+    expect(result.current.activeTemplates[0].name).toEqual('Updated Template');
+    expect(result.current.activeTemplates[0].activeDays).toEqual(['Wed', 'Thu']);
     expect(result.current.activeTemplates[0].customized).toBe(true);
   });
 
-  it('should remove template correctly', () => {
+  it('should remove a template', () => {
     const { result } = renderHook(() => useTemplateManagement());
 
+    const template: ActiveTemplate = {
+      templateId: 'test-template',
+      name: 'Test Template',
+      habits: [],
+      customized: false,
+      activeDays: ['Mon', 'Tue'] as DayOfWeek[]
+    };
+
     act(() => {
-      result.current.addTemplate(mockTemplate);
-      result.current.removeTemplate(mockTemplate.templateId);
+      result.current.addTemplate(template);
+    });
+
+    act(() => {
+      result.current.removeTemplate(template.templateId);
     });
 
     expect(result.current.activeTemplates).toHaveLength(0);
   });
 
-  it('should update template order correctly', () => {
+  it('should update template order', () => {
     const { result } = renderHook(() => useTemplateManagement());
-    const mockTemplate2 = { ...mockTemplate, templateId: 'test-2' };
+
+    const template1: ActiveTemplate = {
+      templateId: 'template-1',
+      name: 'Template 1',
+      habits: [],
+      customized: false,
+      activeDays: ['Mon'] as DayOfWeek[]
+    };
+
+    const template2: ActiveTemplate = {
+      templateId: 'template-2',
+      name: 'Template 2',
+      habits: [],
+      customized: false,
+      activeDays: ['Tue'] as DayOfWeek[]
+    };
 
     act(() => {
-      result.current.addTemplate(mockTemplate);
-      result.current.addTemplate(mockTemplate2);
-      result.current.updateTemplateOrder([mockTemplate2, mockTemplate]);
+      result.current.addTemplate(template1);
+      result.current.addTemplate(template2);
     });
 
-    expect(result.current.activeTemplates[0].templateId).toBe('test-2');
-    expect(result.current.activeTemplates[1].templateId).toBe('test-1');
+    const reorderedTemplates = [template2, template1];
+
+    act(() => {
+      result.current.updateTemplateOrder(reorderedTemplates);
+    });
+
+    expect(result.current.activeTemplates).toEqual(reorderedTemplates);
+  });
+
+  it('should update template days', () => {
+    const { result } = renderHook(() => useTemplateManagement());
+
+    const template: ActiveTemplate = {
+      templateId: 'test-template',
+      name: 'Test Template',
+      habits: [],
+      customized: false,
+      activeDays: ['Mon', 'Tue'] as DayOfWeek[]
+    };
+
+    act(() => {
+      result.current.addTemplate(template);
+    });
+
+    const newDays = ['Wed', 'Thu'] as DayOfWeek[];
+
+    act(() => {
+      result.current.updateTemplateDays(template.templateId, newDays);
+    });
+
+    expect(result.current.activeTemplates[0].activeDays).toEqual(newDays);
+    expect(result.current.activeTemplates[0].customized).toBe(true);
   });
 });

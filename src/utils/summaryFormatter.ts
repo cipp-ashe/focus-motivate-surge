@@ -1,66 +1,61 @@
+import { Task, TaskMetrics } from '@/types/tasks';
+import { Subtask } from '@/types/subtasks';
+import { formatDate, formatDuration } from '@/lib/utils/formatters';
 
-import { Task } from "@/types/tasks";
-import { formatDate } from "@/lib/utils/dateUtils";
-import { formatDuration, calculateEfficiencyRatio } from "@/lib/utils/formatters";
+/**
+ * Utility functions for formatting task summaries
+ */
 
-export const formatTaskSummary = (task: Task): string => {
-  const lines: string[] = [];
+export function formatSubtasks(subtasks: Subtask[]): string {
+  if (!subtasks || subtasks.length === 0) return 'No subtasks';
   
-  // Task name and completion status
-  lines.push(`# ${task.name}`);
-  lines.push(`**Status**: ${task.completed ? "Completed" : task.dismissedAt ? "Dismissed" : "Pending"}`);
+  return subtasks.map(subtask => {
+    return `- ${subtask.name} (${subtask.completed ? 'Completed' : 'Pending'})`;
+  }).join('\n');
+}
+
+export function formatTaskMetrics(metrics: TaskMetrics): string {
+  let summary = '';
   
-  // Date information
-  if (task.completedAt) {
-    lines.push(`**Completed**: ${formatDate(task.completedAt, "MMM d, yyyy 'at' HH:mm")}`);
-  }
-  if (task.dismissedAt) {
-    lines.push(`**Dismissed**: ${formatDate(task.dismissedAt, "MMM d, yyyy 'at' HH:mm")}`);
-  }
-  lines.push(`**Created**: ${formatDate(task.createdAt, "MMM d, yyyy 'at' HH:mm")}`);
+  if (metrics.startTime) summary += `Start Time: ${formatDate(metrics.startTime)}\n`;
+  if (metrics.endTime) summary += `End Time: ${formatDate(metrics.endTime)}\n`;
+  if (metrics.actualDuration) summary += `Actual Duration: ${formatDuration(metrics.actualDuration)}\n`;
+  if (metrics.estimatedDuration) summary += `Estimated Duration: ${formatDuration(metrics.estimatedDuration)}\n`;
+  if (metrics.pausedTime) summary += `Paused Time: ${formatDuration(metrics.pausedTime)}\n`;
+  if (metrics.extensionTime) summary += `Extension Time: ${formatDuration(metrics.extensionTime)}\n`;
+  if (metrics.netEffectiveTime) summary += `Net Effective Time: ${formatDuration(metrics.netEffectiveTime)}\n`;
   
-  // Task metrics if available
-  if (task.metrics) {
-    lines.push("\n## Metrics");
-    
-    if (task.metrics.expectedTime) {
-      lines.push(`**Expected Time**: ${formatDuration(task.metrics.expectedTime)}`);
-    }
-    
-    if (task.metrics.actualDuration) {
-      lines.push(`**Actual Duration**: ${formatDuration(task.metrics.actualDuration)}`);
-    } else if (task.metrics.timeSpent) {
-      lines.push(`**Time Spent**: ${formatDuration(task.metrics.timeSpent)}`);
-    }
-    
-    if (task.metrics.pauseCount) {
-      lines.push(`**Breaks Taken**: ${task.metrics.pauseCount}`);
-    }
-    
-    if (task.metrics.expectedTime && task.metrics.actualDuration) {
-      const efficiencyPercentage = calculateEfficiencyRatio(task.metrics.expectedTime, task.metrics.actualDuration) * 100;
-      lines.push(`**Efficiency**: ${Math.round(efficiencyPercentage)}%`);
-    }
-  }
+  return summary;
+}
+
+export function formatTaskWithMetrics(task: Task, metrics?: TaskMetrics): string {
+  let summary = `Task: ${task.name}\n`;
   
-  // Task description if available
-  if (task.description) {
-    lines.push("\n## Description");
-    lines.push(task.description);
+  // Add basic task data
+  if (task.description) summary += `Description: ${task.description}\n`;
+  if (task.status) summary += `Status: ${task.status}\n`;
+  if (task.priority) summary += `Priority: ${task.priority}\n`;
+  
+  // Add dates
+  if (task.createdAt) summary += `Created: ${formatDate(task.createdAt)}\n`;
+  if (task.scheduledDate) summary += `Scheduled: ${formatDate(task.scheduledDate)}\n`;
+  if (task.completedDate) summary += `Completed: ${formatDate(task.completedDate)}\n`;
+  
+  // Add metrics if available
+  if (metrics) {
+    summary += `\n--- Metrics ---\n${formatTaskMetrics(metrics)}`;
   }
   
-  // Journal entry if available
-  if (task.journalEntry) {
-    lines.push("\n## Journal Entry");
-    lines.push(task.journalEntry);
+  // Add subtasks
+  if (task.subtasks && task.subtasks.length > 0) {
+    summary += `\n--- Subtasks ---\n${formatSubtasks(task.subtasks)}`;
   }
   
-  // Tags if available
-  if (task.tags && task.tags.length > 0) {
-    lines.push("\n## Tags");
-    const tagNames = task.tags.map(tag => tag.name).join(", ");
-    lines.push(tagNames);
-  }
+  return summary;
+}
+
+export function formatTasksAsText(tasks: Task[]): string {
+  if (!tasks || tasks.length === 0) return 'No tasks available.';
   
-  return lines.join("\n");
-};
+  return tasks.map(task => formatTaskWithMetrics(task)).join('\n\n---\n\n');
+}

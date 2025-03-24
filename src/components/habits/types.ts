@@ -9,6 +9,8 @@ export const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frid
 export const SHORT_DAYS: DayOfWeek[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating';
+export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
+export type HabitCategory = 'Wellness' | 'Work' | 'Personal' | 'Learning';
 
 export interface HabitMetrics {
   type: MetricType;
@@ -20,8 +22,8 @@ export interface HabitDetail {
   id: string;
   name: string;
   description?: string;
-  category?: 'Wellness' | 'Work' | 'Personal' | 'Learning';
-  timePreference?: 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
+  category?: HabitCategory;
+  timePreference?: TimePreference;
   metrics: HabitMetrics;
   insights?: string[];
   tips?: string[];
@@ -39,6 +41,9 @@ export interface ActiveTemplate {
   activeDays: DayOfWeek[];
   customized: boolean;
   suppressToast?: boolean;
+  relationships?: {
+    [key: string]: any;
+  };
 }
 
 export interface HabitTemplate {
@@ -57,4 +62,16 @@ export interface NewTemplate {
   defaultHabits: HabitDetail[];
   defaultDays?: DayOfWeek[];
   category?: string;
+}
+
+export interface HabitProgress {
+  date: string;
+  value: boolean | number;
+  notes?: string;
+}
+
+export interface HabitProgressResult {
+  progress: HabitProgress[];
+  streak: number;
+  completion: number;
 }

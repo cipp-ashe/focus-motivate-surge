@@ -30,11 +30,12 @@ export const useTemplateManagement = () => {
         
         const newTemplate: ActiveTemplate = {
           templateId: template.id,
+          name: template.name,
+          description: template.description,
           habits: template.defaultHabits,
           activeDays: template.defaultDays || DEFAULT_ACTIVE_DAYS,
           customized: false,
-          name: template.name,
-          description: template.description,
+          relationships: {} // Add empty relationships object
         };
         
         toast.success('Template added successfully');

@@ -1,128 +1,64 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { toast } from 'sonner';
-import { eventManager } from '@/lib/events/EventManager';
-import { HabitProgressResult } from '@/components/habits/types';
+import { useState, useEffect } from 'react';
+import { HabitDetail } from '@/components/habits/types';
+import { HabitProgress, HabitProgressResult } from '@/components/habits/types';
 
-// Define simplified progress type for internal storage
-interface SimpleProgress {
-  value: boolean | number;
-  streak: number;
-  date: string;
-  completed: boolean;
-}
+/**
+ * Hook to get and track a habit's progress history
+ */
+export const useHabitProgress = (habit: HabitDetail) => {
+  const [progressData, setProgressData] = useState<HabitProgressResult>({
+    progress: [],
+    streak: 0,
+    completion: 0
+  });
 
-// Type for the progress map
-type ProgressMapType = Record<string, Record<string, Record<string, SimpleProgress>>>;
-
-export const useHabitProgress = () => {
-  const [progressMap, setProgressMap] = useState<ProgressMapType>({});
-  
-  // Load progress from localStorage on mount
+  // Load progress data for this habit
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('habit-progress');
-      if (stored) {
-        setProgressMap(JSON.parse(stored));
+    if (!habit?.id) return;
+
+    // This would typically come from a database or localStorage
+    // For now, we'll create mock data
+    const mockProgress: HabitProgress[] = [
+      { date: new Date(Date.now() - 6 * 86400000).toISOString(), value: true },
+      { date: new Date(Date.now() - 5 * 86400000).toISOString(), value: true },
+      { date: new Date(Date.now() - 4 * 86400000).toISOString(), value: true },
+      { date: new Date(Date.now() - 3 * 86400000).toISOString(), value: false },
+      { date: new Date(Date.now() - 2 * 86400000).toISOString(), value: true },
+      { date: new Date(Date.now() - 1 * 86400000).toISOString(), value: true },
+    ];
+
+    // Calculate streak
+    let currentStreak = 0;
+    let maxStreak = 0;
+
+    // Sort by date, most recent first
+    const sortedProgress = [...mockProgress].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    // Calculate current streak
+    for (const entry of sortedProgress) {
+      const value = typeof entry.value === 'boolean' ? entry.value : entry.value > 0;
+      if (value) {
+        currentStreak++;
+      } else {
+        break;
       }
-    } catch (error) {
-      console.error('Error loading habit progress:', error);
-      toast.error('Error loading habit progress');
     }
-  }, []);
 
-  // Save progress to localStorage whenever it changes
-  useEffect(() => {
-    if (Object.keys(progressMap).length > 0) {
-      localStorage.setItem('habit-progress', JSON.stringify(progressMap));
-    }
-  }, [progressMap]);
+    // Calculate completion rate
+    const completedDays = mockProgress.filter(
+      p => typeof p.value === 'boolean' ? p.value : p.value > 0
+    ).length;
+    const completionRate = (completedDays / mockProgress.length) * 100;
 
-  // Listen for events that might need to update habit progress
-  useEffect(() => {
-    const handleJournalComplete = ({ habitId, templateId }: { habitId: string, templateId: string }) => {
-      updateProgress(habitId, templateId, true);
-    };
-    
-    const handleJournalDeleted = ({ habitId, templateId }: { habitId: string, templateId: string }) => {
-      updateProgress(habitId, templateId, false);
-    };
-    
-    const handleTemplateDeleted = ({ templateId }: { templateId: string }) => {
-      // Remove all progress for this template
-      setProgressMap(prev => {
-        const updated = { ...prev };
-        delete updated[templateId];
-        return updated;
-      });
-    };
-    
-    // Subscribe to relevant events using eventManager instead of eventBus
-    const unsubJournalComplete = eventManager.on('habit:journal-complete', handleJournalComplete);
-    const unsubJournalDeleted = eventManager.on('habit:journal-deleted', handleJournalDeleted);
-    const unsubTemplateDeleted = eventManager.on('habit:template-delete', handleTemplateDeleted);
-    
-    return () => {
-      unsubJournalComplete();
-      unsubJournalDeleted();
-      unsubTemplateDeleted();
-    };
-  }, []);
-
-  // Get progress for a specific habit on today's date
-  const getTodayProgress = useCallback((habitId: string, templateId: string): HabitProgressResult => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    if (!progressMap[templateId] || !progressMap[templateId][habitId] || !progressMap[templateId][habitId][today]) {
-      return { value: false, streak: 0, completed: false };
-    }
-    
-    const progress = progressMap[templateId][habitId][today];
-    return { 
-      value: progress.value, 
-      streak: progress.streak, 
-      completed: progress.completed 
-    };
-  }, [progressMap]);
-
-  // Update progress for a specific habit
-  const updateProgress = useCallback((habitId: string, templateId: string, value: boolean | number) => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    const currentProgress = getTodayProgress(habitId, templateId);
-    const streak = value && !currentProgress.value ? (currentProgress.streak || 0) + 1 : currentProgress.streak || 0;
-    
-    setProgressMap(prev => {
-      // Create a deep copy of the previous state
-      const updated = { ...prev };
-      
-      // Initialize nested objects if they don't exist
-      if (!updated[templateId]) {
-        updated[templateId] = {};
-      }
-      if (!updated[templateId][habitId]) {
-        updated[templateId][habitId] = {};
-      }
-      
-      // Update the progress
-      updated[templateId][habitId][today] = {
-        value,
-        streak,
-        date: today,
-        completed: !!value
-      };
-      
-      return updated;
+    setProgressData({
+      progress: mockProgress,
+      streak: currentStreak,
+      completion: completionRate
     });
-    
-    // Emit event using eventManager instead of eventBus
-    eventManager.emit('habit:progress-update', { habitId, templateId, value, date: today });
-    
-    return { value, streak, completed: !!value };
-  }, [getTodayProgress]);
+  }, [habit?.id]);
 
-  return {
-    getTodayProgress,
-    updateProgress
-  };
+  return progressData;
 };

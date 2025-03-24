@@ -13,6 +13,7 @@ jest.mock('react-router-dom', () => ({
 
 const mockTemplate: ActiveTemplate = {
   templateId: 'template-1',
+  name: 'Test Template', // Added required name property
   habits: [
     {
       id: 'habit-1',
@@ -58,4 +59,3 @@ it('should return empty array if no habits are active today', () => {
   const { result } = renderHook(() => useTodaysHabits());
   expect(result.current.todaysHabits).toHaveLength(0);
 });
-
