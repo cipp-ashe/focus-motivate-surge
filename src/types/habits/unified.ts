@@ -19,10 +19,14 @@ export type TimePreference = 'Morning' | 'Afternoon' | 'Evening' | 'Anytime';
 export type HabitCategory = 'Wellness' | 'Work' | 'Personal' | 'Learning';
 export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink';
 
+// Define metric types to be used in code migrating from the old system
+export type MetricType = 'boolean' | 'timer' | 'counter' | 'journal' | 'rating';
+
 // Habit metrics configuration
 export interface HabitMetrics {
   // The task type determines the tracking method and UI
-  trackingType: TaskType;
+  type: MetricType;
+  trackingType?: TaskType;
   
   // Optional configuration based on task type
   target?: number;

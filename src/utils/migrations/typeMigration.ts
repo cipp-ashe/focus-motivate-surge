@@ -1,197 +1,207 @@
 
-/**
- * Type Migration Utilities
- * 
- * This module provides functions to migrate old data formats to the new
- * unified type system.
- */
+import { migrateTaskTypes } from '@/lib/storage/task/taskMigration';
 
-import { Task, TaskType } from '@/types/tasks';
-import { HabitDetail, HabitMetrics } from '@/types/habits/unified';
-import { Note } from '@/types/notes';
-
-/**
- * Migrate legacy MetricType to new TaskType
- */
-export function migrateMetricTypeToTaskType(metricType: string): TaskType {
-  switch (metricType) {
-    case 'boolean':
-      return 'regular';
-    case 'timer':
-      return 'timer';
-    case 'journal':
-      return 'journal';
-    case 'counter':
-      return 'counter';
-    case 'rating':
-      return 'rating';
-    default:
-      return 'regular';
+// A map of migration functions and their descriptions
+const migrations = [
+  {
+    name: 'migrateTaskTypes',
+    description: 'Migrate legacy task types to the new unified type system',
+    fn: migrateTaskTypes
+  },
+  {
+    name: 'migrateVoiceNotes',
+    description: 'Migrate voice notes to the new notes system',
+    fn: migrateVoiceNotesToNotes
+  },
+  {
+    name: 'migrateMetricTypes',
+    description: 'Update habit metric types to align with task types',
+    fn: migrateMetricTypes
   }
-}
+];
 
 /**
- * Migrate legacy habit metrics to new format
+ * Run all data migrations for the type system
  */
-export function migrateHabitMetrics(habit: any): HabitMetrics {
-  // Extract old metrics format
-  const oldMetrics = habit.metrics || {};
-  const oldType = oldMetrics.type || 'boolean';
-  
-  // Create new metrics format
-  return {
-    trackingType: migrateMetricTypeToTaskType(oldType),
-    target: oldMetrics.target,
-    unit: oldMetrics.unit,
-    scale: oldType === 'rating' ? 5 : undefined
-  };
-}
-
-/**
- * Migrate existing habits to new format
- */
-export function migrateHabit(habit: any): HabitDetail {
-  return {
-    ...habit,
-    metrics: migrateHabitMetrics(habit)
-  };
-}
-
-/**
- * Migrate existing tasks to new format
- */
-export function migrateTask(task: any): Task {
-  // Ensure taskType is set
-  let taskType: TaskType = task.taskType || 'regular';
-  
-  // If no taskType but has relationships with metricType, use that
-  if (!task.taskType && task.relationships?.metricType) {
-    taskType = migrateMetricTypeToTaskType(task.relationships.metricType);
-  }
-  
-  // Return migrated task
-  return {
-    ...task,
-    taskType
-  };
-}
-
-/**
- * Migrate voice notes to the notes system
- */
-export function migrateVoiceNoteToNote(voiceNote: any): Note {
-  const now = new Date().toISOString();
-  
-  return {
-    id: `voice-${voiceNote.id}`,
-    title: `Voice Note (${new Date(voiceNote.createdAt || now).toLocaleString()})`,
-    content: voiceNote.text || '',
-    contentType: 'audio',
-    createdAt: voiceNote.createdAt || now,
-    updatedAt: voiceNote.createdAt || now,
-    tags: [{ name: 'voice-note', color: 'red' }],
-    audio: {
-      url: voiceNote.audioUrl || '',
-      duration: voiceNote.duration || 0,
-      transcript: voiceNote.text || '',
-      recordedAt: voiceNote.createdAt || now
-    }
-  };
-}
-
-/**
- * Migrate journal entry to a note
- */
-export function migrateJournalEntryToNote(journalEntry: any): Note {
-  const now = new Date().toISOString();
-  
-  return {
-    id: `journal-${journalEntry.id || new Date().getTime()}`,
-    title: journalEntry.title || `Journal Entry (${new Date(journalEntry.date || now).toLocaleString()})`,
-    content: journalEntry.content || '',
-    contentType: 'text',
-    createdAt: journalEntry.date || now,
-    updatedAt: journalEntry.date || now,
-    tags: [
-      { name: 'journal', color: 'green' },
-      { name: journalEntry.type || 'reflection', color: 'blue' }
-    ],
-    relationships: journalEntry.habitId ? [
-      {
-        entityId: journalEntry.habitId,
-        entityType: 'habit',
-        metadata: {
-          templateId: journalEntry.templateId,
-          date: journalEntry.date
-        }
-      }
-    ] : undefined
-  };
-}
-
-/**
- * Check storage for legacy data formats and migrate them
- */
-export function migrateStorageData() {
+export function runDataMigration() {
+  console.log('Starting data migration...');
   try {
-    // Migrate tasks
-    const tasksStr = localStorage.getItem('tasks');
-    if (tasksStr) {
-      const tasks = JSON.parse(tasksStr);
-      if (Array.isArray(tasks)) {
-        const migratedTasks = tasks.map(migrateTask);
-        localStorage.setItem('tasks', JSON.stringify(migratedTasks));
-        console.log(`Migrated ${migratedTasks.length} tasks`);
+    // Run each migration in sequence
+    let results = [];
+    
+    for (const migration of migrations) {
+      console.log(`Running migration: ${migration.name} - ${migration.description}`);
+      try {
+        const result = migration.fn();
+        results.push({ name: migration.name, success: true, result });
+        console.log(`Migration ${migration.name} completed successfully`);
+      } catch (error) {
+        console.error(`Migration ${migration.name} failed:`, error);
+        results.push({ name: migration.name, success: false, error });
       }
     }
     
-    // Migrate habit templates
-    const templatesStr = localStorage.getItem('habit-templates');
-    if (templatesStr) {
-      const templates = JSON.parse(templatesStr);
-      if (Array.isArray(templates)) {
-        const migratedTemplates = templates.map(template => ({
-          ...template,
-          habits: template.habits.map(migrateHabit)
-        }));
-        localStorage.setItem('habit-templates', JSON.stringify(migratedTemplates));
-        console.log(`Migrated ${migratedTemplates.length} templates`);
-      }
-    }
+    // Check if all migrations were successful
+    const allSuccessful = results.every(r => r.success);
+    console.log(`Data migration ${allSuccessful ? 'completed successfully' : 'completed with errors'}`);
     
-    // Migrate voice notes to notes
-    const voiceNotesStr = localStorage.getItem('voiceNotes');
-    if (voiceNotesStr) {
-      const voiceNotes = JSON.parse(voiceNotesStr);
-      if (Array.isArray(voiceNotes)) {
-        // Load existing notes
-        const notesStr = localStorage.getItem('notes');
-        const existingNotes = notesStr ? JSON.parse(notesStr) : [];
-        
-        // Create voice note entries in notes
-        const voiceNotesAsNotes = voiceNotes.map(migrateVoiceNoteToNote);
-        
-        // Combine with existing notes
-        const combinedNotes = [...existingNotes, ...voiceNotesAsNotes];
-        localStorage.setItem('notes', JSON.stringify(combinedNotes));
-        console.log(`Migrated ${voiceNotesAsNotes.length} voice notes to notes`);
-        
-        // Clear old voice notes
-        localStorage.removeItem('voiceNotes');
-      }
-    }
-    
-    return true;
+    return allSuccessful;
   } catch (error) {
     console.error('Error during data migration:', error);
     return false;
   }
 }
 
-// Export a function to run the migration
-export function runDataMigration() {
-  console.log('Starting data migration to new unified type system...');
-  const result = migrateStorageData();
-  console.log('Data migration complete:', result ? 'Success' : 'Failed');
-  return result;
+/**
+ * Migrate voice notes to the new notes system
+ */
+function migrateVoiceNotesToNotes() {
+  console.log('Starting voice notes migration');
+  
+  try {
+    // Load existing voice notes
+    const voiceNotesStr = localStorage.getItem('voiceNotes');
+    if (!voiceNotesStr) {
+      console.log('No voice notes to migrate');
+      return 0;
+    }
+    
+    const voiceNotes = JSON.parse(voiceNotesStr);
+    if (!Array.isArray(voiceNotes) || voiceNotes.length === 0) {
+      console.log('No voice notes to migrate');
+      return 0;
+    }
+    
+    // Load existing notes
+    const notesStr = localStorage.getItem('notes');
+    const notes = notesStr ? JSON.parse(notesStr) : [];
+    
+    // Track how many notes were migrated
+    let migratedCount = 0;
+    
+    // Convert each voice note to the new note format
+    for (const voiceNote of voiceNotes) {
+      // Skip if this voice note has already been migrated (check by audioUrl)
+      const alreadyMigrated = notes.some(note => 
+        note.audio && note.audio.url === voiceNote.audioUrl
+      );
+      
+      if (alreadyMigrated) {
+        console.log(`Voice note with URL ${voiceNote.audioUrl} already migrated, skipping`);
+        continue;
+      }
+      
+      // Create a new note from the voice note
+      const newNote = {
+        id: voiceNote.id || `voice-note-${Date.now()}-${migratedCount}`,
+        title: voiceNote.title || 'Voice Note',
+        content: voiceNote.text || '',
+        contentType: 'audio',
+        createdAt: voiceNote.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tags: [{ name: 'voice-note', color: 'red' }],
+        audio: {
+          url: voiceNote.audioUrl,
+          duration: voiceNote.duration || 0,
+          transcript: voiceNote.text || '',
+          recordedAt: voiceNote.createdAt || new Date().toISOString()
+        }
+      };
+      
+      // Add the new note to the notes array
+      notes.push(newNote);
+      migratedCount++;
+      
+      console.log(`Migrated voice note: ${newNote.title}`);
+    }
+    
+    // Save the updated notes
+    if (migratedCount > 0) {
+      localStorage.setItem('notes', JSON.stringify(notes));
+      console.log(`Migrated ${migratedCount} voice notes to the notes system`);
+    }
+    
+    return migratedCount;
+  } catch (error) {
+    console.error('Error migrating voice notes:', error);
+    return 0;
+  }
+}
+
+/**
+ * Migrate habit metric types to align with the new task type system
+ */
+function migrateMetricTypes() {
+  console.log('Starting habit metric types migration');
+  
+  try {
+    // Load active templates
+    const templatesStr = localStorage.getItem('habit-templates');
+    if (!templatesStr) {
+      console.log('No habit templates to migrate');
+      return 0;
+    }
+    
+    const templates = JSON.parse(templatesStr);
+    if (!Array.isArray(templates) || templates.length === 0) {
+      console.log('No habit templates to migrate');
+      return 0;
+    }
+    
+    let migratedCount = 0;
+    
+    // Update each template's habits
+    for (const template of templates) {
+      if (!template.habits || !Array.isArray(template.habits)) {
+        continue;
+      }
+      
+      // Update each habit's metrics
+      for (const habit of template.habits) {
+        if (!habit.metrics) {
+          habit.metrics = { type: 'boolean' };
+          migratedCount++;
+          continue;
+        }
+        
+        // Ensure the habit has a metric type
+        if (!habit.metrics.type) {
+          habit.metrics.type = 'boolean';
+          migratedCount++;
+        }
+        
+        // Add trackingType based on the type
+        if (!habit.metrics.trackingType) {
+          switch (habit.metrics.type) {
+            case 'timer':
+              habit.metrics.trackingType = 'timer';
+              break;
+            case 'journal':
+              habit.metrics.trackingType = 'journal';
+              break;
+            case 'counter':
+              habit.metrics.trackingType = 'counter';
+              break;
+            case 'rating':
+              habit.metrics.trackingType = 'rating';
+              break;
+            default:
+              habit.metrics.trackingType = 'regular';
+          }
+          migratedCount++;
+        }
+      }
+    }
+    
+    // Save the updated templates
+    if (migratedCount > 0) {
+      localStorage.setItem('habit-templates', JSON.stringify(templates));
+      console.log(`Updated ${migratedCount} habit metrics`);
+    }
+    
+    return migratedCount;
+  } catch (error) {
+    console.error('Error migrating habit metric types:', error);
+    return 0;
+  }
 }

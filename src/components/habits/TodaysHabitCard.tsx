@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HabitDetail } from './types';
+import { HabitDetail } from '@/types/habits';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Clock, ClipboardList, BookOpen, Zap, XCircle } from "lucide-react";
@@ -54,8 +54,7 @@ export const TodaysHabitCard: React.FC<TodaysHabitCardProps> = ({
       name: habit.name,
       duration: habit.metrics.target || 1500, // Default to 25 minutes
       date: new Date().toDateString(),
-      // Use as a TypeScript assertion to ensure compatibility with event types
-      metricType: habit.metrics.type as string
+      metricType: habit.metrics.type
     });
     
     // Force task update after a short delay

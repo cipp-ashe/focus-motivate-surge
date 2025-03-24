@@ -2,54 +2,49 @@
 /**
  * Unified Task Type System
  * 
- * This module serves as the central definition for all task-related types,
- * consolidating the type hierarchy to align with our domain model.
+ * This module defines all task-related types including both standard and integrated types
  */
 
-// Core task categories
-export type BaseTaskType = 'regular' | 'checklist' | 'counter' | 'rating';
-export type IntegratedTaskType = 'journal' | 'timer' | 'screenshot' | 'voicenote';
-export type TaskType = BaseTaskType | IntegratedTaskType;
+// Basic task types - standard
+export type StandardTaskType = 
+  | 'regular' 
+  | 'checklist' 
+  | 'counter'
+  | 'rating';
 
-// Task status to track progress
-export type TaskStatus = 'pending' | 'started' | 'in-progress' | 'delayed' | 'completed' | 'dismissed';
+// Integrated task types - these interface with other subsystems
+export type IntegratedTaskType = 
+  | 'timer' 
+  | 'journal' 
+  | 'screenshot' 
+  | 'voicenote';
 
-// Task metrics interface
-export interface TaskMetrics {
-  timeSpent?: number;
-  timeElapsed?: number;
-  pauseCount?: number;
-  completionDate?: string;
-  streak?: number;
-  
-  // Timer-specific metrics
-  expectedTime?: number;
-  actualTime?: number;
-  pausedTime?: number;
-  extensionTime?: number;
-  netEffectiveTime?: number;
-  efficiencyRatio?: number;
-  completionStatus?: string;
-  
-  // Counter-specific metrics
-  count?: number;
-  target?: number;
-  
-  // Rating-specific metrics
-  rating?: number;
-  scale?: number;
-}
+// Legacy task types - maintained for backwards compatibility  
+export type LegacyTaskType = 
+  | 'habit' 
+  | 'todo' 
+  | 'focus' 
+  | 'exercise' 
+  | 'reading' 
+  | 'meditation' 
+  | 'check-in'
+  | 'daily' 
+  | 'weekly' 
+  | 'monthly' 
+  | 'yearly' 
+  | 'reminder';
 
-// Task integration relationships
-export interface TaskRelationships {
-  habitId?: string;    // If this task was created from a habit
-  templateId?: string; // The template that contains the habit
-  date?: string;       // The date this habit task is for
-  noteId?: string;     // ID of the note associated with this task
-  timerId?: string;    // ID of the timer session
-  audioId?: string;    // ID of the voice note
-  metricType?: string; // Legacy field for backward compatibility
-}
+// Combined task type
+export type TaskType = 
+  | StandardTaskType 
+  | IntegratedTaskType 
+  | LegacyTaskType;
+
+// Task priority
+export type TaskPriority = 'low' | 'medium' | 'high';
+
+// Task status
+export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'archived' | 'failed';
 
 // Checklist item for checklist tasks
 export interface ChecklistItem {
@@ -58,60 +53,81 @@ export interface ChecklistItem {
   completed: boolean;
 }
 
-// Core Task interface
+// Task relationships
+export interface TaskRelationships {
+  habitId?: string;
+  templateId?: string;
+  date?: string;
+  metricType?: string;
+  noteId?: string;
+  journalId?: string;
+  parentId?: string;
+  projectId?: string;
+  [key: string]: any;
+}
+
+// Task scheduling
+export interface TaskSchedule {
+  type: 'once' | 'daily' | 'weekly' | 'monthly';
+  startDate: string;
+  endDate?: string;
+  daysOfWeek?: number[]; // 0-6: Sunday-Saturday
+  time?: string; // HH:MM format
+}
+
+// Base task interface
 export interface Task {
   id: string;
   name: string;
   description?: string;
+  taskType: TaskType;
   completed: boolean;
-  duration?: number;
   createdAt: string;
   completedAt?: string;
-  dismissedAt?: string;
-  clearReason?: 'manual' | 'completed' | 'dismissed';
-  taskType: TaskType;
+  updatedAt?: string;
+  dueDate?: string;
+  priority?: TaskPriority;
   status?: TaskStatus;
-  relationships?: TaskRelationships;
-  metrics?: TaskMetrics;
+  parentTaskId?: string;
   tags?: string[];
   
-  // Media content fields
-  content?: string;          // For journal entries or text content
-  
-  // Screenshot-specific fields
-  imageUrl?: string;
-  imageType?: 'screenshot' | 'image' | null;
-  fileName?: string;
-  capturedText?: string;
-  imageMetadata?: {
-    dimensions: {
-      width: number;
-      height: number;
-    };
-    fileSize: number;
-    format: string;
-  };
-  
-  // Checklist-specific field
-  checklistItems?: ChecklistItem[];
-  
-  // Voice note-specific fields
-  audioUrl?: string;
-  audioText?: string;
-  audioDuration?: number;
+  // Type-specific properties
+  duration?: number; // In seconds, for timer and time-tracked tasks
+  checklistItems?: ChecklistItem[]; // For checklist tasks
+  count?: number; // For counter tasks
+  target?: number; // Target value for counter tasks
+  rating?: number; // For rating tasks
+  scale?: number; // Rating scale (e.g. 1-5, 1-10)
+
+  // Integrated type properties
+  imageUrl?: string; // For screenshot tasks
+  imageType?: string; // For screenshot tasks
+  journalEntry?: string; // For journal tasks
+  voiceNoteUrl?: string; // For voice note tasks
+  voiceNoteText?: string; // Transcript for voice note tasks
+
+  // Scheduling
+  schedule?: TaskSchedule;
+
+  // Relationships with other entities
+  relationships?: TaskRelationships;
 }
 
-// Storage keys
-export const STORAGE_KEYS = {
-  TASKS: 'tasks',
-  COMPLETED_TASKS: 'completed_tasks',
-};
+// Task creation interface (without required id and timestamps)
+export type TaskCreationParams = Omit<Task, 'id' | 'createdAt'> & { id?: string };
 
-// Task state for context
-export interface TaskState {
-  items: Task[];
-  completed: Task[];
-  cleared: Task[];
-  selected: string | null;
-  isLoaded: boolean;
+// Task update interface
+export type TaskUpdateParams = Partial<Task>;
+
+// Task filter options
+export interface TaskFilter {
+  completed?: boolean;
+  taskType?: TaskType | TaskType[];
+  dueDate?: { from?: string; to?: string };
+  priority?: TaskPriority | TaskPriority[];
+  tags?: string[];
+  search?: string;
 }
+
+// Storage key for tasks
+export const TASKS_STORAGE_KEY = 'tasks';

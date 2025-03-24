@@ -44,7 +44,7 @@ export const migrateTaskTypes = () => {
  */
 const isValidTaskType = (taskType: string): taskType is TaskType => {
   const validTypes: TaskType[] = [
-    'timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'focus',
+    'timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'counter', 'rating',
     'habit', 'todo', 'exercise', 'reading', 'meditation', 'check-in', 'daily', 
     'weekly', 'monthly', 'yearly', 'reminder'
   ];
@@ -66,6 +66,19 @@ const determineTaskTypeFromTask = (task: Task): TaskType => {
     return 'timer';
   } else if (task.journalEntry) {
     return 'journal';
+  } else if (task.rating !== undefined) {
+    return 'rating';
+  } else if (task.count !== undefined) {
+    return 'counter';
+  }
+  
+  // Check for metrics from habit system
+  if (task.relationships?.metricType) {
+    const metricType = task.relationships.metricType;
+    if (metricType === 'timer') return 'timer';
+    if (metricType === 'journal') return 'journal';
+    if (metricType === 'counter') return 'counter';
+    if (metricType === 'rating') return 'rating';
   }
   
   // Default to regular

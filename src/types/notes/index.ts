@@ -123,3 +123,6 @@ export function createVoiceNote(
     }
   };
 }
+
+// Storage constant
+export const STORAGE_KEY = 'notes';

@@ -12,7 +12,7 @@ import { taskOperations } from '@/lib/operations/tasks';
 import { useEvent } from '@/hooks/useEvent';
 import { MetricType, ActiveTemplate } from '@/types/habits';
 import { HabitTaskEvent } from '@/types/events/habit-events';
-import { Task } from '@/types/tasks';
+import { Task, TaskType } from '@/types/tasks';
 
 export const useHabitTaskIntegration = () => {
   // Track which habit tasks have been scheduled to avoid duplicates
@@ -32,9 +32,12 @@ export const useHabitTaskIntegration = () => {
     }
     
     try {
-      // Determine appropriate task type based on habit metric type
-      const taskType = metricType === 'timer' ? 'timer' : 
-                      metricType === 'journal' ? 'journal' : 'regular';
+      // Map metric type to task type
+      let taskType: TaskType = 'regular';
+      if (metricType === 'timer') taskType = 'timer';
+      else if (metricType === 'journal') taskType = 'journal';
+      else if (metricType === 'counter') taskType = 'counter';
+      else if (metricType === 'rating') taskType = 'rating';
       
       // Create the habit task
       const taskId = taskOperations.createHabitTask(
