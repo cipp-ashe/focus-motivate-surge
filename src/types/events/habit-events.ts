@@ -4,6 +4,7 @@
  */
 import { MetricType } from '@/types/habits/types';
 import { HabitCompletionEvent, TemplateUpdateEvent } from '@/types/habits/unified';
+import { HabitTaskEvent } from './unified';
 
 export type HabitEventType =
   | 'habit:complete'
@@ -70,13 +71,4 @@ export interface HabitEventPayloadMap {
     templateId?: string;
     date?: string;
   };
-}
-
-export interface HabitTaskEvent {
-  habitId: string;
-  templateId: string;
-  name: string;
-  duration: number;
-  date: string;
-  metricType?: MetricType;
 }

@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { MetricType, DayOfWeek, ActiveTemplate } from '@/types/habits/types';
+import { EventPayload } from '@/types/events';
 
 /**
  * Unified hook for habit events

@@ -8,9 +8,18 @@
 // Export all types from the unified events file
 export * from './unified';
 
-// Re-export original habit event types for backward compatibility
+// Export base event types
+export * from './base';
+
+// Export habit specific event types
 export * from './habit-events';
 
-// For backward compatibility, export these types from the unified module
-import { EventType, EventPayload, EventCallback, EventPayloadMap } from './unified';
-export { EventType, EventPayload, EventCallback, EventPayloadMap };
+// Additional types that might be used in various places
+export interface JournalEntry {
+  id: string;
+  content: string;
+  date: string;
+  habitId?: string;
+  templateId?: string;
+  taskId?: string;
+}
