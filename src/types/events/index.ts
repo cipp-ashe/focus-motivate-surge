@@ -25,7 +25,15 @@ export type CustomEventType =
   | 'task:add'
   | 'timer:set-task'
   | 'quote:link-task'
-  | 'relationship:batch-update';
+  | 'relationship:batch-update'
+  | 'habit:template-remove'
+  | 'journal:open'
+  | 'journal:close'
+  | 'journal:get'
+  | 'journal:list'
+  | 'journal:save'
+  | 'habit:custom-template-create'
+  | 'habit:custom-template-delete';
 
 // Union of all event types
 export type EventType = 
@@ -48,11 +56,12 @@ export interface EventPayloadMap extends
   'journal:create': { id: string; content: string; date: string; habitId?: string };
   'journal:update': { id: string; content: string };
   'journal:delete': { id: string };
-  'voice-note:create': { id: string; text: string; audioUrl: string };
+  'voice-note:create': { id: string; text: string; audioUrl: string; transcript?: string };
   'task:add': { id: string; name: string };
-  'timer:set-task': { id: string; name: string; duration: number; taskId?: string; completed?: boolean; createdAt?: string };
+  'timer:set-task': { id: string; name: string; duration: number; taskId?: string; completed?: boolean; createdAt?: string; taskType?: string };
   'quote:link-task': { quoteId: string; taskId: string };
   'relationship:batch-update': any;
+  'habit:template-remove': { templateId: string };
 }
 
 // Callback type for event handlers
