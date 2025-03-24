@@ -1,4 +1,3 @@
-
 import { EntityType } from './core';
 
 // Define allowed colors for tags
@@ -71,5 +70,31 @@ export function createNote(
     updatedAt: now,
     tags,
     relationships
+  };
+}
+
+// Create a voice note
+export function createVoiceNote(
+  title: string,
+  audioUrl: string,
+  duration: number,
+  transcript: string = '',
+  tags: Tag[] = []
+): Omit<Note, 'id'> {
+  const now = new Date().toISOString();
+  return {
+    title,
+    content: transcript,
+    createdAt: now,
+    updatedAt: now,
+    tags,
+    relationships: [{
+      entityType: EntityType.VoiceNote,
+      entityId: audioUrl,
+      metadata: {
+        duration,
+        transcript
+      }
+    }]
   };
 }
