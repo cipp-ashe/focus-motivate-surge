@@ -1,9 +1,11 @@
 
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 import { Task } from '@/types/tasks';
 
 export function useTasks() {
   const taskContext = useTaskContext();
+  const taskManager = useUnifiedTaskManager();
   
   return {
     getTask: (taskId: string): Task | null => {
@@ -11,11 +13,11 @@ export function useTasks() {
       const foundTask = taskContext.items.find(task => task.id === taskId);
       return foundTask || null;
     },
-    updateTask: taskContext.updateTask,
+    updateTask: taskManager.updateTask,
     addTask: taskContext.addTask,
-    deleteTask: taskContext.deleteTask,
-    completeTask: taskContext.completeTask,
-    selectTask: taskContext.selectTask,
+    deleteTask: taskManager.deleteTask,
+    completeTask: taskManager.completeTask,
+    selectTask: taskManager.selectTask,
     tasks: taskContext.items,
     completedTasks: taskContext.completed
   };

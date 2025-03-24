@@ -1,3 +1,4 @@
+
 /**
  * Task Operations Module
  * 
@@ -8,12 +9,12 @@
  * @module taskOperations
  */
 
-// Re-export all task operations from their modules to maintain the existing API
 import { createTaskOperations } from './create';
 import { updateTaskOperations } from './update';
 import { deleteTaskOperations } from './delete';
 import { completeTaskOperations } from './complete';
 import { habitTaskOperations } from './habit';
+import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 
 /**
  * Combined task operations object providing a unified API
@@ -54,8 +55,17 @@ export const taskOperations = {
    * Create a task linked to a habit
    * @see habitTaskOperations.createHabitTask
    */
-  createHabitTask: habitTaskOperations.createHabitTask
+  createHabitTask: habitTaskOperations.createHabitTask,
+
+  /**
+   * Get the unified task manager hook
+   * This provides access to the full unified task manager API
+   */
+  useUnifiedTaskManager
 };
 
 // Export the individual operation modules for direct access
 export { createTaskOperations, updateTaskOperations, deleteTaskOperations, completeTaskOperations, habitTaskOperations };
+
+// Export the unified task manager hook directly for convenience
+export { useUnifiedTaskManager };

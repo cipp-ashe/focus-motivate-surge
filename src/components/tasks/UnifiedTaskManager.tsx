@@ -1,8 +1,7 @@
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { TaskList } from './TaskList';
-import { UnifiedTaskEventListener } from './event-handlers/UnifiedTaskEventListener';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -32,51 +31,36 @@ export const UnifiedTaskManager: React.FC<UnifiedTaskManagerProps> = ({
 }) => {
   const { items, selected, completeTask } = useTaskContext();
   const [loading, setLoading] = useState(false);
-  const [forceUpdate, setForceUpdate] = useState(0);
   
   // Use our unified task manager hook
   const taskManager = useUnifiedTaskManager();
   
-  // Task Filtering - simplified without the missing hooks
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  
-  // Initialize filtered tasks with all tasks
-  useEffect(() => {
-    setFilteredTasks(items);
-  }, [items]);
-
-  const handleTaskSelect = useCallback((taskId: string) => {
-    console.log(`TaskManager: Selecting task ${taskId}`);
-    taskManager.selectTask(taskId);
-  }, [taskManager]);
-  
-  const handleForceUpdate = useCallback(() => {
-    setForceUpdate(prev => prev + 1);
-  }, []);
-
-  // Task update handler
-  const handleTaskUpdate = useCallback((data: { taskId: string; updates: Partial<Task> }) => {
-    console.log('TaskManager: Handling task update', data);
-    taskManager.updateTask(data.taskId, data.updates);
-  }, [taskManager]);
-
-  // Task delete handler
-  const handleTaskDelete = useCallback((data: { taskId: string }) => {
-    console.log('TaskManager: Handling task delete', data);
-    taskManager.deleteTask(data.taskId);
-  }, [taskManager]);
-
-  // Task complete handler
-  const handleTaskComplete = useCallback((data: { taskId: string; metrics?: any }) => {
-    console.log('TaskManager: Handling task complete', data);
-    taskManager.completeTask(data.taskId, data.metrics);
-  }, [taskManager]);
-
-  // Calculate task counts
+  // Task counts
   const taskCounts = {
     total: items.length,
     completed: items.filter(t => t.completed).length
   };
+
+  // Task event handlers
+  const handleTaskSelect = useCallback((taskId: string) => {
+    taskManager.selectTask(taskId);
+  }, [taskManager]);
+  
+  const handleTaskDelete = useCallback((data: { taskId: string }) => {
+    taskManager.deleteTask(data.taskId);
+  }, [taskManager]);
+
+  const handleTaskUpdate = useCallback((data: { taskId: string; updates: Partial<Task> }) => {
+    taskManager.updateTask(data.taskId, data.updates);
+  }, [taskManager]);
+
+  const handleTaskComplete = useCallback((data: { taskId: string; metrics?: any }) => {
+    taskManager.completeTask(data.taskId, data.metrics);
+  }, [taskManager]);
+
+  const handleForceUpdate = useCallback(() => {
+    taskManager.forceTaskUpdate();
+  }, [taskManager]);
 
   // Dialog opener handlers
   const handleShowImage = useCallback((imageUrl: string, taskName: string) => {
@@ -110,7 +94,7 @@ export const UnifiedTaskManager: React.FC<UnifiedTaskManagerProps> = ({
       </div>
       
       <TaskList
-        tasks={filteredTasks}
+        tasks={items}
         selectedTaskId={selected}
         handleTaskSelect={handleTaskSelect}
         handleDelete={handleTaskDelete}
@@ -129,13 +113,7 @@ export const UnifiedTaskManager: React.FC<UnifiedTaskManagerProps> = ({
         taskCountInfo={taskCounts}
       />
       
-      <UnifiedTaskEventListener
-        onTaskUpdate={handleTaskUpdate}
-        onShowImage={handleShowImage}
-        onOpenChecklist={handleOpenChecklist}
-        onOpenJournal={handleOpenJournal}
-        onOpenVoiceRecorder={handleOpenVoiceRecorder}
-      />
+      {/* Instead of including separate listeners here, we're using the unified task manager */}
     </div>
   );
 };

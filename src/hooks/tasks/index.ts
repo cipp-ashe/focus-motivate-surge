@@ -1,9 +1,10 @@
 
-// Core task hooks
+// Core task hooks - using our unified approach
 export { useTaskEvents } from './useTaskEvents';
 export { useTasksInitializer } from './useTasksInitializer';
 export { useTasksNavigation } from './useTasksNavigation';
 export { useTemplateTasksManager } from './useTemplateTasksManager';
+export { useUnifiedTaskManager } from './useUnifiedTaskManager';
 
 // Habit task scheduler and related hooks
 export { useHabitTaskScheduler } from './useHabitTaskScheduler';
