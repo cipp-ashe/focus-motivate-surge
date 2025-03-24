@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { Task, TaskType } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { HabitTaskEvent } from '@/types/events/habit-events';
+import { HabitTaskEvent } from '@/types/events/unified';
 import { MetricType } from '@/types/habits/types';
 import { useHabitTaskCreator } from './useHabitTaskCreator';
 

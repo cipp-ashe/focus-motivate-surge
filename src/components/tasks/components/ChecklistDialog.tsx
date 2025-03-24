@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Task, ChecklistItem } from '@/types/tasks';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { 
   Dialog,
@@ -51,7 +51,7 @@ export const ChecklistDialog: React.FC<ChecklistDialogProps> = ({
       checklistItems: editedItems
     };
 
-    eventBus.emit('task:update', { 
+    eventManager.emit('task:update', { 
       taskId: task.id, 
       updates 
     });

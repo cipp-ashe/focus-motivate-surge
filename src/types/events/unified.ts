@@ -10,6 +10,7 @@
 import { Task, TaskType } from '@/types/tasks';
 import { HabitEventType, HabitEventPayloadMap } from './habit-events';
 import { MetricType } from '@/types/habits/types';
+import { TimerEventType, TimerEventPayloadMap } from './timer-events';
 
 // Define the core event types
 export type CoreEventType =
@@ -48,8 +49,8 @@ export type CoreEventType =
   | 'habit:dismissed'
   | 'habit:select';
 
-// Define the unified event type that includes both core and habit events
-export type EventType = CoreEventType | HabitEventType | string;
+// Define the unified event type that includes both core, habit and timer events
+export type EventType = CoreEventType | HabitEventType | TimerEventType | string;
 
 // Define payload types for core events
 export interface CoreEventPayloadMap {
@@ -69,10 +70,10 @@ export interface CoreEventPayloadMap {
   'habits:check-pending': any;
   'tag:link': { tagId: string; entityId: string; entityType: string };
   'tag:unlink': { tagId: string; entityId: string; entityType: string };
-  'timer:tick': { timeLeft: number; taskId?: string };
+  'timer:tick': { timeLeft: number; taskId?: string; taskName?: string };
   'timer:init': { duration?: number; taskId?: string; taskName?: string };
   'timer:close': undefined;
-  'timer:start': { taskId?: string; minutes: number; taskName?: string; duration?: number };
+  'timer:start': { taskId?: string; taskName?: string; duration?: number };
   'app:initialized': { userId?: string };
   'journal:open': { habitId: string; habitName: string; description?: string; templateId?: string; date?: string };
   'journal:update': { id: string; content: string; title?: string };
@@ -89,8 +90,8 @@ export interface CoreEventPayloadMap {
   'habit:select': { habitId: string };
 }
 
-// Combine core and habit event payload maps
-export interface EventPayloadMap extends CoreEventPayloadMap, HabitEventPayloadMap {}
+// Combine core, habit and timer event payload maps
+export interface EventPayloadMap extends CoreEventPayloadMap, HabitEventPayloadMap, TimerEventPayloadMap {}
 
 // Define EventPayload type for type safety in event callbacks
 export type EventPayload<T extends EventType> = T extends keyof EventPayloadMap ? EventPayloadMap[T] : any;

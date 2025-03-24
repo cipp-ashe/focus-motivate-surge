@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { Card } from "@/components/ui/card";
 import { TaskContent } from "./TaskContent";
 import { useDataFlow } from "@/hooks/debug/useDataFlow";
@@ -40,12 +39,6 @@ interface TaskRowProps {
 
 /**
  * A component that renders a single task row with comprehensive debug instrumentation
- * 
- * This enhanced version adds:
- * - Data flow tracing
- * - Performance measurements
- * - State tracking
- * - Validation and assertions
  */
 export const TaskRowDebug: React.FC<TaskRowProps> = (props) => {
   const {
@@ -187,7 +180,7 @@ export const TaskRowDebug: React.FC<TaskRowProps> = (props) => {
     // Convert minutes to seconds and update task
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     
-    eventBus.emit('task:update', {
+    eventManager.emit('task:update', {
       taskId: task.id,
       updates: { duration: parseInt(newDurationInSeconds) }
     });
@@ -202,7 +195,7 @@ export const TaskRowDebug: React.FC<TaskRowProps> = (props) => {
       
       e.stopPropagation();
       e.preventDefault();
-      eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
+      eventManager.emit('task:delete', { taskId: task.id, reason: 'manual' });
     }
   );
 
@@ -216,9 +209,9 @@ export const TaskRowDebug: React.FC<TaskRowProps> = (props) => {
       
       e.stopPropagation();
       if (actionType === 'complete') {
-        eventBus.emit('task:complete', { taskId: task.id });
+        eventManager.emit('task:complete', { taskId: task.id });
       } else if (actionType === 'uncomplete') {
-        eventBus.emit('task:update', { 
+        eventManager.emit('task:update', { 
           taskId: task.id, 
           updates: { completed: false, completedAt: null } 
         });
@@ -261,7 +254,7 @@ export const TaskRowDebug: React.FC<TaskRowProps> = (props) => {
         e.stopPropagation();
         
         // Select the task without triggering conversion
-        eventBus.emit('task:select', task.id);
+        eventManager.emit('task:select', task.id);
         return;
       }
       

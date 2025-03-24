@@ -7,6 +7,8 @@ import { PlusCircle } from 'lucide-react';
 import ActiveTemplateList from './ActiveTemplateList';
 import { useHabitContext } from '@/contexts/habits/HabitContext';
 import { habitTemplates } from '../../utils/habitTemplates';
+import { toast } from 'sonner';
+import { eventManager } from '@/lib/events/EventManager';
 
 export interface HabitTemplateManagerProps {
   activeTemplates: ActiveTemplate[];
@@ -38,6 +40,14 @@ export const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
     // If the template is active, also remove it from the active templates
     if (activeTemplateIds.includes(templateId)) {
       removeTemplate(templateId);
+      
+      // Use the eventManager to emit the delete event
+      eventManager.emit('habit:template-delete', { 
+        templateId, 
+        isOriginatingAction: true 
+      });
+      
+      toast.success(`Template removed successfully`);
     }
   };
   
@@ -63,6 +73,7 @@ export const HabitTemplateManager: React.FC<HabitTemplateManagerProps> = ({
       customized: true
     });
     
+    toast.success(`Custom template "${newTemplate.name}" created`);
     setIsTemplateSheetOpen(false);
   };
   

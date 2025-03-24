@@ -14,12 +14,13 @@ export type TimerEventType =
   | 'timer:update-metrics'
   | 'timer:task-set'
   | 'timer:expand'
-  | 'timer:collapse';
+  | 'timer:collapse'
+  | 'timer:tick'
+  | 'timer:init';
 
 export interface TimerEventPayloadMap {
   'timer:start': { 
     taskId?: string; 
-    minutes: number; 
     taskName?: string;
     duration?: number;
   };
@@ -36,19 +37,7 @@ export interface TimerEventPayloadMap {
   'timer:complete': { 
     taskId?: string; 
     taskName?: string;
-    metrics?: {
-      totalTime?: number;
-      pauseCount?: number;
-      extensionCount?: number;
-      originalDuration?: number;
-      actualDuration?: number;
-      startTime?: string;
-      endTime?: string;
-      pausedTime?: number;
-      extensionTime?: number;
-      netEffectiveTime?: number;
-      completionDate?: string;
-    };
+    metrics?: any;
   };
   'timer:extend': { 
     taskId?: string; 
@@ -58,6 +47,7 @@ export interface TimerEventPayloadMap {
   'timer:reset': { 
     taskId?: string;
     taskName?: string;
+    duration?: number;
   };
   'timer:set-task': { 
     id: string; 
@@ -71,19 +61,7 @@ export interface TimerEventPayloadMap {
   'timer:update-metrics': { 
     taskId?: string; 
     taskName?: string;
-    metrics: {
-      totalTime?: number;
-      pauseCount?: number;
-      extensionCount?: number;
-      originalDuration?: number;
-      actualDuration?: number;
-      startTime?: string;
-      endTime?: string;
-      pausedTime?: number;
-      extensionTime?: number;
-      netEffectiveTime?: number;
-      completionDate?: string;
-    };
+    metrics: any;
   };
   'timer:task-set': {
     id: string;
@@ -97,5 +75,15 @@ export interface TimerEventPayloadMap {
   'timer:collapse': {
     taskName?: string;
     saveNotes?: boolean;
+  };
+  'timer:tick': {
+    timeLeft: number;
+    taskId?: string;
+    taskName?: string;
+  };
+  'timer:init': {
+    duration?: number;
+    taskId?: string;
+    taskName?: string;
   };
 }

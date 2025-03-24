@@ -1,5 +1,6 @@
 
 import { useCallback } from "react";
+import { eventManager } from "@/lib/events/EventManager";
 
 interface UseTimerCloseProps {
   reset: () => Promise<void>;
@@ -12,9 +13,8 @@ export const useTimerClose = ({
 }: UseTimerCloseProps) => {
   // Handle timer close
   const handleClose = useCallback(() => {
-    // Use a custom event since this event isn't in the eventBus types
-    const event = new CustomEvent('timer:close', { detail: { taskName } });
-    window.dispatchEvent(event);
+    // Use eventManager to emit the close event
+    eventManager.emit('timer:close', { taskName });
     
     // Reset the timer
     reset();
