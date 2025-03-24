@@ -1,45 +1,56 @@
 
 import { Task } from '@/types/tasks';
+import { activeTasksStorage } from './activeTasksStorage';
+import { completedTasksStorage } from './completedTasksStorage';
 
-// Define the storage key for task relationships
-const TASK_RELATIONSHIPS_KEY = 'task-relationships';
-
-// Define the relationship type
-interface TaskRelationship {
+/**
+ * Task relationship storage interface
+ */
+export interface TaskRelationship {
   taskId: string;
   entityId: string;
-  entityType: string;
-  relationshipType: string;
-  metadata?: Record<string, any>;
+  entityType?: string;
+  relationshipType?: string;
 }
 
-// Export the task relationship storage module
+// Key for relationship storage
+const TASK_RELATIONSHIPS_KEY = 'task-relationships';
+
+/**
+ * Task Relationship Storage Module
+ * 
+ * Manages relationships between tasks and other entities like habits, templates, etc.
+ */
 export const taskRelationshipStorage = {
-  // Get all relationships for a task
-  getTaskRelationships: (taskId: string): TaskRelationship[] => {
+  /**
+   * Get all relationships for a specific task
+   */
+  getTaskRelationships(taskId: string): TaskRelationship[] {
     try {
-      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
-      if (!relationshipsJson) return [];
+      const relationshipsStr = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      if (!relationshipsStr) return [];
       
-      const relationships: TaskRelationship[] = JSON.parse(relationshipsJson);
-      return relationships.filter(rel => rel.taskId === taskId);
+      const relationships: TaskRelationship[] = JSON.parse(relationshipsStr);
+      return relationships.filter(r => r.taskId === taskId);
     } catch (error) {
-      console.error('Error fetching task relationships:', error);
+      console.error('Error getting task relationships:', error);
       return [];
     }
   },
   
-  // Add a relationship for a task
-  addTaskRelationship: (relationship: TaskRelationship): boolean => {
+  /**
+   * Add a relationship between a task and another entity
+   */
+  addTaskRelationship(relationship: TaskRelationship): boolean {
     try {
-      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
-      const relationships: TaskRelationship[] = relationshipsJson ? JSON.parse(relationshipsJson) : [];
+      const relationshipsStr = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      const relationships: TaskRelationship[] = relationshipsStr ? JSON.parse(relationshipsStr) : [];
       
       // Check if relationship already exists
-      const exists = relationships.some(
-        rel => rel.taskId === relationship.taskId && 
-               rel.entityId === relationship.entityId &&
-               rel.relationshipType === relationship.relationshipType
+      const exists = relationships.some(r => 
+        r.taskId === relationship.taskId && 
+        r.entityId === relationship.entityId &&
+        r.relationshipType === relationship.relationshipType
       );
       
       if (!exists) {
@@ -54,22 +65,25 @@ export const taskRelationshipStorage = {
     }
   },
   
-  // Remove a relationship
-  removeTaskRelationship: (taskId: string, entityId: string, relationshipType?: string): boolean => {
+  /**
+   * Remove a relationship between a task and another entity
+   */
+  removeTaskRelationship(taskId: string, entityId: string, relationshipType?: string): boolean {
     try {
-      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
-      if (!relationshipsJson) return false;
+      const relationshipsStr = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      if (!relationshipsStr) return false;
       
-      let relationships: TaskRelationship[] = JSON.parse(relationshipsJson);
+      const relationships: TaskRelationship[] = JSON.parse(relationshipsStr);
       
-      // Filter out the relationship(s) to remove
-      relationships = relationships.filter(rel => {
-        if (rel.taskId !== taskId || rel.entityId !== entityId) return true;
-        if (relationshipType && rel.relationshipType !== relationshipType) return true;
-        return false;
+      const filteredRelationships = relationships.filter(r => {
+        if (relationshipType) {
+          return !(r.taskId === taskId && r.entityId === entityId && r.relationshipType === relationshipType);
+        }
+        return !(r.taskId === taskId && r.entityId === entityId);
       });
       
-      localStorage.setItem(TASK_RELATIONSHIPS_KEY, JSON.stringify(relationships));
+      localStorage.setItem(TASK_RELATIONSHIPS_KEY, JSON.stringify(filteredRelationships));
+      
       return true;
     } catch (error) {
       console.error('Error removing task relationship:', error);
@@ -77,26 +91,90 @@ export const taskRelationshipStorage = {
     }
   },
   
-  // Get all tasks related to an entity
-  getRelatedTasks: (entityId: string, entityType?: string): Task[] => {
+  /**
+   * Get all tasks related to a specific entity
+   */
+  getRelatedTasks(entityId: string, entityType?: string): Task[] {
     try {
-      // This function would ideally load tasks from task storage
-      // But to avoid circular imports, we'll just return the task IDs
-      const relationshipsJson = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
-      if (!relationshipsJson) return [];
+      const relationshipsStr = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      if (!relationshipsStr) return [];
       
-      const relationships: TaskRelationship[] = JSON.parse(relationshipsJson);
-      return relationships
-        .filter(rel => rel.entityId === entityId && (!entityType || rel.entityType === entityType))
-        .map(rel => ({ id: rel.taskId } as Task)); // Return minimal task objects
+      const relationships: TaskRelationship[] = JSON.parse(relationshipsStr);
+      
+      // Filter relationships matching the entity
+      const matchingRelationships = relationships.filter(r => {
+        if (entityType) {
+          return r.entityId === entityId && r.entityType === entityType;
+        }
+        return r.entityId === entityId;
+      });
+      
+      // Get task IDs from relationships
+      const taskIds = matchingRelationships.map(r => r.taskId);
+      
+      // Get active and completed tasks
+      const activeTasks = activeTasksStorage.loadTasks();
+      const completedTasks = completedTasksStorage.loadCompletedTasks();
+      
+      // Filter tasks by IDs
+      const relatedTasks = [...activeTasks, ...completedTasks].filter(task => 
+        taskIds.includes(task.id)
+      );
+      
+      return relatedTasks;
     } catch (error) {
-      console.error('Error fetching related tasks:', error);
+      console.error('Error getting related tasks:', error);
       return [];
     }
   },
   
-  // Clear all relationships for testing
-  _clearAllRelationships: (): void => {
-    localStorage.removeItem(TASK_RELATIONSHIPS_KEY);
+  /**
+   * Delete all tasks related to a template
+   */
+  deleteTasksByTemplate(templateId: string): boolean {
+    try {
+      // Get all tasks related to the template
+      const relatedTasks = this.getRelatedTasks(templateId, 'template');
+      
+      // Delete each task
+      relatedTasks.forEach(task => {
+        // Active tasks
+        activeTasksStorage.removeTask(task.id);
+        
+        // Completed tasks (if any)
+        completedTasksStorage.removeCompletedTask(task.id);
+      });
+      
+      // Clean up relationships
+      const relationshipsStr = localStorage.getItem(TASK_RELATIONSHIPS_KEY);
+      if (relationshipsStr) {
+        const relationships: TaskRelationship[] = JSON.parse(relationshipsStr);
+        
+        // Filter out relationships for this template
+        const updatedRelationships = relationships.filter(r => 
+          !(r.entityId === templateId && r.entityType === 'template')
+        );
+        
+        localStorage.setItem(TASK_RELATIONSHIPS_KEY, JSON.stringify(updatedRelationships));
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting tasks by template:', error);
+      return false;
+    }
+  },
+  
+  /**
+   * Clear all relationships (used for testing/debugging)
+   */
+  _clearAllRelationships(): boolean {
+    try {
+      localStorage.removeItem(TASK_RELATIONSHIPS_KEY);
+      return true;
+    } catch (error) {
+      console.error('Error clearing relationships:', error);
+      return false;
+    }
   }
 };

@@ -3,118 +3,81 @@ import { Task } from '@/types/tasks';
 import { taskStorage } from '@/lib/storage/taskStorage';
 
 /**
- * Utility for verifying and recovering tasks
+ * Task Verification Module
+ * 
+ * This module provides utilities for verifying and recovering task data
+ * to ensure consistency between storage and memory.
  */
 export const taskVerification = {
   /**
-   * Check if a task with given ID exists in the current task list
+   * Recover missing tasks that are in storage but not in memory
    */
-  taskExists: (tasks: Task[], taskId: string): boolean => {
-    return tasks.some(task => task.id === taskId);
+  recoverMissingTasks(currentTasks: Task[]): Task[] {
+    const storedTasks = taskStorage.loadAllTasks();
+    const currentTaskIds = new Set(currentTasks.map(t => t.id));
+    
+    // Find tasks that are in storage but not in memory
+    const missingActiveTasks = storedTasks.active.filter(t => !currentTaskIds.has(t.id));
+    
+    // Return missing tasks
+    return missingActiveTasks;
   },
   
   /**
-   * Check if a habit task exists for the given habit ID and date
+   * Check for duplicate tasks in memory
    */
-  habitTaskExists: (tasks: Task[], habitId: string, date: string): boolean => {
-    return tasks.some(task => 
-      task.relationships?.habitId === habitId && 
-      task.relationships?.date === date
-    );
-  },
-  
-  /**
-   * Verify that all tasks from storage are loaded in the current state
-   */
-  verifyAllTasksLoaded: (currentTasks: Task[]): boolean => {
-    try {
-      // Load tasks from storage
-      const storedTasks = taskStorage.loadTasks();
-      
-      // Check if any stored tasks are missing from memory
-      const missingTasks = storedTasks.filter((storageTask: Task) => 
-        !currentTasks.some(memTask => memTask.id === storageTask.id)
-      );
-      
-      if (missingTasks.length > 0) {
-        console.log(`TaskVerification: Found ${missingTasks.length} tasks in storage missing from memory`);
-        return false;
+  findDuplicateTasks(currentTasks: Task[]): Task[] {
+    const taskIds = new Set<string>();
+    const duplicates: Task[] = [];
+    
+    for (const task of currentTasks) {
+      if (taskIds.has(task.id)) {
+        duplicates.push(task);
+      } else {
+        taskIds.add(task.id);
       }
-      
-      return true;
-    } catch (error) {
-      console.error('Error verifying tasks:', error);
-      return false;
     }
+    
+    return duplicates;
   },
   
   /**
-   * Recover missing habit tasks by comparing memory tasks with storage
+   * Set up periodic verification to automatically recover missing tasks
    */
-  recoverMissingHabitTasks: (currentTasks: Task[]): Task[] => {
-    try {
-      // Load tasks from storage
-      const storedTasks = taskStorage.loadTasks();
-      
-      // Find habit tasks that are in storage but not in memory
-      const missingHabitTasks = storedTasks.filter((storageTask: Task) => 
-        storageTask.relationships?.habitId && // Only habit tasks
-        !currentTasks.some(memTask => 
-          memTask.id === storageTask.id || 
-          (memTask.relationships?.habitId === storageTask.relationships?.habitId && 
-           memTask.relationships?.date === storageTask.relationships?.date)
-        )
-      );
-      
-      console.log(`TaskVerification: Found ${missingHabitTasks.length} habit tasks in storage missing from memory`);
-      
-      return missingHabitTasks;
-    } catch (error) {
-      console.error('Error recovering missing habit tasks:', error);
-      return [];
-    }
-  },
-  
-  /**
-   * Recover any missing tasks by comparing memory tasks with storage
-   */
-  recoverMissingTasks: (currentTasks: Task[]): Task[] => {
-    try {
-      // Load tasks from storage
-      const storedTasks = taskStorage.loadTasks();
-      
-      // Find tasks that are in storage but not in memory
-      const missingTasks = storedTasks.filter((storageTask: Task) => 
-        !currentTasks.some(memTask => memTask.id === storageTask.id)
-      );
-      
-      console.log(`TaskVerification: Found ${missingTasks.length} tasks in storage missing from memory`);
-      
-      return missingTasks;
-    } catch (error) {
-      console.error('Error recovering missing tasks:', error);
-      return [];
-    }
-  },
-  
-  /**
-   * Set up periodic verification to ensure tasks are properly loaded
-   */
-  setupPeriodicVerification: (
-    getTasks: () => Task[],
-    onMissingTasksFound: (tasks: Task[]) => void,
-    interval: number = 60000
-  ): (() => void) => {
+  setupPeriodicVerification(
+    getTasksFn: () => Task[],
+    onMissingTasks: (tasks: Task[]) => void,
+    intervalMs: number = 60000
+  ): () => void {
     const intervalId = setInterval(() => {
-      const currentTasks = getTasks();
-      const missingTasks = taskVerification.recoverMissingTasks(currentTasks);
+      const currentTasks = getTasksFn();
+      const missingTasks = this.recoverMissingTasks(currentTasks);
       
       if (missingTasks.length > 0) {
-        console.log(`TaskVerification: Periodic check found ${missingTasks.length} missing tasks`);
-        onMissingTasksFound(missingTasks);
+        console.log(`[TaskVerification] Found ${missingTasks.length} missing tasks`);
+        onMissingTasks(missingTasks);
       }
-    }, interval);
+    }, intervalMs);
     
     return () => clearInterval(intervalId);
+  },
+  
+  /**
+   * Verify a specific task exists consistently in memory and storage
+   */
+  verifyTask(taskId: string, currentTasks: Task[]): { inMemory: boolean; inStorage: boolean } {
+    const inMemory = currentTasks.some(t => t.id === taskId);
+    const inStorage = !!taskStorage.getTaskById(taskId);
+    
+    return { inMemory, inStorage };
+  },
+  
+  /**
+   * Check for orphaned task relationships
+   */
+  findOrphanedRelationships(): any[] {
+    // This would require access to relationship storage
+    // Implementation would be specific to how relationships are stored
+    return [];
   }
 };

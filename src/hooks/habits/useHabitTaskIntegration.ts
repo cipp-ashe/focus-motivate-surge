@@ -1,224 +1,115 @@
 
-/**
- * Unified Hook for Habit-Task Integration
- * 
- * This hook consolidates the habit-task integration functionality
- * that was previously scattered across multiple hooks.
- */
-
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { taskOperations } from '@/lib/operations/tasks';
 import { useEvent } from '@/hooks/useEvent';
-import { MetricType, ActiveTemplate } from '@/types/habits/types';
-import { HabitTaskEvent } from '@/types/events/habit-events';
-import { Task, TaskType } from '@/types/tasks';
+import { Task } from '@/types/tasks';
+import { HabitTaskEvent } from '@/types/events/unified';
+import { taskOperations } from '@/lib/operations/tasks';
 
+/**
+ * Hook for integrating habits with tasks
+ */
 export const useHabitTaskIntegration = () => {
-  // Track which habit tasks have been scheduled to avoid duplicates
-  const scheduledTasksRef = useRef<Map<string, string>>(new Map());
+  const [scheduledTasks, setScheduledTasks] = useState<Map<string, string>>(new Map());
   
-  // Handle habit schedule events
+  // Handle habit scheduling (create tasks for habits)
   const handleHabitSchedule = useCallback((event: HabitTaskEvent) => {
     const { habitId, templateId, name, duration, date, metricType } = event;
     
-    // Generate a unique key for this habit-date combination
+    // Generate a key for this habit-date combination
     const key = `${habitId}-${date}`;
     
-    // Check if we've already scheduled this task
-    if (scheduledTasksRef.current.has(key)) {
-      console.log(`Already scheduled task for habit ${habitId} on ${date}, skipping`);
-      return scheduledTasksRef.current.get(key);
+    // Skip if we've already processed this combination
+    if (scheduledTasks.has(key)) {
+      console.log(`Already scheduled habit task for ${name} on ${date}`);
+      return scheduledTasks.get(key);
     }
     
-    try {
-      // Map metric type to task type
-      let taskType: TaskType = 'regular';
-      if (metricType === 'timer') taskType = 'timer';
-      else if (metricType === 'journal') taskType = 'journal';
-      else if (metricType === 'counter') taskType = 'counter';
-      else if (metricType === 'rating') taskType = 'rating';
-      
-      // Create the habit task
-      const taskId = taskOperations.createHabitTask(
-        habitId,
-        templateId,
-        name,
-        duration,
-        date,
-        { 
-          suppressToast: true,
-          taskType,
-          metricType
-        }
-      );
-      
-      if (taskId) {
-        // Track that we've scheduled this task
-        scheduledTasksRef.current.set(key, taskId);
-        console.log(`Scheduled task ${taskId} for habit ${habitId} on ${date}`);
+    // Create the task using the operations API
+    console.log(`Creating habit task for ${name}`);
+    const taskId = taskOperations.createHabitTask(
+      habitId,
+      templateId,
+      name,
+      duration,
+      date,
+      {
+        metricType,
+        suppressToast: true
       }
+    );
+    
+    if (taskId) {
+      setScheduledTasks(prev => {
+        const updated = new Map(prev);
+        updated.set(key, taskId);
+        return updated;
+      });
       
-      return taskId;
-    } catch (error) {
-      console.error('Error scheduling habit task:', error);
-      return null;
+      console.log(`Created habit task: ${taskId}`);
     }
-  }, []);
+    
+    return taskId;
+  }, [scheduledTasks]);
   
-  // Set up event listeners
+  // Set up habit:schedule event listener
   useEvent('habit:schedule', handleHabitSchedule);
   
-  // Sync habits with tasks
-  const syncHabitsWithTasks = useCallback((templates?: ActiveTemplate[]) => {
-    console.log('Syncing habits with tasks...');
+  // Handle habit completion (mark corresponding task as complete)
+  const handleHabitComplete = useCallback((data: {
+    habitId: string;
+    date: string;
+    value: boolean | number;
+  }) => {
+    const { habitId, date, value } = data;
     
-    // Check for missing habit tasks
-    eventManager.emit('habits:check-pending', {});
-    
-    // Force task update
-    setTimeout(() => {
-      window.dispatchEvent(new Event('force-task-update'));
-    }, 100);
-    
-    return true;
-  }, []);
-  
-  // Handle habit completion events
-  const handleHabitComplete = useCallback((payload: any) => {
-    const { habitId, date, value, metricType, habitName, templateId } = payload;
-    console.log(`Handling habit completion for ${habitId} on ${date} with value:`, value);
-    
-    // For journal habit completion, we need special handling
-    if (metricType === 'journal') {
-      // Emit journal open event
-      eventManager.emit('journal:open', {
-        habitId,
-        habitName: habitName || 'Journal Entry',
-        date,
-        templateId
-      });
+    // Basic validation
+    if (!habitId || !date) {
+      console.error('Invalid habit completion data');
+      return;
     }
     
-    // Mark corresponding task as completed if it exists
-    const findAndCompleteHabitTask = (tasks: Task[]) => {
-      const habitTask = tasks.find(task => 
-        task.relationships?.habitId === habitId && 
-        task.relationships?.date === date
-      );
-      
-      if (habitTask && !habitTask.completed) {
-        taskOperations.completeTask(habitTask.id, { value });
-      }
-    };
-    
-    // Get tasks and find the matching habit task
+    // Find and complete the corresponding task
     const tasksStr = localStorage.getItem('tasks');
-    if (tasksStr) {
-      try {
-        const tasks = JSON.parse(tasksStr);
-        if (Array.isArray(tasks)) {
-          findAndCompleteHabitTask(tasks);
-        }
-      } catch (e) {
-        console.error('Error parsing tasks:', e);
+    if (!tasksStr) return;
+    
+    try {
+      const tasks: Task[] = JSON.parse(tasksStr);
+      
+      const matchingTask = tasks.find(task => {
+        if (!task.relationships) return false;
+        return task.relationships.habitId === habitId && 
+               task.relationships.date === date.split('T')[0];
+      });
+      
+      if (matchingTask && !matchingTask.completed) {
+        console.log(`Completing task ${matchingTask.id} for habit ${habitId}`);
+        taskOperations.completeTask(matchingTask.id, { value });
       }
+    } catch (error) {
+      console.error('Error processing habit completion:', error);
     }
   }, []);
   
-  // Set up event listeners for habit completion
+  // Set up habit:complete event listener
   useEffect(() => {
     const unsubscribe = eventManager.on('habit:complete', handleHabitComplete);
     return unsubscribe;
   }, [handleHabitComplete]);
   
-  /**
-   * Check for missing habit tasks and create them
-   */
-  const checkForMissingHabitTasks = useCallback(() => {
-    console.log('Checking for missing habit tasks...');
+  // Check for pending habits and create tasks if needed
+  const checkPendingHabits = useCallback(() => {
+    console.log('Checking for pending habit tasks');
     
-    // Get today's date string (YYYY-MM-DD)
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Get active templates and habits
-    try {
-      const templatesStr = localStorage.getItem('habit-templates');
-      if (!templatesStr) return;
-      
-      const templates: ActiveTemplate[] = JSON.parse(templatesStr);
-      if (!Array.isArray(templates)) return;
-      
-      // Check current day of week
-      const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
-      
-      // Get existing tasks
-      const tasksStr = localStorage.getItem('tasks');
-      const tasks: Task[] = tasksStr ? JSON.parse(tasksStr) : [];
-      
-      // Process each template that's active today
-      templates.forEach(template => {
-        if (!template.activeDays.includes(dayOfWeek as any)) return;
-        
-        // Process each habit in the template
-        template.habits.forEach(habit => {
-          // Generate key for this habit-date combination
-          const key = `${habit.id}-${today}`;
-          
-          // Skip if already scheduled
-          if (scheduledTasksRef.current.has(key)) return;
-          
-          // Check if task already exists
-          const taskExists = tasks.some(task => 
-            task.relationships?.habitId === habit.id && 
-            task.relationships?.date === today
-          );
-          
-          if (taskExists) {
-            // Track existing task
-            scheduledTasksRef.current.set(key, 'exists');
-            return;
-          }
-          
-          // Determine task type based on metric type
-          let taskType: TaskType = 'regular';
-          const metricType = habit.metrics?.type;
-          
-          if (metricType === 'timer') taskType = 'timer';
-          else if (metricType === 'journal') taskType = 'journal';
-          else if (metricType === 'counter') taskType = 'counter';
-          else if (metricType === 'rating') taskType = 'rating';
-          
-          // Create task for this habit
-          const taskId = taskOperations.createHabitTask(
-            habit.id,
-            template.templateId,
-            habit.name,
-            habit.metrics?.goal ? habit.metrics.goal * 60 : 1800, // Default 30 min or goal in seconds
-            today,
-            { 
-              suppressToast: true,
-              taskType,
-              metricType: metricType as MetricType
-            }
-          );
-          
-          if (taskId) {
-            scheduledTasksRef.current.set(key, taskId);
-            console.log(`Created missing habit task ${taskId} for ${habit.name}`);
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Error checking for missing habit tasks:', error);
-    }
+    // This is just a stub - the actual logic is in the useHabitTaskProcessor hook
+    eventManager.emit('habits:check-pending', {});
   }, []);
   
   return {
-    scheduledTasksRef,
-    syncHabitsWithTasks,
+    // Public API
     handleHabitSchedule,
     handleHabitComplete,
-    checkForMissingHabitTasks
+    checkPendingHabits,
+    scheduledTasks
   };
 };

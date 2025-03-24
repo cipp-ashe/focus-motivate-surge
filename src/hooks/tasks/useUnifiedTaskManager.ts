@@ -11,11 +11,24 @@ import { toast } from 'sonner';
  */
 export const useUnifiedTaskManager = () => {
   // Create a new task with ID and timestamp
-  const createTask = useCallback((task: Omit<Task, 'id' | 'createdAt'>) => {
+  const createTask = useCallback((task: Partial<Task>) => {
+    // Ensure required fields
+    if (!task.name) {
+      console.error('Task must have a name');
+      return null;
+    }
+
     const newTask: Task = {
       id: uuidv4(),
       createdAt: new Date().toISOString(),
-      ...task,
+      name: task.name,
+      description: task.description || '',
+      completed: task.completed || false,
+      taskType: task.taskType || 'regular',
+      duration: task.duration || 0,
+      relationships: task.relationships || {},
+      // Add all other properties from the task parameter
+      ...task
     };
     
     console.log('Creating task:', newTask);
@@ -155,7 +168,7 @@ export const useUnifiedTaskManager = () => {
     
     // Optionally select the task after creation
     if (options?.selectAfterCreate) {
-      eventManager.emit('task:select', newTask.id);
+      eventManager.emit('task:select', taskId);
     }
     
     if (!options?.suppressToast) {
