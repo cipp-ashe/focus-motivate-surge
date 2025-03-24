@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { Task } from '@/types/task';
 import { useEvent } from '@/hooks/useEvent';
 import { useUnifiedMediaHandlers } from './useUnifiedMediaHandlers';
+import { useTaskEvents } from '@/hooks/useTaskEvents';
 
 interface UnifiedTaskEventListenerProps {
   onShowImage: (imageUrl: string, taskName: string) => void;
@@ -27,6 +28,9 @@ export const UnifiedTaskEventListener: React.FC<UnifiedTaskEventListenerProps> =
   // Reference to track if a modal is open to prevent event loops
   const isModalOpenRef = useRef(false);
 
+  // Use our unified task events hook
+  const { onTaskUpdate: subscribeToTaskUpdate } = useTaskEvents();
+
   // Use our unified media handlers
   const mediaHandlers = useUnifiedMediaHandlers({
     onShowImage,
@@ -48,7 +52,7 @@ export const UnifiedTaskEventListener: React.FC<UnifiedTaskEventListenerProps> =
     onTaskUpdate(data);
   };
   
-  // Use our useEvent hook to listen for task:update events
+  // Use our subscribeToTaskUpdate function from the hook
   useEvent('task:update', handleTaskUpdate);
 
   // This component doesn't render anything

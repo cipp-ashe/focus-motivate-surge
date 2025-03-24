@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Task } from '@/types/task';
-import { eventManager } from '@/lib/events/EventManager';
+import { useTaskEvents } from '@/hooks/useTaskEvents';
 
 interface TaskEventHandlerProps {
   onTaskCreate?: (task: Task) => void;
@@ -20,6 +20,15 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   onForceUpdate,
   tasks
 }) => {
+  // Use our consolidated task events hook
+  const {
+    onTaskCreate: subscribeToTaskCreate,
+    onTaskUpdate: subscribeToTaskUpdate,
+    onTaskDelete: subscribeToTaskDelete,
+    onTaskComplete: subscribeToTaskComplete,
+    onTaskReload: subscribeToTaskReload
+  } = useTaskEvents();
+
   useEffect(() => {
     // Event handlers
     const handleTaskCreate = (task: Task) => {
@@ -58,11 +67,11 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
     };
 
     // Register event listeners
-    const unsubCreate = eventManager.on('task:create', handleTaskCreate);
-    const unsubUpdate = eventManager.on('task:update', handleTaskUpdate);
-    const unsubDelete = eventManager.on('task:delete', handleTaskDelete);
-    const unsubComplete = eventManager.on('task:complete', handleTaskComplete);
-    const unsubForceUpdate = eventManager.on('task:force-update', handleForceUpdate);
+    const unsubCreate = subscribeToTaskCreate(handleTaskCreate);
+    const unsubUpdate = subscribeToTaskUpdate(handleTaskUpdate);
+    const unsubDelete = subscribeToTaskDelete(handleTaskDelete);
+    const unsubComplete = subscribeToTaskComplete(handleTaskComplete);
+    const unsubForceUpdate = subscribeToTaskReload(handleForceUpdate);
 
     // Clean up on unmount
     return () => {
@@ -72,7 +81,18 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       unsubComplete();
       unsubForceUpdate();
     };
-  }, [onTaskCreate, onTaskUpdate, onTaskDelete, onTaskComplete, onForceUpdate]);
+  }, [
+    subscribeToTaskCreate,
+    subscribeToTaskUpdate,
+    subscribeToTaskDelete,
+    subscribeToTaskComplete,
+    subscribeToTaskReload,
+    onTaskCreate,
+    onTaskUpdate,
+    onTaskDelete,
+    onTaskComplete,
+    onForceUpdate
+  ]);
 
   // This component doesn't render anything
   return null;

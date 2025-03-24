@@ -2,20 +2,23 @@
 import { useCallback } from 'react';
 import { Task, TaskStatus } from '@/types/task';
 import { toast } from 'sonner';
-import { eventManager } from '@/lib/events/EventManager';
+import { useTaskEvents } from '@/hooks/useTaskEvents';
 
 export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) => {
+  // Use our consolidated task events hook
+  const { emitEvent } = useTaskEvents();
+  
   // Handle task deletion
   const handleDelete = useCallback((e: React.MouseEvent<Element>) => {
     e.stopPropagation();
     console.log("Deleting task:", task.id);
     
     // Emit deletion event
-    eventManager.emit('task:delete', { taskId: task.id });
+    emitEvent('task:delete', { taskId: task.id });
     
     // Show toast notification
     toast.success(`Task "${task.name}" deleted`);
-  }, [task.id, task.name]);
+  }, [emitEvent, task.id, task.name]);
   
   // Handle task action
   const handleTaskAction = useCallback((e: React.MouseEvent<Element>, actionType?: string) => {
@@ -27,12 +30,12 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
     // Handle different action types
     switch (actionType) {
       case 'complete':
-        eventManager.emit('task:complete', { taskId: task.id });
+        emitEvent('task:complete', { taskId: task.id });
         toast.success(`Task "${task.name}" completed`);
         break;
         
       case 'dismiss':
-        eventManager.emit('task:dismiss', { 
+        emitEvent('task:dismiss', { 
           taskId: task.id, 
           habitId: task.relationships?.habitId,
           date: task.relationships?.date || new Date().toISOString()
@@ -41,7 +44,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'delete':
-        eventManager.emit('task:delete', { taskId: task.id });
+        emitEvent('task:delete', { taskId: task.id });
         toast.info(`Task "${task.name}" deleted`);
         break;
         
@@ -52,7 +55,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         break;
         
       case 'timer':
-        eventManager.emit('timer:set-task', {
+        emitEvent('timer:set-task', {
           id: task.id,
           name: task.name,
           duration: typeof task.duration === 'number' ? task.duration : 1500, // Default to 25 min if not set
@@ -67,7 +70,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         // For status changes
         if (actionType.startsWith('status-')) {
           const status = actionType.replace('status-', '') as TaskStatus;
-          eventManager.emit('task:update', { 
+          emitEvent('task:update', { 
             taskId: task.id, 
             updates: { status } 
           });
@@ -79,7 +82,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
         }
         break;
     }
-  }, [task, onOpenTaskDialog]);
+  }, [emitEvent, task, onOpenTaskDialog]);
   
   return { handleDelete, handleTaskAction };
 };
