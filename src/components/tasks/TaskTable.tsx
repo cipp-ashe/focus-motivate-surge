@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Task } from '@/types/tasks';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import TaskRow from './TaskRow';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 
 interface TaskTableProps {
   tasks: Task[];
@@ -36,17 +36,17 @@ export const TaskTable: React.FC<TaskTableProps> = ({
 
   // Handle task selection
   const handleTaskClick = (task: Task, event: React.MouseEvent<HTMLDivElement>) => {
-    eventBus.emit('task:select', task.id);
+    eventManager.emit('task:select', task.id);
   };
 
   // Handle task deletion
   const handleTaskDelete = (taskId: string) => {
-    eventBus.emit('task:delete', { taskId, reason: 'manual' });
+    eventManager.emit('task:delete', { taskId, reason: 'manual' });
   };
 
   // Handle task duration change
   const handleDurationChange = (taskId: string, newDuration: string) => {
-    eventBus.emit('task:update', {
+    eventManager.emit('task:update', {
       taskId,
       updates: { duration: parseInt(newDuration) * 60 }
     });

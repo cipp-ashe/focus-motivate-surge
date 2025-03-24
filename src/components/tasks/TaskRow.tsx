@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { Task } from "@/types/tasks";
-import { eventBus } from "@/lib/eventBus";
+import { eventManager } from "@/lib/events/EventManager";
 import { Card } from "@/components/ui/card";
 import { TaskContent } from "./components/TaskContent";
 
@@ -106,7 +105,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
     // Convert minutes to seconds and update task
     const newDurationInSeconds = (parseInt(finalValue) * 60).toString();
     
-    eventBus.emit('task:update', {
+    eventManager.emit('task:update', {
       taskId: task.id,
       updates: { duration: parseInt(newDurationInSeconds) }
     });
@@ -117,16 +116,16 @@ export const TaskRow: React.FC<TaskRowProps> = ({
   const handleDelete = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    eventBus.emit('task:delete', { taskId: task.id, reason: 'manual' });
+    eventManager.emit('task:delete', { taskId: task.id, reason: 'manual' });
   };
 
   // Handle task actions
   const handleTaskAction = (e: React.MouseEvent<HTMLElement>, actionType?: string) => {
     e.stopPropagation();
     if (actionType === 'complete') {
-      eventBus.emit('task:complete', { taskId: task.id });
+      eventManager.emit('task:complete', { taskId: task.id });
     } else if (actionType === 'uncomplete') {
-      eventBus.emit('task:update', { 
+      eventManager.emit('task:update', { 
         taskId: task.id, 
         updates: { completed: false, completedAt: null } 
       });
@@ -158,7 +157,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({
       e.stopPropagation();
       
       // Select the task without triggering conversion
-      eventBus.emit('task:select', task.id);
+      eventManager.emit('task:select', task.id);
       return;
     }
     

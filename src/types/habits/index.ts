@@ -3,10 +3,7 @@
  * Habit Types Module
  * 
  * This is the main entry point for habit-related types.
+ * All habit types are centralized in types.ts to avoid duplication.
  */
 
-export * from './unified';
-
-// Export MetricType for backward compatibility during transition
-// This type is used in many places and will be phased out gradually
-export type MetricType = 'timer' | 'journal' | 'boolean' | 'counter' | 'rating';
+export * from './types';

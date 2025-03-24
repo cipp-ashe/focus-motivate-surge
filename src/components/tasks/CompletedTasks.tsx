@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { eventBus } from '@/lib/eventBus';
+import { eventManager } from '@/lib/events/EventManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CompletedTasksList from './completed/CompletedTasksList';
 import { Button } from '@/components/ui/button';
@@ -54,7 +53,7 @@ export const CompletedTasks: React.FC<CompletedTasksProps> = ({
 
   // Handle deleting a completed/dismissed task
   const handleDeleteTask = (taskId: string) => {
-    eventBus.emit('task:delete', { 
+    eventManager.emit('task:delete', { 
       taskId, 
       reason: 'manual',
       suppressToast: false 
@@ -93,7 +92,7 @@ export const CompletedTasks: React.FC<CompletedTasksProps> = ({
     if (window.confirm(`Are you sure you want to delete all ${displayTasks.length} tasks in this view?`)) {
       // Delete all displayed tasks
       displayTasks.forEach(task => {
-        eventBus.emit('task:delete', {
+        eventManager.emit('task:delete', {
           taskId: task.id,
           reason: 'manual',
           suppressToast: true

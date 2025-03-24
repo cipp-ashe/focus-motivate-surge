@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useTemplateCreation } from '../useTemplateCreation';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { ActiveTemplate } from '@/types/habits/types';
-import { TimePreference, HabitCategory } from '@/types/habits/unified';
+import { TimePreference, HabitCategory } from '@/types/habits/types';
 
 describe('useTemplateCreation', () => {
   const mockAddTemplate = vi.fn();
