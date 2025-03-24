@@ -31,6 +31,7 @@ export interface HabitDetail {
     templateId?: string;
     [key: string]: any;
   };
+  order?: number; // Adding the order property that was missing
 }
 
 export interface ActiveTemplate {
@@ -62,12 +63,16 @@ export interface NewTemplate {
   defaultHabits: HabitDetail[];
   defaultDays?: DayOfWeek[];
   category?: string;
+  habits?: HabitDetail[]; // Adding habits property to fix errors
+  days?: DayOfWeek[]; // Adding days property to fix errors
 }
 
 export interface HabitProgress {
   date: string;
   value: boolean | number;
   notes?: string;
+  completed?: boolean; // Add property for backward compatibility
+  streak?: number; // Add property for backward compatibility
 }
 
 export interface HabitProgressResult {

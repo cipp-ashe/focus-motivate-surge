@@ -46,8 +46,8 @@ export const formatPercentage = (value: number, decimalPlaces = 0): string => {
 };
 
 // Format time (hours:minutes)
-export const formatTime = (date: Date): string => {
-  return date.toLocaleTimeString('en-US', {
+export const formatTime = (date: Date, options?: Intl.DateTimeFormatOptions): string => {
+  return date.toLocaleTimeString('en-US', options || {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true
@@ -76,24 +76,44 @@ export const getCompletionTimingClass = (
   return 'text-red-500 dark:text-red-400';
 };
 
-// Format a date to a specific format - compatible with date-fns
-export const formatDate = (date: Date | string, format = 'MMM d, yyyy'): string => {
+// Format a date to a specific format - compatible with date-fns format strings
+export const formatDate = (date: Date | string, formatStr = 'MMM d, yyyy'): string => {
   const d = typeof date === 'string' ? new Date(date) : date;
   
   // Simple formatting function that handles common patterns
   // In a real app, you would use date-fns or another library
   const options: Intl.DateTimeFormatOptions = {};
   
-  if (format.includes('yyyy')) options.year = 'numeric';
-  if (format.includes('yy')) options.year = '2-digit';
-  if (format.includes('MMM')) options.month = 'short';
-  if (format.includes('MM')) options.month = '2-digit';
-  if (format.includes('d')) options.day = 'numeric';
-  if (format.includes('HH')) {
+  if (formatStr.includes('yyyy')) options.year = 'numeric';
+  if (formatStr.includes('yy')) options.year = '2-digit';
+  if (formatStr.includes('MMM')) options.month = 'short';
+  if (formatStr.includes('MM')) options.month = '2-digit';
+  if (formatStr.includes('d')) options.day = 'numeric';
+  if (formatStr.includes('HH')) {
     options.hour = '2-digit';
     options.hour12 = false;
   }
-  if (format.includes('mm')) options.minute = '2-digit';
+  if (formatStr.includes('mm')) options.minute = '2-digit';
   
   return d.toLocaleString('en-US', options);
+};
+
+// Calculate efficiency ratio for timer
+export const calculateEfficiencyRatio = (expectedTime: number, actualTime: number): number => {
+  if (!expectedTime || !actualTime) return 1;
+  
+  return Math.min(1.5, Math.max(0.5, actualTime / expectedTime));
+};
+
+// Determine completion status based on time
+export const determineCompletionStatus = (expectedTime: number, actualTime: number): string => {
+  if (!expectedTime || !actualTime) return 'Completed';
+  
+  const ratio = actualTime / expectedTime;
+  
+  if (ratio < 0.8) return 'Early Finish';
+  if (ratio <= 1.0) return 'On Time';
+  if (ratio <= 1.2) return 'Slight Delay';
+  if (ratio <= 1.5) return 'Delayed';
+  return 'Significantly Delayed';
 };

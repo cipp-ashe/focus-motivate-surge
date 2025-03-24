@@ -1,112 +1,134 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+
+import React, { createContext, useContext, useReducer, useCallback } from 'react';
 import { noteReducer } from './noteReducer';
-import { initialState } from './initialState';
+import { initialState, Note, NoteState } from './initialState';
+import { v4 as uuidv4 } from 'uuid';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType } from '@/types/events';
-import { Note } from '@/types/notes';
 
-interface NoteContextProps {
-  notes: Note[];
-  selectedNoteId: string | null;
-  addNote: (note: Note) => void;
-  updateNote: (note: Note) => void;
+// Define the context type
+interface NoteContextType extends NoteState {
+  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateNote: (id: string, updates: Partial<Note>) => void;
   deleteNote: (id: string) => void;
-  selectNote: (id: string) => void;
-  clearSelectedNote: () => void;
+  selectNote: (id: string | null) => void;
+  getNoteById: (id: string) => Note | null;
 }
 
-const NoteContext = createContext<NoteContextProps>({
-  notes: [],
-  selectedNoteId: null,
-  addNote: () => {},
-  updateNote: () => {},
-  deleteNote: () => {},
-  selectNote: () => {},
-  clearSelectedNote: () => {},
-});
+// Create the context
+const NoteContext = createContext<NoteContextType | null>(null);
 
-interface NoteProviderProps {
-  children: React.ReactNode;
-}
-
-export const NoteProvider: React.FC<NoteProviderProps> = ({ children }) => {
+// Provider component
+export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(noteReducer, initialState);
 
-  useEffect(() => {
-    const storedNotes = localStorage.getItem('notes');
-    if (storedNotes) {
-      dispatch({ type: 'LOAD_NOTES', payload: JSON.parse(storedNotes) });
+  const addNote = useCallback((note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const now = new Date().toISOString();
+    const newNote: Note = {
+      id: uuidv4(),
+      ...note,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    dispatch({ type: 'ADD_NOTE', payload: newNote });
+    eventManager.emit('note:create', newNote);
+  }, []);
+
+  const updateNote = useCallback((id: string, updates: Partial<Note>) => {
+    dispatch({ 
+      type: 'UPDATE_NOTE', 
+      payload: { 
+        id, 
+        updates: { 
+          ...updates, 
+          updatedAt: new Date().toISOString() 
+        } 
+      } 
+    });
+    eventManager.emit('note:update', { id, updates });
+  }, []);
+
+  const deleteNote = useCallback((id: string) => {
+    dispatch({ type: 'DELETE_NOTE', payload: id });
+    eventManager.emit('note:delete', { id });
+  }, []);
+
+  const selectNote = useCallback((id: string | null) => {
+    dispatch({ type: 'SELECT_NOTE', payload: id });
+    if (id) {
+      const note = state.notes.find(n => n.id === id);
+      if (note) {
+        eventManager.emit('note:select', { id, title: note.title });
+      }
+    }
+  }, [state.notes]);
+
+  const getNoteById = useCallback((id: string) => {
+    return state.notes.find(note => note.id === id) || null;
+  }, [state.notes]);
+
+  // Sample data for testing
+  React.useEffect(() => {
+    // Load any saved notes or populate with sample data
+    const savedNotes = localStorage.getItem('notes');
+    
+    if (savedNotes) {
+      try {
+        const parsed = JSON.parse(savedNotes);
+        dispatch({ type: 'SET_NOTES', payload: parsed });
+      } catch (e) {
+        console.error('Error loading saved notes', e);
+      }
+    } else {
+      // Add sample note if none exist
+      const sampleNote: Note = {
+        id: uuidv4(),
+        title: 'Welcome to Notes',
+        content: 'This is a sample note to help you get started. You can edit or delete it.',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tags: ['sample']
+      };
+      
+      dispatch({ type: 'SET_NOTES', payload: [sampleNote] });
     }
   }, []);
 
-  useEffect(() => {
+  // Save notes to localStorage when they change
+  React.useEffect(() => {
     localStorage.setItem('notes', JSON.stringify(state.notes));
   }, [state.notes]);
 
-  const addNote = (note: Note) => {
-    dispatch({ type: 'ADD_NOTE', payload: note });
-  };
-
-  const updateNote = (note: Note) => {
-    dispatch({ type: 'UPDATE_NOTE', payload: note });
-  };
-
-  const deleteNote = (id: string) => {
-    dispatch({ type: 'DELETE_NOTE', payload: id });
-  };
-
-  const selectNote = (id: string) => {
-    dispatch({ type: 'SELECT_NOTE', payload: id });
-  };
-
-  const clearSelectedNote = () => {
-    dispatch({ type: 'CLEAR_SELECTED_NOTE' });
-  };
-
-  useEffect(() => {
-    const handleJournalOpen = (payload: any) => {
-      console.log('Journal opened for habit:', payload);
-      const newNote: Note = {
-        id: payload.habitId,
-        title: payload.habitName,
-        content: payload.description || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        category: 'Habit',
-        tags: [payload.templateId || 'habit']
-      };
-      addNote(newNote);
-      selectNote(newNote.id);
-    };
-
-    eventManager.on('journal:open' as EventType, handleJournalOpen);
-
-    return () => {
-      eventManager.off('journal:open' as EventType, handleJournalOpen);
-    };
-  }, [addNote, selectNote]);
-
-  const value: NoteContextProps = {
-    notes: state.notes,
-    selectedNoteId: state.selectedNoteId,
-    addNote,
-    updateNote,
-    deleteNote,
-    selectNote,
-    clearSelectedNote,
-  };
-
   return (
-    <NoteContext.Provider value={value}>
+    <NoteContext.Provider value={{
+      ...state,
+      addNote,
+      updateNote,
+      deleteNote,
+      selectNote,
+      getNoteById
+    }}>
       {children}
     </NoteContext.Provider>
   );
 };
 
-export const useNoteContext = () => {
+// Custom hooks to use the context
+export const useNoteContext = (): NoteContextType => {
   const context = useContext(NoteContext);
   if (!context) {
     throw new Error('useNoteContext must be used within a NoteProvider');
   }
   return context;
+};
+
+// Split into separate hooks for actions and state
+export const useNoteActions = () => {
+  const { addNote, updateNote, deleteNote, selectNote } = useNoteContext();
+  return { addNote, updateNote, deleteNote, selectNote };
+};
+
+export const useNoteState = () => {
+  const { notes, selectedNoteId, isLoading, error, getNoteById } = useNoteContext();
+  return { notes, selectedNoteId, isLoading, error, getNoteById };
 };

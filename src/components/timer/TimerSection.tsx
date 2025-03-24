@@ -7,9 +7,7 @@ import { Quote } from '@/types/timer';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
-import { useEvent } from '@/hooks/useEvent';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { Card, CardContent } from '@/components/ui/card';
 
 interface TimerSectionProps {
   favorites: Quote[];
@@ -40,18 +38,33 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
     setSelectedTaskState(selectedTask);
   }, [selectedTask]);
   
-  // Listen for task updates to refresh timer if needed
-  useEvent('task:update', ({ taskId, updates }) => {
-    if (selectedTaskState && selectedTaskState.id === taskId) {
-      console.log("TimerSection: Selected task was updated, refreshing", updates);
+  // Listen for task updates
+  useEffect(() => {
+    const handleTaskUpdate = (payload: any) => {
+      if (!selectedTaskState || !payload) return;
       
-      // If the selected task was updated, refresh it
-      setSelectedTaskState({
-        ...selectedTaskState,
-        ...updates
-      });
-    }
-  });
+      // Make sure we have a valid payload with taskId and updates
+      if (typeof payload === 'object' && 
+          'taskId' in payload && 
+          'updates' in payload &&
+          selectedTaskState.id === payload.taskId) {
+        console.log("TimerSection: Selected task was updated, refreshing", payload.updates);
+        
+        // If the selected task was updated, refresh it
+        setSelectedTaskState({
+          ...selectedTaskState,
+          ...payload.updates
+        });
+      }
+    };
+    
+    // Subscribe to task update events
+    const unsubscribe = eventManager.on('task:update', handleTaskUpdate);
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [selectedTaskState]);
   
   // Listen for timer:set-task events using eventManager only (no window events)
   useEffect(() => {    
@@ -61,11 +74,11 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
       if (payload && typeof payload === 'object' && 'id' in payload) {
         // Create a valid Task object
         const task: Task = {
-          id: payload.id,
-          name: payload.name,
-          duration: payload.duration || 1500,
-          completed: payload.completed || false,
-          createdAt: payload.createdAt || new Date().toISOString()
+          id: payload.id as string,
+          name: payload.name as string,
+          duration: (payload.duration as number) || 1500,
+          completed: (payload.completed as boolean) || false,
+          createdAt: (payload.createdAt as string) || new Date().toISOString()
         };
         
         selectTask(task);

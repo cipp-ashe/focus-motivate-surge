@@ -2,7 +2,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
-import { useEvent } from '@/hooks/useEvent';
 
 // Global flag to prevent duplicate event handling
 let eventHandlersInitialized = false;
@@ -25,19 +24,45 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
 }) => {
   const isMountedRef = useRef(true);
   
-  // Set up event handlers with the useEvent hook - these are optimized to prevent duplicates
-  useEvent('task:create', onTaskCreate);
-  useEvent('task:update', onTaskUpdate);
-  useEvent('task:delete', onTaskDelete);
-  useEvent('task:complete', onTaskComplete);
-  
+  // Set up event handlers
   useEffect(() => {
     if (eventHandlersInitialized) return;
     
     eventHandlersInitialized = true;
+    
+    // Handle task create events
+    const handleTaskCreate = (payload: any) => {
+      if (!isMountedRef.current) return;
+      onTaskCreate(payload);
+    };
+    
+    // Handle task update events
+    const handleTaskUpdate = (payload: { taskId: string; updates: Partial<Task> }) => {
+      if (!isMountedRef.current) return;
+      onTaskUpdate(payload);
+    };
+    
+    // Handle task delete events
+    const handleTaskDelete = (payload: { taskId: string }) => {
+      if (!isMountedRef.current) return;
+      onTaskDelete(payload);
+    };
+    
+    // Handle task complete events
+    const handleTaskComplete = (payload: { taskId: string; metrics?: any }) => {
+      if (!isMountedRef.current) return;
+      onTaskComplete(payload);
+    };
+    
+    // Register the event listeners
+    const unsubscribeCreate = eventManager.on('task:create', handleTaskCreate);
+    const unsubscribeUpdate = eventManager.on('task:update', handleTaskUpdate);
+    const unsubscribeDelete = eventManager.on('task:delete', handleTaskDelete);
+    const unsubscribeComplete = eventManager.on('task:complete', handleTaskComplete);
+    
     const lastUpdateTimeRef = { current: 0 };
     
-    // Single combined event handler with debouncing
+    // Handle force update events
     const handleForceUpdate = () => {
       if (!isMountedRef.current) return;
       
@@ -50,10 +75,10 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
       onForceUpdate();
     };
     
-    // Register only the essential event listeners
+    // Register window event listeners
     window.addEventListener('force-task-update', handleForceUpdate);
     
-    // Event handler for timer task setting
+    // Listen for timer task setting events
     const timerTaskHandler = (event: CustomEvent) => {
       console.log('TaskEventHandler: Received timer:set-task event', event.detail);
       
@@ -65,10 +90,18 @@ export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
     
     return () => {
       isMountedRef.current = false;
+      
+      // Unsubscribe from event manager events
+      unsubscribeCreate();
+      unsubscribeUpdate();
+      unsubscribeDelete();
+      unsubscribeComplete();
+      
+      // Remove window event listeners
       window.removeEventListener('force-task-update', handleForceUpdate);
       window.removeEventListener('timer:set-task', timerTaskHandler as EventListener);
     };
-  }, [onForceUpdate]);
+  }, [onTaskCreate, onTaskUpdate, onTaskDelete, onTaskComplete, onForceUpdate]);
   
   // Set up cleanup for mounted ref
   useEffect(() => {
