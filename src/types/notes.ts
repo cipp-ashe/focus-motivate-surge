@@ -3,6 +3,7 @@ import { EntityType } from './core';
 
 // Define allowed colors for tags
 export type TagColor =
+  | 'default'  // Added 'default' as a valid tag color
   | 'red'
   | 'green'
   | 'blue'
@@ -33,4 +34,13 @@ export interface Note {
     entityId: string;
     entityType: EntityType;
   }[];
+}
+
+// Helper function to validate tag colors
+export function isValidTagColor(color: string): boolean {
+  return [
+    'default', 'red', 'green', 'blue', 'yellow', 
+    'purple', 'pink', 'orange', 'teal', 'cyan', 
+    'indigo', 'gray'
+  ].includes(color);
 }

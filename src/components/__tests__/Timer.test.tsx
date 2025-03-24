@@ -52,12 +52,12 @@ describe('Timer Component', () => {
       />
     );
     
-    const favoriteQuote = {
+    const favoriteQuote: Quote = {
       id: '123',
       text: 'Test quote',
       author: 'Test author',
       isFavorite: true,
-      category: 'focus' // Add the required category property
+      category: 'focus' // This is now properly typed as QuoteCategory
     };
 
     // Mock the window.localStorage object
