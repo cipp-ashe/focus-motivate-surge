@@ -4,7 +4,7 @@ export { useLocalStorageData } from '../useLocalStorageData';
 export { useNoteStorage } from '../useNoteStorage';
 export { useTaskStorage } from '../useTaskStorage';
 export { useNotesStorage } from '../useNotesStorage';
-export { useDataInitialization } from '../useDataInitialization';
+export { useDataInitialization } from './useDataInitialization';
 
 // Data management hooks
 export { useTagSystem } from '../useTagSystem';

@@ -51,3 +51,27 @@ export const isValidTagColor = (color: string): color is TagColor => {
   ];
   return validColors.includes(color as TagColor);
 };
+
+/**
+ * Initialize the data store with required schema and default values
+ * This function is called when the application is first loaded
+ * or when the data store needs to be reset
+ */
+export const initializeDataStore = (): boolean => {
+  try {
+    // Initialize schema version
+    localStorage.setItem('schema-version', '1.0');
+    
+    // Initialize entity relationships (empty object)
+    localStorage.setItem('entity-relations', JSON.stringify({}));
+    
+    // Initialize tag relationships (empty object)
+    localStorage.setItem('tag-relations', JSON.stringify({}));
+    
+    // Return success
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize data store:', error);
+    return false;
+  }
+};

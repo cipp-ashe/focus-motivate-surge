@@ -159,7 +159,7 @@ export interface EventPayloadMap {
   'quote:link-task': { quoteId: string; taskId: string };
   
   // App events
-  'app:initialized': { timestamp: number };
+  'app:initialized': { timestamp: string };
   '*': any;  // Type for wildcard events
 }
 
