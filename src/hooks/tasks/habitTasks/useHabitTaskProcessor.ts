@@ -1,9 +1,8 @@
 
 import { useCallback } from 'react';
-import { Task, TaskType } from '@/types/tasks';
+import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitTaskEvent } from '@/types/events/unified';
-import { MetricType } from '@/types/habits/types';
 import { habitTaskOperations } from '@/lib/operations/tasks/habit';
 
 /**

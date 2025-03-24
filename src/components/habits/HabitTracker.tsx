@@ -10,7 +10,7 @@ import { ActiveTemplate, HabitDetail } from '@/types/habits/types';
 import { useHabitContext } from '@/contexts/habits/HabitContext';
 import { CalendarDateRangePicker } from '@/components/dashboard/date-range-picker';
 import { getTodaysHabits } from '@/utils/habitUtils';
-import { useTemplateManagement } from './hooks/useTemplateManagement';
+import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
 
 const HabitTracker: React.FC = () => {
   const { templates, addTemplate: addTemplateContext, updateTemplate: updateTemplateContext, removeTemplate: removeTemplateContext } = useHabitContext();

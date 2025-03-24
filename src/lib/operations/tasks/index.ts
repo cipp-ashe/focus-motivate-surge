@@ -56,12 +56,6 @@ export const taskOperations = {
    * @see habitTaskOperations.createHabitTask
    */
   createHabitTask: habitTaskOperations.createHabitTask,
-
-  /**
-   * Get the unified task manager hook
-   * This provides access to the full unified task manager API
-   */
-  useUnifiedTaskManager
 };
 
 // Export the individual operation modules for direct access

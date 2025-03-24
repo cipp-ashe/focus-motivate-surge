@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
 import ConfigurationDialog from '../habits/ConfigurationDialog';
-import { ActiveTemplate, DayOfWeek, HabitDetail } from './types';
+import { ActiveTemplate, DayOfWeek, HabitDetail } from '@/types/habits/types';
 import { toast } from 'sonner';
 import { eventManager } from '@/lib/events/EventManager';
 

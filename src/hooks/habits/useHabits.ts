@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Habit, STORAGE_KEY } from '@/types/habits/types';
-import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks';
+import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
 
 // Helper function to parse stored habits
 const parseStoredHabits = (storedHabits: string | null): Habit[] => {

@@ -12,7 +12,7 @@ import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
 import { ErrorBoundary } from 'react-error-boundary';
 import { HabitProvider, useHabitContext } from '@/contexts/habits/HabitContext';
 import { eventManager } from '@/lib/events/EventManager';
-import { HabitDetail } from '@/types/habits';
+import { HabitDetail } from '@/types/habits/types';
 import { NoteProvider } from '@/contexts/notes/NoteContext';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { motion } from 'framer-motion';

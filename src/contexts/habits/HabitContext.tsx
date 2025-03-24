@@ -3,9 +3,7 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { type HabitState, type HabitContextActions, type HabitContext as HabitContextType, initialState } from './types';
 import { habitReducer } from './habitReducer';
 import { eventManager } from '@/lib/events/EventManager';
-import { ActiveTemplate, DayOfWeek } from '@/components/habits/types';
-import { logger } from '@/utils/logManager';
-import { EventType } from '@/types/events';
+import { ActiveTemplate, DayOfWeek } from '@/types/habits/types';
 
 // Create the context
 const HabitContext = createContext<HabitContextType>({} as HabitContextType);
