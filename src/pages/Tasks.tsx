@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
@@ -8,7 +7,7 @@ import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
 import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
 import { VoiceNoteDialog } from '@/components/tasks/dialogs/VoiceNoteDialog';
-import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { TaskProvider, useTaskContext } from '@/contexts/tasks/TaskContext';
 import { ErrorBoundary } from 'react-error-boundary';
 import { UnifiedTaskView } from '@/components/tasks/UnifiedTaskView';
 import { TaskInput } from '@/components/tasks/TaskInput';
@@ -21,11 +20,10 @@ const ErrorFallback = () => (
   </div>
 );
 
-const TaskPage = () => {
+const TaskPageContent = () => {
   const isMobile = useIsMobile();
   const taskContext = useTaskContext();
   
-  // Dialog state
   const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const [currentChecklistTask, setCurrentChecklistTask] = useState<{
     taskId: string;
@@ -53,7 +51,6 @@ const TaskPage = () => {
     taskName: string;
   } | null>(null);
   
-  // Dialog opener handlers
   const handleShowImage = useCallback((imageUrl: string, taskName: string) => {
     console.log("Tasks.tsx - Opening screenshot for:", taskName, imageUrl);
     setCurrentScreenshotTask({
@@ -97,7 +94,6 @@ const TaskPage = () => {
     toast.info(`Recording for: ${taskName}`, { duration: 1500 });
   }, []);
   
-  // Task update handler
   const handleTaskUpdate = useCallback((data: { taskId: string, updates: Partial<Task> }) => {
     console.log('Tasks.tsx - Task update received:', data);
     
@@ -123,7 +119,6 @@ const TaskPage = () => {
     voicenote: handleOpenVoiceRecorder
   };
 
-  // Added some debugging logs to help identify why UnifiedTaskView might not be rendering
   console.log('Tasks.tsx rendering - Task context:', 
     { 
       items: taskContext?.items?.length || 0,
@@ -133,14 +128,29 @@ const TaskPage = () => {
   );
 
   return (
-    <div className="container mx-auto max-w-6xl py-4 px-4">
-      <h1 className="text-2xl sm:text-3xl mb-5 font-bold" id="page-title">
-        Task Manager
-      </h1>
+    <>
+      <div className="mb-6">
+        <div className="bg-card rounded-md p-4 shadow-sm">
+          <h2 className="text-xl font-semibold mb-2">Task Statistics</h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-muted/50 p-3 rounded-md">
+              <h3 className="text-sm font-medium">Total Tasks</h3>
+              <p className="text-2xl font-bold">{(taskContext?.items?.length || 0) + (taskContext?.completed?.length || 0)}</p>
+            </div>
+            <div className="bg-muted/50 p-3 rounded-md">
+              <h3 className="text-sm font-medium">Completed</h3>
+              <p className="text-2xl font-bold text-green-500">{taskContext?.completed?.length || 0}</p>
+            </div>
+            <div className="bg-muted/50 p-3 rounded-md">
+              <h3 className="text-sm font-medium">Pending</h3>
+              <p className="text-2xl font-bold text-amber-500">{taskContext?.items?.length || 0}</p>
+            </div>
+          </div>
+        </div>
+      </div>
       
-      <main aria-labelledby="page-title" className="space-y-4">
-        {/* Task Input */}
-        <Card>
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="shadow-sm">
           <CardContent className="p-4">
             <TaskInput 
               onTaskAdd={(task) => taskContext?.addTask?.(task)}
@@ -149,33 +159,30 @@ const TaskPage = () => {
           </CardContent>
         </Card>
         
-        <TaskEventListener 
-          onShowImage={handleShowImage}
-          onOpenChecklist={handleOpenChecklist}
-          onOpenJournal={handleOpenJournal}
-          onOpenVoiceRecorder={handleOpenVoiceRecorder}
-          onTaskUpdate={handleTaskUpdate}
-        />
-        
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
-          {taskContext && (
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <UnifiedTaskView 
-                  activeTasks={taskContext.items || []}
-                  completedTasks={taskContext.completed || []}
-                  selectedTaskId={taskContext.selected}
-                  dialogOpeners={dialogOpeners}
-                  onTaskAdd={(task) => taskContext.addTask?.(task)}
-                  onTasksAdd={(tasks) => tasks.forEach(task => taskContext.addTask?.(task))}
-                />
-              </CardContent>
-            </Card>
-          )}
-        </ErrorBoundary>
-      </main>
+        <Card className="overflow-hidden shadow-sm">
+          <CardContent className="p-0">
+            {taskContext && (
+              <UnifiedTaskView 
+                activeTasks={taskContext.items || []}
+                completedTasks={taskContext.completed || []}
+                selectedTaskId={taskContext.selected}
+                dialogOpeners={dialogOpeners}
+                onTaskAdd={(task) => taskContext.addTask?.(task)}
+                onTasksAdd={(tasks) => tasks.forEach(task => taskContext.addTask?.(task))}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
       
-      {/* Task-specific dialogs */}
+      <TaskEventListener 
+        onShowImage={handleShowImage}
+        onOpenChecklist={handleOpenChecklist}
+        onOpenJournal={handleOpenJournal}
+        onOpenVoiceRecorder={handleOpenVoiceRecorder}
+        onTaskUpdate={handleTaskUpdate}
+      />
+      
       {currentChecklistTask && (
         <ChecklistDialog 
           isOpen={isChecklistOpen}
@@ -218,6 +225,24 @@ const TaskPage = () => {
           }}
         />
       )}
+    </>
+  );
+};
+
+const TaskPage = () => {
+  console.log('TasksPage.tsx main component rendering');
+  
+  return (
+    <div className="container max-w-6xl mx-auto py-4 px-4">
+      <h1 className="text-2xl sm:text-3xl mb-5 font-bold" id="page-title">
+        Task Manager
+      </h1>
+      
+      <TaskProvider>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <TaskPageContent />
+        </ErrorBoundary>
+      </TaskProvider>
     </div>
   );
 };

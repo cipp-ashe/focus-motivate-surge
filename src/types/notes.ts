@@ -1,47 +1,36 @@
 
 import { EntityType } from './core';
 
+// Define allowed colors for tags
+export type TagColor =
+  | 'red'
+  | 'green'
+  | 'blue'
+  | 'yellow'
+  | 'purple'
+  | 'pink'
+  | 'orange'
+  | 'teal'
+  | 'cyan'
+  | 'indigo'
+  | 'gray';
+
+// Define the Tag type
+export interface Tag {
+  name: string;
+  color: TagColor;
+}
+
+// Define the Note type
 export interface Note {
   id: string;
   title: string;
   content: string;
   createdAt: string;
   updatedAt: string;
-  tags?: Tag[];
-  color?: string;
-  archived?: boolean;
-  pinned?: boolean;
+  tags: Tag[];
   relationships?: {
     entityId: string;
     entityType: EntityType;
   }[];
-}
-
-export interface Tag {
-  name: string;
-  color: TagColor;
-}
-
-export type TagColor = 
-  | 'default' 
-  | 'red' 
-  | 'orange' 
-  | 'yellow' 
-  | 'green' 
-  | 'blue' 
-  | 'purple' 
-  | 'pink';
-
-export function isValidTagColor(color: string): color is TagColor {
-  return ['default', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'].includes(color);
-}
-
-export interface NotesState {
-  notes: Note[];
-  selectedNoteId: string | null;
-  filterTag: string | null;
-}
-
-export interface NotesProps {
-  hideNotes?: boolean;
 }

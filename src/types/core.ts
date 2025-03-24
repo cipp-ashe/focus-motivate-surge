@@ -1,60 +1,26 @@
 
-export enum EntityType {
-  Task = 'task',
-  Habit = 'habit',
-  Note = 'note',
-  Template = 'template',
-  Tag = 'tag',
-  VoiceNote = 'voicenote',
-  Quote = 'quote'
-}
+// Define entity types used across the application
+export type EntityType = 
+  | 'task' 
+  | 'note' 
+  | 'habit' 
+  | 'timer' 
+  | 'tag' 
+  | 'profile' 
+  | 'voice-note' 
+  | 'screenshot';
 
-export interface Relationship {
-  id: string;
-  entityId: string;
-  entityType: EntityType;
-  relatedEntityId: string;
-  relatedEntityType: EntityType;
-  relationshipType?: string;
-  metadata?: Record<string, any>;
-}
+// Common date format type
+export type DateFormat = 'yyyy-MM-dd' | 'MM/dd/yyyy' | 'dd/MM/yyyy' | 'MMM dd, yyyy';
 
-export interface Tag {
-  id: string;
-  name: string;
-  color: string;
-  createdAt: string;
-  updatedAt?: string;
-}
+// Common status types
+export type Status = 'active' | 'completed' | 'archived' | 'pending' | 'deleted';
 
-export interface TagRelation {
-  id: string;
-  tagId: string;
-  entityId: string;
-  entityType: EntityType;
-  createdAt: string;
-  updatedAt?: string;
-}
+// Common day of week type
+export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 
-// Add the initializeDataStore function
-export const initializeDataStore = (): boolean => {
-  try {
-    // Set schema version
-    localStorage.setItem('schema-version', '1.0');
-    
-    // Initialize entity relations if not exists
-    if (!localStorage.getItem('entity-relations')) {
-      localStorage.setItem('entity-relations', JSON.stringify([]));
-    }
-    
-    // Initialize tag relations if not exists
-    if (!localStorage.getItem('tag-relations')) {
-      localStorage.setItem('tag-relations', JSON.stringify([]));
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Failed to initialize data store:', error);
-    return false;
-  }
-};
+// Common time of day type
+export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
+
+// Common difficulty level type
+export type DifficultyLevel = 'easy' | 'medium' | 'hard' | 'expert';

@@ -5,6 +5,8 @@ import { SavedNotes } from './SavedNotes';
 import { toast } from 'sonner';
 import { useNoteActions, useNoteState } from '@/contexts/notes/NoteContext';
 import { eventManager } from '@/lib/events/EventManager';
+import { Note, Tag, TagColor } from '@/types/notes';
+import { EntityType } from '@/types/core';
 
 export const Notes = () => {
   // Use state to track initialization
@@ -76,9 +78,29 @@ export const Notes = () => {
   };
   
   // Helper function to select a note for editing
-  const selectNoteForEdit = (note: any) => {
+  const selectNoteForEdit = (note: Note) => {
     selectNote(note.id);
     setCurrentContent(note.content);
+  };
+
+  // Add and remove tags from notes
+  const addTagToNote = (noteId: string, tagName: string, tagColor: TagColor) => {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    
+    const existingTag = note.tags.find(t => t.name === tagName);
+    if (existingTag) return;
+    
+    const updatedTags = [...note.tags, { name: tagName, color: tagColor }];
+    updateNote(noteId, { tags: updatedTags });
+  };
+  
+  const removeTagFromNote = (noteId: string, tagName: string) => {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    
+    const updatedTags = note.tags.filter(t => t.name !== tagName);
+    updateNote(noteId, { tags: updatedTags });
   };
 
   const handleSave = () => {
@@ -102,7 +124,11 @@ export const Notes = () => {
         toast.success('Note updated successfully');
       } else {
         console.log('Creating new note');
-        addNote({ content: currentContent });
+        addNote({ 
+          title: 'Untitled Note', 
+          content: currentContent,
+          tags: [] 
+        });
         setCurrentContent("");
         toast.success('Note created successfully');
       }
@@ -121,10 +147,10 @@ export const Notes = () => {
         addNote({ 
           content: data.content,
           title: `Journal: ${data.habitName || 'Habit'}`,
-          tags: [{ name: 'journal', color: 'blue' }],
+          tags: [{ name: 'journal', color: 'blue' as TagColor }],
           relationships: [{
             entityId: data.habitId,
-            entityType: 'habit'
+            entityType: 'habit' as EntityType
           }]
         });
       }
@@ -167,11 +193,14 @@ export const Notes = () => {
         onEditNote={selectNoteForEdit}
         onDeleteNote={deleteNote}
         onUpdateTagColor={(noteId, tagName, color) => {
-          updateNote(noteId, { 
-            tags: selectedNote?.tags?.map(tag => 
-              tag.name === tagName ? { ...tag, color } : tag
-            ) || []
-          });
+          const note = notes.find(n => n.id === noteId);
+          if (note) {
+            updateNote(noteId, { 
+              tags: note.tags.map(tag => 
+                tag.name === tagName ? { ...tag, color } : tag
+              ) 
+            });
+          }
         }}
       />
     </div>

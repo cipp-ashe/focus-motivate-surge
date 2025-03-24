@@ -94,8 +94,13 @@ export const NotesEditor = forwardRef<NotesEditorRef, NotesEditorProps>(({
           toast.success("Note updated ✨", { duration: 1500 });
         }
       } else {
-        // Add new note - don't check return value for truthiness
-        noteActions.addNote({ content });
+        // Add new note with required fields
+        noteActions.addNote({ 
+          title: 'Untitled Note',
+          content, 
+          tags: [] 
+        });
+        
         if (!isToolbarAction) {
           toast.success("Note saved ✨", { duration: 1500 });
         }

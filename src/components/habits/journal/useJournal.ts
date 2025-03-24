@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { findExistingJournalNote, getJournalType, getTemplateForType } from "./utils";
 import { getJournalQuotes, getJournalTags } from "./constants";
 import { Quote } from "@/types/timer/models";
+import { EntityType } from "@/types/core";
 
 interface UseJournalProps {
   habitId: string;
@@ -76,7 +77,7 @@ export const useJournal = ({
         description: "Your journal entry has been updated"
       });
     } else {
-      // This note creation will be handled by the event system
+      // Emit event to create a note from the habit
       eventManager.emit('note:create-from-habit', {
         habitId,
         habitName,
