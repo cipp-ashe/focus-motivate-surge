@@ -29,34 +29,6 @@ export interface VoiceNoteEventPayloadMap {
   };
 }
 
-// Journal Events
-export type JournalEventType = 
-  | 'journal:create'
-  | 'journal:update'
-  | 'journal:delete'
-  | 'journal:open';
-
-export interface JournalEventPayloadMap {
-  'journal:create': {
-    title: string;
-    content: string;
-    tags?: string[];
-  };
-  'journal:update': {
-    id: string;
-    updates: any;
-  };
-  'journal:delete': {
-    id: string;
-  };
-  'journal:open': {
-    id: string;
-    title: string;
-    content: string;
-    type: string;
-  };
-}
-
 // Relationship Events
 export type RelationshipEventType = 
   | 'relationship:create'

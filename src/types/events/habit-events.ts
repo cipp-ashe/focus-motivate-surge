@@ -17,8 +17,7 @@ export type HabitEventType =
   | 'habits:check-pending'
   | 'habit:create-note'
   | 'habit:dismiss'
-  | 'habit:dismissed'
-  | 'journal:open';
+  | 'habit:dismissed';
 
 // Habit task event definition
 export interface HabitTaskEvent {
@@ -73,5 +72,4 @@ export interface HabitEventPayloadMap {
     taskId: string;
     date: string;
   };
-  'journal:open': HabitNoteData;
 }

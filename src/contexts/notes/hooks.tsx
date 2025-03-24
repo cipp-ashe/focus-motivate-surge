@@ -9,18 +9,33 @@ import { deprecate } from '@/utils/deprecation';
 export const useNoteActions = () => {
   const { dispatch } = useContext(NoteContext);
 
-  const addNote = useCallback((note: Omit<Note, 'id'>) => {
+  const loadNotes = useCallback(() => {
+    try {
+      const savedNotes = localStorage.getItem('notes');
+      if (savedNotes) {
+        const parsedNotes = JSON.parse(savedNotes);
+        dispatch({ type: 'SET_NOTES', payload: parsedNotes });
+      }
+    } catch (error) {
+      console.error('Error loading notes from localStorage:', error);
+      toast.error('Failed to load saved notes');
+    }
+  }, [dispatch]);
+
+  const addNote = useCallback((note: Omit<Note, 'id'> & { id?: string }) => {
     const newNote: Note = {
-      id: `note-${Date.now()}`,
+      id: note.id || `note-${Date.now()}`,
       ...note,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: note.createdAt || new Date().toISOString(),
+      updatedAt: note.updatedAt || new Date().toISOString(),
     };
 
     dispatch({ type: 'ADD_NOTE', payload: newNote });
     // Emit event with appropriate structure
     eventManager.emit('note:add', { note: newNote });
     toast.success('Note added successfully');
+    
+    return newNote.id;
   }, [dispatch]);
 
   const deleteNote = useCallback((id: string) => {
@@ -59,6 +74,7 @@ export const useNoteActions = () => {
   }, [dispatch]);
 
   return {
+    loadNotes,
     addNote,
     deleteNote,
     updateNote,

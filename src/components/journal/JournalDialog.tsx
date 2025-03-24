@@ -10,9 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Edit, Save, X } from 'lucide-react';
-import { eventManager } from '@/lib/events/EventManager';
-import { toast } from 'sonner';
 import { useJournalService } from '@/hooks/journal/useJournalService';
+import { toast } from 'sonner';
 
 interface JournalDialogProps {
   isOpen: boolean;

@@ -22,6 +22,18 @@ export interface Tag {
   color: TagColor;
 }
 
+// Relationship metadata for associating notes with other entities
+export interface Relationship {
+  entityId: string;
+  entityType: EntityType;
+  metadata?: {
+    templateId?: string;
+    date?: string;
+    metricType?: string;
+    [key: string]: any;
+  };
+}
+
 // Define the Note type
 export interface Note {
   id: string;
@@ -30,10 +42,7 @@ export interface Note {
   createdAt: string;
   updatedAt: string;
   tags: Tag[];
-  relationships?: {
-    entityId: string;
-    entityType: EntityType;
-  }[];
+  relationships?: Relationship[];
 }
 
 // Helper function to validate tag colors

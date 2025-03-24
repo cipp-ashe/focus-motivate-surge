@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { useNoteActions, useNoteState } from '@/contexts/notes/hooks';
-import { Note } from '@/types/notes';
+import { Note, Tag, Relationship } from '@/types/notes';
 import { toast } from 'sonner';
 import { EntityType } from '@/types/core';
 import { JournalEntry } from '@/types/events/journal-events';
@@ -35,27 +35,28 @@ export const useJournalService = () => {
       // Then try to match by relationships
       if (note.relationships) {
         // Match by task ID
-        if (criteria.taskId && 
-            note.relationships.some(rel => 
-              rel.entityId === criteria.taskId && 
-              rel.entityType === EntityType.Task
-            )) {
-          return true;
+        if (criteria.taskId) {
+          const hasTaskRelationship = note.relationships.some(rel => 
+            rel.entityId === criteria.taskId && 
+            rel.entityType === EntityType.Task
+          );
+          if (hasTaskRelationship) return true;
         }
 
-        // Match by habit ID
-        if (criteria.habitId && 
-            note.relationships.some(rel => 
-              rel.entityId === criteria.habitId && 
-              rel.entityType === EntityType.Habit
-            )) {
-          // If date is provided, also check the date
-          if (criteria.date) {
-            return note.relationships.some(rel => 
-              rel.metadata?.date === criteria.date
-            );
+        // Match by habit ID and date (if provided)
+        if (criteria.habitId) {
+          const habitRelationship = note.relationships.find(rel => 
+            rel.entityId === criteria.habitId && 
+            rel.entityType === EntityType.Habit
+          );
+          
+          if (habitRelationship) {
+            // If date is provided, also check the date
+            if (criteria.date && habitRelationship.metadata?.date) {
+              return habitRelationship.metadata.date === criteria.date;
+            }
+            return true;
           }
-          return true;
         }
       }
 
@@ -129,7 +130,7 @@ export const useJournalService = () => {
     const id = `journal-${habitId || taskId || Date.now()}-${date.split('T')[0]}`;
 
     // Create relationships
-    const relationships = [];
+    const relationships: Relationship[] = [];
     
     if (habitId) {
       relationships.push({
@@ -147,7 +148,7 @@ export const useJournalService = () => {
     }
 
     // Create standard tags
-    const noteTags = [{ name: 'journal', color: 'green' }];
+    const noteTags: Tag[] = [{ name: 'journal', color: 'green' }];
     
     // Add custom tags
     if (tags && tags.length > 0) {

@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { useHabitEvents } from '@/hooks/habits/useHabitEvents';
-import { useNoteActions } from '@/contexts/notes/NoteContext';
+import { useNoteActions } from '@/contexts/notes/hooks';
 import { JournalProvider } from './components/journal/JournalProvider';
 import { eventManager } from '@/lib/events/EventManager';
 
