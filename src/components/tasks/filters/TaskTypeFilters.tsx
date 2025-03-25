@@ -12,7 +12,7 @@ interface TaskTypeFiltersProps {
   counts: {
     all: number;
     timer: number;
-    regular: number;
+    standard: number;
     journal: number;
     checklist: number;
     screenshot: number;
@@ -41,12 +41,12 @@ export const TaskTypeFilters: React.FC<TaskTypeFiltersProps> = ({
       label,
       icon: () => icon, // Convert React node to function component
       count: counts[type as keyof typeof counts] || 0,
-      colorName: type === 'regular' ? 'slate' : 
-                 type === 'timer' ? 'purple' : 
-                 type === 'journal' ? 'amber' : 
-                 type === 'checklist' ? 'emerald' : 
-                 type === 'screenshot' ? 'blue' : 
-                 type === 'voicenote' ? 'rose' : 'slate'
+      colorName: type === 'standard' ? 'slate' : 
+                type === 'timer' ? 'purple' : 
+                type === 'journal' ? 'amber' : 
+                type === 'checklist' ? 'cyan' : 
+                type === 'screenshot' ? 'blue' : 
+                type === 'voicenote' ? 'rose' : 'slate'
     }))
   ];
 

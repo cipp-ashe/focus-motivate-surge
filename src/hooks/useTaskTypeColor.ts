@@ -13,28 +13,28 @@ export function useTaskTypeColor() {
   /**
    * Get the appropriate color class for the task icon based on task type
    */
-  const getIconColorClass = (type: TaskType = 'regular'): string => {
+  const getIconColorClass = (type: TaskType = 'standard'): string => {
     return getTaskColorClass(type, 'icon');
   };
 
   /**
    * Get the appropriate background color class for task type
    */
-  const getBackgroundColorClass = (type: TaskType = 'regular'): string => {
+  const getBackgroundColorClass = (type: TaskType = 'standard'): string => {
     return getTaskColorClass(type, 'background');
   };
 
   /**
    * Get the appropriate border color class for task type
    */
-  const getBorderColorClass = (type: TaskType = 'regular'): string => {
+  const getBorderColorClass = (type: TaskType = 'standard'): string => {
     return getTaskColorClass(type, 'border');
   };
 
   /**
    * Get the appropriate button background color class for task type
    */
-  const getButtonColorClass = (type: TaskType = 'regular'): string => {
+  const getButtonColorClass = (type: TaskType = 'standard'): string => {
     return getTaskColorClass(type, 'button');
   };
 

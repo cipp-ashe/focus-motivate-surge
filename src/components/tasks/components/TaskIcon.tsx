@@ -18,7 +18,7 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   size = 16,
 }) => {
   // Use type if provided, otherwise fall back to taskType
-  const iconType = type || taskType || 'regular';
+  const iconType = type || taskType || 'standard';
 
   // Get the appropriate color class based on task type
   const colorClass = getTaskColorClass(iconType, 'icon');
