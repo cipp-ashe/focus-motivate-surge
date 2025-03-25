@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Task } from '@/types/tasks';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
@@ -17,7 +16,7 @@ export const TimerTaskInput = () => {
   const { selectTask } = useTaskSelection();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreateTimerTask = (e: React.FormEvent) => {
+  const handleCreateTimerTask = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!taskName.trim()) {
@@ -35,6 +34,7 @@ export const TimerTaskInput = () => {
         taskType: 'timer',
         duration: 1500, // 25 minutes in seconds
         completed: false,
+        createdAt: new Date().toISOString()
       }, {
         suppressToast: true,
         selectAfterCreate: false
@@ -59,18 +59,20 @@ export const TimerTaskInput = () => {
   };
 
   return (
-    <form onSubmit={handleCreateTimerTask} className="mb-4 flex items-center space-x-2">
-      <Input
-        type="text"
-        placeholder="Add a new timer task..."
-        value={taskName}
-        onChange={(e) => setTaskName(e.target.value)}
-        className="flex-1 bg-background dark:bg-card"
-      />
+    <form onSubmit={handleCreateTimerTask} className="mb-5 flex items-center space-x-2">
+      <div className="relative flex-1">
+        <Input
+          type="text"
+          placeholder="Add a new timer task..."
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+          className="flex-1 bg-card/60 dark:bg-card/30 border-border/40 dark:border-border/30 pl-3 pr-3 py-5 text-base shadow-sm"
+        />
+      </div>
       <Button 
         type="submit" 
         disabled={isSubmitting || !taskName.trim()}
-        className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
+        className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 py-5 px-4 shadow-sm"
       >
         <PlusIcon className="h-4 w-4 mr-2" />
         <PlayIcon className="h-4 w-4" />

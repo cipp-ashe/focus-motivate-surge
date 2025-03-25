@@ -80,14 +80,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   return (
     <div
       className={cn(
-        'relative rounded-md border p-3 transition-all w-full overflow-hidden',
-        'min-h-[4.5rem] flex flex-col justify-between',
+        'relative rounded-lg border p-3 transition-all w-full',
+        'min-h-[4.5rem] flex flex-col justify-between gap-2',
         taskIsSelected
-          ? `border-primary/50 dark:border-primary/30 ${borderColorClass}/60 bg-primary/5 dark:bg-primary/10`
-          : `border-border/[var(--border-medium)] dark:border-border/[var(--border-medium)] hover:border-border dark:hover:border-border/80 ${borderColorClass}/30 ${bgColorClass}`,
+          ? `border-primary/50 dark:border-primary/40 shadow-md ${borderColorClass}/60 bg-primary/5 dark:bg-primary/10`
+          : `border-border/40 dark:border-border/30 hover:border-border/70 dark:hover:border-border/60 ${borderColorClass}/30 ${bgColorClass}`,
         isHovered &&
           !taskIsSelected &&
-          'border-border dark:border-border/80 bg-card/80 dark:bg-card/30',
+          'border-border/70 dark:border-border/60 bg-card/50 dark:bg-card/40 shadow-sm',
         'md:max-w-full'
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -113,7 +113,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       {/* Always show TaskActions */}
       <TaskActions
         task={task}
-        isHovered={isHovered}
+        isHovered={isHovered || taskIsSelected}
         isSelected={taskIsSelected}
         handleDelete={handleDeleteClick}
         handleTaskAction={(e, actionType) =>

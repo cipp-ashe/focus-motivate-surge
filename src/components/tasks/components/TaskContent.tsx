@@ -53,14 +53,14 @@ export const TaskContent: React.FC<TaskContentProps> = React.memo(
     const shouldHideTimerTag = isTimerView && isTimerTask;
 
     return (
-      <div className="flex items-start gap-2 w-full overflow-hidden" data-testid="task-content">
+      <div className="flex items-start gap-3 w-full overflow-hidden" data-testid="task-content">
         {/* Checkbox column - fixed width */}
-        <div className="w-5 flex-shrink-0">
+        <div className="w-5 flex-shrink-0 pt-0.5">
           <TaskCheckbox task={task} isTimerView={isTimerView} onCheck={handleCheckboxChange} />
         </div>
 
         {/* Main content column - flexible width */}
-        <div className="flex-grow min-w-0 overflow-hidden pr-2">
+        <div className="flex-grow min-w-0 overflow-hidden">
           <TaskContentDisplay 
             task={task} 
             handleTaskAction={handleTaskAction} 

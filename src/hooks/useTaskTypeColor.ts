@@ -12,23 +12,23 @@ export function useTaskTypeColor() {
   const getIconColorClass = (type: TaskType = 'regular'): string => {
     switch (type) {
       case 'timer':
-        return 'text-[hsl(var(--timer))] dark:text-[hsl(var(--timer))]';
-      case 'journal':
-        return 'text-[hsl(var(--journal))] dark:text-[hsl(var(--journal))]';
-      case 'checklist':
-        return 'text-[hsl(var(--checklist))] dark:text-[hsl(var(--checklist))]';
-      case 'screenshot':
-        return 'text-[hsl(var(--screenshot))] dark:text-[hsl(var(--screenshot))]';
-      case 'voicenote':
-        return 'text-[hsl(var(--voicenote))] dark:text-[hsl(var(--voicenote))]';
-      case 'focus':
-        return 'text-[hsl(var(--focus))] dark:text-[hsl(var(--focus))]';
-      case 'habit':
         return 'text-purple-500 dark:text-purple-400';
+      case 'journal':
+        return 'text-amber-500 dark:text-amber-400';
+      case 'checklist':
+        return 'text-emerald-500 dark:text-emerald-400';
+      case 'screenshot':
+        return 'text-blue-500 dark:text-blue-400';
+      case 'voicenote':
+        return 'text-rose-500 dark:text-rose-400';
+      case 'focus':
+        return 'text-cyan-500 dark:text-cyan-400';
+      case 'habit':
+        return 'text-indigo-500 dark:text-indigo-400';
       case 'regular':
       case 'standard':
       default:
-        return 'text-[hsl(var(--regular))] dark:text-[hsl(var(--regular))]';
+        return 'text-slate-500 dark:text-slate-400';
     }
   };
 
@@ -38,23 +38,23 @@ export function useTaskTypeColor() {
   const getBackgroundColorClass = (type: TaskType = 'regular'): string => {
     switch (type) {
       case 'timer':
-        return 'bg-[hsla(var(--timer),0.1)] dark:bg-[hsla(var(--timer),0.05)]';
+        return 'bg-purple-100/50 dark:bg-purple-900/20';
       case 'journal':
-        return 'bg-[hsla(var(--journal),0.1)] dark:bg-[hsla(var(--journal),0.05)]';
+        return 'bg-amber-100/50 dark:bg-amber-900/20';
       case 'checklist':
-        return 'bg-[hsla(var(--checklist),0.1)] dark:bg-[hsla(var(--checklist),0.05)]';
+        return 'bg-emerald-100/50 dark:bg-emerald-900/20';
       case 'screenshot':
-        return 'bg-[hsla(var(--screenshot),0.1)] dark:bg-[hsla(var(--screenshot),0.05)]';
+        return 'bg-blue-100/50 dark:bg-blue-900/20';
       case 'voicenote':
-        return 'bg-[hsla(var(--voicenote),0.1)] dark:bg-[hsla(var(--voicenote),0.05)]';
+        return 'bg-rose-100/50 dark:bg-rose-900/20';
       case 'focus':
-        return 'bg-[hsla(var(--focus),0.1)] dark:bg-[hsla(var(--focus),0.05)]';
+        return 'bg-cyan-100/50 dark:bg-cyan-900/20';
       case 'habit':
-        return 'bg-purple-100 dark:bg-purple-900/20';
+        return 'bg-indigo-100/50 dark:bg-indigo-900/20';
       case 'regular':
       case 'standard':
       default:
-        return 'bg-[hsla(var(--regular),0.1)] dark:bg-[hsla(var(--regular),0.05)]';
+        return 'bg-slate-100/50 dark:bg-slate-900/20';
     }
   };
 
@@ -64,23 +64,23 @@ export function useTaskTypeColor() {
   const getBorderColorClass = (type: TaskType = 'regular'): string => {
     switch (type) {
       case 'timer':
-        return 'border-[hsl(var(--timer))]';
+        return 'border-purple-400/50 dark:border-purple-500/40';
       case 'journal':
-        return 'border-[hsl(var(--journal))]';
+        return 'border-amber-400/50 dark:border-amber-500/40';
       case 'checklist':
-        return 'border-[hsl(var(--checklist))]';
+        return 'border-emerald-400/50 dark:border-emerald-500/40';
       case 'screenshot':
-        return 'border-[hsl(var(--screenshot))]';
+        return 'border-blue-400/50 dark:border-blue-500/40';
       case 'voicenote':
-        return 'border-[hsl(var(--voicenote))]';
+        return 'border-rose-400/50 dark:border-rose-500/40';
       case 'focus':
-        return 'border-[hsl(var(--focus))]';
+        return 'border-cyan-400/50 dark:border-cyan-500/40';
       case 'habit':
-        return 'border-purple-300 dark:border-purple-800';
+        return 'border-indigo-400/50 dark:border-indigo-500/40';
       case 'regular':
       case 'standard':
       default:
-        return 'border-[hsl(var(--regular))]';
+        return 'border-slate-300/50 dark:border-slate-600/40';
     }
   };
 

@@ -72,38 +72,38 @@ const TimerPage = () => {
       
       <TaskSelectionProvider>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Timer Task Input */}
+          {/* Timer Task Input - Spans full width */}
           <div className="md:col-span-12">
             <TimerTaskInput />
           </div>
           
-          {/* Timer Task List - Now with more space */}
+          {/* Timer Task List - Placed on right side on desktop */}
           <div className="md:col-span-5 md:order-2">
-            <Card className="dark:bg-card/90 border-border/40 dark:border-border/20 h-full">
-              <CardHeader className="pb-3">
+            <Card className="dark:bg-card/80 border-border/30 dark:border-border/20 h-full shadow-md overflow-hidden">
+              <CardHeader className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 pb-3">
                 <CardTitle className="text-lg font-medium flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                  <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
                   Timer Tasks
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-full max-h-[70vh]">
+              <CardContent className="p-4">
+                <ScrollArea className="h-full max-h-[70vh] pr-2">
                   <FilteredTimerTaskList />
                 </ScrollArea>
               </CardContent>
             </Card>
           </div>
           
-          {/* Timer Section - Now with less space */}
+          {/* Timer Section - Placed on left side on desktop */}
           <div className="md:col-span-7 md:order-1">
-            <Card className="dark:bg-card/90 border-border/40 dark:border-border/20">
-              <CardHeader className="pb-3">
+            <Card className="dark:bg-card/80 border-border/30 dark:border-border/20 shadow-md overflow-hidden">
+              <CardHeader className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 pb-3">
                 <CardTitle className="text-lg font-medium flex items-center gap-2">
                   <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
                   Task Timer
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4">
                 <ScrollArea className="h-full max-h-[70vh]">
                   <TimerSection 
                     favorites={favorites} 
