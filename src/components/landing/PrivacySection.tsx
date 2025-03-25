@@ -8,7 +8,7 @@ const PrivacySection: React.FC = () => {
         <div className="flex flex-col gap-6 h-full">
           <div className="flex-shrink-0 flex items-center gap-2">
             <Lock className="w-8 h-8 text-primary" />
-            <h3 className="text-xl font-semibold">Your Data is Stored Locally</h3>
+            <h3 className="text-xl">Your Data is Stored Locally</h3>
           </div>
           <div className="flex-1">
             <p className="mb-6 text-muted-foreground text-base">Your data is saved to your browser's local storage. If you would like access across multiple devices, register with a magic link on the settings page.</p>
