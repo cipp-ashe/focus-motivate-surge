@@ -34,7 +34,7 @@ export interface TimerCircleProps {
   timeLeft: number;
   duration?: number;
   isRunning: boolean;
-  isPaused: boolean;
+  isPaused?: boolean;
   isComplete?: boolean;
   taskName?: string;
   size?: 'normal' | 'large';

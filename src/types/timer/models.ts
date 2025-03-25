@@ -15,3 +15,7 @@ export interface Quote {
 }
 
 export type SoundOption = 'bell' | 'chime' | 'gong' | 'notification' | 'success' | 'none';
+
+export type TaskType = 'timer' | 'focus' | 'standard' | 'journal' | 'habit' | 'recurring' | 'checklist' | 'project' | 'screenshot' | 'voicenote';
+
+export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'canceled' | 'archived';

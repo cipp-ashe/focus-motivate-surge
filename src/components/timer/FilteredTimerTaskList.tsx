@@ -8,6 +8,7 @@ import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { ClockIcon } from 'lucide-react';
 import { logger } from '@/utils/logManager';
 import { toast } from 'sonner';
+import { TaskType } from '@/types/timer/models';
 
 interface EmptyStateProps {
   icon: React.ReactNode;
@@ -36,7 +37,7 @@ export const FilteredTimerTaskList = () => {
     logger.debug('FilteredTimerTaskList', 'Filtering timer tasks from all tasks');
     
     const filteredTasks = items
-      .filter(task => !task.completed && (task.taskType === 'timer' || task.taskType === 'focus'))
+      .filter(task => !task.completed && (task.taskType === 'timer' || task.taskType === 'focus' as TaskType))
       .sort((a, b) => {
         // Sort by creation date (newest first)
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -55,7 +56,7 @@ export const FilteredTimerTaskList = () => {
   // Listen for task creation events to immediately update the list
   useEffect(() => {
     const handleTaskCreate = (task: Task) => {
-      if (task.taskType === 'timer' || task.taskType === 'focus') {
+      if (task.taskType === 'timer' || task.taskType === 'focus' as TaskType) {
         logger.debug('FilteredTimerTaskList', `New timer task created: ${task.name}`);
         
         // Immediately add the new task to our filtered list

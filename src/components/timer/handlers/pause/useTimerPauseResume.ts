@@ -31,7 +31,7 @@ export const useTimerPauseResume = ({
     
     // Store pause timestamp for calculating paused time
     updateMetrics({
-      lastPauseTimestamp: new Date(),
+      lastPauseTimestamp: new Date().toISOString(), // Convert to ISO string
       pauseCount: metrics.pauseCount + 1,
       isPaused: true,
       pausedTimeLeft: timeLeft

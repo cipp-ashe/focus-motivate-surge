@@ -15,6 +15,7 @@ import { createTaskOperations } from '@/lib/operations/tasks/create';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { logger } from '@/utils/logManager';
+import { TaskStatus } from '@/types/timer/models';
 
 interface TimerConfigModalProps {
   open: boolean;
@@ -53,7 +54,7 @@ export const TimerConfigModal = ({
       duration: minutes * 60,
       completed: false,
       createdAt: new Date().toISOString(),
-      status: 'pending',
+      status: 'pending' as TaskStatus,
       tags: []
     }, {
       // Show toast notification so user knows task was created

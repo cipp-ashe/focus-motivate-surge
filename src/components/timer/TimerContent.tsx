@@ -2,10 +2,11 @@
 import React from "react";
 import { Timer as TimerIcon } from "lucide-react";
 import { CardHeader, CardTitle } from "@/components/ui/card";
-import { TimerExpandedViewRef, Quote, SoundOption } from "@/types/timer";
 import { TimerStateMetrics } from "@/types/metrics";
 import { CompletionView } from "./views/CompletionView";
 import { TimerRenderer } from "./views/TimerRenderer";
+import { TimerExpandedViewRef } from "@/types/timer/views";
+import { Quote, SoundOption } from "@/types/timer/models";
 
 interface TimerContentProps {
   // Refs

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { useTimerInitialization } from "./hooks/useTimerInitialization";
 import { TimerErrorBoundary } from "./TimerErrorBoundary";
 import { toISOString } from "@/lib/utils/dateUtils";
 import { logger } from "@/utils/logManager";
+import { Quote } from "@/types/timer/models";
 
 export const Timer = ({
   duration,
@@ -99,7 +99,7 @@ export const Timer = ({
   // Transform favorites to match expected format if needed
   const adaptedFavorites = favorites.map(quote => ({
     ...quote,
-    favorite: quote.favorite ?? false
+    isFavorite: quote.isFavorite ?? false
   }));
 
   return (

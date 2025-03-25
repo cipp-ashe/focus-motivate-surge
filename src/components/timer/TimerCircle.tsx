@@ -12,9 +12,9 @@ const formatTime = (seconds: number): string => {
 export const TimerCircle = memo(({
   percentage,
   timeLeft,
-  duration,
+  duration = 1500, // Default duration if not provided
   isRunning,
-  isPaused,
+  isPaused = false, // Default to false if not provided
   isComplete,
   taskName,
   size = 'normal',

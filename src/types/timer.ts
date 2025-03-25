@@ -1,51 +1,16 @@
 
+import { TimerStateMetrics } from './metrics';
+import { QuoteCategory, Quote, SoundOption, TaskType, TaskStatus } from './timer/models';
+
 /**
  * Timer Types
  */
 
+// Re-export the types from models for backward compatibility
+export type { QuoteCategory, Quote, SoundOption, TaskType, TaskStatus };
+
 // Timer state metrics
-export interface TimerStateMetrics {
-  startTime: string;
-  endTime: string | null;
-  completionDate: string | null;
-  actualDuration: number;
-  pausedTime: number;
-  extensionTime: number;
-  netEffectiveTime: number;
-  completionStatus: 'completed' | 'abandoned' | 'extended' | null;
-  isPaused: boolean;
-  taskId?: string;
-  
-  // Additional metrics properties needed by components
-  expectedTime?: number;
-  pauseCount?: number;
-  lastPauseTimestamp?: string;
-  favoriteQuotes?: string[];
-  pausedTimeLeft?: number;
-  efficiencyRatio?: number;
-}
-
-// Sound options
-export type SoundOption = 'bell' | 'chime' | 'ding' | 'beep' | 'success' | 'none';
-
-// Quote category
-export type QuoteCategory = 
-  | 'motivation'
-  | 'focus'
-  | 'productivity'
-  | 'success'
-  | 'mindfulness'
-  | 'creativity'
-  | 'learning';
-
-// Quote type
-export interface Quote {
-  id: string;
-  text: string;
-  author: string;
-  category: QuoteCategory | QuoteCategory[];
-  favorite?: boolean;
-}
+export { type TimerStateMetrics };
 
 // Timer state
 export interface TimerState {
@@ -86,6 +51,11 @@ export type TimerAction =
 export interface TimerExpandedViewRef {
   toggleExpansion: () => void;
   isExpanded: boolean;
+  expand?: () => void;
+  collapse?: () => void;
+  saveNotes?: () => void;
+  notesRef?: React.RefObject<HTMLTextAreaElement>;
+  handleSave?: () => void;
 }
 
 // Timer view props extended by TimerBody
@@ -95,5 +65,7 @@ export interface TimerCircleProps {
   minutes: number;
   percentage?: number;
   isComplete?: boolean;
+  isPaused?: boolean;
+  duration?: number;
   taskName?: string;
 }

@@ -1,12 +1,8 @@
-
 import { useState, useEffect, useCallback } from "react";
-import { Quote } from "../types/timer/models";
+import { Quote, QuoteCategory } from "../types/timer/models";
 import { toast } from "sonner";
 
 import { quotes } from "../data/quotes";
-
-// Define QuoteCategory here since we're using it internally
-type QuoteCategory = 'motivation' | 'productivity' | 'focus' | 'success' | 'wisdom' | 'general';
 
 interface UseQuoteManagerProps {
   favorites: Quote[];
@@ -128,7 +124,6 @@ export const useQuoteManager = ({
     setIsLiked(!isLiked);
   }, [currentQuote, currentTask, isLiked, setFavorites]);
 
-  // Initialize quotes
   useEffect(() => {
     if (!currentQuote) {
       const taskCategories = getRelevantCategories(currentTask);
@@ -139,7 +134,6 @@ export const useQuoteManager = ({
     }
   }, [currentTask, currentQuote, getRelevantCategories, getContextualQuotes, shuffleQuotes]);
 
-  // Auto-cycle quotes
   useEffect(() => {
     const cycleQuote = () => {
       if (!isTransitioning && quotePool.length > 0) {
@@ -151,7 +145,6 @@ export const useQuoteManager = ({
     return () => clearInterval(interval);
   }, [isTransitioning, quotePool.length, getRandomQuote]);
 
-  // Update like status when quote or favorites change
   useEffect(() => {
     if (currentQuote) {
       setIsLiked(favorites.some(fav => fav.text === currentQuote.text));

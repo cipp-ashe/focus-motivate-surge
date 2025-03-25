@@ -46,11 +46,20 @@ export function useRenderTimer(
     // Log to console if enabled
     if (logToConsole) {
       if (duration > errorThreshold) {
-        console.error(`🐢 ${componentName} render: ${duration.toFixed(2)}ms (extremely slow)`);
+        console.error(
+          `%c🐢 ${componentName} render: ${duration.toFixed(2)}ms (extremely slow)`,
+          'color: #ef4444; font-weight: bold; background-color: rgba(239, 68, 68, 0.1); padding: 2px 4px; border-radius: 2px; dark:background-color: rgba(239, 68, 68, 0.2);'
+        );
       } else if (duration > warnThreshold) {
-        console.warn(`⚠️ ${componentName} render: ${duration.toFixed(2)}ms (slow)`);
+        console.warn(
+          `%c⚠️ ${componentName} render: ${duration.toFixed(2)}ms (slow)`,
+          'color: #f59e0b; font-weight: bold; background-color: rgba(245, 158, 11, 0.1); padding: 2px 4px; border-radius: 2px; dark:background-color: rgba(245, 158, 11, 0.2);'
+        );
       } else {
-        console.log(`⚡ ${componentName} render: ${duration.toFixed(2)}ms`);
+        console.log(
+          `%c⚡ ${componentName} render: ${duration.toFixed(2)}ms`,
+          'color: #10b981; font-weight: bold; dark:color: #34d399;'
+        );
       }
     }
   }, [isEnabled, componentName, trackRenderTiming, logToConsole, warnThreshold, errorThreshold]);

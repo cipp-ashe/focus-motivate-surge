@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Timer } from './Timer';
 import { EmptyTimerState } from './EmptyTimerState';
 import { useTaskSelection } from './providers/TaskSelectionProvider';
-import { Quote } from '@/types/timer';
 import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { logger } from '@/utils/logManager';
+import { Quote } from '@/types/timer/models';
 
 interface TimerSectionProps {
   favorites: Quote[];
