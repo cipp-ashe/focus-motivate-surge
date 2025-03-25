@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   createBrowserRouter,
@@ -13,6 +12,8 @@ const Journal = React.lazy(() => import("./pages/Journal"));
 const Notes = React.lazy(() => import("./pages/Notes"));
 const Settings = React.lazy(() => import("./pages/Settings"));
 const Metrics = React.lazy(() => import("./pages/Metrics"));
+const Auth = React.lazy(() => import("./pages/Auth"));
+const AuthCallback = React.lazy(() => import("./pages/AuthCallback"));
 
 const Router = createBrowserRouter([
   {
@@ -25,6 +26,22 @@ const Router = createBrowserRouter([
           </React.Suspense>
         </Layout>
       </RequireAuth>
+    ),
+  },
+  {
+    path: "/auth",
+    element: (
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <Auth />
+      </React.Suspense>
+    ),
+  },
+  {
+    path: "/auth/callback",
+    element: (
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <AuthCallback />
+      </React.Suspense>
     ),
   },
   {
