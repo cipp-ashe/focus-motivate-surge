@@ -1,116 +1,120 @@
 
-import { Clipboard, Timer, Image, BookOpen, CheckSquare, Folder, PenTool, LayoutGrid } from 'lucide-react';
-import { TaskType, TaskStatus } from '@/types/tasks';
+import { 
+  Clipboard, Timer, Image, BookOpen, CheckSquare, 
+  Folder, PenTool, LayoutGrid, RefreshCw 
+} from 'lucide-react';
+import { TaskType } from '@/types/tasks';
 
-// Task type color configuration
-export const TASK_TYPE_DEFINITIONS = {
-  standard: {
+export const TASK_TYPE_DEFINITIONS = [
+  {
+    type: 'standard' as TaskType,
     icon: Clipboard,
-    label: 'Task',
-    description: 'Standard task',
-    color: 'blue'
+    label: 'Standard Task',
+    description: 'Basic task',
+    color: { 
+      icon: 'text-blue-500',
+      button: 'bg-blue-500/10 hover:bg-blue-500/20'
+    }
   },
-  timer: {
+  {
+    type: 'timer' as TaskType,
     icon: Timer,
-    label: 'Timer',
-    description: 'Timer task',
-    color: 'purple'
+    label: 'Timer Task',
+    description: 'Task with timer',
+    color: {
+      icon: 'text-purple-500',
+      button: 'bg-purple-500/10 hover:bg-purple-500/20'
+    }
   },
-  screenshot: {
-    icon: Image,
-    label: 'Screenshot',
-    description: 'Screenshot task',
-    color: 'green'
-  },
-  journal: {
+  {
+    type: 'journal' as TaskType,
     icon: BookOpen,
-    label: 'Journal',
+    label: 'Journal Entry',
     description: 'Journal task',
-    color: 'teal'
+    color: {
+      icon: 'text-teal-500',
+      button: 'bg-teal-500/10 hover:bg-teal-500/20'
+    }
   },
-  checklist: {
+  {
+    type: 'checklist' as TaskType,
     icon: CheckSquare,
     label: 'Checklist',
-    description: 'Checklist task',
-    color: 'amber'
+    description: 'Task with subtasks',
+    color: {
+      icon: 'text-amber-500',
+      button: 'bg-amber-500/10 hover:bg-amber-500/20'
+    }
   },
-  project: {
+  {
+    type: 'project' as TaskType,
     icon: Folder,
     label: 'Project',
     description: 'Project task',
-    color: 'indigo'
+    color: {
+      icon: 'text-indigo-500',
+      button: 'bg-indigo-500/10 hover:bg-indigo-500/20'
+    }
   },
-  voicenote: {
+  {
+    type: 'screenshot' as TaskType,
+    icon: Image,
+    label: 'Screenshot',
+    description: 'Screenshot task',
+    color: {
+      icon: 'text-green-500',
+      button: 'bg-green-500/10 hover:bg-green-500/20'
+    }
+  },
+  {
+    type: 'voicenote' as TaskType,
     icon: PenTool,
     label: 'Voice Note',
     description: 'Voice note task',
-    color: 'red'
+    color: {
+      icon: 'text-red-500',
+      button: 'bg-red-500/10 hover:bg-red-500/20'
+    }
   },
-  habit: {
+  {
+    type: 'habit' as TaskType,
     icon: LayoutGrid,
     label: 'Habit',
     description: 'Habit task',
-    color: 'emerald'
+    color: {
+      icon: 'text-emerald-500',
+      button: 'bg-emerald-500/10 hover:bg-emerald-500/20'
+    }
   },
-  focus: {
-    icon: Timer,
-    label: 'Focus',
-    description: 'Focus task',
-    color: 'purple'
-  },
-  recurring: {
-    icon: LayoutGrid,
+  {
+    type: 'recurring' as TaskType,
+    icon: RefreshCw,
     label: 'Recurring',
     description: 'Recurring task',
-    color: 'sky'
+    color: {
+      icon: 'text-sky-500',
+      button: 'bg-sky-500/10 hover:bg-sky-500/20'
+    }
   }
+];
+
+export const getTaskTypeDefinition = (type: TaskType = 'standard') => {
+  return TASK_TYPE_DEFINITIONS.find(def => def.type === type) || TASK_TYPE_DEFINITIONS[0];
 };
 
-// Helper functions
-export const getTaskIcon = (taskType: TaskType = 'standard') => {
-  return TASK_TYPE_DEFINITIONS[taskType]?.icon || TASK_TYPE_DEFINITIONS.standard.icon;
+export const getTaskIcon = (type: TaskType = 'standard') => {
+  return getTaskTypeDefinition(type).icon;
 };
 
-export const getTaskTypeLabel = (taskType: TaskType = 'standard') => {
-  return TASK_TYPE_DEFINITIONS[taskType]?.label || TASK_TYPE_DEFINITIONS.standard.label;
+export const getTaskTypeLabel = (type: TaskType = 'standard') => {
+  return getTaskTypeDefinition(type).label;
 };
 
-export const getTaskTypeIcon = (taskType: TaskType = 'standard') => {
-  return TASK_TYPE_DEFINITIONS[taskType]?.icon || TASK_TYPE_DEFINITIONS.standard.icon;
-};
-
-export const getTaskColorClass = (taskType: TaskType = 'standard') => {
-  const color = TASK_TYPE_DEFINITIONS[taskType]?.color || 'blue';
+export const getTaskColorClass = (type: TaskType = 'standard') => {
+  const def = getTaskTypeDefinition(type);
   return {
-    textColor: `text-${color}-600 dark:text-${color}-400`,
-    bgColor: `bg-${color}-100 dark:bg-${color}-950/50`,
-    borderColor: `border-${color}-200 dark:border-${color}-800`,
-    hoverBg: `hover:bg-${color}-200 dark:hover:bg-${color}-900/50`,
-    accentColor: `text-${color}-700 dark:text-${color}-300`
+    icon: def.color.icon,
+    button: def.color.button
   };
 };
 
-// Task status helpers
-export const getStatusColor = (status: TaskStatus) => {
-  switch (status) {
-    case 'completed':
-      return 'text-green-600 dark:text-green-400';
-    case 'in-progress':
-      return 'text-blue-600 dark:text-blue-400';
-    case 'canceled':
-      return 'text-red-600 dark:text-red-400';
-    case 'on-hold':
-      return 'text-amber-600 dark:text-amber-400';
-    case 'started':
-      return 'text-indigo-600 dark:text-indigo-400';
-    case 'delayed':
-      return 'text-orange-600 dark:text-orange-400';
-    default:
-      return 'text-slate-600 dark:text-slate-400';
-  }
-};
-
-// Get task type definition - for backwards compatibility
-export const getTaskTypeDefinition = (taskType: TaskType = 'standard') => {
-  return TASK_TYPE_DEFINITIONS[taskType] || TASK_TYPE_DEFINITIONS.standard;
-};

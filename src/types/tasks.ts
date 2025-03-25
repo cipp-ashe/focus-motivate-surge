@@ -1,108 +1,86 @@
 
-/**
- * Task types
- */
-
-// Task type
+// Task types
 export type TaskType =
-  | 'standard'
-  | 'habit'
-  | 'journal'
-  | 'recurring'
-  | 'checklist'
-  | 'project'
-  | 'timer'
-  | 'screenshot'
-  | 'voicenote';
+  | 'standard'  // Base task type (replacing 'regular')
+  | 'timer'     // For timed/pomodoro tasks
+  | 'journal'   // For journal entries
+  | 'checklist' // For tasks with subtasks
+  | 'project'   // For project-level tasks
+  | 'habit'     // For habit-tracking tasks
+  | 'screenshot'// For screenshot tasks
+  | 'voicenote' // For voice note tasks
+  | 'recurring'; // For recurring tasks
 
 // Task status
 export type TaskStatus =
-  | 'todo'
+  | 'todo'      // Not started
   | 'in-progress'
   | 'completed'
   | 'cancelled'
   | 'deferred'
   | 'dismissed';
 
-// Task priority
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
-
-// Task time estimate unit
-export type TimeUnit = 'minutes' | 'hours' | 'days';
-
-// Task time estimate
-export interface TimeEstimate {
-  value: number;
-  unit: TimeUnit;
-}
-
 // Task metrics
 export interface TaskMetrics {
-  completionTime: number; // Time in seconds to complete
+  completionTime?: number;  // Time in seconds to complete
   startedAt?: string;
   completedAt?: string;
   pausedTime?: number;
   actualDuration?: number;
   estimatedDuration?: number;
   completionStatus?: 'completed' | 'abandoned' | 'extended';
+  timeSpent?: number;      // Total time spent on task
+  pauseCount?: number;     // Number of times task was paused
+  efficiencyRatio?: number; // Ratio of estimated vs actual time
 }
 
-// Checklist item interface
-export interface ChecklistItem {
-  id: string;
-  text: string;
-  completed: boolean;
+export interface TimeEstimate {
+  value: number;
+  unit: 'minutes' | 'hours' | 'days';
 }
 
-// Task interface
+export interface TaskRelationships {
+  habitId?: string;
+  projectId?: string;
+  checklistItems?: string[];
+  date?: string;
+  templateId?: string;
+  noteId?: string;
+  metricType?: string;
+}
+
 export interface Task {
   id: string;
   name: string;
   description?: string;
-  status?: TaskStatus;
-  type?: TaskType;
-  taskType?: TaskType;
-  priority?: TaskPriority;
+  status: TaskStatus;
+  type: TaskType;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   dueDate?: string;
   createdAt: string;
   updatedAt?: string;
   completedAt?: string;
   tags?: string[];
   duration?: number;
-  timeEstimate?: TimeEstimate;
   completed?: boolean;
   metrics?: TaskMetrics;
-  parentId?: string;
-  dismissedAt?: string;
+  timeEstimate?: TimeEstimate;
+  relationships?: TaskRelationships;
+  // Task type specific fields
   imageUrl?: string;
-  imageMetadata?: {
-    width?: number;
-    height?: number;
-    caption?: string;
-    tags?: string[];
-    createdAt?: string;
-  };
-  voiceNoteUrl?: string;
-  recurring?: {
-    frequency: 'daily' | 'weekly' | 'monthly';
-    interval: number;
-    endDate?: string;
-    count?: number;
-  };
-  relationships?: {
-    habitId?: string;
-    projectId?: string;
-    checklistItems?: string[];
-    date?: string;
-  };
-  // Content extensions
-  notes?: string;
-  journalEntry?: string;
-  checklistItems?: ChecklistItem[];
-  attachments?: Array<{
+  fileName?: string;
+  audioUrl?: string;
+  audioText?: string;
+  audioDuration?: number;
+  checklistItems?: Array<{
     id: string;
-    type: 'image' | 'audio' | 'file';
-    url: string;
-    name?: string;
+    text: string;
+    completed: boolean;
   }>;
 }
+
+export interface Tag {
+  id: string;
+  name: string;
+}
+
