@@ -2,8 +2,9 @@
 import React, { createContext, useReducer, useContext, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
-import { Note, NoteTag, TagColor, STORAGE_KEY } from '@/types/notes';
+import { Note, NoteTag } from '@/types/notes';
 import { notesReducer } from './notesReducer';
+import { STORAGE_KEY } from '@/utils/noteUtils';
 
 // Define initial state
 interface NotesState {

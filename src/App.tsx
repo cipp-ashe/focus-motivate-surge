@@ -1,31 +1,18 @@
+import React, { useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
+import NotesPage from '@/pages/Notes';
+import './index.css';
+import './styles/animations.css';
 
-import React from 'react';
-import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
-import { router } from '@/router';
-import { RouterProvider } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/contexts/auth/AuthContext';
-import { TaskProvider } from '@/contexts/tasks/TaskContext';
-import { Toaster as SonnerToaster } from 'sonner';
-import { queryClient } from '@/lib/query';
-import { setupGlobalErrorHandlers } from '@/utils/errorHandler';
-
-// Set up global error handlers
-setupGlobalErrorHandlers();
-
-export default function App() {
+const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TaskProvider>
-          <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-            <RouterProvider router={router} />
-            <Toaster />
-            <SonnerToaster position="bottom-right" />
-          </ThemeProvider>
-        </TaskProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route path="/notes" element={<NotesPage />} />
+      </Route>
+    </Routes>
   );
-}
+};
+
+export default App;

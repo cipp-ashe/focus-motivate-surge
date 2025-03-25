@@ -1,19 +1,7 @@
 
 import { Note } from '@/types/notes';
 
-// Action types
-export type NotesAction =
-  | { type: 'SET_NOTES'; payload: Note[] }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: Error | null }
-  | { type: 'ADD_NOTE'; payload: Note }
-  | { type: 'UPDATE_NOTE'; payload: { id: string; updates: Partial<Note> } }
-  | { type: 'DELETE_NOTE'; payload: string }
-  | { type: 'SELECT_NOTE'; payload: string | null }
-  | { type: 'SET_FILTER'; payload: string | null }
-  | { type: 'SET_SORTING'; payload: { sortBy: 'createdAt' | 'updatedAt' | 'title'; direction: 'asc' | 'desc' } };
-
-// State interface
+// Define state interface
 export interface NotesState {
   notes: Note[];
   selectedNoteId: string | null;
@@ -24,13 +12,26 @@ export interface NotesState {
   sortDirection: 'asc' | 'desc';
 }
 
+// Define action types
+type NotesAction =
+  | { type: 'SET_NOTES'; payload: Note[] }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: Error }
+  | { type: 'ADD_NOTE'; payload: Note }
+  | { type: 'UPDATE_NOTE'; payload: { id: string; updates: Partial<Note> } }
+  | { type: 'DELETE_NOTE'; payload: string }
+  | { type: 'SELECT_NOTE'; payload: string | null }
+  | { type: 'SET_FILTER'; payload: string | null }
+  | { type: 'SET_SORTING'; payload: { sortBy: 'createdAt' | 'updatedAt' | 'title'; direction: 'asc' | 'desc' } };
+
 // Reducer function
 export const notesReducer = (state: NotesState, action: NotesAction): NotesState => {
   switch (action.type) {
     case 'SET_NOTES':
       return {
         ...state,
-        notes: action.payload
+        notes: action.payload,
+        isLoading: false
       };
       
     case 'SET_LOADING':
@@ -42,30 +43,23 @@ export const notesReducer = (state: NotesState, action: NotesAction): NotesState
     case 'SET_ERROR':
       return {
         ...state,
-        error: action.payload
+        error: action.payload,
+        isLoading: false
       };
       
     case 'ADD_NOTE':
       return {
         ...state,
-        notes: [action.payload, ...state.notes]
+        notes: [action.payload, ...state.notes],
+        selectedNoteId: action.payload.id // Auto-select the newly created note
       };
       
     case 'UPDATE_NOTE': {
       const { id, updates } = action.payload;
-      const noteIndex = state.notes.findIndex(note => note.id === id);
       
-      if (noteIndex === -1) {
-        return state;
-      }
-      
-      const updatedNote = {
-        ...state.notes[noteIndex],
-        ...updates
-      };
-      
-      const updatedNotes = [...state.notes];
-      updatedNotes[noteIndex] = updatedNote;
+      const updatedNotes = state.notes.map(note => 
+        note.id === id ? { ...note, ...updates } : note
+      );
       
       return {
         ...state,
@@ -73,12 +67,21 @@ export const notesReducer = (state: NotesState, action: NotesAction): NotesState
       };
     }
       
-    case 'DELETE_NOTE':
+    case 'DELETE_NOTE': {
+      const updatedNotes = state.notes.filter(note => note.id !== action.payload);
+      
+      // If the deleted note was selected, clear selection
+      const updatedSelectedNoteId = 
+        state.selectedNoteId === action.payload 
+          ? null 
+          : state.selectedNoteId;
+      
       return {
         ...state,
-        notes: state.notes.filter(note => note.id !== action.payload),
-        selectedNoteId: state.selectedNoteId === action.payload ? null : state.selectedNoteId
+        notes: updatedNotes,
+        selectedNoteId: updatedSelectedNoteId
       };
+    }
       
     case 'SELECT_NOTE':
       return {

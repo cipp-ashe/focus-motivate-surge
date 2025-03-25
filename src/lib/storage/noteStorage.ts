@@ -1,141 +1,146 @@
 
-import { Note, Tag, TagColor } from '@/types/notes';
-
-const STORAGE_KEY = 'notes';
+import { Note, NoteTag, TagColor } from '@/types/notes';
+import { STORAGE_KEY, sanitizeContent } from '@/utils/noteUtils';
 
 /**
- * Service for managing note storage
+ * Note storage utility functions
  */
 export const noteStorage = {
   /**
-   * Load all notes from localStorage
+   * Load notes from localStorage
    */
   loadNotes: (): Note[] => {
     try {
-      const notesStr = localStorage.getItem(STORAGE_KEY);
-      return notesStr ? JSON.parse(notesStr) : [];
+      const notesJson = localStorage.getItem(STORAGE_KEY);
+      return notesJson ? JSON.parse(notesJson) : [];
     } catch (error) {
-      console.error('Error loading notes from storage:', error);
+      console.error('Error loading notes:', error);
       return [];
     }
   },
-
+  
   /**
-   * Save all notes to localStorage
+   * Save notes to localStorage
    */
   saveNotes: (notes: Note[]): boolean => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+      const sanitizedNotes = notes.map(note => ({
+        ...note,
+        content: sanitizeContent(note.content)
+      }));
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizedNotes));
+      
+      // Dispatch an event so other components know notes have been updated
       window.dispatchEvent(new Event('notesUpdated'));
+      
       return true;
     } catch (error) {
-      console.error('Error saving notes to storage:', error);
+      console.error('Error saving notes:', error);
       return false;
     }
   },
-
+  
   /**
-   * Delete a specific note
+   * Get a note by ID
    */
-  deleteNote: (noteId: string): boolean => {
-    try {
-      const notes = noteStorage.loadNotes();
-      const updatedNotes = notes.filter(note => note.id !== noteId);
-      
-      if (notes.length === updatedNotes.length) {
-        // Note was not found
-        return false;
-      }
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
-      window.dispatchEvent(new Event('notesUpdated'));
-      return true;
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      return false;
-    }
+  getNoteById: (id: string): Note | undefined => {
+    const notes = noteStorage.loadNotes();
+    return notes.find(note => note.id === id);
   },
-
+  
+  /**
+   * Save a single note
+   */
+  saveNote: (note: Note): boolean => {
+    const notes = noteStorage.loadNotes();
+    const existingIndex = notes.findIndex(n => n.id === note.id);
+    
+    if (existingIndex >= 0) {
+      notes[existingIndex] = {
+        ...note,
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      notes.unshift(note);
+    }
+    
+    return noteStorage.saveNotes(notes);
+  },
+  
+  /**
+   * Delete a note by ID
+   */
+  deleteNote: (id: string): boolean => {
+    const notes = noteStorage.loadNotes();
+    const filteredNotes = notes.filter(note => note.id !== id);
+    
+    if (filteredNotes.length === notes.length) {
+      return false; // No note was deleted
+    }
+    
+    return noteStorage.saveNotes(filteredNotes);
+  },
+  
   /**
    * Add a tag to a note
    */
   addTagToNote: (noteId: string, tagName: string, color: TagColor = 'default'): boolean => {
-    try {
-      const notes = noteStorage.loadNotes();
-      const noteIndex = notes.findIndex(note => note.id === noteId);
-      
-      if (noteIndex === -1) {
-        return false;
-      }
-      
-      const note = notes[noteIndex];
-      
-      // Check if tag already exists
-      const existingTagIndex = note.tags.findIndex(tag => tag.name === tagName);
-      
-      if (existingTagIndex >= 0) {
-        // Update existing tag color
-        note.tags[existingTagIndex].color = color;
-      } else {
-        // Add new tag
-        note.tags.push({ name: tagName, color });
-      }
-      
-      // Update note
-      notes[noteIndex] = {
-        ...note,
-        updatedAt: new Date().toISOString()
-      };
-      
-      // Save updated notes
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-      window.dispatchEvent(new Event('notesUpdated'));
-      return true;
-    } catch (error) {
-      console.error('Error adding tag to note:', error);
-      return false;
+    const notes = noteStorage.loadNotes();
+    const noteIndex = notes.findIndex(note => note.id === noteId);
+    
+    if (noteIndex === -1) return false;
+    
+    const note = notes[noteIndex];
+    const existingTagIndex = note.tags.findIndex(tag => tag.name === tagName);
+    
+    if (existingTagIndex >= 0) {
+      // Update existing tag's color
+      note.tags[existingTagIndex].color = color;
+    } else {
+      // Add new tag
+      note.tags.push({ name: tagName, color });
     }
+    
+    notes[noteIndex] = {
+      ...note,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return noteStorage.saveNotes(notes);
   },
-
+  
   /**
    * Remove a tag from a note
    */
   removeTagFromNote: (noteId: string, tagName: string): boolean => {
-    try {
-      const notes = noteStorage.loadNotes();
-      const noteIndex = notes.findIndex(note => note.id === noteId);
-      
-      if (noteIndex === -1) {
-        return false;
-      }
-      
-      const note = notes[noteIndex];
-      
-      // Remove tag
-      note.tags = note.tags.filter(tag => tag.name !== tagName);
-      
-      // Update note
-      notes[noteIndex] = {
-        ...note,
-        updatedAt: new Date().toISOString()
-      };
-      
-      // Save updated notes
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-      window.dispatchEvent(new Event('notesUpdated'));
-      return true;
-    } catch (error) {
-      console.error('Error removing tag from note:', error);
-      return false;
+    const notes = noteStorage.loadNotes();
+    const noteIndex = notes.findIndex(note => note.id === noteId);
+    
+    if (noteIndex === -1) return false;
+    
+    const note = notes[noteIndex];
+    const filteredTags = note.tags.filter(tag => tag.name !== tagName);
+    
+    if (filteredTags.length === note.tags.length) {
+      return false; // No tag was removed
     }
+    
+    notes[noteIndex] = {
+      ...note,
+      tags: filteredTags,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return noteStorage.saveNotes(notes);
   },
-
+  
   /**
    * Clear all notes
    */
   clearNotes: (): boolean => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+      localStorage.removeItem(STORAGE_KEY);
       window.dispatchEvent(new Event('notesUpdated'));
       return true;
     } catch (error) {
