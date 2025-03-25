@@ -96,12 +96,18 @@ export const Timer = ({
     );
   }
 
+  // Transform favorites to match expected format if needed
+  const adaptedFavorites = favorites.map(quote => ({
+    ...quote,
+    favorite: quote.favorite ?? false
+  }));
+
   return (
     <TimerErrorBoundary>
       <Card className="shadow-md border-border/20 overflow-hidden">
         <TimerContent
           {...timerProps}
-          favorites={favorites}
+          favorites={adaptedFavorites}
           setFavorites={setFavorites}
           taskName={taskName}
         />

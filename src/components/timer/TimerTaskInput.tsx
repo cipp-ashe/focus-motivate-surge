@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { eventManager } from '@/lib/events/EventManager';
 import { logger } from '@/utils/logManager';
+import { Task } from '@/types/tasks';
 
 export const TimerTaskInput = () => {
   const [taskName, setTaskName] = useState('');
@@ -22,31 +23,33 @@ export const TimerTaskInput = () => {
     
     logger.debug('TimerTaskInput', 'Creating timer task:', taskName);
     
-    // Create a new timer task
-    const newTask = createTaskOperations.createTask({
-      name: taskName,
-      taskType: 'timer',
-      duration: 25 * 60, // Default to 25 minutes
-      completed: false,
-      createdAt: new Date().toISOString(),
-      status: 'pending',
-      tags: []
-    }, {
-      suppressToast: false,
-      selectAfterCreate: true
-    });
-    
-    // Clear the input
-    setTaskName('');
-    
-    // Emit event to select the task
-    eventManager.emit('timer:set-task', {
-      id: newTask.id,
-      name: newTask.name,
-      duration: newTask.duration || 25 * 60,
-      completed: newTask.completed || false,
-      createdAt: newTask.createdAt
-    });
+    try {
+      // Create a new timer task
+      const newTask = createTaskOperations.createTask({
+        name: taskName,
+        taskType: 'timer',
+        duration: 25 * 60, // Default to 25 minutes
+        completed: false,
+        createdAt: new Date().toISOString(),
+        status: 'pending',
+        tags: []
+      }, {
+        // Don't suppress toast notification so user knows task was created
+        suppressToast: false,
+        // Don't automatically select after create - let user select from list
+        selectAfterCreate: false
+      });
+      
+      // Clear the input
+      setTaskName('');
+      
+      // Log the created task for debugging
+      logger.debug('TimerTaskInput', 'Task created successfully:', newTask.id, newTask.name);
+      
+    } catch (error) {
+      logger.error('TimerTaskInput', 'Error creating task:', error);
+      toast.error('Failed to create timer task');
+    }
   };
 
   return (

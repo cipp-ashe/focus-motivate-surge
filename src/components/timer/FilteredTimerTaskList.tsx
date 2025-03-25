@@ -1,19 +1,41 @@
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TaskList } from '@/components/tasks/TaskList';
 import { useTasks } from '@/hooks/useTasks';
 import { useTaskSelection } from '@/components/timer/providers/TaskSelectionProvider';
 import { Task } from '@/types/tasks';
 import { logger } from '@/utils/logManager';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 
 export const FilteredTimerTaskList = () => {
   const { tasks, completeTask, updateTask, deleteTask } = useTasks();
   const { selectedTask, selectTask, clearSelectedTask } = useTaskSelection();
+  const taskEvents = useTaskEvents();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Listen for task creation events to trigger a refresh
+  useEffect(() => {
+    const handleTaskCreate = (task: Task) => {
+      if (task.taskType === 'timer') {
+        logger.debug('FilteredTimerTaskList', 'New timer task created, refreshing list:', task.name);
+        // Trigger a refresh of the list
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+    
+    // Subscribe to task creation events
+    const unsubscribe = taskEvents.onTaskCreate(handleTaskCreate);
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [taskEvents]);
   
   // Filter tasks to only show timer tasks
   const timerTasks = useMemo(() => {
+    logger.debug('FilteredTimerTaskList', `Filtering tasks: ${tasks.length} total tasks, refresh trigger: ${refreshTrigger}`);
     return tasks.filter(task => task.taskType === 'timer' && !task.completed);
-  }, [tasks]);
+  }, [tasks, refreshTrigger]);
   
   logger.debug('FilteredTimerTaskList', `Rendering ${timerTasks.length} timer tasks`);
   

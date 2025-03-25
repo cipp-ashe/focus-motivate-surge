@@ -56,8 +56,10 @@ export const TimerConfigModal = ({
       status: 'pending',
       tags: []
     }, {
-      suppressToast: true,
-      selectAfterCreate: true
+      // Show toast notification so user knows task was created
+      suppressToast: false,
+      // Select after create to immediately start the timer
+      selectAfterCreate: true 
     });
     
     // Emit event to select and start the timer
