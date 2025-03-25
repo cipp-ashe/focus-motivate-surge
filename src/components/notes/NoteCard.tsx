@@ -1,109 +1,124 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { Trash2, Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Note } from '@/types/notes';
-import { ActionButton } from '@/components/ui/action-button';
-import { NoteTagList } from '@/components/notes/NoteTagList';
-import { getNoteTitleColor, getNoteTypeIcon } from '@/utils/noteUtils';
+import { useNotesContext } from '@/contexts/notes/notesContext';
+import { formatRelativeDate, getPreviewText, getNoteTitleColor, getNoteTypeIcon } from '@/utils/noteUtils';
+import { NoteTagList } from './NoteTagList';
+import { MoreHorizontal, Pin, Archive, ArchiveRestore } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
 
 interface NoteCardProps {
   note: Note;
   isSelected: boolean;
-  onSelect: () => void;
-  onDelete: () => void;
-  onToggleFavorite: () => void;
+  view: 'grid' | 'list';
 }
 
-export const NoteCard: React.FC<NoteCardProps> = ({
-  note,
-  isSelected,
-  onSelect,
-  onDelete,
-  onToggleFavorite
-}) => {
-  // Format date
-  const formattedDate = format(new Date(note.updatedAt), 'MMM d, yyyy h:mm a');
+export const NoteCard: React.FC<NoteCardProps> = ({ note, isSelected, view }) => {
+  const { selectNote, deleteNote, toggleArchiveNote, togglePinNote } = useNotesContext();
   
-  // Get note type icon
-  const NoteTypeIcon = getNoteTypeIcon(note.type);
+  const handleSelect = () => {
+    selectNote(note.id);
+  };
   
-  // Truncate content for preview
-  const truncatedContent = note.content.length > 100
-    ? `${note.content.substring(0, 100)}...`
-    : note.content;
-    
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteNote(note.id);
+  };
+  
+  const handleArchiveToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleArchiveNote(note.id);
+  };
+  
+  const handlePinToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    togglePinNote(note.id);
+  };
+  
+  // Get the icon for the note type
+  const IconComponent = React.useMemo(() => {
+    const iconName = getNoteTypeIcon(note.type);
+    // @ts-ignore - Dynamic import of Lucide icons
+    return require('lucide-react')[iconName.split('-').map((part, i) => 
+      i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
+    ).join('')] as LucideIcon;
+  }, [note.type]);
+  
   return (
     <div 
       className={cn(
-        "group relative rounded-md p-3 cursor-pointer transition-colors",
-        isSelected 
-          ? "bg-primary/10 dark:bg-primary/20 border border-primary/20" 
-          : "hover:bg-muted/50 dark:hover:bg-muted/10 border border-transparent",
-        "animate-fade-in"
+        "group rounded-md border border-border overflow-hidden transition-all",
+        isSelected ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50",
+        note.pinned && "border-primary/30",
+        view === 'grid' ? "p-4" : "p-3 mb-2",
+        note.archived && "opacity-70"
       )}
-      onClick={onSelect}
+      onClick={handleSelect}
     >
-      <div className="flex justify-between items-start">
-        <div className="flex items-start space-x-2">
-          <div className={cn(
-            "rounded-full p-1.5 mt-0.5",
-            getNoteTitleColor(note.type)
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex items-center">
+          <IconComponent className={cn("h-4 w-4 mr-2", getNoteTitleColor(note.type))} />
+          <h3 className={cn(
+            "font-medium text-foreground truncate",
+            view === 'grid' ? "text-base" : "text-sm"
           )}>
-            <NoteTypeIcon className="h-3.5 w-3.5 text-white" />
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center">
-              <h3 className={cn(
-                "font-medium truncate",
-                isSelected ? "text-primary" : "text-foreground"
-              )}>
-                {note.title || 'Untitled Note'}
-              </h3>
-              
-              {note.favorite && (
-                <Star className="h-3.5 w-3.5 ml-1 fill-yellow-400 text-yellow-400" />
-              )}
-            </div>
-            
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-              {truncatedContent || 'No content'}
-            </p>
-            
-            <div className="flex items-center justify-between mt-2">
-              <NoteTagList tags={note.tags} size="sm" />
-              
-              <span className="text-xs text-muted-foreground">
-                {formattedDate}
-              </span>
-            </div>
-          </div>
+            {note.title}
+          </h3>
         </div>
         
-        <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-          <ActionButton
-            icon={Star}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite();
-            }}
-            className="h-7 w-7"
-            variant={note.favorite ? 'default' : 'ghost'}
-            iconClassName={note.favorite ? 'fill-yellow-400 text-yellow-400' : ''}
-          />
+        <div className="flex items-center">
+          {note.pinned && (
+            <Pin className="h-3.5 w-3.5 text-primary fill-primary mr-1" />
+          )}
           
-          <ActionButton
-            icon={Trash2}
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="h-7 w-7"
-            variant="ghost"
-          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handlePinToggle}>
+                <Pin className="h-4 w-4 mr-2" />
+                {note.pinned ? 'Unpin' : 'Pin'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleArchiveToggle}>
+                {note.archived ? (
+                  <>
+                    <ArchiveRestore className="h-4 w-4 mr-2" />
+                    Unarchive
+                  </>
+                ) : (
+                  <>
+                    <Archive className="h-4 w-4 mr-2" />
+                    Archive
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+      </div>
+      
+      {view === 'grid' && (
+        <div className="text-sm text-muted-foreground mb-3 line-clamp-3">
+          {getPreviewText(note.content)}
+        </div>
+      )}
+      
+      <div className="flex flex-wrap gap-1 mb-2">
+        <NoteTagList tags={note.tags} />
+      </div>
+      
+      <div className="text-xs text-muted-foreground mt-2">
+        {formatRelativeDate(note.updatedAt)}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 /**
  * Event System Types
  */
@@ -18,11 +19,17 @@ export type EventType =
   | 'task:dismiss'
   // Timer events
   | 'timer:init'
+  | 'timer:start'
+  | 'timer:pause'
+  | 'timer:resume'
+  | 'timer:tick'
   | 'timer:expand'
   | 'timer:collapse'
   | 'timer:update-metrics'
   | 'timer:close'
   | 'timer:set-task'
+  | 'timer:reset'
+  | 'timer:complete'
   // Habit events
   | 'habit:template-add'
   | 'habits:check-pending'
@@ -38,8 +45,18 @@ export type EventType =
   | 'habit:journal-create'
   // Journal events
   | 'journal:open'
+  | 'journal:save'
+  | 'journal:create'
   // Note events
   | 'note:create'
+  | 'note:update'
+  | 'note:delete'
+  | 'note:select'
+  | 'note:tags:update'
+  | 'note:archive'
+  | 'note:unarchive'
+  | 'note:pin'
+  | 'note:unpin'
   | 'notes:refresh'
   // Relationship events
   | 'relationship:create'
@@ -70,5 +87,6 @@ export interface JournalEntry {
   date: string;
   habitId?: string;
   taskId?: string;
+  templateId?: string;
   mood?: 'great' | 'good' | 'neutral' | 'bad' | 'terrible';
 }

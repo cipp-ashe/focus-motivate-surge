@@ -1,37 +1,23 @@
 
 /**
- * Note Types
+ * Notes Types
  */
 
-// Note type
-export type NoteType = 'text' | 'journal' | 'habit-journal' | 'voice' | 'task-journal';
+import { EntityType } from './core';
 
-// Tag color
-export type TagColor =
-  | 'default'
-  | 'red'
-  | 'green'
-  | 'blue'
-  | 'purple'
-  | 'yellow'
-  | 'orange'
-  | 'cyan'
-  | 'pink';
+export type NoteType = 'standard' | 'journal' | 'task' | 'habit' | 'markdown';
 
-// Note tag
 export interface NoteTag {
+  id: string;
   name: string;
-  color: TagColor;
+  color?: TagColor;
 }
 
-// Relationship type
-export interface Relationship {
-  entityId: string;
-  entityType: 'task' | 'habit' | 'note';
-  metadata?: Record<string, any>;
-}
+export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink' | 'teal';
 
-// Note interface
+export type NoteSortOption = 'createdAt' | 'updatedAt' | 'title' | 'type';
+export type NoteSortDirection = 'asc' | 'desc';
+
 export interface Note {
   id: string;
   title: string;
@@ -40,60 +26,31 @@ export interface Note {
   createdAt: string;
   updatedAt: string;
   tags: NoteTag[];
-  favorite?: boolean;
-  relatedEntityId?: string;
-  relatedEntityType?: 'task' | 'habit';
-  voiceNoteUrl?: string;
-  transcription?: string;
-  relationships?: Relationship[];
+  pinned?: boolean;
+  archived?: boolean;
+  color?: string;
+  relationships?: NoteRelationships;
 }
 
-// Storage key for notes
-export const STORAGE_KEY = 'notes';
-
-/**
- * Checks if a string is a valid tag color
- */
-export function isValidTagColor(color: string): boolean {
-  return ['default', 'red', 'green', 'blue', 'purple', 'yellow', 'orange', 'cyan', 'pink'].includes(color);
+export interface NoteRelationships {
+  taskId?: string;
+  habitId?: string;
+  templateId?: string;
+  journalId?: string;
+  projectId?: string;
+  [key: string]: string | undefined;
 }
 
-// Helper function to create a new note
-export const createNote = (
-  title: string,
-  content: string,
-  type: NoteType = 'text',
-  tags: NoteTag[] = []
-): Omit<Note, 'id'> => {
-  const now = new Date().toISOString();
-  return {
-    title,
-    content,
-    type,
-    tags,
-    createdAt: now,
-    updatedAt: now,
-  };
-};
-
-// Helper function to create a voice note
-export const createVoiceNote = (
-  title: string,
-  voiceNoteUrl: string,
-  duration: number,
-  transcription: string = '',
-  tags: NoteTag[] = []
-): Omit<Note, 'id'> => {
-  return {
-    title,
-    content:
-      transcription ||
-      `Voice note recorded on ${new Date().toLocaleString()}. Duration: ${duration}s`,
-    type: 'voice',
-    tags,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    voiceNoteUrl,
-    transcription,
-  };
-};
+// Note Events
+export interface NoteEvents {
+  'note:create': Note;
+  'note:update': { id: string; updates: Partial<Note> };
+  'note:delete': { id: string; reason?: string };
+  'note:select': string | null;
+  'note:tags:update': { noteId: string; tags: NoteTag[] };
+  'note:archive': { id: string };
+  'note:unarchive': { id: string };
+  'note:pin': { id: string };
+  'note:unpin': { id: string };
+  'notes:refresh': void;
+}

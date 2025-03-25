@@ -1,86 +1,188 @@
 
-import { Note, NoteTag, TagColor } from '@/types/notes';
-import { v4 as uuidv4 } from 'uuid';
-
-// Storage key for notes
-export const STORAGE_KEY = 'notes';
+import { Note, NoteTag, TagColor, NoteType } from '@/types/notes';
+import { format, formatDistanceToNow } from 'date-fns';
 
 /**
- * Sanitize content to remove potentially harmful content
- */
-export const sanitizeContent = (content: string): string => {
-  if (!content) return '';
-  
-  // Basic sanitization - in a real app, use a library like DOMPurify
-  return content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/javascript:/gi, 'removed:');
-};
-
-/**
- * Create a new note with default values
- */
-export const createEmptyNote = (type: 'text' = 'text'): Note => {
-  return {
-    id: uuidv4(),
-    title: 'Untitled Note',
-    content: '',
-    type,
-    tags: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-};
-
-/**
- * Create a new tag with the given name and color
- */
-export const createTag = (name: string, color: TagColor = 'default'): NoteTag => {
-  return { name, color };
-};
-
-/**
- * Format a date string to a readable format
+ * Format a date string
  */
 export const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleString();
+  try {
+    const date = new Date(dateString);
+    return format(date, 'MMM d, yyyy h:mm a');
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString;
+  }
 };
 
 /**
- * Download a note as a text file
+ * Format a date relative to now
  */
-export const downloadNote = (note: Note): void => {
-  const filename = `${note.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-  const text = `${note.title}\n\n${note.content}\n\nCreated: ${formatDate(note.createdAt)}\nLast Updated: ${formatDate(note.updatedAt)}`;
-  
-  const element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-  
-  element.style.display = 'none';
-  document.body.appendChild(element);
-  
-  element.click();
-  
-  document.body.removeChild(element);
+export const formatRelativeDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (error) {
+    console.error('Error formatting relative date:', error);
+    return 'some time ago';
+  }
 };
 
 /**
- * Get a truncated preview of note content
+ * Get a color for a note tag
  */
-export const getNotePreview = (content: string, maxLength: number = 100): string => {
-  if (!content) return '';
-  if (content.length <= maxLength) return content;
+export const getTagColor = (color: TagColor | undefined): string => {
+  const colorMap: Record<TagColor, string> = {
+    default: 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300',
+    red: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+    orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300',
+    yellow: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+    green: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+    blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+    purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
+    pink: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300',
+    teal: 'bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300'
+  };
   
-  return content.substring(0, maxLength) + '...';
+  return colorMap[color || 'default'];
 };
 
 /**
- * Process note content for display
- * This would be where you'd add any transformation of content (like Markdown rendering)
+ * Get a note icon based on type
  */
-export const processNoteContent = (content: string): string => {
-  if (!content) return '';
-  return content;
+export const getNoteTypeIcon = (type: NoteType): string => {
+  const iconMap: Record<NoteType, string> = {
+    standard: 'file-text',
+    journal: 'book-open',
+    task: 'check-square',
+    habit: 'activity',
+    markdown: 'code'
+  };
+  
+  return iconMap[type] || 'file-text';
+};
+
+/**
+ * Get a note title color based on type
+ */
+export const getNoteTitleColor = (type: NoteType): string => {
+  const colorMap: Record<NoteType, string> = {
+    standard: 'text-blue-600 dark:text-blue-400',
+    journal: 'text-green-600 dark:text-green-400',
+    task: 'text-orange-600 dark:text-orange-400',
+    habit: 'text-purple-600 dark:text-purple-400',
+    markdown: 'text-teal-600 dark:text-teal-400'
+  };
+  
+  return colorMap[type] || 'text-gray-800 dark:text-gray-200';
+};
+
+/**
+ * Extract preview text from note content
+ */
+export const getPreviewText = (content: string, length: number = 120): string => {
+  // Remove any markdown formatting
+  const textOnly = content
+    .replace(/#{1,6}\s+/g, '') // Remove headers
+    .replace(/\*\*(.+?)\*\*/g, '$1') // Remove bold
+    .replace(/\*(.+?)\*/g, '$1') // Remove italic
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1') // Remove links
+    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+    .replace(/`(.+?)`/g, '$1') // Remove inline code
+    .trim();
+    
+  if (textOnly.length <= length) {
+    return textOnly;
+  }
+  
+  return textOnly.substring(0, length) + '...';
+};
+
+/**
+ * Download note as markdown
+ */
+export const downloadNoteAsMarkdown = (note: Note): void => {
+  const content = `# ${note.title}\n\n${note.content}`;
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${note.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Filter notes by search term, tag, and type
+ */
+export const filterNotes = (
+  notes: Note[], 
+  searchTerm: string = '', 
+  tagFilter: string | null = null,
+  typeFilter: NoteType | null = null,
+  showArchived: boolean = false
+): Note[] => {
+  return notes.filter(note => {
+    // Filter by archive status
+    if (!showArchived && note.archived) {
+      return false;
+    }
+    
+    // Filter by tag if specified
+    if (tagFilter && !note.tags.some(tag => tag.id === tagFilter)) {
+      return false;
+    }
+    
+    // Filter by type if specified
+    if (typeFilter && note.type !== typeFilter) {
+      return false;
+    }
+    
+    // Filter by search term if specified
+    if (searchTerm) {
+      const termLower = searchTerm.toLowerCase();
+      return (
+        note.title.toLowerCase().includes(termLower) ||
+        note.content.toLowerCase().includes(termLower) ||
+        note.tags.some(tag => tag.name.toLowerCase().includes(termLower))
+      );
+    }
+    
+    return true;
+  });
+};
+
+/**
+ * Sort notes by specified criteria
+ */
+export const sortNotes = (
+  notes: Note[], 
+  sortBy: 'createdAt' | 'updatedAt' | 'title' = 'updatedAt',
+  direction: 'asc' | 'desc' = 'desc'
+): Note[] => {
+  // Create a copy to avoid mutating the original array
+  const sorted = [...notes];
+  
+  sorted.sort((a, b) => {
+    // Always put pinned notes first
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    
+    // Then sort by the specified criteria
+    if (sortBy === 'title') {
+      return direction === 'asc' 
+        ? a.title.localeCompare(b.title)
+        : b.title.localeCompare(a.title);
+    } else {
+      const dateA = new Date(a[sortBy]).getTime();
+      const dateB = new Date(b[sortBy]).getTime();
+      return direction === 'asc' 
+        ? dateA - dateB 
+        : dateB - dateA;
+    }
+  });
+  
+  return sorted;
 };
