@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CheckSquare, Clock, Image, FileText, Mic, Zap } from 'lucide-react';
+import { CheckSquare, Clock, FileText, Image, Mic, Zap, File } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 
 /**
@@ -26,7 +26,7 @@ export type TaskTypeDefinition = {
 export const TASK_TYPE_DEFINITIONS: TaskTypeDefinition[] = [
   {
     type: 'standard',
-    icon: <CheckSquare className="h-4 w-4" />,
+    icon: <File className="h-4 w-4" />,
     label: 'Task',
     color: {
       icon: 'text-slate-500 dark:text-slate-400',
