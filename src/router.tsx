@@ -1,120 +1,103 @@
+import React from "react";
+import {
+  createBrowserRouter,
+} from "react-router-dom";
+import { RequireAuth } from "@/components/auth/RequireAuth";
+import { Layout } from "@/components/layout/Layout";
 
-import { createBrowserRouter } from 'react-router-dom';
-import Index from './pages/Index';
-import Tasks from './pages/Tasks';
-import Timer from './pages/Timer';
-import Notes from './pages/Notes';
-import Habits from './pages/Habits';
-import Auth from './pages/Auth';
-import AuthCallback from './pages/AuthCallback';
-import Settings from './pages/Settings';
-import VoiceNotes from './pages/VoiceNotes';
-import Screenshots from './pages/Screenshots';
-import { RequireAuth } from './components/auth/RequireAuth';
-import AppLayout from './components/AppLayout';
-import { DebugProvider } from './providers/DebugProvider';
-import { DebugPanel } from './components/debug/DebugPanel';
-import { AuthProvider } from './contexts/auth/AuthContext';
-import { ThemeProvider } from './components/ThemeProvider';
-import { TaskProvider } from './contexts/tasks/TaskContext';
+const Home = React.lazy(() => import("./pages/Home"));
+const Tasks = React.lazy(() => import("./pages/Tasks"));
+const Habits = React.lazy(() => import("./pages/Habits"));
+const Journal = React.lazy(() => import("./pages/Journal"));
+const Notes = React.lazy(() => import("./pages/Notes"));
+const Settings = React.lazy(() => import("./pages/Settings"));
+const Metrics = React.lazy(() => import("./pages/Metrics"));
 
-// Error component to handle routing errors
-const ErrorComponent = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-    <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-    <p className="mb-4">We couldn't find the page you're looking for.</p>
-    <a href="/" className="text-primary">
-      Return to homepage
-    </a>
-  </div>
-);
-
-// Create and export the router configuration
-export const router = createBrowserRouter([
+const Router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: (
-      <ThemeProvider defaultTheme="dark">
-        <AuthProvider>
-          <TaskProvider>
-            <DebugProvider>
-              <AppLayout />
-              <DebugPanel />
-            </DebugProvider>
-          </TaskProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <Home />
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
     ),
-    errorElement: <ErrorComponent />,
-    children: [
-      {
-        index: true,
-        element: <Index />,
-      },
-      {
-        path: 'tasks',
-        element: (
-          <RequireAuth requireAuth={false}>
+  },
+  {
+    path: "/tasks",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
             <Tasks />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'timer',
-        element: (
-          <RequireAuth requireAuth={false}>
-            <Timer />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'notes',
-        element: (
-          <RequireAuth requireAuth={false}>
-            <Notes />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'habits',
-        element: (
-          <RequireAuth requireAuth={false}>
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/habits",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
             <Habits />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'voice-notes',
-        element: (
-          <RequireAuth requireAuth={false}>
-            <VoiceNotes />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'screenshots',
-        element: (
-          <RequireAuth requireAuth={false}>
-            <Screenshots />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'settings',
-        element: (
-          <RequireAuth requireAuth={false}>
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/journal",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <Journal />
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/notes",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <Notes />
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/settings",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
             <Settings />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: 'auth',
-        element: <Auth />,
-      },
-      {
-        path: 'auth/callback',
-        element: <AuthCallback />,
-      },
-    ],
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/metrics",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <Metrics />
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
+    ),
   },
 ]);
+
+export default Router;

@@ -1,50 +1,46 @@
+import { Home, Calendar, ListChecks, BarChart } from 'lucide-react';
 
-import { 
-  Home, 
-  ListTodo, 
-  Clock, 
-  Image, 
-  BookOpen, 
-  Mic, 
-  Settings, 
-  Activity
-} from 'lucide-react';
-import { NavItem } from './NavigationDropdown';
-
-// Organize items with proper nesting
-export const TASKS_ITEMS: NavItem[] = [
-  { path: '/tasks', icon: ListTodo, label: 'Task List' },
-  { path: '/timer', icon: Clock, label: 'Timer' }, // Timer as a task item
-  { path: '/screenshots', icon: Image, label: 'Screenshots' }
-];
-
-export const NOTES_ITEMS: NavItem[] = [
-  { path: '/notes', icon: BookOpen, label: 'Journal' },
-  { path: '/voice-notes', icon: Mic, label: 'Voice Notes' }
-];
-
-export const SETTINGS_ITEMS: NavItem[] = [
-  { path: '/settings', icon: Settings, label: 'Settings' },
-  { path: '/habits', icon: Activity, label: 'Habits' }
-];
-
-export const NAV_CATEGORIES = {
-  tasks: {
-    icon: ListTodo,
-    label: 'Tasks',
-    items: TASKS_ITEMS,
-    paths: TASKS_ITEMS.map(item => item.path)
+export const navigationConfig = [
+  {
+    title: "Home",
+    href: "/",
+    icon: Home,
+    description: "Overview of your day",
   },
-  notes: {
-    icon: BookOpen,
-    label: 'Notes',
-    items: NOTES_ITEMS,
-    paths: NOTES_ITEMS.map(item => item.path)
+  {
+    title: "Tasks",
+    href: "/tasks",
+    icon: ListChecks,
+    description: "Manage your tasks",
   },
-  settings: {
-    icon: Settings,
-    label: 'Settings',
-    items: SETTINGS_ITEMS,
-    paths: SETTINGS_ITEMS.map(item => item.path)
-  }
-};
+  {
+    title: "Habits",
+    href: "/habits",
+    icon: Calendar,
+    description: "Track your habits",
+  },
+  {
+    title: "Notes",
+    href: "/notes",
+    icon: "Edit",
+    description: "Manage your notes",
+  },
+  {
+    title: "Journal",
+    href: "/journal",
+    icon: "Book",
+    description: "Write in your journal",
+  },
+  {
+    title: "Timer",
+    href: "/timer",
+    icon: "AlarmClock",
+    description: "Start a timer session",
+  },
+  {
+    title: "Metrics",
+    href: "/metrics",
+    icon: BarChart, // Use BarChart icon from Lucide
+    description: "View your productivity metrics and statistics",
+  },
+];

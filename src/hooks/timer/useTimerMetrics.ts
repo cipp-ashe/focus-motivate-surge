@@ -1,170 +1,140 @@
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
-import { 
-  calculateEfficiencyRatio, 
-  determineCompletionStatus, 
-  formatTimeDisplay 
-} from '@/lib/utils/formatters';
 
-export const useTimerMetrics = (initialDurationSeconds: number) => {
-  const [metrics, setMetrics] = useState<TimerStateMetrics>({
-    startTime: null,
-    endTime: null,
-    pauseCount: 0,
-    expectedTime: initialDurationSeconds,
-    actualDuration: 0,
-    favoriteQuotes: [] as string[],
-    pausedTime: 0,
-    lastPauseTimestamp: null,
-    extensionTime: 0,
-    netEffectiveTime: 0,
-    efficiencyRatio: 0,
-    completionStatus: 'Completed On Time',
-    isPaused: false,
-    pausedTimeLeft: null,
-  });
+const TIMER_METRICS_STORAGE_KEY = 'timer-metrics';
 
-  const isMountedRef = useRef(true);
-  const metricsRef = useRef(metrics);
-
-  useEffect(() => {
-    metricsRef.current = metrics;
-  }, [metrics]);
-
-  const logMetrics = useCallback((metrics: TimerStateMetrics) => {
-    if (!isMountedRef.current) return;
-
-    console.group('Timer Metrics');
-    console.log('Expected Time:', {
-      seconds: metrics.expectedTime,
-      formatted: formatTimeDisplay(metrics.expectedTime)
-    });
-    if (metrics.actualDuration) {
-      console.log('Total Elapsed Time:', {
-        seconds: metrics.actualDuration,
-        formatted: formatTimeDisplay(metrics.actualDuration)
-      });
+export const useTimerMetricsStorage = () => {
+  // Load metrics from storage
+  const loadMetrics = useCallback((): TimerStateMetrics[] => {
+    try {
+      const storedMetrics = localStorage.getItem(TIMER_METRICS_STORAGE_KEY);
+      if (storedMetrics) {
+        return JSON.parse(storedMetrics);
+      }
+    } catch (error) {
+      console.error('Failed to load timer metrics:', error);
     }
-    console.log('Paused Time:', {
-      seconds: metrics.pausedTime,
-      formatted: formatTimeDisplay(metrics.pausedTime)
-    });
-    if (metrics.netEffectiveTime) {
-      console.log('Active Working Time:', {
-        seconds: metrics.netEffectiveTime,
-        formatted: formatTimeDisplay(metrics.netEffectiveTime)
-      });
-    }
-    if (metrics.startTime) {
-      const startTimeStr = typeof metrics.startTime === 'string' 
-        ? metrics.startTime 
-        : metrics.startTime.toISOString();
-      console.log('Start Time:', startTimeStr);
-    }
-    if (metrics.endTime) {
-      const endTimeStr = typeof metrics.endTime === 'string' 
-        ? metrics.endTime 
-        : metrics.endTime.toISOString();
-      console.log('End Time:', endTimeStr);
-    }
-    console.groupEnd();
+    return [];
   }, []);
 
-  const updateMetrics = useCallback((updates: Partial<TimerStateMetrics>) => {
-    if (!isMountedRef.current) return;
+  // Save metrics to storage
+  const saveMetrics = useCallback((metrics: TimerStateMetrics) => {
+    try {
+      console.log('Saving timer metrics:', metrics);
+      const currentMetrics = loadMetrics();
+      const updatedMetrics = [...currentMetrics, metrics];
+      
+      localStorage.setItem(TIMER_METRICS_STORAGE_KEY, JSON.stringify(updatedMetrics));
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('metrics-updated'));
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to save timer metrics:', error);
+      return false;
+    }
+  }, [loadMetrics]);
 
-    setMetrics(prev => {
-      let updatedPausedTime = prev.pausedTime;
-      if (prev.lastPauseTimestamp && updates.lastPauseTimestamp === null) {
-        const now = new Date();
-        const pauseTimestamp = typeof prev.lastPauseTimestamp === 'string' 
-          ? new Date(prev.lastPauseTimestamp) 
-          : prev.lastPauseTimestamp;
+  // Update an existing metric
+  const updateMetric = useCallback((index: number, updates: Partial<TimerStateMetrics>) => {
+    try {
+      const currentMetrics = loadMetrics();
+      if (index >= 0 && index < currentMetrics.length) {
+        currentMetrics[index] = { ...currentMetrics[index], ...updates };
+        localStorage.setItem(TIMER_METRICS_STORAGE_KEY, JSON.stringify(currentMetrics));
         
-        const pauseDuration = Math.floor(
-          (now.getTime() - pauseTimestamp.getTime()) / 1000
-        );
-        updatedPausedTime += pauseDuration;
+        // Dispatch event to notify other components
+        window.dispatchEvent(new Event('metrics-updated'));
+        
+        return true;
       }
-
-      const newMetrics = {
-        ...prev,
-        ...updates,
-        pausedTime: updates.pausedTime !== undefined ? updates.pausedTime : updatedPausedTime,
-      };
-
-      logMetrics(newMetrics);
-      return newMetrics;
-    });
-  }, [logMetrics]);
-
-  const calculateFinalMetrics = useCallback((completionTime: Date) => {
-    return new Promise<TimerStateMetrics>((resolve) => {
-      if (!isMountedRef.current) {
-        resolve(metricsRef.current);
-        return;
-      }
-
-      setMetrics(prev => {
-        if (!prev.startTime) {
-          console.warn('No start time found in metrics');
-          return prev;
-        }
-
-        const startTime = typeof prev.startTime === 'string' 
-          ? new Date(prev.startTime) 
-          : prev.startTime;
-        
-        const totalElapsedMs = completionTime.getTime() - startTime.getTime();
-        
-        let finalPausedTime = prev.pausedTime;
-        if (prev.lastPauseTimestamp) {
-          const pauseTimestamp = typeof prev.lastPauseTimestamp === 'string' 
-            ? new Date(prev.lastPauseTimestamp) 
-            : prev.lastPauseTimestamp;
-          
-          finalPausedTime += Math.floor(
-            (completionTime.getTime() - pauseTimestamp.getTime()) / 1000
-          );
-        }
-        
-        const totalElapsedSeconds = Math.floor(totalElapsedMs / 1000);
-        const actualWorkingTime = Math.max(0, totalElapsedSeconds - finalPausedTime);
-        const netEffectiveTime = actualWorkingTime + prev.extensionTime;
-        
-        const efficiencyRatio = calculateEfficiencyRatio(prev.expectedTime, netEffectiveTime);
-        const completionStatus = determineCompletionStatus(prev.expectedTime, netEffectiveTime);
-        
-        const finalMetrics: TimerStateMetrics = {
-          ...prev,
-          endTime: completionTime,
-          actualDuration: totalElapsedSeconds,
-          pausedTime: finalPausedTime,
-          netEffectiveTime: netEffectiveTime,
-          efficiencyRatio: efficiencyRatio,
-          completionStatus: completionStatus,
-          isPaused: false,
-          pausedTimeLeft: null,
-          lastPauseTimestamp: null,
-        };
-
-        logMetrics(finalMetrics);
-        resolve(finalMetrics);
-        return finalMetrics;
-      });
-    });
-  }, [logMetrics]);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+      return false;
+    } catch (error) {
+      console.error('Failed to update timer metric:', error);
+      return false;
+    }
+  }, [loadMetrics]);
 
   return {
-    metrics,
-    updateMetrics,
-    calculateFinalMetrics,
+    loadMetrics,
+    saveMetrics,
+    updateMetric
+  };
+};
+
+export const useTimerMetrics = (initialMetrics?: Partial<TimerStateMetrics>) => {
+  const { saveMetrics, loadMetrics } = useTimerMetricsStorage();
+  
+  // Initialize metrics with current timestamp
+  const initializeMetrics = useCallback((): TimerStateMetrics => {
+    return {
+      startTime: new Date().toISOString(),
+      endTime: null,
+      completionDate: null,
+      actualDuration: 0,
+      pausedTime: 0,
+      extensionTime: 0,
+      netEffectiveTime: 0,
+      completionStatus: null,
+      isPaused: false,
+      pausedTimeLeft: null,
+      expectedTime: 0,
+      pauseCount: 0,
+      lastPauseTimestamp: null,
+      favoriteQuotes: [],
+      efficiencyRatio: 0,
+      ...initialMetrics
+    };
+  }, [initialMetrics]);
+
+  // Calculate metrics when timer completes
+  const calculateCompletionMetrics = useCallback(
+    (metrics: TimerStateMetrics, status: 'completed' | 'abandoned' | 'extended'): TimerStateMetrics => {
+      const now = new Date().toISOString();
+      const endTime = metrics.endTime || now;
+      const startTimestamp = metrics.startTime ? new Date(metrics.startTime).getTime() : 0;
+      const endTimestamp = new Date(endTime).getTime();
+      
+      // Calculate actual duration (in seconds)
+      const actualDuration = Math.round((endTimestamp - startTimestamp) / 1000);
+      
+      // Calculate net effective time (actual duration minus paused time)
+      const netEffectiveTime = Math.max(0, actualDuration - (metrics.pausedTime || 0));
+      
+      // Calculate efficiency ratio (if expected time is available)
+      let efficiencyRatio = 0;
+      if (metrics.expectedTime && metrics.expectedTime > 0) {
+        efficiencyRatio = Math.min(1, metrics.expectedTime / netEffectiveTime);
+      }
+      
+      return {
+        ...metrics,
+        endTime,
+        completionDate: now,
+        actualDuration,
+        netEffectiveTime,
+        efficiencyRatio,
+        completionStatus: status
+      };
+    },
+    []
+  );
+
+  // Save completion metrics
+  const saveCompletionMetrics = useCallback(
+    (metrics: TimerStateMetrics, status: 'completed' | 'abandoned' | 'extended') => {
+      const completedMetrics = calculateCompletionMetrics(metrics, status);
+      return saveMetrics(completedMetrics);
+    },
+    [calculateCompletionMetrics, saveMetrics]
+  );
+
+  return {
+    initializeMetrics,
+    calculateCompletionMetrics,
+    saveCompletionMetrics,
+    loadMetrics
   };
 };
