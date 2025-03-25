@@ -1,45 +1,50 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface NotesPaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  compact?: boolean;
+  className?: string;
 }
 
-export const NotesPagination = ({
+export const NotesPagination: React.FC<NotesPaginationProps> = ({
   currentPage,
   totalPages,
   onPageChange,
-  compact = false
-}: NotesPaginationProps) => {
-  if (totalPages <= 1) return null;
-
+  className
+}) => {
+  if (totalPages <= 1) {
+    return null;
+  }
+  
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className={cn("flex items-center space-x-1", className)}>
       <Button
         variant="ghost"
-        size="sm"
+        size="icon"
+        className="h-7 w-7"
         onClick={() => onPageChange(Math.max(0, currentPage - 1))}
         disabled={currentPage === 0}
-        className={`${compact ? "h-6 w-6" : "h-7 w-7"} p-0 group hover:bg-primary/10`}
       >
-        <ChevronLeft className={`${compact ? "h-3 w-3" : "h-4 w-4"} group-hover:scale-110 transition-transform`} />
+        <ChevronLeft className="h-4 w-4" />
       </Button>
-      <span className={`text-muted-foreground ${compact ? "text-[10px]" : "text-xs"} min-w-[3ch] text-center`}>
+      
+      <span className="text-xs px-2">
         {currentPage + 1} / {totalPages}
       </span>
+      
       <Button
         variant="ghost"
-        size="sm"
+        size="icon"
+        className="h-7 w-7"
         onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
         disabled={currentPage === totalPages - 1}
-        className={`${compact ? "h-6 w-6" : "h-7 w-7"} p-0 group hover:bg-primary/10`}
       >
-        <ChevronRight className={`${compact ? "h-3 w-3" : "h-4 w-4"} group-hover:scale-110 transition-transform`} />
+        <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
   );

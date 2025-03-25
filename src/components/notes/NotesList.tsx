@@ -10,6 +10,8 @@ interface NotesListProps {
   onSelectNote: (note: Note) => void;
   onDeleteNote: (id: string) => void;
   onToggleFavorite: (id: string) => void;
+  className?: string;
+  isLoading?: boolean;
 }
 
 export const NotesList: React.FC<NotesListProps> = ({
@@ -17,10 +19,26 @@ export const NotesList: React.FC<NotesListProps> = ({
   selectedNoteId,
   onSelectNote,
   onDeleteNote,
-  onToggleFavorite
+  onToggleFavorite,
+  className,
+  isLoading = false
 }) => {
+  console.log('NotesList rendering with notes count:', notes.length);
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  
+  if (notes.length === 0) {
+    return null;
+  }
+  
   return (
-    <div className="space-y-2 animate-fade-in">
+    <div className={cn("space-y-2 animate-fade-in", className)}>
       {notes.map(note => (
         <NoteCard
           key={note.id}

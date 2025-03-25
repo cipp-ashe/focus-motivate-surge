@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Book } from 'lucide-react';
 import { NotesProvider } from '@/contexts/notes/NotesContext';
@@ -9,6 +9,8 @@ import { NotesLayout } from '@/components/notes/NotesLayout';
 import { NotesErrorFallback } from '@/components/notes/NotesErrorFallback';
 
 const NotesPage: React.FC = () => {
+  console.log('NotesPage rendering');
+  
   return (
     <ErrorBoundary FallbackComponent={NotesErrorFallback}>
       <NotesProvider>

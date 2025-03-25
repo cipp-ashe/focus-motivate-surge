@@ -1,14 +1,14 @@
+
 import React from 'react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface NotesDialogProps {
   open: boolean;
@@ -18,44 +18,47 @@ interface NotesDialogProps {
   actionText: string;
   cancelText?: string;
   onAction: () => void;
-  onCancel?: () => void;
-  variant?: 'default' | 'destructive';
-  inExpandedView?: boolean;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 }
 
-export const NotesDialog = ({
+export const NotesDialog: React.FC<NotesDialogProps> = ({
   open,
   onOpenChange,
   title,
   description,
   actionText,
-  cancelText = "Cancel",
+  cancelText = 'Cancel',
   onAction,
-  onCancel,
-  variant = 'default',
-  inExpandedView = false
-}: NotesDialogProps) => {
+  variant = 'default'
+}) => {
+  const handleAction = () => {
+    onAction();
+    onOpenChange(false);
+  };
+  
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className={inExpandedView ? 'max-w-xl' : undefined}>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {description}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        
+        <DialogFooter>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+          >
             {cancelText}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onAction}
-            className={variant === 'destructive' ? 'bg-destructive hover:bg-destructive/90' : undefined}
+          </Button>
+          <Button 
+            variant={variant} 
+            onClick={handleAction}
           >
             {actionText}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

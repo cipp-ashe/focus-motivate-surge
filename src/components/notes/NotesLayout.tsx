@@ -12,6 +12,8 @@ import { Note } from '@/types/notes';
 import { cn } from '@/lib/utils';
 
 export const NotesLayout: React.FC = () => {
+  console.log('NotesLayout rendering');
+  
   const { 
     state: { notes, selectedNoteId, isLoading, filter, sortBy, sortDirection },
     selectNote,
@@ -25,6 +27,14 @@ export const NotesLayout: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  // Track initialization to avoid layout shifts
+  useEffect(() => {
+    if (!isLoading && !hasInitialized) {
+      setHasInitialized(true);
+    }
+  }, [isLoading, hasInitialized]);
 
   // Get the selected note
   const selectedNote = selectedNoteId 
@@ -79,7 +89,7 @@ export const NotesLayout: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full dark:bg-background/5">
       <NotesToolbar 
         onCreateNote={() => selectNote(null)} 
         sortBy={sortBy}
@@ -109,7 +119,7 @@ export const NotesLayout: React.FC = () => {
           </Tabs>
           
           <div className="mt-4 flex-1 overflow-auto">
-            {isLoading ? (
+            {!hasInitialized ? (
               <LoadingSpinner className="mt-8" />
             ) : sortedNotes.length > 0 ? (
               <NotesList 
@@ -131,7 +141,7 @@ export const NotesLayout: React.FC = () => {
         )}>
           <NoteEditor 
             note={selectedNote} 
-            onAddTag={addTagToNote}
+            onAddTag={(noteId, tag) => addTagToNote(noteId, tag)}
             onRemoveTag={removeTagFromNote}
           />
         </div>

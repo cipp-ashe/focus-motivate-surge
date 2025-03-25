@@ -1,106 +1,92 @@
 
-import React, { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { ActionButton } from '@/components/ui/action-button';
+import React from 'react';
 import { X, Plus } from 'lucide-react';
-import type { Tag, TagColor } from '@/types/notes';
-import { getTagStyles } from '../utils/tagUtils';
+import { Badge } from '@/components/ui/badge';
+import { TagColor } from '@/types/notes';
 import { cn } from '@/lib/utils';
+import { getTagColor } from '@/utils/noteUtils';
 
 interface NoteTagsProps {
-  tags: Tag[];
-  onAddTag: (tagName: string) => void;
-  onRemoveTag: (tagName: string) => void;
-  onTagClick: (tag: Tag) => void;
+  tags: Array<{ name: string; color: TagColor }>;
+  onTagClick?: (tag: { name: string; color: TagColor }) => void;
+  onAddTag?: (tagName: string) => void;
+  onRemoveTag?: (tagName: string) => void;
   compact?: boolean;
+  className?: string;
 }
 
-export const NoteTags = ({
-  tags,
+export const NoteTags: React.FC<NoteTagsProps> = ({
+  tags = [],
+  onTagClick,
   onAddTag,
   onRemoveTag,
-  onTagClick,
-  compact = false
-}: NoteTagsProps) => {
-  const [tagInput, setTagInput] = useState('');
-  const [isEditingTags, setIsEditingTags] = useState(false);
-
-  const handleAddTag = (tagName: string) => {
-    if (!tagName.trim()) return;
-    onAddTag(tagName);
-    setTagInput('');
-    setIsEditingTags(false);
+  compact = false,
+  className
+}) => {
+  const hasActions = !!onAddTag || !!onRemoveTag;
+  
+  if (!tags.length && !hasActions) {
+    return null;
+  }
+  
+  const handleAddTag = () => {
+    if (!onAddTag) return;
+    
+    const tagName = window.prompt('Enter tag name:');
+    if (tagName?.trim()) {
+      onAddTag(tagName.trim());
+    }
   };
-
+  
   return (
-    <div className="flex items-center gap-1">
+    <div 
+      className={cn(
+        "flex flex-wrap items-center gap-1.5", 
+        compact ? "max-w-[150px]" : "",
+        className
+      )}
+    >
       {tags.map(tag => (
-        <Badge 
-          key={tag.name} 
-          variant="secondary" 
+        <Badge
+          key={tag.name}
+          variant="outline"
           className={cn(
-            "text-xs px-1.5 h-5 transition-colors cursor-pointer",
-            getTagStyles(tag.color),
-            compact && "text-[10px] px-1 h-4"
+            "group/tag transition-all",
+            getTagColor(tag.color),
+            compact ? "text-xs py-0 px-1.5 h-5" : "text-xs py-0.5 px-2 h-6",
+            onTagClick ? "cursor-pointer" : "",
+            "flex items-center"
           )}
-          onClick={(e) => {
-            e.stopPropagation();
-            onTagClick(tag);
-          }}
+          onClick={() => onTagClick && onTagClick(tag)}
         >
-          {tag.name}
-          <X 
-            className={cn(
-              "ml-1 cursor-pointer opacity-50 hover:opacity-100",
-              compact ? "h-2 w-2" : "h-3 w-3"
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemoveTag(tag.name);
-            }}
-          />
+          <span className="truncate">{tag.name}</span>
+          
+          {onRemoveTag && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveTag(tag.name);
+              }}
+              className="ml-1 opacity-60 hover:opacity-100 transition-opacity"
+              aria-label={`Remove ${tag.name} tag`}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </Badge>
       ))}
-      {isEditingTags ? (
-        <div className="relative" onClick={e => e.stopPropagation()}>
-          <Input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleAddTag(tagInput);
-              } else if (e.key === 'Escape') {
-                setIsEditingTags(false);
-                setTagInput('');
-              }
-            }}
-            onBlur={() => {
-              if (tagInput.trim()) {
-                handleAddTag(tagInput);
-              }
-              setIsEditingTags(false);
-            }}
-            placeholder="Add tag"
-            className={cn(
-              "h-5 w-16 text-xs px-1.5",
-              compact && "h-4 text-[10px]"
-            )}
-            autoFocus
-          />
-        </div>
-      ) : (
-        <ActionButton
-          icon={Plus}
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsEditingTags(true);
-          }}
-          className={cn(
-            "h-5 w-5 p-0 opacity-0 group-hover:opacity-100",
-            compact && "h-4 w-4"
-          )}
-        />
+      
+      {onAddTag && (
+        <button
+          type="button"
+          onClick={handleAddTag}
+          className="text-xs flex items-center text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Add tag"
+        >
+          <Plus className="h-3 w-3 mr-0.5" />
+          <span>Add</span>
+        </button>
       )}
     </div>
   );

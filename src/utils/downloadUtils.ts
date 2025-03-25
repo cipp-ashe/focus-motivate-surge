@@ -1,54 +1,71 @@
 
-import { Note } from '@/types/notes';
-import { format } from 'date-fns';
+import { Note } from "@/types/notes";
 
 /**
- * Creates a markdown string from a note
+ * Download a text file with all notes content
  */
-export const noteToMarkdown = (note: Note): string => {
-  const createdDate = format(new Date(note.createdAt), 'PPpp');
-  const updatedDate = format(new Date(note.updatedAt), 'PPpp');
-  const tags = note.tags.map(t => `#${t.name}`).join(' ');
-  
-  return `# ${note.title}
+export const downloadAllNotes = (notes: Note[]) => {
+  if (!notes || notes.length === 0) {
+    console.log("No notes to download");
+    return;
+  }
 
-*Created: ${createdDate}*
-*Updated: ${updatedDate}*
-${tags ? `*Tags: ${tags}*` : ''}
+  try {
+    const notesText = notes
+      .map((note) => {
+        const date = new Date(note.updatedAt || note.createdAt).toLocaleString();
+        const tags = note.tags?.map((tag) => `#${tag.name}`).join(" ") || "";
+        
+        return `--- ${note.title || "Untitled"} (${date}) ---\n${tags ? `Tags: ${tags}\n` : ""}${note.content}\n\n`;
+      })
+      .join("\n");
 
-${note.content}`;
+    const blob = new Blob([notesText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    
+    a.href = url;
+    a.download = `my-notes-${new Date().toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+  } catch (error) {
+    console.error("Error downloading notes:", error);
+  }
 };
 
 /**
- * Download a note as a markdown file
+ * Download a single note as markdown
  */
-export const downloadNoteAsMarkdown = (note: Note): void => {
-  const markdown = noteToMarkdown(note);
-  const blob = new Blob([markdown], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${note.title.replace(/[^\w\s]/gi, '_').toLowerCase()}_${format(new Date(), 'yyyyMMdd')}.md`;
-  a.click();
-  
-  URL.revokeObjectURL(url);
-};
+export const downloadNote = (note: Note) => {
+  if (!note) return;
 
-/**
- * Download all notes as a ZIP file
- */
-export const downloadAllNotes = (notes: Note[]): void => {
-  if (!notes.length) return;
-  
-  // For now just download as a JSON file since we don't have JSZip dependency
-  const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `notes_backup_${format(new Date(), 'yyyyMMdd')}.json`;
-  a.click();
-  
-  URL.revokeObjectURL(url);
+  try {
+    const date = new Date(note.updatedAt || note.createdAt).toLocaleString();
+    const tags = note.tags?.map((tag) => `#${tag.name}`).join(" ") || "";
+    
+    const content = `# ${note.title || "Untitled Note"}\n\nDate: ${date}\n${tags ? `Tags: ${tags}\n` : ""}\n${note.content}`;
+    
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    
+    a.href = url;
+    a.download = `${note.title || "note"}-${new Date().toISOString().split("T")[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+  } catch (error) {
+    console.error("Error downloading note:", error);
+  }
 };
