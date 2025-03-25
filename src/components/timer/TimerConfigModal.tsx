@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog,
   DialogContent,
@@ -14,17 +14,35 @@ import { Clock, Play } from 'lucide-react';
 import { createTaskOperations } from '@/lib/operations/tasks/create';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logManager';
 
 interface TimerConfigModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialTaskName?: string;
+  initialMinutes?: number;
 }
 
-export const TimerConfigModal = ({ open, onOpenChange }: TimerConfigModalProps) => {
-  const [taskName, setTaskName] = useState('');
-  const [minutes, setMinutes] = useState(25);
+export const TimerConfigModal = ({ 
+  open, 
+  onOpenChange, 
+  initialTaskName = '', 
+  initialMinutes = 25 
+}: TimerConfigModalProps) => {
+  const [taskName, setTaskName] = useState(initialTaskName);
+  const [minutes, setMinutes] = useState(initialMinutes);
+  
+  // Update state when props change
+  useEffect(() => {
+    if (open) {
+      setTaskName(initialTaskName);
+      setMinutes(initialMinutes);
+    }
+  }, [open, initialTaskName, initialMinutes]);
 
   const handleStartTimer = () => {
+    logger.debug('TimerConfigModal', 'Starting timer with', { taskName, minutes });
+    
     // If no task name is provided, use a default name
     const name = taskName.trim() || `Quick Timer (${minutes} min)`;
     
@@ -43,11 +61,10 @@ export const TimerConfigModal = ({ open, onOpenChange }: TimerConfigModalProps) 
     });
     
     // Emit event to select and start the timer
-    // Fix: Ensure duration is always provided as a number
     eventManager.emit('timer:set-task', {
       id: newTask.id,
       name: newTask.name,
-      duration: newTask.duration || minutes * 60, // Ensure duration is never undefined
+      duration: newTask.duration || minutes * 60,
       completed: newTask.completed || false,
       createdAt: newTask.createdAt
     });

@@ -7,17 +7,16 @@ import { Clock } from 'lucide-react';
 import { TimerSection } from '@/components/timer/TimerSection';
 import { TaskSelectionProvider } from '@/components/timer/providers/TaskSelectionProvider';
 import { UnifiedTaskEventListener } from '@/components/tasks/event-handlers/UnifiedTaskEventListener';
-import { useTasks } from '@/hooks/useTasks';
 import { Quote } from '@/types/timer';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { logger } from '@/utils/logManager';
+import { TimerConfigModalListener } from '@/components/timer/TimerConfigModalListener';
+import { FilteredTimerTaskList } from '@/components/timer/FilteredTimerTaskList';
+import { TimerTaskInput } from '@/components/timer/TimerTaskInput';
 
 const TimerPage = () => {
   logger.debug('TimerPage', 'Rendering Timer page');
   const [favorites, setFavorites] = useState<Quote[]>([]);
-  const { tasks, completedTasks, updateTask } = useTasks();
-  const taskEvents = useTaskEvents();
 
   // Event handlers for task management dialogs
   const handleShowImage = (imageUrl: string, taskName: string) => {
@@ -42,7 +41,6 @@ const TimerPage = () => {
 
   const handleTaskUpdate = (data: { taskId: string, updates: any }) => {
     logger.debug('TimerPage', 'Updating task', data.taskId, data.updates);
-    updateTask(data.taskId, data.updates);
   };
 
   return (
@@ -56,26 +54,51 @@ const TimerPage = () => {
       </PageHeader>
       
       <TaskSelectionProvider>
-        <div className="grid grid-cols-1 gap-6">
-          <Card className="dark:bg-card/90 border-border/40 dark:border-border/20">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
-                Task Timer
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-full max-h-[70vh]">
-                <TimerSection 
-                  favorites={favorites} 
-                  setFavorites={setFavorites} 
-                />
-              </ScrollArea>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Timer Task Input */}
+          <div className="md:col-span-3">
+            <TimerTaskInput />
+          </div>
+          
+          {/* Timer Section */}
+          <div className="md:col-span-2">
+            <Card className="dark:bg-card/90 border-border/40 dark:border-border/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-medium flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
+                  Task Timer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-full max-h-[70vh]">
+                  <TimerSection 
+                    favorites={favorites} 
+                    setFavorites={setFavorites} 
+                  />
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Timer Task List */}
+          <div className="md:col-span-1">
+            <Card className="dark:bg-card/90 border-border/40 dark:border-border/20 h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-medium flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                  Timer Tasks
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-full max-h-[60vh]">
+                  <FilteredTimerTaskList />
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        {/* Event listener for task-related events */}
+        {/* Event listeners */}
         <UnifiedTaskEventListener
           onShowImage={handleShowImage}
           onOpenChecklist={handleOpenChecklist}
@@ -83,6 +106,9 @@ const TimerPage = () => {
           onOpenVoiceRecorder={handleOpenVoiceRecorder}
           onTaskUpdate={handleTaskUpdate}
         />
+        
+        {/* Timer modal listener */}
+        <TimerConfigModalListener />
       </TaskSelectionProvider>
     </div>
   );
