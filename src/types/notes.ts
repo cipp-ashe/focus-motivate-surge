@@ -1,3 +1,4 @@
+
 /**
  * Note Types
  */
@@ -50,12 +51,11 @@ export interface Note {
 // Storage key for notes
 export const STORAGE_KEY = 'notes';
 
-// Tag type
-export interface Tag {
-  id: string;
-  name: string;
-  color?: string;
-  description?: string;
+/**
+ * Checks if a string is a valid tag color
+ */
+export function isValidTagColor(color: string): boolean {
+  return ['default', 'red', 'green', 'blue', 'purple', 'yellow', 'orange', 'cyan', 'pink'].includes(color);
 }
 
 // Helper function to create a new note

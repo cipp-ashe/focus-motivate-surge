@@ -1,6 +1,6 @@
 
-import { Note, Tag, TagColor } from '@/types/notes';
-import { EntityType } from '@/types/core';
+import { Note, TagColor, NoteType } from '@/types/notes';
+import { Book, File, Mic, CheckSquare, Clock } from 'lucide-react';
 
 // Storage key for notes
 export const STORAGE_KEY = 'notes';
@@ -11,91 +11,81 @@ export const sanitizeContent = (content: string): string => {
   return content.replace(/(<script.*?>.*?<\/script>)/gi, '');
 };
 
-// Create a standard note object
-export function createStandardNote(
-  title: string = 'Untitled Note',
-  content: string = '',
-  tags: Tag[] = []
-): Omit<Note, 'id'> {
-  const now = new Date().toISOString();
-  
-  return {
-    title,
-    content,
-    tags,
-    createdAt: now,
-    updatedAt: now
-  };
-}
+// Get appropriate icon for note type
+export const getNoteTypeIcon = (type: NoteType) => {
+  switch (type) {
+    case 'journal':
+    case 'habit-journal':
+      return Book;
+    case 'voice':
+      return Mic;
+    case 'task-journal':
+      return CheckSquare;
+    default:
+      return File;
+  }
+};
 
-// Helper to create a journal note
-export function createJournalNote(
-  title: string,
-  content: string,
-  habitId?: string,
-  taskId?: string,
-  templateId?: string
-): Omit<Note, 'id'> {
-  const now = new Date().toISOString();
-  const relationships = [];
-  
-  // Add habit relationship if applicable
-  if (habitId) {
-    relationships.push({
-      entityId: habitId,
-      entityType: EntityType.Habit,
-      metadata: {
-        templateId,
-        date: now
-      }
-    });
+// Get color for note title based on type
+export const getNoteTitleColor = (type: NoteType): string => {
+  switch (type) {
+    case 'journal':
+    case 'habit-journal':
+      return 'bg-amber-500';
+    case 'voice':
+      return 'bg-rose-500';
+    case 'task-journal':
+      return 'bg-cyan-500';
+    default:
+      return 'bg-slate-500';
   }
-  
-  // Add task relationship if applicable
-  if (taskId) {
-    relationships.push({
-      entityId: taskId,
-      entityType: EntityType.Task,
-      metadata: {
-        date: now
-      }
-    });
-  }
-  
-  return {
-    title,
-    content,
-    tags: [
-      { name: 'journal', color: 'blue' as TagColor }
-    ],
-    relationships,
-    createdAt: now,
-    updatedAt: now
-  };
-}
+};
 
-// Function to get the color for a tag
-export const getTagColor = (tagName: string): TagColor => {
-  const lowerTag = tagName.toLowerCase();
-  
-  if (lowerTag === 'important' || lowerTag === 'urgent') {
-    return 'red';
-  } else if (lowerTag === 'work' || lowerTag === 'project') {
-    return 'blue';
-  } else if (lowerTag === 'personal' || lowerTag === 'private') {
-    return 'purple';
-  } else if (lowerTag === 'idea' || lowerTag === 'inspiration') {
-    return 'yellow';
-  } else if (lowerTag === 'journal' || lowerTag === 'diary') {
-    return 'teal';
-  } else if (lowerTag === 'habit' || lowerTag === 'routine') {
-    return 'green';
-  } else if (lowerTag === 'meeting' || lowerTag === 'event') {
-    return 'orange';
-  } else if (lowerTag === 'task' || lowerTag === 'todo') {
-    return 'cyan';
+// Get CSS classes for tag colors
+export const getTagColor = (color: TagColor): string => {
+  switch (color) {
+    case 'red':
+      return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/40';
+    case 'green':
+      return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800/40';
+    case 'blue':
+      return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/40';
+    case 'purple':
+      return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800/40';
+    case 'yellow':
+      return 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800/40';
+    case 'orange':
+      return 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800/40';
+    case 'cyan':
+      return 'bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-400 dark:border-cyan-800/40';
+    case 'pink':
+      return 'bg-pink-100 text-pink-700 border-pink-200 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800/40';
+    default:
+      return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700/40';
   }
-  
-  // Default color
-  return 'default';
+};
+
+// Helper to create a download URL for a note
+export const createNoteDownloadUrl = (note: Note): string => {
+  const content = `# ${note.title}
+Created: ${new Date(note.createdAt).toLocaleString()}
+Updated: ${new Date(note.updatedAt).toLocaleString()}
+Tags: ${note.tags.map(t => t.name).join(', ')}
+
+${note.content}`;
+
+  const blob = new Blob([content], { type: 'text/markdown' });
+  return URL.createObjectURL(blob);
+};
+
+// Helper function to download a note
+export const downloadNote = (note: Note): void => {
+  const url = createNoteDownloadUrl(note);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${note.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
