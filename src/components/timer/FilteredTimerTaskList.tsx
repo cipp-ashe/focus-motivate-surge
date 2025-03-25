@@ -1,100 +1,104 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { TaskList } from '@/components/tasks/TaskList';
-import { useTasks } from '@/hooks/useTasks';
-import { useTaskSelection } from '@/components/timer/providers/TaskSelectionProvider';
+import React, { useEffect, useState } from 'react';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
-import { logger } from '@/utils/logManager';
+import { TaskList } from '@/components/tasks/TaskList';
+import { useTaskSelection } from './providers/TaskSelectionProvider';
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ClockIcon } from 'lucide-react';
+import { logger } from '@/utils/logManager';
 
 export const FilteredTimerTaskList = () => {
-  const { tasks, completeTask, updateTask, deleteTask } = useTasks();
-  const { selectedTask, selectTask, clearSelectedTask } = useTaskSelection();
+  const { items } = useTaskContext();
+  const [timerTasks, setTimerTasks] = useState<Task[]>([]);
+  const { selectedTask, selectTask } = useTaskSelection();
   const taskEvents = useTaskEvents();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
-  // Listen for task creation events to trigger a refresh
+  // Filter tasks specifically for timer view (timer tasks)
+  useEffect(() => {
+    logger.debug('FilteredTimerTaskList', 'Filtering timer tasks from all tasks');
+    
+    const filteredTasks = items
+      .filter(task => !task.completed && (task.taskType === 'timer' || task.taskType === 'focus'))
+      .sort((a, b) => {
+        // Sort by creation date (newest first)
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+    
+    logger.debug('FilteredTimerTaskList', `Found ${filteredTasks.length} timer tasks`);
+    setTimerTasks(filteredTasks);
+  }, [items]);
+  
+  // Listen for task creation events to immediately update the list
   useEffect(() => {
     const handleTaskCreate = (task: Task) => {
-      if (task.taskType === 'timer') {
-        logger.debug('FilteredTimerTaskList', 'New timer task created, refreshing list:', task.name);
-        // Trigger a refresh of the list
-        setRefreshTrigger(prev => prev + 1);
+      if (task.taskType === 'timer' || task.taskType === 'focus') {
+        logger.debug('FilteredTimerTaskList', `New timer task created: ${task.name}`);
+        
+        // Immediately add the new task to our filtered list
+        setTimerTasks(prev => [task, ...prev]);
       }
     };
     
-    // Subscribe to task creation events
     const unsubscribe = taskEvents.onTaskCreate(handleTaskCreate);
-    
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [taskEvents]);
-  
-  // Filter tasks to only show timer tasks
-  const timerTasks = useMemo(() => {
-    logger.debug('FilteredTimerTaskList', `Filtering tasks: ${tasks.length} total tasks, refresh trigger: ${refreshTrigger}`);
-    return tasks.filter(task => task.taskType === 'timer' && !task.completed);
-  }, [tasks, refreshTrigger]);
-  
-  logger.debug('FilteredTimerTaskList', `Rendering ${timerTasks.length} timer tasks`);
   
   // Handle task selection
   const handleTaskSelect = (taskId: string) => {
-    logger.debug('FilteredTimerTaskList', 'Task selected:', taskId);
-    const task = tasks.find(t => t.id === taskId);
+    logger.debug('FilteredTimerTaskList', `Task selected: ${taskId}`);
+    
+    const task = timerTasks.find(t => t.id === taskId);
     if (task) {
       selectTask(task);
     }
   };
   
-  // Handle task deletion
-  const handleDelete = (data: { taskId: string }) => {
-    logger.debug('FilteredTimerTaskList', 'Deleting task:', data.taskId);
-    
-    // If the deleted task is currently selected, clear the selection
-    if (selectedTask && selectedTask.id === data.taskId) {
-      clearSelectedTask();
-    }
-    
-    deleteTask(data.taskId);
-  };
-  
-  // Handle task update
+  // Event handlers for timer tasks
   const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
-    logger.debug('FilteredTimerTaskList', 'Updating task:', data.taskId, data.updates);
-    updateTask(data.taskId, data.updates);
+    logger.debug('FilteredTimerTaskList', `Task updated: ${data.taskId}`, data.updates);
+    // TaskContext will handle the actual update
   };
   
-  // Handle task completion
-  const handleTaskComplete = (data: { taskId: string, metrics?: any }) => {
-    logger.debug('FilteredTimerTaskList', 'Completing task:', data.taskId);
-    
-    // If the completed task is currently selected, clear the selection
-    if (selectedTask && selectedTask.id === data.taskId) {
-      clearSelectedTask();
-    }
-    
-    completeTask(data.taskId, data.metrics);
+  const handleTaskDelete = (data: { taskId: string }) => {
+    logger.debug('FilteredTimerTaskList', `Task deleted: ${data.taskId}`);
+    // Remove from local state immediately for better UX
+    setTimerTasks(prev => prev.filter(task => task.id !== data.taskId));
   };
   
+  const handleTaskComplete = (data: { taskId: string }) => {
+    logger.debug('FilteredTimerTaskList', `Task completed: ${data.taskId}`);
+    // Remove from local state immediately for better UX
+    setTimerTasks(prev => prev.filter(task => task.id !== data.taskId));
+  };
+
   return (
-    <div className="h-full">
-      <TaskList
-        tasks={timerTasks}
-        selectedTaskId={selectedTask?.id || null}
-        handleTaskSelect={handleTaskSelect}
-        handleDelete={handleDelete}
-        handleTaskUpdate={handleTaskUpdate}
-        handleTaskComplete={handleTaskComplete}
-        isTimerView={true}
-        emptyState={
-          <div className="py-8 text-center">
-            <p className="text-lg font-medium mb-2">No timer tasks</p>
-            <p className="text-sm text-muted-foreground">Create a new timer task to get started</p>
-          </div>
-        }
-      />
+    <div className="space-y-2">
+      {timerTasks.length > 0 ? (
+        <TaskList
+          tasks={timerTasks}
+          selectedTaskId={selectedTask?.id}
+          handleTaskSelect={handleTaskSelect}
+          handleTaskUpdate={handleTaskUpdate}
+          handleDelete={handleTaskDelete}
+          handleTaskComplete={handleTaskComplete}
+          isTimerView={true}
+          emptyState={
+            <EmptyState
+              icon={<ClockIcon className="h-10 w-10 text-muted-foreground" />}
+              title="No timer tasks"
+              description="Create a timer task to get started"
+            />
+          }
+        />
+      ) : (
+        <EmptyState
+          icon={<ClockIcon className="h-10 w-10 text-muted-foreground" />}
+          title="No timer tasks"
+          description="Create a timer task to get started"
+        />
+      )}
     </div>
   );
 };

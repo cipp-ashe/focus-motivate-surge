@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PageTitle } from '@/components/layout/PageTitle';
@@ -13,10 +13,27 @@ import { logger } from '@/utils/logManager';
 import { TimerConfigModalListener } from '@/components/timer/TimerConfigModalListener';
 import { FilteredTimerTaskList } from '@/components/timer/FilteredTimerTaskList';
 import { TimerTaskInput } from '@/components/timer/TimerTaskInput';
+import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { eventManager } from '@/lib/events/EventManager';
 
 const TimerPage = () => {
   logger.debug('TimerPage', 'Rendering Timer page');
   const [favorites, setFavorites] = useState<Quote[]>([]);
+  const { items, loadTasks } = useTaskContext();
+
+  // Force a task refresh when the Timer page loads
+  useEffect(() => {
+    logger.debug('TimerPage', 'Initializing Timer page with fresh task data');
+    
+    // Ensure we have the latest tasks
+    loadTasks();
+    
+    // Emit a task reload event to ensure all components have the latest data
+    eventManager.emit('task:reload', {});
+    
+    // Trigger a UI refresh
+    window.dispatchEvent(new Event('force-task-update'));
+  }, [loadTasks]);
 
   // Event handlers for task management dialogs
   const handleShowImage = (imageUrl: string, taskName: string) => {

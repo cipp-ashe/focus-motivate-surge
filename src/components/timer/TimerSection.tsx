@@ -8,6 +8,7 @@ import { Task } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 import { toast } from 'sonner';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
+import { logger } from '@/utils/logManager';
 
 interface TimerSectionProps {
   favorites: Quote[];
@@ -22,12 +23,17 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
   const [selectedTaskState, setSelectedTaskState] = useState(selectedTask);
   const taskContext = useTaskContext();
   
+  // Log for debugging
+  useEffect(() => {
+    logger.debug('TimerSection', 'Current selected task:', selectedTaskState?.name || 'None');
+  }, [selectedTaskState]);
+  
   // Check for selected task in tasks context if not already selected
   useEffect(() => {
     if (!selectedTask && taskContext?.selected) {
       const selectedTaskFromContext = taskContext.items.find(task => task.id === taskContext.selected);
       if (selectedTaskFromContext) {
-        console.log("TimerSection: Found selected task in context:", selectedTaskFromContext.name);
+        logger.debug("TimerSection: Found selected task in context:", selectedTaskFromContext.name);
         selectTask(selectedTaskFromContext);
       }
     }
@@ -48,13 +54,13 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
           'taskId' in payload && 
           'updates' in payload &&
           selectedTaskState.id === payload.taskId) {
-        console.log("TimerSection: Selected task was updated, refreshing", payload.updates);
+        logger.debug("TimerSection: Selected task was updated, refreshing", payload.updates);
         
         // If the selected task was updated, refresh it
-        setSelectedTaskState({
-          ...selectedTaskState,
+        setSelectedTaskState(prev => prev ? {
+          ...prev,
           ...payload.updates
-        });
+        } : null);
       }
     };
     
@@ -66,11 +72,11 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
     };
   }, [selectedTaskState]);
   
-  // Listen for timer:set-task events using eventManager only (no window events)
+  // Listen for timer:set-task events 
   useEffect(() => {    
     // Listen with event manager
     const unsubscribe = eventManager.on('timer:set-task', (payload) => {
-      console.log('TimerSection: Received timer:set-task from eventManager', payload);
+      logger.debug('TimerSection: Received timer:set-task from eventManager', payload);
       if (payload && typeof payload === 'object' && 'id' in payload) {
         // Create a valid Task object
         const task: Task = {
@@ -81,7 +87,11 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
           createdAt: (payload.createdAt as string) || new Date().toISOString()
         };
         
+        // Select the task immediately and update local state for faster UI response
         selectTask(task);
+        setSelectedTaskState(task);
+        
+        logger.debug('TimerSection: Task set immediately', task.name);
         
         // Emit a task-set event for any components that need to know
         eventManager.emit('timer:task-set', {
@@ -100,7 +110,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
   
   // Handle timer completion
   const handleTaskCompleted = (taskId: string, metrics: any) => {
-    console.log('Timer completed for task:', taskId, metrics);
+    logger.debug('Timer completed for task:', taskId, metrics);
     
     // If the completed task is the currently selected one, clear it
     if (selectedTaskState && selectedTaskState.id === taskId) {
@@ -120,7 +130,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
   
   // Handle timer reset
   const handleTaskReset = (taskId: string) => {
-    console.log('Timer reset for task:', taskId);
+    logger.debug('Timer reset for task:', taskId);
     
     // Show a toast notification
     if (selectedTaskState) {
