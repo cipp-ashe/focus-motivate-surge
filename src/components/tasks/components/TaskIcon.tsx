@@ -1,17 +1,8 @@
 
 import React from 'react';
-import {
-  CheckSquare,
-  Clock,
-  Image,
-  FileText,
-  Mic,
-  CheckCircle2,
-  Zap,
-} from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 import { cn } from '@/lib/utils';
-import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
+import { getTaskIcon, getTaskLabel, getTaskColorClass } from '@/utils/taskTypeConfig';
 
 export interface TaskIconProps {
   type?: TaskType;
@@ -26,56 +17,24 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   className = '',
   size = 16,
 }) => {
-  const { getIconColorClass } = useTaskTypeColor();
-  
   // Use type if provided, otherwise fall back to taskType
   const iconType = type || taskType || 'regular';
 
   // Get the appropriate color class based on task type
-  const colorClass = getIconColorClass(iconType);
-  const iconProps = {
-    className: cn(className, colorClass),
-    size,
-    'aria-hidden': true,
-  };
+  const colorClass = getTaskColorClass(iconType, 'icon');
+  
+  // Clone the icon with the right properties
+  const icon = React.cloneElement(
+    getTaskIcon(iconType) as React.ReactElement,
+    {
+      className: cn(className, colorClass),
+      size,
+      'aria-hidden': true,
+    }
+  );
 
-  switch (iconType) {
-    case 'timer':
-      return <Clock {...iconProps} />;
-    case 'screenshot':
-      return <Image {...iconProps} />;
-    case 'journal':
-      return <FileText {...iconProps} />;
-    case 'voicenote':
-      return <Mic {...iconProps} />;
-    case 'checklist':
-      return <CheckSquare {...iconProps} />;
-    case 'habit':
-      return <Zap {...iconProps} />; // Using Zap for habits to show they're different
-    case 'standard':
-    case 'regular':
-    default:
-      return <CheckSquare {...iconProps} />;
-  }
+  return icon;
 };
 
-export const getTaskTypeLabel = (type: TaskType): string => {
-  switch (type) {
-    case 'timer':
-      return 'Timer';
-    case 'screenshot':
-      return 'Screenshot';
-    case 'journal':
-      return 'Journal';
-    case 'voicenote':
-      return 'Voice Note';
-    case 'checklist':
-      return 'Checklist';
-    case 'habit':
-      return 'Habit';
-    case 'standard':
-    case 'regular':
-    default:
-      return 'Task';
-  }
-};
+// Export the getTaskTypeLabel function from our centralized config
+export const getTaskTypeLabel = getTaskLabel;

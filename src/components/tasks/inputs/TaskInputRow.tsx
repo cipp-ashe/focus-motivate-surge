@@ -4,9 +4,9 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Upload, FileText, Timer, CheckSquare, Mic, Image } from 'lucide-react';
+import { Send, Upload } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
-import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
+import { TASK_TYPE_DEFINITIONS, getTaskTypeDefinition } from '@/utils/taskTypeConfig';
 
 /**
  * Props for the TaskInputRow component
@@ -28,31 +28,6 @@ interface TaskInputRowProps {
 }
 
 /**
- * Map of task types to their corresponding icons
- * Only includes the allowed task types for creation via the input
- */
-const taskTypeIcons = {
-  regular: <CheckSquare className="h-4 w-4" />,
-  timer: <Timer className="h-4 w-4" />,
-  journal: <FileText className="h-4 w-4" />,
-  checklist: <CheckSquare className="h-4 w-4" />,
-  screenshot: <Image className="h-4 w-4" />,
-  voicenote: <Mic className="h-4 w-4" />,
-};
-
-/**
- * Map of task types to their display labels
- */
-const taskTypeLabels = {
-  regular: 'Regular Task',
-  timer: 'Focused Timer',
-  journal: 'Journal Entry',
-  checklist: 'Checklist',
-  screenshot: 'Screenshot',
-  voicenote: 'Voice Note',
-};
-
-/**
  * A component that renders an input row for creating new tasks
  *
  * This component handles the main task input UI, including:
@@ -72,9 +47,9 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
   onAddTask,
   onToggleMultipleInput,
 }) => {
-  const { getIconColorClass } = useTaskTypeColor();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const currentTaskType = getTaskTypeDefinition(taskType as TaskType);
 
   const handleTaskTypeSelect = (type: string) => {
     onTaskTypeChange(type);
@@ -89,32 +64,28 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
             <Button 
               variant="ghost" 
               size="icon"
-              className={cn(getIconColorClass(taskType as TaskType))}
+              className={cn(currentTaskType.color.icon)}
             >
-              {taskTypeIcons[taskType as keyof typeof taskTypeIcons] || taskTypeIcons.regular}
+              {currentTaskType.icon}
             </Button>
           </PopoverTrigger>
           <PopoverContent>
             <div className="flex flex-col gap-1 w-full">
-              {Object.entries(taskTypeIcons).map(([type, icon]) => {
-                const iconColorClass = getIconColorClass(type as TaskType);
-                
-                return (
-                  <Button
-                    key={type}
-                    variant={type === taskType ? 'secondary' : 'ghost'}
-                    onClick={() => handleTaskTypeSelect(type)}
-                    className={cn(
-                      "flex items-center gap-3 w-full p-2 justify-start",
-                      type === taskType ? "bg-secondary" : "",
-                      iconColorClass
-                    )}
-                  >
-                    <span className={iconColorClass}>{icon}</span>
-                    <span className="text-sm">{taskTypeLabels[type as TaskType]}</span>
-                  </Button>
-                );
-              })}
+              {TASK_TYPE_DEFINITIONS.map(({ type, icon, label, color }) => (
+                <Button
+                  key={type}
+                  variant={type === taskType ? 'secondary' : 'ghost'}
+                  onClick={() => handleTaskTypeSelect(type)}
+                  className={cn(
+                    "flex items-center gap-3 w-full p-2 justify-start",
+                    type === taskType ? "bg-secondary" : "",
+                    color.icon
+                  )}
+                >
+                  <span className={color.icon}>{icon}</span>
+                  <span className="text-sm">{label}</span>
+                </Button>
+              ))}
             </div>
           </PopoverContent>
         </Popover>

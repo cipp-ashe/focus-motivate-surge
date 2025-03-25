@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { FileText, Layers, CheckSquare } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskIcon } from '../components/TaskIcon';
+import { TASK_TYPE_DEFINITIONS } from '@/utils/taskTypeConfig';
 
 interface TaskTabsListProps {
   activeTaskType: string;
@@ -17,34 +18,14 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
   onTaskTypeChange,
   taskCounts,
 }) => {
+  // Define the task type tabs, starting with the "All Tasks" option
   const taskTypes = [
     { id: 'all', name: 'All Tasks', icon: <Layers className="h-4 w-4 mr-1.5" /> },
-    { id: 'regular', name: 'Regular', icon: <FileText className="h-4 w-4 mr-1.5" /> },
-    {
-      id: 'checklist',
-      name: 'Checklists',
-      icon: <CheckSquare className="h-4 w-4 mr-1.5 text-emerald-500 dark:text-emerald-400" />,
-    },
-    {
-      id: 'timer',
-      name: 'Timers',
-      icon: <TaskIcon taskType="timer" size={16} className="mr-1.5" />,
-    },
-    {
-      id: 'journal',
-      name: 'Journals',
-      icon: <TaskIcon taskType="journal" size={16} className="mr-1.5" />,
-    },
-    {
-      id: 'screenshot',
-      name: 'Screenshots',
-      icon: <TaskIcon taskType="screenshot" size={16} className="mr-1.5" />,
-    },
-    {
-      id: 'voicenote',
-      name: 'Voice Notes',
-      icon: <TaskIcon taskType="voicenote" size={16} className="mr-1.5" />,
-    },
+    ...TASK_TYPE_DEFINITIONS.map(({ type, label }) => ({
+      id: type,
+      name: label + 's', // Pluralize the task type name for the tab
+      icon: <TaskIcon taskType={type} size={16} className="mr-1.5" />
+    }))
   ];
 
   return (
