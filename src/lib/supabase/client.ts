@@ -1,5 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/utils/logManager';
 
 // Get environment variables
 export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -21,7 +22,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     fetch: (url, options) => {
       // Only log in development mode
       if (import.meta.env.DEV) {
-        console.debug('Supabase fetch:', url);
+        logger.debug('Supabase', 'Fetch:', url);
       }
       return fetch(url, options);
     }
@@ -38,17 +39,25 @@ let realtimeChannel: any = null;
 let realtimeEnabled = false;
 
 // Enable realtime for specific tables only when explicitly called
-export const enableRealtimeForTables = async () => {
+export const enableRealtimeForTables = async (forceEnable = false) => {
+  // Check if we're on the homepage, we can disable realtime there if not forced
+  const isHomePage = window.location.pathname === '/' && !forceEnable;
+  
+  if (isHomePage && !forceEnable) {
+    logger.debug('Supabase', 'Skipping realtime on homepage');
+    return;
+  }
+  
   // Only set up the channel if it doesn't already exist
   if (realtimeChannel || realtimeEnabled) {
-    console.log('Realtime already enabled for tables');
+    logger.debug('Supabase', 'Realtime already enabled for tables');
     return;
   }
   
   realtimeEnabled = true;
   
   try {
-    console.log('Enabling realtime for tables...');
+    logger.debug('Supabase', 'Enabling realtime for tables...');
     // Create a single channel for all tables to minimize connections
     realtimeChannel = supabase.channel('schema-db-changes')
       .on('postgres_changes', { 
@@ -72,12 +81,12 @@ export const enableRealtimeForTables = async () => {
         table: 'events'
       }, () => {})
       .subscribe((status) => {
-        console.log('Realtime subscription status:', status);
+        logger.debug('Supabase', 'Realtime subscription status:', status);
       });
     
-    console.log('Realtime enabled for tables');
+    logger.debug('Supabase', 'Realtime enabled for tables');
   } catch (error) {
-    console.error('Error enabling realtime:', error);
+    logger.error('Supabase', 'Error enabling realtime:', error);
     realtimeEnabled = false;
   }
 };
@@ -88,6 +97,6 @@ export const disableRealtime = () => {
     realtimeChannel.unsubscribe();
     realtimeChannel = null;
     realtimeEnabled = false;
-    console.log('Realtime disabled for tables');
+    logger.debug('Supabase', 'Realtime disabled for tables');
   }
 };
