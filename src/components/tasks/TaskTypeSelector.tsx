@@ -26,7 +26,7 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onCha
           )}
         >
           <span className={value !== type ? color.icon : ""}>
-            <TaskIcon taskType={type} size={16} />
+            <TaskIcon type={type} size={16} />
           </span>
           <span>{label}</span>
         </Button>

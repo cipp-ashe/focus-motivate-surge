@@ -42,7 +42,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const { getBorderColorClass, getBackgroundColorClass } = useTaskTypeColor();
 
   const taskIsSelected = isSelected || selected === task.id;
-  const taskType = task.taskType || 'regular';
+  const taskType = task.taskType || 'standard';
   
   // Get border color based on task type
   const borderColorClass = getBorderColorClass(taskType);

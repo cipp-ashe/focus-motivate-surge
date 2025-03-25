@@ -53,7 +53,7 @@ export const TaskContentDisplay: React.FC<TaskContentDisplayProps> = ({
             className={cn(
               "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium",
               "bg-background/80 dark:bg-background/30 border border-border/30 dark:border-border/20",
-              isChecklist ? "text-emerald-500 dark:text-emerald-400" : iconColorClass
+              isChecklist ? "text-cyan-500 dark:text-cyan-400" : iconColorClass
             )}
           >
             <TaskIcon type={task.taskType} size={12} />
