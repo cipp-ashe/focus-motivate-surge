@@ -37,18 +37,6 @@ export const TaskContentDisplay: React.FC<TaskContentDisplayProps> = ({
             {task.status || 'pending'}
           </Badge>
           
-          {/* Timer Badge - Only show if not hidden */}
-          {task.taskType === 'timer' && !hideTimerTag && (
-            <Badge 
-              className={cn(
-                "text-xs flex items-center", 
-                getBackgroundColorClass(task.taskType)
-              )}
-            >
-              timer
-            </Badge>
-          )}
-          
           {/* Duration Badge */}
           {task.duration && (
             <Badge 

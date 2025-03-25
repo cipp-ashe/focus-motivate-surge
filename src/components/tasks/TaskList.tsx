@@ -2,6 +2,7 @@
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { TaskItem } from './components/TaskItem';
+import { logger } from '@/utils/logManager';
 
 export interface TaskListProps {
   tasks: Task[];
@@ -36,7 +37,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 max-h-[80vh] overflow-y-auto pr-1 scrollbar-thin">
       {tasks.map((task) => (
         <TaskItem
           key={task.id}

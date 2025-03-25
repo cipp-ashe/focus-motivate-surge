@@ -79,20 +79,22 @@ export const FilteredTimerTaskList = () => {
   };
   
   return (
-    <TaskList
-      tasks={timerTasks}
-      selectedTaskId={selectedTask?.id || null}
-      handleTaskSelect={handleTaskSelect}
-      handleDelete={handleDelete}
-      handleTaskUpdate={handleTaskUpdate}
-      handleTaskComplete={handleTaskComplete}
-      isTimerView={true}
-      emptyState={
-        <div className="py-8 text-center">
-          <p className="text-lg font-medium mb-2">No timer tasks</p>
-          <p className="text-sm text-muted-foreground">Create a new timer task to get started</p>
-        </div>
-      }
-    />
+    <div className="h-full">
+      <TaskList
+        tasks={timerTasks}
+        selectedTaskId={selectedTask?.id || null}
+        handleTaskSelect={handleTaskSelect}
+        handleDelete={handleDelete}
+        handleTaskUpdate={handleTaskUpdate}
+        handleTaskComplete={handleTaskComplete}
+        isTimerView={true}
+        emptyState={
+          <div className="py-8 text-center">
+            <p className="text-lg font-medium mb-2">No timer tasks</p>
+            <p className="text-sm text-muted-foreground">Create a new timer task to get started</p>
+          </div>
+        }
+      />
+    </div>
   );
 };
