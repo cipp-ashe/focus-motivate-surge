@@ -19,14 +19,21 @@ const Index = () => {
         {/* Hero Section */}
         <HeroSection />
         
-        {/* Features Section - Add our new component */}
+        {/* Features Section */}
         <FeaturesSection />
         
-        {/* Privacy Section */}
-        <PrivacySection />
-        
-        {/* Quick Access Section */}
-        <QuickAccessSection />
+        {/* Two-column layout for Privacy and Quick Access on larger screens */}
+        <div className="mt-8 mb-16 flex flex-col lg:flex-row gap-8">
+          {/* Privacy Section - takes 1/3 width on larger screens */}
+          <div className="lg:w-1/3">
+            <PrivacySection />
+          </div>
+          
+          {/* Quick Access Section - takes 2/3 width on larger screens */}
+          <div className="lg:w-2/3">
+            <QuickAccessSection />
+          </div>
+        </div>
       </div>
     </div>
   );

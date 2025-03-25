@@ -6,18 +6,20 @@ import { Button } from '@/components/ui/button';
 
 const PrivacySection: React.FC = () => {
   return (
-    <section className="mt-8 mb-8">
-      <div className="border-theme-medium rounded-lg p-6 bg-card/70 backdrop-blur-sm">
-        <div className="flex flex-col md:flex-row gap-6 items-center">
-          <div className="flex-shrink-0">
+    <section className="h-full">
+      <div className="border-theme-medium rounded-lg p-6 bg-card/70 backdrop-blur-sm h-full flex flex-col">
+        <div className="flex flex-col gap-6 h-full">
+          <div className="flex-shrink-0 flex items-center gap-2">
             <Lock className="w-8 h-8 text-primary" />
+            <h3 className="text-xl font-semibold">Your Data is Stored Locally</h3>
           </div>
-          <div className="flex-1 text-center md:text-left">
-            <h3 className="text-xl font-semibold mb-2">Your Data is Stored Locally</h3>
-            <p className="mb-4 text-muted-foreground">
+          <div className="flex-1">
+            <p className="mb-6 text-muted-foreground">
               FlowTime saves your data to your browser's local storage. For access across multiple devices, 
               register with a magic link on the settings page.
             </p>
+          </div>
+          <div className="mt-auto">
             <Button asChild variant="purple" size="sm">
               <Link to="/settings" className="flex items-center gap-1">
                 Settings <ArrowRight className="h-3.5 w-3.5" />
