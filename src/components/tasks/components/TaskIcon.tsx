@@ -37,7 +37,7 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
   const iconProps = {
     className: cn(className, colorClass),
     size,
-    'aria-hidden': 'true',
+    'aria-hidden': true,
   };
 
   switch (iconType) {
