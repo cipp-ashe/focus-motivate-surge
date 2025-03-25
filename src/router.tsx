@@ -1,9 +1,10 @@
+
 import React from "react";
 import {
   createBrowserRouter,
 } from "react-router-dom";
 import { RequireAuth } from "@/components/auth/RequireAuth";
-import { Layout } from "@/components/layout/Layout";
+import Layout from "@/components/layout/Layout";
 
 const Home = React.lazy(() => import("./pages/Home"));
 const Tasks = React.lazy(() => import("./pages/Tasks"));
