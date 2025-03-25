@@ -7,7 +7,6 @@ import {
   FileText,
   Mic,
   CheckCircle2,
-  ClipboardList,
   Zap,
 } from 'lucide-react';
 import { TaskType } from '@/types/tasks';

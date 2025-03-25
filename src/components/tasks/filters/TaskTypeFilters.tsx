@@ -47,7 +47,7 @@ export const TaskTypeFilters: React.FC<TaskTypeFiltersProps> = ({
       label: 'Regular', 
       icon: FileText, 
       count: counts.regular,
-      color: 'sky'
+      color: 'slate'
     },
     { 
       id: 'timer', 
@@ -68,7 +68,7 @@ export const TaskTypeFilters: React.FC<TaskTypeFiltersProps> = ({
       label: 'Checklist', 
       icon: CheckSquare, 
       count: counts.checklist,
-      color: 'cyan'
+      color: 'emerald'
     },
     { 
       id: 'screenshot', 

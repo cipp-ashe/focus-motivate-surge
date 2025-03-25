@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Task, TaskType } from '@/types/tasks';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -43,7 +44,6 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
     checklist: 0,
     voicenote: 0,
     regular: 0,
-    focus: 0,
   });
 
   // Use our unified task manager hook
@@ -95,7 +95,6 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
       journal: currentTasks.filter((t) => t.taskType === 'journal').length,
       checklist: currentTasks.filter((t) => t.taskType === 'checklist').length,
       voicenote: currentTasks.filter((t) => t.taskType === 'voicenote').length,
-      focus: currentTasks.filter((t) => t.taskType === 'focus').length,
       regular: currentTasks.filter((t) => t.taskType === 'regular' || !t.taskType).length,
     };
 

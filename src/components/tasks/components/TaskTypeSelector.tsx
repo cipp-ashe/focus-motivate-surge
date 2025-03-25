@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { TaskType } from '@/types/tasks';
 import { CheckSquare, Clock, Image, FileText, Mic } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
 
 interface TaskTypeSelectorProps {
@@ -11,7 +12,7 @@ interface TaskTypeSelectorProps {
 }
 
 export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onChange }) => {
-  const { getIconColorClass } = useTaskTypeColor();
+  const { getIconColorClass, getButtonColorClass } = useTaskTypeColor();
   
   const types: { type: TaskType; icon: React.ReactNode; label: string }[] = [
     { type: 'regular', icon: <CheckSquare className="h-4 w-4" />, label: 'Task' },
@@ -26,6 +27,7 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onCha
     <div className="flex flex-wrap gap-2">
       {types.map(({ type, icon, label }) => {
         const iconColorClass = getIconColorClass(type);
+        const buttonColorClass = getButtonColorClass(type);
         
         return (
           <Button
@@ -35,11 +37,10 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onCha
             onClick={() => onChange(type)}
             className={cn(
               "flex items-center gap-1",
-              value === type ? `bg-${type}-500 dark:bg-${type}-600` : "",
-              value === type ? iconColorClass.replace("text-", "bg-").replace("dark:text-", "dark:bg-") : ""
+              value === type ? buttonColorClass : ""
             )}
           >
-            <span className={value === type ? "text-white" : iconColorClass}>{icon}</span>
+            <span className={value !== type ? iconColorClass : ""}>{icon}</span>
             <span>{label}</span>
           </Button>
         );
