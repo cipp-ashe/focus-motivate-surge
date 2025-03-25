@@ -1,3 +1,4 @@
+
 import { createBrowserRouter } from 'react-router-dom';
 import Index from './pages/Index';
 import Tasks from './pages/Tasks';
@@ -14,7 +15,7 @@ import AppLayout from './components/AppLayout';
 import { DebugProvider } from './providers/DebugProvider';
 import { DebugPanel } from './components/debug/DebugPanel';
 import { AuthProvider } from './contexts/auth/AuthContext';
-import { ThemeProvider } from './components/theme-provider';
+import { ThemeProvider } from './components/ThemeProvider';
 import { TaskProvider } from './contexts/tasks/TaskContext';
 
 // Error component to handle routing errors

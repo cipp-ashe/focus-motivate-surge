@@ -1,306 +1,79 @@
+
+/* Base CSS styles for the application */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 215 30% 95%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
+
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 355.7 100% 97.3%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 262 83% 58%;
-    --accent-foreground: 0 0% 98%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 210 40% 98%;
+
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 262 83% 58%;
+    --ring: 222.2 84% 4.9%;
+
     --radius: 0.5rem;
-
-    /* Task type colors */
-    --standard: 215 30% 40%;
-    --timer: 262 83% 58%;
-    --journal: 40 100% 65%;
-    --checklist: 195 100% 50%;
-    --screenshot: 210 100% 50%;
-    --voicenote: 350 100% 65%;
-    --habit: 262 83% 58%;
-
-    /* Border opacity levels */
-    --border-light: 0.1;
-    --border-medium: 0.2;
-    --border-strong: 0.4;
-
-    /* Z-index standardization */
-    --z-dropdown: 100;
-    --z-sticky: 50;
-    --z-drawer: 200;
-    --z-modal: 300;
-    --z-toast: 400;
-    --z-tooltip: 500;
   }
 
   .dark {
-    --background: 225 25% 12%;
-    --foreground: 225 25% 98%;
-    --card: 225 25% 15%;
-    --card-foreground: 225 25% 98%;
-    --popover: 225 25% 15%;
-    --popover-foreground: 225 25% 98%;
-    --primary: 280 85% 60%;
-    --primary-foreground: 225 25% 98%;
-    --secondary: 225 25% 25%;
-    --secondary-foreground: 225 25% 98%;
-    --muted: 225 25% 25%;
-    --muted-foreground: 225 25% 60%;
-    --accent: 280 85% 60%;
-    --accent-foreground: 225 25% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 225 25% 98%;
-    --border: 225 25% 30%;
-    --input: 225 25% 30%;
-    --ring: 280 85% 60%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    /* Task type colors - adjusted for dark mode */
-    --standard: 215 30% 60%;
-    --timer: 280 85% 60%;
-    --journal: 40 90% 65%;
-    --checklist: 195 90% 50%;
-    --screenshot: 210 90% 50%;
-    --voicenote: 350 90% 65%;
-    --habit: 280 85% 60%;
-  }
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-  html,
-  body,
-  #root {
-    height: 100%;
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
-@layer components {
-  .glass-card {
-    @apply bg-card/70 backdrop-blur-lg border border-border shadow-sm;
+@layer base {
+  * {
+    @apply border-border;
   }
-
-  .text-gradient-purple {
-    @apply bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent;
-  }
-
-  /* Task type color classes */
-  .task-icon-standard {
-    @apply text-[hsl(var(--standard))];
-  }
-
-  .task-icon-timer {
-    @apply text-[hsl(var(--timer))];
-  }
-
-  .task-icon-journal {
-    @apply text-[hsl(var(--journal))];
-  }
-
-  .task-icon-checklist {
-    @apply text-[hsl(var(--checklist))];
-  }
-
-  .task-icon-screenshot {
-    @apply text-[hsl(var(--screenshot))];
-  }
-
-  .task-icon-voicenote {
-    @apply text-[hsl(var(--voicenote))];
-  }
-
-  .task-icon-habit {
-    @apply text-[hsl(var(--habit))];
-  }
-
-  .task-bg-standard {
-    @apply bg-[hsla(var(--standard),0.1)] dark:bg-[hsla(var(--standard),0.15)];
-  }
-
-  .task-bg-timer {
-    @apply bg-[hsla(var(--timer),0.1)] dark:bg-[hsla(var(--timer),0.15)];
-  }
-
-  .task-bg-journal {
-    @apply bg-[hsla(var(--journal),0.1)] dark:bg-[hsla(var(--journal),0.15)];
-  }
-
-  .task-bg-checklist {
-    @apply bg-[hsla(var(--checklist),0.1)] dark:bg-[hsla(var(--checklist),0.15)];
-  }
-
-  .task-bg-screenshot {
-    @apply bg-[hsla(var(--screenshot),0.1)] dark:bg-[hsla(var(--screenshot),0.15)];
-  }
-
-  .task-bg-voicenote {
-    @apply bg-[hsla(var(--voicenote),0.1)] dark:bg-[hsla(var(--voicenote),0.15)];
-  }
-
-  .task-bg-habit {
-    @apply bg-[hsla(var(--habit),0.1)] dark:bg-[hsla(var(--habit),0.15)];
-  }
-
-  /* Task border color classes */
-  .task-border-standard {
-    @apply border-[hsla(var(--standard),0.3)] dark:border-[hsla(var(--standard),0.4)];
-  }
-
-  .task-border-timer {
-    @apply border-[hsla(var(--timer),0.3)] dark:border-[hsla(var(--timer),0.4)];
-  }
-
-  .task-border-journal {
-    @apply border-[hsla(var(--journal),0.3)] dark:border-[hsla(var(--journal),0.4)];
-  }
-
-  .task-border-checklist {
-    @apply border-[hsla(var(--checklist),0.3)] dark:border-[hsla(var(--checklist),0.4)];
-  }
-
-  .task-border-screenshot {
-    @apply border-[hsla(var(--screenshot),0.3)] dark:border-[hsla(var(--screenshot),0.4)];
-  }
-
-  .task-border-voicenote {
-    @apply border-[hsla(var(--voicenote),0.3)] dark:border-[hsla(var(--voicenote),0.4)];
-  }
-
-  .task-border-habit {
-    @apply border-[hsla(var(--habit),0.3)] dark:border-[hsla(var(--habit),0.4)];
-  }
-
-  /* Task button color classes */
-  .task-button-standard {
-    @apply bg-[hsla(var(--standard),0.1)] hover:bg-[hsla(var(--standard),0.2)] dark:bg-[hsla(var(--standard),0.2)] dark:hover:bg-[hsla(var(--standard),0.3)];
-  }
-
-  .task-button-timer {
-    @apply bg-[hsla(var(--timer),0.1)] hover:bg-[hsla(var(--timer),0.2)] dark:bg-[hsla(var(--timer),0.2)] dark:hover:bg-[hsla(var(--timer),0.3)];
-  }
-
-  .task-button-journal {
-    @apply bg-[hsla(var(--journal),0.1)] hover:bg-[hsla(var(--journal),0.2)] dark:bg-[hsla(var(--journal),0.2)] dark:hover:bg-[hsla(var(--journal),0.3)];
-  }
-
-  .task-button-checklist {
-    @apply bg-[hsla(var(--checklist),0.1)] hover:bg-[hsla(var(--checklist),0.2)] dark:bg-[hsla(var(--checklist),0.2)] dark:hover:bg-[hsla(var(--checklist),0.3)];
-  }
-
-  .task-button-screenshot {
-    @apply bg-[hsla(var(--screenshot),0.1)] hover:bg-[hsla(var(--screenshot),0.2)] dark:bg-[hsla(var(--screenshot),0.2)] dark:hover:bg-[hsla(var(--screenshot),0.3)];
-  }
-
-  .task-button-voicenote {
-    @apply bg-[hsla(var(--voicenote),0.1)] hover:bg-[hsla(var(--voicenote),0.2)] dark:bg-[hsla(var(--voicenote),0.2)] dark:hover:bg-[hsla(var(--voicenote),0.3)];
-  }
-
-  .task-button-habit {
-    @apply bg-[hsla(var(--habit),0.1)] hover:bg-[hsla(var(--habit),0.2)] dark:bg-[hsla(var(--habit),0.2)] dark:hover:bg-[hsla(var(--habit),0.3)];
-  }
-
-  /* Standard border styles */
-  .border-theme-light {
-    @apply border border-border/[var(--border-light)];
-  }
-
-  .border-theme-medium {
-    @apply border border-border/[var(--border-medium)];
-  }
-
-  .border-theme-strong {
-    @apply border border-border/[var(--border-strong)];
-  }
-
-  /* Z-index utility classes */
-  .z-dropdown {
-    z-index: var(--z-dropdown);
-  }
-
-  .z-sticky {
-    z-index: var(--z-sticky);
-  }
-
-  .z-drawer {
-    z-index: var(--z-drawer);
-  }
-
-  .z-modal {
-    z-index: var(--z-modal);
-  }
-
-  .z-toast {
-    z-index: var(--z-toast);
-  }
-
-  .z-tooltip {
-    z-index: var(--z-tooltip);
-  }
-}
-
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in forwards;
-  }
-
-  .app-background {
-    @apply bg-background;
-  }
-
-  .whitespace-pre-wrap {
-    white-space: pre-wrap;
-  }
-
-  /* Responsive overflow handling for task lists */
-  .task-list-container {
-    @apply space-y-2 overflow-y-auto overflow-x-hidden max-h-[70vh] md:max-h-none;
-  }
-
-  /* Task card responsive styling */
-  .task-card {
-    @apply relative border rounded-md p-3 transition-all;
-    @apply overflow-visible md:overflow-hidden;
-    @apply min-h-[4.5rem] flex flex-col justify-between;
-    @apply w-full md:max-w-none;
-  }
-
-  /* Task action buttons */
-  .task-action-button {
-    @apply h-7 w-7 p-0 rounded-full transition-colors;
-    @apply flex items-center justify-center;
-  }
-
-  /* Dark mode enhanced styles */
-  .dark .glass-card {
-    @apply bg-card/30 backdrop-blur-lg border border-border/20 shadow-lg;
-  }
-
-  .dark .scrollbar-thin {
-    scrollbar-width: thin;
-  }
-
-  .dark .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .dark .scrollbar-thin::-webkit-scrollbar-track {
-    @apply bg-muted/30;
-  }
-
-  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 hover:bg-muted-foreground/50 rounded;
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
