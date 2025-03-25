@@ -1,3 +1,4 @@
+
 /**
  * Task types
  */
@@ -11,7 +12,6 @@ export type TaskType =
   | 'checklist'
   | 'project'
   | 'timer'
-  | 'regular'
   | 'screenshot'
   | 'voicenote';
 

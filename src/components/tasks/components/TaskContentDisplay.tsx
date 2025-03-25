@@ -30,9 +30,6 @@ export const TaskContentDisplay: React.FC<TaskContentDisplayProps> = ({
     handleTaskAction(e, actionType);
   };
   
-  // Determine if this is a checklist task for consistent styling
-  const isChecklist = task.taskType === 'checklist';
-  
   return (
     <div className="flex flex-col w-full">
       {/* Task name */}
@@ -53,7 +50,7 @@ export const TaskContentDisplay: React.FC<TaskContentDisplayProps> = ({
             className={cn(
               "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium",
               "bg-background/80 dark:bg-background/30 border border-border/30 dark:border-border/20",
-              isChecklist ? "text-cyan-500 dark:text-cyan-400" : iconColorClass
+              iconColorClass
             )}
           >
             <TaskIcon type={task.taskType} size={12} />

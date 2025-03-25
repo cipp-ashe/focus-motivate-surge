@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckSquare } from 'lucide-react';
 import { TaskButtonProps } from './ButtonTypes';
+import { getTaskColorClass } from '@/utils/taskTypeConfig';
 
 export interface ChecklistButtonProps extends TaskButtonProps {}
 
@@ -12,11 +13,15 @@ export const ChecklistButton: React.FC<ChecklistButtonProps> = ({ task, onTaskAc
     onTaskAction(e, 'checklist');
   };
 
+  // Get colors from the centralized config
+  const iconColorClass = getTaskColorClass('checklist', 'icon');
+  const hoverBgClass = 'hover:bg-cyan-100/60 dark:hover:bg-cyan-900/20';
+
   return (
     <Button 
       variant="ghost"
       size="sm"
-      className="h-7 w-7 p-0 text-cyan-500 hover:text-cyan-600 hover:bg-cyan-100/60 dark:text-cyan-400 dark:hover:text-cyan-300 dark:hover:bg-cyan-900/20"
+      className={`h-7 w-7 p-0 ${iconColorClass} ${hoverBgClass}`}
       onClick={handleClick}
       title="Open Checklist"
     >

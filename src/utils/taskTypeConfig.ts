@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CheckSquare, Clock, Image, FileText, Mic } from 'lucide-react';
+import { CheckSquare, Clock, Image, FileText, Mic, Zap } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 
 /**
@@ -88,6 +88,17 @@ export const TASK_TYPE_DEFINITIONS: TaskTypeDefinition[] = [
       background: 'bg-cyan-100/50 dark:bg-cyan-900/20',
       border: 'border-cyan-400/50 dark:border-cyan-500/40',
       button: 'bg-cyan-500 hover:bg-cyan-600 dark:bg-cyan-600 dark:hover:bg-cyan-700'
+    }
+  },
+  {
+    type: 'habit',
+    icon: <Zap className="h-4 w-4" />,
+    label: 'Habit',
+    color: {
+      icon: 'text-emerald-500 dark:text-emerald-400',
+      background: 'bg-emerald-100/50 dark:bg-emerald-900/20',
+      border: 'border-emerald-400/50 dark:border-emerald-500/40',
+      button: 'bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700'
     }
   }
 ];

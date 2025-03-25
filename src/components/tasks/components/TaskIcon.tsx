@@ -5,27 +5,22 @@ import { cn } from '@/lib/utils';
 import { getTaskIcon, getTaskLabel, getTaskColorClass } from '@/utils/taskTypeConfig';
 
 export interface TaskIconProps {
-  type?: TaskType;
-  taskType?: TaskType; // Added for backward compatibility
+  type: TaskType;
   className?: string;
   size?: number;
 }
 
 export const TaskIcon: React.FC<TaskIconProps> = ({
-  type,
-  taskType,
+  type = 'standard',
   className = '',
   size = 16,
 }) => {
-  // Use type if provided, otherwise fall back to taskType
-  const iconType = type || taskType || 'standard';
-
   // Get the appropriate color class based on task type
-  const colorClass = getTaskColorClass(iconType, 'icon');
+  const colorClass = getTaskColorClass(type, 'icon');
   
   // Clone the icon with the right properties
   const icon = React.cloneElement(
-    getTaskIcon(iconType) as React.ReactElement,
+    getTaskIcon(type) as React.ReactElement,
     {
       className: cn(className, colorClass),
       size,
