@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { taskStorage } from '@/lib/storage/taskStorage';
 import { Task } from '@/types/tasks';
@@ -10,6 +9,13 @@ import { ActiveTemplate } from '@/components/habits/types';
  * Synchronize local tasks to Supabase
  */
 export const syncTasksToSupabase = async (userId: string): Promise<boolean> => {
+  // Check if we're in local-only mode
+  const isLocalOnly = localStorage.getItem('prefer-local-only') === 'true';
+  if (isLocalOnly) {
+    console.log('Local-only mode active, skipping sync to Supabase');
+    return true;
+  }
+  
   try {
     // Load tasks from localStorage
     const localTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
@@ -53,6 +59,13 @@ export const syncTasksToSupabase = async (userId: string): Promise<boolean> => {
  * Synchronize local habits to Supabase
  */
 export const syncHabitsToSupabase = async (userId: string): Promise<boolean> => {
+  // Check if we're in local-only mode
+  const isLocalOnly = localStorage.getItem('prefer-local-only') === 'true';
+  if (isLocalOnly) {
+    console.log('Local-only mode active, skipping sync to Supabase');
+    return true;
+  }
+  
   try {
     // Load habit templates from localStorage
     const localTemplates = JSON.parse(localStorage.getItem('habit-templates') || '[]');
@@ -95,6 +108,13 @@ export const syncHabitsToSupabase = async (userId: string): Promise<boolean> => 
  * Synchronize local notes to Supabase
  */
 export const syncNotesToSupabase = async (userId: string): Promise<boolean> => {
+  // Check if we're in local-only mode
+  const isLocalOnly = localStorage.getItem('prefer-local-only') === 'true';
+  if (isLocalOnly) {
+    console.log('Local-only mode active, skipping sync to Supabase');
+    return true;
+  }
+  
   try {
     // Load notes from localStorage
     const localNotes = JSON.parse(localStorage.getItem('notes') || '[]');
@@ -133,6 +153,13 @@ export const syncNotesToSupabase = async (userId: string): Promise<boolean> => {
  * @param userId The user's ID from Supabase Auth
  */
 export const syncLocalDataToSupabase = async (userId: string) => {
+  // Check if we're in local-only mode
+  const isLocalOnly = localStorage.getItem('prefer-local-only') === 'true';
+  if (isLocalOnly) {
+    console.log('Local-only mode active, skipping sync to Supabase');
+    return;
+  }
+  
   console.log(`Syncing local data to Supabase for user ${userId}`);
   
   try {
@@ -201,8 +228,11 @@ export const syncLocalDataToSupabase = async (userId: string) => {
  * Get data from Supabase or localStorage based on auth status
  */
 export const getTaskData = async (userId: string | null): Promise<Task[]> => {
-  // If user is not authenticated, use localStorage
-  if (!userId) {
+  // Check if we're in local-only mode
+  const isLocalOnly = localStorage.getItem('prefer-local-only') === 'true';
+  
+  // If user is not authenticated or in local-only mode, use localStorage
+  if (!userId || isLocalOnly) {
     const localTasks = JSON.parse(localStorage.getItem('taskList') || '[]');
     return localTasks;
   }
@@ -244,8 +274,9 @@ export const getTaskData = async (userId: string | null): Promise<Task[]> => {
 };
 
 /**
- * Decide whether to use local or cloud storage based on auth status
+ * Decide whether to use local or cloud storage based on auth status and preference
  */
 export const shouldUseLocalStorage = (user: User | null): boolean => {
-  return !user;
+  const isLocalOnly = localStorage.getItem('prefer-local-only') === 'true';
+  return !user || isLocalOnly;
 };

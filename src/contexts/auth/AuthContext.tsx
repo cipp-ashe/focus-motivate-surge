@@ -10,6 +10,8 @@ export interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   signOut: () => Promise<void>;
+  isLocalOnly: boolean;
+  setLocalOnly: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,8 +20,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // New state for tracking if user prefers to stay local-only
+  const [isLocalOnly, setIsLocalOnly] = useState(() => {
+    const stored = localStorage.getItem('prefer-local-only');
+    return stored === 'true';
+  });
 
   useEffect(() => {
+    localStorage.setItem('prefer-local-only', isLocalOnly.toString());
+  }, [isLocalOnly]);
+
+  useEffect(() => {
+    // Skip auth checking if user has opted for local-only mode
+    if (isLocalOnly) {
+      setIsLoading(false);
+      return;
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -43,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isLocalOnly]);
 
   const handleSignOut = async () => {
     try {
@@ -60,7 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       session,
       isLoading, 
       isAuthenticated: !!user, 
-      signOut: handleSignOut 
+      signOut: handleSignOut,
+      isLocalOnly,
+      setLocalOnly: (value) => setIsLocalOnly(value)
     }}>
       {children}
     </AuthContext.Provider>

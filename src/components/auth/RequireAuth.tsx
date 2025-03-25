@@ -7,7 +7,7 @@ export const RequireAuth: React.FC<{ children: React.ReactNode; requireAuth?: bo
   children, 
   requireAuth = true
 }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isLocalOnly } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -19,9 +19,10 @@ export const RequireAuth: React.FC<{ children: React.ReactNode; requireAuth?: bo
     );
   }
 
-  // If authentication is required but user is not logged in,
-  // redirect to auth page but save the attempted location
-  if (requireAuth && !user) {
+  // Allow access if:
+  // 1. User has chosen local-only mode, OR
+  // 2. User is logged in
+  if (requireAuth && !isLocalOnly && !user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
