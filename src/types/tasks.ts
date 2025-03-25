@@ -13,8 +13,7 @@ export type TaskType =
   | 'timer'
   | 'regular'
   | 'screenshot'
-  | 'voicenote'
-  | 'focus';
+  | 'voicenote';
 
 // Task status
 export type TaskStatus =

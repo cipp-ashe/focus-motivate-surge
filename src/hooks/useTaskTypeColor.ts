@@ -21,8 +21,6 @@ export function useTaskTypeColor() {
         return 'text-blue-500 dark:text-blue-400';
       case 'voicenote':
         return 'text-rose-500 dark:text-rose-400';
-      case 'focus':
-        return 'text-cyan-500 dark:text-cyan-400';
       case 'habit':
         return 'text-indigo-500 dark:text-indigo-400';
       case 'regular':
@@ -47,8 +45,6 @@ export function useTaskTypeColor() {
         return 'bg-blue-100/50 dark:bg-blue-900/20';
       case 'voicenote':
         return 'bg-rose-100/50 dark:bg-rose-900/20';
-      case 'focus':
-        return 'bg-cyan-100/50 dark:bg-cyan-900/20';
       case 'habit':
         return 'bg-indigo-100/50 dark:bg-indigo-900/20';
       case 'regular':
@@ -73,8 +69,6 @@ export function useTaskTypeColor() {
         return 'border-blue-400/50 dark:border-blue-500/40';
       case 'voicenote':
         return 'border-rose-400/50 dark:border-rose-500/40';
-      case 'focus':
-        return 'border-cyan-400/50 dark:border-cyan-500/40';
       case 'habit':
         return 'border-indigo-400/50 dark:border-indigo-500/40';
       case 'regular':

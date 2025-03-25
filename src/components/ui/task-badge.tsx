@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-type TaskType = 'timer' | 'journal' | 'checklist' | 'screenshot' | 'voicenote' | 'focus' | 'regular';
+type TaskType = 'timer' | 'journal' | 'checklist' | 'screenshot' | 'voicenote' | 'regular';
 
 interface TaskBadgeProps {
   type: TaskType;
@@ -24,8 +24,6 @@ export function TaskBadge({ type, className, children }: TaskBadgeProps) {
         return 'bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300';
       case 'voicenote':
         return 'bg-rose-500/15 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300';
-      case 'focus':
-        return 'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300';
       case 'regular':
       default:
         return 'bg-muted text-muted-foreground dark:bg-muted/20';

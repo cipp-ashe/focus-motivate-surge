@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { TaskType } from '@/types/tasks';
-import { CheckSquare, Clock, Image, FileText, Mic, Focus, CheckCircle2, ClipboardList } from 'lucide-react';
+import { CheckSquare, Clock, Image, FileText, Mic, CheckCircle2, ClipboardList } from 'lucide-react';
 
 interface TaskTypeSelectorProps {
   value: TaskType;
@@ -16,7 +16,6 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onCha
     { type: 'screenshot', icon: <Image className="h-4 w-4" />, label: 'Screenshot' },
     { type: 'journal', icon: <FileText className="h-4 w-4" />, label: 'Journal' },
     { type: 'voicenote', icon: <Mic className="h-4 w-4" />, label: 'Voice' },
-    { type: 'focus', icon: <Focus className="h-4 w-4" />, label: 'Focus' },
     { type: 'habit', icon: <CheckCircle2 className="h-4 w-4" />, label: 'Habit' },
     { type: 'checklist', icon: <ClipboardList className="h-4 w-4" />, label: 'Checklist' }
   ];

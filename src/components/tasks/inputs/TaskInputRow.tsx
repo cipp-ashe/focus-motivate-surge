@@ -1,9 +1,10 @@
+
 import React, { useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Upload, FileText, Timer, BookOpen, CheckSquare } from 'lucide-react';
+import { Send, Upload, FileText, Timer, BookOpen, CheckSquare, ClipboardList } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 
 /**
@@ -33,7 +34,7 @@ const taskTypeIcons = {
   regular: <FileText />,
   timer: <Timer />,
   journal: <BookOpen />,
-  checklist: <CheckSquare />,
+  checklist: <ClipboardList />,
 };
 
 /**

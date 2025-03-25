@@ -6,7 +6,6 @@ import {
   Image,
   FileText,
   Mic,
-  Focus,
   CheckCircle2,
   ClipboardList,
 } from 'lucide-react';
@@ -49,8 +48,6 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
       return <FileText {...iconProps} />;
     case 'voicenote':
       return <Mic {...iconProps} />;
-    case 'focus':
-      return <Focus {...iconProps} />;
     case 'checklist':
       return <ClipboardList {...iconProps} />;
     case 'habit':
@@ -72,8 +69,6 @@ export const getTaskTypeLabel = (type: TaskType): string => {
       return 'Journal';
     case 'voicenote':
       return 'Voice Note';
-    case 'focus':
-      return 'Focus';
     case 'checklist':
       return 'Checklist';
     case 'habit':

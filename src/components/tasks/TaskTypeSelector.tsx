@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { TaskType } from '@/types/tasks';
-import { CheckSquare, Clock, Image, FileText, Mic, Focus, CheckCircle2, ClipboardList } from 'lucide-react';
+import { CheckSquare, Clock, Image, FileText, Mic, CheckCircle2, ClipboardList } from 'lucide-react';
 import { TaskIcon } from './components/TaskIcon';
 
 interface TaskTypeSelectorProps {
@@ -17,7 +17,6 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onCha
     { type: 'screenshot', icon: <Image className="h-4 w-4" />, label: 'Screenshot' },
     { type: 'journal', icon: <FileText className="h-4 w-4" />, label: 'Journal' },
     { type: 'voicenote', icon: <Mic className="h-4 w-4" />, label: 'Voice' },
-    { type: 'focus', icon: <Focus className="h-4 w-4" />, label: 'Focus' },
     { type: 'habit', icon: <CheckCircle2 className="h-4 w-4" />, label: 'Habit' },
     { type: 'checklist', icon: <ClipboardList className="h-4 w-4" />, label: 'Checklist' }
   ];
@@ -37,8 +36,6 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onCha
         return "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700";
       case 'voicenote':
         return "bg-rose-500 hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-700";
-      case 'focus':
-        return "bg-cyan-500 hover:bg-cyan-600 dark:bg-cyan-600 dark:hover:bg-cyan-700";
       case 'habit':
         return "bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700";
       default:

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Layers, FileSpreadsheet } from 'lucide-react';
+import { FileText, Layers, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,7 +23,7 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
     {
       id: 'checklist',
       name: 'Checklists',
-      icon: <TaskIcon taskType="checklist" size={16} className="mr-1.5" />,
+      icon: <ClipboardList className="h-4 w-4 mr-1.5 text-emerald-500 dark:text-emerald-400" />,
     },
     {
       id: 'timer',
