@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { TaskType } from '@/types/tasks';
 import { cn } from '@/lib/utils';
 import { TASK_TYPE_DEFINITIONS } from '@/utils/taskTypeConfig';
+import { TaskIcon } from './TaskIcon';
 
 interface TaskTypeSelectorProps {
   value: TaskType;
@@ -13,7 +14,7 @@ interface TaskTypeSelectorProps {
 export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onChange }) => {
   return (
     <div className="flex flex-wrap gap-2">
-      {TASK_TYPE_DEFINITIONS.map(({ type, icon, label, color }) => (
+      {TASK_TYPE_DEFINITIONS.map(({ type, label, color }) => (
         <Button
           key={type}
           variant={value === type ? 'default' : 'outline'}
@@ -24,7 +25,9 @@ export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onCha
             value === type ? color.button : ""
           )}
         >
-          <span className={value !== type ? color.icon : ""}>{icon}</span>
+          <span className={value !== type ? color.icon : ""}>
+            <TaskIcon type={type} size={16} />
+          </span>
           <span>{label}</span>
         </Button>
       ))}
