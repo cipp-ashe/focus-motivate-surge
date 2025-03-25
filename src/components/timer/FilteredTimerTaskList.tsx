@@ -86,6 +86,7 @@ export const FilteredTimerTaskList = () => {
       handleDelete={handleDelete}
       handleTaskUpdate={handleTaskUpdate}
       handleTaskComplete={handleTaskComplete}
+      isTimerView={true}
       emptyState={
         <div className="py-8 text-center">
           <p className="text-lg font-medium mb-2">No timer tasks</p>

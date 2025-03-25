@@ -54,14 +54,31 @@ const TimerPage = () => {
       </PageHeader>
       
       <TaskSelectionProvider>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Timer Task Input */}
-          <div className="md:col-span-3">
+          <div className="md:col-span-12">
             <TimerTaskInput />
           </div>
           
-          {/* Timer Section */}
-          <div className="md:col-span-2">
+          {/* Timer Task List - Now with more space */}
+          <div className="md:col-span-5 md:order-2">
+            <Card className="dark:bg-card/90 border-border/40 dark:border-border/20 h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-medium flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                  Timer Tasks
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-full max-h-[70vh]">
+                  <FilteredTimerTaskList />
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Timer Section - Now with less space */}
+          <div className="md:col-span-7 md:order-1">
             <Card className="dark:bg-card/90 border-border/40 dark:border-border/20">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg font-medium flex items-center gap-2">
@@ -75,23 +92,6 @@ const TimerPage = () => {
                     favorites={favorites} 
                     setFavorites={setFavorites} 
                   />
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Timer Task List */}
-          <div className="md:col-span-1">
-            <Card className="dark:bg-card/90 border-border/40 dark:border-border/20 h-full">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                  Timer Tasks
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-full max-h-[60vh]">
-                  <FilteredTimerTaskList />
                 </ScrollArea>
               </CardContent>
             </Card>

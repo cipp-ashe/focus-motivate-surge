@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { formatDistanceToNow } from 'date-fns';
@@ -47,6 +48,10 @@ export const TaskContent: React.FC<TaskContentProps> = React.memo(
       [handleTaskAction]
     );
 
+    // Determine if we should hide the timer tag in the task content
+    const isTimerTask = task.taskType === 'timer';
+    const shouldHideTimerTag = isTimerView && isTimerTask;
+
     return (
       <div className="flex items-start gap-2 w-full overflow-hidden" data-testid="task-content">
         {/* Checkbox column - fixed width */}
@@ -56,7 +61,11 @@ export const TaskContent: React.FC<TaskContentProps> = React.memo(
 
         {/* Main content column - flexible width */}
         <div className="flex-grow min-w-0 overflow-hidden pr-2">
-          <TaskContentDisplay task={task} handleTaskAction={handleTaskAction} />
+          <TaskContentDisplay 
+            task={task} 
+            handleTaskAction={handleTaskAction} 
+            hideTimerTag={shouldHideTimerTag}
+          />
         </div>
 
         {/* Details column - only shown when needed */}
