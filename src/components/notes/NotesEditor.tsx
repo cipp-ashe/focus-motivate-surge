@@ -1,31 +1,40 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Note, NoteTag } from '@/types/notes';
-import { useNotesContext } from '@/contexts/notes/notesContext';
+import { useNotesContext } from '@/contexts/notes/NotesContext';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { 
-  ChevronLeft, Save, Trash, 
-  FileText, BookOpen, CheckSquare, Activity, Code,
-  Pin, Archive, ArchiveRestore, Download, Tags
+import {
+  ChevronLeft,
+  Save,
+  Trash,
+  FileText,
+  BookOpen,
+  CheckSquare,
+  Activity,
+  Code,
+  Pin,
+  Archive,
+  ArchiveRestore,
+  Download,
+  Tags,
 } from 'lucide-react';
 import { formatDate, downloadNoteAsMarkdown } from '@/utils/noteUtils';
 import { NoteTagList } from './NoteTagList';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogDescription
+  DialogDescription,
 } from '@/components/ui/dialog';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,9 +43,17 @@ interface NotesEditorProps {
 }
 
 export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
-  const { updateNote, deleteNote, selectNote, toggleArchiveNote, togglePinNote, addTagToNote, removeTagFromNote } = useNotesContext();
+  const {
+    updateNote,
+    deleteNote,
+    selectNote,
+    toggleArchiveNote,
+    togglePinNote,
+    addTagToNote,
+    removeTagFromNote,
+  } = useNotesContext();
   const { toast } = useToast();
-  
+
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -45,27 +62,27 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
   const [selectedTags, setSelectedTags] = useState<NoteTag[]>(note.tags);
   const [tagColor, setTagColor] = useState<string>('default');
   const [isMobile, setIsMobile] = useState(false);
-  
+
   const contentRef = useRef<HTMLTextAreaElement>(null);
-  
+
   // Check for mobile view
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
+
   // Update local state when note changes
   useEffect(() => {
     setTitle(note.title);
     setContent(note.content);
     setSelectedTags(note.tags);
   }, [note]);
-  
+
   // Autoresize textarea
   useEffect(() => {
     if (contentRef.current) {
@@ -73,65 +90,65 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
       contentRef.current.style.height = `${contentRef.current.scrollHeight}px`;
     }
   }, [content]);
-  
+
   const handleSave = () => {
     if (!title.trim()) {
       toast({
-        title: "Title is required",
-        description: "Please enter a title for your note",
-        variant: "destructive"
+        title: 'Title is required',
+        description: 'Please enter a title for your note',
+        variant: 'destructive',
       });
       return;
     }
-    
+
     updateNote(note.id, {
       title,
       content,
-      tags: selectedTags
+      tags: selectedTags,
     });
-    
+
     toast({
-      title: "Note saved",
-      description: "Your changes have been saved"
+      title: 'Note saved',
+      description: 'Your changes have been saved',
     });
   };
-  
+
   const handleDelete = () => {
     deleteNote(note.id);
     setIsDeleteDialogOpen(false);
   };
-  
+
   const handleBack = () => {
     selectNote(null);
   };
-  
+
   const handleAddTag = () => {
     if (!tagInput.trim()) return;
-    
+
     const newTag: NoteTag = {
       id: `tag-${Date.now()}`,
       name: tagInput.trim(),
-      color: tagColor as any
+      color: tagColor as any,
     };
-    
+
     addTagToNote(note.id, newTag);
     setTagInput('');
     setTagColor('default');
   };
-  
+
   const handleRemoveTag = (tagId: string) => {
     removeTagFromNote(note.id, tagId);
   };
-  
+
   const handleChangeNoteType = (type: 'standard' | 'journal' | 'task' | 'habit' | 'markdown') => {
     updateNote(note.id, { type });
-    
+
     toast({
-      title: "Note type changed",
-      description: `This note is now a ${type} note`
+      title: 'Note type changed',
+      description: `This note is now a ${type} note`,
     });
   };
-  
+
   return (
     <div className="flex flex-col h-full bg-background dark:bg-background animate-fade-in">
       <div className="flex items-center justify-between border-b border-border p-3">
@@ -140,7 +157,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
             <ChevronLeft className="h-5 w-5" />
             <span className="sr-only">Back</span>
           </Button>
-          
+
           <div>
             <h2 className="text-lg font-medium">Editor</h2>
             <p className="text-xs text-muted-foreground">
@@ -148,13 +165,13 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon" onClick={handleSave} title="Save note">
             <Save className="h-5 w-5" />
             <span className="sr-only">Save</span>
           </Button>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -185,7 +202,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -221,7 +238,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
                 Manage Tags
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => setIsDeleteDialogOpen(true)}
                 className="text-destructive"
               >
@@ -232,7 +249,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
           </DropdownMenu>
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-auto p-4 space-y-4">
         <Input
           value={title}
@@ -240,18 +257,14 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
           placeholder="Note title"
           className="text-xl font-medium border-0 border-b border-border rounded-none px-0 h-auto focus-visible:ring-0"
         />
-        
+
         <div className="flex flex-wrap gap-1 mt-2">
-          <NoteTagList 
-            tags={selectedTags} 
-            onRemove={handleRemoveTag}
-            interactive
-          />
-          
+          <NoteTagList tags={selectedTags} onRemove={handleRemoveTag} interactive />
+
           {selectedTags.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="h-5 px-2 text-xs"
               onClick={() => setIsTagDialogOpen(true)}
             >
@@ -259,7 +272,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
             </Button>
           )}
         </div>
-        
+
         <Textarea
           ref={contentRef}
           value={content}
@@ -268,7 +281,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
           className="min-h-[300px] resize-none border-0 focus-visible:ring-0 p-0 text-base leading-relaxed"
         />
       </div>
-      
+
       {isMobile && (
         <div className="border-t border-border p-3 flex justify-end space-x-2">
           <Button variant="default" onClick={handleSave}>
@@ -277,7 +290,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
           </Button>
         </div>
       )}
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
@@ -288,22 +301,24 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Tag Management Dialog */}
       <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Manage Tags</DialogTitle>
-            <DialogDescription>
-              Add or remove tags from this note
-            </DialogDescription>
+            <DialogDescription>Add or remove tags from this note</DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex items-end gap-2 mb-4">
             <div className="flex-1">
               <label className="text-sm font-medium mb-1 block">Tag Name</label>
@@ -319,6 +334,7 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
                 value={tagColor}
                 onChange={(e) => setTagColor(e.target.value)}
                 className="w-full h-10 px-3 border border-input rounded-md bg-background text-sm"
+                aria-label="Tag color"
               >
                 <option value="default">Default</option>
                 <option value="red">Red</option>
@@ -331,24 +347,22 @@ export const NotesEditor: React.FC<NotesEditorProps> = ({ note }) => {
                 <option value="teal">Teal</option>
               </select>
             </div>
-            <Button type="button" onClick={handleAddTag}>Add</Button>
+            <Button type="button" onClick={handleAddTag}>
+              Add
+            </Button>
           </div>
-          
+
           <div className="space-y-2">
             <label className="text-sm font-medium mb-1 block">Current Tags</label>
             <div className="flex flex-wrap gap-1 min-h-[100px] border border-input rounded-md p-2">
               {selectedTags.length > 0 ? (
-                <NoteTagList 
-                  tags={selectedTags} 
-                  onRemove={handleRemoveTag}
-                  interactive
-                />
+                <NoteTagList tags={selectedTags} onRemove={handleRemoveTag} interactive />
               ) : (
                 <p className="text-sm text-muted-foreground">No tags added yet</p>
               )}
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button onClick={() => setIsTagDialogOpen(false)}>Done</Button>
           </DialogFooter>

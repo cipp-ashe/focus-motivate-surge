@@ -84,12 +84,12 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
   if (showCompletion && completionMetrics) {
     return (
       <>
-        <CardHeader className="bg-card/70 border-b border-border/10 py-4">
-          <CardTitle className="text-lg font-medium flex items-center gap-2 text-purple-400">
-            <TimerIcon className="h-5 w-5 text-purple-400" />
+        <div className="bg-card/70 border-b border-border/10 p-3">
+          <h3 className="text-base font-medium flex items-center gap-2 text-purple-400">
+            <TimerIcon className="h-4 w-4 text-purple-400" />
             Timer Complete
-          </CardTitle>
-        </CardHeader>
+          </h3>
+        </div>
         <CompletionView metrics={completionMetrics} onComplete={handleCloseCompletion} />
       </>
     );
@@ -97,12 +97,6 @@ export const TimerContent: React.FC<TimerContentProps> = (props) => {
 
   return (
     <>
-      <CardHeader className="bg-card/70 border-b border-border/10 py-4">
-        <CardTitle className="text-lg font-medium flex items-center gap-2">
-          <TimerIcon className="h-5 w-5 text-purple-500" />
-          {taskName || 'Focus Timer'}
-        </CardTitle>
-      </CardHeader>
       <TimerRenderer
         isExpanded={isExpanded}
         taskName={taskName}

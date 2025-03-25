@@ -1,4 +1,3 @@
-
 /**
  * Notes Types
  */
@@ -13,7 +12,16 @@ export interface NoteTag {
   color?: TagColor;
 }
 
-export type TagColor = 'default' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink' | 'teal';
+export type TagColor =
+  | 'default'
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'blue'
+  | 'purple'
+  | 'pink'
+  | 'teal';
 
 export type NoteSortOption = 'createdAt' | 'updatedAt' | 'title' | 'type';
 export type NoteSortDirection = 'asc' | 'desc';
@@ -28,6 +36,7 @@ export interface Note {
   tags: NoteTag[];
   pinned?: boolean;
   archived?: boolean;
+  favorite?: boolean;
   color?: string;
   relationships?: NoteRelationships;
 }

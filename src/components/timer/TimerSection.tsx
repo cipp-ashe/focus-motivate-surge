@@ -141,7 +141,7 @@ export const TimerSection: React.FC<TimerSectionProps> = ({
   };
 
   return (
-    <div className="w-full h-full p-4">
+    <div className="w-full h-full">
       {selectedTaskState ? (
         <Timer 
           key={selectedTaskState.id}

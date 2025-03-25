@@ -90,51 +90,49 @@ export const TimerExpandedView = forwardRef<TimerExpandedViewRef, TimerExpandedV
       handleSave
     }));
 
-    return (
-      <div className="p-4 h-full flex flex-col">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-foreground/90">
-            {taskName} - Extended View
-          </h3>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="icon" onClick={handleSave} title="Save notes">
-              <Save className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={collapse} title="Collapse view">
-              <ArrowDown className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onClose} title="Close expanded view">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <Card className="mb-4 bg-card/50">
-          <CardContent className="p-4">
-            <QuoteDisplay
-              quote={quote}
-              onNewQuote={onNewQuote}
-              onAddToFavorites={onAddToFavorites}
-              onRemoveFromFavorites={onRemoveFromFavorites}
-            />
-          </CardContent>
-        </Card>
-
-        <div className="flex-grow flex flex-col">
-          <label htmlFor="notes" className="mb-2 text-sm font-medium text-foreground/90">
-            Notes
-          </label>
-          <Textarea
-            ref={notesRef}
-            id="notes"
-            placeholder="Take notes during your timer session..."
-            className="flex-grow resize-none bg-background/50 focus:bg-background/80 transition-colors"
-            value={notes}
-            onChange={(e) => onNotesChange(e.target.value)}
-          />
+  return (
+    <div className="p-4 h-full flex flex-col">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-base font-medium">
+          {taskName}
+        </h3>
+        <div className="flex gap-1">
+          <Button variant="ghost" size="icon" onClick={handleSave} title="Save notes" className="h-8 w-8">
+            <Save className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={collapse} title="Collapse view" className="h-8 w-8">
+            <ArrowDown className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose} title="Close expanded view" className="h-8 w-8">
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
-    );
+
+      <div className="bg-card/20 p-3 rounded-md mb-3">
+        <QuoteDisplay
+          quote={quote}
+          onNewQuote={onNewQuote}
+          onAddToFavorites={onAddToFavorites}
+          onRemoveFromFavorites={onRemoveFromFavorites}
+        />
+      </div>
+
+      <div className="flex-grow flex flex-col">
+        <label htmlFor="notes" className="mb-2 text-sm font-medium">
+          Notes
+        </label>
+        <Textarea
+          ref={notesRef}
+          id="notes"
+          placeholder="Take notes during your timer session..."
+          className="flex-grow resize-none bg-background/50 focus:bg-background/80 transition-colors"
+          value={notes}
+          onChange={(e) => onNotesChange(e.target.value)}
+        />
+      </div>
+    </div>
+  );
   }
 );
 

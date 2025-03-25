@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { Task } from '@/types/tasks';
@@ -8,7 +7,7 @@ import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 import { ClockIcon } from 'lucide-react';
 import { logger } from '@/utils/logManager';
 import { toast } from 'sonner';
-import { TaskType } from '@/types/timer/models';
+import { TaskType } from '@/types/tasks';
 
 interface EmptyStateProps {
   icon: React.ReactNode;
@@ -17,12 +16,12 @@ interface EmptyStateProps {
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description }) => (
-  <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
-    <div className="h-12 w-12 rounded-full flex items-center justify-center bg-muted/20 mb-2">
+  <div className="flex flex-col items-center justify-center py-4 text-center">
+    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-muted/20 mb-2">
       {icon}
     </div>
-    <h3 className="font-medium text-lg text-foreground/90">{title}</h3>
-    <p className="text-muted-foreground text-sm max-w-[220px]">{description}</p>
+    <h3 className="font-medium text-base">{title}</h3>
+    <p className="text-muted-foreground text-sm max-w-[200px] mt-1">{description}</p>
   </div>
 );
 
@@ -32,79 +31,79 @@ export const FilteredTimerTaskList = () => {
   const { selectedTask, selectTask } = useTaskSelection();
   const taskEvents = useTaskEvents();
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const filterTimerTasks = useCallback(() => {
     logger.debug('FilteredTimerTaskList', 'Filtering timer tasks from all tasks');
-    
+
     const filteredTasks = items
-      .filter(task => !task.completed && (task.taskType === 'timer' || task.taskType === 'focus' as TaskType))
+      .filter((task) => !task.completed && task.taskType === 'timer')
       .sort((a, b) => {
         // Sort by creation date (newest first)
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-    
+
     logger.debug('FilteredTimerTaskList', `Found ${filteredTasks.length} timer tasks`);
     setTimerTasks(filteredTasks);
     setIsLoading(false);
   }, [items]);
-  
+
   // Filter tasks specifically for timer view (timer tasks)
   useEffect(() => {
     filterTimerTasks();
   }, [filterTimerTasks]);
-  
+
   // Listen for task creation events to immediately update the list
   useEffect(() => {
     const handleTaskCreate = (task: Task) => {
-      if (task.taskType === 'timer' || task.taskType === 'focus' as TaskType) {
+      if (task.taskType === 'timer') {
         logger.debug('FilteredTimerTaskList', `New timer task created: ${task.name}`);
-        
+
         // Immediately add the new task to our filtered list
-        setTimerTasks(prev => [task, ...prev]);
-        
+        setTimerTasks((prev) => [task, ...prev]);
+
         // Automatically select the new task
         selectTask(task);
-        
+
         toast.success(`Timer task added: ${task.name}`);
       }
     };
-    
+
     const unsubscribe = taskEvents.onTaskCreate(handleTaskCreate);
     return () => unsubscribe();
   }, [taskEvents, selectTask]);
-  
+
   // Handle task selection
   const handleTaskSelect = (taskId: string) => {
     logger.debug('FilteredTimerTaskList', `Task selected: ${taskId}`);
-    
-    const task = timerTasks.find(t => t.id === taskId);
+
+    const task = timerTasks.find((t) => t.id === taskId);
     if (task) {
       selectTask(task);
     }
   };
-  
+
   // Event handlers for timer tasks
-  const handleTaskUpdate = (data: { taskId: string, updates: Partial<Task> }) => {
+  const handleTaskUpdate = (data: { taskId: string; updates: Partial<Task> }) => {
     logger.debug('FilteredTimerTaskList', `Task updated: ${data.taskId}`, data.updates);
     // TaskContext will handle the actual update
   };
-  
+
   const handleTaskDelete = (data: { taskId: string }) => {
     logger.debug('FilteredTimerTaskList', `Task deleted: ${data.taskId}`);
     // Remove from local state immediately for better UX
-    setTimerTasks(prev => prev.filter(task => task.id !== data.taskId));
-    
+    setTimerTasks((prev) => prev.filter((task) => task.id !== data.taskId));
+
     // If the deleted task was selected, clear the selection
     if (selectedTask?.id === data.taskId) {
       selectTask(null);
     }
   };
-  
+
   const handleTaskComplete = (data: { taskId: string }) => {
     logger.debug('FilteredTimerTaskList', `Task completed: ${data.taskId}`);
     // Remove from local state immediately for better UX
-    setTimerTasks(prev => prev.filter(task => task.id !== data.taskId));
-    
+    setTimerTasks((prev) => prev.filter((task) => task.id !== data.taskId));
+
     // If the completed task was selected, clear the selection
     if (selectedTask?.id === data.taskId) {
       selectTask(null);

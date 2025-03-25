@@ -1,63 +1,62 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useNotesContext } from '@/contexts/notes/notesContext';
-import { 
-  Search, X, ListFilter, SortAsc, SortDesc, Grid3X3, List, 
-  CheckSquare, Archive, ArchiveRestore 
+// Import from the PascalCase file name
+import { useNotesContext } from '@/contexts/notes/NotesContext';
+import {
+  Search,
+  X,
+  ListFilter,
+  SortAsc,
+  SortDesc,
+  Grid3X3,
+  List,
+  CheckSquare,
+  Archive,
+  ArchiveRestore,
 } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NoteType } from '@/types/notes';
 import { cn } from '@/lib/utils';
 
 export const NotesHeader: React.FC = () => {
-  const { 
-    state, 
-    setSearchTerm,
-    setSorting,
-    setFilter,
-    setView,
-    setShowArchived
-  } = useNotesContext();
-  
+  const { state, setSearchTerm, setSorting, setFilter, setView, setShowArchived } =
+    useNotesContext();
+
   const [searchValue, setSearchValue] = useState('');
-  
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
     setSearchTerm(e.target.value);
   };
-  
+
   const clearSearch = () => {
     setSearchValue('');
     setSearchTerm('');
   };
-  
+
   const toggleSortDirection = () => {
-    setSorting(
-      state.sortBy, 
-      state.sortDirection === 'asc' ? 'desc' : 'asc'
-    );
+    setSorting(state.sortBy, state.sortDirection === 'asc' ? 'desc' : 'asc');
   };
-  
+
   const handleFilterByType = (type: NoteType | null) => {
     setFilter(type);
   };
-  
+
   const toggleView = () => {
     setView(state.view === 'grid' ? 'list' : 'grid');
   };
-  
+
   const toggleShowArchived = () => {
     setShowArchived(!state.showArchived);
   };
-  
+
   return (
     <div className="border-b border-border p-3 space-y-3">
       <div className="relative">
@@ -69,7 +68,7 @@ export const NotesHeader: React.FC = () => {
           className="pl-8 pr-8"
         />
         {searchValue && (
-          <button 
+          <button
             className="absolute right-2 top-1/2 transform -translate-y-1/2"
             onClick={clearSearch}
           >
@@ -78,7 +77,7 @@ export const NotesHeader: React.FC = () => {
           </button>
         )}
       </div>
-      
+
       <div className="flex space-x-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -88,9 +87,7 @@ export const NotesHeader: React.FC = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => handleFilterByType(null)}>
-              All Notes
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleFilterByType(null)}>All Notes</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleFilterByType('standard')}>
               Standard Notes
@@ -109,7 +106,7 @@ export const NotesHeader: React.FC = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="flex-1">
@@ -138,14 +135,9 @@ export const NotesHeader: React.FC = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      
+
       <div className="flex space-x-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex-1"
-          onClick={toggleView}
-        >
+        <Button variant="outline" size="sm" className="flex-1" onClick={toggleView}>
           {state.view === 'grid' ? (
             <>
               <List className="h-4 w-4 mr-1" />
@@ -158,11 +150,11 @@ export const NotesHeader: React.FC = () => {
             </>
           )}
         </Button>
-        
-        <Button 
-          variant={state.showArchived ? "default" : "outline"}
-          size="sm" 
-          className={cn("flex-1", state.showArchived && "bg-amber-500 hover:bg-amber-600")}
+
+        <Button
+          variant={state.showArchived ? 'default' : 'outline'}
+          size="sm"
+          className={cn('flex-1', state.showArchived && 'bg-amber-500 hover:bg-amber-600')}
           onClick={toggleShowArchived}
         >
           {state.showArchived ? (

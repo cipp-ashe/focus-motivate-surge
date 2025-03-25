@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Task } from '@/types/tasks';
 import { TaskItem } from './components/TaskItem';
@@ -8,11 +7,13 @@ export interface TaskListProps {
   tasks: Task[];
   selectedTaskId?: string | null;
   handleTaskSelect?: (taskId: string) => void;
-  handleTaskUpdate?: (data: { taskId: string, updates: Partial<Task> }) => void;
-  handleTaskComplete?: (data: { taskId: string, metrics?: any }) => void;
+  handleTaskUpdate?: (data: { taskId: string; updates: Partial<Task> }) => void;
+  handleTaskComplete?: (data: { taskId: string; metrics?: any }) => void;
   handleDelete?: (data: { taskId: string }) => void;
   emptyState?: React.ReactNode;
   isTimerView?: boolean;
+  isLoading?: boolean;
+  onForceUpdate?: () => void;
   dialogOpeners?: {
     checklist?: (taskId: string, taskName: string, items: any[]) => void;
     journal?: (taskId: string, taskName: string, entry: string) => void;
@@ -30,7 +31,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   handleDelete,
   emptyState,
   isTimerView = false,
-  dialogOpeners
+  dialogOpeners,
 }) => {
   if (tasks.length === 0 && emptyState) {
     return <>{emptyState}</>;
@@ -46,8 +47,16 @@ export const TaskList: React.FC<TaskListProps> = ({
           isTimerView={isTimerView}
           onSelect={() => handleTaskSelect?.(task.id)}
           onDelete={handleDelete ? () => handleDelete({ taskId: task.id }) : undefined}
-          onUpdate={handleTaskUpdate ? (updates) => handleTaskUpdate({ taskId: task.id, updates }) : undefined}
-          onComplete={handleTaskComplete ? (metrics) => handleTaskComplete({ taskId: task.id, metrics }) : undefined}
+          onUpdate={
+            handleTaskUpdate
+              ? (updates) => handleTaskUpdate({ taskId: task.id, updates })
+              : undefined
+          }
+          onComplete={
+            handleTaskComplete
+              ? (metrics) => handleTaskComplete({ taskId: task.id, metrics })
+              : undefined
+          }
           dialogOpeners={dialogOpeners}
         />
       ))}

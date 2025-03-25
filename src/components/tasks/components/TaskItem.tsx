@@ -87,7 +87,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           : `border-border/40 dark:border-border/30 hover:border-border/70 dark:hover:border-border/60 ${borderColorClass}/30 ${bgColorClass}`,
         isHovered &&
           !taskIsSelected &&
-          'border-border/70 dark:border-border/60 bg-card/50 dark:bg-card/40 shadow-sm',
+          'border-border/70 dark:border-border/60 shadow-sm',
         'md:max-w-full'
       )}
       onMouseEnter={() => setIsHovered(true)}

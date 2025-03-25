@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,37 +17,40 @@ export const TimerTaskInput = () => {
 
   const handleCreateTimerTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!taskName.trim()) {
       toast.error('Please enter a task name');
       return;
     }
-    
+
     setIsSubmitting(true);
     logger.debug('TimerTaskInput', `Creating timer task: ${taskName}`);
-    
+
     try {
       // Create a new timer task with default 25 minutes
-      const newTask = createTaskOperations.createTask({
-        name: taskName,
-        taskType: 'timer',
-        duration: 1500, // 25 minutes in seconds
-        completed: false,
-        createdAt: new Date().toISOString()
-      }, {
-        suppressToast: true,
-        selectAfterCreate: false
-      });
-      
+      const newTask = createTaskOperations.createTask(
+        {
+          name: taskName,
+          taskType: 'timer',
+          duration: 1500, // 25 minutes in seconds
+          completed: false,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          suppressToast: true,
+          selectAfterCreate: false,
+        }
+      );
+
       // Clear input
       setTaskName('');
-      
+
       // Show success message
       toast.success(`Timer task created: ${newTask.name}`);
-      
+
       // Immediately select the new task
       selectTask(newTask);
-      
+
       logger.debug('TimerTaskInput', `Timer task created and selected: ${newTask.id}`);
     } catch (error) {
       logger.error('TimerTaskInput', 'Error creating timer task:', error);
@@ -59,23 +61,23 @@ export const TimerTaskInput = () => {
   };
 
   return (
-    <form onSubmit={handleCreateTimerTask} className="mb-5 flex items-center space-x-2">
+    <form onSubmit={handleCreateTimerTask} className="mb-4 flex items-center gap-2">
       <div className="relative flex-1">
         <Input
           type="text"
           placeholder="Add a new timer task..."
           value={taskName}
           onChange={(e) => setTaskName(e.target.value)}
-          className="flex-1 bg-card/60 dark:bg-card/30 border-border/40 dark:border-border/30 pl-3 pr-3 py-5 text-base shadow-sm"
+          className="flex-1 bg-card/30 border-border/30 py-2 text-base"
         />
       </div>
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         disabled={isSubmitting || !taskName.trim()}
-        className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 py-5 px-4 shadow-sm"
+        className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
       >
-        <PlusIcon className="h-4 w-4 mr-2" />
-        <PlayIcon className="h-4 w-4" />
+        <PlusIcon className="h-4 w-4 mr-1" />
+        <span className="sr-only md:not-sr-only md:inline">Add</span>
       </Button>
     </form>
   );

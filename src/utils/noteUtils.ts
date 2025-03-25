@@ -1,4 +1,3 @@
-
 import { Note, NoteTag, TagColor, NoteType } from '@/types/notes';
 import { format, formatDistanceToNow } from 'date-fns';
 import { STORAGE_KEYS } from './constants';
@@ -45,9 +44,9 @@ export const getTagColor = (color: TagColor | undefined): string => {
     blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
     purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
     pink: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300',
-    teal: 'bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300'
+    teal: 'bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300',
   };
-  
+
   return colorMap[color || 'default'];
 };
 
@@ -60,10 +59,25 @@ export const getNoteTypeIcon = (type: NoteType): string => {
     journal: 'book-open',
     task: 'check-square',
     habit: 'activity',
-    markdown: 'code'
+    markdown: 'code',
   };
-  
+
   return iconMap[type] || 'file-text';
+};
+
+/**
+ * Get a color class for a note title based on type
+ */
+export const getNoteTitleColor = (type: NoteType): string => {
+  const colorMap: Record<NoteType, string> = {
+    standard: 'text-blue-600 dark:text-blue-400',
+    journal: 'text-purple-600 dark:text-purple-400',
+    task: 'text-green-600 dark:text-green-400',
+    habit: 'text-orange-600 dark:text-orange-400',
+    markdown: 'text-teal-600 dark:text-teal-400',
+  };
+
+  return colorMap[type] || 'text-blue-600 dark:text-blue-400';
 };
 
 /**
@@ -71,11 +85,9 @@ export const getNoteTypeIcon = (type: NoteType): string => {
  */
 export const sanitizeContent = (content: string): string => {
   if (!content) return '';
-  
+
   // Basic sanitation - remove potentially harmful scripts
-  return content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .trim();
+  return content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').trim();
 };
 
 /**
@@ -91,11 +103,11 @@ export const getPreviewText = (content: string, length: number = 120): string =>
     .replace(/```[\s\S]*?```/g, '') // Remove code blocks
     .replace(/`(.+?)`/g, '$1') // Remove inline code
     .trim();
-    
+
   if (textOnly.length <= length) {
     return textOnly;
   }
-  
+
   return textOnly.substring(0, length) + '...';
 };
 
@@ -103,38 +115,38 @@ export const getPreviewText = (content: string, length: number = 120): string =>
  * Filter notes by search term, tag, and type
  */
 export const filterNotes = (
-  notes: Note[], 
-  searchTerm: string = '', 
+  notes: Note[],
+  searchTerm: string = '',
   tagFilter: string | null = null,
   typeFilter: NoteType | null = null,
   showArchived: boolean = false
 ): Note[] => {
-  return notes.filter(note => {
+  return notes.filter((note) => {
     // Filter by archive status
     if (!showArchived && note.archived) {
       return false;
     }
-    
+
     // Filter by tag if specified
-    if (tagFilter && !note.tags.some(tag => tag.id === tagFilter)) {
+    if (tagFilter && !note.tags.some((tag) => tag.id === tagFilter)) {
       return false;
     }
-    
+
     // Filter by type if specified
     if (typeFilter && note.type !== typeFilter) {
       return false;
     }
-    
+
     // Filter by search term if specified
     if (searchTerm) {
       const termLower = searchTerm.toLowerCase();
       return (
         note.title.toLowerCase().includes(termLower) ||
         note.content.toLowerCase().includes(termLower) ||
-        note.tags.some(tag => tag.name.toLowerCase().includes(termLower))
+        note.tags.some((tag) => tag.name.toLowerCase().includes(termLower))
       );
     }
-    
+
     return true;
   });
 };
@@ -159,31 +171,27 @@ export const downloadNoteAsMarkdown = (note: Note): void => {
  * Sort notes by specified criteria
  */
 export const sortNotes = (
-  notes: Note[], 
+  notes: Note[],
   sortBy: 'createdAt' | 'updatedAt' | 'title' = 'updatedAt',
   direction: 'asc' | 'desc' = 'desc'
 ): Note[] => {
   // Create a copy to avoid mutating the original array
   const sorted = [...notes];
-  
+
   sorted.sort((a, b) => {
     // Always put pinned notes first
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
-    
+
     // Then sort by the specified criteria
     if (sortBy === 'title') {
-      return direction === 'asc' 
-        ? a.title.localeCompare(b.title)
-        : b.title.localeCompare(a.title);
+      return direction === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
     } else {
       const dateA = new Date(a[sortBy]).getTime();
       const dateB = new Date(b[sortBy]).getTime();
-      return direction === 'asc' 
-        ? dateA - dateB 
-        : dateB - dateA;
+      return direction === 'asc' ? dateA - dateB : dateB - dateA;
     }
   });
-  
+
   return sorted;
 };

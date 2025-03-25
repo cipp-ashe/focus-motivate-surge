@@ -1,14 +1,14 @@
-import React from "react";
-import { toast } from "sonner";
-import { Card } from "@/components/ui/card";
-import type { TimerProps } from "@/types/timer/components";
-import { TimerError } from "./TimerError";
-import { TimerContent } from "./TimerContent";
-import { useTimerInitialization } from "./hooks/useTimerInitialization";
-import { TimerErrorBoundary } from "./TimerErrorBoundary";
-import { toISOString } from "@/lib/utils/dateUtils";
-import { logger } from "@/utils/logManager";
-import { Quote } from "@/types/timer/models";
+import React from 'react';
+import { toast } from 'sonner';
+import { Card } from '@/components/ui/card';
+import type { TimerProps } from '@/types/timer/components';
+import { TimerError } from './TimerError';
+import { TimerContent } from './TimerContent';
+import { useTimerInitialization } from './hooks/useTimerInitialization';
+import { TimerErrorBoundary } from './TimerErrorBoundary';
+import { toISOString } from '@/lib/utils/dateUtils';
+import { logger } from '@/utils/logManager';
+import { Quote } from '@/types/timer/models';
 
 export const Timer = ({
   duration,
@@ -18,13 +18,13 @@ export const Timer = ({
   onAddTime,
   onDurationChange,
   favorites = [],
-  setFavorites = () => {}
+  setFavorites = () => {},
 }: TimerProps) => {
   logger.debug('Timer', 'Timer component rendering with:', {
     duration,
     taskName,
     taskId,
-    isValid: Boolean(duration && taskName)
+    isValid: Boolean(duration && taskName),
   });
 
   // Validate required props
@@ -38,46 +38,50 @@ export const Timer = ({
   }
 
   // Wrap onComplete to ensure it receives valid metrics and handle errors gracefully
-  const handleComplete = React.useCallback((metrics: any) => {
-    try {
-      logger.debug('Timer', "Timer: handleComplete with metrics:", metrics);
-      
-      // Ensure we have valid metrics with all required fields
-      const validatedMetrics = {
-        ...metrics,
-        // Make sure we have these required fields with default values if needed
-        startTime: metrics.startTime || toISOString(new Date()),
-        endTime: metrics.endTime || toISOString(new Date()),
-        // Ensure completionDate is a properly formatted ISO string
-        completionDate: metrics.completionDate || toISOString(new Date()),
-        // Ensure numeric values are actually numbers
-        actualDuration: typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 0,
-        pausedTime: typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0,
-        extensionTime: typeof metrics.extensionTime === 'number' ? metrics.extensionTime : 0,
-        netEffectiveTime: typeof metrics.netEffectiveTime === 'number' ? metrics.netEffectiveTime : 0,
-        // Add taskId to metrics if available
-        taskId: taskId || metrics.taskId
-      };
-      
-      logger.debug('Timer', "Timer: Validated metrics:", validatedMetrics);
-      
-      if (onComplete) {
-        onComplete(validatedMetrics);
+  const handleComplete = React.useCallback(
+    (metrics: any) => {
+      try {
+        logger.debug('Timer', 'Timer: handleComplete with metrics:', metrics);
+
+        // Ensure we have valid metrics with all required fields
+        const validatedMetrics = {
+          ...metrics,
+          // Make sure we have these required fields with default values if needed
+          startTime: metrics.startTime || toISOString(new Date()),
+          endTime: metrics.endTime || toISOString(new Date()),
+          // Ensure completionDate is a properly formatted ISO string
+          completionDate: metrics.completionDate || toISOString(new Date()),
+          // Ensure numeric values are actually numbers
+          actualDuration: typeof metrics.actualDuration === 'number' ? metrics.actualDuration : 0,
+          pausedTime: typeof metrics.pausedTime === 'number' ? metrics.pausedTime : 0,
+          extensionTime: typeof metrics.extensionTime === 'number' ? metrics.extensionTime : 0,
+          netEffectiveTime:
+            typeof metrics.netEffectiveTime === 'number' ? metrics.netEffectiveTime : 0,
+          // Add taskId to metrics if available
+          taskId: taskId || metrics.taskId,
+        };
+
+        logger.debug('Timer', 'Timer: Validated metrics:', validatedMetrics);
+
+        if (onComplete) {
+          onComplete(validatedMetrics);
+        }
+      } catch (error) {
+        logger.error('Timer', 'Error in timer completion callback:', error);
+        toast.error('Error completing timer');
       }
-    } catch (error) {
-      logger.error('Timer', "Error in timer completion callback:", error);
-      toast.error("Error completing timer");
-    }
-  }, [onComplete, taskId]);
+    },
+    [onComplete, taskId]
+  );
 
   // Error handling for initialization
   const handleInitializationError = React.useCallback((error: any) => {
-    logger.error('Timer', "Error initializing timer:", error);
-    toast.error("Could not initialize timer. Please try again.");
+    logger.error('Timer', 'Error initializing timer:', error);
+    toast.error('Could not initialize timer. Please try again.');
   }, []);
 
   // Initialize the timer with error handling
-  let timerProps; 
+  let timerProps;
   try {
     timerProps = useTimerInitialization({
       duration,
@@ -88,30 +92,32 @@ export const Timer = ({
       onDurationChange,
     });
   } catch (error) {
-    logger.error('Timer', "Fatal error in timer initialization:", error);
+    logger.error('Timer', 'Fatal error in timer initialization:', error);
     return (
       <Card className="shadow-md border-border/20 overflow-hidden">
-        <TimerError message={`Could not initialize timer: ${error instanceof Error ? error.message : 'Unknown error'}`} />
+        <TimerError
+          message={`Could not initialize timer: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`}
+        />
       </Card>
     );
   }
 
   // Transform favorites to match expected format if needed
-  const adaptedFavorites = favorites.map(quote => ({
+  const adaptedFavorites = favorites.map((quote) => ({
     ...quote,
-    isFavorite: quote.isFavorite ?? false
+    isFavorite: quote.isFavorite ?? false,
   }));
 
   return (
     <TimerErrorBoundary>
-      <Card className="shadow-md border-border/20 overflow-hidden">
-        <TimerContent
-          {...timerProps}
-          favorites={adaptedFavorites}
-          setFavorites={setFavorites}
-          taskName={taskName}
-        />
-      </Card>
+      <TimerContent
+        {...timerProps}
+        favorites={adaptedFavorites}
+        setFavorites={setFavorites}
+        taskName={taskName}
+      />
     </TimerErrorBoundary>
   );
 };

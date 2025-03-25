@@ -1,17 +1,21 @@
-
-import { createBrowserRouter } from "react-router-dom";
-import Index from "./pages/Index";
-import Tasks from "./pages/Tasks";
-import Timer from "./pages/Timer";
-import Notes from "./pages/Notes";
-import Habits from "./pages/Habits";
-import Auth from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
-import Settings from "./pages/Settings";
-import VoiceNotes from "./pages/VoiceNotes";
-import Screenshots from "./pages/Screenshots";
-import { RequireAuth } from "./components/auth/RequireAuth";
-import AppLayout from "./components/AppLayout";
+import { createBrowserRouter } from 'react-router-dom';
+import Index from './pages/Index';
+import Tasks from './pages/Tasks';
+import Timer from './pages/Timer';
+import Notes from './pages/Notes';
+import Habits from './pages/Habits';
+import Auth from './pages/Auth';
+import AuthCallback from './pages/AuthCallback';
+import Settings from './pages/Settings';
+import VoiceNotes from './pages/VoiceNotes';
+import Screenshots from './pages/Screenshots';
+import { RequireAuth } from './components/auth/RequireAuth';
+import AppLayout from './components/AppLayout';
+import { DebugProvider } from './providers/DebugProvider';
+import { DebugPanel } from './components/debug/DebugPanel';
+import { AuthProvider } from './contexts/auth/AuthContext';
+import { ThemeProvider } from './components/theme-provider';
+import { TaskProvider } from './contexts/tasks/TaskContext';
 
 // Error component to handle routing errors
 const ErrorComponent = () => (
@@ -27,8 +31,19 @@ const ErrorComponent = () => (
 // Create and export the router configuration
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <AppLayout />,
+    path: '/',
+    element: (
+      <ThemeProvider defaultTheme="dark">
+        <AuthProvider>
+          <TaskProvider>
+            <DebugProvider>
+              <AppLayout />
+              <DebugPanel />
+            </DebugProvider>
+          </TaskProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    ),
     errorElement: <ErrorComponent />,
     children: [
       {
@@ -36,7 +51,7 @@ export const router = createBrowserRouter([
         element: <Index />,
       },
       {
-        path: "tasks",
+        path: 'tasks',
         element: (
           <RequireAuth requireAuth={false}>
             <Tasks />
@@ -44,7 +59,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "timer",
+        path: 'timer',
         element: (
           <RequireAuth requireAuth={false}>
             <Timer />
@@ -52,7 +67,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "notes",
+        path: 'notes',
         element: (
           <RequireAuth requireAuth={false}>
             <Notes />
@@ -60,7 +75,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "habits",
+        path: 'habits',
         element: (
           <RequireAuth requireAuth={false}>
             <Habits />
@@ -68,7 +83,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "voice-notes",
+        path: 'voice-notes',
         element: (
           <RequireAuth requireAuth={false}>
             <VoiceNotes />
@@ -76,7 +91,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "screenshots",
+        path: 'screenshots',
         element: (
           <RequireAuth requireAuth={false}>
             <Screenshots />
@@ -84,7 +99,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "settings",
+        path: 'settings',
         element: (
           <RequireAuth requireAuth={false}>
             <Settings />
@@ -92,11 +107,11 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "auth",
+        path: 'auth',
         element: <Auth />,
       },
       {
-        path: "auth/callback",
+        path: 'auth/callback',
         element: <AuthCallback />,
       },
     ],

@@ -127,31 +127,89 @@
   }
 
   .task-bg-standard {
-    @apply bg-[hsla(var(--standard),0.1)];
+    @apply bg-[hsla(var(--standard),0.1)] dark:bg-[hsla(var(--standard),0.15)];
   }
 
   .task-bg-timer {
-    @apply bg-[hsla(var(--timer),0.1)];
+    @apply bg-[hsla(var(--timer),0.1)] dark:bg-[hsla(var(--timer),0.15)];
   }
 
   .task-bg-journal {
-    @apply bg-[hsla(var(--journal),0.1)];
+    @apply bg-[hsla(var(--journal),0.1)] dark:bg-[hsla(var(--journal),0.15)];
   }
 
   .task-bg-checklist {
-    @apply bg-[hsla(var(--checklist),0.1)];
+    @apply bg-[hsla(var(--checklist),0.1)] dark:bg-[hsla(var(--checklist),0.15)];
   }
 
   .task-bg-screenshot {
-    @apply bg-[hsla(var(--screenshot),0.1)];
+    @apply bg-[hsla(var(--screenshot),0.1)] dark:bg-[hsla(var(--screenshot),0.15)];
   }
 
   .task-bg-voicenote {
-    @apply bg-[hsla(var(--voicenote),0.1)];
+    @apply bg-[hsla(var(--voicenote),0.1)] dark:bg-[hsla(var(--voicenote),0.15)];
   }
-  
+
   .task-bg-habit {
-    @apply bg-[hsla(var(--habit),0.1)];
+    @apply bg-[hsla(var(--habit),0.1)] dark:bg-[hsla(var(--habit),0.15)];
+  }
+
+  /* Task border color classes */
+  .task-border-standard {
+    @apply border-[hsla(var(--standard),0.3)] dark:border-[hsla(var(--standard),0.4)];
+  }
+
+  .task-border-timer {
+    @apply border-[hsla(var(--timer),0.3)] dark:border-[hsla(var(--timer),0.4)];
+  }
+
+  .task-border-journal {
+    @apply border-[hsla(var(--journal),0.3)] dark:border-[hsla(var(--journal),0.4)];
+  }
+
+  .task-border-checklist {
+    @apply border-[hsla(var(--checklist),0.3)] dark:border-[hsla(var(--checklist),0.4)];
+  }
+
+  .task-border-screenshot {
+    @apply border-[hsla(var(--screenshot),0.3)] dark:border-[hsla(var(--screenshot),0.4)];
+  }
+
+  .task-border-voicenote {
+    @apply border-[hsla(var(--voicenote),0.3)] dark:border-[hsla(var(--voicenote),0.4)];
+  }
+
+  .task-border-habit {
+    @apply border-[hsla(var(--habit),0.3)] dark:border-[hsla(var(--habit),0.4)];
+  }
+
+  /* Task button color classes */
+  .task-button-standard {
+    @apply bg-[hsla(var(--standard),0.1)] hover:bg-[hsla(var(--standard),0.2)] dark:bg-[hsla(var(--standard),0.2)] dark:hover:bg-[hsla(var(--standard),0.3)];
+  }
+
+  .task-button-timer {
+    @apply bg-[hsla(var(--timer),0.1)] hover:bg-[hsla(var(--timer),0.2)] dark:bg-[hsla(var(--timer),0.2)] dark:hover:bg-[hsla(var(--timer),0.3)];
+  }
+
+  .task-button-journal {
+    @apply bg-[hsla(var(--journal),0.1)] hover:bg-[hsla(var(--journal),0.2)] dark:bg-[hsla(var(--journal),0.2)] dark:hover:bg-[hsla(var(--journal),0.3)];
+  }
+
+  .task-button-checklist {
+    @apply bg-[hsla(var(--checklist),0.1)] hover:bg-[hsla(var(--checklist),0.2)] dark:bg-[hsla(var(--checklist),0.2)] dark:hover:bg-[hsla(var(--checklist),0.3)];
+  }
+
+  .task-button-screenshot {
+    @apply bg-[hsla(var(--screenshot),0.1)] hover:bg-[hsla(var(--screenshot),0.2)] dark:bg-[hsla(var(--screenshot),0.2)] dark:hover:bg-[hsla(var(--screenshot),0.3)];
+  }
+
+  .task-button-voicenote {
+    @apply bg-[hsla(var(--voicenote),0.1)] hover:bg-[hsla(var(--voicenote),0.2)] dark:bg-[hsla(var(--voicenote),0.2)] dark:hover:bg-[hsla(var(--voicenote),0.3)];
+  }
+
+  .task-button-habit {
+    @apply bg-[hsla(var(--habit),0.1)] hover:bg-[hsla(var(--habit),0.2)] dark:bg-[hsla(var(--habit),0.2)] dark:hover:bg-[hsla(var(--habit),0.3)];
   }
 
   /* Standard border styles */
@@ -201,12 +259,16 @@
   .app-background {
     @apply bg-background;
   }
-  
+
+  .whitespace-pre-wrap {
+    white-space: pre-wrap;
+  }
+
   /* Responsive overflow handling for task lists */
   .task-list-container {
     @apply space-y-2 overflow-y-auto overflow-x-hidden max-h-[70vh] md:max-h-none;
   }
-  
+
   /* Task card responsive styling */
   .task-card {
     @apply relative border rounded-md p-3 transition-all;
@@ -214,30 +276,30 @@
     @apply min-h-[4.5rem] flex flex-col justify-between;
     @apply w-full md:max-w-none;
   }
-  
+
   /* Task action buttons */
   .task-action-button {
     @apply h-7 w-7 p-0 rounded-full transition-colors;
     @apply flex items-center justify-center;
   }
-  
+
   /* Dark mode enhanced styles */
   .dark .glass-card {
     @apply bg-card/30 backdrop-blur-lg border border-border/20 shadow-lg;
   }
-  
+
   .dark .scrollbar-thin {
     scrollbar-width: thin;
   }
-  
+
   .dark .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   .dark .scrollbar-thin::-webkit-scrollbar-track {
     @apply bg-muted/30;
   }
-  
+
   .dark .scrollbar-thin::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/30 hover:bg-muted-foreground/50 rounded;
   }

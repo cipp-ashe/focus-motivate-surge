@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Task, TaskType } from '@/types/tasks';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -95,7 +94,7 @@ export const UnifiedTaskView: React.FC<UnifiedTaskViewProps> = ({
       journal: currentTasks.filter((t) => t.taskType === 'journal').length,
       checklist: currentTasks.filter((t) => t.taskType === 'checklist').length,
       voicenote: currentTasks.filter((t) => t.taskType === 'voicenote').length,
-      regular: currentTasks.filter((t) => t.taskType === 'regular' || !t.taskType).length,
+      regular: currentTasks.filter((t) => t.taskType === 'standard' || !t.taskType).length,
     };
 
     setTaskCounts(counts);

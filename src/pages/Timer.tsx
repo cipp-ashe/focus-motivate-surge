@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -19,21 +18,18 @@ import { eventManager } from '@/lib/events/EventManager';
 const TimerPage = () => {
   logger.debug('TimerPage', 'Rendering Timer page');
   const [favorites, setFavorites] = useState<Quote[]>([]);
-  const { items, loadTasks } = useTaskContext();
+  const taskContext = useTaskContext();
 
   // Force a task refresh when the Timer page loads
   useEffect(() => {
     logger.debug('TimerPage', 'Initializing Timer page with fresh task data');
-    
-    // Ensure we have the latest tasks
-    loadTasks();
-    
+
     // Emit a task reload event to ensure all components have the latest data
     eventManager.emit('task:reload', {});
-    
+
     // Trigger a UI refresh
     window.dispatchEvent(new Event('force-task-update'));
-  }, [loadTasks]);
+  }, []);
 
   // Event handlers for task management dialogs
   const handleShowImage = (imageUrl: string, taskName: string) => {
@@ -56,62 +52,55 @@ const TimerPage = () => {
     // Implementation for opening a voice recorder for a task
   };
 
-  const handleTaskUpdate = (data: { taskId: string, updates: any }) => {
+  const handleTaskUpdate = (data: { taskId: string; updates: any }) => {
     logger.debug('TimerPage', 'Updating task', data.taskId, data.updates);
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl animate-fade-in">
+    <div className="container mx-auto px-2 py-4 max-w-6xl animate-fade-in">
       <PageHeader>
-        <PageTitle 
+        <PageTitle
           icon={<Clock className="h-5 w-5" />}
           title="Timer"
           subtitle="Focus and track your time"
         />
       </PageHeader>
-      
+
       <TaskSelectionProvider>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Timer Task Input - Spans full width */}
-          <div className="md:col-span-12">
+          <div className="lg:col-span-12">
             <TimerTaskInput />
           </div>
-          
-          {/* Timer Task List - Placed on right side on desktop */}
-          <div className="md:col-span-5 md:order-2">
-            <Card className="dark:bg-card/80 border-border/30 dark:border-border/20 h-full shadow-md overflow-hidden">
-              <CardHeader className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 pb-3">
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
-                  Timer Tasks
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <ScrollArea className="h-full max-h-[70vh] pr-2">
-                  <FilteredTimerTaskList />
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Timer Section - Placed on left side on desktop */}
-          <div className="md:col-span-7 md:order-1">
-            <Card className="dark:bg-card/80 border-border/30 dark:border-border/20 shadow-md overflow-hidden">
-              <CardHeader className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 pb-3">
-                <CardTitle className="text-lg font-medium flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-purple-500 dark:text-purple-400" />
+
+          {/* Timer Section - Main focus, larger on all screens */}
+          <div className="lg:col-span-8 order-1">
+            <div className="bg-card/30 border border-border/20 rounded-lg shadow-sm overflow-hidden">
+              <div className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 p-3">
+                <h3 className="text-base font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                   Task Timer
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <ScrollArea className="h-full max-h-[70vh]">
-                  <TimerSection 
-                    favorites={favorites} 
-                    setFavorites={setFavorites} 
-                  />
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                </h3>
+              </div>
+              <div className="max-h-[70vh] overflow-auto">
+                <TimerSection favorites={favorites} setFavorites={setFavorites} />
+              </div>
+            </div>
+          </div>
+
+          {/* Timer Task List - Secondary focus, smaller */}
+          <div className="lg:col-span-4 order-2">
+            <div className="bg-card/30 border border-border/20 rounded-lg shadow-sm overflow-hidden h-full">
+              <div className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 p-3">
+                <h3 className="text-base font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-purple-500 dark:text-purple-400" />
+                  Timer Tasks
+                </h3>
+              </div>
+              <div className="p-3 max-h-[60vh] overflow-auto">
+                <FilteredTimerTaskList />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -123,7 +112,7 @@ const TimerPage = () => {
           onOpenVoiceRecorder={handleOpenVoiceRecorder}
           onTaskUpdate={handleTaskUpdate}
         />
-        
+
         {/* Timer modal listener */}
         <TimerConfigModalListener />
       </TaskSelectionProvider>

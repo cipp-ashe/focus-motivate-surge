@@ -1,7 +1,6 @@
-
 /**
  * Event Manager
- * 
+ *
  * A simple event system that allows components to communicate
  * without direct dependencies on each other.
  */
@@ -10,7 +9,16 @@ type EventCallback = (payload?: any) => void;
 
 class EventManager {
   private events: Map<string, EventCallback[]> = new Map();
-  
+  private debugMode: boolean = false;
+
+  /**
+   * Enable or disable debug mode
+   * @param enabled Whether debug mode should be enabled
+   */
+  setDebug(enabled: boolean): void {
+    this.debugMode = enabled;
+  }
+
   /**
    * Subscribe to an event
    * @param eventName The name of the event to subscribe to
@@ -21,10 +29,10 @@ class EventManager {
     if (!this.events.has(eventName)) {
       this.events.set(eventName, []);
     }
-    
+
     const callbacks = this.events.get(eventName)!;
     callbacks.push(callback);
-    
+
     return () => {
       const index = callbacks.indexOf(callback);
       if (index !== -1) {
@@ -32,7 +40,7 @@ class EventManager {
       }
     };
   }
-  
+
   /**
    * Emit an event
    * @param eventName The name of the event to emit
@@ -41,8 +49,8 @@ class EventManager {
   emit(eventName: string, payload?: any): void {
     // Ensure unsubscribing during handling doesn't affect current emit
     const callbacks = [...(this.events.get(eventName) || [])];
-    
-    callbacks.forEach(callback => {
+
+    callbacks.forEach((callback) => {
       try {
         callback(payload);
       } catch (error) {
@@ -50,14 +58,14 @@ class EventManager {
       }
     });
   }
-  
+
   /**
    * Remove all event listeners
    */
   clear(): void {
     this.events.clear();
   }
-  
+
   /**
    * Get the number of listeners for an event
    */

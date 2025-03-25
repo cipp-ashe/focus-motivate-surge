@@ -40,18 +40,21 @@ export const QuoteDisplay: React.FC<QuoteDisplayProps> = ({
   // Enhanced implementation that supports both compact display and interactive mode
   if (currentTask && (onLike || favorites)) {
     // This is the interactive quotes display with favorites functionality
-    // Just provide a basic implementation for compatibility
     return (
-      <div className={`quote-container ${showAsOverlay ? 'overlay' : ''}`}>
+      <div className={`${showAsOverlay ? 'bg-background/80 backdrop-blur-sm p-3 rounded-md' : ''}`}>
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-sm font-medium">Inspirational Quote</h3>
           {onLike && (
-            <button onClick={onLike} className="text-amber-500 hover:text-amber-600">
+            <button 
+              onClick={onLike} 
+              className="text-amber-500 hover:text-amber-600 focus:outline-none"
+              aria-label="Like quote"
+            >
               <Star className="h-4 w-4" />
             </button>
           )}
         </div>
-        <p className="text-sm italic">{quoteText || "Focus on what matters most."}</p>
+        <p className="text-sm italic text-foreground/90">{quoteText || "Focus on what matters most."}</p>
         {quoteAuthor && <p className="text-xs text-muted-foreground mt-1">— {quoteAuthor}</p>}
       </div>
     );
@@ -59,8 +62,8 @@ export const QuoteDisplay: React.FC<QuoteDisplayProps> = ({
   
   // Original basic display implementation
   return (
-    <div className={`quote-display ${compact ? 'quote-compact' : ''}`}>
-      <p className="text-sm italic">{quoteText}</p>
+    <div className={compact ? 'text-center' : ''}>
+      <p className="text-sm italic text-foreground/90">{quoteText}</p>
       {quoteAuthor && <p className="text-xs text-muted-foreground mt-1">— {quoteAuthor}</p>}
     </div>
   );

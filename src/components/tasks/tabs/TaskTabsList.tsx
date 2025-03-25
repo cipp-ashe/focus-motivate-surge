@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -24,8 +23,8 @@ export const TaskTabsList: React.FC<TaskTabsListProps> = ({
     ...TASK_TYPE_DEFINITIONS.map(({ type, label }) => ({
       id: type,
       name: label + 's', // Pluralize the task type name for the tab
-      icon: <TaskIcon taskType={type} size={16} className="mr-1.5" />
-    }))
+      icon: <TaskIcon type={type} size={16} className="mr-1.5" />,
+    })),
   ];
 
   return (

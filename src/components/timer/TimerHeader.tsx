@@ -12,11 +12,11 @@ export const TimerHeader = memo(({ taskName, onCloseTimer }: TimerHeaderProps) =
   const isMobile = useIsMobile();
   
   return (
-    <div className="text-center">
+    <div className="text-center mb-2">
       <h2 
         className={cn(
-          "font-bold text-gradient-purple break-words whitespace-pre-wrap max-w-full px-2 tracking-tight",
-          isMobile ? "text-xl" : "text-2xl sm:text-3xl"
+          "font-medium break-words whitespace-pre-wrap max-w-full tracking-tight text-primary",
+          isMobile ? "text-lg" : "text-xl"
         )}
       >
         {taskName}

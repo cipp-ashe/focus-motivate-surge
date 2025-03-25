@@ -24,7 +24,7 @@ export const TaskActions: React.FC<TaskActionsProps> = ({
   handleTaskAction,
 }) => {
   const { getIconColorClass } = useTaskTypeColor();
-  const iconColorClass = getIconColorClass(task.taskType || 'regular');
+  const iconColorClass = getIconColorClass(task.taskType || 'standard');
 
   // Handle dismiss action (X button)
   const handleDismiss = (e: React.MouseEvent<HTMLButtonElement>) => {

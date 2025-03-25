@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { NotesProvider } from '@/contexts/notes/notesContext';
+import { NotesProvider } from '@/contexts/notes/NotesContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -12,7 +11,7 @@ const NotesErrorFallback = ({ error }: { error: Error }) => {
       <p className="text-gray-600 dark:text-gray-400 mb-4">
         {error.message || 'An unexpected error occurred while loading your notes.'}
       </p>
-      <button 
+      <button
         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         onClick={() => window.location.reload()}
       >
@@ -22,20 +21,7 @@ const NotesErrorFallback = ({ error }: { error: Error }) => {
   );
 };
 
-// Placeholder component until we implement notes
-const NotesContent = () => {
-  return (
-    <div className="flex items-center justify-center h-[90vh]">
-      <div className="text-center">
-        <LoadingSpinner size="lg" className="mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Loading Notes</h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Your notes will appear here shortly...
-        </p>
-      </div>
-    </div>
-  );
-};
+import { NotesLayout } from '@/components/notes/NotesLayout';
 
 // Main Notes Page Component
 const NotesPage: React.FC = () => {
@@ -43,8 +29,8 @@ const NotesPage: React.FC = () => {
     <ThemeProvider defaultTheme="dark" storageKey="notes-theme">
       <ErrorBoundary FallbackComponent={NotesErrorFallback}>
         <NotesProvider>
-          <div className="w-full h-full animate-fade-in bg-white dark:bg-gray-900">
-            <NotesContent />
+          <div className="w-full h-full animate-fade-in dark:bg-gray-900">
+            <NotesLayout />
           </div>
         </NotesProvider>
       </ErrorBoundary>

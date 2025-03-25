@@ -9,7 +9,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { HabitProvider, useHabitContext } from '@/contexts/habits/HabitContext';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitDetail } from '@/types/habit';
-import { NoteProvider } from '@/contexts/notes/NoteContext';
+import { NotesProvider } from '@/contexts/notes/NotesContext';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { motion } from 'framer-motion';
 import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
@@ -35,7 +35,7 @@ const HabitsPage = () => {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <HabitProvider>
-        <NoteProvider>
+        <NotesProvider>
           <HabitsPanelProvider>
             <motion.div
               className="page-container"
@@ -53,7 +53,7 @@ const HabitsPage = () => {
               </ErrorBoundary>
             </motion.div>
           </HabitsPanelProvider>
-        </NoteProvider>
+        </NotesProvider>
       </HabitProvider>
     </ErrorBoundary>
   );

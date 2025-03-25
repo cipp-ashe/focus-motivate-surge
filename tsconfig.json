@@ -1,19 +1,23 @@
 {
   "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "noImplicitAny": false,
+    "strict": true, // Enable all strict type checking options
+    "noImplicitAny": false, // Override strict setting to maintain compatibility
+    "strictNullChecks": false, // Override strict setting to maintain compatibility
     "noUnusedParameters": false,
     "skipLibCheck": true,
     "allowJs": true,
     "noUnusedLocals": false,
-    "strictNullChecks": false
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "forceConsistentCasingInFileNames": true
+    // Note: We've enabled strict mode but overridden specific checks
+    // to maintain compatibility with the existing codebase.
+    // Future refactoring should aim to enable these checks gradually.
   }
 }
