@@ -1,6 +1,10 @@
 
 import { Note, NoteTag, TagColor, NoteType } from '@/types/notes';
 import { format, formatDistanceToNow } from 'date-fns';
+import { STORAGE_KEYS } from './constants';
+
+// Export the storage key constant
+export const STORAGE_KEY = STORAGE_KEYS.NOTES;
 
 /**
  * Format a date string
@@ -63,18 +67,15 @@ export const getNoteTypeIcon = (type: NoteType): string => {
 };
 
 /**
- * Get a note title color based on type
+ * Sanitize content for storage
  */
-export const getNoteTitleColor = (type: NoteType): string => {
-  const colorMap: Record<NoteType, string> = {
-    standard: 'text-blue-600 dark:text-blue-400',
-    journal: 'text-green-600 dark:text-green-400',
-    task: 'text-orange-600 dark:text-orange-400',
-    habit: 'text-purple-600 dark:text-purple-400',
-    markdown: 'text-teal-600 dark:text-teal-400'
-  };
+export const sanitizeContent = (content: string): string => {
+  if (!content) return '';
   
-  return colorMap[type] || 'text-gray-800 dark:text-gray-200';
+  // Basic sanitation - remove potentially harmful scripts
+  return content
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .trim();
 };
 
 /**
@@ -96,22 +97,6 @@ export const getPreviewText = (content: string, length: number = 120): string =>
   }
   
   return textOnly.substring(0, length) + '...';
-};
-
-/**
- * Download note as markdown
- */
-export const downloadNoteAsMarkdown = (note: Note): void => {
-  const content = `# ${note.title}\n\n${note.content}`;
-  const blob = new Blob([content], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${note.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 };
 
 /**
@@ -152,6 +137,22 @@ export const filterNotes = (
     
     return true;
   });
+};
+
+/**
+ * Download note as markdown
+ */
+export const downloadNoteAsMarkdown = (note: Note): void => {
+  const content = `# ${note.title}\n\n${note.content}`;
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${note.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
 /**

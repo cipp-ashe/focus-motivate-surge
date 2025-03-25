@@ -9,19 +9,21 @@ interface NoteTagListProps {
   tags: NoteTag[];
   onRemove?: (tagId: string) => void;
   interactive?: boolean;
+  className?: string;
 }
 
 export const NoteTagList: React.FC<NoteTagListProps> = ({ 
   tags, 
   onRemove,
-  interactive = false
+  interactive = false,
+  className
 }) => {
   if (!tags.length) {
     return null;
   }
   
   return (
-    <>
+    <div className={cn("flex flex-wrap gap-1", className)}>
       {tags.map(tag => (
         <div 
           key={tag.id}
@@ -45,6 +47,6 @@ export const NoteTagList: React.FC<NoteTagListProps> = ({
           )}
         </div>
       ))}
-    </>
+    </div>
   );
 };

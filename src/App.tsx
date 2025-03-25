@@ -7,6 +7,8 @@ import './index.css';
 import './styles/animations.css';
 
 const App: React.FC = () => {
+  console.log('App rendering');
+  
   // Ensure our routes are properly configured
   return (
     <Routes>

@@ -85,21 +85,21 @@ export const noteStorage = {
   /**
    * Add a tag to a note
    */
-  addTagToNote: (noteId: string, tagName: string, color: TagColor = 'default'): boolean => {
+  addTagToNote: (noteId: string, tag: NoteTag): boolean => {
     const notes = noteStorage.loadNotes();
     const noteIndex = notes.findIndex(note => note.id === noteId);
     
     if (noteIndex === -1) return false;
     
     const note = notes[noteIndex];
-    const existingTagIndex = note.tags.findIndex(tag => tag.name === tagName);
+    const existingTagIndex = note.tags.findIndex(t => t.id === tag.id);
     
     if (existingTagIndex >= 0) {
-      // Update existing tag's color
-      note.tags[existingTagIndex].color = color;
+      // Update existing tag
+      note.tags[existingTagIndex] = tag;
     } else {
       // Add new tag
-      note.tags.push({ name: tagName, color });
+      note.tags.push(tag);
     }
     
     notes[noteIndex] = {
@@ -113,14 +113,14 @@ export const noteStorage = {
   /**
    * Remove a tag from a note
    */
-  removeTagFromNote: (noteId: string, tagName: string): boolean => {
+  removeTagFromNote: (noteId: string, tagId: string): boolean => {
     const notes = noteStorage.loadNotes();
     const noteIndex = notes.findIndex(note => note.id === noteId);
     
     if (noteIndex === -1) return false;
     
     const note = notes[noteIndex];
-    const filteredTags = note.tags.filter(tag => tag.name !== tagName);
+    const filteredTags = note.tags.filter(tag => tag.id !== tagId);
     
     if (filteredTags.length === note.tags.length) {
       return false; // No tag was removed
