@@ -4,7 +4,7 @@
  */
 
 export interface TimerStateMetrics {
-  startTime: string;
+  startTime: string | null;
   endTime: string | null;
   completionDate: string | null;
   actualDuration: number;
@@ -18,9 +18,9 @@ export interface TimerStateMetrics {
   // Additional metrics properties
   expectedTime?: number;
   pauseCount?: number;
-  lastPauseTimestamp?: string;
+  lastPauseTimestamp?: string | null;
   favoriteQuotes?: string[];
-  pausedTimeLeft?: number;
+  pausedTimeLeft?: number | null;
   efficiencyRatio?: number;
 }
 
