@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ClipboardList } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import { TaskButtonProps } from './ButtonTypes';
 
 export interface ChecklistButtonProps extends TaskButtonProps {}
@@ -20,7 +20,7 @@ export const ChecklistButton: React.FC<ChecklistButtonProps> = ({ task, onTaskAc
       onClick={handleClick}
       title="Open Checklist"
     >
-      <ClipboardList className="h-4 w-4" />
+      <CheckSquare className="h-4 w-4" />
     </Button>
   );
 };

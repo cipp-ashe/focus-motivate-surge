@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { TaskType } from '@/types/tasks';
-import { CheckSquare, Clock, Image, FileText, Mic, CheckCircle2, ClipboardList } from 'lucide-react';
+import { CheckSquare, Clock, Image, FileText, Mic } from 'lucide-react';
+import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
 
 interface TaskTypeSelectorProps {
   value: TaskType;
@@ -10,30 +11,39 @@ interface TaskTypeSelectorProps {
 }
 
 export const TaskTypeSelector: React.FC<TaskTypeSelectorProps> = ({ value, onChange }) => {
+  const { getIconColorClass } = useTaskTypeColor();
+  
   const types: { type: TaskType; icon: React.ReactNode; label: string }[] = [
     { type: 'regular', icon: <CheckSquare className="h-4 w-4" />, label: 'Task' },
     { type: 'timer', icon: <Clock className="h-4 w-4" />, label: 'Timer' },
     { type: 'screenshot', icon: <Image className="h-4 w-4" />, label: 'Screenshot' },
     { type: 'journal', icon: <FileText className="h-4 w-4" />, label: 'Journal' },
     { type: 'voicenote', icon: <Mic className="h-4 w-4" />, label: 'Voice' },
-    { type: 'habit', icon: <CheckCircle2 className="h-4 w-4" />, label: 'Habit' },
-    { type: 'checklist', icon: <ClipboardList className="h-4 w-4" />, label: 'Checklist' }
+    { type: 'checklist', icon: <CheckSquare className="h-4 w-4" />, label: 'Checklist' }
   ];
 
   return (
     <div className="flex flex-wrap gap-2">
-      {types.map(({ type, icon, label }) => (
-        <Button
-          key={type}
-          variant={value === type ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => onChange(type)}
-          className="flex items-center gap-1"
-        >
-          {icon}
-          <span>{label}</span>
-        </Button>
-      ))}
+      {types.map(({ type, icon, label }) => {
+        const iconColorClass = getIconColorClass(type);
+        
+        return (
+          <Button
+            key={type}
+            variant={value === type ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onChange(type)}
+            className={cn(
+              "flex items-center gap-1",
+              value === type ? `bg-${type}-500 dark:bg-${type}-600` : "",
+              value === type ? iconColorClass.replace("text-", "bg-").replace("dark:text-", "dark:bg-") : ""
+            )}
+          >
+            <span className={value === type ? "text-white" : iconColorClass}>{icon}</span>
+            <span>{label}</span>
+          </Button>
+        );
+      })}
     </div>
   );
 };

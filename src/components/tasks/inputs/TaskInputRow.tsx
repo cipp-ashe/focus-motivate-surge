@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Upload, FileText, Timer, BookOpen, CheckSquare, ClipboardList } from 'lucide-react';
+import { Send, Upload, FileText, Timer, CheckSquare, Mic, Image } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
+import { useTaskTypeColor } from '@/hooks/useTaskTypeColor';
 
 /**
  * Props for the TaskInputRow component
@@ -31,10 +32,12 @@ interface TaskInputRowProps {
  * Only includes the allowed task types for creation via the input
  */
 const taskTypeIcons = {
-  regular: <FileText />,
-  timer: <Timer />,
-  journal: <BookOpen />,
-  checklist: <ClipboardList />,
+  regular: <CheckSquare className="h-4 w-4" />,
+  timer: <Timer className="h-4 w-4" />,
+  journal: <FileText className="h-4 w-4" />,
+  checklist: <CheckSquare className="h-4 w-4" />,
+  screenshot: <Image className="h-4 w-4" />,
+  voicenote: <Mic className="h-4 w-4" />,
 };
 
 /**
@@ -45,6 +48,8 @@ const taskTypeLabels = {
   timer: 'Focused Timer',
   journal: 'Journal Entry',
   checklist: 'Checklist',
+  screenshot: 'Screenshot',
+  voicenote: 'Voice Note',
 };
 
 /**
@@ -67,6 +72,7 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
   onAddTask,
   onToggleMultipleInput,
 }) => {
+  const { getIconColorClass } = useTaskTypeColor();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -80,22 +86,35 @@ export const TaskInputRow: React.FC<TaskInputRowProps> = ({
       <div className="flex-grow relative flex items-center">
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className={cn(getIconColorClass(taskType as TaskType))}
+            >
               {taskTypeIcons[taskType as keyof typeof taskTypeIcons] || taskTypeIcons.regular}
             </Button>
           </PopoverTrigger>
           <PopoverContent>
-            <div>
-              {Object.entries(taskTypeIcons).map(([type, icon]) => (
-                <Button
-                  key={type}
-                  variant={type === taskType ? 'secondary' : 'ghost'}
-                  onClick={() => handleTaskTypeSelect(type)}
-                >
-                  {icon}
-                  <span className="text-sm">{taskTypeLabels[type as TaskType]}</span>
-                </Button>
-              ))}
+            <div className="flex flex-col gap-1 w-full">
+              {Object.entries(taskTypeIcons).map(([type, icon]) => {
+                const iconColorClass = getIconColorClass(type as TaskType);
+                
+                return (
+                  <Button
+                    key={type}
+                    variant={type === taskType ? 'secondary' : 'ghost'}
+                    onClick={() => handleTaskTypeSelect(type)}
+                    className={cn(
+                      "flex items-center gap-3 w-full p-2 justify-start",
+                      type === taskType ? "bg-secondary" : "",
+                      iconColorClass
+                    )}
+                  >
+                    <span className={iconColorClass}>{icon}</span>
+                    <span className="text-sm">{taskTypeLabels[type as TaskType]}</span>
+                  </Button>
+                );
+              })}
             </div>
           </PopoverContent>
         </Popover>

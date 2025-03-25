@@ -8,6 +8,7 @@ import {
   Mic,
   CheckCircle2,
   ClipboardList,
+  Zap,
 } from 'lucide-react';
 import { TaskType } from '@/types/tasks';
 import { cn } from '@/lib/utils';
@@ -49,9 +50,9 @@ export const TaskIcon: React.FC<TaskIconProps> = ({
     case 'voicenote':
       return <Mic {...iconProps} />;
     case 'checklist':
-      return <ClipboardList {...iconProps} />;
+      return <CheckSquare {...iconProps} />;
     case 'habit':
-      return <CheckCircle2 {...iconProps} />;
+      return <Zap {...iconProps} />; // Using Zap for habits to show they're different
     case 'standard':
     case 'regular':
     default:
