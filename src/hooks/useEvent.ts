@@ -1,26 +1,21 @@
 
 import { useEffect } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
-import { EventType, EventCallback } from '@/types/events';
 
 /**
- * Hook for subscribing to events
+ * Hook to subscribe to an application event
  * 
- * This hook provides a simple way to subscribe to events and automatically
- * unsubscribes when the component unmounts.
- * 
- * @param eventType The type of event to subscribe to
+ * @param eventName The name of the event to subscribe to
  * @param callback The function to call when the event is emitted
  */
-export function useEvent<T extends EventType>(
-  eventType: T,
-  callback: EventCallback<T>
-) {
+export const useEvent = (eventName: string, callback: (payload?: any) => void) => {
   useEffect(() => {
-    // Subscribe to the event
-    const unsubscribe = eventManager.on(eventType, callback);
+    // Subscribe to the event when the component mounts
+    const unsubscribe = eventManager.on(eventName, callback);
     
-    // Return cleanup function that unsubscribes
-    return unsubscribe;
-  }, [eventType, callback]);
-}
+    // Unsubscribe when the component unmounts
+    return () => {
+      unsubscribe();
+    };
+  }, [eventName, callback]);
+};

@@ -1,21 +1,28 @@
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { eventManager } from '@/lib/events/EventManager';
 
+/**
+ * Hook for managing timer modal functionality
+ */
 export const useTimerModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  
   const openTimerModal = useCallback(() => {
-    setIsOpen(true);
+    eventManager.emit('timer:open-modal', {
+      type: 'instant'
+    });
   }, []);
-  
-  const closeTimerModal = useCallback(() => {
-    setIsOpen(false);
+
+  const openTimerModalWithTask = useCallback((taskId: string, taskName: string, duration: number) => {
+    eventManager.emit('timer:open-modal', {
+      type: 'task',
+      taskId,
+      taskName,
+      duration
+    });
   }, []);
-  
+
   return {
-    isOpen,
     openTimerModal,
-    closeTimerModal,
-    setIsOpen
+    openTimerModalWithTask
   };
 };

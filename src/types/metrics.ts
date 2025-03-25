@@ -1,9 +1,8 @@
 
 /**
- * Metrics types
+ * Timer metrics types
  */
 
-// Timer metrics
 export interface TimerStateMetrics {
   startTime: string;
   endTime: string | null;
@@ -15,23 +14,24 @@ export interface TimerStateMetrics {
   completionStatus: 'completed' | 'abandoned' | 'extended' | null;
   isPaused: boolean;
   taskId?: string;
+  
+  // Additional metrics properties
+  expectedTime?: number;
+  pauseCount?: number;
+  lastPauseTimestamp?: string;
+  favoriteQuotes?: string[];
+  pausedTimeLeft?: number;
+  efficiencyRatio?: number;
 }
 
-// Task metrics
-export interface TaskStateMetrics {
-  completedCount: number;
-  totalCount: number;
-  avgCompletionTime: number;
-  completionRate: number;
-  tasksByPriority: Record<string, number>;
-  tasksByStatus: Record<string, number>;
-  tasksByType: Record<string, number>;
-}
-
-// Habit metrics
-export interface HabitStateMetrics {
-  completionRate: number;
-  currentStreak: number;
-  longestStreak: number;
-  habitsByCategory: Record<string, number>;
+export interface TimerMetricsData {
+  startTime: string;
+  endTime: string;
+  duration: number;
+  pauseCount: number;
+  pauseDuration: number;
+  extensionCount: number;
+  extensionDuration: number;
+  taskId?: string;
+  completed: boolean;
 }

@@ -1,94 +1,45 @@
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { TimerStateMetrics } from '@/types/metrics';
 
-export const useTimerState = (initialDuration: number) => {
+interface UseTimerStateParams {
+  initialDuration?: number;
+}
+
+export const useTimerState = (initialDuration = 1500) => {
   const [timeLeft, setTimeLeft] = useState(initialDuration);
   const [minutes, setMinutes] = useState(Math.floor(initialDuration / 60));
   const [isRunning, setIsRunning] = useState(false);
+  const isMountedRef = useRef(true);
+  
+  // Initialize metrics
   const [metrics, setMetrics] = useState<TimerStateMetrics>({
-    startTime: null,
+    startTime: '',
     endTime: null,
-    pauseCount: 0,
-    expectedTime: initialDuration,
+    completionDate: null,
     actualDuration: 0,
-    favoriteQuotes: [] as string[],
     pausedTime: 0,
-    lastPauseTimestamp: null,
     extensionTime: 0,
     netEffectiveTime: 0,
-    efficiencyRatio: 0,
-    completionStatus: 'Completed On Time',
-    isPaused: false,
-    pausedTimeLeft: null
+    completionStatus: null,
+    isPaused: false
   });
 
-  const isMountedRef = useRef(true);
-  const lastTimeLeftRef = useRef(initialDuration);
-  const lastPauseStartRef = useRef<Date | null>(null);
+  // Update timeLeft
+  const updateTimeLeft = (newTimeLeft: number) => {
+    setTimeLeft(newTimeLeft);
+  };
 
-  const updateTimeLeft = useCallback((value: number | ((prev: number) => number)) => {
-    if (isMountedRef.current) {
-      if (typeof value === 'function') {
-        setTimeLeft((prev) => {
-          const newValue = value(prev);
-          console.log('Updating time left:', { prev, newValue });
-          lastTimeLeftRef.current = newValue;
-          return newValue;
-        });
-      } else {
-        // Only update if not paused or if explicitly setting a new value
-        if (!metrics.isPaused || value !== lastTimeLeftRef.current) {
-          console.log('Setting time left directly:', value);
-          lastTimeLeftRef.current = value;
-          setTimeLeft(value);
-        } else {
-          console.log('Maintaining paused time:', metrics.pausedTimeLeft);
-          setTimeLeft(metrics.pausedTimeLeft || value);
-        }
-      }
-    }
-  }, [metrics.isPaused, metrics.pausedTimeLeft]);
+  // Update minutes
+  const updateMinutes = (newMinutes: number) => {
+    setMinutes(newMinutes);
+    setTimeLeft(newMinutes * 60);
+  };
 
-  const updateMinutes = useCallback((value: number) => {
-    if (isMountedRef.current) {
-      setMinutes(value);
-    }
-  }, []);
-
-  const updateMetrics = useCallback((updates: Partial<TimerStateMetrics> | ((prev: TimerStateMetrics) => Partial<TimerStateMetrics>)) => {
-    if (isMountedRef.current) {
-      setMetrics(prev => {
-        const newUpdates = typeof updates === 'function' ? updates(prev) : updates;
-        const newMetrics = {
-          ...prev,
-          ...newUpdates
-        };
-        
-        // If pausing, store the current timeLeft and pause start time
-        if (newUpdates.isPaused && !prev.isPaused) {
-          newMetrics.pausedTimeLeft = timeLeft;
-          lastPauseStartRef.current = new Date();
-        }
-        
-        // If resuming, calculate and add pause duration to total paused time
-        if (!newUpdates.isPaused && prev.isPaused && lastPauseStartRef.current) {
-          const pauseDuration = Math.floor(
-            (new Date().getTime() - lastPauseStartRef.current.getTime()) / 1000
-          );
-          newMetrics.pausedTime = (prev.pausedTime || 0) + pauseDuration;
-          lastPauseStartRef.current = null;
-        }
-        
-        // If resuming, use the stored pausedTimeLeft
-        if (!newUpdates.isPaused && prev.isPaused && prev.pausedTimeLeft !== null) {
-          lastTimeLeftRef.current = prev.pausedTimeLeft;
-        }
-        
-        return newMetrics;
-      });
-    }
-  }, [timeLeft]);
+  // Update metrics
+  const updateMetrics = (updates: Partial<TimerStateMetrics>) => {
+    setMetrics(prev => ({ ...prev, ...updates }));
+  };
 
   return {
     timeLeft,
@@ -99,6 +50,6 @@ export const useTimerState = (initialDuration: number) => {
     updateMinutes,
     setIsRunning,
     updateMetrics,
-    isMountedRef,
+    isMountedRef
   };
 };
