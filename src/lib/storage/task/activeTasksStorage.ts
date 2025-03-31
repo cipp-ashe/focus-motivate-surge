@@ -14,7 +14,8 @@ export const activeTasksStorage = {
    */
   loadTasks: (): Task[] => {
     try {
-      const tasks = utils.loadFromStorage<Task[]>(constants.ACTIVE_TASKS_KEY, []);
+      const rawTasks = utils.loadFromStorage<any[]>(constants.ACTIVE_TASKS_KEY, []);
+      const tasks = utils.normalizeTasks(rawTasks);
 
       // Only log on first load or if there are actually tasks
       if (!initialLoadLogged || tasks.length > 0) {
@@ -34,15 +35,9 @@ export const activeTasksStorage = {
    */
   saveTasks: (tasks: Task[]): boolean => {
     try {
-      // Log task statuses to see if any dismissed tasks are being saved to active storage
-      const dismissedTasks = tasks.filter((t) => t.status === 'dismissed');
-      if (dismissedTasks.length > 0) {
-        console.log(
-          `WARNING: Found ${dismissedTasks.length} dismissed tasks in active tasks storage:`,
-          dismissedTasks
-        );
-      }
-
+      // Clean up tasks for storage and normalize them
+      const tasksToSave = tasks.map(task => utils.cleanupTaskForStorage(utils.normalizeTask(task)));
+      
       // Only log if we're saving a non-empty array
       if (tasks.length > 0) {
         console.log(
@@ -51,7 +46,7 @@ export const activeTasksStorage = {
         );
       }
 
-      return utils.saveToStorage(constants.ACTIVE_TASKS_KEY, tasks);
+      return utils.saveToStorage(constants.ACTIVE_TASKS_KEY, tasksToSave);
     } catch (error) {
       console.error('Error saving tasks to storage:', error);
       return false;

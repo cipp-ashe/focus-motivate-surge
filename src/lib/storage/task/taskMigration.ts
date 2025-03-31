@@ -1,84 +1,73 @@
 
 import { Task, TaskType } from '@/types/tasks';
-import { taskStorage } from '@/lib/storage/taskStorage';
+import { constants } from './constants';
+import { utils } from './utils';
 
 /**
- * Migrates any tasks with incorrect taskType values to the correct values
- * This is especially important for habit tasks that may have been created
- * with the non-standard "habit" type
+ * Migrate task types from 'regular' to 'standard' and normalize taskType/type fields
  */
-export const migrateTaskTypes = () => {
-  console.log('Starting task type migration...');
-  
+export const migrateTaskTypes = (): { migratedActive: number, migratedCompleted: number } => {
   try {
-    // Get all tasks from storage
-    const allTasks = taskStorage.loadTasks();
-    let migratedCount = 0;
+    console.log('Starting task type migration...');
     
-    // Check each task for invalid task types
-    allTasks.forEach(task => {
-      // Skip if task has no type or a valid type
-      if (!task.taskType || isValidTaskType(task.taskType)) return;
+    // Migrate active tasks
+    const activeTasks = utils.loadFromStorage<any[]>(constants.ACTIVE_TASKS_KEY, []);
+    let activeMigrationCount = 0;
+    
+    const migratedActiveTasks = activeTasks.map(task => {
+      const originalType = task.type || task.taskType || 'regular';
+      const needsMigration = 
+        originalType === 'regular' || 
+        (task.type && !task.taskType) ||
+        (task.taskType && !task.type) ||
+        (task.type !== task.taskType);
       
-      // Determine the correct task type based on available information
-      const newTaskType = determineTaskTypeFromTask(task);
+      if (needsMigration) {
+        activeMigrationCount++;
+        const normalizedTask = utils.normalizeTask(task);
+        return utils.cleanupTaskForStorage(normalizedTask);
+      }
       
-      // Update the task with the new type
-      task.taskType = newTaskType;
-      taskStorage.updateTask(task.id, task);
-      migratedCount++;
-      
-      console.log(`Migrated task ${task.id} (${task.name}) from invalid type to ${newTaskType}`);
+      return task;
     });
     
-    console.log(`Task migration complete. Migrated ${migratedCount} tasks.`);
-    return migratedCount;
+    if (activeMigrationCount > 0) {
+      utils.saveToStorage(constants.ACTIVE_TASKS_KEY, migratedActiveTasks);
+      console.log(`Migrated ${activeMigrationCount} active tasks`);
+    }
+    
+    // Migrate completed tasks
+    const completedTasks = utils.loadFromStorage<any[]>(constants.COMPLETED_TASKS_KEY, []);
+    let completedMigrationCount = 0;
+    
+    const migratedCompletedTasks = completedTasks.map(task => {
+      const originalType = task.type || task.taskType || 'regular';
+      const needsMigration = 
+        originalType === 'regular' || 
+        (task.type && !task.taskType) ||
+        (task.taskType && !task.type) ||
+        (task.type !== task.taskType);
+      
+      if (needsMigration) {
+        completedMigrationCount++;
+        const normalizedTask = utils.normalizeTask(task);
+        return utils.cleanupTaskForStorage(normalizedTask);
+      }
+      
+      return task;
+    });
+    
+    if (completedMigrationCount > 0) {
+      utils.saveToStorage(constants.COMPLETED_TASKS_KEY, migratedCompletedTasks);
+      console.log(`Migrated ${completedMigrationCount} completed tasks`);
+    }
+    
+    return {
+      migratedActive: activeMigrationCount,
+      migratedCompleted: completedMigrationCount
+    };
   } catch (error) {
     console.error('Error during task type migration:', error);
-    return 0;
+    return { migratedActive: 0, migratedCompleted: 0 };
   }
-};
-
-/**
- * Check if a taskType is valid according to the TaskType enum
- */
-const isValidTaskType = (taskType: string): taskType is TaskType => {
-  const validTypes: TaskType[] = [
-    'timer', 'regular', 'screenshot', 'journal', 'checklist', 'voicenote', 'counter', 'rating'
-  ];
-  return validTypes.includes(taskType as TaskType);
-};
-
-/**
- * Determine the appropriate task type based on the task properties
- */
-const determineTaskTypeFromTask = (task: Task): TaskType => {
-  // Check for specific task properties that indicate a certain type
-  if (task.checklistItems && task.checklistItems.length > 0) {
-    return 'checklist';
-  } else if (task.imageUrl || task.imageType) {
-    return 'screenshot';
-  } else if (task.voiceNoteUrl || task.voiceNoteText) {
-    return 'voicenote';
-  } else if (task.duration && task.duration > 0) {
-    return 'timer';
-  } else if (task.journalEntry) {
-    return 'journal';
-  } else if (task.rating !== undefined) {
-    return 'rating';
-  } else if (task.count !== undefined) {
-    return 'counter';
-  }
-  
-  // Check for metrics from habit system
-  if (task.relationships?.metricType) {
-    const metricType = task.relationships.metricType;
-    if (metricType === 'timer') return 'timer';
-    if (metricType === 'journal') return 'journal';
-    if (metricType === 'counter') return 'counter';
-    if (metricType === 'rating') return 'rating';
-  }
-  
-  // Default to regular
-  return 'regular';
 };

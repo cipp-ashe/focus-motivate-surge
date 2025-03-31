@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { UserIcon, LogOutIcon, LogInIcon, CloudOff, CloudSync } from 'lucide-react';
+import { UserIcon, LogOutIcon, LogInIcon, CloudOff, Cloud } from 'lucide-react';
 
 export const AuthStatus = () => {
   const { user, isAuthenticated, signOut, isLocalOnly, setLocalOnly } = useAuth();
@@ -40,7 +40,7 @@ export const AuthStatus = () => {
           </>
         ) : (
           <>
-            <CloudSync className="h-4 w-4 mr-1 text-blue-500" />
+            <Cloud className="h-4 w-4 mr-1 text-blue-500" />
             <span className="hidden md:inline-block text-blue-500">Sync</span>
           </>
         )}

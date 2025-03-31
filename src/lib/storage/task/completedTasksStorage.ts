@@ -15,7 +15,8 @@ export const completedTasksStorage = {
    */
   loadCompletedTasks: (): Task[] => {
     try {
-      const tasks = utils.loadFromStorage<Task[]>(constants.COMPLETED_TASKS_KEY, []);
+      const rawTasks = utils.loadFromStorage<any[]>(constants.COMPLETED_TASKS_KEY, []);
+      const tasks = utils.normalizeTasks(rawTasks);
       
       // Only log on first load and only if there are tasks
       if (!initialLoadLogged && tasks.length > 0) {
@@ -35,8 +36,11 @@ export const completedTasksStorage = {
    */
   saveCompletedTasks: (tasks: Task[]): boolean => {
     try {
+      // Clean up tasks for storage and normalize them
+      const tasksToSave = tasks.map(task => utils.cleanupTaskForStorage(utils.normalizeTask(task)));
+      
       console.log(`completedTasksStorage: Saving ${tasks.length} completed tasks to storage`);
-      return utils.saveToStorage(constants.COMPLETED_TASKS_KEY, tasks);
+      return utils.saveToStorage(constants.COMPLETED_TASKS_KEY, tasksToSave);
     } catch (error) {
       console.error('Error saving completed tasks to storage:', error);
       return false;
