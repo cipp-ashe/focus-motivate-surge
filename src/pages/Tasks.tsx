@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
@@ -17,7 +18,7 @@ import { CheckSquare } from 'lucide-react';
 const ErrorFallback = () => (
   <div className="p-4 m-4 border border-red-300 bg-red-900/20 rounded-md text-center">
     <h2 className="text-xl font-semibold text-red-400 mb-2">Error Loading Tasks</h2>
-    <p>There was a problem loading the task manager. Please try again later or refresh the page.</p>
+    <p className="dark:text-gray-300">There was a problem loading the task manager. Please try again later or refresh the page.</p>
   </div>
 );
 
@@ -133,19 +134,19 @@ const TaskPageContent = () => {
           <GlassCardContent>
             <h2 className="text-xl font-semibold mb-2 dark:text-white">Task Statistics</h2>
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-secondary/50 dark:bg-secondary/20 p-3 rounded-md">
+              <div className="bg-secondary/50 dark:bg-gray-800 p-3 rounded-md">
                 <h3 className="text-sm font-medium dark:text-gray-300">Total Tasks</h3>
                 <p className="text-2xl font-bold dark:text-white">
                   {(taskContext?.items?.length || 0) + (taskContext?.completed?.length || 0)}
                 </p>
               </div>
-              <div className="bg-secondary/50 dark:bg-secondary/20 p-3 rounded-md">
+              <div className="bg-secondary/50 dark:bg-gray-800 p-3 rounded-md">
                 <h3 className="text-sm font-medium dark:text-gray-300">Completed</h3>
                 <p className="text-2xl font-bold text-green-500 dark:text-green-400">
                   {taskContext?.completed?.length || 0}
                 </p>
               </div>
-              <div className="bg-secondary/50 dark:bg-secondary/20 p-3 rounded-md">
+              <div className="bg-secondary/50 dark:bg-gray-800 p-3 rounded-md">
                 <h3 className="text-sm font-medium dark:text-gray-300">Pending</h3>
                 <p className="text-2xl font-bold text-amber-500 dark:text-amber-400">
                   {taskContext?.items?.length || 0}

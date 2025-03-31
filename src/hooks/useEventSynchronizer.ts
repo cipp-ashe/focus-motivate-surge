@@ -25,6 +25,8 @@ export function useEventSynchronizer<T extends EventType, U extends EventType>(
   useEffect(() => {
     const unsubscribers = mappingsRef.current.map(mapping => {
       return eventManager.on(mapping.source, (payload: EventPayload<T>) => {
+        console.log(`EventSynchronizer: Syncing ${mapping.source} to ${mapping.target}`);
+        
         const transformedPayload = mapping.transform ? 
           mapping.transform(payload) : 
           payload as unknown as EventPayload<U>;

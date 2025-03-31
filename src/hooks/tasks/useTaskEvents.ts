@@ -4,15 +4,17 @@ import { eventManager } from '@/lib/events/EventManager';
 import { Task } from '@/types/tasks';
 import { v4 as uuidv4 } from 'uuid';
 import { EventType, EventPayload } from '@/types/events';
+import { useEventEmitter } from '@/hooks/useEvent';
 
 /**
  * Unified hook for task events and actions
  * 
- * This hook consolidates all task-related events functionality
- * from previous hooks into a single source of truth
+ * This hook is the single source of truth for all task-related events
  */
 export const useTaskEvents = () => {
-  // Event subscriptions
+  const { emit } = useEventEmitter();
+  
+  // Event subscriptions with proper typing
   const onTaskCreate = useCallback((callback: (task: Task) => void) => {
     return eventManager.on('task:create', callback);
   }, []);
@@ -38,7 +40,6 @@ export const useTaskEvents = () => {
   }, []);
 
   // Event emission
-  // Create a new task with ID and timestamp
   const createTask = useCallback((task: Omit<Task, 'id' | 'createdAt'>) => {
     const newTask: Task = {
       id: uuidv4(),
@@ -47,99 +48,92 @@ export const useTaskEvents = () => {
     };
     
     console.log('Creating task:', newTask);
-    eventManager.emit('task:create', newTask);
+    emit('task:create', newTask);
     
     return newTask;
-  }, []);
+  }, [emit]);
 
-  // Update an existing task
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     console.log(`Updating task ${taskId}:`, updates);
-    eventManager.emit('task:update', { taskId, updates });
-  }, []);
+    emit('task:update', { taskId, updates });
+  }, [emit]);
 
-  // Delete a task
   const deleteTask = useCallback((taskId: string, reason?: string) => {
     console.log(`Deleting task ${taskId}`, reason ? `Reason: ${reason}` : '');
-    eventManager.emit('task:delete', { taskId, reason });
-  }, []);
+    emit('task:delete', { taskId, reason });
+  }, [emit]);
 
-  // Complete a task
   const completeTask = useCallback((taskId: string, metrics?: any) => {
     console.log(`Completing task ${taskId}`, metrics ? `Metrics: ${JSON.stringify(metrics)}` : '');
-    eventManager.emit('task:complete', { taskId, metrics });
-  }, []);
+    emit('task:complete', { taskId, metrics });
+  }, [emit]);
 
-  // Select a task for editing
   const selectTask = useCallback((taskId: string | null) => {
-    eventManager.emit('task:select', taskId);
-  }, []);
+    emit('task:select', taskId);
+  }, [emit]);
 
-  // Dismiss a task (especially for habits)
   const dismissTask = useCallback((taskId: string, habitId?: string, date?: string) => {
-    eventManager.emit('task:dismiss', { 
+    emit('task:dismiss', { 
       taskId, 
       habitId, 
       date: date || new Date().toISOString() 
     });
-  }, []);
+  }, [emit]);
   
-  // Track time spent on task
   const trackTaskTime = useCallback((taskId: string, minutes: number, notes?: string) => {
-    eventManager.emit('task:timer', { 
+    emit('task:timer', { 
       taskId, 
       minutes, 
       notes
     });
-  }, []);
+  }, [emit]);
   
-  // Force update task list
   const forceTaskUpdate = useCallback(() => {
     console.log("Force updating task list");
-    eventManager.emit('task:reload', undefined);
-  }, []);
+    emit('task:reload', undefined);
+  }, [emit]);
   
   // Media-related event emitters
   const showTaskImage = useCallback((imageUrl: string, taskName: string) => {
-    eventManager.emit('task:show-image', {
+    emit('task:show-image', {
       imageUrl,
       taskName
     });
-  }, []);
+  }, [emit]);
   
   const openTaskChecklist = useCallback((taskId: string, taskName: string, items: any[]) => {
-    eventManager.emit('task:open-checklist', {
+    emit('task:open-checklist', {
       taskId,
       taskName,
       items
     });
-  }, []);
+  }, [emit]);
   
   const openTaskJournal = useCallback((taskId: string, taskName: string, entry: string = '') => {
-    eventManager.emit('task:open-journal', {
+    emit('task:open-journal', {
       taskId,
       taskName,
       entry
     });
-  }, []);
+  }, [emit]);
   
   const openTaskVoiceRecorder = useCallback((taskId: string, taskName: string) => {
-    eventManager.emit('task:open-voice-recorder', {
+    emit('task:open-voice-recorder', {
       taskId,
       taskName
     });
-  }, []);
+  }, [emit]);
 
   // Generic event emitter
   const emitEvent = useCallback(<E extends EventType>(eventType: E, payload?: EventPayload<E>) => {
-    eventManager.emit(eventType, payload);
-  }, []);
+    emit(eventType, payload);
+  }, [emit]);
   
   // Habit integration
   const checkPendingHabits = useCallback(() => {
     console.log('Checking pending habits');
-    eventManager.emit('habits:check-pending', {});
-  }, []);
+    emit('habits:check-pending', {});
+  }, [emit]);
 
   return {
     // Event subscriptions
@@ -170,9 +164,5 @@ export const useTaskEvents = () => {
   };
 };
 
-// For consolidated exports - now with proper commenting
-/**
- * The main task events hook for the application.
- * This is the primary hook for task event management and should be used whenever possible.
- */
+// Rename to follow consistent naming convention
 export const useTasks = useTaskEvents;
