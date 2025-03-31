@@ -4,27 +4,22 @@ import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/theme/ThemeContext';
 
-export const ThemeToggle: React.FC = () => {
-  const { theme, setTheme, isDarkMode } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(isDarkMode ? 'light' : 'dark');
-  };
+export const ThemeToggle = () => {
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="w-9 h-9 rounded-full"
-      title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+      className="rounded-full h-8 w-8 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800"
+      aria-label="Toggle theme"
     >
-      {isDarkMode ? (
-        <Sun className="h-4 w-4 text-yellow-300" />
+      {theme === 'dark' ? (
+        <Sun className="h-4 w-4" />
       ) : (
-        <Moon className="h-4 w-4 text-slate-600" />
+        <Moon className="h-4 w-4" />
       )}
-      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 };

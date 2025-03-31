@@ -6,6 +6,7 @@ import { NavigationDropdown } from './NavigationDropdown';
 import { useNavigation } from '@/hooks/ui/useNavigation';
 import { NavigationLinkItem } from './NavigationLinkItem';
 import { Home } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export const HeaderNav: React.FC = () => {
   const location = useLocation();
@@ -18,7 +19,7 @@ export const HeaderNav: React.FC = () => {
         icon={Home}
         label="Home"
         isActive={isActive('/')}
-        className="font-medium"
+        className="font-medium dark:text-slate-300 dark:hover:text-white"
       />
       
       {/* Dynamic category dropdowns with improved z-index handling */}
@@ -35,10 +36,11 @@ export const HeaderNav: React.FC = () => {
           isActiveItem={isActive}
           showLabel={true}
           position="top"
-          className="font-medium"
+          className="font-medium dark:text-slate-300 dark:hover:text-white"
         />
       ))}
+      
+      <ThemeToggle />
     </nav>
   );
 };
-

@@ -3,31 +3,19 @@ import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { logger } from '@/utils/logManager';
 
-/**
- * Hook for managing timer modal functionality
- */
 export const useTimerModal = () => {
   const openTimerModal = useCallback(() => {
-    logger.debug('useTimerModal', 'Opening timer modal (instant)');
-    
-    eventManager.emit('timer:open-modal', {
-      type: 'instant'
-    });
+    logger.debug('useTimerModal', 'Opening timer modal');
+    eventManager.emit('modal:open', { type: 'timer-config' });
   }, []);
 
-  const openTimerModalWithTask = useCallback((taskId: string, taskName: string, duration: number) => {
-    logger.debug('useTimerModal', 'Opening timer modal with task', { taskId, taskName, duration });
-    
-    eventManager.emit('timer:open-modal', {
-      type: 'task',
-      taskId,
-      taskName,
-      duration
-    });
+  const closeTimerModal = useCallback(() => {
+    logger.debug('useTimerModal', 'Closing timer modal');
+    eventManager.emit('modal:close', { type: 'timer-config' });
   }, []);
 
   return {
     openTimerModal,
-    openTimerModalWithTask
+    closeTimerModal
   };
 };

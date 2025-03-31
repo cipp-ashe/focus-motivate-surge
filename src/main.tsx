@@ -7,6 +7,8 @@ import './index.css';
 import { AuthProvider } from '@/contexts/auth/AuthContext';
 import { ThemeProvider } from '@/contexts/theme/ThemeContext';
 import { Toaster } from '@/components/ui/toaster';
+import { TaskProvider } from '@/contexts/tasks/TaskContext';
+import { DebugProvider } from '@/providers/DebugProvider';
 
 // Initialize application
 import { initializeApplication } from './utils/appInitialization';
@@ -16,10 +18,14 @@ initializeApplication();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="dark">
       <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster />
+        <TaskProvider>
+          <DebugProvider>
+            <RouterProvider router={router} />
+            <Toaster />
+          </DebugProvider>
+        </TaskProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>,

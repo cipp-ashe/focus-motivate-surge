@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -14,6 +15,7 @@ import { FilteredTimerTaskList } from '@/components/timer/FilteredTimerTaskList'
 import { TimerTaskInput } from '@/components/timer/TimerTaskInput';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
 import { eventManager } from '@/lib/events/EventManager';
+import ErrorBoundary from '@/utils/debug/errorBoundary';
 
 const TimerPage = () => {
   logger.debug('TimerPage', 'Rendering Timer page');
@@ -66,56 +68,58 @@ const TimerPage = () => {
         />
       </PageHeader>
 
-      <TaskSelectionProvider>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Timer Task Input - Spans full width */}
-          <div className="lg:col-span-12">
-            <TimerTaskInput />
-          </div>
+      <ErrorBoundary module="timer" component="TimerPage">
+        <TaskSelectionProvider>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Timer Task Input - Spans full width */}
+            <div className="lg:col-span-12">
+              <TimerTaskInput />
+            </div>
 
-          {/* Timer Section - Main focus, larger on all screens */}
-          <div className="lg:col-span-8 order-1">
-            <div className="bg-card/30 border border-border/20 rounded-lg shadow-sm overflow-hidden">
-              <div className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 p-3">
-                <h3 className="text-base font-medium flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-purple-500 dark:text-purple-400" />
-                  Task Timer
-                </h3>
+            {/* Timer Section - Main focus, larger on all screens */}
+            <div className="lg:col-span-8 order-1">
+              <div className="bg-card/30 border border-border/20 rounded-lg shadow-sm overflow-hidden dark:bg-slate-900/40 dark:border-slate-800/50">
+                <div className="bg-card/50 dark:bg-slate-900/70 border-b border-border/10 dark:border-slate-800/30 p-3">
+                  <h3 className="text-base font-medium flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-purple-500 dark:text-purple-400" />
+                    Task Timer
+                  </h3>
+                </div>
+                <div className="max-h-[70vh] overflow-auto">
+                  <TimerSection favorites={favorites} setFavorites={setFavorites} />
+                </div>
               </div>
-              <div className="max-h-[70vh] overflow-auto">
-                <TimerSection favorites={favorites} setFavorites={setFavorites} />
+            </div>
+
+            {/* Timer Task List - Secondary focus, smaller */}
+            <div className="lg:col-span-4 order-2">
+              <div className="bg-card/30 border border-border/20 rounded-lg shadow-sm overflow-hidden h-full dark:bg-slate-900/40 dark:border-slate-800/50">
+                <div className="bg-card/50 dark:bg-slate-900/70 border-b border-border/10 dark:border-slate-800/30 p-3">
+                  <h3 className="text-base font-medium flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-purple-500 dark:text-purple-400" />
+                    Timer Tasks
+                  </h3>
+                </div>
+                <div className="p-3 max-h-[60vh] overflow-auto">
+                  <FilteredTimerTaskList />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Timer Task List - Secondary focus, smaller */}
-          <div className="lg:col-span-4 order-2">
-            <div className="bg-card/30 border border-border/20 rounded-lg shadow-sm overflow-hidden h-full">
-              <div className="bg-card/50 dark:bg-card/40 border-b border-border/10 dark:border-border/10 p-3">
-                <h3 className="text-base font-medium flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-purple-500 dark:text-purple-400" />
-                  Timer Tasks
-                </h3>
-              </div>
-              <div className="p-3 max-h-[60vh] overflow-auto">
-                <FilteredTimerTaskList />
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Event listeners */}
+          <UnifiedTaskEventListener
+            onShowImage={handleShowImage}
+            onOpenChecklist={handleOpenChecklist}
+            onOpenJournal={handleOpenJournal}
+            onOpenVoiceRecorder={handleOpenVoiceRecorder}
+            onTaskUpdate={handleTaskUpdate}
+          />
 
-        {/* Event listeners */}
-        <UnifiedTaskEventListener
-          onShowImage={handleShowImage}
-          onOpenChecklist={handleOpenChecklist}
-          onOpenJournal={handleOpenJournal}
-          onOpenVoiceRecorder={handleOpenVoiceRecorder}
-          onTaskUpdate={handleTaskUpdate}
-        />
-
-        {/* Timer modal listener */}
-        <TimerConfigModalListener />
-      </TaskSelectionProvider>
+          {/* Timer modal listener */}
+          <TimerConfigModalListener />
+        </TaskSelectionProvider>
+      </ErrorBoundary>
     </div>
   );
 };

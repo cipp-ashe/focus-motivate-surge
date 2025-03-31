@@ -12,11 +12,11 @@ const App: React.FC = () => {
   console.log('App rendering');
   
   return (
-    <DebugProvider>
+    <div className="min-h-screen bg-background text-foreground dark:bg-slate-950 dark:text-slate-100">
       <RouterProvider router={router} />
       <Toaster position="top-right" richColors />
       <DebugPanel />
-    </DebugProvider>
+    </div>
   );
 };
 

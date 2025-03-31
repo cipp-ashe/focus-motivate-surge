@@ -2,7 +2,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -73,5 +73,30 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Custom dark mode overrides */
+.dark {
+  color-scheme: dark;
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Apply dark mode overrides for components */
+.dark .bg-card {
+  background-color: hsl(222.2, 84%, 6.5%);
+}
+
+.dark .border-border {
+  border-color: hsl(217.2, 32.6%, 20%);
 }
