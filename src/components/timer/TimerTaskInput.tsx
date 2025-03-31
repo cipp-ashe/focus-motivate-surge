@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,13 +69,13 @@ export const TimerTaskInput = () => {
           placeholder="Add a new timer task..."
           value={taskName}
           onChange={(e) => setTaskName(e.target.value)}
-          className="flex-1 bg-card/30 border-border/30 py-2 text-base"
+          className="flex-1 bg-card/30 border-border/30 py-2 text-base dark:bg-card/20 dark:border-border/20"
         />
       </div>
       <Button
         type="submit"
         disabled={isSubmitting || !taskName.trim()}
-        className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800"
+        className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 text-white"
       >
         <PlusIcon className="h-4 w-4 mr-1" />
         <span className="sr-only md:not-sr-only md:inline">Add</span>

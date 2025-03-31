@@ -2,6 +2,7 @@
 import { useEffect, useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { EventType, EventPayload, EventUnsubscribe, EventCallback } from '@/types/events';
+import { logger } from '@/utils/logManager';
 
 /**
  * Hook to subscribe to application events
@@ -17,11 +18,14 @@ export function useEvent<E extends EventType>(
   const stableCallback = useCallback(callback, [callback]);
   
   useEffect(() => {
+    logger.debug('useEvent', `Subscribing to ${eventName}`);
+    
     // Subscribe to the event when the component mounts
     const unsubscribe = eventManager.on(eventName, stableCallback);
     
     // Cleanup subscription when the component unmounts
     return () => {
+      logger.debug('useEvent', `Unsubscribing from ${eventName}`);
       unsubscribe();
     };
   }, [eventName, stableCallback]);
@@ -40,6 +44,7 @@ export function useEventEmitter() {
     eventType: E, 
     payload?: EventPayload<E>
   ): void => {
+    logger.debug('useEventEmitter', `Emitting ${eventType}`, payload);
     eventManager.emit(eventType, payload);
   }, []);
   
@@ -50,6 +55,7 @@ export function useEventEmitter() {
     eventType: E,
     handler: EventCallback<E>
   ): EventUnsubscribe => {
+    logger.debug('useEventEmitter', `Subscribing to ${eventType}`);
     return eventManager.on(eventType, handler);
   }, []);
   
@@ -60,6 +66,7 @@ export function useEventEmitter() {
     eventType: E,
     handler: EventCallback<E>
   ): EventUnsubscribe => {
+    logger.debug('useEventEmitter', `Subscribing once to ${eventType}`);
     return eventManager.once(eventType, handler);
   }, []);
   

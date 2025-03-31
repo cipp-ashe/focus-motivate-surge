@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   createBrowserRouter,
@@ -6,6 +7,8 @@ import { RequireAuth } from "@/components/auth/RequireAuth";
 import Layout from "@/components/layout/Layout";
 
 const Home = React.lazy(() => import("./pages/Home"));
+const Index = React.lazy(() => import("./pages/Index"));
+const Timer = React.lazy(() => import("./pages/Timer"));
 const Tasks = React.lazy(() => import("./pages/Tasks"));
 const Habits = React.lazy(() => import("./pages/Habits"));
 const Journal = React.lazy(() => import("./pages/Journal"));
@@ -18,6 +21,18 @@ const AuthCallback = React.lazy(() => import("./pages/AuthCallback"));
 const Router = createBrowserRouter([
   {
     path: "/",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <Index />
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/home",
     element: (
       <RequireAuth>
         <Layout>
@@ -42,6 +57,18 @@ const Router = createBrowserRouter([
       <React.Suspense fallback={<div>Loading...</div>}>
         <AuthCallback />
       </React.Suspense>
+    ),
+  },
+  {
+    path: "/timer",
+    element: (
+      <RequireAuth>
+        <Layout>
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <Timer />
+          </React.Suspense>
+        </Layout>
+      </RequireAuth>
     ),
   },
   {

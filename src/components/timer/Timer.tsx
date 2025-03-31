@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
@@ -31,7 +32,7 @@ export const Timer = ({
   if (!duration || !taskName) {
     logger.error('Timer', 'Timer missing required props:', { duration, taskName });
     return (
-      <Card className="shadow-md border-border/20 overflow-hidden">
+      <Card className="shadow-md border-border/20 overflow-hidden dark:border-border/10 dark:bg-card/40">
         <TimerError message="Missing required timer properties (duration or task name)" />
       </Card>
     );
@@ -94,7 +95,7 @@ export const Timer = ({
   } catch (error) {
     logger.error('Timer', 'Fatal error in timer initialization:', error);
     return (
-      <Card className="shadow-md border-border/20 overflow-hidden">
+      <Card className="shadow-md border-border/20 overflow-hidden dark:border-border/10 dark:bg-card/40">
         <TimerError
           message={`Could not initialize timer: ${
             error instanceof Error ? error.message : 'Unknown error'
