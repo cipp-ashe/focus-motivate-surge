@@ -6,7 +6,6 @@ import { NavigationDropdown } from './NavigationDropdown';
 import { useNavigation } from '@/hooks/ui/useNavigation';
 import { NavigationLinkItem } from './NavigationLinkItem';
 import { Home } from 'lucide-react';
-import { ModeToggle } from '@/components/mode-toggle';
 
 export const HeaderNav: React.FC = () => {
   const location = useLocation();
@@ -39,8 +38,6 @@ export const HeaderNav: React.FC = () => {
           className="font-medium dark:text-slate-300 dark:hover:text-white"
         />
       ))}
-      
-      <ModeToggle />
     </nav>
   );
 };

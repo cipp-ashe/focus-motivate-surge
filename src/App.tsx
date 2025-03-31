@@ -21,7 +21,7 @@ const App: React.FC = () => {
           <DebugProvider>
             <div className="min-h-screen bg-background text-foreground">
               <RouterProvider router={router} />
-              <Toaster position="top-right" />
+              <Toaster />
               <DebugPanel />
             </div>
           </DebugProvider>
