@@ -30,12 +30,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 // Create a hook for listening to auth changes
-export const onAuthStateChange = (callback: (event: string, session: any) => void) => {
+export const onAuthStateChange = (callback) => {
   return supabase.auth.onAuthStateChange(callback);
 };
 
 // Single Realtime channel instance to prevent duplicate subscriptions
-let realtimeChannel: any = null;
+let realtimeChannel = null;
 let realtimeEnabled = false;
 
 // Enable realtime for specific tables only when explicitly called
