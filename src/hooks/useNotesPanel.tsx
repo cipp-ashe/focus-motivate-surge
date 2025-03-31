@@ -1,3 +1,3 @@
 
 // Re-export the hooks from their new location
-export { useNotesPanel, NotesPanelProvider } from './ui/useNotesPanel';
+export { useNotesPanel, PanelProvider as NotesPanelProvider } from '@/contexts/ui/PanelContext';

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { HabitTracker, HabitDebugLogger, TodaysHabitsSection } from '@/components/habits';
 import { useTodaysHabits } from '@/hooks/habits/useTodaysHabits';
 import { useHabitCompletion } from '@/hooks/habits/useHabitCompletion';
-import { HabitsPanelProvider } from '@/hooks/ui/useHabitsPanel';
+import { PanelProvider } from '@/contexts/ui/PanelContext';
 import { ErrorBoundary } from 'react-error-boundary';
 import { HabitProvider, useHabitContext } from '@/contexts/habits/HabitContext';
 import { eventManager } from '@/lib/events/EventManager';
@@ -29,14 +29,14 @@ const ErrorFallback = ({ error }: { error: Error }) => (
   </div>
 );
 
-const HabitsPage = () => {
+const NotesPage: React.FC = () => {
   const isMobile = useIsMobile();
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <HabitProvider>
         <NotesProvider>
-          <HabitsPanelProvider>
+          <PanelProvider>
             <motion.div
               className="page-container"
               initial={{ opacity: 0 }}
@@ -52,7 +52,7 @@ const HabitsPage = () => {
                 <HabitsContent isMobile={isMobile} />
               </ErrorBoundary>
             </motion.div>
-          </HabitsPanelProvider>
+          </PanelProvider>
         </NotesProvider>
       </HabitProvider>
     </ErrorBoundary>
@@ -215,4 +215,4 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
   );
 };
 
-export default HabitsPage;
+export default NotesPage;

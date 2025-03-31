@@ -1,27 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+// Re-export the hooks from the unified PanelContext
+import { useHabitsPanel, PanelProvider as HabitsPanelProvider } from '@/contexts/ui/PanelContext';
 
-type HabitsPanelContextType = {
-  activePanel: string;
-  setActivePanel: (panel: string) => void;
-};
-
-const HabitsPanelContext = createContext<HabitsPanelContextType | undefined>(undefined);
-
-export const HabitsPanelProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activePanel, setActivePanel] = useState<string>('templates');
-  
-  return (
-    <HabitsPanelContext.Provider value={{ activePanel, setActivePanel }}>
-      {children}
-    </HabitsPanelContext.Provider>
-  );
-};
-
-export const useHabitsPanel = () => {
-  const context = useContext(HabitsPanelContext);
-  if (context === undefined) {
-    throw new Error('useHabitsPanel must be used within a HabitsPanelProvider');
-  }
-  return context;
-};
+export { useHabitsPanel, HabitsPanelProvider };
