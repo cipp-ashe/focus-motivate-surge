@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { useHabitsPanel } from '@/hooks/useHabitsPanel';
+import { usePanel } from '@/contexts/ui/PanelContext';
 
 const HabitTrackerHeader: React.FC = () => {
-  const { close } = useHabitsPanel();
+  const panel = usePanel();
   
   return (
     <div className="flex justify-between items-center mb-4">
@@ -12,7 +12,7 @@ const HabitTrackerHeader: React.FC = () => {
       <Button 
         variant="outline" 
         size="sm"
-        onClick={close}
+        onClick={panel.closePanel}
       >
         Close
       </Button>

@@ -12,6 +12,9 @@ export { useToast } from './use-toast';
 export { useIsMobile } from './ui/useIsMobile';
 export { useUserPreferences } from './useUserPreferences';
 
+// Export panel hooks from their source
+export { usePanel, useNotesPanel, useHabitsPanel } from '@/contexts/ui/PanelContext';
+
 // Re-export habit hooks
 export {
   useHabits,

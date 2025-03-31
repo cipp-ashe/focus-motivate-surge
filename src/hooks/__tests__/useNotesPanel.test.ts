@@ -1,8 +1,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { describe, it, expect } from 'vitest';
-import { useNotesPanel } from '../useNotesPanel';
-import { PanelProvider } from '@/contexts/ui/PanelContext';
+import { useNotesPanel, PanelProvider } from '@/contexts/ui/PanelContext';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <PanelProvider>{children}</PanelProvider>
