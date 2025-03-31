@@ -66,6 +66,7 @@ export interface Task {
   createdAt: string;
   updatedAt?: string;
   completedAt?: string;
+  dismissedAt?: string;
   tags?: string[];
   duration?: number;
   completed?: boolean;
@@ -78,11 +79,18 @@ export interface Task {
   audioUrl?: string;
   audioText?: string;
   audioDuration?: number;
+  imageMetadata?: {
+    dimensions: { width: number; height: number };
+    fileSize: number;
+    format?: string;
+  };
+  capturedText?: string;
   checklistItems?: Array<{
     id: string;
     text: string;
     completed: boolean;
   }>;
+  journalEntry?: string;
 }
 
 export interface Tag {

@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Task } from "@/types/task";
+import { Task } from "@/types/tasks";
 import { Badge } from "@/components/ui/badge";
 import { 
   Calendar, 
@@ -74,8 +74,8 @@ export const ScreenshotDetails: React.FC<ScreenshotDetailsProps> = ({ task }) =>
           <div className="text-muted-foreground mb-1">Tags:</div>
           <div className="flex flex-wrap gap-1">
             {task.tags.map(tag => (
-              <Badge key={tag.id} variant="outline" className="text-xs">
-                {tag.name}
+              <Badge key={tag} variant="outline" className="text-xs">
+                {tag}
               </Badge>
             ))}
           </div>
@@ -83,4 +83,4 @@ export const ScreenshotDetails: React.FC<ScreenshotDetailsProps> = ({ task }) =>
       )}
     </div>
   );
-};
+}

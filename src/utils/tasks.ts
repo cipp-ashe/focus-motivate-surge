@@ -5,7 +5,7 @@
  * Common utilities for working with tasks
  */
 
-import { Task, TaskStatus } from '@/types/task';
+import { Task, TaskStatus } from '@/types/tasks';
 import { eventManager } from '@/lib/events/EventManager';
 
 /**

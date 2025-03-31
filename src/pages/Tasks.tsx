@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/ui/useIsMobile';
-import { ChecklistItem, Task } from '@/types/task';
+import { Task } from '@/types/tasks';
 import { ChecklistDialog } from '@/components/tasks/dialogs/ChecklistDialog';
 import { JournalDialog } from '@/components/tasks/dialogs/JournalDialog';
 import { ScreenshotDialog } from '@/components/tasks/dialogs/ScreenshotDialog';
@@ -29,7 +29,7 @@ const TaskPageContent = () => {
   const [currentChecklistTask, setCurrentChecklistTask] = useState<{
     taskId: string;
     taskName: string;
-    items: ChecklistItem[];
+    items: any[];
   } | null>(null);
 
   const [isJournalOpen, setIsJournalOpen] = useState(false);
@@ -64,7 +64,7 @@ const TaskPageContent = () => {
   }, []);
 
   const handleOpenChecklist = useCallback(
-    (taskId: string, taskName: string, items: ChecklistItem[]) => {
+    (taskId: string, taskName: string, items: any[]) => {
       console.log('Tasks.tsx - Opening checklist for task:', { taskId, taskName, items });
       setCurrentChecklistTask({
         taskId,
@@ -131,23 +131,23 @@ const TaskPageContent = () => {
       <div className="mb-6">
         <GlassCard>
           <GlassCardContent>
-            <h2 className="text-xl font-semibold mb-2">Task Statistics</h2>
+            <h2 className="text-xl font-semibold mb-2 dark:text-white">Task Statistics</h2>
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-secondary/50 p-3 rounded-md">
-                <h3 className="text-sm font-medium">Total Tasks</h3>
-                <p className="text-2xl font-bold">
+              <div className="bg-secondary/50 dark:bg-secondary/20 p-3 rounded-md">
+                <h3 className="text-sm font-medium dark:text-gray-300">Total Tasks</h3>
+                <p className="text-2xl font-bold dark:text-white">
                   {(taskContext?.items?.length || 0) + (taskContext?.completed?.length || 0)}
                 </p>
               </div>
-              <div className="bg-secondary/50 p-3 rounded-md">
-                <h3 className="text-sm font-medium">Completed</h3>
-                <p className="text-2xl font-bold text-green-500">
+              <div className="bg-secondary/50 dark:bg-secondary/20 p-3 rounded-md">
+                <h3 className="text-sm font-medium dark:text-gray-300">Completed</h3>
+                <p className="text-2xl font-bold text-green-500 dark:text-green-400">
                   {taskContext?.completed?.length || 0}
                 </p>
               </div>
-              <div className="bg-secondary/50 p-3 rounded-md">
-                <h3 className="text-sm font-medium">Pending</h3>
-                <p className="text-2xl font-bold text-amber-500">
+              <div className="bg-secondary/50 dark:bg-secondary/20 p-3 rounded-md">
+                <h3 className="text-sm font-medium dark:text-gray-300">Pending</h3>
+                <p className="text-2xl font-bold text-amber-500 dark:text-amber-400">
                   {taskContext?.items?.length || 0}
                 </p>
               </div>

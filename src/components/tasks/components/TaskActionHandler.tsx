@@ -1,7 +1,8 @@
+
 import { useCallback } from 'react';
-import { Task, TaskStatus } from '@/types/task';
+import { Task, TaskStatus } from '@/types/tasks';
 import { toast } from 'sonner';
-import { useTaskEvents } from '@/hooks/useTaskEvents';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 
 export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) => {
   // Use our consolidated task events hook
@@ -68,7 +69,7 @@ export const useTaskActionHandler = (task: Task, onOpenTaskDialog?: () => void) 
             duration: typeof task.duration === 'number' ? task.duration : 1500, // Default to 25 min if not set
             completed: task.completed || false,
             createdAt: task.createdAt || new Date().toISOString(),
-            taskType: task.taskType,
+            type: task.type || task.taskType,
           });
           toast.info(`Timer set for task: ${task.name}`);
           break;

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Task } from "@/types/task";
+import { Task } from "@/types/tasks";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { eventManager } from "@/lib/events/EventManager";

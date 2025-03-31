@@ -2,17 +2,15 @@
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitDetail } from '@/types/habit';
-import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
+import { useUnifiedTaskManager } from '@/hooks/tasks/useUnifiedTaskManager';
 import { toast } from 'sonner';
-import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 
 /**
  * Hook to integrate habits with tasks
  * This consolidated hook simplifies the habit-task integration
  */
 export const useHabitTaskIntegration = () => {
-  const { handleHabitSchedule } = useHabitTaskProcessor();
-  const taskEvents = useTaskEvents();
+  const taskManager = useUnifiedTaskManager();
 
   /**
    * Add a habit to tasks
@@ -34,25 +32,28 @@ export const useHabitTaskIntegration = () => {
       }
 
       // Create the habit task
-      const taskId = handleHabitSchedule({
-        habitId: habit.id,
+      const taskId = taskManager.createHabitTask(
+        habit.id,
+        habit.name,
+        'habit',
         templateId,
-        name: habit.name,
-        duration,
         date,
-        metricType: habit.metrics.type,
-      });
+        {
+          duration,
+          metricType: habit.metrics.type
+        }
+      );
 
       // Force update task list to show the new task
       setTimeout(() => {
-        taskEvents.forceTaskUpdate();
+        taskManager.forceTaskUpdate();
         eventManager.emit('habits:check-pending', {});
       }, 300);
 
       toast.success(`Added "${habit.name}" as a task`);
       return true;
     },
-    [handleHabitSchedule, taskEvents]
+    [taskManager]
   );
 
   /**
@@ -70,7 +71,7 @@ export const useHabitTaskIntegration = () => {
       );
 
       if (habitTask && !habitTask.completed) {
-        taskEvents.completeTask(habitTask.id);
+        taskManager.completeTask(habitTask.id);
         return true;
       }
     } catch (e) {
@@ -78,7 +79,7 @@ export const useHabitTaskIntegration = () => {
     }
 
     return false;
-  }, [taskEvents]);
+  }, [taskManager]);
 
   return {
     addHabitToTasks,

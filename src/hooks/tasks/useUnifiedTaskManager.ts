@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 /**
  * A unified hook for task management that consolidates functionality
- * from useTaskManager, useTaskEvents, useUnifiedTaskEvents, and useTaskManagement
+ * from all task-related hooks into a single source of truth
  */
 export const useUnifiedTaskManager = () => {
   // Create a new task with ID and timestamp
@@ -24,7 +24,7 @@ export const useUnifiedTaskManager = () => {
       name: task.name,
       description: task.description || '',
       completed: task.completed || false,
-      taskType: task.taskType || 'regular',
+      type: task.type || task.taskType || 'standard',
       duration: task.duration || 0,
       relationships: task.relationships || {},
       // Add all other properties from the task parameter
@@ -142,6 +142,7 @@ export const useUnifiedTaskManager = () => {
       suppressToast?: boolean;
       duration?: number;
       selectAfterCreate?: boolean;
+      metricType?: string;
     }
   ) => {
     console.log(`Creating task for habit ${habitId}`);
@@ -152,14 +153,15 @@ export const useUnifiedTaskManager = () => {
       id: taskId,
       name,
       description: `Task for habit on ${date}`,
-      taskType,
+      type: taskType,
       completed: false,
       duration: options?.duration || 1800, // Default 30 minutes
       createdAt: new Date().toISOString(),
       relationships: {
         habitId,
         templateId,
-        date
+        date,
+        metricType: options?.metricType
       }
     };
     
@@ -201,3 +203,6 @@ export const useUnifiedTaskManager = () => {
     createHabitTask
   };
 };
+
+// Provide a simpler alias for consistency in imports
+export const useTaskManager = useUnifiedTaskManager;

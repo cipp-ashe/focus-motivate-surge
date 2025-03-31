@@ -15,10 +15,9 @@ export { useUserPreferences } from './useUserPreferences';
 // Export panel hooks from their source
 export { usePanel, useNotesPanel, useHabitsPanel } from '@/contexts/ui/PanelContext';
 
-// Re-export task hooks with a unified approach
+// Task hooks (consolidated to reduce duplication)
 export { useTaskEvents, useTasks } from './tasks/useTaskEvents';
-export { useUnifiedTaskManager } from './tasks/useUnifiedTaskManager';
-export { useTaskManagement } from './tasks/useTaskManagement';
+export { useUnifiedTaskManager, useTaskManager } from './tasks/useUnifiedTaskManager';
 
 // Re-export habit hooks
 export {
@@ -34,10 +33,6 @@ export {
   useCompletionMutation,
   useDismissMutation
 } from './habits';
-
-// Task hooks with direct exports to avoid redundancy
-export { useTaskManager } from './tasks/useTaskManager';
-export { useTaskActions } from './tasks/useTaskActions';
 
 // Journal hooks
 export { useJournalService } from './journal/useJournalService';

@@ -170,6 +170,9 @@ export const useTaskEvents = () => {
   };
 };
 
-// For backward compatibility - these are just aliases
+// For consolidated exports - now with proper commenting
+/**
+ * The main task events hook for the application.
+ * This is the primary hook for task event management and should be used whenever possible.
+ */
 export const useTasks = useTaskEvents;
-export const useUnifiedTaskEvents = useTaskEvents;

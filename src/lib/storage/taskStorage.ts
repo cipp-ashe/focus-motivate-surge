@@ -1,8 +1,6 @@
 
 /**
- * Re-export the taskStorage from the task subdirectory
- * This file exists for backward compatibility
+ * Direct export from the task directory's index
+ * This simplifies imports and maintains a clean structure
  */
-import { taskStorage } from './task';
-
-export { taskStorage };
+export { taskStorage, ACTIVE_TASKS_KEY, COMPLETED_TASKS_KEY } from './task';
