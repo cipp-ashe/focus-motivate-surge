@@ -5,9 +5,12 @@ import { completedTasksStorage } from './completedTasksStorage';
 import { taskRelationshipStorage } from './taskRelationshipStorage';
 import { constants } from './constants';
 import { migrateTaskTypes } from './taskMigration';
-import { Task } from '@/types/task';
+import { Task } from '@/types/tasks';
 
-// Export all storage modules with a unified interface
+/**
+ * Unified task storage API
+ * Combines all task storage functionality into one cohesive API
+ */
 export const taskStorage = {
   // First include all the existing storage modules
   ...activeTasksStorage,
@@ -22,16 +25,6 @@ export const taskStorage = {
     const active = activeTasksStorage.loadTasks();
     const completed = completedTasksStorage.loadCompletedTasks();
     return { active, completed };
-  },
-  
-  // Alias getTaskById for backward compatibility
-  getTaskById: (taskId: string): Task | null => {
-    return activeTasksStorage.getTaskById(taskId);
-  },
-  
-  // For backward compatibility
-  removeTask: (taskId: string): boolean => {
-    return activeTasksStorage.removeTask(taskId);
   },
   
   // For testing

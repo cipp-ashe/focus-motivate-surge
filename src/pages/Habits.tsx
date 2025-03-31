@@ -29,7 +29,7 @@ const ErrorFallback = ({ error }: { error: Error }) => (
   </div>
 );
 
-const NotesPage: React.FC = () => {
+const HabitsPage: React.FC = () => {
   const isMobile = useIsMobile();
 
   return (
@@ -155,7 +155,7 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
           </motion.div>
         )}
 
-        <motion.div variants={itemVariants} className="card-glass h-full shadow-sm">
+        <motion.div variants={itemVariants} className="card-glass h-full shadow-sm dark:bg-gray-900/40 dark:border-gray-800/50">
           <HabitTracker />
         </motion.div>
       </motion.div>
@@ -175,20 +175,20 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
         >
           <ResizablePanelGroup
             direction="horizontal"
-            className="h-full rounded-xl overflow-hidden border border-border/20 shadow-sm"
+            className="h-full rounded-xl overflow-hidden border border-border/20 dark:border-gray-800/30 shadow-sm"
           >
             <ResizablePanel defaultSize={75} minSize={55} className="transition-all duration-300">
-              <div className="glass-panel h-full p-1">
+              <div className="glass-panel h-full p-1 dark:bg-gray-900/40">
                 <HabitTracker />
               </div>
             </ResizablePanel>
 
             <ResizableHandle
               withHandle
-              className="bg-border/20 hover:bg-primary/10 transition-colors"
+              className="bg-border/20 hover:bg-primary/10 dark:bg-gray-800/50 dark:hover:bg-gray-700/50 transition-colors"
             />
 
-            <ResizablePanel defaultSize={25} minSize={20} className="transition-all duration-300">
+            <ResizablePanel defaultSize={25} minSize={20} className="transition-all duration-300 dark:bg-gray-900/60">
               <TodaysHabitsSection
                 key={`today-habits-${todaysHabitsSectionKey}`}
                 todaysHabits={todaysHabits}
@@ -206,7 +206,7 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-          className="glass-panel h-full mt-4 rounded-xl border border-border/20 shadow-sm"
+          className="glass-panel h-full mt-4 rounded-xl border border-border/20 dark:border-gray-800/30 dark:bg-gray-900/40 shadow-sm"
         >
           <HabitTracker />
         </motion.div>
@@ -215,4 +215,4 @@ const HabitsContent = ({ isMobile }: { isMobile: boolean }) => {
   );
 };
 
-export default NotesPage;
+export default HabitsPage;

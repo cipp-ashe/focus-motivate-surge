@@ -1,13 +1,10 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Task } from '@/types/tasks';
 import { TaskList } from './TaskList';
-import { TaskEventHandler } from './TaskEventHandler';
 import { useTaskContext } from '@/contexts/tasks/TaskContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { useTaskManager } from '@/hooks/tasks/useTaskManager';
 import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
-import { useTasksNavigation } from '@/hooks/tasks/useTasksNavigation';
+import { TaskEventHandler } from './TaskEventHandler';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TaskManagerProps {
@@ -22,6 +19,11 @@ interface TaskManagerProps {
   };
 }
 
+/**
+ * TaskManager component
+ * 
+ * Consolidated from previous TaskManager and UnifiedTaskManager components
+ */
 export const TaskManager: React.FC<TaskManagerProps> = ({
   initialFilter = 'all',
   initialTag = null,
@@ -30,78 +32,69 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 }) => {
   const { items, selected, completeTask } = useTaskContext();
   const [loading, setLoading] = useState(false);
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
-  const [forceUpdate, setForceUpdate] = useState(0);
   
-  // Task Actions
-  const { createTask, updateTask, deleteTask } = useTaskManager();
+  // Use our consolidated task events hook
+  const taskEvents = useTaskEvents();
   
-  // Task Events
-  const { forceTaskUpdate } = useTaskEvents();
-  
-  // Task Navigation
-  const { navigateToTask } = useTasksNavigation();
-  
-  // Task Filtering & Sorting - simplified without the missing hooks
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  
-  // Initialize filtered tasks with all tasks
-  useEffect(() => {
-    setFilteredTasks(items);
-  }, [items]);
-
-  const handleTaskSelect = useCallback((taskId: string) => {
-    console.log(`TaskManager: Selecting task ${taskId}`);
-    navigateToTask(taskId);
-  }, [navigateToTask]);
-  
-  const handleAction = useCallback((action: string, taskId: string) => {
-    console.log(`TaskManager: Handling action ${action} for task ${taskId}`);
-    
-    // Handle task selection
-    if (action === 'select') {
-      handleTaskSelect(taskId);
-    }
-  }, [handleTaskSelect]);
-  
-  const handleComplete = useCallback((taskId: string, metrics?: any) => {
-    console.log(`TaskManager: Completing task ${taskId}`);
-    if (completeTask) {
-      completeTask(taskId, metrics);
-    }
-  }, [completeTask]);
-  
-  const handleForceUpdate = () => {
-    setForceUpdate(prev => prev + 1);
-  };
-
-  // Wrapper functions to adapt to the expected parameter format for event handlers
-  const handleTaskUpdateWrapper = (data: { taskId: string; updates: Partial<Task> }) => {
-    console.log('TaskManager: Handling task update wrapper', data);
-    if (updateTask) {
-      updateTask(data.taskId, data.updates);
-    }
-  };
-
-  const handleTaskDeleteWrapper = (data: { taskId: string }) => {
-    console.log('TaskManager: Handling task delete wrapper', data);
-    if (deleteTask) {
-      deleteTask(data.taskId);
-    }
-  };
-
-  const handleTaskCompleteWrapper = (data: { taskId: string; metrics?: any }) => {
-    console.log('TaskManager: Handling task complete wrapper', data);
-    if (completeTask) {
-      completeTask(data.taskId, data.metrics);
-    }
-  };
-
-  // Calculate task counts
+  // Task counts
   const taskCounts = {
     total: items.length,
     completed: items.filter(t => t.completed).length
   };
+
+  // Task event handlers
+  const handleTaskSelect = useCallback((taskId: string) => {
+    taskEvents.selectTask(taskId);
+  }, [taskEvents]);
+  
+  const handleTaskDelete = useCallback((data: { taskId: string }) => {
+    taskEvents.deleteTask(data.taskId);
+  }, [taskEvents]);
+
+  const handleTaskUpdate = useCallback((data: { taskId: string; updates: Partial<Task> }) => {
+    taskEvents.updateTask(data.taskId, data.updates);
+  }, [taskEvents]);
+
+  const handleTaskComplete = useCallback((data: { taskId: string; metrics?: any }) => {
+    taskEvents.completeTask(data.taskId, data.metrics);
+  }, [taskEvents]);
+
+  const handleForceUpdate = useCallback(() => {
+    taskEvents.forceTaskUpdate();
+  }, [taskEvents]);
+
+  // Dialog opener handlers
+  const handleShowImage = useCallback((imageUrl: string, taskName: string) => {
+    if (dialogOpeners?.screenshot) {
+      dialogOpeners.screenshot(imageUrl, taskName);
+    } else {
+      taskEvents.showTaskImage(imageUrl, taskName);
+    }
+  }, [dialogOpeners, taskEvents]);
+
+  const handleOpenChecklist = useCallback((taskId: string, taskName: string, items: any[]) => {
+    if (dialogOpeners?.checklist) {
+      dialogOpeners.checklist(taskId, taskName, items);
+    } else {
+      taskEvents.openTaskChecklist(taskId, taskName, items);
+    }
+  }, [dialogOpeners, taskEvents]);
+
+  const handleOpenJournal = useCallback((taskId: string, taskName: string, entry: string) => {
+    if (dialogOpeners?.journal) {
+      dialogOpeners.journal(taskId, taskName, entry);
+    } else {
+      taskEvents.openTaskJournal(taskId, taskName, entry);
+    }
+  }, [dialogOpeners, taskEvents]);
+
+  const handleOpenVoiceRecorder = useCallback((taskId: string, taskName: string) => {
+    if (dialogOpeners?.voicenote) {
+      dialogOpeners.voicenote(taskId, taskName);
+    } else {
+      taskEvents.openTaskVoiceRecorder(taskId, taskName);
+    }
+  }, [dialogOpeners, taskEvents]);
 
   return (
     <div className="h-full flex flex-col">
@@ -110,13 +103,13 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       </div>
       
       <TaskList
-        tasks={filteredTasks}
+        tasks={items}
         selectedTaskId={selected}
         handleTaskSelect={handleTaskSelect}
-        handleDelete={handleTaskDeleteWrapper}
-        handleTaskUpdate={handleTaskUpdateWrapper}
+        handleDelete={handleTaskDelete}
+        handleTaskUpdate={handleTaskUpdate}
         onForceUpdate={handleForceUpdate}
-        handleTaskComplete={handleTaskCompleteWrapper}
+        handleTaskComplete={handleTaskComplete}
         isLoading={loading}
         loadingCount={3}
         emptyState={<div>No tasks found. Create your first task!</div>}
@@ -131,12 +124,14 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       
       <TaskEventHandler
         onForceUpdate={handleForceUpdate}
-        onTaskCreate={createTask}
-        onTaskUpdate={handleTaskUpdateWrapper}
-        onTaskDelete={handleTaskDeleteWrapper}
-        onTaskComplete={handleTaskCompleteWrapper}
-        tasks={filteredTasks}
+        onTaskUpdate={handleTaskUpdate}
+        onTaskDelete={handleTaskDelete}
+        onTaskComplete={handleTaskComplete}
+        tasks={items}
       />
     </div>
   );
 };
+
+// Export a renamed alias for backward compatibility
+export const UnifiedTaskManager = TaskManager;

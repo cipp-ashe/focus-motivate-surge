@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
-import { Task } from '@/types/task';
-import { useTaskEvents } from '@/hooks/useTaskEvents';
+import { Task } from '@/types/tasks';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 
 interface TaskEventHandlerProps {
   onTaskCreate?: (task: Task) => void;
@@ -12,6 +12,10 @@ interface TaskEventHandlerProps {
   tasks: Task[];
 }
 
+/**
+ * Component for handling task-related events 
+ * Now using the consolidated useTaskEvents hook
+ */
 export const TaskEventHandler: React.FC<TaskEventHandlerProps> = ({
   onTaskCreate,
   onTaskUpdate,

@@ -8,10 +8,10 @@ import { useHabitContext } from '@/contexts/habits/HabitContext';
 import { useTemplateManagement } from '@/hooks/habits/useTemplateManagement';
 
 export const HabitTracker: React.FC = () => {
-  const { templates, addTemplate: addTemplateContext, removeTemplate: removeTemplateContext } = useHabitContext();
+  const { templates } = useHabitContext();
 
   // Template management functions
-  const { activeTemplates, addTemplate, updateTemplate, removeTemplate, updateTemplateOrder, updateTemplateDays } = useTemplateManagement();
+  const { activeTemplates, addTemplate, updateTemplate, removeTemplate } = useTemplateManagement();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState('calendar');
@@ -30,24 +30,24 @@ export const HabitTracker: React.FC = () => {
         </TabsList>
         
         <TabsContent value="calendar" className="mt-4">
-          <Card>
+          <Card className="dark:bg-gray-900/60 dark:border-gray-800/50">
             <CardHeader>
-              <CardTitle>Habit Calendar</CardTitle>
-              <CardDescription>Track your habit streaks over time</CardDescription>
+              <CardTitle className="dark:text-gray-200">Habit Calendar</CardTitle>
+              <CardDescription className="dark:text-gray-400">Track your habit streaks over time</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
-                className="rounded-md border"
+                className="rounded-md border dark:border-gray-800 dark:bg-gray-900/40"
               />
             </CardContent>
           </Card>
         </TabsContent>
         
         <TabsContent value="templates" className="mt-4">
-          <div className="h-full">
+          <div className="h-full dark:text-gray-200">
             <HabitTemplateManager 
               activeTemplates={activeTemplates}
               addTemplate={handleAddTemplate}

@@ -1,7 +1,12 @@
 
+/**
+ * Unified Task Types
+ * This is the single source of truth for task-related type definitions
+ */
+
 // Task types
 export type TaskType =
-  | 'standard'  // Base task type (replacing 'regular')
+  | 'standard'  // Base task type
   | 'timer'     // For timed/pomodoro tasks
   | 'journal'   // For journal entries
   | 'checklist' // For tasks with subtasks
@@ -53,8 +58,9 @@ export interface Task {
   id: string;
   name: string;
   description?: string;
-  status: TaskStatus;
-  type: TaskType;
+  status?: TaskStatus;
+  type?: TaskType;
+  taskType?: TaskType; // For backward compatibility
   priority?: 'low' | 'medium' | 'high' | 'urgent';
   dueDate?: string;
   createdAt: string;
@@ -83,4 +89,3 @@ export interface Tag {
   id: string;
   name: string;
 }
-

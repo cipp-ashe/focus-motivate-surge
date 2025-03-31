@@ -1,14 +1,22 @@
+
 import { useCallback } from 'react';
 import { eventManager } from '@/lib/events/EventManager';
 import { HabitDetail } from '@/types/habit';
 import { useHabitTaskProcessor } from '@/hooks/tasks/habitTasks/useHabitTaskProcessor';
+import { toast } from 'sonner';
+import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
 
 /**
  * Hook to integrate habits with tasks
+ * This consolidated hook simplifies the habit-task integration
  */
 export const useHabitTaskIntegration = () => {
   const { handleHabitSchedule } = useHabitTaskProcessor();
+  const taskEvents = useTaskEvents();
 
+  /**
+   * Add a habit to tasks
+   */
   const addHabitToTasks = useCallback(
     (habit: HabitDetail) => {
       if (!habit.id) {
@@ -25,7 +33,8 @@ export const useHabitTaskIntegration = () => {
         duration = habit.metrics.goal;
       }
 
-      handleHabitSchedule({
+      // Create the habit task
+      const taskId = handleHabitSchedule({
         habitId: habit.id,
         templateId,
         name: habit.name,
@@ -34,11 +43,21 @@ export const useHabitTaskIntegration = () => {
         metricType: habit.metrics.type,
       });
 
+      // Force update task list to show the new task
+      setTimeout(() => {
+        taskEvents.forceTaskUpdate();
+        eventManager.emit('habits:check-pending', {});
+      }, 300);
+
+      toast.success(`Added "${habit.name}" as a task`);
       return true;
     },
-    [handleHabitSchedule]
+    [handleHabitSchedule, taskEvents]
   );
 
+  /**
+   * Complete a habit task
+   */
   const completeHabitTask = useCallback((habitId: string, date: string) => {
     // Find and complete any task associated with this habit
     const tasksStr = localStorage.getItem('tasks');
@@ -51,7 +70,7 @@ export const useHabitTaskIntegration = () => {
       );
 
       if (habitTask && !habitTask.completed) {
-        eventManager.emit('task:complete', { taskId: habitTask.id });
+        taskEvents.completeTask(habitTask.id);
         return true;
       }
     } catch (e) {
@@ -59,7 +78,7 @@ export const useHabitTaskIntegration = () => {
     }
 
     return false;
-  }, []);
+  }, [taskEvents]);
 
   return {
     addHabitToTasks,
