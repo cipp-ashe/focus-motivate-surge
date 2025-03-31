@@ -14,6 +14,7 @@ export { useTaskManager, useUnifiedTaskManager } from './useUnifiedTaskManager';
 export { useTasksInitializer } from './useTasksInitializer';
 export { useTasksNavigation } from './useTasksNavigation';
 export { useTemplateTasksManager } from './useTemplateTasksManager';
+export { useTimerTasksManager } from './useTimerTasksManager';
 
 // Habit task integration
 export { useHabitTaskScheduler } from './useHabitTaskScheduler';
