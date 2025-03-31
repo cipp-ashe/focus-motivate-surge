@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { NotesProvider } from '@/contexts/notes/NotesContext';
-import { ThemeProvider } from '@/components/ThemeProvider';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -26,15 +26,13 @@ import { NotesLayout } from '@/components/notes/NotesLayout';
 // Main Notes Page Component
 const NotesPage: React.FC = () => {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="notes-theme">
-      <ErrorBoundary FallbackComponent={NotesErrorFallback}>
-        <NotesProvider>
-          <div className="w-full h-full animate-fade-in dark:bg-gray-900">
-            <NotesLayout />
-          </div>
-        </NotesProvider>
-      </ErrorBoundary>
-    </ThemeProvider>
+    <ErrorBoundary FallbackComponent={NotesErrorFallback}>
+      <NotesProvider>
+        <div className="w-full h-full animate-fade-in dark:bg-gray-900">
+          <NotesLayout />
+        </div>
+      </NotesProvider>
+    </ErrorBoundary>
   );
 };
 

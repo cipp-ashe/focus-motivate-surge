@@ -12,9 +12,24 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useLocalStorage<Theme>('theme', 'system');
+export const ThemeProvider: React.FC<{ 
+  children: React.ReactNode; 
+  defaultTheme?: Theme;
+  storageKey?: string;
+}> = ({ 
+  children, 
+  defaultTheme = 'system', 
+  storageKey = 'vite-ui-theme' 
+}) => {
+  // Use local storage with the provided storage key
+  const [theme, setThemeValue] = useLocalStorage<Theme>(storageKey, defaultTheme);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+
+  // Function to set theme that updates local storage
+  const setTheme = (newTheme: Theme) => {
+    setThemeValue(newTheme);
+    console.log(`Theme changed to: ${newTheme}`);
+  };
 
   useEffect(() => {
     const updateTheme = () => {
