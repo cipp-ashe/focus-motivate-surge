@@ -20,10 +20,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // New state for tracking if user prefers to stay local-only
+  
+  // Check for stored preference, default to true (local-only) for new users
   const [isLocalOnly, setIsLocalOnly] = useState(() => {
     const stored = localStorage.getItem('prefer-local-only');
-    return stored === 'true';
+    // If no preference is stored, default to true (local-only mode)
+    return stored === null ? true : stored === 'true';
   });
 
   useEffect(() => {
