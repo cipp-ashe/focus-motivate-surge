@@ -10,7 +10,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function GlassCard({ children, className, ...props }: GlassCardProps) {
   return (
     <Card className={cn(
-      "border border-border/[var(--border-medium)] bg-card/75 backdrop-blur-sm dark:bg-card/40 dark:backdrop-blur-md shadow-sm", 
+      "border border-border bg-card/75 backdrop-blur-sm dark:bg-card/40 dark:backdrop-blur-md shadow-sm", 
       className
     )} {...props}>
       {children}

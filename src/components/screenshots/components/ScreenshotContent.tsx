@@ -82,7 +82,7 @@ export const ScreenshotContent: React.FC<ScreenshotContentProps> = ({
           <Button 
             variant="secondary" 
             size="sm" 
-            className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+            className="absolute bottom-2 right-2 bg-background/80 dark:bg-background/60 backdrop-blur-sm hover:bg-background/90"
             onClick={handleDownload}
           >
             <Download className="h-4 w-4 mr-1" />

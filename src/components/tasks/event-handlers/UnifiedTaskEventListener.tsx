@@ -2,7 +2,7 @@
 import React, { useRef } from 'react';
 import { useEvent } from '@/hooks/useEvent';
 import { useUnifiedMediaHandlers } from './useUnifiedMediaHandlers';
-import { useTaskEvents } from '@/hooks/tasks/useTaskEvents';
+import { useTaskEvents } from '@/hooks/tasks';
 import { logger } from '@/utils/logManager';
 
 interface UnifiedTaskEventListenerProps {
