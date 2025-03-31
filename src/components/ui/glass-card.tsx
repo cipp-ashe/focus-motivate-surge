@@ -10,7 +10,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function GlassCard({ children, className, ...props }: GlassCardProps) {
   return (
     <Card className={cn(
-      "border border-border bg-card/75 backdrop-blur-sm dark:bg-card/40 dark:backdrop-blur-md shadow-sm", 
+      "border border-border bg-card/75 backdrop-blur-sm dark:bg-card/40 dark:backdrop-blur-md dark:border-border/50 shadow-sm", 
       className
     )} {...props}>
       {children}
@@ -28,7 +28,7 @@ export function GlassCardContent({ children, className, ...props }: GlassCardPro
 
 export function GlassCardHeader({ children, className, ...props }: GlassCardProps) {
   return (
-    <CardHeader className={cn("px-4 py-3 border-b border-border/40", className)} {...props}>
+    <CardHeader className={cn("px-4 py-3 border-b border-border/40 dark:border-border/20", className)} {...props}>
       {children}
     </CardHeader>
   );
@@ -36,7 +36,7 @@ export function GlassCardHeader({ children, className, ...props }: GlassCardProp
 
 export function GlassCardTitle({ children, className, ...props }: GlassCardProps) {
   return (
-    <CardTitle className={cn("text-xl", className)} {...props}>
+    <CardTitle className={cn("text-xl dark:text-slate-100", className)} {...props}>
       {children}
     </CardTitle>
   );

@@ -2,12 +2,15 @@
 import React, { ReactNode } from 'react';
 import { Header } from './Header';
 import { BottomNav } from './BottomNav';
+import { useIsMobile } from '@/hooks/ui/useIsMobile';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen flex flex-col w-full bg-background text-foreground">
       <Header />
@@ -16,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </div>
       </main>
-      <BottomNav />
+      {isMobile && <BottomNav />}
     </div>
   );
 };

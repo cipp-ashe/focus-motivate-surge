@@ -6,7 +6,7 @@ import { NavigationDropdown } from './NavigationDropdown';
 import { useNavigation } from '@/hooks/ui/useNavigation';
 import { NavigationLinkItem } from './NavigationLinkItem';
 import { Home } from 'lucide-react';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { ModeToggle } from '@/components/mode-toggle';
 
 export const HeaderNav: React.FC = () => {
   const location = useLocation();
@@ -40,7 +40,7 @@ export const HeaderNav: React.FC = () => {
         />
       ))}
       
-      <ThemeToggle />
+      <ModeToggle />
     </nav>
   );
 };
